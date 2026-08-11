@@ -1,6 +1,6 @@
 # AIIS ICS 多仓库项目管理与交付方案
 
-Status: `ARCH-001 r2` is `qa_blocked`; ARCH-MIG-001 migration truth, the Human Owner license decision and final re-verification remain before publication  
+Status: 架构迁移基线已完成；ARCH-001 r3、ARCH-MIG-001 r1、ARCH-DOCKER-001 r1 均已获 Human Owner 接受，GitHub `main` 已首次推送，长期 dev 环境采用与 1.0.0 定版仍按独立 gate 推进
 Target repository: `aiis-ics-arch`  
 Hosting: GitHub public repository
 
@@ -735,12 +735,196 @@ aiis-ics-l2-<project-id>::UPGRADE-001
 
 ## 20. 当前执行顺序
 
-1. 首个 `aiis-ics-l2-<project-id>` 完成独立项目迁移、验证和 Gitee 私有仓推送。
-2. 旧 Vibe 仓继续作为私有历史来源。
-3. 在本地 `aiis-ics-arch` 落本方案和 ARCH-001 PM spec。
-4. 手动复制工作基线，但不立即 GitHub push。
-5. ARCH-001 Development 完成去项目化、脱敏、模块拆分和验证。
-6. Human Owner final acceptance 后初始化 Git，并推送 GitHub public `main`。
-7. 架构核心稳定后创建 `release/1.0.0` 和 `v1.0.0`。
-8. 在架构仓依次规划 CA 配置、设置页、PostgreSQL 和 MSSQL gate。
-9. 架构基线稳定后，再初始化 Gitee 私有 `aiis-ics-modules`。
+截至 2026-08-11，以下迁移步骤已经完成：
+
+1. 首个 `aiis-ics-l2-<project-id>` 已完成独立项目迁移、验证和 Gitee 私有仓推送；
+2. `aiis-ics-arch` 已完成去项目化、Core migration 重建、Docker smoke/dev 验证和公开基线验收；
+3. GitHub public `main` 已首次推送到 `https://github.com/jasonbu163/aiis-ics-arch.git`；
+4. 当前本地 `main` 与 `origin/main` 均指向 `fd8e3f0875d6730b0e0c7b2b5cfe303e47afadb5`；
+5. 旧 Vibe 仓保留为私有历史来源，不再承载 Architecture Core 新功能开发。
+
+后续固定顺序为：
+
+1. 使用第 21 节的 `aiis-ics-arch-dev` 环境进行实际 Core 开发与人工确认；
+2. dev 环境确认稳定后启动独立 `ARCH-REL-001`，创建 `release/1.0.0` 和 `v1.0.0`；
+3. 在 `aiis-ics-arch/main` 执行 `ARCH-FE-001` 前端模块自动组装；
+4. 在 `aiis-ics-arch/main` 执行 `CA-CONFIG-001` 打包配置管理；
+5. 根据这两项能力的实际兼容性和验收结果决定下一 Core 版本，预计为 `1.1.0`；
+6. 再启动 `aiis-ics-modules::MODULES-001`，从已固定的 Architecture 版本和真实项目提炼模块。
+
+`ARCH-FE-001` 和 `CA-CONFIG-001` 不再从 Vibe L2 定版继续复制或拆分。Vibe 只提供历史参考；从
+2026-08-11 起，这两项能力的唯一开发真相源是 `aiis-ics-arch/main`。
+
+## 21. Architecture 长期 Docker dev 环境
+
+本节记录本次迁移完成后的长期 Core 开发入口。它使用 `docker-compose.dev.yml`、MySQL `8.4.6`、
+backend/frontend 源码 bind mount、一次性 migration 服务和 named volumes。该环境用于本地开发，
+不等于 production readiness，也不替代后续 release gate。
+
+### 21.1 本次 env 迁移事实
+
+Human Owner 将旧 Vibe 环境中的 backend/frontend dev env 复制到 Architecture 仓后，
+`ARCH-DEV-001 r2` 做了以下字段级收敛，未记录或输出 secret 值：
+
+- 保留本地开发使用的 `JWT_SECRET_KEY`、`MYSQL_PASSWORD`、`MYSQL_ROOT_PASSWORD`；
+- backend 身份改为 `AIIS ICS Architecture`，数据库改为 `aiis_ics_architecture`；
+- Compose 内数据库地址固定为 `mysql:3306`；
+- Projection、backend mock 和 admin/supervisor/operator bootstrap 默认关闭；
+- backend API permission 与 frontend page access 均收敛为空对象；
+- frontend 删除旧项目 brand logo/glow 变量；
+- 两个真实 env 的 key set 与对应 example 一致，并由根 `.gitignore` 的 `.env.*` 规则忽略。
+
+复用 secret 只适用于本地 dev。若同一值仍用于客户、现场、生产或其他共享环境，必须独立轮换，不能
+因为 Git 忽略就把凭据复用当作长期安全方案。
+
+### 21.2 首次启动准备
+
+如果真实 dev env 尚不存在，先从 example 创建：
+
+```bash
+cd /Users/jason/Desktop/DreamCode/aiis-ics-arch
+cp backend/.env.docker.dev.example backend/.env.docker.dev
+cp frontend-js/.env.docker.dev.example frontend-js/.env.docker.dev
+```
+
+只在本地编辑 `backend/.env.docker.dev` 中的 JWT/MySQL secret。真实 env 不提交 Git，不把值写进
+README、PLAN、3MD、日志或聊天。
+
+可在当前终端定义临时快捷函数：
+
+```bash
+dcdev() {
+  docker compose \
+    --project-name aiis-ics-arch-dev \
+    --env-file backend/.env.docker.dev \
+    -f docker-compose.dev.yml "$@"
+}
+```
+
+该函数只在当前终端有效；新开终端后需要重新定义。
+
+### 21.3 首次构建和启动
+
+```bash
+dcdev config --quiet
+dcdev build backend frontend
+dcdev up -d mysql
+dcdev up migration
+dcdev up -d backend frontend
+dcdev ps -a
+```
+
+预期状态：
+
+- `mysql`、`backend`、`frontend` 为 healthy；
+- `migration` 为 `exited (0)`，这是一次性迁移服务的正常终态；
+- backend 使用 `http://127.0.0.1:8000`；
+- frontend 使用 `http://127.0.0.1:5190`；
+- MySQL 宿主机开发端口默认为 `3307`。
+
+日志和 HTTP 验证：
+
+```bash
+dcdev logs -f backend frontend
+
+curl -fsS http://127.0.0.1:8000/health
+curl -I http://127.0.0.1:5190/
+curl -i http://127.0.0.1:5190/api/v1/auth/me
+```
+
+`/api/v1/auth/me` 未登录时预期返回 `401 Not authenticated`，它可以证明 Vite `/api` proxy 已到达
+backend。当前 backend health route 是 `/health`；不要用 `/api/v1/health` 的已知 404 判断 proxy 失败。
+
+### 21.4 日常开发
+
+以后启动 Docker Desktop，进入仓库并重新定义 `dcdev` 后运行：
+
+```bash
+dcdev up -d backend frontend
+dcdev ps -a
+```
+
+- 修改 `backend/` Python 源码后，Uvicorn reload 自动生效；
+- 修改 `frontend-js/` 源码后，Vite HMR 自动生效；
+- 普通源码修改不需要 rebuild；
+- 模块新增、删除、重命名或 manifest 拓扑变化仍应重启对应容器；
+- 新增表、字段、约束或索引仍必须新增 Alembic migration，module registry 不自动建表。
+
+后端依赖变化：
+
+```bash
+dcdev run --rm backend uv sync --frozen --extra dev
+dcdev restart backend
+```
+
+前端依赖变化：
+
+```bash
+dcdev exec frontend pnpm install --frozen-lockfile
+dcdev restart frontend
+```
+
+新增 migration 后：
+
+```bash
+dcdev run --rm migration
+dcdev restart backend
+```
+
+只有 Dockerfile、Python/Node 版本、系统依赖、基础镜像或 ODBC driver 变化时才需要重建：
+
+```bash
+dcdev up -d --build --force-recreate backend frontend
+```
+
+### 21.5 可选本地管理员
+
+Architecture public 默认不创建账号。如果需要登录进行本地 UI 开发：
+
+1. 只在被忽略的 `backend/.env.docker.dev` 中设置强本地密码；
+2. 临时把 `ADMIN_BOOTSTRAP_ENABLED` 改为 `True`；
+3. 显式运行一次：
+
+```bash
+dcdev --profile bootstrap run --rm bootstrap
+```
+
+4. 完成后立即把 `ADMIN_BOOTSTRAP_ENABLED` 恢复为 `False`。
+
+不要默认启用 supervisor/operator，也不要把项目权限矩阵复制回 Architecture Core。
+
+### 21.6 停止、保留和清空
+
+临时停止并保留全部容器和数据：
+
+```bash
+dcdev stop
+```
+
+删除容器和网络，但保留 MySQL、backend venv、frontend node_modules named volumes：
+
+```bash
+dcdev down --remove-orphans
+```
+
+彻底清空整个本地 dev 环境：
+
+```bash
+dcdev down --volumes --remove-orphans
+```
+
+最后一条会删除本地 MySQL 数据和依赖 volumes，只能在明确需要重置时使用。MySQL volume 建立后，
+仅修改 env 密码不会自动修改数据库内部账号；应通过数据库修改密码，或明确删除 dev volume 后重建。
+
+### 21.7 进入 1.0.0 定版的人工 gate
+
+Human Owner 使用该 dev 环境完成实际开发确认后，至少检查：
+
+```bash
+dcdev ps -a
+git status --short
+git branch -vv
+```
+
+确认运行稳定、没有真实 env 被 Git 跟踪、tracked worktree 只包含预期修改后，再启动
+`aiis-ics-arch::ARCH-REL-001`。版本分支/tag 和 GitHub Release 是独立操作，不由 dev Compose 自动产生。
