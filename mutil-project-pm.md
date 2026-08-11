@@ -1,7 +1,7 @@
 # AIIS ICS 多仓库项目管理与交付方案
 
 Status: 架构迁移基线已完成；ARCH-001 r3、ARCH-MIG-001 r1、ARCH-DOCKER-001 r1 均已获 Human Owner 接受，GitHub `main` 已首次推送，长期 dev 环境采用与 1.0.0 定版仍按独立 gate 推进
-Target repository: `aiis-ics-arch`  
+Target repository: `aiis-ics-arch`
 Hosting: GitHub public repository
 
 ## 1. 目标
@@ -21,11 +21,11 @@ AIIS ICS 使用三个职责独立的仓库管理架构平台、实际项目和�
 
 ## 2. 三个仓库
 
-| 类型 | 仓库名 | 托管位置 | 可见性 | 主要职责 |
-| --- | --- | --- | --- | --- |
-| 架构仓 | `aiis-ics-arch` | GitHub | 公开 | 平台核心、Control Agent、通用工具、模板、版本与架构规范 |
-| 项目仓 | `aiis-ics-l2-<项目号>` | Gitee | 私有 | 客户项目、业务模块、PLC 配置、migration、部署和交付 |
-| 模块仓 | `aiis-ics-modules` | Gitee | 私有 | 可复用的前后端业务模块和接入说明 |
+| 类型   | 仓库名                   | 托管位置 | 可见性 | 主要职责                                                |
+| ------ | ------------------------ | -------- | ------ | ------------------------------------------------------- |
+| 架构仓 | `aiis-ics-arch`        | GitHub   | 公开   | 平台核心、Control Agent、通用工具、模板、版本与架构规范 |
+| 项目仓 | `aiis-ics-l2-<项目号>` | Gitee    | 私有   | 客户项目、业务模块、PLC 配置、migration、部署和交付     |
+| 模块仓 | `aiis-ics-modules`     | Gitee    | 私有   | 可复用的前后端业务模块和接入说明                        |
 
 实际项目仓统一使用：
 
