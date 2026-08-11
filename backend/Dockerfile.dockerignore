@@ -1,0 +1,45 @@
+# File Path: /backend/Dockerfile.dockerignore
+# Production backend build-context allowlist. Everything is denied by default.
+# It intentionally excludes task evidence, runtime env files and generated state.
+*
+!pyproject.toml
+!uv.lock
+!alembic.ini
+!main.py
+!settings.py
+!alembic/
+!alembic/**
+!app/
+!app/**
+!common/
+!common/**
+!config/
+!config/**
+!core/
+!core/**
+!database/
+!database/**
+!projection/
+!projection/**
+!scripts/
+!scripts/maintenance/
+!scripts/maintenance/**
+
+# Explicit safety exclusions remain useful if the allowlist is extended later.
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+**/plans/**
+**/logs/**
+**/data/**
+**/storage/**
+**/uploads/**
+**/exports/**
+**/*.sql
+**/*.db
+**/*.sqlite*
+**/__pycache__/
+**/*.py[cod]
+**/README
+**/README*.md

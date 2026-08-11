@@ -1,0 +1,146 @@
+/**
+ * File Path: /control-agent/src/styles/theme.css
+ * Description: Control Agent theme tokens
+ * Main Features:
+ *   - Defines light and dark mode tokens
+ *   - Provides industrial console color roles
+ *   - Avoids hardcoded colors in Vue components
+ */
+:root {
+  color-scheme: light dark;
+  --agent-bg: #f3f6f8;
+  --agent-surface: #ffffff;
+  --agent-surface-muted: #edf3f7;
+  --agent-surface-strong: #162734;
+  --agent-border: #cbd6de;
+  --agent-border-strong: #94a8b6;
+  --agent-text: #17212b;
+  --agent-text-inverse: #eef6f8;
+  --agent-text-muted: #5a6875;
+  --agent-accent: #0891b2;
+  --agent-accent-strong: #0e7490;
+  --agent-accent-soft: rgba(8, 145, 178, 0.1);
+  --agent-accent-surface: rgba(8, 145, 178, 0.16);
+  --agent-on-accent: #f7feff;
+  --agent-success: #26835d;
+  --agent-warning: #b7791f;
+  --agent-danger: #b13f35;
+  --agent-card-bg: rgba(255, 255, 255, 0.84);
+  --agent-card-border: rgba(23, 33, 43, 0.08);
+  --agent-card-border-hover: rgba(8, 145, 178, 0.22);
+  --agent-card-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+  --agent-card-shadow-hover: 0 18px 40px rgb(15 23 42 / 0.06);
+  --agent-table-grid: rgba(23, 33, 43, 0.08);
+  --agent-table-label-bg: rgba(237, 243, 247, 0.72);
+  --agent-table-shell-bg: rgba(255, 255, 255, 0.36);
+  --agent-table-header-bg: rgba(255, 255, 255, 0.16);
+  --agent-table-stripe-bg: rgba(237, 243, 247, 0.72);
+  --agent-table-row-hover: rgba(8, 145, 178, 0.06);
+  --agent-table-fixed-bg: rgba(255, 255, 255, 0.92);
+  --agent-info-label-bg: rgba(237, 243, 247, 0.56);
+  --agent-shadow: 0 10px 24px rgb(23 33 43 / 0.08);
+  --agent-shell-shadow: 0 18px 42px rgb(15 23 42 / 0.1);
+  --agent-header-glass-bg: rgba(255, 255, 255, 0.68);
+  --agent-header-glass-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.62) inset,
+    0 0 0 1px rgb(8 145 178 / 0.08),
+    0 12px 28px rgb(15 23 42 / 0.08),
+    0 24px 54px rgb(15 23 42 / 0.1);
+  --agent-sidebar-bg: rgba(255, 255, 255, 0.74);
+  --agent-sidebar-active-bg: rgba(8, 145, 178, 0.1);
+  --agent-card-radius: 20px;
+  --agent-card-radius-compact: 16px;
+  --agent-menu-radius: 12px;
+  --agent-control-radius: 14px;
+  --agent-control-radius-small: 10px;
+  --agent-sidebar-width: 236px;
+  --agent-topbar-height: 76px;
+}
+
+:root[data-agent-theme="dark"] {
+    --agent-bg: #111820;
+    --agent-surface: #18222c;
+    --agent-surface-muted: #202c37;
+    --agent-surface-strong: #0f202b;
+    --agent-border: #334452;
+    --agent-border-strong: #4b6477;
+    --agent-text: #e6edf2;
+    --agent-text-inverse: #e6edf2;
+    --agent-text-muted: #a4b1bd;
+    --agent-accent: #22d3ee;
+    --agent-accent-strong: #67e8f9;
+    --agent-accent-soft: rgba(34, 211, 238, 0.14);
+    --agent-accent-surface: rgba(34, 211, 238, 0.2);
+    --agent-on-accent: #06212a;
+    --agent-success: #55bf8d;
+    --agent-warning: #f0b95b;
+    --agent-danger: #e06d61;
+    --agent-card-bg: rgba(255, 255, 255, 0.04);
+    --agent-card-border: rgba(255, 255, 255, 0.07);
+    --agent-card-border-hover: rgba(34, 211, 238, 0.24);
+    --agent-card-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+    --agent-card-shadow-hover: 0 18px 48px rgb(0 0 0 / 0.32);
+    --agent-table-grid: rgba(255, 255, 255, 0.07);
+    --agent-table-label-bg: rgba(255, 255, 255, 0.045);
+    --agent-table-shell-bg: rgba(255, 255, 255, 0.025);
+    --agent-table-header-bg: rgba(255, 255, 255, 0.025);
+    --agent-table-stripe-bg: rgba(255, 255, 255, 0.045);
+    --agent-table-row-hover: rgba(34, 211, 238, 0.08);
+    --agent-table-fixed-bg: rgba(24, 34, 44, 0.96);
+    --agent-info-label-bg: rgba(255, 255, 255, 0.04);
+    --agent-shadow: 0 12px 28px rgb(0 0 0 / 0.24);
+    --agent-shell-shadow: 0 20px 44px rgb(0 0 0 / 0.32);
+    --agent-header-glass-bg: rgba(18, 28, 36, 0.74);
+    --agent-header-glass-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.06) inset,
+      0 0 0 1px rgb(34 211 238 / 0.12),
+      0 14px 34px rgb(0 0 0 / 0.34),
+      0 30px 70px rgb(0 0 0 / 0.38);
+    --agent-sidebar-bg: rgba(18, 30, 39, 0.82);
+    --agent-sidebar-active-bg: rgba(34, 211, 238, 0.12);
+  }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-agent-theme]) {
+    --agent-bg: #111820;
+    --agent-surface: #18222c;
+    --agent-surface-muted: #202c37;
+    --agent-surface-strong: #0f202b;
+    --agent-border: #334452;
+    --agent-border-strong: #4b6477;
+    --agent-text: #e6edf2;
+    --agent-text-inverse: #e6edf2;
+    --agent-text-muted: #a4b1bd;
+    --agent-accent: #22d3ee;
+    --agent-accent-strong: #67e8f9;
+    --agent-accent-soft: rgba(34, 211, 238, 0.14);
+    --agent-accent-surface: rgba(34, 211, 238, 0.2);
+    --agent-on-accent: #06212a;
+    --agent-success: #55bf8d;
+    --agent-warning: #f0b95b;
+    --agent-danger: #e06d61;
+    --agent-card-bg: rgba(255, 255, 255, 0.04);
+    --agent-card-border: rgba(255, 255, 255, 0.07);
+    --agent-card-border-hover: rgba(34, 211, 238, 0.24);
+    --agent-card-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+    --agent-card-shadow-hover: 0 18px 48px rgb(0 0 0 / 0.32);
+    --agent-table-grid: rgba(255, 255, 255, 0.07);
+    --agent-table-label-bg: rgba(255, 255, 255, 0.045);
+    --agent-table-shell-bg: rgba(255, 255, 255, 0.025);
+    --agent-table-header-bg: rgba(255, 255, 255, 0.025);
+    --agent-table-stripe-bg: rgba(255, 255, 255, 0.045);
+    --agent-table-row-hover: rgba(34, 211, 238, 0.08);
+    --agent-table-fixed-bg: rgba(24, 34, 44, 0.96);
+    --agent-info-label-bg: rgba(255, 255, 255, 0.04);
+    --agent-shadow: 0 12px 28px rgb(0 0 0 / 0.24);
+    --agent-shell-shadow: 0 20px 44px rgb(0 0 0 / 0.32);
+    --agent-header-glass-bg: rgba(18, 28, 36, 0.74);
+    --agent-header-glass-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.06) inset,
+      0 0 0 1px rgb(34 211 238 / 0.12),
+      0 14px 34px rgb(0 0 0 / 0.34),
+      0 30px 70px rgb(0 0 0 / 0.38);
+    --agent-sidebar-bg: rgba(18, 30, 39, 0.82);
+    --agent-sidebar-active-bg: rgba(34, 211, 238, 0.12);
+  }
+}

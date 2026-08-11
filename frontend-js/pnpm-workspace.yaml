@@ -1,0 +1,4 @@
+pmOnFail: ignore
+allowBuilds:
+  esbuild: true
+  vue-demi: true

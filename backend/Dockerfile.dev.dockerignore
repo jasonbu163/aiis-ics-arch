@@ -1,0 +1,6 @@
+# File Path: /backend/Dockerfile.dev.dockerignore
+# Docker-dev image contains dependencies only; Compose supplies the source mount.
+*
+!Dockerfile.dev
+!pyproject.toml
+!uv.lock

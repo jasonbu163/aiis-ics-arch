@@ -1,0 +1,21 @@
+# AIIS ICS Architecture Core frontend development image.
+
+FROM docker.m.daocloud.io/library/node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32
+
+# 安装固定版本 pnpm，避免 corepack 每次查询 latest。
+RUN npm install -g pnpm@11.11.0
+
+WORKDIR /app
+
+# 复制 package 文件
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+# 安装依赖
+RUN pnpm install --frozen-lockfile
+
+# A separately approved Docker task supplies source mounts and runtime settings.
+
+EXPOSE 5190
+
+# Development command; deployment orchestration is maintained by a separate task.
+CMD ["pnpm", "run", "dev", "--host", "0.0.0.0"]

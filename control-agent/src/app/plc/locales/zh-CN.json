@@ -1,0 +1,101 @@
+{
+  "status": "合同状态",
+  "path": "配置路径",
+  "endpoint": "PLC endpoint",
+  "endpointProbe": "endpoint 探测",
+  "sampleRead": "只读样本读取",
+  "driver": "PLC 驱动",
+  "plcCount": "PLC 数量",
+  "groupCount": "DB group 数量",
+  "pointCount": "点位数量",
+  "readableWritable": "读写标记",
+  "readable": "可读",
+  "writable": "可写",
+  "issues": "合同问题",
+  "sampleValues": "PLC 样本值",
+  "pointName": "点位名称",
+  "dataType": "数据类型",
+  "value": "值",
+  "dbOffset": "DB / offset / bit",
+  "missingRequired": "缺必需字段",
+  "unsupportedTypes": "不支持类型",
+  "rack": "rack",
+  "slot": "slot",
+  "selectedPlc": "当前 PLC",
+  "runtimeUnits": "PLC 运行单元",
+  "unitPickerHint": "请选择一个 PLC 作为当前点位合同和样本读取目标。选择只切换上下文，不会自动连接 PLC。",
+  "runtimeUnit": "运行单元",
+  "collectionUnit": "采集状态",
+  "endpointMultiple": "共 {count} 个 PLC endpoint；样本读取请选择一个 PLC",
+  "endpointProbeMultiple": "运行时已报告 {count} 个 PLC 单元",
+  "runtimeUnitStatus": "运行状态：{status}",
+  "selectedPointValues": "{groups} 个 group / {points} 个点位",
+  "aggregatePointValues": "全部 PLC 共 {groups} 个 group / {points} 个点位",
+  "selectOneForSample": "样本读取请选择一个具体 PLC。",
+  "controls": {
+    "readOnce": "读取一次",
+    "select": "选择",
+    "selected": "已选择",
+    "startRead": "启动读取",
+    "stopRead": "停止读取",
+    "startConfirmTitle": "启动 PLC 点位读取",
+    "startConfirmMessage": "启动后，当前页面会按配置周期只读目标 {target} 的 PLC 点位样本，不写入数据库。请确认 PLC endpoint 和驱动配置已经复核。",
+    "confirmStart": "确认启动",
+    "cancel": "取消",
+    "resultTitle": "PLC 读取结果",
+    "started": "PLC 点位读取已启动。",
+    "stopped": "PLC 点位读取已停止。",
+    "succeeded": "读取成功：{count} 点，{latency} ms。",
+    "failed": "PLC 读取失败：目标 PLC 可能未上线或连接异常。详细信息：{error}",
+    "failedUnknown": "PLC 读取失败：目标 PLC 可能未上线或连接异常。",
+    "notAttempted": "PLC 读取未执行：请确认读取门禁和目标 PLC 配置。",
+    "notAttemptedWithReason": "PLC 读取未执行：请确认读取门禁和目标 PLC 配置。详细信息：{error}",
+    "targetRequired": "样本读取前请选择一个具体 PLC。",
+    "disabledReasons": {
+      "runtime": "浏览器模式不能控制本地 PLC runtime。",
+      "readGate": "PLC 读取门禁未开启或存在配置冲突。",
+      "busy": "另一个 PLC 样本读取正在执行。"
+    }
+  },
+  "sectionTitle": "PLC 点位合同",
+  "states": {
+    "contract": {
+      "loaded": "已加载",
+      "failed": "读取失败",
+      "missing": "未找到",
+      "noEndpoint": "未配置 endpoint"
+    },
+    "endpoint": {
+      "disabled": "已关闭",
+      "idle": "等待启动",
+      "reachableWithLatency": "可达 · {latency} ms",
+      "unreachable": "不可达"
+    },
+    "sample": {
+      "disabled": "已关闭",
+      "idle": "等待启动",
+      "pendingForTarget": "尚未读取当前 PLC：{plcKey}",
+      "running": "读取中",
+      "succeededWithLatency": "成功 · {plcKey} · {count} 点 · {latency} ms",
+      "failed": "读取失败",
+      "skipped": "未执行"
+    },
+    "runtime": {
+      "unknown": "未知",
+      "starting": "启动中",
+      "running": "运行中",
+      "stopping": "停止中",
+      "stopped": "已停止",
+      "failed": "失败",
+      "partial": "部分成功",
+      "all_good": "全部正常"
+    },
+    "sampleUnit": {
+      "idle": "空闲",
+      "starting": "读取中",
+      "succeeded": "成功",
+      "failed": "失败",
+      "stopped": "已停止"
+    }
+  }
+}

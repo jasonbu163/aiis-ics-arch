@@ -1,0 +1,7 @@
+# File Path: /frontend-js/Dockerfile.dev.dockerignore
+# Development image contains dependencies only; Compose supplies source.
+*
+!Dockerfile.dev
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml

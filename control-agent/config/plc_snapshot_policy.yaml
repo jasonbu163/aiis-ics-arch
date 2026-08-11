@@ -1,0 +1,22 @@
+# Public example raw/latest snapshot policy.
+#
+# The runtime gates in .env.example remain disabled. Replace this example with
+# a reviewed site policy together with plc_points.yaml before enabling PLC I/O.
+PLC_1:
+  snapshot_policy_version: 2
+  groups:
+    - name: example_group
+      db_number: 1
+      points:
+        - name: example_value
+          raw_enabled: true
+          raw_policy: every_sample
+          latest_enabled: true
+        - name: example_status
+          raw_enabled: true
+          raw_policy: every_sample
+          latest_enabled: true
+        - name: example_counter
+          raw_enabled: true
+          raw_policy: every_sample
+          latest_enabled: true

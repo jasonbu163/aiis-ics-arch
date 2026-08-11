@@ -1,0 +1,28 @@
+# File Path: /frontend-js/Dockerfile.dockerignore
+# Description: Minimal source/build context for the production frontend image.
+# Main Features:
+#   - Excludes secrets, task evidence and generated dependency/build output
+#   - Includes only the source and lockfile needed for the image build
+
+*
+!Dockerfile
+!nginx.conf
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!index.html
+!vite.config.js
+!public/
+!public/**
+!scripts/
+!scripts/**
+!src/
+!src/**
+
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+**/plans/**
+**/node_modules/**
+**/dist/**

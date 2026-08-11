@@ -1,0 +1,24 @@
+{
+  "subtitle": "AIIS ICS Architecture",
+  "username": "Username",
+  "password": "Password",
+  "rememberMe": "Remember me",
+  "login": "Login",
+  "loggingIn": "Logging in...",
+  "demoAccount": "Demo Account",
+  "messages": {
+    "invalidCredentials": "Incorrect username or password",
+    "failed": "Login failed. Please try again."
+  },
+  "rules": {
+    "usernameRequired": "Please input username",
+    "usernameLength": "Length 3-20 characters",
+    "passwordRequired": "Please input password",
+    "passwordLength": "Length 6-20 characters"
+  },
+  "roles": {
+    "admin": "Admin",
+    "supervisor": "Supervisor",
+    "operator": "Operator"
+  }
+}

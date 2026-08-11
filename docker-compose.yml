@@ -1,0 +1,41 @@
+# Production-shaped source build for configuration and image verification.
+# The database is external and must be supplied by a reviewed deployment env.
+name: aiis-ics-arch-release-check
+
+services:
+  backend:
+    image: aiis-ics-arch-release-check-backend:local
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env.docker.prod
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_HOST_PORT:-8000}:8000"
+    networks:
+      - core
+
+  frontend:
+    image: aiis-ics-arch-release-check-frontend:local
+    build:
+      context: ./frontend-js
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api/v1
+        VITE_PROXY_TARGET: http://backend:8000
+        VITE_FRONTEND_MOCK_ENABLED: "false"
+        VITE_ROLE_PAGE_ACCESS_JSON: "{}"
+        VITE_LOGIN_DEMO_ACCOUNTS_ENABLED: "false"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_HOST_PORT:-80}:80"
+    networks:
+      - core
+
+networks:
+  core:
+    driver: bridge

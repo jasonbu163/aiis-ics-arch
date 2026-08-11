@@ -1,0 +1,101 @@
+{
+  "status": "Contract status",
+  "path": "Config path",
+  "endpoint": "PLC endpoint",
+  "endpointProbe": "Endpoint probe",
+  "sampleRead": "Read-only sample read",
+  "driver": "PLC driver",
+  "plcCount": "PLC count",
+  "groupCount": "DB group count",
+  "pointCount": "Point count",
+  "readableWritable": "Read/write flags",
+  "readable": "Readable",
+  "writable": "Writable",
+  "issues": "Contract issues",
+  "sampleValues": "PLC sample values",
+  "pointName": "Point name",
+  "dataType": "Data type",
+  "value": "Value",
+  "dbOffset": "DB / offset / bit",
+  "missingRequired": "Missing required",
+  "unsupportedTypes": "Unsupported types",
+  "rack": "rack",
+  "slot": "slot",
+  "selectedPlc": "Selected PLC",
+  "runtimeUnits": "PLC runtime units",
+  "unitPickerHint": "Select one PLC as the current point-contract and sample-read target. Selection changes context only; it does not connect to the PLC.",
+  "runtimeUnit": "Runtime unit",
+  "collectionUnit": "Collection state",
+  "endpointMultiple": "{count} PLC endpoints; select one PLC for a sample read",
+  "endpointProbeMultiple": "{count} PLC runtime units reported",
+  "runtimeUnitStatus": "Runtime state: {status}",
+  "selectedPointValues": "{groups} groups / {points} points",
+  "aggregatePointValues": "{groups} groups / {points} points across all PLCs",
+  "selectOneForSample": "Select one PLC for a targeted sample read.",
+  "controls": {
+    "readOnce": "Read once",
+    "select": "Select",
+    "selected": "Selected",
+    "startRead": "Start read",
+    "stopRead": "Stop read",
+    "startConfirmTitle": "Start PLC point read",
+    "startConfirmMessage": "After start, this page will read target {target} on the configured interval without writing to the database. Confirm that the PLC endpoint and driver settings have been checked.",
+    "confirmStart": "Start",
+    "cancel": "Cancel",
+    "resultTitle": "PLC read result",
+    "started": "PLC point reading started.",
+    "stopped": "PLC point reading stopped.",
+    "succeeded": "Read succeeded: {count} points, {latency} ms.",
+    "failed": "PLC read failed: the target PLC may be offline or unreachable. Details: {error}",
+    "failedUnknown": "PLC read failed: the target PLC may be offline or unreachable.",
+    "notAttempted": "PLC read was not attempted. Check the read gate and target PLC configuration.",
+    "notAttemptedWithReason": "PLC read was not attempted. Check the read gate and target PLC configuration. Details: {error}",
+    "targetRequired": "Select one PLC before starting a sample read.",
+    "disabledReasons": {
+      "runtime": "Browser mode cannot control the local PLC runtime.",
+      "readGate": "The PLC read gate is closed or has a configuration conflict.",
+      "busy": "Another PLC sample read is in progress."
+    }
+  },
+  "sectionTitle": "PLC point contract",
+  "states": {
+    "contract": {
+      "loaded": "Loaded",
+      "failed": "Read failed",
+      "missing": "Missing",
+      "noEndpoint": "No endpoint configured"
+    },
+    "endpoint": {
+      "disabled": "Disabled",
+      "idle": "Waiting to start",
+      "reachableWithLatency": "Reachable · {latency} ms",
+      "unreachable": "Unreachable"
+    },
+    "sample": {
+      "disabled": "Disabled",
+      "idle": "Waiting to start",
+      "pendingForTarget": "No sample has been read for the selected PLC: {plcKey}",
+      "running": "Reading",
+      "succeededWithLatency": "Succeeded · {plcKey} · {count} points · {latency} ms",
+      "failed": "Read failed",
+      "skipped": "Not attempted"
+    },
+    "runtime": {
+      "unknown": "Unknown",
+      "starting": "Starting",
+      "running": "Running",
+      "stopping": "Stopping",
+      "stopped": "Stopped",
+      "failed": "Failed",
+      "partial": "Partial",
+      "all_good": "All good"
+    },
+    "sampleUnit": {
+      "idle": "Idle",
+      "starting": "Reading",
+      "succeeded": "Succeeded",
+      "failed": "Failed",
+      "stopped": "Stopped"
+    }
+  }
+}

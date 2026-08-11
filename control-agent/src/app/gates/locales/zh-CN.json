@@ -1,0 +1,19 @@
+{
+  "status": "门禁状态",
+  "upperSystem": "上位系统链路",
+  "selfTest": "本地自检",
+  "provider": "自检 provider",
+  "operator": "操作员身份",
+  "actionScope": "动作范围",
+  "resource": "资源",
+  "approval": "授权 ID",
+  "highRiskRequired": "高危授权必需",
+  "highRiskNotRequired": "高危授权非必需",
+  "failClosed": "失败关闭",
+  "failOpen": "失败放行",
+  "timeoutMs": "{timeout} ms 超时",
+  "selfTestDisabled": "自检已关闭",
+  "selfTestPassed": "通过 · {result}",
+  "selfTestFailed": "失败 · {result}",
+  "sectionTitle": "授权门禁"
+}

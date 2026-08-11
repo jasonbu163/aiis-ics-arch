@@ -1,0 +1,19 @@
+{
+  "status": "Gate status",
+  "upperSystem": "Upper-system link",
+  "selfTest": "Local self-test",
+  "provider": "Self-test provider",
+  "operator": "Operator identity",
+  "actionScope": "Action scope",
+  "resource": "Resource",
+  "approval": "Approval id",
+  "highRiskRequired": "High-risk auth required",
+  "highRiskNotRequired": "High-risk auth not required",
+  "failClosed": "Fail-closed",
+  "failOpen": "Fail-open",
+  "timeoutMs": "{timeout} ms timeout",
+  "selfTestDisabled": "Self-test disabled",
+  "selfTestPassed": "Passed · {result}",
+  "selfTestFailed": "Failed · {result}",
+  "sectionTitle": "Authorization gate"
+}

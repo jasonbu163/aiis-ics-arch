@@ -1,0 +1,91 @@
+{
+  "title": "Lineage Mapping Studio",
+  "subtitle": "File-driven visual review for projection lineage",
+  "language": "Language",
+  "inputs": "Inputs",
+  "graph": "Graph",
+  "evidence": "Evidence",
+  "import": {
+    "frontendSources": "Frontend sources CSV",
+    "frontendI18nRefs": "Frontend i18n refs CSV",
+    "frontendComponentRefs": "Frontend components CSV",
+    "frontendApiRefs": "Frontend APIs CSV",
+    "frontendApiUriRefs": "Frontend API URIs CSV",
+    "frontendLinks": "Frontend links CSV",
+    "backendRoutes": "Backend routes CSV",
+    "backendRouteUriRefs": "Backend route URIs CSV",
+    "backendModels": "Backend models CSV",
+    "backendRouteModelLinks": "Backend route/model edges CSV",
+    "tableSchema": "Table schema JSON",
+    "lineageGraph": "Lineage graph JSON"
+  },
+  "actions": {
+    "loadInputs": "Load from inputs",
+    "buildGraph": "Build graph",
+    "exportDraft": "Export draft",
+    "clear": "Clear",
+    "fitGraph": "Fit graph",
+    "hideSidebar": "Hide",
+    "showSidebar": "Show",
+    "locate": "Locate",
+    "showAllKinds": "All"
+  },
+  "search": {
+    "label": "Search graph nodes",
+    "placeholder": "Search node",
+    "count": "{count} match(es)"
+  },
+  "viewPresets": {
+    "label": "View presets",
+    "core": "Core",
+    "copy": "Copy",
+    "fields": "Fields",
+    "plc": "PLC",
+    "all": "All"
+  },
+  "stats": {
+    "frontendSources": "Frontend sources",
+    "frontendI18nRefs": "i18n",
+    "frontendApiRefs": "APIs",
+    "frontendApiUriRefs": "API URIs",
+    "frontendLinks": "Frontend links",
+    "backendRoutes": "Routes",
+    "backendRouteUriRefs": "Route URIs",
+    "backendModels": "Models",
+    "backendRouteModelLinks": "Backend edges",
+    "tables": "Tables",
+    "xlsxBindings": "XLSX bindings",
+    "nodes": "Nodes",
+    "edges": "Edges"
+  },
+  "status": {
+    "ready": "Ready",
+    "missingEvidence": "Import audit evidence first",
+    "graphBuilt": "Graph built",
+    "graphBuiltWithCounts": "Graph built: {nodes} nodes / {edges} edges",
+    "draftExported": "Draft exported",
+    "defaultInputsLoaded": "Loaded {loaded} file(s) from inputs",
+    "defaultInputsLoadedWithMissing": "Loaded {loaded} file(s); {missing} default file(s) missing",
+    "noDefaultInputs": "No default input files found in inputs",
+    "inputLoadFailed": "Default input load failed: {files}",
+    "noGraph": "Build the graph first",
+    "graphFitted": "Graph fitted to view",
+    "fitFailed": "Graph fit failed",
+    "focusedGraph": "Focused on {node}: {nodes} related nodes",
+    "searchMatched": "Located {node}; {count} match(es)",
+    "searchIsolated": "Showing {count} matched node(s)",
+    "searchNoMatch": "No node matched {term}",
+    "searchHiddenKind": "{node} is hidden by the {kind} filter"
+  },
+  "legend": {
+    "locale": "Locale file",
+    "i18n": "I18n key",
+    "component": "Component",
+    "api": "API",
+    "route": "Route",
+    "model": "Model",
+    "table": "Table",
+    "field": "Field",
+    "plc": "PLC point"
+  }
+}

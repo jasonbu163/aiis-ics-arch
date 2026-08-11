@@ -1,0 +1,91 @@
+{
+  "title": "血缘映射工作台",
+  "subtitle": "面向投影血缘的文件驱动可视化复核工具",
+  "language": "语言",
+  "inputs": "输入",
+  "graph": "图谱",
+  "evidence": "证据",
+  "import": {
+    "frontendSources": "前端源文件清单 CSV",
+    "frontendI18nRefs": "前端 i18n 引用 CSV",
+    "frontendComponentRefs": "前端组件清单 CSV",
+    "frontendApiRefs": "前端 API 清单 CSV",
+    "frontendApiUriRefs": "前端 API URI 清单 CSV",
+    "frontendLinks": "前端 link 表 CSV",
+    "backendRoutes": "后端 Route 清单 CSV",
+    "backendRouteUriRefs": "后端 Route URI 清单 CSV",
+    "backendModels": "后端 Model 清单 CSV",
+    "backendRouteModelLinks": "后端 Route/Model 边表 CSV",
+    "tableSchema": "表结构 JSON",
+    "lineageGraph": "血缘图 JSON"
+  },
+  "actions": {
+    "loadInputs": "从 inputs 加载",
+    "buildGraph": "生成图谱",
+    "exportDraft": "导出草稿",
+    "clear": "清空",
+    "fitGraph": "适配图谱",
+    "hideSidebar": "隐藏",
+    "showSidebar": "显示",
+    "locate": "定位",
+    "showAllKinds": "全部"
+  },
+  "search": {
+    "label": "搜索图谱节点",
+    "placeholder": "搜索节点",
+    "count": "{count} 个匹配"
+  },
+  "viewPresets": {
+    "label": "视图预设",
+    "core": "核心",
+    "copy": "文案",
+    "fields": "字段",
+    "plc": "PLC",
+    "all": "全量"
+  },
+  "stats": {
+    "frontendSources": "前端源",
+    "frontendI18nRefs": "i18n",
+    "frontendApiRefs": "API",
+    "frontendApiUriRefs": "API URI",
+    "frontendLinks": "前端边",
+    "backendRoutes": "Route",
+    "backendRouteUriRefs": "Route URI",
+    "backendModels": "Model",
+    "backendRouteModelLinks": "后端边",
+    "tables": "数据表",
+    "xlsxBindings": "XLSX 绑定",
+    "nodes": "节点",
+    "edges": "连线"
+  },
+  "status": {
+    "ready": "就绪",
+    "missingEvidence": "请先导入审计证据",
+    "graphBuilt": "图谱已生成",
+    "graphBuiltWithCounts": "图谱已生成：{nodes} 个节点 / {edges} 条连线",
+    "draftExported": "草稿已导出",
+    "defaultInputsLoaded": "已从 inputs 加载 {loaded} 个文件",
+    "defaultInputsLoadedWithMissing": "已加载 {loaded} 个文件，缺少 {missing} 个默认文件",
+    "noDefaultInputs": "inputs 中没有找到默认输入文件",
+    "inputLoadFailed": "默认输入加载失败：{files}",
+    "noGraph": "请先生成图谱",
+    "graphFitted": "图谱已适配视图",
+    "fitFailed": "图谱适配失败",
+    "focusedGraph": "已聚焦 {node}：{nodes} 个相关节点",
+    "searchMatched": "已定位 {node}，共 {count} 个匹配",
+    "searchIsolated": "已显示 {count} 个匹配节点",
+    "searchNoMatch": "没有匹配 {term} 的节点",
+    "searchHiddenKind": "{node} 已被 {kind} 类别过滤隐藏"
+  },
+  "legend": {
+    "locale": "Locale 文件",
+    "i18n": "I18n Key",
+    "component": "组件",
+    "api": "API",
+    "route": "Route",
+    "model": "Model",
+    "table": "表",
+    "field": "字段",
+    "plc": "PLC 点位"
+  }
+}

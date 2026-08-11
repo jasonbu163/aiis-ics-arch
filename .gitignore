@@ -1,0 +1,275 @@
+# ============================================================================
+# Project Git Ignore Configuration / 项目 Git 忽略配置
+# ============================================================================
+
+# ============================================================================
+# Input & Output Resources / 输入输出资源
+# ============================================================================
+resources/*
+!resources/README.md
+!resources/README.zh-CN.md
+
+# ============================================================================
+# Logs Files / 日志文件
+# ============================================================================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*logs.json
+
+# ============================================================================
+# Dependencies Directory / 依赖目录
+# ============================================================================
+node_modules
+.pnp
+.pnp.js
+jspm_packages/
+.npm
+.pnpm-store/
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.yarn-integrity
+
+# ============================================================================
+# Build Outputs / 构建输出
+# ============================================================================
+dist
+dist-ssr
+build
+.next
+out
+public
+.vuepress/dist
+.nuxt
+*.tgz
+
+# ============================================================================
+# Cache Directory / 缓存目录
+# ============================================================================
+.cache
+.parcel-cache
+.vite/
+.fusebox/
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+.temp
+.eslintcache
+.stylelintcache
+.node_repl_history
+.tern-port
+.vscode-test
+.dynamodb/
+
+# ============================================================================
+# Editor & IDE / 编辑器和 IDE
+# ============================================================================
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.sublime-project
+*.sublime-workspace
+
+# ============================================================================
+# Environment Variables & Configuration Files / 环境变量和配置文件
+# ============================================================================
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.local
+.env.*.local
+!.env.example
+!**/.env.example
+!**/.env.*.example
+
+# ============================================================================
+# Backend / 后端 (FastAPI + Python)
+# ============================================================================
+# Python Cache / Python 缓存
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+*.pyc.original
+*.pyo.original
+.pytest_cache/
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Python Virtual Environment / Python 虚拟环境
+backend/.venv/
+backend/venv/
+backend/env/
+backend/ENV/
+backend/.env/
+backend/.env.docker.smoke
+tools/.venv/
+.env/
+
+# Database Files / 数据库文件
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+backend/*.db.sqlite3
+
+# Project tools local outputs / 项目工具本地输出
+tools/**/.env
+tools/**/inputs/*
+tools/**/outputs/*
+!tools/**/inputs/.gitkeep
+!tools/**/outputs/.gitkeep
+
+# Logs Files / 日志文件
+backend/logs/
+backend/data/
+
+# Tests & Coverage / 测试和覆盖率
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Celery
+celerybeat-schedule
+celerybeat-schedule-shm
+celerybeat-schedule-wal
+celerybeat.pid
+
+# Rust / Tauri build outputs
+desktop-tauri/src-tauri/target/
+control-agent/src-tauri/target/
+
+# ============================================================================
+# Frontend / 前端 (Vite + Vue)
+# ============================================================================
+# Vite
+frontend/.vite/
+frontend/dist/
+frontend/dist-ssr/
+frontend/node_modules/
+
+# 本地开发 / Local Development
+frontend/*.local
+frontend/.env.local
+frontend/.env.*.local
+
+# ============================================================================
+# Docker
+# ============================================================================
+*.pid
+*.seed
+*.pid.lock
+docker-compose.override.yml
+.docker/
+
+# ============================================================================
+# 部署脚本 / Deployment Scripts
+# ============================================================================
+deploy-dev-windows.ps1.bak
+start-dev.ps1.bak
+stop-dev.ps1.bak
+
+# Formal release runtime and generated offline artifacts / 正式运行与离线生成物
+release/out/
+/runtime/
+*.tar
+*.tar.gz
+*.zip
+*.sha256
+SHA256SUMS
+*.image.tar
+*.docker.tar
+*.sql.gz
+*.dump
+*.pfx
+*.p12
+*.pem
+*.key
+
+# ============================================================================
+# 临时文件 / Temporary Files
+# ============================================================================
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+*.bak
+*.old
+*.orig
+
+# ============================================================================
+# 操作系统 / Operating System
+# ============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ============================================================================
+# 其他 / Others
+# ============================================================================
+coverage
+*.lcov
+.serverless/
+.docusaurus
+.worktrees/.worktrees/
+
+# AI / coding-agent local files
+.trae/
+# Keep the reviewed G-004 Codex adapter auditable; all other local Codex state remains ignored.
+.codex/
+.cursor/
+.windsurf/
+.continue/
+.superpowers/
+
+.aider*
+.cursorrules
+.codeartsdoer
+
+.local-links/

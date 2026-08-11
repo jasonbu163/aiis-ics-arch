@@ -1,0 +1,16 @@
+# AIIS ICS Architecture public placeholder policy.
+#
+# Project repositories must replace this file with an approved, project-owned
+# PLC contract before enabling any Control Agent or Projection runtime.  The
+# placeholder contains no customer endpoint, address, or production point.
+
+example_plc:
+  snapshot_policy_version: 2
+  groups:
+    - name: example_group
+      db_number: 1
+      points:
+        - name: example_value
+          type: Real
+          raw_enabled: false
+          latest_enabled: false

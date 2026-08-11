@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "AIIS ICS Control Agent",
+  "version": "0.1.0",
+  "identifier": "com.aiis.ics.controlagent",
+  "build": {
+    "beforeDevCommand": {
+      "cwd": ".",
+      "script": "pnpm dev",
+      "wait": false
+    },
+    "beforeBuildCommand": {
+      "cwd": ".",
+      "script": "pnpm build",
+      "wait": true
+    },
+    "devUrl": "http://localhost:15190",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "AIIS ICS Control Agent",
+        "label": "main",
+        "width": 1280,
+        "height": 820,
+        "minWidth": 960,
+        "minHeight": 640,
+        "resizable": true,
+        "maximized": false,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "DeveloperTool",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "shortDescription": "AIIS ICS control-agent diagnostics console",
+    "longDescription": "Tauri operations console for the AIIS ICS Rust control agent."
+  }
+}

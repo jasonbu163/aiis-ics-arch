@@ -1,0 +1,27 @@
+{
+  "name": "aiis-ics-architecture-frontend",
+  "version": "1.0.0",
+  "description": "AIIS ICS Architecture Core frontend",
+  "type": "module",
+  "packageManager": "pnpm@11.11.0",
+  "scripts": {
+    "dev": "vite",
+    "dev:api": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
+    "axios": "^1.6.5",
+    "echarts": "^6.0.0",
+    "element-plus": "^2.6.1",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.21",
+    "vue-i18n": "^9.14.5",
+    "vue-router": "^4.3.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "vite": "^5.1.6"
+  }
+}

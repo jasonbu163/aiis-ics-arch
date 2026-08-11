@@ -1,0 +1,38 @@
+# File Path: /.dockerignore
+# Description: Safety boundary for any explicit root-context Docker build.
+# Main Features:
+#   - Excludes secrets, generated releases and runtime state
+#   - Keeps build artifacts and local dependencies out of image layers
+
+.git/
+.env
+.env.*
+!**/.env.example
+!**/.env.*.example
+**/.venv/
+**/node_modules/
+**/__pycache__/
+**/.pytest_cache/
+**/.ruff_cache/
+**/dist/
+**/build/
+**/logs/
+**/plans/
+**/.env.docker.smoke
+**/storage/
+**/uploads/
+**/exports/
+backend/data/
+release/out/
+runtime/
+resources/
+*.tar
+*.tar.gz
+*.zip
+*.dump
+*.sql.gz
+*.sql
+*.pem
+*.key
+*.p12
+*.pfx
