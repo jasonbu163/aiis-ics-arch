@@ -55,18 +55,6 @@ cargo test --workspace
 
 根 `docker-compose.yml` 是 production-shaped 的 `aiis-ics-arch-release-check` config/build 表面：从源码构建 backend/frontend，连接外部配置的数据库，不提供数据库、migration 或 bootstrap 服务，也不挂载宿主机源码、dist 或 runtime。没有单独获批且任务专属的外部数据库夹具时不得启动。
 
-## 可丢弃 Docker smoke
-
-`docker-compose.smoke.yml` 是单独跟踪的非生产 runtime 证明：从当前源码构建 backend/frontend，在一次性
-MySQL `8.4.6` volume 上执行唯一 `d4e6f8a0b2c4` Core migration，并默认把 backend/frontend 映射到可覆盖
-的 smoke 端口 `18000`/`18080`。MySQL 不发布宿主机端口；四个服务固定为 `mysql`、一次性 `migration`、
-`backend`、`frontend`。
-
-smoke 使用从 example 复制、且被忽略的 `backend/.env.docker.smoke`。运行时必须固定 project name
-`aiis-ics-arch-smoke`，结束时执行 `docker compose ... down --volumes --remove-orphans` 并删除临时
-env。该证明只覆盖 Core MySQL 开发路径，不代表生产 readiness、多方言兼容、版本发布或真实数据库/PLC
-门槛；fresh-context Verification 与 Human Owner 验收仍是独立生命周期阶段。
-
 ## 治理入口
 
 修改前先阅读 [AGENTS.md](AGENTS.md)。当前架构状态见 [PLAN.zh-CN.md](PLAN.zh-CN.md)，源码版本记录见 [CHANGELOG.zh-CN.md](CHANGELOG.zh-CN.md)。仓库保留 MIT [LICENSE](LICENSE) 及其中声明的 ownership；该事实不授权发布或 Release。三仓协作方案见 [mutil-project-pm.md](mutil-project-pm.md)。

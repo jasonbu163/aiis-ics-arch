@@ -63,34 +63,6 @@ rm -f backend/.env.docker.dev frontend-js/.env.docker.dev
 
 The Vite `/api` proxy forwards the original path to the backend. Use the backend's direct `/health` endpoint for health checks; authenticated API paths can prove proxy reachability without adding a second health route.
 
-## ARCH-DOCKER-001 smoke (separate gate)
-
-The approved disposable smoke is limited to MySQL `8.4.6` and the four Compose services in
-`docker-compose.smoke.yml`. It does not prove production readiness or other database providers.
-
-```bash
-cp backend/.env.docker.smoke.example backend/.env.docker.smoke
-# Replace the three one-time smoke placeholders locally; do not print or commit their values.
-
-docker compose --project-name aiis-ics-arch-smoke \
-  --env-file backend/.env.docker.smoke -f docker-compose.smoke.yml config --quiet
-docker compose --project-name aiis-ics-arch-smoke \
-  --env-file backend/.env.docker.smoke -f docker-compose.smoke.yml build backend frontend
-docker compose --project-name aiis-ics-arch-smoke \
-  --env-file backend/.env.docker.smoke -f docker-compose.smoke.yml up -d mysql
-docker compose --project-name aiis-ics-arch-smoke \
-  --env-file backend/.env.docker.smoke -f docker-compose.smoke.yml up migration backend frontend
-
-docker compose --project-name aiis-ics-arch-smoke \
-  --env-file backend/.env.docker.smoke -f docker-compose.smoke.yml down --volumes --remove-orphans
-rm -f backend/.env.docker.smoke
-```
-
-MySQL is intentionally not published to a host port. The default backend/frontend smoke ports are `18000` and
-`18080` and can be overridden with `SMOKE_BACKEND_PORT` / `SMOKE_FRONTEND_PORT`. Always use the fixed project
-name and remove the temporary env after success or failure. Fresh-context Verification and Human Owner final
-acceptance remain required.
-
 ## Production-shaped config/build check
 
 The root Compose file builds backend and frontend from source and expects an external database. It intentionally has no database, migration, or bootstrap service and no host runtime bind.

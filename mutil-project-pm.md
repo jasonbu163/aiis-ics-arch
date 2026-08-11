@@ -805,6 +805,18 @@ dcdev() {
 
 ### 21.3 首次构建和启动
 
+dev Compose 固定使用以下 Docker Desktop 容器显示名：
+
+```text
+aiis-ics-arch-dev-mysql
+aiis-ics-arch-dev-migration
+aiis-ics-arch-dev-backend
+aiis-ics-arch-dev-frontend
+```
+
+`bootstrap` 是按需 `run --rm` 的临时维护容器，不固定名字。固定容器名意味着同一 Docker daemon
+不能并行启动第二套同名 Architecture dev checkout，也不支持对这四个服务做 Compose scale。
+
 ```bash
 dcdev config --quiet
 dcdev build backend frontend
@@ -821,6 +833,16 @@ dcdev ps -a
 - backend 使用 `http://127.0.0.1:8000`；
 - frontend 使用 `http://127.0.0.1:5190`；
 - MySQL 宿主机开发端口默认为 `3307`。
+
+只修改 `container_name` 时镜像内容没有变化，不需要重新 build。已有 dev 栈应执行：
+
+```bash
+dcdev down --remove-orphans
+dcdev up -d backend frontend
+dcdev ps -a
+```
+
+不要加 `--volumes`；MySQL 数据、backend venv 和 frontend node_modules named volumes 会继续保留。
 
 日志和 HTTP 验证：
 

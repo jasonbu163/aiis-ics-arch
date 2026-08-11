@@ -1,11 +1,11 @@
 # ARCH-DEV-001 本地开发环境采用与迁移追溯 — PM Spec
 
 Task ID: ARCH-DEV-001  
-Revision: r2  
-Status: owner_approved  
+Revision: r4
+Status: owner_approved
 Owner Role: PM  
 Allowed Writers: PM, Human Owner  
-Handoff: Human Owner 已批准 r2 采用基础 3MD 的 lightweight_same_session 执行；Development 可按精确 allowlist 先实施再记录事实
+Handoff: Human Owner 已批准 r4；Development 可按精确 allowlist 清理失效 smoke 活动文档并回填人工 dev runtime 事实
 
 Task Namespace: aiis-ics-arch  
 Classification: root  
@@ -14,7 +14,7 @@ Owner: architecture development environment
 Depends On: ARCH-001 r3 owner_accepted, ARCH-DOCKER-001 r1 owner_accepted  
 Related Task: ARCH-FE-001, CA-CONFIG-001, planned ARCH-REL-001  
 Target Version: 1.0.0 pre-release development baseline；本任务不创建 release branch、tag 或 GitHub Release  
-Acceptance Chain Reference: ARCH-DEV-001 PM spec -> Human Owner r2 execution-mode approval -> Development tasks.md -> same-session factual checklist.md -> Human Owner final acceptance -> separate ARCH-REL-001 decision  
+Acceptance Chain Reference: ARCH-DEV-001 PM spec -> Human Owner r4 approval -> Development tasks.md -> same-session factual checklist.md -> Human Owner final acceptance -> separate ARCH-REL-001 decision
 Execution Mode: lightweight_same_session  
 Role Separation: merged_same_session  
 Fresh Context: not provided  
@@ -28,6 +28,12 @@ Revision History:
 - `r2`：Human Owner 明确授权改为“最基础的 3MD”，不启动 Agent Team，并要求先修改、再记录事实。
   本任务因此使用 `lightweight_same_session`；同一会话完成 PM、Development 和 checklist 记录，明确不提供
   fresh-context 独立 QA，不把 checklist 冒充独立复核。
+- `r3`：Human Owner 明确选择固定的 Docker Desktop 容器显示名。仅给 dev Compose 的 mysql、migration、
+  backend、frontend 增加精确 `container_name`；不固定按需 `run --rm` 的 bootstrap，不重建镜像，不删除
+  named volumes，并把实际重建留给 Human Owner 手工 `down` / `up`。
+- `r4`：Human Owner 已删除不再需要的 `docker-compose.smoke.yml`，并要求 Codex 负责清理五个活动文档中的
+  失效 smoke 入口。r4 同时只记录 Human Owner 已提供的 dev runtime 事实，不重新启动、停止或修改容器；
+  继续使用 `lightweight_same_session`，不启动 Agent Team。
 
 ## 1. PM 结论
 
@@ -90,17 +96,43 @@ Human Owner 已手工把旧仓的 backend/frontend dev env 复制到 Architectur
 - 增加 `ARCH-DEV-001` 当前阶段及下一 gate；
 - 不改变 ARCH-FE-001 或 CA-CONFIG-001 的 draft 技术范围。
 
+### 2.5 固定 dev 容器显示名
+
+只修改 `docker-compose.dev.yml`，固定以下四个容器名：
+
+- `aiis-ics-arch-dev-mysql`；
+- `aiis-ics-arch-dev-migration`；
+- `aiis-ics-arch-dev-backend`；
+- `aiis-ics-arch-dev-frontend`。
+
+`bootstrap` 继续使用 Compose `run --rm` 的临时命名，不设置 `container_name`。该决定只服务单一长期
+Architecture dev 栈；Human Owner 接受固定名带来的限制：同一 Docker daemon 不能并行启动第二套使用
+相同固定名的 checkout，且这些服务不能通过 Compose scale 创建多个副本。
+
+### 2.6 失效 smoke 活动文档清理与 dev runtime 事实回填
+
+只清理当前活动说明，不改写历史任务证据：
+
+- 从 `README.md` / `README.zh-CN.md` 删除已不存在的 Docker smoke 运行入口；
+- 从 `INITIALIZATION.md` / `INITIALIZATION.zh-CN.md` 删除已不存在的 smoke 初始化命令；
+- 从 `CODE_INDEX.md` 删除 `docker-compose.smoke.yml` 条目，并把 `backend/Dockerfile` 描述收敛为
+  production-shaped release-check source build；
+- 保留 `plans/` 中 ARCH-DOCKER-001 / ARCH-001 的历史 smoke 验证事实；
+- 保留 `.gitignore` / `.dockerignore` 中 `.env.docker.smoke` 防泄漏规则；
+- 保留 `backend/scripts/api_smoke/`，它是 API 测试工具，不是已删除的 Docker Compose smoke 环境；
+- 在 Development / checklist 记录 Human Owner 已提供的本轮 dev runtime 事实：mysql、backend、frontend
+  healthy，migration `Exited (0)`，backend `/health` 返回版本 `1.0.0`，frontend HTTP `200`，六个
+  bootstrap enable/reset 开关均为 `False`。
+
 ## 3. Exact Allowlist
 
-PM 当前只允许写本 `spec.md` 和四个任务索引。Human Owner 批准 r2 后，Development allowlist 为：
+PM 在 r4 获批前只允许写本 `spec.md`。Human Owner 批准 r4 后，Development allowlist 为：
 
-- `backend/.env.docker.dev`（Git ignored，可能含 secret；禁止回显）；
-- `frontend-js/.env.docker.dev`（Git ignored）；
-- `mutil-project-pm.md`；
-- `PLAN.md`；
-- `PLAN.zh-CN.md`；
-- `plans/README.md`；
-- `plans/README.zh-CN.md`；
+- `README.md`；
+- `README.zh-CN.md`；
+- `INITIALIZATION.md`；
+- `INITIALIZATION.zh-CN.md`；
+- `CODE_INDEX.md`；
 - `plans/ARCH-DEV-001-local-development-environment-adoption/tasks.md`（Development 唯一任务记录）。
 
 同一会话事实复核后唯一新增 checklist 写面为：
@@ -109,8 +141,8 @@ PM 当前只允许写本 `spec.md` 和四个任务索引。Human Owner 批准 r2
 
 ## 4. Explicit Exclusions
 
-- 不修改、恢复或删除当前用户拥有的 `backend/.env.docker.smoke.example` working-tree 删除状态；
-- 不修改任何 `.env.*.example`、Compose、Dockerfile、应用源码、migration、lockfile、测试或 LICENSE；
+- 不恢复或编辑 Human Owner 已删除的 smoke Compose/example；只删除 2.6 指定的活动文档引用；
+- 不修改任何真实 env、`.env.*.example`、Compose、Dockerfile、应用源码、migration、lockfile、测试或 LICENSE；
 - 不启动、停止、重建或删除 Docker container、network、volume 或 image；
 - 不连接数据库，不执行 Alembic、bootstrap、seed 或业务写入；
 - 不执行 Git add/commit/push、branch、tag、GitHub Release 或生产部署；
@@ -131,7 +163,15 @@ Development 必须在不回显 env 值的情况下记录：
 6. `docker compose --project-name aiis-ics-arch-dev --env-file backend/.env.docker.dev
    -f docker-compose.dev.yml config --quiet` exit `0`；禁止去掉 `--quiet`；
 7. 文档中的命令与当前 Compose service、端口、volume、migration 和 bootstrap profile 一致；
-8. `git diff --check` 通过，并证明 unrelated smoke-example 删除未被修改。
+8. `git diff --check` 通过，并证明已删除 smoke Compose/example 未被恢复。
+9. `docker-compose.dev.yml` 精确包含四个固定 `container_name`，bootstrap 不含 `container_name`；
+10. 本变更只需 Human Owner 手工 `down --remove-orphans` 后 `up -d backend frontend`，不得建议
+    `down --volumes` 或无必要的 image rebuild。
+11. 对五个活动文档做精确残留扫描，`docker-compose.smoke`、`env.docker.smoke`、
+    `aiis-ics-arch-smoke`、`SMOKE_BACKEND_PORT`、`SMOKE_FRONTEND_PORT` 均无命中；历史 `plans/` 与 ignore
+    防泄漏规则不纳入删除。
+12. 只把 Human Owner 提供的终端结果记为人工 runtime 证据，不声称 Codex 独立重跑；不读取或记录真实
+    env 的 secret 值。
 
 Development self-check 不构成 Docker runtime 通过，也不构成 release readiness。Human Owner 后续人工
 启动 dev Compose 并确认稳定，仍是进入 `ARCH-REL-001` 前的独立决定。
@@ -148,6 +188,12 @@ Development self-check 不构成 Docker runtime 通过，也不构成 release re
 - **AC-008**：allowlist 外文件未改，尤其不触碰当前 unrelated `backend/.env.docker.smoke.example` 删除。
 - **AC-009**：同一会话只在 checklist 记录事实复核与 `qa_passed|qa_failed|qa_blocked`，并明确
   `Role Separation: merged_same_session`、`Fresh Context: not provided`，不冒充独立 QA。
+- **AC-010**：四个 dev 容器名精确固定，bootstrap 仍为临时容器；Compose 静态解析通过，未执行
+  Docker lifecycle，文档明确无需 rebuild 且不得删除 volumes。
+- **AC-011**：五个活动文档不再引用已删除的 Docker smoke Compose/env/端口；历史 task evidence、ignore
+  防泄漏规则和 API smoke 工具保持不变。
+- **AC-012**：Development/checklist 准确记录 Human Owner 提供的 dev runtime 结果及证据来源，且不把它
+  冒充 Codex 独立 Docker Verification。
 
 ## 7. Risks and Rollback
 
@@ -160,10 +206,23 @@ Development self-check 不构成 Docker runtime 通过，也不构成 release re
 
 ## 8. Human Owner Approval
 
-2026-08-11 Human Owner 原文：
+2026-08-11 Human Owner r2 原文：
 
 `我授权调整到直接用最基础的3md执行。不用上升agent team。本来就不是一个复杂的事情。先修改，再记录事实。`
 
-PM 将该决定收敛为 r2：保持 r1 技术 allowlist 和 secret 边界不变，只把 Execution Mode 改为
-`lightweight_same_session`，允许同一会话按“实施 -> tasks 事实记录 -> checklist 非独立复核”完成。
+同日 r3 容器名决定原文：
+
+`好的，重新调整为这个，再重新构建一次镜像吗？还是docker-compose up/down一次就可以？`
+
+PM 将第一项决定收敛为 r2 的 `lightweight_same_session`，把第二项决定收敛为 r3 的四个固定
+`container_name`。r3 继续按“实施 -> tasks 事实记录 -> checklist 非独立复核”完成；镜像内容未变，
+因此不要求 rebuild，只要求 Human Owner 手工重建容器且保留 volumes。
+该批准不授权 Docker lifecycle、数据库动作、Git/GitHub 发布、release branch/tag 或生产操作。
+
+同日 Human Owner 发出 r4 PM 输入原文：`smoke这个部分你来做。` 该输入授权 PM 固定范围，不自动跳过
+Revision gate。可复制批准语句：
+
+`批准 aiis-ics-arch::ARCH-DEV-001 r4，按 spec 精确范围和 allowlist 清理失效 smoke 活动文档、回填人工 dev runtime 事实；继续使用基础 3MD，不启动 Agent Team。`
+
+Human Owner 随后逐字批准上述 r4 语句。r4 Development 仅获得 §3 allowlist 内的文档清理与事实回填权限；
 该批准不授权 Docker lifecycle、数据库动作、Git/GitHub 发布、release branch/tag 或生产操作。

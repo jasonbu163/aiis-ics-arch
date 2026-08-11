@@ -63,33 +63,6 @@ rm -f backend/.env.docker.dev frontend-js/.env.docker.dev
 
 Vite `/api` proxy 会把原始路径传给 backend。健康检查使用 backend 直连 `/health`；可通过需要认证的 API 路径证明代理可达，而无需新增第二个健康路由。
 
-## ARCH-DOCKER-001 smoke（独立 gate）
-
-已批准的可丢弃 smoke 只覆盖 MySQL `8.4.6` 和 `docker-compose.smoke.yml` 中的四个 Compose 服务，不证明
-生产 readiness 或其他数据库 provider。
-
-```bash
-cp backend/.env.docker.smoke.example backend/.env.docker.smoke
-# 仅在本机替换三个一次性 smoke 占位值；不要打印或提交值。
-
-docker compose --project-name aiis-ics-arch-smoke \
-  --env-file backend/.env.docker.smoke -f docker-compose.smoke.yml config --quiet
-docker compose --project-name aiis-ics-arch-smoke \
-  --env-file backend/.env.docker.smoke -f docker-compose.smoke.yml build backend frontend
-docker compose --project-name aiis-ics-arch-smoke \
-  --env-file backend/.env.docker.smoke -f docker-compose.smoke.yml up -d mysql
-docker compose --project-name aiis-ics-arch-smoke \
-  --env-file backend/.env.docker.smoke -f docker-compose.smoke.yml up migration backend frontend
-
-docker compose --project-name aiis-ics-arch-smoke \
-  --env-file backend/.env.docker.smoke -f docker-compose.smoke.yml down --volumes --remove-orphans
-rm -f backend/.env.docker.smoke
-```
-
-MySQL 不发布宿主机端口；backend/frontend 默认 smoke 端口为 `18000`/`18080`，可用
-`SMOKE_BACKEND_PORT`/`SMOKE_FRONTEND_PORT` 覆盖。无论成功失败都必须固定 project name 并删除临时 env。
-fresh-context Verification 与 Human Owner final acceptance 仍是必需 gate。
-
 ## Production-shaped config/build 检查
 
 根 Compose 从源码构建 backend/frontend，并要求外部数据库；它刻意不提供数据库、migration、bootstrap 服务或宿主机 runtime bind。

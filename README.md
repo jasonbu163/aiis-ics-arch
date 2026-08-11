@@ -55,19 +55,6 @@ These commands are source/static checks. They do not start Docker, modify a real
 
 The root `docker-compose.yml` is the production-shaped `aiis-ics-arch-release-check` config/build surface: source-built backend and frontend, an externally configured database, no database/migration/bootstrap service, and no host source, distribution, or runtime bind. Do not start it without a separately approved, task-exclusive external-database fixture.
 
-## Disposable Docker smoke
-
-`docker-compose.smoke.yml` is the separately tracked, non-production runtime proof. It builds the backend and
-frontend from this source tree, runs the single `d4e6f8a0b2c4` Core migration against a disposable MySQL `8.4.6`
-volume, and exposes only configurable smoke ports (`18000` and `18080` by default). MySQL has no host port; the
-four services are `mysql`, one-shot `migration`, `backend`, and `frontend`.
-
-The smoke uses the ignored `backend/.env.docker.smoke` copied from its example. Run it only with the fixed
-project name `aiis-ics-arch-smoke`, and always finish with `docker compose ... down --volumes --remove-orphans`
-and removal of the temporary env. This proves the Core MySQL development path only; it is not production
-readiness, multi-dialect compatibility, release publication, or a real database/PLC gate. Fresh-context
-Verification and Human Owner acceptance remain separate lifecycle stages.
-
 ## Governance
 
 Read [AGENTS.md](AGENTS.md) before making changes. Current architecture status is indexed in [PLAN.md](PLAN.md); source-version notes are in [CHANGELOG.md](CHANGELOG.md). The repository retains the MIT [LICENSE](LICENSE) and its stated ownership; that fact does not authorize publication or release. The three-repository operating model is documented in [mutil-project-pm.md](mutil-project-pm.md).

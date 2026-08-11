@@ -23,7 +23,7 @@ source topology or important entrypoints change.
 - `backend/app/monitor/` — collector health and generic raw/latest PLC snapshot facts.
 - `backend/alembic/` — single `d4e6f8a0b2c4` Core root migration for fourteen tables plus static parity coverage.
 - `backend/scripts/` — generic maintenance and smoke helpers.
-- `backend/Dockerfile` — reproducible source-built backend image reused by the smoke migration/API services.
+- `backend/Dockerfile` — reproducible source-built backend image used by the production-shaped release-check surface.
 - `backend/Dockerfile.dev` — pinned dependency image for the source-mounted backend development service.
 
 ## Frontend entrypoints
@@ -44,8 +44,6 @@ Complete manifest-driven navigation/menu/permission assembly is deferred to
 
 - `docker-compose.dev.yml` — fixed-name MySQL `8.4.6` development stack with backend/frontend source hot reload,
   one-shot migration and an opt-in, default-off bootstrap profile.
-- `docker-compose.smoke.yml` — four-service, non-production MySQL `8.4.6` empty-volume runtime proof for
-  `ARCH-DOCKER-001`; no host MySQL port or source bind mounts.
 - `docker-compose.yml` — production-shaped source build for backend/frontend with an externally configured
   database and no database, migration, bootstrap or host runtime bind.
 
