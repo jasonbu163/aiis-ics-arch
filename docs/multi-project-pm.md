@@ -1,8 +1,10 @@
 # AIIS ICS 多仓库项目管理与交付方案
 
-Status: 架构迁移基线已完成；ARCH-001 r3、ARCH-MIG-001 r1、ARCH-DOCKER-001 r1 均已获 Human Owner 接受，GitHub `main` 已首次推送，长期 dev 环境采用与 1.0.0 定版仍按独立 gate 推进
+Status: 架构迁移基线与长期 dev 环境采用均已获 Human Owner 接受；GitHub `main` 已首次推送，ARCH-REL-001 r2 已批准并处于 Development release preparation，Git/GitHub 写入仍等待 Human Owner 手工执行
 Target repository: `aiis-ics-arch`
 Hosting: GitHub public repository
+Canonical path: `docs/multi-project-pm.md`
+Lifecycle owner: 根目录 [PLAN](../PLAN.zh-CN.md)
 
 ## 1. 目标
 
@@ -70,9 +72,9 @@ aiis-ics-arch
 - 通用 PLC、映射、审计工具框架；
 - 账号、认证、权限和系统管理基线；
 - 前后端模块规范和默认关闭的 Demo 模块；
-- Docker、初始化、升级和发布模板；
-- contracts、design system、release scripts；
-- 架构说明、版本记录和 3MD 任务记录。
+- Docker、初始化、升级和源码定版合同；
+- 根目录 `contracts/` Core 合同中心与 design system；
+- `docs/` 下的跨仓库/流程类长期说明、根目录版本记录和 `plans/` 任务记录。
 
 初始仓库只建立已经存在并准备维护的目录，不预先创建大量未来空目录。目标结构可以逐步收敛为：
 
@@ -85,25 +87,21 @@ aiis-ics-arch/
 ├── PLAN.zh-CN.md
 ├── CHANGELOG.md
 ├── CHANGELOG.zh-CN.md
-├── mutil-project-pm.md
 ├── backend/
 ├── frontend-js/
 ├── control-agent/
 ├── tools/
 ├── contracts/
-├── design-system/
-├── release/
+├── docs/
+│   ├── README.md
+│   ├── README.zh-CN.md
+│   └── multi-project-pm.md
 └── plans/
 ```
 
-`release/` 只保存发布脚本、manifest 模板、校验工具和说明，不复制保存：
-
-```text
-release/v1/backend
-release/v1/frontend
-```
-
-历史源码版本由 Git release 分支和 tag 保存，不在同一仓库中重复复制整套源代码。
+历史源码版本只由同一精确 commit 上的 Git `release/<semver>` 分支和 annotated `v<semver>` tag 固定。
+架构仓不建立实体 `release/` 目录，也不以 `release/v1/backend`、`release/v1/frontend` 等路径重复复制
+整套源代码。`main` 继续作为后续 Core 开发线，已发布的版本分支和 tag 保持固定。
 
 ### 4.2 公开仓禁止内容
 
@@ -386,12 +384,12 @@ control-agent/config/ 中的项目 YAML
 项目仓不保存 CA 源码，只消费由架构仓固定版本构建并评审的 artifact。项目 YAML 和数据库目标仍由
 项目仓拥有，不能编译进通用 CA 二进制。
 
-## 11. contracts、design-system、release 和 runtime
+## 11. contracts、design-system、源码定版和 runtime
 
-- `contracts/` 可以迁移，但必须先清除 Vibe/项目身份并确认适合作为公开合同。
+- 根目录 `contracts/` 是当前 Core 跨运行时公开合同中心，不迁入 `docs/`；其后续变化必须由独立获批任务管理。
 - `design-system/vibe-l2-next/` 不能以旧名称直接进入公开仓；先重命名并清理项目视觉事实。
-- `release/scripts/`、`release/templates/` 和通用 docs 可以迁移。
-- `release/out/` 是生成产物，不复制、不提交。
+- 源码定版使用 Git release branch 与 annotated tag，不迁移或创建实体 `release/` 目录。
+- 发布脚本、manifest 模板、校验工具如未来确有复用需求，应由独立任务确定归属；生成产物始终不提交。
 - `runtime/` 当前探索内容不作为首批架构基线；确认有真实源码和长期 Owner 后另立任务迁入。
 - `desktop-tauri/` 不是每个项目必需，首批不复制；需要时在架构仓另立可选能力任务。
 
@@ -493,7 +491,7 @@ rsync -a \
 `control-agent/plans/` 不进入公开架构仓 staging。CA 历史证据继续保留在旧私有仓；历史任务不做
 伪造性改写。需要公开的长期决策由后续任务重新整理为 public-safe 文档。
 
-### 12.6 复制通用合同和 release 源文件
+### 12.6 复制通用合同
 
 ```bash
 rsync -a \
@@ -501,15 +499,10 @@ rsync -a \
   --exclude '.env*' \
   --exclude '.DS_Store' \
   "$AIIS_LEGACY_SOURCE/contracts/" "$AIIS_ARCH_TARGET/contracts/"
-
-rsync -a \
-  --exclude '.git/' \
-  --exclude '.env*' \
-  --exclude '.DS_Store' \
-  --exclude 'out/' \
-  --exclude 'plans/' \
-  "$AIIS_LEGACY_SOURCE/release/" "$AIIS_ARCH_TARGET/release/"
 ```
+
+早期迁移方案曾考虑复制旧仓的 `release/` 工具表面；当前源码定版合同已经收敛为 Git branch/tag，
+因此不再复制旧仓 `release/`，也不在架构仓创建同名实体目录。
 
 `design-system/` 暂不复制，先处理 `vibe-l2-next` 命名；`runtime/` 和 `desktop-tauri/` 也不进入首批复制。
 
@@ -584,81 +577,22 @@ cargo test --manifest-path src-tauri/Cargo.toml
 具体 focused tests、数据库边界和 CA feature tests 由后续已批准 spec 固定。公开前验证不得连接生产数据库、
 真实 PLC 或客户环境。
 
-## 14. GitHub 手动初始化和推送教程
+## 14. GitHub 当前事实与 1.0.0 手工定版顺序
 
-以下步骤只在代码清理、脱敏、测试、LICENSE 决策和 Human Owner final acceptance 全部完成后执行。
+GitHub public 仓库与首次 `main` 推送已经完成。ARCH-REL-001 r2 只准备 source-only 1.0.0 的受控文档、
+碰撞检查、Development 证据和 Human Owner 手工发布交接；它不表示目标 branch/tag 已经发布。
 
-### 14.1 在 GitHub 创建空仓库
+当前发布的精确预检事实、16 路径暂存清单、可复制命令、动态 OID 与命令输出只记录在
+[ARCH-REL-001 r2 tasks](../plans/ARCH-REL-001-source-release-1.0.0/tasks.md)。本长期文档不复制这些
+易变化的命令或证据，避免形成第二个发布事实面。
 
-在 GitHub 创建：
+长期顺序保持为：Human Owner 在碰撞和 allowlist gate 通过后形成唯一 release-preparation commit 并先
+推送 `main`，再从该同一精确 OID 创建固定 `release/<version>` branch 和 annotated `v<version>` tag；
+Development 记录 Human Owner 返回的原始输出后才能进入 `developer_handoff`，随后由 fresh-context
+Verification 独立核对 refs 与 annotated tag。最终接受后的治理 receipt 只追加到 `main`，已固定 refs
+不移动、不删除、不 force-update、不重建。
 
-```text
-aiis-ics-arch
-```
-
-建议设置为 Public。创建时不要自动生成 README、LICENSE 或 `.gitignore`，避免与本地文件冲突。
-
-### 14.2 初始化本地 Git
-
-```bash
-AIIS_ARCH_TARGET=/absolute/path/to/aiis-ics-arch
-cd "$AIIS_ARCH_TARGET"
-
-git init -b main
-git status --short
-git add -n .
-```
-
-`git add -n .` 只预演。确认没有 `.env`、日志、数据库、项目 Excel、PLC YAML、生成物和客户信息后：
-
-```bash
-git add .
-git diff --cached --check
-git diff --cached --stat
-git status --short
-```
-
-人工检查暂存内容后提交：
-
-```bash
-git commit -m "chore: initialize AIIS ICS Architecture"
-```
-
-### 14.3 连接 GitHub 并推送 main
-
-将 `<github-account>` 替换为实际 GitHub 账号或组织：
-
-```bash
-git remote add origin https://github.com/<github-account>/aiis-ics-arch.git
-git remote -v
-git ls-remote --heads origin
-git push -u origin main
-```
-
-这一步只推送 GitHub，不添加 Gitee remote。`aiis-ics-modules` 后续才在 Gitee 建立私有仓库。
-
-### 14.4 固定第一个版本
-
-不要在未经验证的原始复制状态创建 `1.0.0`。当架构核心和 CA 基线通过完整验收后：
-
-```bash
-git switch main
-git pull --ff-only
-git branch release/1.0.0
-git tag -a v1.0.0 -m "AIIS ICS Architecture 1.0.0"
-git push origin release/1.0.0
-git push origin v1.0.0
-```
-
-长期云端分支为：
-
-```text
-main
-release/<version>
-```
-
-临时 feature/PR 分支合并后删除。已发布 tag 不移动；修复形成 `release/1.0.1` 和 `v1.0.1`，不覆盖
-`1.0.0`。
+1.0.0 只固定源码，不创建 GitHub Release 页面、不上传 asset、不生成 build artifact，也不执行部署。
 
 ## 15. 发布形式
 
@@ -671,7 +605,8 @@ backend、frontend-js、tools 和 modules 以源码版本作为正式基线：
 
 Control Agent 是特殊交付物：源码只在架构仓维护，项目消费针对目标系统构建并评审的 artifact。CA
 二进制可以作为 GitHub Release asset 或离线交付包发布，但必须记录 arch tag、commit、目标系统和
-SHA-256；二进制不替代源码 release。
+SHA-256；二进制不替代源码 release。该能力属于未来独立批准的 artifact 任务，ARCH-REL-001 r2 的
+source-only 1.0.0 不创建 GitHub Release 页面或 asset。
 
 ## 16. 新项目创建和升级
 
@@ -735,22 +670,28 @@ aiis-ics-l2-<project-id>::UPGRADE-001
 
 ## 20. 当前执行顺序
 
-截至 2026-08-11，以下迁移步骤已经完成：
+截至 2026-08-20，以下迁移步骤已经完成：
 
 1. 首个 `aiis-ics-l2-<project-id>` 已完成独立项目迁移、验证和 Gitee 私有仓推送；
 2. `aiis-ics-arch` 已完成去项目化、Core migration 重建、Docker smoke/dev 验证和公开基线验收；
 3. GitHub public `main` 已首次推送到 `https://github.com/jasonbu163/aiis-ics-arch.git`；
-4. 当前本地 `main` 与 `origin/main` 均指向 `fd8e3f0875d6730b0e0c7b2b5cfe303e47afadb5`；
-5. 旧 Vibe 仓保留为私有历史来源，不再承载 Architecture Core 新功能开发。
+4. ARCH-DEV-001 r4 已获 Human Owner 接受；
+5. ARCH-REL-001 r2 已获批准并进入 Development release preparation；当前动态 OID、branch/tag
+   碰撞结果和工作树证据只归属该任务的 `tasks.md`，本长期文档不固化副本；
+6. 旧 Vibe 仓保留为私有历史来源，不再承载 Architecture Core 新功能开发。
 
 后续固定顺序为：
 
-1. 使用第 21 节的 `aiis-ics-arch-dev` 环境进行实际 Core 开发与人工确认；
-2. dev 环境确认稳定后启动独立 `ARCH-REL-001`，创建 `release/1.0.0` 和 `v1.0.0`；
-3. 在 `aiis-ics-arch/main` 执行 `ARCH-FE-001` 前端模块自动组装；
-4. 在 `aiis-ics-arch/main` 执行 `CA-CONFIG-001` 打包配置管理；
-5. 根据这两项能力的实际兼容性和验收结果决定下一 Core 版本，预计为 `1.1.0`；
-6. 再启动 `aiis-ics-modules::MODULES-001`，从已固定的 Architecture 版本和真实项目提炼模块。
+1. Development 完成 ARCH-REL-001 r2 的受控文档、碰撞检查、DEV self-check 与 Human Owner 手工交接；
+2. Human Owner 只暂存显式批准路径，创建唯一 release commit 并 push `main`；
+3. Human Owner 从该同一 OID 创建并 push 固定 `release/1.0.0` 与 annotated `v1.0.0`；
+4. Development 记录 Human Owner 原始输出后进入 `developer_handoff`，fresh-context Verification 再独立
+   核对 local/remote refs、annotated tag 与 peeled commit；
+5. Human Owner 最终接受后，只向 `main` 追加 governance receipt，不移动 1.0.0 branch/tag；
+6. 在后续 `aiis-ics-arch/main` 执行独立的 `ARCH-FE-001` 前端模块自动组装；
+7. 在后续 `aiis-ics-arch/main` 执行独立的 `CA-CONFIG-001` 打包配置管理；
+8. 根据这两项能力的实际兼容性和验收结果决定下一 Core 版本，预计为 `1.1.0`；
+9. 再启动 `aiis-ics-modules::MODULES-001`，从已固定的 Architecture 版本和真实项目提炼模块。
 
 `ARCH-FE-001` 和 `CA-CONFIG-001` 不再从 Vibe L2 定版继续复制或拆分。Vibe 只提供历史参考；从
 2026-08-11 起，这两项能力的唯一开发真相源是 `aiis-ics-arch/main`。
@@ -938,15 +879,10 @@ dcdev down --volumes --remove-orphans
 最后一条会删除本地 MySQL 数据和依赖 volumes，只能在明确需要重置时使用。MySQL volume 建立后，
 仅修改 env 密码不会自动修改数据库内部账号；应通过数据库修改密码，或明确删除 dev volume 后重建。
 
-### 21.7 进入 1.0.0 定版的人工 gate
+### 21.7 执行 1.0.0 手工定版前的人工 gate
 
-Human Owner 使用该 dev 环境完成实际开发确认后，至少检查：
-
-```bash
-dcdev ps -a
-git status --short
-git branch -vv
-```
-
-确认运行稳定、没有真实 env 被 Git 跟踪、tracked worktree 只包含预期修改后，再启动
-`aiis-ics-arch::ARCH-REL-001`。版本分支/tag 和 GitHub Release 是独立操作，不由 dev Compose 自动产生。
+ARCH-REL-001 r2 已获批准。Human Owner 真正提交前仍需确认 dev 运行状态可接受、没有真实 env 被 Git
+跟踪、tracked worktree 只包含精确批准路径，并重新核对本地/远端目标 refs 不存在。当前精确检查命令、
+预期输出和发布证据只使用 [ARCH-REL-001 r2 tasks](../plans/ARCH-REL-001-source-release-1.0.0/tasks.md)，
+不从本长期文档复制执行。版本分支/tag 只由 Human Owner 手工产生；dev Compose 不产生任何 Git 状态，
+本 r2 也不创建 GitHub Release 页面。

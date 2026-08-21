@@ -9,8 +9,8 @@ source topology or important entrypoints change.
 - `frontend-js/` — JavaScript Core web shell, route/locale discovery and system UI.
 - `control-agent/` — optional Rust/Tauri field runtime and operations console.
 - `tools/` — offline lineage, PLC mapping and simulator tools.
-- `contracts/` — cross-role contract references; source truth remains in code.
-- `release/` — source-only delivery templates and validation helpers.
+- `contracts/` — root Core hub for cross-runtime public contracts; source truth remains in code.
+- `docs/` — root-PLAN-owned durable cross-repository and process documentation, indexed by a bilingual README pair.
 - `plans/` — current root architecture task bundles.
 
 ## Backend entrypoints
@@ -57,6 +57,11 @@ Complete manifest-driven navigation/menu/permission assembly is deferred to
 - `control-agent/config/` — sanitized, default-off YAML shape examples.
 
 Database engine settings and YAML upload are deferred to `CA-CONFIG-001`.
+
+## Documentation entrypoints
+
+- `docs/README.md` / `docs/README.zh-CN.md` — bilingual index and authority boundary for durable project documents.
+- `docs/multi-project-pm.md` — canonical multi-project development and governance guide.
 
 ## Tools entrypoints
 

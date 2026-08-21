@@ -12,12 +12,16 @@ AIIS ICS Architecture is the public source baseline for reusable industrial info
 ├── frontend-js/   # Vue 3 + Vite JavaScript Core frontend
 ├── control-agent/ # Rust/Tauri field-fact collection runtime
 ├── tools/         # Independent project-level tools
-├── contracts/     # Cross-runtime public contracts
-├── release/       # Approved source-version materials
+├── contracts/     # Root Core cross-runtime contract hub
+├── docs/          # Durable cross-repository and process documents
 └── plans/         # Architecture decisions and task bundles
 ```
 
 Project repositories consume a pinned source version and add their own modules under the same vertical module conventions. This repository does not contain project-specific pages, PLC workbooks, customer data, real addresses, credentials, or build output.
+
+## Source version model
+
+`main` is the continuing Core development line. A fixed source version uses a `release/<semver>` branch and an annotated `v<semver>` tag on the same exact commit. Source is not copied into a physical `release/` directory, and a source version does not imply a hosted GitHub Release, build artifact, deployment, or production readiness. Publication of those Git refs is a separately approved Human Owner action.
 
 ## Runtime boundaries
 
@@ -57,4 +61,4 @@ The root `docker-compose.yml` is the production-shaped `aiis-ics-arch-release-ch
 
 ## Governance
 
-Read [AGENTS.md](AGENTS.md) before making changes. Current architecture status is indexed in [PLAN.md](PLAN.md); source-version notes are in [CHANGELOG.md](CHANGELOG.md). The repository retains the MIT [LICENSE](LICENSE) and its stated ownership; that fact does not authorize publication or release. The three-repository operating model is documented in [mutil-project-pm.md](mutil-project-pm.md).
+Read [AGENTS.md](AGENTS.md) before making changes. Current architecture status is indexed in [PLAN.md](PLAN.md); source-version notes are in [CHANGELOG.md](CHANGELOG.md). The repository retains the MIT [LICENSE](LICENSE) and its stated ownership; that fact does not authorize publication or release. Durable project documentation is indexed under [docs/](docs/README.md), including the [multi-project development guide](docs/multi-project-pm.md); the root `contracts/` directory remains the Core contract hub.

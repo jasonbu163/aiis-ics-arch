@@ -14,10 +14,16 @@
 - `frontend-js/` 是保留 JavaScript 语言形态的 Vue 3 + Vite Core 前端模板。
 - `control-agent/` 是独立的 Rust/Tauri 现场事实采集运行时；它不依赖 backend 进程内轮询 PLC。
 - `tools/` 是不默认导入 backend、数据库或 `.env` 的项目级独立工具。
-- `contracts/` 保存跨运行时公开合同；`release/` 只保存经批准的源码版本材料。
+- `contracts/` 是根目录 Core 跨运行时公开合同中心；源码版本由 Git refs 固定，不建立实体 `release/` 源码目录。
+- `docs/` 保存跨仓库与流程类长期文档，由根目录 PLAN 统一管理，只建立双语 README 索引而不建立独立 PLAN。
 - 项目客户模块、真实 PLC/数据库地址、输入工件、构建产物、日志和密钥不进入公开架构仓。
 
 前后端模块采用 `app/<module>/.../manifest` 约定。后端 manifest 是模块向 Registry opt-in 的唯一入口；前端 route/locale 自动发现属于基础设施，菜单自动组装另行立项，不在本契约中默认宣称已实现。
+
+固定源码版本以同一精确 commit 上的 `release/<semver>` 分支与 `v<semver>` annotated tag 为权威，
+`main` 继续作为后续 Core 开发线。已发布的版本分支和 tag 不得移动、force-update、删除或重建；源码
+不复制到实体 `release/` 目录，构建产物、GitHub Release 页面和部署状态也不属于源码定版事实。创建或
+发布这些 Git refs 必须由独立获批任务明确授权，并由 Human Owner 手工执行。
 
 ## 3. 运行与安全边界
 
@@ -37,6 +43,7 @@
 ## 5. 文档与代码质量
 
 - 根 README/PLAN/CHANGELOG/INITIALIZATION 保持英文主文档与中文 pair；本契约中文为唯一执行语言版本。
+- `docs/` 不替代 `contracts/` 或 `plans/`：公开合同继续归根目录 `contracts/`，任务范围、Development 证据与 Verification 结论继续归 `plans/`；运行与发布操作事实只归相应 README、INITIALIZATION 和当前任务 `tasks.md`。
 - 用户可见文案必须进入 i18n，中文和英文键保持对称。
 - 新增或修改的关键源码保持中文头部说明或现有文件风格；真实结构发生变化时同步维护 `CODE_INDEX.md`。
 - 裸运行工具入口只显示帮助，不读取默认输入或产生副作用；验证产物优先写入 `/private/tmp`。
