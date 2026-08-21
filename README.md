@@ -21,7 +21,12 @@ Project repositories consume a pinned source version and add their own modules u
 
 ## Source version model
 
-`main` is the continuing Core development line. A fixed source version uses a `release/<semver>` branch and an annotated `v<semver>` tag on the same exact commit. Source is not copied into a physical `release/` directory, and a source version does not imply a hosted GitHub Release, build artifact, deployment, or production readiness. Publication of those Git refs is a separately approved Human Owner action.
+`main` is the continuing Core development line. A major-version maintenance line uses a literal branch such as
+`release/1.x.x` (future lines use `release/2.x.x`, `release/3.x.x`, and so on) and may move only through a
+separately approved release task for that major line. Each exact source version uses an immutable annotated tag
+such as `v1.0.0`, `v1.2.1`, or `v2.1.2`; a tag is not replaced by the maintenance branch. Source is not copied
+into a physical `release/` directory, and a source version does not imply a hosted GitHub Release, build artifact,
+deployment, or production readiness. Publication of those Git refs is a separately approved Human Owner action.
 
 ## Runtime boundaries
 

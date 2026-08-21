@@ -20,10 +20,11 @@
 
 前后端模块采用 `app/<module>/.../manifest` 约定。后端 manifest 是模块向 Registry opt-in 的唯一入口；前端 route/locale 自动发现属于基础设施，菜单自动组装另行立项，不在本契约中默认宣称已实现。
 
-固定源码版本以同一精确 commit 上的 `release/<semver>` 分支与 `v<semver>` annotated tag 为权威，
-`main` 继续作为后续 Core 开发线。已发布的版本分支和 tag 不得移动、force-update、删除或重建；源码
-不复制到实体 `release/` 目录，构建产物、GitHub Release 页面和部署状态也不属于源码定版事实。创建或
-发布这些 Git refs 必须由独立获批任务明确授权，并由 Human Owner 手工执行。
+`main` 是持续 Core 开发线；大版本维护线使用字面分支 `release/1.x.x`、未来的 `release/2.x.x`、
+`release/3.x.x` 等，并只能在独立获批的对应大版本发布任务中 fast-forward。精确源码版本只由不可变的
+annotated tag（例如 `v1.0.0`、`v1.2.1`、`v2.1.2`）固定；已发布 tag 不得移动、force-update、删除或
+重建。源码不复制到实体 `release/` 目录，构建产物、GitHub Release 页面和部署状态也不属于源码定版
+事实。创建或发布这些 Git refs 必须由独立获批任务明确授权，并由 Human Owner 手工执行。
 
 ## 3. 运行与安全边界
 

@@ -21,7 +21,11 @@ AIIS ICS Architecture 是可复用工业信息系统架构的公开源码基线�
 
 ## 源码版本模型
 
-`main` 是持续演进的 Core 开发线。固定源码版本使用同一精确 commit 上的 `release/<semver>` 分支与 annotated `v<semver>` tag。源码不复制到实体 `release/` 目录；源码定版也不代表已经创建托管 GitHub Release、构建产物、部署或具备生产就绪性。发布这些 Git refs 必须由单独获批的 Human Owner 手工执行。
+`main` 是持续演进的 Core 开发线。大版本维护线使用字面分支，例如 `release/1.x.x`（未来使用
+`release/2.x.x`、`release/3.x.x` 等），只能由该大版本单独获批的发布任务继续 fast-forward。每个精确
+源码版本使用不可变的 annotated tag，例如 `v1.0.0`、`v1.2.1`、`v2.1.2`；tag 不由维护分支替代。源码
+不复制到实体 `release/` 目录；源码定版也不代表已经创建托管 GitHub Release、构建产物、部署或具备
+生产就绪性。发布这些 Git refs 必须由单独获批的 Human Owner 手工执行。
 
 ## 运行边界
 
