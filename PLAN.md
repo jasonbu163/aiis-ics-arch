@@ -4,7 +4,8 @@ Chinese version: [PLAN.zh-CN.md](PLAN.zh-CN.md)
 
 ## Current source baseline
 
-- Baseline source version: `1.0.0` (source record only; no tag, branch, hosted release, or deployment is implied).
+- Baseline source version: `1.0.0` (the annotated `v1.0.0` tag and `release/1.x.x` maintenance branch are
+  verified; no hosted release or deployment is implied).
 - Core surfaces: `backend/`, `frontend-js/`, `control-agent/`, `tools/`, `contracts/`.
 - Project-specific modules and inputs belong to consuming project repositories.
 
@@ -16,7 +17,7 @@ Chinese version: [PLAN.zh-CN.md](PLAN.zh-CN.md)
 | Core migration baseline | `owner_accepted` | [ARCH-MIG-001 spec](plans/ARCH-MIG-001-core-migration-baseline/spec.md) | Human Owner accepted the single `d4e6f8a0b2c4` Core root and fourteen-table source/static/no-DB baseline |
 | Empty-volume Docker runtime proof | `owner_accepted` | [ARCH-DOCKER-001 spec](plans/ARCH-DOCKER-001-empty-volume-runtime-proof/spec.md) | Human Owner accepted r1 after fresh-context Verification passed the isolated MySQL 8.4.6 build/migrate/health/proxy/cleanup proof |
 | Local development environment adoption | `owner_accepted` | [ARCH-DEV-001 spec](plans/ARCH-DEV-001-local-development-environment-adoption/spec.md) | Human Owner accepted r4 after the fixed-name dev runtime, health/frontend checks, bootstrap default-off proof and retired-smoke documentation cleanup |
-| Source release 1.0.0 | `implementation_in_progress` | [ARCH-REL-001 spec](plans/ARCH-REL-001-source-release-1.0.0/spec.md) | Human Owner approved r3; Development is synchronizing the `main` + major-line maintenance branch + immutable annotated tag model, while Git/GitHub writes and release refs remain Human Owner-only |
+| Source release 1.0.0 | `owner_accepted` | [ARCH-REL-001 spec](plans/ARCH-REL-001-source-release-1.0.0/spec.md) | Fresh-context Verification passed r3 and Human Owner accepted it; the §5.4 main-only governance receipt is prepared but still pending Human Owner manual push |
 | Frontend module assembly | `draft` | [ARCH-FE-001 spec](plans/ARCH-FE-001-frontend-module-auto-assembly/spec.md) | Manifest-driven menu/permission assembly; not part of Core extraction |
 | Packaged CA configuration | `draft` | [CA-CONFIG-001 spec](plans/CA-CONFIG-001-packaged-configuration-management/spec.md) | Database type/address settings and YAML upload UI |
 
@@ -24,9 +25,10 @@ Chinese version: [PLAN.zh-CN.md](PLAN.zh-CN.md)
 
 ARCH-MIG-001 r1, ARCH-DOCKER-001 r1 and ARCH-DEV-001 r4 are owner-accepted. The MIT license and stated
 ownership are retained, but production Docker topology, real PLC/CA operation and project module migration remain
-separate Human Owner gates. ARCH-REL-001 r3 is approved and in Development preparation; its r1/r2 Development
-records and r2 main preparation commit are retained as superseded history. Git/GitHub writes remain Human
-Owner-only: the first release-preparation commit must reach `main` before `release/1.x.x` and `v1.0.0` are
-created, and no release maintenance branch or exact tag is claimed as published yet.
+separate Human Owner gates. ARCH-REL-001 r3 is `owner_accepted` after fresh-context Verification recorded
+`qa_passed` and Human Owner final acceptance. Its r1/r2 Development records and r2 main preparation commit
+remain superseded history. The six-path §5.4 main-only governance receipt is prepared but still pending Human
+Owner manual staging, commit and push; this status does not imply a GitHub Release, deployment or production
+readiness.
 
 Keep this file as a concise index. Detailed scope, commands and evidence belong to the owning task bundle.

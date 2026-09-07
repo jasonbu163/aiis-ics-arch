@@ -2,10 +2,10 @@
 
 Task ID: ARCH-REL-001
 Revision: r3
-Status: implementation_in_progress
+Status: developer_handoff
 Owner Role: Development
 Allowed Writers: Development
-Handoff: pending Human Owner manual Git publication outputs; `developer_handoff` is not set
+Handoff: `developer_handoff` -> fresh-context QA / Verification created the checklist and recorded `qa_passed`; Human Owner final acceptance is recorded there; §5.4 main-only receipt remains pending Human Owner manual push
 
 Task Namespace: aiis-ics-arch
 PM Spec: [spec.md](spec.md)
@@ -36,9 +36,13 @@ Git / GitHub Writes: Human Owner-only
 | ARCH-DEV-001 | r4 | `owner_accepted` |
 
 - r3 只做 source-only 版本模型和长期文档同步。Development 未运行 `git add`、`commit`、`push`、
-  `branch`、`tag` 或任何 Git/GitHub 写操作；未创建 `checklist.md`。
-- 当前状态保持 `implementation_in_progress`。Human Owner 返回完整 Git 命令、退出码和 OID 后，才由
-  Development 回填证据并进入 `developer_handoff`。
+  `branch`、`tag` 或任何 Git/GitHub 写操作；fresh-context Verification 已在 handoff 后创建
+  `checklist.md` 并独立完成验证。
+- Human Owner 已完成并推送 r3 `main` release-preparation commit，创建并推送 `release/1.x.x` 与
+  annotated `v1.0.0`；Development 回填本文件 §8 的 publication evidence 并进入
+  `developer_handoff`。fresh-context Verification 已记录 `qa_passed`，Human Owner final acceptance
+  已按原文记录在 checklist §10；该事实不把 Development 自检或 publication evidence 改写为 QA
+  verdict，剩余 §5.4 receipt 仍由 Human Owner 手工追加并 push。
 
 ## 2. r3 精确实现范围
 
@@ -49,15 +53,16 @@ Development 按 r3 spec 完成以下 bounded preparation：
    `release/2.x.x` + immutable annotated tag 的 source-only 合同。
 2. 明确 `release/1.x.x` 是可由未来独立获批任务 fast-forward 的 1.x 维护线，不是精确版本权威；精确版本
    只由 `v<major>.<minor>.<patch>` annotated tag 表达；本首次发布创建 `release/1.x.x` 与 `v1.0.0`。
-3. 将本文件原地从 r2 升级为 `Revision: r3` / `implementation_in_progress`，保留 r2/r1 facts 和旧
-   publication commands 为 superseded history；当前命令仅在 §7。
+3. 将本文件原地从 r2 升级为 `Revision: r3`，保留 r2/r1 facts 和旧
+   publication commands 为 superseded history；已完成的 publication command 仅在 §7，当前 receipt
+   command 仅在 §12。
 4. 不修改 `CODE_INDEX.md`：r2 已完成 docs 结构变化，r3 只做版本语义同步；不修改 `contracts/`、accepted
    history、源码、配置、Docker、env、runtime 或任何未列入 §3 的路径。
 
 ## 3. r3 allowlist 与十二路径 staged-set
 
 Development 写面是以下十一项；Human Owner 的第一个 r3 release-preparation commit 还必须包含 PM-owned
-r3 `spec.md` diff，合计十二个路径。当前 worktree 应只出现这十二项变化，index 由 Human Owner 暂存前保持
+r3 `spec.md` diff，合计十二个路径。发布前 worktree 应只出现这十二项变化，index 由 Human Owner 暂存前保持
 为空：
 
 | Path | 预期 Git 事实 | Owner |
@@ -79,7 +84,7 @@ r3 `spec.md` diff，合计十二个路径。当前 worktree 应只出现这十�
 `docs/README.*`、`contracts/`、accepted history、根 `multi-project-pm.md`、`docs/PLAN.*` 或
 `docs/plans/`。
 
-## 4. r3 当前 preflight 事实
+## 4. r3 发布前 preflight 事实
 
 Development 在本次写入前执行了只读 preflight：
 
@@ -93,8 +98,8 @@ Development 在本次写入前执行了只读 preflight：
 | protected surfaces | `contracts/`、`CODE_INDEX.md` 与四项 accepted task bundle 的 worktree diff 无输出 |
 | docs topology | `docs/README.*` 与 `docs/multi-project-pm.md` 已存在；根 `multi-project-pm.md`、`docs/PLAN.*`、`docs/plans/` 不存在 |
 
-以上均为时点事实。Human Owner 暂存前必须重新执行 §7.1；任一 main 分叉、index 非空、目标 ref collision、
-网络/权限失败或 allowlist 外变化即停止。
+以上均为发布前时点事实；Human Owner 发布前必须重新执行 §7.1。发布后的 refs 与只读复核见 §8；任一
+main 分叉、index 非空、目标 ref collision、网络/权限失败或 allowlist 外变化均是停止条件。
 
 ## 5. r3 Development 记录
 
@@ -102,15 +107,17 @@ Development 在本次写入前执行了只读 preflight：
 
 - `AGENTS.md`：更新长期 Git source-version boundary。
 - 双语根 README：说明 `main`、大版本维护线和精确 annotated tags；消费方锁定 tag/commit。
-- 双语 CHANGELOG：记录 1.0.0 source-only 定版顺序与 refs 尚未由本任务声明发布。
-- 双语 PLAN 与 `plans/README.*`：机械同步 r3 `implementation_in_progress`、下一 gate 和 pending handoff。
+- 双语 CHANGELOG：记录 1.0.0 source-only 定版顺序；动态 publication evidence 只归本文件 §8。
+- 双语 PLAN 与 `plans/README.*`：本次 receipt preparation 将聚合索引从
+  `implementation_in_progress`/pending handoff 同步为 `owner_accepted`，明确 `qa_passed` 与 Human
+  Owner final acceptance 已记录，并保留 §5.4 main-only receipt pending 的边界。
 - `docs/multi-project-pm.md`：只同步长期分支/tag 模型、发布顺序和任务入口；不复制当前命令、动态 OID
   或 evidence，不移动 `contracts/`。
 - 本 `tasks.md`：将当前 Development authority 从 r2 升级为 r3，并把旧命令隔离为历史。
 
 未修改 `CODE_INDEX.md`、`docs/README.*`、`contracts/`、accepted historical bundles、源码、配置、
-Compose、env、runtime 或 `checklist.md`；未创建 `release/` 源码目录、`release/1.0.0`、`release/2.x.x`
-或 GitHub Release。
+Compose、env、runtime；`checklist.md` 仍由 Verification 独占维护，Development 未改写其 QA 或接受
+结论。未创建 `release/` 源码目录、`release/1.0.0`、`release/2.x.x` 或 GitHub Release。
 
 ## 6. DEV self-check 证据
 
@@ -118,22 +125,25 @@ Compose、env、runtime 或 `checklist.md`；未创建 `release/` 源码目录�
 
 | 命令 / 检查 | 结果 |
 | --- | --- |
-| `git status --short --branch`；`git diff --name-status --no-renames` | 精确十二项：十一项 Development path + PM `spec.md`；index 为空 |
-| exact 12-path worktree audit；topology audit | 期望/实际排序路径一致 exit `0`；根 `multi-project-pm.md`、`docs/PLAN.*`、`docs/plans/` 和 checklist 均不存在 |
+| `git status --short --branch`；`git diff --name-status --no-renames` | receipt preparation 只允许 §5.4 六项 path：五项 receipt 文件修改 + Verification `checklist.md`；Human Owner staging 前 index 为空 |
+| exact receipt-path worktree audit；topology audit | 期望/实际排序路径一致 exit `0`；根 `multi-project-pm.md`、`docs/PLAN.*`、`docs/plans/` 不存在，物理 `release/` 目录不存在 |
 | `git diff --check`；`git diff --cached --check` | 两项 exit `0`；index 为空 |
 | bilingual symmetry、Markdown links、active ref scan | 双语 heading 对称：README `7/7`、CHANGELOG `2/2`、PLAN `4/4`、catalog `1/1`、docs README `3/3`；changed-doc link check exit `0`；active old release-model scan exit `0` |
 | ignore proof（不读取 env 值）；secret/artifact/path scan | 四个真实 `.env` 路径均被 ignore；secret、artifact path 和工作树敏感文件扫描无命中 |
 | `grep -E` command compatibility | All Human Owner copyable scans use macOS standard `grep -E`; no `rg` dependency |
 | `CODE_INDEX.md`、`contracts/` / accepted history no-diff audit | `git diff --name-only` protected-surface audit exit `0`；`CODE_INDEX.md`、`contracts/` 与四项 accepted bundle 无 diff |
-| bundle metadata / checklist absence / ref-name / local+remote collision | spec=`r3/owner_approved`、tasks=`r3/implementation_in_progress`；checklist absent；local/remote target collision preflight exit `0`，仅远端 `main` 返回 |
-| project-governance checker | Expected exit `1` only for pre-existing accepted `ARCH-001/checklist.md` duplicate `Handoff:`; this out-of-allowlist limitation is not repaired |
+| final bundle metadata / receipt preflight basis | spec=`r3/owner_approved`、tasks=`r3/developer_handoff`、checklist=`r3/owner_accepted`；本地/远端 release refs 已按发布证据复核；receipt staging 前 index 必须为空 |
+| project-governance checker | `bash /Users/jason/Desktop/DreamCode/AI/AIIS/skills/project-governance/scripts/check-governance-bundle.sh /Users/jason/Desktop/DreamCode/aiis-ics-arch` exit `1`，仅报告既有 accepted `ARCH-001/checklist.md` duplicate `Handoff:` metadata（checker 输出两次）；该 out-of-allowlist limitation 未修复 |
+| post-publication refs / local state read-only recheck | local `rev-parse`/`cat-file` group exit `0`；授权 `git ls-remote --heads --tags ...` exit `0`；`main`、`release/1.x.x`、annotated tag object、peeled commit 与 `tag` 类型见 §8；publication checkpoint clean `main` |
+| receipt-preparation self-check | `git diff --check` 与五项 receipt 文件范围检查 exit `0`；checklist metadata 为 `Status=owner_accepted`；tasks 保持 `Status=developer_handoff`，并明确 §5.4 receipt 尚未 push |
 
-## 7. Human Owner 唯一手工 Git 发布命令
+## 7. 已完成的 Human Owner r3 Git 发布命令（历史记录，禁止重跑）
 
-本节是 r3 当前唯一 copyable publication command surface。请在仓库根目录逐条执行并保留每条命令的
-stdout、stderr 与退出码；任何一步失败即停止，不删除、移动、force-update 或重建 refs，不 rewrite history。
+本节保留首次 r3 publication 所用命令及 preflight，作为已经完成动作的可审计历史；不得因本 receipt
+重新执行、移动、force-update、删除或重建任何 refs。当前唯一可执行的命令面仅为 §12 的 main-only
+governance receipt。
 
-### 7.1 发布前 stop-condition preflight
+### 7.1 发布前 stop-condition preflight（历史；不得重跑）
 
 ```bash
 test "$(git symbolic-ref --short HEAD)" = "main"
@@ -150,7 +160,7 @@ git ls-remote --heads --tags origin main release/1.x.x release/2.x.x release/1.0
 预期全部 exit `0`；最后一条只返回远端 `main`，其 OID 等于本地 `HEAD`。若 index 非空、三方 main 不同、
 任一目标 ref 已存在、出现 `release/1.0.0` 或远端无法核对，立即停止。
 
-### 7.2 只暂存精确十二路径
+### 7.2 只暂存精确十二路径（历史；不得重跑）
 
 禁止 `git add .` 或 `git add -A`。Human Owner 只运行：
 
@@ -196,7 +206,7 @@ if git diff --cached -U0 --no-renames | grep -E 'BEGIN (RSA |EC |OPENSSH )?PRIVA
 `git check-ignore` 只打印 ignore rule/path，不读取 env 内容；四个路径必须均命中 ignore rule。两项
 `grep -E` 扫描预期均无输出并继续，任何命中都停止。
 
-### 7.3 创建唯一 r3 release-preparation commit 并先 push main
+### 7.3 创建唯一 r3 release-preparation commit 并先 push main（历史；不得重跑）
 
 ```bash
 git commit -m "chore: prepare AIIS ICS Architecture v1.0.0 r3 release"
@@ -210,7 +220,7 @@ printf '%s\n' "$release_commit"
 预期 commit 与 push exit `0`，`release_commit` 为新的 r3 preparation commit 且等于远端 `main` OID。若
 push 或 OID 核对失败，停止，不创建 maintenance branch/tag。
 
-### 7.4 从同一 release commit 创建并分别 push 固定 refs
+### 7.4 从同一 release commit 创建并分别 push 固定 refs（历史；不得重跑）
 
 保持 checkout 在 `main`。创建前再次确认远端目标仍无 collision：
 
@@ -235,16 +245,28 @@ ref 另有 annotated tag object OID，`git cat-file -t refs/tags/v1.0.0` 输出 
 
 禁止 force push/tag、ref 删除、history rewrite、GitHub Release 页面/asset 创建或任何未授权外部状态变化。
 
-## 8. Human Owner publication evidence（等待回填）
+## 8. Human Owner publication evidence（r3 Development handoff）
 
-| Evidence | Value |
-| --- | --- |
-| r3 release-preparation commit / remote main OID | Pending Human Owner execution |
-| local / remote `release/1.x.x` OID | Pending Human Owner execution |
-| annotated tag object OID | Pending Human Owner execution |
-| peeled `v1.0.0^{}` OID | Pending Human Owner execution |
-| exact command outputs and exit codes | Pending Human Owner execution |
-| Development handoff | Not set; remains `implementation_in_progress` |
+Human Owner 已完成 r3 手工 publication sequence：先将 release-preparation commit 推送到 `main`，再从
+同一 commit 创建并推送 `release/1.x.x` 与 annotated `v1.0.0`。这只证明 Human Owner 已执行获批的 Git
+publication gate，不构成 QA verdict、Human Owner final acceptance、GitHub Release、部署或生产授权。
+
+证据来源必须区分：Human Owner 提供给协调侧的原始输出只覆盖 `git cat-file -t refs/tags/v1.0.0` 与
+`git ls-remote --heads --tags origin main release/1.x.x release/2.x.x release/1.0.0 v1.0.0` 两个
+检查的结果；未提供完整的逐条 stdout/stderr/exit-code transcript，因此本节不补造不存在的 Human Owner
+逐条退出码。以下 OID、peeled commit、tag type 和工作树状态由 Development/协调侧以只读命令独立复核。
+
+| Evidence | Value | Source and boundary |
+| --- | --- | --- |
+| r3 release-preparation commit / local `main` / tracking `origin/main` / remote `main` | `b6c36a8c7eb7bb229f6bc7798d74e08a97e288ac` | Human Owner 已完成并推送；协调侧 `git rev-parse HEAD`、`git rev-parse refs/heads/main`、`git rev-parse refs/remotes/origin/main` 及授权只读 `git ls-remote` 均复核为该 OID。 |
+| local / remote `release/1.x.x` OID | `b6c36a8c7eb7bb229f6bc7798d74e08a97e288ac` | 协调侧 `git rev-parse refs/heads/release/1.x.x` 与授权只读 `git ls-remote` 复核；与 release-preparation commit 相同。 |
+| annotated tag object OID | `cf93268d4fea927fc27d463e75467c1eff9692fc` | 协调侧只读 `git rev-parse refs/tags/v1.0.0` 复核；该对象类型另由 `git cat-file -t refs/tags/v1.0.0` 复核为 `tag`。 |
+| peeled `v1.0.0^{}` commit OID | `b6c36a8c7eb7bb229f6bc7798d74e08a97e288ac` | 协调侧只读 `git rev-parse 'refs/tags/v1.0.0^{}'` 复核；与 `main` 和 `release/1.x.x` 相同。 |
+| tag type | `tag` | Human Owner 原始回传覆盖了 `git cat-file` 检查；协调侧再次只读复核，未执行任何 tag 写操作。 |
+| remote read-only recheck output | `b6c36a8c7eb7bb229f6bc7798d74e08a97e288ac refs/heads/main`; `b6c36a8c7eb7bb229f6bc7798d74e08a97e288ac refs/heads/release/1.x.x`; `cf93268d4fea927fc27d463e75467c1eff9692fc refs/tags/v1.0.0` | 精确授权重跑 `git ls-remote --heads --tags origin main release/1.x.x release/2.x.x release/1.0.0 v1.0.0` exit `0`；输出未把 `release/1.0.0` 或 `release/2.x.x` 列为存在。 |
+| publication-time worktree / checkout | `git status --short --branch` exit `0`，输出仅 `## main...origin/main`；checkout 为 `main` | 协调侧只读复核发生在本次 tasks.md handoff 写入前；当前 §5.4 receipt preparation 只允许五项 receipt 文件与 Verification checklist 的变化，Human Owner staging 前 index 必须为空。 |
+| exact command-output limitation | Human Owner 原始回传没有完整逐条退出码；协调侧普通 sandbox `git ls-remote` 因 DNS 失败 exit `128`，随后精确网络授权只读重跑 exit `0` | 这是环境/证据来源限制，不改写为 Human Owner 成功 transcript；Development 未执行任何 Git/GitHub 写操作。 |
+| Development handoff | `developer_handoff` | fresh-context QA / Verification 已创建 checklist 并独立复核 refs、tag annotation、source-only boundary 与本节证据；verdict=`qa_passed`，Human Owner final acceptance 已记录，§5.4 receipt 仍待 Human Owner 手工 push。 |
 
 ## 9. r2 superseded Development history
 
@@ -277,11 +299,98 @@ git push origin refs/heads/release/1.0.0:refs/heads/release/1.0.0
 
 ## 11. Development 限制与 handoff
 
-- Development 未运行且无权运行任何 Git/GitHub 写操作；Human Owner 必须手工执行 §7。
+- Development 未运行且无权运行任何 Git/GitHub 写操作；本节只记录 Human Owner 已完成的手工 §7 gate
+  与协调侧只读复核。
 - 本任务仅验证文档、路径、引用、ref 名称和 source-only release boundary；未运行 Docker build/up/down、
   数据库 migration、真实 PLC/CA、部署、GitHub Release、asset 或 artifact 操作。
-- `checklist.md` 只能由 `developer_handoff` 后的 fresh-context Verification 创建；当前不存在该文件。
-- Human Owner 返回完整命令 stdout/stderr、退出码、release commit、`release/1.x.x` OID、tag object OID
-  与 peeled commit 后，Development 才能补写 §8 并将 `Status` 改为 `developer_handoff`。
+- `checklist.md` 已由本次 `developer_handoff` 后的 fresh-context Verification 创建并记录 `qa_passed`；
+  Human Owner final acceptance 已按原文记录在 checklist §10。Development 不修改 checklist，也不把
+  `owner_accepted` 改成 Development status。
+- 精确 handoff：Task ID `ARCH-REL-001` / Revision `r3`；publication commit 与 refs 已在 §8 记录；
+  receipt preparation 只更新 §5.4 允许的五个非 checklist 文件，当前 index 必须保持为空。剩余
+  main-only receipt 由 Human Owner 手工 staging、commit、push；未执行前不得宣称 receipt 完成。
 - Development self-check 不构成 QA verdict、Human Owner final acceptance、平台 ACL、强制路由、发布部署或
   生产授权。
+
+## 12. Human Owner §5.4 main-only governance receipt command
+
+本节是当前唯一的 receipt command surface；它不重建 §7 的已完成 publication sequence。请在仓库根目录
+逐条执行并保留 stdout、stderr 与退出码。任何一步失败立即停止，不删除、移动、force-update 或重建
+任何 release ref，也不继续执行后续命令。receipt 只提交到当前 main，不创建 release/2.x.x。
+
+```bash
+release_commit=$(git rev-parse 'refs/tags/v1.0.0^{}')
+tag_object=$(git rev-parse refs/tags/v1.0.0)
+expected_paths=$(printf '%s\n' \
+  PLAN.md \
+  PLAN.zh-CN.md \
+  plans/README.md \
+  plans/README.zh-CN.md \
+  plans/ARCH-REL-001-source-release-1.0.0/tasks.md \
+  plans/ARCH-REL-001-source-release-1.0.0/checklist.md | LC_ALL=C sort)
+actual_worktree_paths=$(git status --short | awk '{print substr($0,4)}' | LC_ALL=C sort)
+test "$actual_worktree_paths" = "$expected_paths"
+test "$(git symbolic-ref --short HEAD)" = "main"
+test "$(git rev-parse HEAD)" = "$release_commit"
+test "$(git rev-parse refs/heads/main)" = "$release_commit"
+test "$(git rev-parse refs/remotes/origin/main)" = "$release_commit"
+test -z "$(git diff --cached --name-only --no-renames)"
+test "$(git cat-file -t refs/tags/v1.0.0)" = "tag"
+test "$(git rev-parse refs/heads/release/1.x.x)" = "$release_commit"
+test -z "$(git branch --list 'release/2.x.x')"
+test -z "$(git ls-remote --heads origin refs/heads/release/2.x.x)"
+remote_main_before=$(git ls-remote --heads origin refs/heads/main | awk '$2 == "refs/heads/main" {print $1}')
+remote_release_before=$(git ls-remote --heads origin refs/heads/release/1.x.x | awk '$2 == "refs/heads/release/1.x.x" {print $1}')
+remote_tag_before=$(git ls-remote --tags origin refs/tags/v1.0.0 | awk '$2 == "refs/tags/v1.0.0" {print $1}')
+test "$remote_main_before" = "$release_commit"
+test "$remote_release_before" = "$release_commit"
+test "$remote_tag_before" = "$tag_object"
+
+git add -- \
+  PLAN.md \
+  PLAN.zh-CN.md \
+  plans/README.md \
+  plans/README.zh-CN.md \
+  plans/ARCH-REL-001-source-release-1.0.0/tasks.md \
+  plans/ARCH-REL-001-source-release-1.0.0/checklist.md
+git diff --cached --check
+git diff --cached --name-status --no-renames
+actual_paths=$(git diff --cached --name-only --no-renames | LC_ALL=C sort)
+test "$actual_paths" = "$expected_paths"
+expected_status=$( {
+  printf 'M\t%s\n' \
+    PLAN.md \
+    PLAN.zh-CN.md \
+    plans/README.md \
+    plans/README.zh-CN.md \
+    plans/ARCH-REL-001-source-release-1.0.0/tasks.md
+  printf 'A\t%s\n' \
+    plans/ARCH-REL-001-source-release-1.0.0/checklist.md
+} | LC_ALL=C sort)
+actual_status=$(git diff --cached --name-status --no-renames | LC_ALL=C sort)
+test "$actual_status" = "$expected_status"
+test -z "$(git diff --cached --diff-filter=R --name-only --no-renames)"
+if git diff --cached --name-only --no-renames | grep -E '(^|/)(\.env($|\.)|node_modules|dist|build|target|__pycache__|\.venv|\.log$|\.sql$|\.db$)'; then exit 1; fi
+
+git commit -m "chore: record v1.0.0 release acceptance"
+git push origin HEAD:refs/heads/main
+post_main=$(git ls-remote --heads origin refs/heads/main | awk '$2 == "refs/heads/main" {print $1}')
+test "$post_main" = "$(git rev-parse HEAD)"
+test "$post_main" != "$release_commit"
+git merge-base --is-ancestor "$release_commit" "$post_main"
+test "$(git symbolic-ref --short HEAD)" = "main"
+test "$(git rev-parse refs/heads/release/1.x.x)" = "$release_commit"
+test "$(git rev-parse refs/tags/v1.0.0)" = "$tag_object"
+test "$(git rev-parse 'refs/tags/v1.0.0^{}')" = "$release_commit"
+test "$(git cat-file -t refs/tags/v1.0.0)" = "tag"
+remote_release_after=$(git ls-remote --heads origin refs/heads/release/1.x.x | awk '$2 == "refs/heads/release/1.x.x" {print $1}')
+remote_tag_after=$(git ls-remote --tags origin refs/tags/v1.0.0 | awk '$2 == "refs/tags/v1.0.0" {print $1}')
+test "$remote_release_after" = "$remote_release_before"
+test "$remote_tag_after" = "$remote_tag_before"
+test -z "$(git branch --list 'release/2.x.x')"
+test -z "$(git ls-remote --heads origin refs/heads/release/2.x.x)"
+test -z "$(git status --short)"
+```
+
+以上命令只把本节六项路径追加到 main；不会修改 release/1.x.x、v1.0.0 或任何禁止目标。命令
+完成前，qa_passed 与 Human Owner final acceptance 已记录，但 §5.4 receipt 仍应视为 pending。
