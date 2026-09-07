@@ -8,16 +8,19 @@
 
 export const systemModule = {
   name: 'system',
+  enabled: true,
   order: 80,
+  navigation: { titleKey: 'system.title', icon: 'Setting' },
   routes: [
     {
       path: 'system/user',
       name: 'SystemUser',
       component: () => import('./views/user/index.vue'),
       meta: {
-        titleKey: 'breadcrumb.systemUser',
+        titleKey: 'system.user',
         pageId: 'system.user',
-        parentTitleKey: 'nav.system'
+        parentTitleKey: 'system.title',
+        navigation: { visible: true, order: 10, icon: 'User' }
       }
     },
     {
@@ -25,10 +28,11 @@ export const systemModule = {
       name: 'SystemProjectionMapping',
       component: () => import('./views/dict/index.vue'),
       meta: {
-        titleKey: 'breadcrumb.systemProjectionMapping',
+        titleKey: 'system.mapping.title',
         pageId: 'system.projection-mapping',
         requiresAdmin: true,
-        parentTitleKey: 'nav.system'
+        parentTitleKey: 'system.title',
+        navigation: { visible: true, order: 20, icon: 'Collection' }
       }
     }
   ]

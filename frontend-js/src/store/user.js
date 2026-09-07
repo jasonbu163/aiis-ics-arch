@@ -19,7 +19,8 @@ export const useUserStore = defineStore('user', () => {
   try {
     const info = localStorage.getItem('userInfo')
     if (info) {
-      parsedUserInfo = JSON.parse(info)
+      const parsed = JSON.parse(info)
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) parsedUserInfo = parsed
     }
   } catch (error) {
     console.error('解析 userInfo 失败:', error)
@@ -30,7 +31,7 @@ export const useUserStore = defineStore('user', () => {
 
   const username = computed(() => userInfo.value.username || '')
   // A missing or unknown role must not inherit operator page access.
-  const role = computed(() => userInfo.value.role || '')
+  const role = computed(() => typeof userInfo.value.role === 'string' ? userInfo.value.role : '')
   const roleName = computed(() => {
     const roleMap = {
       admin: '系统管理员',
@@ -43,7 +44,8 @@ export const useUserStore = defineStore('user', () => {
   const isLoggedIn = computed(() => !!token.value)
 
   const pageAccess = computed(() => {
-    return ROLE_PAGE_ACCESS[role.value] || []
+    const grants = Object.hasOwn(ROLE_PAGE_ACCESS, role.value) ? ROLE_PAGE_ACCESS[role.value] : undefined
+    return Array.isArray(grants) ? grants : []
   })
 
   const hasPageAccess = (pageId) => {

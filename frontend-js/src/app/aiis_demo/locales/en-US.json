@@ -1,0 +1,7 @@
+{
+  "navigation": { "title": "Offline example" },
+  "example": {
+    "title": "Module assembly example",
+    "description": "This local example demonstrates routes, navigation and bilingual messages. It does not connect to an API or device."
+  }
+}

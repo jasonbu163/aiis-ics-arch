@@ -1,11 +1,11 @@
 # ARCH-FE-001 Frontend Module Auto Assembly — PM Spec
 
 Task ID: ARCH-FE-001  
-Revision: r2  
-Status: draft  
+Revision: r3
+Status: owner_approved
 Owner Role: PM  
 Allowed Writers: PM, Human Owner  
-Handoff: PM r2 scope fixed; Development blocked until ARCH-001 is owner_accepted, an immutable Core baseline is recorded, the baseline audit is complete, and this exact Revision is approved
+Handoff: Human Owner approved exact r3; Development may start within §10 allowlist
 
 Task Namespace: aiis-ics-arch  
 Classification: root  
@@ -16,10 +16,13 @@ Target Version: deferred; exact SemVer is decided only after implementation, com
 Acceptance Chain Reference: ARCH-FE-001 PM spec -> ARCH-001 owner acceptance -> immutable Core baseline -> baseline audit -> Human Owner exact Revision approval -> Development tasks.md -> developer_handoff -> fresh-context QA checklist.md -> Human Owner final acceptance -> separate version/release decision  
 Execution Mode: agent_team_same_session  
 Created: 2026-08-08  
-Updated: 2026-08-10
+Updated: 2026-09-07
 
 Revision History:
 
+- `r3`：基于已接受的 `v1.0.0` 复核，明确 system 为不可禁用的必需 Core 模块；旧 manifest
+  保留全局标题 key 兼容，新格式采用模块内标题 key。其余范围、角色级 allowlist 与版本延后决定不变。
+  Human Owner 本轮仅授权修订 spec，不构成 Development 批准。
 - `r1`：在 Core 拆分前固定 route、navigation、locale 与 access-filter 统一装配方向，并将 Development
   阻塞在 `ARCH-001` 和首个稳定基线之后。
 - `r2`：Human Owner 明确暂不固定版本号；本 Revision 将稳定的 `src/app/<module>` 结构、Core-only
@@ -49,10 +52,10 @@ Development 必须同时满足：
 2. 首个 Core 的 immutable baseline identifier 已记录；它可以是 accepted source record、commit 或后续
    单独批准的 tag，不要求本 spec 现在固定版本号；
 3. PM 基于该 baseline 重新检查本 spec 的文件路径、manifest 现状和 allowlist；
-4. 如 baseline 与本 r2 有 material drift，先形成新 Revision；
+4. 如 baseline 与本 Revision 有 material drift，先形成新 Revision；
 5. Human Owner 对最终 Revision 使用精确批准语句。
 
-现在创建 r2 只用于固定 PM 范围，不能据此创建 `tasks.md`、`checklist.md` 或修改 frontend 源码。
+现在创建 r3 只用于固定 PM 范围，不能据此创建 `tasks.md`、`checklist.md` 或修改 frontend 源码。
 
 ## 3. 当前事实
 
@@ -65,14 +68,21 @@ Development 必须同时满足：
 
 当前尚未具备：
 
-- `MainLayout.vue` 仍硬编码每个业务模块的菜单、图标和 `pageId` group；
+- `MainLayout.vue` 当前只硬编码 Core system 菜单、图标和 `pageId` group；
 - router、menu 与 locale 各自发现，缺少一个可复用、可验证的 normalized module registry；
 - manifest 没有正式的 `enabled` 和 navigation schema；
 - disabled module 不能以统一合同同时退出 route、menu、default redirect 和 module locale；
 - 新模块仍需修改共享 MainLayout，尚未达到“只写模块目录即可接入”的目标。
 
-上述 current facts 来自冻结 JS 模块基线和当前 Arch staging。`ARCH-001` 会继续清理共享壳层，因此
-Development 启动前必须重读接受后的 Core 文件；聊天和本节的旧行号不能覆盖届时 baseline audit。
+2026-09-07 baseline audit：`ARCH-001 r3` checklist 已为 `owner_accepted`；immutable baseline 为
+annotated `v1.0.0`，peeled commit 为 `b6c36a8c7eb7bb229f6bc7798d74e08a97e288ac`。
+当前 `main` 为 `d85604a88ade5a6c86e77abaafa96de267515479`，与该 tag 的差异仅为六个发布验收文档，
+`frontend-js/` 无差异。现有写入路径适用；Registry、离线示例和测试为计划新增路径。
+本轮只读复核未运行构建。Development 启动前仍需核对实际基线是否变化。
+
+两项规则偏差由本 r3 收敛：壳层依赖 system 提供的 `system.*` / `user.*` 语言包；旧 system manifest
+使用全局 `breadcrumb.*` 标题。另有默认跳转只检查 pageId、未检查 requiresAdmin 的现状，继续在既有
+统一权限过滤范围内处理。
 
 ### 3.1 稳定模块结构与 Core 边界
 
@@ -91,6 +101,8 @@ frontend-js/src/app/<module>/
 - `frontend-js/src/app/moduleManifest.js` 与 `moduleRegistry.js` 是共享 composition infrastructure，虽位于
   `src/app/`，但不是 `src/app/<module>/` 业务模块；
 - `system` 只补充 canonical manifest/locale 合同，`aiis_demo` 只作为默认关闭、无外部 I/O 的离线样例；
+- `system` 是不可禁用、不可删除的必需 Core 模块；其 `system.*` / `user.*` 文案继续供公共壳层使用，
+  不迁移账号 UI 或语言包。下文模块禁用/删除语义仅适用于可选模块。
 - 其他业务模块继续归 consuming project 或 modules 仓，不进入本任务 write scope；
 - 新合同生效后，模块只需在自己的目录内提供完整 manifest；共享 Core 不再为具体模块添加硬编码入口。
 
@@ -102,8 +114,8 @@ frontend-js/src/app/<module>/
    locale loader；
 2. 单一 normalized registry 同时提供 active manifests、routes、navigation model 和 active module
    names；
-3. `enabled: false` 的模块不进入 route、menu、default redirect 或 module locale messages；
-4. 新增一个完整模块目录后，经 dev server restart 可进入 route、menu、default redirect 候选与 module
+3. 可选模块 `enabled: false` 时不进入 route、menu、default redirect 或 module locale messages；
+4. 新增一个完整可选模块目录后，经 dev server restart 可进入 route、menu、default redirect 候选与 module
    locale；删除整个模块目录后，上述四个 consumer 不留共享代码残余；production 始终需要重新 build；
 5. 新格式 manifest 的 navigation 信息完全由模块拥有，共享布局不包含任何业务模块名、业务路径或
    业务 `pageId`；
@@ -152,8 +164,11 @@ export default {
 固定语义：
 
 - `name`：与目录名一致的稳定 module ID；
-- `enabled`：新模板必须显式声明 boolean；`false` 完全退出活动装配；
+- `enabled`：新模板必须显式声明 boolean；可选模块的 `false` 完全退出活动装配；
 - 为保持向后兼容，旧 manifest 缺少 `enabled` 时按当前行为视为启用；非 boolean 值必须失败；
+- `system` canonical manifest 必须显式 `enabled: true`；完整应用装配中缺失 system 或声明
+  `enabled: false` 必须在 build/test 校验时明确失败，不得静默恢复或继续构建残缺壳层。
+  system 必需性只属于 Core 装配约束，不豁免任何页面权限过滤，也不授权业务菜单硬编码；
 - `order`：模块、路由和菜单的稳定排序事实，不作为权限或启用开关；
 - `navigation`：可选。缺少时 route/locale 继续注册，但不会自动生成侧边栏 group；
 - `navigation.titleKey` 必须指向模块自己的 locale namespace；
@@ -162,7 +177,11 @@ export default {
 - 首版只生成两级导航；本任务不从 path、route name 或页面文件名猜测更深层菜单树；
 - `icon` 是可选 presentation hint；未知图标使用通用 fallback，不要求修改共享 icon registry；
 - `pageId` 是前端页面访问 key，不授予 backend API 权限；
-- module/route 的 title key 必须在中英文 module locale 中存在；重复 namespace 必须明确失败；
+- 新格式 manifest 的 module/route title key 必须归该模块拥有的 namespace，并在中英文 module
+  locale 中存在；重复 namespace 必须明确失败；
+- 为确定标题校验边界，未声明 `enabled`、模块 `navigation` 或 route `meta.navigation` 新字段的
+  manifest 按旧格式处理：保留原有全局 title key（例如 `breadcrumb.*`），按双语全局与模块消息的
+  实际解析结果校验，不因 key 不在模块 namespace 而拒绝。声明任一上述新字段即采用新格式标题规则；
 - manifest 必须静态、无副作用，不调用 API、不启动 timer、不读取数据库或修改运行时状态。
 
 ## 6. 装配数据流
@@ -206,6 +225,8 @@ route/menu/default redirect/messages，不代表源码未被打包扫描，也�
 - 旧 manifest 的 `name/order/routes/meta` 继续有效；
 - 缺少 `enabled` 时保持现有启用行为；
 - 缺少 `navigation` 时不自动产生 menu，但 route/locale 行为不变；
+- 旧格式的全局标题 key 继续有效；升级为新格式时同步把标题声明迁入模块 namespace，保留既有
+  route name/path/pageId。system 在本任务内完成该标题升级，公共壳层原有文案 key 保持可用；
 - 现有项目可逐模块补充 navigation 元数据，不要求一次性升级所有业务模块；
 - Core system module 与 `aiis_demo` 必须在本任务内采用完整新合同，作为 canonical 示例；
 - 删除模块只自动清除 Registry 的 Core consumers；其他模块中显式存在的 import、QuickLink、业务跳转
@@ -229,7 +250,7 @@ route/menu/default redirect/messages，不代表源码未被打包扫描，也�
 
 ## 10. 角色级精确 write allowlist
 
-本 r2 PM 阶段只允许写本 `spec.md`。它不授权创建 Development/Verification 文档或修改任何源码。
+本 r3 PM 阶段只允许写本 `spec.md`。它不授权创建 Development/Verification 文档或修改任何源码。
 
 前置 gate 和 Human Owner exact Revision approval 完成后，Development 只可写：
 
@@ -278,9 +299,11 @@ Verification 不修改 Development 源码或 `tasks.md`；发现问题时记录 
 3. duplicate module/name/path/pageId/locale namespace、非法 enabled/navigation、动态 route 可见、navigation
    titleKey 在中英文模块 locale 中缺失的负向测试；
 4. enabled module 同时进入 route/menu/locale/default redirect 的正向测试；
-5. disabled module 同时退出上述四个 consumer 的负向测试；
-6. fixture 中新增完整模块后进入四个 consumer、删除该模块后四处同时退出的 add/remove 测试；
-7. legacy manifest 缺少 enabled/navigation 的 compatibility 测试；
+5. disabled 可选模块同时退出上述四个 consumer 的负向测试；完整应用装配缺失 system 或禁用 system
+   时校验失败，正常 system 保持壳层所需双语文案的测试；
+6. fixture 中新增完整可选模块后进入四个 consumer、删除该模块后四处同时退出的 add/remove 测试；
+7. legacy manifest 缺少 enabled/navigation、使用全局标题 key 的 compatibility 测试；新格式使用
+   模块标题 key 的正向测试，以及使用全局标题 key 或缺少模块双语标题的负向测试；
 8. admin、access provider 已授权非 admin、未授权/未知用户的 menu/route/default filter 测试；
 9. 两级 group/leaf、无可访问 leaf 隐藏 group、缺失/未知 icon fallback 测试；
 10. orphan pageId grant 不得重建已删除模块 route/menu 的测试；
@@ -299,12 +322,12 @@ Verification 不修改 Development 源码或 `tasks.md`；发现问题时记录 
 | --- | --- |
 | AC-001 | 前置 gate、Revision、Execution Mode、角色级 allowlist 和 3MD handoff 一致。 |
 | AC-002 | manifest 只有一套 normalize/validate/sort 逻辑，router/menu/locale 不复制规则。 |
-| AC-003 | enabled=true/legacy-enabled 模块按合同注册；enabled=false 或物理删除模块同时退出 route/menu/default redirect/module locale。 |
+| AC-003 | enabled=true/legacy-enabled 模块按合同注册；可选模块 enabled=false 或物理删除时同时退出 route/menu/default redirect/module locale；完整应用缺失 system 或禁用 system 必须校验失败。 |
 | AC-004 | navigation 缺失保持 route/locale 兼容；显式 navigation 自动生成稳定排序的 group/leaf。 |
 | AC-005 | 共享 MainLayout/router/locales/config/store 不含具体业务模块名、业务路径或业务 pageId。 |
 | AC-006 | menu/route/default filter 通过 consumer-supplied access provider 对 admin、授权用户、未授权/未知用户 fail closed；manifest 不授予权限，backend authorization 权威未改变。 |
-| AC-007 | duplicate name/route/path/pageId/locale namespace、非法 manifest、动态可见 route 和缺失双语 title key 在 build/test 前明确失败。 |
-| AC-008 | system module 采用完整新合同，既有 route name/path/pageId 保持兼容。 |
+| AC-007 | duplicate name/route/path/pageId/locale namespace、非法 manifest、动态可见 route 和缺失双语 title key 在 build/test 前明确失败；旧格式允许全局标题 key，新格式要求模块内标题 key，按 §5 判定。 |
+| AC-008 | system 是不可禁用的必需 Core 模块，采用完整新合同及模块内标题；既有 route name/path/pageId 保持兼容，壳层依赖的 system/user 双语文案保持可用。 |
 | AC-009 | `aiis_demo` 默认关闭、无 API/DB/PLC/外部 I/O，并可作为离线复制模板。 |
 | AC-010 | 模块手册明确稳定目录、route/menu/locale/mock/permission ownership、legacy compatibility、跨模块依赖边界、dev restart、production rebuild 和离线接入/删除步骤。 |
 | AC-011 | 不新增 dependency、不修改 pnpm lock；contract tests、checker 和 production build 通过。 |
@@ -333,7 +356,7 @@ Rollback 边界：
 Deferred decisions：
 
 - 精确 SemVer、tag/release 名称与发布日期；
-- `ARCH-001` 接受后的 immutable baseline identifier 和最终行号；
+- Development 启动时再次核对 §3 已记录的 immutable baseline 与实际源码；
 - baseline audit 发现的非实质路径调整。若路径、范围、风险、allowlist 或 AC 实质变化，必须新 Revision。
 
 ## 14. Stop conditions
@@ -351,15 +374,19 @@ Deferred decisions：
 
 ## 15. 当前状态与后续批准
 
-本 r2 只固定 PM 范围，当前不进入批准或 Development，也不影响进行中的 `ARCH-001`。本轮没有修改
+本 r3 已获 Human Owner 精确批准，当前为 `owner_approved`。PM 修订轮没有修改
 `ARCH-001`、frontend 源码、root PLAN 或其他 task bundle。
 
-`ARCH-001` owner acceptance 和 immutable Core baseline 形成后，PM 必须完成 baseline audit；如无 material
-drift，可把审计结果补入本 Revision 的批准记录；如有 material drift，先形成 r3。届时 Human Owner 的
-精确 Development 批准语句为：
+`ARCH-001` owner acceptance、immutable Core baseline 与本轮 baseline audit 已记录于 §3。
+本次 spec 修订授权不等于 Development 批准。Human Owner 的精确 Development 批准语句为：
 
 ```text
-批准 aiis-ics-arch::ARCH-FE-001 r2，按 spec 精确范围和角色级 allowlist 开始 Development。
+批准 aiis-ics-arch::ARCH-FE-001 r3，按 spec 精确范围和角色级 allowlist 开始 Development；Git/GitHub 写操作继续由 Human Owner 手工执行。
 ```
 
-在此之前，当前任务状态保持 `draft`，不得创建 `tasks.md` 或 `checklist.md`。
+Human Owner approval recorded: 2026-09-07。
+
+批准原文：`批准 aiis-ics-arch::ARCH-FE-001 r3，按 spec 精确范围和角色级 allowlist 开始 Development；Git/GitHub 写操作继续由 Human Owner 手工执行。`
+
+Development 现在可创建 `tasks.md` 并在 §10 allowlist 内实施；`checklist.md` 仍只能由
+developer_handoff 后的独立 fresh-context Verification 创建。

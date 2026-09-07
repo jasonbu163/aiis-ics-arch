@@ -1,0 +1,7 @@
+{
+  "navigation": { "title": "离线示例" },
+  "example": {
+    "title": "模块装配示例",
+    "description": "此本地示例演示路由、导航与双语文案，不连接 API 或设备。"
+  }
+}

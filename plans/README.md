@@ -6,6 +6,7 @@ This catalog links only role documents that currently exist. `tasks.md` is creat
 
 | Task | Aggregate status | PM scope | Development | Verification |
 | --- | --- | --- | --- | --- |
+| ARCH-DOCKER-002 Reusable Docker Deployment | `draft` | [spec.md](ARCH-DOCKER-002-reusable-deployment/spec.md) | Pending exact r1 approval | Pending `developer_handoff` |
 | ARCH-001 Public Architecture Baseline Extraction | `owner_accepted` | [spec.md](ARCH-001-public-architecture-baseline-extraction/spec.md) | [tasks.md](ARCH-001-public-architecture-baseline-extraction/tasks.md) | [checklist.md](ARCH-001-public-architecture-baseline-extraction/checklist.md); Human Owner accepted r3 |
 | ARCH-MIG-001 Core-only Migration Baseline | `owner_accepted` | [spec.md](ARCH-MIG-001-core-migration-baseline/spec.md) | [tasks.md](ARCH-MIG-001-core-migration-baseline/tasks.md) | [checklist.md](ARCH-MIG-001-core-migration-baseline/checklist.md); Human Owner accepted r1 |
 | ARCH-DOCKER-001 Empty-volume Docker Runtime Proof | `owner_accepted` | [spec.md](ARCH-DOCKER-001-empty-volume-runtime-proof/spec.md) | [tasks.md](ARCH-DOCKER-001-empty-volume-runtime-proof/tasks.md) | [checklist.md](ARCH-DOCKER-001-empty-volume-runtime-proof/checklist.md); Human Owner accepted r1 |

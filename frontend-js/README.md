@@ -6,17 +6,19 @@ This is the JavaScript Vue 3 + Vite Core frontend template. It contains login, t
 
 ## Stable boundaries
 
-- src/router/index.js is the route composition root and automatically discovers module manifest.js files.
-- src/locales/index.js is the i18n composition root and automatically discovers module locale JSON files.
+- src/app/moduleRegistry.js is the single manifest/locale discovery and validated assembly entrypoint.
+- src/router/index.js and src/locales/index.js consume its active routes and bilingual messages.
 - src/layouts/ contains shell structure only; business page behavior stays in its module.
 - src/api/ contains auth/request/mock-mode infrastructure; business API facades belong to their module.
-- The sidebar currently exposes only Core system pages. Full manifest-driven menu assembly is tracked in ARCH-FE-001 and is not implemented here.
+- The sidebar uses manifest navigation and the same access provider as route/default filtering. Required system remains enabled; optional modules can opt out of all four consumers.
 
 ## Commands
 
 ~~~bash
 pnpm install
 pnpm dev
+pnpm check:modules
+pnpm test:modules
 pnpm build
 ~~~
 
@@ -28,7 +30,7 @@ Read [src/app/README.md](src/app/README.md) before creating a module. It documen
 
 ## Verification
 
-The source-only baseline uses pnpm build and JavaScript syntax checks. It does not start Docker, connect to a backend database, access PLC devices or publish a release.
+The source-only checks use the Node contract matrix and pnpm build (including prebuild manifest validation). Adding/removing modules requires a dev restart or production rebuild. These checks do not start Docker, connect to a backend database, access PLC devices or publish a release.
 
 The approved `ARCH-DOCKER-001` frontend image runs a fixed Node/pnpm lockfile build stage and copies its dist into
 an Nginx runtime image. The runtime has no source or `node_modules` bind mount and proxies `/api/v1` to the Compose

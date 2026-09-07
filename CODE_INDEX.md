@@ -28,17 +28,22 @@ source topology or important entrypoints change.
 
 ## Frontend entrypoints
 
-- `frontend-js/src/router/` — router creation, auth guards and route discovery.
+- `frontend-js/src/router/` — router creation, auth guards and active Registry route consumption.
+- `frontend-js/src/app/moduleManifest.js` — pure manifest/locale validation, normalization, sorting and access consumers.
+- `frontend-js/src/app/moduleRegistry.js` — single Vite manifest/locale discovery and active assembly.
 - `frontend-js/src/app/system/` — system/user/mapping Core module.
+- `frontend-js/src/app/aiis_demo/` — default-disabled offline module example.
 - `frontend-js/src/locales/` — global dictionaries and module locale assembly.
 - `frontend-js/src/styles/` — Core theme tokens and shared layout styles.
 - `frontend-js/src/components/` — shared Core UI components.
+- `frontend-js/src/components/navigation/ModuleNavigation.vue` — generic group/leaf menu and icon fallback.
+- `frontend-js/scripts/check-module-manifests.mjs` — dependency-free prebuild contract checker.
+- `frontend-js/tests/module-registry/` — pure registry and actual source regression matrix.
 - `frontend-js/Dockerfile` — locked pnpm source build copied into the Nginx runtime image.
 - `frontend-js/Dockerfile.dev` — pinned dependency image for the source-mounted Vite development service.
 - `frontend-js/nginx.conf` — SPA serving and `/api/v1` proxy to the Compose backend service.
 
-Complete manifest-driven navigation/menu/permission assembly is deferred to
-`ARCH-FE-001`.
+Manifest-driven navigation shares the Registry and consumer-supplied page access checks.
 
 ## Docker entrypoints
 

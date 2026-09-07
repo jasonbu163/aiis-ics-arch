@@ -5,8 +5,8 @@ Chinese version: [PLAN.zh-CN.md](PLAN.zh-CN.md)
 ## Current baseline
 
 - Core pages: login, system/user and system/dict.
-- Route and locale discovery are enabled through module manifests and locale globs.
+- Route, navigation, default entry and locale assembly share the normalized module Registry.
 - Project business modules and page IDs are intentionally absent from this Core template.
-- Full manifest-driven menu/permission assembly is tracked separately in the root ARCH-FE-001 spec.
+- [ARCH-FE-001 r3](../plans/ARCH-FE-001-frontend-module-auto-assembly/spec.md): `developer_handoff`; first QA findings reworked, 15 contract test groups and isolated production build passed. Fresh-context re-verification and Human Owner acceptance remain pending; release version is deferred.
 
 Detailed UI work requires a separate approved task. This index does not carry a project business backlog.

@@ -6,6 +6,7 @@ English version: [README.md](README.md)
 
 | 任务 | 聚合状态 | PM 范围 | Development | Verification |
 | --- | --- | --- | --- | --- |
+| ARCH-DOCKER-002 通用 Docker 部署 | `draft` | [spec.md](ARCH-DOCKER-002-reusable-deployment/spec.md) | 等待精确批准 r1 | 等待 `developer_handoff` |
 | ARCH-001 公开架构基线提取 | `owner_accepted` | [spec.md](ARCH-001-public-architecture-baseline-extraction/spec.md) | [tasks.md](ARCH-001-public-architecture-baseline-extraction/tasks.md) | [checklist.md](ARCH-001-public-architecture-baseline-extraction/checklist.md)；Human Owner 已接受 r3 |
 | ARCH-MIG-001 Core-only Migration Baseline | `owner_accepted` | [spec.md](ARCH-MIG-001-core-migration-baseline/spec.md) | [tasks.md](ARCH-MIG-001-core-migration-baseline/tasks.md) | [checklist.md](ARCH-MIG-001-core-migration-baseline/checklist.md)；Human Owner 已接受 r1 |
 | ARCH-DOCKER-001 空 volume Docker runtime 证明 | `owner_accepted` | [spec.md](ARCH-DOCKER-001-empty-volume-runtime-proof/spec.md) | [tasks.md](ARCH-DOCKER-001-empty-volume-runtime-proof/tasks.md) | [checklist.md](ARCH-DOCKER-001-empty-volume-runtime-proof/checklist.md)；Human Owner 已接受 r1 |

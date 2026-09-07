@@ -33,20 +33,7 @@
         router
         @select="handleMenuSelect"
       >
-        <el-sub-menu v-if="userStore.isAdmin || hasPageAccess('system.user')" index="system">
-          <template #title>
-            <el-icon><Setting /></el-icon>
-            <span>{{ $t('nav.system') }}</span>
-          </template>
-          <el-menu-item v-if="hasPageAccess('system.user')" index="/system/user">
-            <el-icon><User /></el-icon>
-            <span>{{ $t('system.user') }}</span>
-          </el-menu-item>
-          <el-menu-item v-if="userStore.isAdmin && hasPageAccess('system.projection-mapping')" index="/system/dict">
-            <el-icon><Collection /></el-icon>
-            <span>{{ $t('system.mapping.title') }}</span>
-          </el-menu-item>
-        </el-sub-menu>
+        <ModuleNavigation :groups="navigationGroups" />
       </el-menu>
 
       <div v-if="!isCollapse" class="sidebar-brand-footer">
@@ -252,6 +239,9 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import HeaderUtilityCapsule from '@/components/shell/HeaderUtilityCapsule.vue'
 import BrandLogo from '@/components/shell/BrandLogo.vue'
+import ModuleNavigation from '@/components/navigation/ModuleNavigation.vue'
+import { moduleRegistry } from '@/app/moduleRegistry'
+import { accessibleNavigation } from '@/app/moduleManifest'
 import {
   changeCurrentUserPassword,
   getCurrentUser,
@@ -330,9 +320,7 @@ const passwordRules = {
 const sidebarBg = computed(() => 'var(--sidebar-bg)')
 const sidebarText = computed(() => 'var(--sidebar-text)')
 const sidebarActive = computed(() => 'var(--sidebar-active)')
-const hasPageAccess = (pageId) => {
-  return userStore.hasPageAccess(pageId)
-}
+const navigationGroups = computed(() => accessibleNavigation(moduleRegistry, userStore))
 
 const getRoleLabel = (role) => {
   const roleKeyMap = {

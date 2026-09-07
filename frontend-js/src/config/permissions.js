@@ -4,15 +4,10 @@
  * 主要功能:
  *   - 解析 Vite 注入的 role -> leaf page id JSON 映射
  *   - 配置损坏时默认拒绝页面访问
- *   - 提供 system 叶子页面与演示账号显示开关
+ *   - 作为用户 store 的默认权限来源；Registry 本身不依赖该配置
  */
 
-export const SYSTEM_PAGE_IDS = [
-  'system.user',
-  'system.projection-mapping'
-]
-
-const PAGE_ID_PATTERN = /^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/
+const PAGE_ID_PATTERN = /^[a-z][a-z0-9_-]*(?:\.[a-z][a-z0-9_-]*)+$/
 
 export const parseRolePageAccess = (rawConfig) => {
   if (typeof rawConfig !== 'string' || !rawConfig.trim()) {

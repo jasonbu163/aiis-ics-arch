@@ -8,7 +8,10 @@
     "dev": "vite",
     "dev:api": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prebuild": "node scripts/check-module-manifests.mjs --check",
+    "check:modules": "node scripts/check-module-manifests.mjs --check",
+    "test:modules": "node --test tests/module-registry/*.test.mjs"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
