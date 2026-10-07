@@ -49,3 +49,7 @@ disposable MySQL `8.4.6` volume; the smoke env is ignored and must be removed af
 ## Packaging
 
 main.py is the reload-disabled application entry; run.py is the local development entry. build.py is an optional PyInstaller source package path and never copies a real .env, data dump or customer input. See BUILD.md.
+
+## Single-host Docker entry
+
+The root `docker-compose.prod.yml` reuses this Dockerfile and mounts `.env.docker.prod` read-only at `/app/.env`, with logs in `runtime/backend/logs`. Source remains inside the image. The database-only entry reads this directory's `.env`; its MySQL volume is independent from dev. Keep bootstrap flags off until an explicit account-initialization action is needed. Follow the root [deployment instructions](../INITIALIZATION.md#single-host-deployment).

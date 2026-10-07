@@ -13,13 +13,15 @@ Chinese version: [PLAN.zh-CN.md](PLAN.zh-CN.md)
 
 | Workstream | Status | Record | Boundary |
 | --- | --- | --- | --- |
-| Reusable Docker deployment | `draft` | [ARCH-DOCKER-002 spec](plans/ARCH-DOCKER-002-reusable-deployment/spec.md) | Add isolated database-only and prod deployment entries; r1 awaits Human Owner approval |
+| v1/v2 stack and multi-backend roadmap | `draft` | [ARCH-MULTI-001 spec](plans/ARCH-MULTI-001-versioned-stack-roadmap/spec.md) | Owner direction recorded: .NET and native delivery in 1.x; Rust/PostgreSQL defaults and Vue TS/Ant Design Vue in 2.x; implementation scope and verification pending |
+| Reusable Docker deployment | `developer_handoff` | [ARCH-DOCKER-002 spec](plans/ARCH-DOCKER-002-reusable-deployment/spec.md) | r2 implemented; three Compose static checks passed; old root entry retired; fresh-context Verification pending, runtime separately gated |
 | Public Core extraction | `owner_accepted` | [ARCH-001 spec](plans/ARCH-001-public-architecture-baseline-extraction/spec.md) | Human Owner accepted r3 after fresh-context Verification passed the public-safe Core, smoke/dev/release-check and cleanup audit |
 | Core migration baseline | `owner_accepted` | [ARCH-MIG-001 spec](plans/ARCH-MIG-001-core-migration-baseline/spec.md) | Human Owner accepted the single `d4e6f8a0b2c4` Core root and fourteen-table source/static/no-DB baseline |
 | Empty-volume Docker runtime proof | `owner_accepted` | [ARCH-DOCKER-001 spec](plans/ARCH-DOCKER-001-empty-volume-runtime-proof/spec.md) | Human Owner accepted r1 after fresh-context Verification passed the isolated MySQL 8.4.6 build/migrate/health/proxy/cleanup proof |
 | Local development environment adoption | `owner_accepted` | [ARCH-DEV-001 spec](plans/ARCH-DEV-001-local-development-environment-adoption/spec.md) | Human Owner accepted r4 after the fixed-name dev runtime, health/frontend checks, bootstrap default-off proof and retired-smoke documentation cleanup |
 | Source release 1.0.0 | `owner_accepted` | [ARCH-REL-001 spec](plans/ARCH-REL-001-source-release-1.0.0/spec.md) | Fresh-context Verification passed r3 and Human Owner accepted it; the §5.4 main-only governance receipt is prepared but still pending Human Owner manual push |
 | Frontend module assembly | `draft` | [ARCH-FE-001 spec](plans/ARCH-FE-001-frontend-module-auto-assembly/spec.md) | Manifest-driven menu/permission assembly; not part of Core extraction |
+| Project frontend role access and module pilot | `draft` | [ARCH-FE-002 spec](plans/ARCH-FE-002-project-role-access-and-module-pilot/spec.md) | PM r1 proposes separate supervisor/operator page grants, three frontend env contexts, and dashboard/plan onboarding; env identity and remaining-module scope await Owner confirmation |
 | Packaged CA configuration | `draft` | [CA-CONFIG-001 spec](plans/CA-CONFIG-001-packaged-configuration-management/spec.md) | Database type/address settings and YAML upload UI |
 
 ## Deferred boundaries

@@ -48,3 +48,7 @@ API 服务复用。它只连接同一 Compose 的 `mysql:3306`，使用可丢弃
 ## 打包
 
 main.py 是禁用 reload 的应用入口；run.py 是本地开发入口；build.py 是可选 PyInstaller 源码打包路径，不会复制真实 .env、数据 dump 或客户输入。详见 BUILD.zh-CN.md。
+
+## 单机 Docker 入口
+
+根 `docker-compose.prod.yml` 复用本目录 Dockerfile，只读挂载 `.env.docker.prod` 到 `/app/.env`，日志写到 `runtime/backend/logs`；源码保留在镜像内。database-only 读取本目录 `.env`，其 MySQL 数据卷与 dev 独立。bootstrap 默认保持关闭，需要初始化账号时再显式启用。操作步骤见根[部署说明](../INITIALIZATION.zh-CN.md#单机部署)。

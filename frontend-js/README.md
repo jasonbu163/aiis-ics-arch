@@ -35,3 +35,7 @@ The source-only checks use the Node contract matrix and pnpm build (including pr
 The approved `ARCH-DOCKER-001` frontend image runs a fixed Node/pnpm lockfile build stage and copies its dist into
 an Nginx runtime image. The runtime has no source or `node_modules` bind mount and proxies `/api/v1` to the Compose
 `backend` service; it is a disposable MySQL smoke surface, not a production release artifact.
+
+## Prebuilt dist deployment
+
+The root `docker-compose.prod.yml` uses pinned Nginx with this directory's existing `nginx.conf` and mounts `dist` read-only at `/usr/share/nginx/html/current`. Build with the checked-in pnpm lockfile before startup; a missing `dist/index.html` fails startup explicitly. Use `/api/v1` and disable mocks/demo accounts for the production build. The frontend Dockerfile remains available as a standalone image-build recipe; prod uses host-built dist. See [deployment preparation](../INITIALIZATION.md#single-host-deployment).

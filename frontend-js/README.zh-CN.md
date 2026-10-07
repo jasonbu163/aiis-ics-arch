@@ -35,3 +35,7 @@ pnpm build
 已批准的 `ARCH-DOCKER-001` frontend 镜像使用固定 Node/pnpm lockfile 构建阶段，并把 dist 复制进 Nginx
 runtime。runtime 不挂载源码或 `node_modules`，`/api/v1` 反向代理到 Compose 的 `backend` 服务；它只是
 可丢弃的 MySQL smoke 表面，不是生产发布产物。
+
+## 预构建 dist 部署
+
+根 `docker-compose.prod.yml` 使用固定版本 Nginx 和本目录现有 `nginx.conf`，把 `dist` 只读挂载到 `/usr/share/nginx/html/current`。启动前使用已提交的 pnpm 锁文件构建；缺少 `dist/index.html` 会明确启动失败。生产构建使用 `/api/v1`，关闭 mock 和演示账号。前端 Dockerfile 保留为独立镜像构建配方；prod 使用宿主机构建的 dist。详见[部署准备](../INITIALIZATION.zh-CN.md#单机部署)。

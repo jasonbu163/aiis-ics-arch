@@ -1,0 +1,93 @@
+{
+  "title": "Dashboard",
+  "stats": {
+    "todayProduction": "Today's Production",
+    "pendingPlans": "Pending Plans",
+    "completedCoils": "Completed Coils",
+    "oee": "OEE",
+    "productionUnit": "ton"
+  },
+  "charts": {
+    "productionTrend": "7-Day Production Trend",
+    "qualityDistribution": "Quality Distribution",
+    "oeeAnalysis": "OEE Analysis",
+    "temperatureTrend": "Temperature Trend",
+    "energyMonitor": "Energy Monitor",
+    "downtimeAnalysis": "Downtime Analysis",
+    "lineChart": "Line",
+    "barChart": "Bar"
+  },
+  "chart": {
+    "actual": "Actual",
+    "target": "Target",
+    "productionUnit": "Production(ton)",
+    "thisWeek": "This Week",
+    "lastWeek": "Last Week",
+    "electricity": "Electricity",
+    "gas": "Gas",
+    "electricityUnit": "Electricity(kWh)",
+    "gasUnit": "Gas(m³)",
+    "downtimeDuration": "Downtime",
+    "qualityDistribution": "Quality Distribution"
+  },
+  "weekdays": {
+    "sun": "Sun",
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat"
+  },
+  "furnaceZones": {
+    "rtf": "RTF",
+    "sf": "SF",
+    "cf": "CF",
+    "rtf1": "RTF1",
+    "rtf2": "RTF2",
+    "sf1": "SF1",
+    "sf2": "SF2"
+  },
+  "qualityGrades": {
+    "excellent": "Excellent",
+    "firstClass": "First Class",
+    "qualified": "Qualified",
+    "pending": "Pending Inspection"
+  },
+  "oeeIndicators": {
+    "availability": "Availability",
+    "performance": "Performance",
+    "quality": "Quality",
+    "planAchievement": "Plan Achievement",
+    "equipmentStability": "Equipment Stability"
+  },
+  "downtimeReasons": {
+    "scheduled": "Scheduled",
+    "coilChange": "Coil Change",
+    "equipment": "Equipment",
+    "material": "Material",
+    "other": "Other"
+  },
+  "productionStatus": {
+    "title": "Production Status",
+    "onlineCoil": "Online Coil",
+    "readyCoil": "Ready Coil",
+    "currentSpeed": "Current Speed",
+    "furnaceTemp": "Furnace Temp",
+    "producing": "Producing",
+    "waiting": "Waiting",
+    "normal": "Normal",
+    "high": "High"
+  },
+  "recentPlans": "Recent Plans",
+  "viewAll": "View All",
+  "quickLinks": "Quick Links",
+  "quickLinkItems": {
+    "planManagement": "Plan Management",
+    "performanceQuery": "Performance Query",
+    "monitorCurve": "Monitor Curves",
+    "energyStats": "Energy Stats",
+    "efficiencyStats": "Efficiency Stats",
+    "equipmentStatus": "Device Status"
+  }
+}

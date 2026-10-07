@@ -1,0 +1,93 @@
+{
+  "title": "工作台",
+  "stats": {
+    "todayProduction": "今日生产量",
+    "pendingPlans": "待上卷计划",
+    "completedCoils": "已完成卷数",
+    "oee": "设备综合效率OEE",
+    "productionUnit": "吨"
+  },
+  "charts": {
+    "productionTrend": "近7日产量趋势",
+    "qualityDistribution": "生产质量分布",
+    "oeeAnalysis": "OEE分析雷达图",
+    "temperatureTrend": "炉区温度趋势",
+    "energyMonitor": "今日能耗实时监控",
+    "downtimeAnalysis": "停机原因分析",
+    "lineChart": "曲线图",
+    "barChart": "柱状图"
+  },
+  "chart": {
+    "actual": "实际产量",
+    "target": "目标产量",
+    "productionUnit": "产量(吨)",
+    "thisWeek": "本周",
+    "lastWeek": "上周",
+    "electricity": "电力消耗",
+    "gas": "天然气消耗",
+    "electricityUnit": "电力(kWh)",
+    "gasUnit": "天然气(m³)",
+    "downtimeDuration": "停机时长",
+    "qualityDistribution": "质量分布"
+  },
+  "weekdays": {
+    "sun": "周日",
+    "mon": "周一",
+    "tue": "周二",
+    "wed": "周三",
+    "thu": "周四",
+    "fri": "周五",
+    "sat": "周六"
+  },
+  "furnaceZones": {
+    "rtf": "RTF",
+    "sf": "SF",
+    "cf": "CF",
+    "rtf1": "RTF1",
+    "rtf2": "RTF2",
+    "sf1": "SF1",
+    "sf2": "SF2"
+  },
+  "qualityGrades": {
+    "excellent": "优等品",
+    "firstClass": "一等品",
+    "qualified": "合格品",
+    "pending": "待复检"
+  },
+  "oeeIndicators": {
+    "availability": "可用率",
+    "performance": "性能效率",
+    "quality": "质量指数",
+    "planAchievement": "计划达成率",
+    "equipmentStability": "设备稳定性"
+  },
+  "downtimeReasons": {
+    "scheduled": "计划停机",
+    "coilChange": "换卷时间",
+    "equipment": "设备故障",
+    "material": "原料不足",
+    "other": "其他"
+  },
+  "productionStatus": {
+    "title": "当前生产状态",
+    "onlineCoil": "在线卷",
+    "readyCoil": "准备卷",
+    "currentSpeed": "当前速度",
+    "furnaceTemp": "炉区温度",
+    "producing": "生产中",
+    "waiting": "等待上卷",
+    "normal": "正常",
+    "high": "偏高"
+  },
+  "recentPlans": "近期计划",
+  "viewAll": "查看全部",
+  "quickLinks": "快捷入口",
+  "quickLinkItems": {
+    "planManagement": "计划管理",
+    "performanceQuery": "实绩查询",
+    "monitorCurve": "监控曲线",
+    "energyStats": "能耗统计",
+    "efficiencyStats": "效率统计",
+    "equipmentStatus": "设备状态"
+  }
+}

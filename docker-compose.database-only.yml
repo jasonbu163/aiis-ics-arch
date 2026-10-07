@@ -1,0 +1,22 @@
+# 独立 MySQL，供宿主机源码或 prod 通过宿主机发布端口访问。
+# 默认与 dev 共用宿主机 3307 端口，切换前停止另一模式，保留各自数据卷。
+name: aiis-ics-arch-database-only
+
+services:
+  mysql:
+    image: mysql:8.4.6
+    env_file:
+      - ./backend/.env
+    ports:
+      - "${MYSQL_HOST_PORT:-3307}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$${MYSQL_ROOT_USER:-root} -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  mysql_data:

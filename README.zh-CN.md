@@ -61,8 +61,13 @@ cargo test --workspace
 
 `docker-compose.dev.yml` 是固定 project name 为 `aiis-ics-arch-dev` 的源码开发栈：使用 MySQL `8.4.6`，通过 backend/frontend 源码 bind 支持热更新，以一次性 migration 服务执行迁移，并把 public default 均保持关闭的 bootstrap 放在需显式启用的 `bootstrap` profile。
 
-根 `docker-compose.yml` 是 production-shaped 的 `aiis-ics-arch-release-check` config/build 表面：从源码构建 backend/frontend，连接外部配置的数据库，不提供数据库、migration 或 bootstrap 服务，也不挂载宿主机源码、dist 或 runtime。没有单独获批且任务专属的外部数据库夹具时不得启动。
 
 ## 治理入口
 
 修改前先阅读 [AGENTS.md](AGENTS.md)。当前架构状态见 [PLAN.zh-CN.md](PLAN.zh-CN.md)，源码版本记录见 [CHANGELOG.zh-CN.md](CHANGELOG.zh-CN.md)。仓库保留 MIT [LICENSE](LICENSE) 及其中声明的 ownership；该事实不授权发布或 Release。长期项目文档由 [docs/](docs/README.zh-CN.md) 索引，其中包括[多项目开发指南](docs/multi-project-pm.md)；根目录 `contracts/` 继续作为 Core 合同中心。
+
+## 单机部署
+
+`docker-compose.database-only.yml` 提供独立 MySQL `8.4.6`，供宿主机源码或 prod 使用。`docker-compose.prod.yml` 运行镜像内源码的 backend 与 Nginx，前端只读挂载宿主机预构建的 `frontend-js/dist`；数据库位于该 Compose 项目外。当前统一使用 dev、database-only、prod 三个入口，命令必须通过 `-f` 显式选择。
+
+环境文件、准备步骤、显式迁移、账号初始化、重启和排障见[初始化与部署说明](INITIALIZATION.zh-CN.md#单机部署)。配置校验通过不代表已完成运行部署。

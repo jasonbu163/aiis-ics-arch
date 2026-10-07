@@ -62,8 +62,13 @@ These commands are source/static checks. They do not start Docker, modify a real
 
 `docker-compose.dev.yml` is the fixed-name `aiis-ics-arch-dev` source-development stack. It uses MySQL `8.4.6`, source binds for backend/frontend hot reload, a one-shot migration service, and an opt-in `bootstrap` profile whose public defaults remain off.
 
-The root `docker-compose.yml` is the production-shaped `aiis-ics-arch-release-check` config/build surface: source-built backend and frontend, an externally configured database, no database/migration/bootstrap service, and no host source, distribution, or runtime bind. Do not start it without a separately approved, task-exclusive external-database fixture.
 
 ## Governance
 
 Read [AGENTS.md](AGENTS.md) before making changes. Current architecture status is indexed in [PLAN.md](PLAN.md); source-version notes are in [CHANGELOG.md](CHANGELOG.md). The repository retains the MIT [LICENSE](LICENSE) and its stated ownership; that fact does not authorize publication or release. Durable project documentation is indexed under [docs/](docs/README.md), including the [multi-project development guide](docs/multi-project-pm.md); the root `contracts/` directory remains the Core contract hub.
+
+## Single-host deployment
+
+`docker-compose.database-only.yml` provides isolated MySQL `8.4.6` for host-source development or the prod stack. `docker-compose.prod.yml` runs an image-built backend and Nginx serving the host's prebuilt `frontend-js/dist`; its database is external to that Compose project. The three supported entries are dev, database-only and prod; always select one explicitly with `-f`.
+
+See [initialization and deployment](INITIALIZATION.md#single-host-deployment) for environment files, preparation, explicit migrations, account setup, restart behavior and troubleshooting. Configuration validation does not establish successful runtime deployment.

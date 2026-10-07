@@ -149,7 +149,8 @@ aiis-ics-l2-<project-id>/
 │       ├── quality/
 │       └── ...
 ├── tools/
-├── docker-compose.yml
+├── docker-compose.prod.yml
+├── docker-compose.database-only.yml
 ├── docker-compose.dev.yml
 └── plans/
 ```
