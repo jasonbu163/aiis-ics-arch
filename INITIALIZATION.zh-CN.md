@@ -6,6 +6,8 @@ English version: [INITIALIZATION.md](INITIALIZATION.md)
 
 ## 手动测试顺序
 
+使用 database-only + `uv run run.py` + `pnpm dev` 时，直接按[宿主机源码开发](#宿主机源码开发与-database-only)执行，包含显式账号初始化步骤。
+
 建议先按[单机部署](#单机部署)执行：准备文件/dist → 启动 database-only → 等待 MySQL healthy → 初始化表结构和应用账号 → 启动 prod → 检查首页、健康接口和登录。使用明确的测试数据库；任何命令失败都先处理再继续。
 
 之后如需测试[完整 dev](#源码开发栈)，先用各自的 `-f` 路径对 prod、database-only 执行 `down`（不加 `-v`），再按 dev 章节启动。dev 使用独立数据库卷，不会带入 prod 创建的用户；如需测试 dev 登录，临时在 backend/.env.docker.dev 配置目标 bootstrap 用户，再执行该节 bootstrap profile 命令，完成后关闭开关。所有 Compose 命令显式指定 `-f`，不再有默认根入口。
@@ -35,6 +37,69 @@ cargo test --workspace
 ```
 
 只有单独获批的运行时任务才能使用项目自有的非生产环境。数据库迁移执行、Docker 生命周期、PLC 采集、打包和 Git/GitHub 操作不属于本源码基线。
+
+## 宿主机源码开发与 database-only
+
+MySQL 使用 `docker-compose.database-only.yml`、后端和前端分别在宿主机通过 `uv` 与 `pnpm` 运行时，使用本节。从仓库根目录开始，仅对获批开发数据库执行启停和写入命令；任何步骤失败都先处理再继续。
+
+1. 缺少文件时，将 `backend/.env.example` 复制为 `backend/.env`，将 `frontend-js/.env.example` 复制为 `frontend-js/.env`；保留已有文件。在 `backend/.env` 配置库名、非 root MySQL 用户及密码、root 密码和 JWT secret。宿主机使用 `MYSQL_HOST=127.0.0.1`、`MYSQL_PORT=3307`（或实际发布端口）。先停止端口冲突的完整 dev 栈；它的数据库卷和用户与 database-only 独立。
+2. 启动 MySQL，等待 `ps` 显示 healthy。目标 database-only 服务已健康时可跳过启动。
+
+   ```bash
+   docker compose -f docker-compose.database-only.yml config --quiet
+   docker compose -f docker-compose.database-only.yml up -d mysql
+   docker compose -f docker-compose.database-only.yml ps
+   ```
+
+3. 安装后端依赖并迁移目标数据库：
+
+   ```bash
+   cd backend
+   uv sync
+   uv run alembic upgrade head
+   ```
+
+4. 按下表前缀在 `backend/.env` 配置所需登录账号。对需要的账号临时设置 `<PREFIX>_BOOTSTRAP_ENABLED=True`，指定 `<PREFIX>_BOOTSTRAP_USERNAME`、非空强密码 `<PREFIX>_BOOTSTRAP_PASSWORD` 和 `<PREFIX>_BOOTSTRAP_NAME`。首次创建保持 `<PREFIX>_BOOTSTRAP_RESET_PASSWORD=False`；不需要的账号保持关闭。
+
+   | 前缀 | 默认用户名 | `<PREFIX>_BOOTSTRAP_ROLE` |
+   | --- | --- | --- |
+   | `ADMIN` | `admin` | `admin` |
+   | `SUPERVISOR` | `supervisor` | `supervisor` |
+   | `OPERATOR` | `operator` | `operator` |
+
+   在 `backend/` 显式执行：
+
+   ```bash
+   uv run python main.py --maintenance bootstrap-users
+   ```
+
+   **Alembic 负责建表；`uv run run.py` 和 `pnpm dev` 都不会创建登录账号。ENABLED 开关只允许这条维护命令执行相应操作。** 源码运行读取 `backend/.env`，不读取 `.env.docker.dev` 或 `.env.docker.prod`；已导出的进程环境变量可覆盖文件值。MySQL 连接账号与 `users` 表中的应用登录账号彼此独立。
+
+   三个账号均启用且尚不存在时，应出现以下摘要（自定义用户名会显示对应值）：
+
+   ```text
+   target=admin_user status=created username=admin role=admin
+   target=supervisor_user status=created username=supervisor role=supervisor
+   target=operator_user status=created username=operator role=operator
+   ```
+
+   RESET_PASSWORD=False 时重复执行会保留已有用户并报告 `status=exists`；关闭的账号报告 `status=skipped reason=bootstrap_disabled`。RESET_PASSWORD=True 会重置已有密码并重新激活账号，报告 `status=password_reset`，只用于明确需要的重置。成功后将启用开关改回 False、清空 bootstrap 密码，并保持重置开关 False；已创建的账号仍可使用。
+5. 在 `backend/` 启动 API：
+
+   ```bash
+   uv run python run.py
+   ```
+
+   另开终端，在仓库根目录操作。配置 `frontend-js/.env`：`VITE_API_BASE_URL=/api/v1`、`VITE_PROXY_TARGET=http://127.0.0.1:8000`（匹配后端端口）、`VITE_FRONTEND_MOCK_ENABLED=false`、`VITE_LOGIN_DEMO_ACCOUNTS_ENABLED=false`，然后执行：
+
+   ```bash
+   pnpm --dir frontend-js install --frozen-lockfile
+   pnpm --dir frontend-js dev
+   ```
+
+   打开 Vite 输出的地址，使用刚初始化的应用账号登录。API 已运行且连接同一数据库时，创建账号通常无需重启 API；修改后端连接配置后需要重启后端。
+
+登录返回 HTTP 401 时，先检查 bootstrap 输出，以及 API 和维护命令是否使用同一数据库、是否存在环境变量覆盖，再核对输入的账号密码。仅凭 401 不能断定账号不存在。维护命令报缺表时核对迁移目标及迁移成功结果；连接失败时检查 MySQL healthy 状态和宿主机发布端口。前端角色/页面配置不会创建后端账号。
 
 ## 源码开发栈
 
@@ -109,7 +174,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Frontend build failed' }
 Get-Item frontend-js/dist/index.html
 ```
 
-确认每一步成功再继续。VITE 配置是公开构建值，检查本地 frontend env 中的角色页面配置是否符合部署需求，不能放密钥。Nginx 不负责构建前端；它读取 `dist`，不挂源码或 node_modules。
+确认每一步成功再继续。VITE 配置是公开构建值，检查共用 frontend-js/.env 中 VITE_SUPERVISOR_PAGE_ACCESS_JSON 与 VITE_OPERATOR_PAGE_ACCESS_JSON 是否符合部署需求（operator 必须是 supervisor 子集），不能放密钥。宿主机 dev/build 共用该文件；已有 mode/local 文件及进程变量按 Vite 优先级覆盖。Docker dev 使用 .env.docker.dev。保留并迁移旧角色数组，旧 VITE_ROLE_PAGE_ACCESS_JSON 原行可注释，不能保持活动。构建前运行 pnpm --dir frontend-js check:access --mode production；未知、关闭或 admin 专属 pageId 明确失败。Nginx 不负责构建前端；它读取 `dist`，不挂源码或 node_modules。
 
 在 `backend/.env` 设置 MySQL 库名、应用用户及强密码、root 强密码；宿主机 backend 用 `127.0.0.1:3307`。database-only 首次空卷启动由 MySQL 镜像创建该库及应用用户，应用用户使用非 root 用户。已有卷修改 env 不会自动修改数据库账号或密码。
 

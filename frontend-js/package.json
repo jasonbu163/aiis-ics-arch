@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "prebuild": "node scripts/check-module-manifests.mjs --check",
     "check:modules": "node scripts/check-module-manifests.mjs --check",
-    "test:modules": "node --test tests/module-registry/*.test.mjs"
+    "test:modules": "node --test tests/module-registry/*.test.mjs",
+    "check:access": "node scripts/check-page-access.mjs --check"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",

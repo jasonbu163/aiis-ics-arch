@@ -162,7 +162,7 @@ const loadDashboardData = async () => {
     productionStatus.value = statusRes.status === 'fulfilled' ? statusRes.value : { onlineCoil: { id: '', progress: 0, status: '' }, readyCoil: { id: '', grade: '', weight: 0 }, currentSpeed: 0, furnaceTemp: 0 }
     recentPlans.value = plansRes.status === 'fulfilled' ? plansRes.value?.plans || [] : []
   } catch (error) {
-    ElMessage.error(t('plan.messages.loadError'))
+    ElMessage.error(t('dashboard.messages.loadError'))
   } finally {
     loading.value = false
   }

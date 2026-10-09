@@ -1,10 +1,10 @@
 # AIIS ICS Architecture 项目契约
 
-本文件是本仓库的中文 canonical 长期工程契约。通用方法来自已安装的 AIIS skills；稳定运行事实归根目录 README 与 PLAN；一次性任务的范围、证据和验收只写入对应的 `plans/<task>/` 三文件。
+本文件是本仓库的中文 canonical 长期工程契约。通用方法来自已安装的 AIIS skills；稳定运行事实归根目录 README 与 PLAN；使用 3MD 的一次性任务范围、证据和验收只写入对应的 `plans/<task>/` 三文件；DIRECT 的当前会话记录按开发 workflow 执行。
 
 ## 1. 开始前必读
 
-非琐碎工作开始前，依次阅读本文件、`README.md` / `README.zh-CN.md`、`PLAN.md` / `PLAN.zh-CN.md`，再阅读最近触达目录的 README 与 PLAN。写入任务还必须完整阅读所属 `spec.md`、`tasks.md`，以及交接后由 Verification 创建的 `checklist.md`。
+非琐碎工作开始前，依次阅读本文件、`README.md` / `README.zh-CN.md`、`PLAN.md` / `PLAN.zh-CN.md`，再阅读最近触达目录的 README 与 PLAN。STD 写入任务及 BACKFILL 回填现有任务时还必须完整阅读所属 `spec.md`、`tasks.md`，以及交接后由 Verification 创建的 `checklist.md`。
 
 根目录只放跨仓库架构入口，不承载项目客户业务。稳定的模块规则写在对应模块 README；持续工作的阶段状态写在 PLAN；具体范围和证据写在任务 bundle。
 
@@ -37,9 +37,11 @@ annotated tag（例如 `v1.0.0`、`v1.2.1`、`v2.1.2`）固定；已发布 tag �
 
 ## 4. 写入任务治理
 
-写入型任务遵循 `spec.md -> Human Owner 批准 -> tasks.md -> developer_handoff -> fresh-context Verification checklist.md -> Human Owner final acceptance`。Revision、范围、allowlist、验收或风险发生实质变化时，停止写入并回到 PM 新 Revision。
+写入型任务先遵循 [Development Lifecycle Workflow](.codex/workflows/development-lifecycle-workflow.md)：默认 STD，实际选择 `pm` / `development` / `verification` TOML 角色，Verification 使用 fresh context（工具支持时 `fork_turns="none"`）；明确 DIRECT 不用 3MD，明确 BACKFILL 先实施后真实回填，默认仅影响当前任务。只读讨论不启动团队或创建空 bundle；角色失败不静默降级，session routing/registry 不作为开发依赖。详细流程、旧工具兼容、通知和资源收尾归该 canonical workflow。
 
-`tasks.md` 是 Development 的事实面；`checklist.md` 只能由独立 Verification 创建或更新。QA 通过不等于 Human Owner 最终验收，也不授权发布、部署、数据库写入、真实设备操作或 Git/GitHub 推送。
+STD 遵循 `spec.md -> Human Owner 批准 -> tasks.md -> developer_handoff -> fresh-context Verification checklist.md -> Human Owner final acceptance`。STD 的 Revision、范围、allowlist、验收或风险发生实质变化时，停止写入并回到 PM 新 Revision。
+
+STD 中 `tasks.md` 是 Development 的事实面；`checklist.md` 只能由独立 Verification 创建或更新。BACKFILL 的实际记录者和验证独立性按 canonical workflow 如实注明。QA 通过不等于 Human Owner 最终验收，也不授权发布、部署、数据库写入、真实设备操作或 Git/GitHub 推送。
 
 ## 5. 文档与代码质量
 
@@ -52,4 +54,4 @@ annotated tag（例如 `v1.0.0`、`v1.2.1`、`v2.1.2`）固定；已发布 tag �
 
 ## 6. 交付前检查
 
-交接前先更新所属任务文档，再运行与范围匹配的静态检查、编译、单元测试和文档链接检查，记录真实命令、退出码、环境限制和未授权边界。发布版本、版本分支/tag、托管平台设置、Docker `up/down/build`、真实数据库迁移和现场 CA 操作均需另行批准。
+STD 交接或 BACKFILL 回填时先更新所属任务文档；三个模式均运行与范围匹配的静态检查、编译、单元测试和文档链接检查，记录真实命令、退出码、环境限制和未授权边界。发布版本、版本分支/tag、托管平台设置、Docker `up/down/build`、真实数据库迁移和现场 CA 操作均需另行批准。

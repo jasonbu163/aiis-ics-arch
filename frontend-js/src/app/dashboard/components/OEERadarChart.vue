@@ -1,5 +1,5 @@
 <!--
-  文件路径: /frontend-next-js/src/app/dashboard/components/OEERadarChart.vue
+  文件路径: /frontend-js/src/app/dashboard/components/OEERadarChart.vue
   功能描述: OEE雷达图组件
   主要功能:
     - 展示OEE分析雷达图
@@ -54,6 +54,12 @@ const initChart = () => {
 
 const updateChart = () => {
   if (!chart) return
+  // ECharts 6 雷达图不能在零维度时绘制；等待异步数据后再建立 series。
+  const indicators = translatedIndicators.value
+  if (!indicators.length) {
+    chart.clear()
+    return
+  }
   const option = {
     tooltip: { 
       trigger: 'item'
@@ -63,7 +69,7 @@ const updateChart = () => {
       top: 0
     },
     radar: { 
-      indicator: translatedIndicators.value, 
+      indicator: indicators,
       center: ['50%', '55%'], 
       radius: '65%'
     },
@@ -82,7 +88,7 @@ const updateChart = () => {
       ] 
     }]
   }
-  chart.setOption(option)
+  chart.setOption(option, { notMerge: true })
 }
 
 const handleResize = () => chart?.resize()

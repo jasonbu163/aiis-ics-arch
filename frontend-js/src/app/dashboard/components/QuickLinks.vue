@@ -1,5 +1,5 @@
 <!--
-  文件路径: /frontend-next-js/src/app/dashboard/components/QuickLinks.vue
+  文件路径: /frontend-js/src/app/dashboard/components/QuickLinks.vue
   功能描述: Dashboard 快捷入口组件
   主要功能:
     - 展示常用功能快捷入口
@@ -24,8 +24,12 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BaseCard from '@/components/common/BaseCard.vue'
+import { moduleRegistry } from '@/app/moduleRegistry'
+import { canAccessRoute } from '@/app/moduleManifest'
+import { useUserStore } from '@/store/user'
 
 const { t } = useI18n()
+const userStore = useUserStore()
 
 const props = defineProps({
   quickLinks: {
@@ -37,7 +41,10 @@ const props = defineProps({
 
 // 将英文键名翻译成当前语言
 const translatedQuickLinks = computed(() => {
-  return props.quickLinks.map(link => ({
+  return props.quickLinks.filter(link => {
+    const route = moduleRegistry.routeRecords.find(route => route.path === link.path)
+    return canAccessRoute(route, userStore)
+  }).map(link => ({
     ...link,
     name: t(`dashboard.quickLinkItems.${link.nameKey}`)
   }))

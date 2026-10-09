@@ -57,6 +57,10 @@ cargo test --workspace
 
 这些命令只做源码/静态验证，不启动 Docker、不修改真实数据库、不连接 PLC，也不发布版本。运行时必须使用项目自有的环境文件和获批的非生产夹具。
 
+## 宿主机源码启动
+
+使用 database-only + `uv run run.py` + `pnpm dev` 时，按[宿主机源码初始化教程](INITIALIZATION.zh-CN.md#宿主机源码开发与-database-only)依次迁移、显式创建登录账号、启动应用。仅开启 bootstrap 配置不会创建账号。
+
 ## Docker 表面
 
 `docker-compose.dev.yml` 是固定 project name 为 `aiis-ics-arch-dev` 的源码开发栈：使用 MySQL `8.4.6`，通过 backend/frontend 源码 bind 支持热更新，以一次性 migration 服务执行迁移，并把 public default 均保持关闭的 bootstrap 放在需显式启用的 `bootstrap` profile。

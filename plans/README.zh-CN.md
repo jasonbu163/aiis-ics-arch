@@ -14,7 +14,9 @@ English version: [README.md](README.md)
 | ARCH-DEV-001 本地开发环境采用 | `owner_accepted` | [spec.md](ARCH-DEV-001-local-development-environment-adoption/spec.md) | [tasks.md](ARCH-DEV-001-local-development-environment-adoption/tasks.md) | [checklist.md](ARCH-DEV-001-local-development-environment-adoption/checklist.md)；Human Owner 已接受 r4 |
 | ARCH-REL-001 1.0.0 源码定版 | `owner_accepted` | [spec.md](ARCH-REL-001-source-release-1.0.0/spec.md) | [tasks.md](ARCH-REL-001-source-release-1.0.0/tasks.md) 记录 r3 准备、发布证据与 §5.4 receipt handoff，并保留 superseded 的 r1/r2 Development 历史 | [checklist.md](ARCH-REL-001-source-release-1.0.0/checklist.md)；`qa_passed` 与 Human Owner final acceptance 已记录；§5.4 receipt 仍待手工追加到 main 并 push |
 | ARCH-FE-001 前端模块自动组装 | `draft` | [spec.md](ARCH-FE-001-frontend-module-auto-assembly/spec.md) | 等待阻塞解除并精确批准对应 Revision | 等待 `developer_handoff` |
-| ARCH-FE-002 项目前端角色权限与模块首批接入 | `draft` | [spec.md](ARCH-FE-002-project-role-access-and-module-pilot/spec.md)；PM r1 草案 | 待 Owner 确认三种 env 场景与模块范围，再精确批准 Revision | 等待 `developer_handoff` |
+| ARCH-FE-002 项目前端角色权限与模块首批接入 | `owner_accepted` | [spec.md](ARCH-FE-002-project-role-access-and-module-pilot/spec.md)；r4 已获 Owner 批准 | [tasks.md](ARCH-FE-002-project-role-access-and-module-pilot/tasks.md)；r4 developer_handoff | [checklist.md](ARCH-FE-002-project-role-access-and-module-pilot/checklist.md)；r4 独立 qa_passed，保留 r2/r3 历史；Human Owner 已于 2026-10-09 接受 r4 |
+| ARCH-FE-004 前端系统名称配置 | `draft` | [spec.md](ARCH-FE-004-system-name-env-configuration/spec.md)；r1 双语构建期系统名称 | 等待 Human Owner 精确批准 r1 | 等待 developer_handoff |
+| ARCH-BE-001 后端角色 API 权限配置 | `qa_passed` | [spec.md](ARCH-BE-001-role-api-permissions/spec.md)；r3 格式恢复已批准 | [tasks.md](ARCH-BE-001-role-api-permissions/tasks.md)；r3 developer_handoff | [checklist.md](ARCH-BE-001-role-api-permissions/checklist.md)；保留 r1/r2 历史，r3 独立 qa_passed；待 Owner 最终验收 |
 | CA-CONFIG-001 打包配置管理 | `draft` | [spec.md](CA-CONFIG-001-packaged-configuration-management/spec.md) | 等待基线刷新并精确批准对应 Revision | 等待 `developer_handoff` |
 
 根 [PLAN.zh-CN.md](../PLAN.zh-CN.md) 是优先级驾驶舱；范围、实施证据和独立 verdict 继续归各任务的角色权威文档。

@@ -58,6 +58,10 @@ cargo test --workspace
 
 These commands are source/static checks. They do not start Docker, modify a real database, connect to a PLC, or publish a release. Use explicit project-owned environment files and approved non-production fixtures for runtime work.
 
+## Host-source startup
+
+For database-only + `uv run run.py` + `pnpm dev`, follow [host-source initialization](INITIALIZATION.md#host-source-development-with-database-only): migrate, explicitly bootstrap login accounts, then start the applications. Bootstrap flags alone do not create accounts.
+
 ## Docker surfaces
 
 `docker-compose.dev.yml` is the fixed-name `aiis-ics-arch-dev` source-development stack. It uses MySQL `8.4.6`, source binds for backend/frontend hot reload, a one-shot migration service, and an opt-in `bootstrap` profile whose public defaults remain off.

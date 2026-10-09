@@ -1,5 +1,5 @@
 /**
- * 文件路径: /frontend-next-js/src/app/dashboard/manifest.js
+ * 文件路径: /frontend-js/src/app/dashboard/manifest.js
  * 功能描述: Dashboard 模块前端 manifest，集中声明工作台路由
  * 主要功能:
  *   - 暴露 dashboard 首页路由定义
@@ -8,6 +8,8 @@
 
 export const dashboardModule = {
   name: 'dashboard',
+  enabled: true,
+  navigation: { titleKey: 'dashboard.title', icon: 'House' },
   order: 10,
   routes: [
     {
@@ -19,9 +21,10 @@ export const dashboardModule = {
       name: 'Dashboard',
       component: () => import('./views/home/index.vue'),
       meta: {
-        titleKey: 'breadcrumb.dashboard',
+        titleKey: 'dashboard.title',
         pageId: 'dashboard.home',
-        parentTitleKey: 'nav.dashboard'
+        parentTitleKey: 'dashboard.title',
+        navigation: { visible: true, order: 10, icon: 'House' }
       }
     }
   ]

@@ -52,7 +52,8 @@
     "deleteSuccess": "删除成功",
     "deleteError": "删除失败",
     "saveSuccess": "保存成功",
-    "loadError": "加载数据失败"
+    "loadError": "加载数据失败",
+    "saveError": "保存失败"
   },
   "xlsx": {
     "downloadTemplate": "下载模板",

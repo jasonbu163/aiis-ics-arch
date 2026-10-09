@@ -11,7 +11,7 @@ from pathlib import Path
 from urllib.parse import quote_plus
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import field_validator
+from pydantic import Field, field_validator
 
 
 def resolve_env_file() -> Path:
@@ -187,7 +187,27 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int
     # Only non-admin role grants are deployment configuration. Administrator
     # privilege is fixed in core.deps and never sourced from this setting.
-    ROLE_API_PERMISSIONS_JSON: str = '{}'
+    SUPERVISOR_API_PERMISSIONS_JSON: str = '[]'
+    OPERATOR_API_PERMISSIONS_JSON: str = '[]'
+    legacy_role_api_permissions_present: bool = Field(default=False, exclude=True, repr=False)
+
+    @classmethod
+    def settings_customise_sources(
+        cls, settings_cls, init_settings, env_settings, dotenv_settings, file_secret_settings,
+    ):
+        # This derived fact is authoritative, not an overridable configuration flag.
+        # Sources have already loaded their key inventories; no second dotenv read.
+        def legacy_presence():
+            return {
+                "legacy_role_api_permissions_present": any(
+                    "ROLE_API_PERMISSIONS_JSON" in source.env_vars
+                    for source in (env_settings, dotenv_settings)
+                ),
+            }
+
+        return (
+            legacy_presence, init_settings, env_settings, dotenv_settings, file_secret_settings,
+        )
     
     API_V1_PREFIX: str
     

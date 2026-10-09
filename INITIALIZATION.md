@@ -6,6 +6,8 @@ This document covers source checks and operator-run Docker deployment procedures
 
 ## Manual test order
 
+For `uv run run.py` + `pnpm dev` with database-only, follow [host-source development](#host-source-development-with-database-only), including the explicit account initialization step.
+
 Start with [single-host deployment](#single-host-deployment): prepare files/dist, start database-only, wait for MySQL healthy, initialize the schema and application account, then start prod and check the homepage/health/login. Use a reviewed test database, and stop after any failed command.
 
 To test [full dev](#source-development-stack) afterwards, stop prod and database-only with their explicit `-f` paths and `down` (without `-v`), then follow the dev section. Dev uses its own database volume; prod-created users are not present there. For a dev login test, temporarily configure the desired bootstrap user in backend/.env.docker.dev, then run the documented bootstrap profile command; disable the flag afterwards. Always specify `-f`; there is no default root Compose entry.
@@ -35,6 +37,69 @@ cargo test --workspace
 ```
 
 Use a project-owned non-production environment only when a separately approved runtime task requires it. Database migration execution, Docker lifecycle, PLC collection, packaging and Git/GitHub actions are outside this baseline.
+
+## Host-source development with database-only
+
+Use this path when MySQL runs in `docker-compose.database-only.yml` while the backend and frontend run with `uv` and `pnpm` on the host. Start from the repository root. Run lifecycle and database-write commands only against the approved development database; stop after any failure.
+
+1. If absent, copy `backend/.env.example` to `backend/.env` and `frontend-js/.env.example` to `frontend-js/.env`; preserve existing files. Configure the database name, non-root MySQL user/password, root password and JWT secret in `backend/.env`. Use `MYSQL_HOST=127.0.0.1` and `MYSQL_PORT=3307` (or the actual published port). Stop a conflicting full dev stack first; its database volume and users are separate.
+2. Start MySQL and wait until `ps` reports healthy. Skip startup if the intended database-only service is already healthy.
+
+   ```bash
+   docker compose -f docker-compose.database-only.yml config --quiet
+   docker compose -f docker-compose.database-only.yml up -d mysql
+   docker compose -f docker-compose.database-only.yml ps
+   ```
+
+3. Install backend dependencies and migrate the selected database:
+
+   ```bash
+   cd backend
+   uv sync
+   uv run alembic upgrade head
+   ```
+
+4. Configure the desired login accounts in `backend/.env` using the following prefixes. For each desired account, temporarily set `<PREFIX>_BOOTSTRAP_ENABLED=True`, choose `<PREFIX>_BOOTSTRAP_USERNAME`, a non-empty strong `<PREFIX>_BOOTSTRAP_PASSWORD`, and `<PREFIX>_BOOTSTRAP_NAME`. Keep `<PREFIX>_BOOTSTRAP_RESET_PASSWORD=False` for initial creation; leave unneeded accounts disabled.
+
+   | Prefix | Default username | `<PREFIX>_BOOTSTRAP_ROLE` |
+   | --- | --- | --- |
+   | `ADMIN` | `admin` | `admin` |
+   | `SUPERVISOR` | `supervisor` | `supervisor` |
+   | `OPERATOR` | `operator` | `operator` |
+
+   From `backend/`, explicitly run:
+
+   ```bash
+   uv run python main.py --maintenance bootstrap-users
+   ```
+
+   **Alembic creates tables; neither `uv run run.py` nor `pnpm dev` creates login accounts. Setting ENABLED only allows this maintenance command to act.** Source execution reads `backend/.env`, not `.env.docker.dev` or `.env.docker.prod`; exported process variables can override file values. MySQL connection accounts and application login accounts in `users` are separate.
+
+   With all three enabled and absent, expect these summaries (custom usernames appear instead when configured):
+
+   ```text
+   target=admin_user status=created username=admin role=admin
+   target=supervisor_user status=created username=supervisor role=supervisor
+   target=operator_user status=created username=operator role=operator
+   ```
+
+   Repeating with RESET_PASSWORD=False preserves existing users and reports `status=exists`; disabled entries report `status=skipped reason=bootstrap_disabled`. RESET_PASSWORD=True resets an existing password and reactivates the account, reporting `status=password_reset`; use it only for an intentional reset. After success, set the enabled flags back to False, clear bootstrap passwords, and keep reset flags False. Already-created accounts remain available.
+5. Start the API from `backend/`:
+
+   ```bash
+   uv run python run.py
+   ```
+
+   In another terminal at the repository root, configure `frontend-js/.env` with `VITE_API_BASE_URL=/api/v1`, `VITE_PROXY_TARGET=http://127.0.0.1:8000` (match the backend port), `VITE_FRONTEND_MOCK_ENABLED=false` and `VITE_LOGIN_DEMO_ACCOUNTS_ENABLED=false`, then run:
+
+   ```bash
+   pnpm --dir frontend-js install --frozen-lockfile
+   pnpm --dir frontend-js dev
+   ```
+
+   Open the URL printed by Vite and log in with an initialized application account. If the API was already running against the same database, account creation normally requires no API restart. Restart the backend after changing its connection settings.
+
+For login HTTP 401, first check the bootstrap result and whether the API and maintenance command use the same database and environment overrides; then check the entered credentials. A 401 alone does not prove the user is missing. If maintenance reports missing tables, verify the migration target and successful completion; if it reports a connection failure, check MySQL health and the published host port. Frontend role/page settings do not create backend accounts.
 
 ## Source-development stack
 
@@ -109,7 +174,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Frontend build failed' }
 Get-Item frontend-js/dist/index.html
 ```
 
-Confirm each step succeeds before continuing. VITE settings are public build values; review deployment-owned role/page configuration in local frontend env files, and never include secrets. Nginx serves dist and does not build it or mount source/node_modules.
+Confirm each step succeeds before continuing. VITE settings are public build values; review both VITE_SUPERVISOR_PAGE_ACCESS_JSON and VITE_OPERATOR_PAGE_ACCESS_JSON in the shared frontend-js/.env (operator must be a subset of supervisor), and never include secrets. Host dev/build share this file; existing mode/local files and process variables override it by Vite precedence. Docker dev uses .env.docker.dev. Preserve and migrate old role arrays; comment the retired VITE_ROLE_PAGE_ACCESS_JSON line instead of keeping it active. Run pnpm --dir frontend-js check:access --mode production before building; unknown, disabled or admin-only pageIds fail explicitly. Nginx serves dist and does not build it or mount source/node_modules.
 
 Set the MySQL database, non-root application user/password and root password in `backend/.env`. Host-source backend uses `127.0.0.1:3307`. On first empty-volume startup the MySQL image creates the configured database and application account. Editing env for an existing volume does not update its accounts/passwords.
 

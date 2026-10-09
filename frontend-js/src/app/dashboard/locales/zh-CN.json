@@ -28,7 +28,8 @@
     "electricityUnit": "电力(kWh)",
     "gasUnit": "天然气(m³)",
     "downtimeDuration": "停机时长",
-    "qualityDistribution": "质量分布"
+    "qualityDistribution": "质量分布",
+    "averageTemperature": "平均温度"
   },
   "weekdays": {
     "sun": "周日",
@@ -89,5 +90,8 @@
     "energyStats": "能耗统计",
     "efficiencyStats": "效率统计",
     "equipmentStatus": "设备状态"
+  },
+  "messages": {
+    "loadError": "工作台数据加载失败"
   }
 }

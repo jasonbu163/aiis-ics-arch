@@ -406,7 +406,7 @@ const handleSubmit = async () => {
         visible.value = false
         emit('success')
       } catch (error) {
-        ElMessage.error(getErrorMessage(error, t('common.saveError')))
+        ElMessage.error(getErrorMessage(error, t('plan.messages.saveError')))
       } finally {
         submitLoading.value = false
       }

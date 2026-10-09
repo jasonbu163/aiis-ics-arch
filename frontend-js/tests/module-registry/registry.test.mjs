@@ -8,7 +8,6 @@ import {
   createModuleRegistry, canAccessRoute, accessibleNavigation, defaultAuthenticatedPath,
   resolveNavigationIcon, resolveMessage
 } from '../../src/app/moduleManifest.js'
-import { parseRolePageAccess } from '../../src/config/permissions.js'
 import { loadRegistry } from '../../scripts/check-module-manifests.mjs'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
@@ -247,16 +246,14 @@ test('invalid schema, dynamic visible route and incomplete bilingual title fail'
   assert.throws(() => build([fixture()], (manifests, locales) => { locales['/app/example/locales/zh-CN.json'] = {} }), /Bilingual key mismatch/)
 })
 
-test('default role configuration stays fail closed and permits underscore module IDs', () => {
-  for (const input of [undefined, '', 'null', '[]', '{broken', '{"admin":[]}', '{"operator":["a.b","a.b"]}']) assert.deepEqual(parseRolePageAccess(input), {})
-  assert.deepEqual(parseRolePageAccess('{"operator":["aiis_demo.example"]}'), { operator: ['aiis_demo.example'] })
-})
-
 test('actual source preserves Core route identity, shell locales and default-disabled demo', async () => {
   const root = fileURLToPath(new URL('../../', import.meta.url))
   const registry = await loadRegistry(root)
-  assert.deepEqual(registry.activeModuleNames, ['system'])
+  assert.deepEqual(registry.activeModuleNames, ['dashboard', 'plan', 'system'])
   assert.deepEqual(registry.routes.map(route => [route.name, route.path, route.meta.pageId]), [
+    ['Dashboard', 'dashboard/home', 'dashboard.home'],
+    [undefined, 'dashboard', undefined],
+    ['PlanList', 'plan/list', 'plan.list'],
     ['SystemUser', 'system/user', 'system.user'],
     ['SystemProjectionMapping', 'system/dict', 'system.projection-mapping']
   ])

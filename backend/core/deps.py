@@ -4,11 +4,9 @@
 主要功能:
     - 数据库会话依赖
     - 用户认证依赖
-    - 角色权限定义和检查
+    - 消费应用组合期有效角色权限并检查
 """
-import json
-
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,34 +20,10 @@ from app.user.models.user import User
 security = HTTPBearer()
 
 
-def parse_role_api_permissions(raw_config: str) -> dict[str, list[str]]:
-    """Parse non-admin deployment permissions and fail closed on invalid input."""
-    try:
-        configured_permissions = json.loads(raw_config)
-    except (TypeError, json.JSONDecodeError):
-        return {}
-
-    if not isinstance(configured_permissions, dict):
-        return {}
-
-    normalized_permissions: dict[str, list[str]] = {}
-    for role, permissions in configured_permissions.items():
-        if not isinstance(role, str) or not role.strip() or not isinstance(permissions, list):
-            return {}
-        if any(not isinstance(permission, str) or not permission.strip() for permission in permissions):
-            return {}
-        # Administrator privilege is a code invariant, not deployment configuration.
-        # Reject an entire damaged config rather than accidentally honoring a wildcard.
-        if role == "admin" or "*" in permissions:
-            return {}
-        normalized_permissions[role] = permissions
-
-    return normalized_permissions
-
-
-def get_role_permissions(role: str) -> list[str]:
-    """Return deployment-configured permissions for a non-admin role."""
-    return parse_role_api_permissions(settings.ROLE_API_PERMISSIONS_JSON).get(role, [])
+def get_role_permissions(role: str, request: Request | None = None) -> list[str]:
+    """消费本应用组合期策略；未建立策略或未知角色时拒绝授权。"""
+    policy = getattr(request.app.state, "role_api_permissions", None) if request else None
+    return sorted(policy.get(role, ())) if policy else []
 
 
 def require_permissions(*required_permissions: str):
@@ -61,12 +35,13 @@ def require_permissions(*required_permissions: str):
         async def list_users(): ...
     """
     async def permission_checker(
+        request: Request,
         current_user: User = Depends(get_current_user)
     ) -> User:
         if current_user.role == "admin":
             return current_user
 
-        user_permissions = get_role_permissions(current_user.role)
+        user_permissions = get_role_permissions(current_user.role, request)
 
         for perm in required_permissions:
             if perm not in user_permissions:

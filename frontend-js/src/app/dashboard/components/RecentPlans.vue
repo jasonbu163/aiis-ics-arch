@@ -1,5 +1,5 @@
 <!--
-  文件路径: /frontend-next-js/src/app/dashboard/components/RecentPlans.vue
+  文件路径: /frontend-js/src/app/dashboard/components/RecentPlans.vue
   功能描述: Dashboard 近期计划列表组件
   主要功能:
     - 展示近期生产计划列表
@@ -9,7 +9,7 @@
 <template>
   <BaseCard class="chart-card" :title="$t('dashboard.recentPlans')">
     <template #actions>
-      <el-button text type="primary" size="small" class="card-action-button" @click="$router.push('/plan/list')">
+      <el-button v-if="canViewPlans" text type="primary" size="small" class="card-action-button" @click="$router.push('/plan/list')">
         {{ $t('dashboard.viewAll') }}
       </el-button>
     </template>
@@ -31,6 +31,15 @@
 <script setup>
 import PlanStatusTag from '@/app/plan/components/PlanStatusTag.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
+import { computed } from 'vue'
+import { moduleRegistry } from '@/app/moduleRegistry'
+import { canAccessRoute } from '@/app/moduleManifest'
+import { useUserStore } from '@/store/user'
+
+const userStore = useUserStore()
+const canViewPlans = computed(() => canAccessRoute(
+  moduleRegistry.routeRecords.find(route => route.meta.pageId === 'plan.list'), userStore
+))
 
 defineProps({
   recentPlans: {

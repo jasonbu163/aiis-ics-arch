@@ -117,8 +117,10 @@ Orphan grants cannot recreate deleted routes/menus; the Registry never edits the
 `canAccessRoute`, `accessibleNavigation` and `defaultAuthenticatedPath` take a consumer-supplied object:
 `{ isAdmin, hasPageAccess(pageId) }` (an explicit `isLoggedIn: false` also denies access).
 Only literal `true` grants access. Non-admin users need a page grant; `requiresAdmin` also requires admin.
-Missing/unknown/broken providers fail closed. The user store currently adapts the existing role configuration;
-projects may supply backend-derived permissions without coupling the Registry to that source.
+Missing/unknown/broken providers fail closed. The user store adapts the validated supervisor/operator arrays documented in the [frontend README](../../README.md#project-page-configuration).
+Registry access primitives remain independent of the grant source. Dashboard/plan are the first enabled pilot;
+dashboard reuses plan status labels/components for recent plans and filters cross-module links by active route access.
+Other legacy modules require a separate migration audit. aiis_demo stays disabled as an onboarding reference.
 The router separately enforces authentication and active route membership. Frontend visibility never replaces
 backend API authorization.
 
@@ -131,7 +133,8 @@ pnpm test:modules
 pnpm build
 ```
 
-The build's `prebuild` validates the same Registry before Vite. Direct `vite build` bypasses this hook; use the
-project command. Bare `node scripts/check-module-manifests.mjs` prints help only. The checker imports trusted
+The build's `prebuild` validates the same Registry before Vite. Direct `vite build` bypasses the package hook,
+but the Vite config still validates the Registry and effective page-access env. Use the project command.
+Bare `node scripts/check-module-manifests.mjs` prints help only. The checker imports trusted
 local manifests and JSON, never invokes lazy page imports or loads `.env`. Vite itself reads build environment;
 use public project-owned values or an isolated copy without real `.env` for source verification.

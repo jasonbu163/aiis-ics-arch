@@ -52,7 +52,8 @@
     "deleteSuccess": "Delete success",
     "deleteError": "Delete failed",
     "saveSuccess": "Save success",
-    "loadError": "Load data failed"
+    "loadError": "Load data failed",
+    "saveError": "Save failed"
   },
   "xlsx": {
     "downloadTemplate": "Download Template",

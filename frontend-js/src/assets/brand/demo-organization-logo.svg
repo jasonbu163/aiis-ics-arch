@@ -1,0 +1,12 @@
+<!--
+  File Path: /frontend-js/src/assets/brand/demo-organization-logo.svg
+  Description: Transparent demo organization wordmark for local brand configuration
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 160" fill="none" role="img" aria-label="NEXO demo organization logo">
+  <g fill="#101216">
+    <path d="M34 43h46l17 37-17 37H34L17 80l17-37Zm11 18-9 19 9 19h24l9-19-9-19H45Z" />
+    <path d="M111 55h24l28 50h-24l-16-29-16 29H83l28-50Z" />
+    <path d="M174 55h67v17h-42v12h36v16h-36v5h42v17h-67V55Z" />
+    <path d="M271 55h18l18 25-18 25h-18l18-25-18-25Z" />
+  </g>
+</svg>

@@ -1,9 +1,11 @@
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
+import { checkPageAccess } from './scripts/check-page-access.mjs'
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(async ({ mode }) => {
   // 加载环境变量
+  await checkPageAccess(process.cwd(), mode)
   const env = loadEnv(mode, process.cwd(), '')
   const appPort = parseInt(env.VITE_APP_PORT) || 5190
   

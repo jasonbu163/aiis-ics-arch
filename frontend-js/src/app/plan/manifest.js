@@ -1,5 +1,5 @@
 /**
- * 文件路径: /frontend-next-js/src/app/plan/manifest.js
+ * 文件路径: /frontend-js/src/app/plan/manifest.js
  * 功能描述: 计划模块前端 manifest，集中声明模块路由
  * 主要功能:
  *   - 暴露计划模块路由定义
@@ -8,6 +8,8 @@
 
 export const planModule = {
   name: 'plan',
+  enabled: true,
+  navigation: { titleKey: 'plan.title', icon: 'Calendar' },
   order: 20,
   routes: [
     {
@@ -15,9 +17,10 @@ export const planModule = {
       name: 'PlanList',
       component: () => import('./views/list/index.vue'),
       meta: {
-        titleKey: 'breadcrumb.planList',
+        titleKey: 'plan.list',
         pageId: 'plan.list',
-        parentTitleKey: 'nav.plan'
+        parentTitleKey: 'plan.title',
+        navigation: { visible: true, order: 10, icon: 'Calendar' }
       }
     }
   ]

@@ -111,7 +111,9 @@ loader 或图标注册表。禁用时设置 `enabled: false`；删除时删除�
 `canAccessRoute`、`accessibleNavigation` 和 `defaultAuthenticatedPath` 接收使用方对象
 `{ isAdmin, hasPageAccess(pageId) }`，显式 `isLoggedIn: false` 也会拒绝。仅 boolean true 授权；
 非 admin 需要 page grant，`requiresAdmin` 还要求 admin。缺失、未知、损坏输入 fail closed。
-当前 user store 适配原角色配置；使用方可接入 backend 返回的权限，不把 Registry 耦合到某个来源。
+当前 user store 适配已校验的 supervisor/operator 数组，配置见[前端 README](../../README.zh-CN.md#项目页面配置)。
+Registry access 原语仍独立于授权来源。dashboard/plan 是首批启用模块；dashboard 近期计划复用 plan
+状态标签/组件，跨模块入口按活动路由权限过滤。其他旧模块须另行迁入审核，aiis_demo 保持关闭供开发参考。
 router 另检查登录与活动路由归属；前端可见性永远不替代 backend API 授权。
 
 ## 检查
@@ -123,7 +125,8 @@ pnpm test:modules
 pnpm build
 ```
 
-build 的 `prebuild` 在 Vite 前校验相同 Registry；直接 `vite build` 会绕过 hook，应使用项目命令。
+build 的 `prebuild` 在 Vite 前校验相同 Registry；直接 `vite build` 会绕过 package hook，
+但 Vite config 仍校验 Registry 与有效页面权限 env。应使用项目命令。
 裸调用 `node scripts/check-module-manifests.mjs` 仅显示帮助。checker 导入受信任本地 manifest 与
 JSON，不调用页面懒加载、不读取 `.env`。Vite 自身会读取构建环境；源码验证应使用公开的项目自有
 值，或使用排除真实 `.env` 的隔离副本。

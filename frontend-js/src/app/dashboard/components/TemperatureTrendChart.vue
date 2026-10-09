@@ -87,7 +87,7 @@ const updateChart = () => {
     },
     yAxis: { 
       type: 'value', 
-      name: t('performance.table.avgTemp') + '(℃)',
+      name: t('dashboard.chart.averageTemperature') + '(℃)',
       axisLabel: { fontSize: 10 }
     },
     series: series

@@ -21,7 +21,9 @@ English version: [PLAN.md](PLAN.md)
 | 本地开发环境采用 | `owner_accepted` | [ARCH-DEV-001 spec](plans/ARCH-DEV-001-local-development-environment-adoption/spec.md) | 固定名 dev runtime、后端健康/前端检查、bootstrap default-off 证明和失效 smoke 文档清理完成后，Human Owner 已接受 r4 |
 | 1.0.0 源码定版 | `owner_accepted` | [ARCH-REL-001 spec](plans/ARCH-REL-001-source-release-1.0.0/spec.md) | fresh-context Verification 已通过 r3，Human Owner 已接受；§5.4 main-only governance receipt 已准备但仍待 Human Owner 手工 push |
 | 前端模块组装 | `draft` | [ARCH-FE-001 spec](plans/ARCH-FE-001-frontend-module-auto-assembly/spec.md) | manifest 驱动的菜单/权限组装；不并入 Core 提取 |
-| 项目前端角色权限与模块首批接入 | `draft` | [ARCH-FE-002 spec](plans/ARCH-FE-002-project-role-access-and-module-pilot/spec.md) | PM r1 草案：拆分 supervisor/operator 页面授权、覆盖三种前端 env 场景并接入 dashboard/plan；待 Owner 确认 env 含义与后续模块范围 |
+| 项目前端角色权限与模块首批接入 | `owner_accepted` | [ARCH-FE-002 spec](plans/ARCH-FE-002-project-role-access-and-module-pilot/spec.md) | r4 品牌、配置、启动、构建与公开浏览器检查已独立通过；保留 r2/r3 历史，Human Owner 已于 2026-10-09 接受 r4，其他模块预留 003 |
+| 前端系统名称配置 | `draft` | [ARCH-FE-004 spec](plans/ARCH-FE-004-system-name-env-configuration/spec.md) | r1 定义双语构建期名称及统一 i18n/标签页行为；待 Human Owner 精确批准 Revision |
+| 后端角色 API 权限配置 | `qa_passed` | [ARCH-BE-001 spec](plans/ARCH-BE-001-role-api-permissions/spec.md) | r3 已恢复十一组英文 env 标题；配置值和逐项注释保留；独立 QA 通过；待 Human Owner 最终验收 |
 | CA 打包配置 | `draft` | [CA-CONFIG-001 spec](plans/CA-CONFIG-001-packaged-configuration-management/spec.md) | 数据库类型/地址设置与 YAML 上传界面 |
 
 ## 延后边界

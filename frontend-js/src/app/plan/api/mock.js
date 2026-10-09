@@ -16,7 +16,7 @@ const makePlan = (apiName, index) => createMockRecord(apiName, index, {
   planNo: `MOCK-PLAN-${String(index).padStart(4, '0')}`,
   coilNo: `MOCK-COIL-${String(index).padStart(4, '0')}`,
   grade: MOCK_LABEL,
-  materialStatus: 'ready',
+  materialStatus: 'degreasing',
   spec: '99.99 x 9999',
   weight: 999,
   thickness: 99.99,

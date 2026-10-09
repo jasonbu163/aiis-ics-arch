@@ -111,7 +111,7 @@
           <el-table-column prop="materialStatus" :label="$t('plan.materialStatus')" width="110">
             <template #default="{ row }">
               <el-tag :type="materialStatusMap[row.materialStatus]?.type || 'info'">
-                {{ $t(`plan.materialStatusMap.${row.materialStatus}`) }}
+                {{ materialStatusLabel(row.materialStatus) }}
               </el-tag>
             </template>
           </el-table-column>
@@ -292,7 +292,11 @@ import ActionButton from '@/components/common/ActionButton.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
 import PlanFormDialog from '@/app/plan/components/PlanFormDialog.vue'
 
-const { t } = useI18n()
+const { t, te } = useI18n()
+const materialStatusLabel = value => {
+  const key = `plan.materialStatusMap.${value}`
+  return te(key) ? t(key) : (value || '-')
+}
 
 const getErrorMessage = (error, fallback) => {
   return error?.response?.data?.detail || error?.message || fallback

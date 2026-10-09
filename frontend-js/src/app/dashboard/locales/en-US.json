@@ -28,7 +28,8 @@
     "electricityUnit": "Electricity(kWh)",
     "gasUnit": "Gas(m³)",
     "downtimeDuration": "Downtime",
-    "qualityDistribution": "Quality Distribution"
+    "qualityDistribution": "Quality Distribution",
+    "averageTemperature": "Average Temperature"
   },
   "weekdays": {
     "sun": "Sun",
@@ -89,5 +90,8 @@
     "energyStats": "Energy Stats",
     "efficiencyStats": "Efficiency Stats",
     "equipmentStatus": "Device Status"
+  },
+  "messages": {
+    "loadError": "Load dashboard data failed"
   }
 }

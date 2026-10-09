@@ -18,6 +18,8 @@ source topology or important entrypoints change.
 - `backend/main.py` — production/package entrypoint.
 - `backend/run.py` — local reload entrypoint.
 - `backend/settings.py` — environment and database configuration.
+- `backend/core/role_permissions.py` — pure role arrays, hierarchy and manifest-owner grant filtering.
+- `backend/tests/test_role_api_permission_startup.py` — no-DB composition, configuration-source and maintenance-order regressions.
 - `backend/app/module_registry.py` — manifest-based module discovery and router/model registration.
 - `backend/app/router.py` — explicit Core/user/control-agent route boundary.
 - `backend/app/monitor/` — collector health and generic raw/latest PLC snapshot facts.
@@ -37,6 +39,14 @@ source topology or important entrypoints change.
 - `frontend-js/src/styles/` — Core theme tokens and shared layout styles.
 - `frontend-js/src/components/` — shared Core UI components.
 - `frontend-js/src/components/navigation/ModuleNavigation.vue` — generic group/leaf menu and icon fallback.
+- `frontend-js/src/app/dashboard/` / `frontend-js/src/app/plan/` — first enabled module onboarding pilot.
+- `frontend-js/src/config/brand.js` / `brandOptions.js` — bundled Logo discovery and pure alignment/glow options.
+- `frontend-js/src/components/shell/BrandLogo.vue` — shared login/shell image contain sizing and three glow regions.
+- `frontend-js/src/assets/brand/demo-organization-logo.svg` — generic public fallback asset.
+- `frontend-js/tests/module-registry/brand-options.test.mjs` — safe resource, alignment and glow contract matrix.
+- `frontend-js/src/config/pageAccess.js` — shared pure role-array, subset and active-page validation.
+- `frontend-js/scripts/check-page-access.mjs` — effective Vite mode/local/process configuration checker.
+- `frontend-js/tests/module-registry/page-access.test.mjs` — grant failures, role decisions, env precedence and bilingual pilot regression.
 - `frontend-js/scripts/check-module-manifests.mjs` — dependency-free prebuild contract checker.
 - `frontend-js/tests/module-registry/` — pure registry and actual source regression matrix.
 - `frontend-js/Dockerfile` — locked pnpm source build copied into the Nginx runtime image.
