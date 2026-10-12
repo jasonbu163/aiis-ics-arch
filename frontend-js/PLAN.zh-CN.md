@@ -9,6 +9,7 @@ English version: [PLAN.md](PLAN.md)
 - ARCH-FE-002 已接入获批的 dashboard/plan 首批模块及 `dashboard.home`、`plan.list` 页面；其余业务模块由后续 003 迁移任务处理。
 - [ARCH-FE-001 r3](../plans/ARCH-FE-001-frontend-module-auto-assembly/spec.md)：`developer_handoff`；首轮 QA 问题已返工，15 组 contract 测试与隔离生产构建通过。fresh-context 复验与 Human Owner 验收待进行，版本号延后决定。
 - [ARCH-FE-002 r4](../plans/ARCH-FE-002-project-role-access-and-module-pilot/spec.md)：`owner_accepted`；保留 r2/r3 QA 历史。通用 Logo/对齐/光晕与当前页面宿主机授权已通过独立检查，Human Owner 已于 2026-10-09 接受 r4。其他模块预留 003。
-- [ARCH-FE-004 r1](../plans/ARCH-FE-004-system-name-env-configuration/spec.md)：`draft`；双语构建期系统名称通过 `common.systemTitle` 统一登录页、Logo alt 与浏览器标题。待 Human Owner 精确批准 Revision。
+- [ARCH-FE-003 r2](../plans/ARCH-FE-003-remaining-module-manifest-adaptation/spec.md)：`owner_accepted`；价格页直调 auxiliary API，使用局部状态；模块检查、36 项测试及隔离构建独立验证通过，Human Owner 于 2026-10-12 接受 r2，并确认 env 页面权限显示测试正常；保留 r1 历史。
+- [ARCH-FE-004 r3](../plans/ARCH-FE-004-system-name-env-configuration/spec.md)：`owner_accepted`；独立静态复核通过后，Human Owner 于 2026-10-10 反馈系统名称/小标题配置测试无误并接受。保留 r1/r2 历史与原始验证证据。
 
 详细 UI 工作必须另立获批任务；本索引不承载项目业务 backlog。

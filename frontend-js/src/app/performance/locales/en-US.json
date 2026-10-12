@@ -1,0 +1,454 @@
+{
+  "title": "Performance Management",
+  "list": "Performance List",
+  "coilNo": "Coil No",
+  "parentCoilNo": "Parent Coil",
+  "grade": "Grade",
+  "spec": "Spec",
+  "weight": "Weight",
+  "totalLength": "Total Length",
+  "diameter": "Diameter",
+  "density": "Density",
+  "totalTime": "Total Time",
+  "totalDuration": "Total Duration",
+  "observationStatus": "Production Status",
+  "recordSource": "Record Source",
+  "splitStatus": "Split Status",
+  "split": "Split Management",
+  "splitNo": "Split No",
+  "print": "Print Settings",
+  "data": "Data",
+  "modules": {
+    "qualityControl": "Quality Control",
+    "efficiency": "Efficiency Statistics"
+  },
+  "edit": "Edit Performance",
+  "processData": "Process Data Tracking",
+  "temperatureCurve": "Temperature Curve",
+  "tensionCurve": "Tension Curve",
+  "speedCurve": "Speed Curve",
+  "formSections": {
+    "basicInfo": "Basic Info",
+    "specParams": "Spec Params",
+    "otherInfo": "Other Info"
+  },
+  "units": {
+    "celsius": "℃",
+    "kN": "kN"
+  },
+  "chart": {
+    "temperatureAxis": "Temperature",
+    "tensionAxis": "Tension",
+    "speedAxis": "Speed"
+  },
+  "splitStatusMap": {
+    "splitted": "Splitted",
+    "notSplit": "Not Split",
+    "child": "Child"
+  },
+  "observationStatusMap": {
+    "in_production": "In Production",
+    "not_in_production": "Observation Ended",
+    "unknown": "Unknown",
+    "manual_historical": "Manual / Historical"
+  },
+  "durationSourceMap": {
+    "manual_time": "Manual Start / End Time",
+    "plc_observed": "PLC Observed Time",
+    "unavailable": "Unavailable"
+  },
+  "durationUnits": {
+    "second": "s"
+  },
+  "recordSources": {
+    "manual_entry": "Manual Entry",
+    "split_generated": "Split Generated",
+    "merge_generated": "Merge Generated",
+    "unplanned_plc": "Unplanned PLC",
+    "frontend_mock": "Frontend Mock"
+  },
+  "planLink": {
+    "title": "Plan Linkage",
+    "performanceSummary": "Performance Summary",
+    "planId": "Plan ID",
+    "statusColumn": "Plan Link",
+    "linked": "Linked",
+    "unlinked": "Unlinked",
+    "rowAction": "Link Plan",
+    "candidatesTab": "Match Existing Plan",
+    "backfillTab": "Backfill Plan",
+    "syncObservation": "Sync Observation",
+    "linkSelected": "Link Selected Plan",
+    "backfillSubmit": "Backfill and Link",
+    "resultLinked": "{action}, plan ID: {planId}",
+    "resultNotLinked": "{action}, candidates: {count}",
+    "actionMap": {
+      "candidate_loaded": "Candidates loaded",
+      "no_matching_plan": "No matching plan",
+      "synced_observation": "Existing plan observation synced",
+      "linked_existing_plan": "Existing plan linked",
+      "backfilled_plan": "Plan backfilled and linked",
+      "already_linked": "Performance already linked",
+      "unknown": "Unknown result"
+    },
+    "messages": {
+      "candidateLoadFailed": "Failed to load plan candidates",
+      "syncSuccess": "Plan observation synced",
+      "syncFailed": "Sync observation failed",
+      "linkSuccess": "Plan linked",
+      "linkFailed": "Plan link failed",
+      "backfillSuccess": "Plan backfilled and linked",
+      "backfillFailed": "Plan backfill failed"
+    }
+  },
+  "table": {
+    "zone": "Zone/Area",
+    "maxTemp": "Max Temp",
+    "minTemp": "Min Temp",
+    "avgTemp": "Avg Temp",
+    "duration": "Duration",
+    "setTension": "Set Tension",
+    "avgTension": "Avg Tension",
+    "maxTension": "Max Tension",
+    "minTension": "Min Tension",
+    "setSpeed": "Set Speed",
+    "avgSpeed": "Avg Speed",
+    "maxSpeed": "Max Speed",
+    "operation": "Operation",
+    "info": "Info",
+    "setTemp": "Set Temp"
+  },
+  "form": {
+    "coilNo": "Coil No",
+    "grade": "Grade",
+    "density": "Density",
+    "weight": "Weight (Ton)",
+    "totalLength": "Total Length",
+    "diameter": "Diameter",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "spec": "Spec",
+    "remark": "Remark",
+    "placeholder": "Please enter {label}",
+    "selectPlaceholder": "Please select {label}"
+  },
+  "stats": {
+    "total": "Total",
+    "completed": "Completed",
+    "pending": "Pending",
+    "avgScore": "Avg Score"
+  },
+  "efficiency": {
+    "filterTitle": "Statistics Filters",
+    "oeeFactors": "OEE Factor Analysis",
+    "oeeOverview": "OEE Overview",
+    "oeeTrend": "OEE Trend",
+    "downtimeAnalysis": "Downtime Analysis",
+    "detailedData": "Efficiency Details",
+    "exportReport": "Export Report",
+    "runningTime": "Running Time",
+    "downtime": "Downtime",
+    "processedCoils": "Processed Coils",
+    "availability": "Availability",
+    "performance": "Performance",
+    "quality": "Quality Index",
+    "comparison": "Vs Prev",
+    "factorDescriptions": {
+      "availability": "Measures actual running time within planned production time",
+      "performance": "Compares actual output with theoretical capacity",
+      "quality": "Measures qualified output against total output"
+    },
+    "factors": {
+      "plannedTime": "Planned Time",
+      "actualTime": "Actual Time",
+      "downtimeLoss": "Downtime Loss",
+      "theoreticalOutput": "Theo. Output",
+      "actualOutput": "Actual Output",
+      "speedLoss": "Speed Loss",
+      "totalOutput": "Total Output",
+      "qualifiedOutput": "Qualified",
+      "defectOutput": "Defect"
+    }
+  },
+  "quality": {
+    "basicInfo": "Basic Info",
+    "inspectItems": "Inspect Items",
+    "defectRecords": "Defect Records",
+    "summary": "Summary",
+    "standard": "Standard",
+    "actual": "Actual",
+    "result": "Result",
+    "inspector": "Inspector",
+    "time": "Time",
+    "position": "Position",
+    "defectType": "Defect Type",
+    "level": "Level",
+    "length": "Length(mm)",
+    "judgment": "Judgment",
+    "qualityGrade": "Grade",
+    "comment": "Comment"
+  },
+  "printQuality": {
+    "surfaceQuality": "Surface Quality",
+    "thicknessDeviation": "Thickness Deviation",
+    "widthDeviation": "Width Deviation",
+    "flatness": "Flatness",
+    "noDefect": "No Defect",
+    "thicknessStandard": "±0.05mm",
+    "thicknessActual": "+0.02mm",
+    "widthStandard": "±2mm",
+    "widthActual": "+1mm",
+    "flatnessStandard": "≤3mm/m",
+    "flatnessActual": "2mm/m",
+    "results": {
+      "qualified": "Qualified",
+      "unqualified": "Unqualified"
+    }
+  },
+  "printSettings": {
+    "title": "Print Settings",
+    "records": "Print Records",
+    "selectedCount": "{count} selected",
+    "templateSettings": "Template Settings",
+    "templatePreview": "Template Preview",
+    "noPreview": "No template preview",
+    "labelTitle": "Label Title",
+    "layout": "Layout",
+    "paper": "Paper",
+    "labelPaper": "Label 100×150mm",
+    "orientation": "Orientation",
+    "portrait": "Portrait",
+    "landscape": "Landscape",
+    "fontSize": "Font Size",
+    "scale": "Scale",
+    "appearance": "Appearance",
+    "enhancedStyle": "Enhanced Style",
+    "margin": "Margin(mm)",
+    "marginTop": "Top",
+    "marginRight": "Right",
+    "marginBottom": "Bottom",
+    "marginLeft": "Left",
+    "sections": "Print Sections",
+    "printDocumentTitle": "Production Label Print"
+  },
+  "splitManagement": {
+    "title": "Split Management",
+    "actions": {
+      "add": "Add"
+    },
+    "filters": {
+      "keyword": "Keyword",
+      "keywordPlaceholder": "Search coil no, parent coil, or split no",
+      "statusPlaceholder": "Select status"
+    },
+    "table": {
+      "empty": "No split management data",
+      "lineageStatus": "Lineage Status",
+      "lineageSummary": "Lineage Summary",
+      "availableSummary": "Available weight {value}"
+    },
+    "dialog": {
+      "title": "New Split / Merge"
+    },
+    "status": {
+      "actionable": "Actionable",
+      "split_generated": "Split Generated",
+      "merge_generated": "Merge Generated",
+      "backend_unavailable": "Backend Unavailable",
+      "unavailable": "Unavailable"
+    }
+  },
+  "splitWorkbench": {
+    "title": "Split / Merge Workbench",
+    "description": "Select source performance records and submit split or merge transforms; coil numbers and allocated weights are explicitly entered by the operator.",
+    "empty": "-",
+    "modes": {
+      "split": "Split",
+      "merge": "Merge"
+    },
+    "actions": {
+      "addTarget": "Add target coil",
+      "submit": {
+        "split": "Submit split",
+        "merge": "Submit merge"
+      }
+    },
+    "confirmModeSwitch": {
+      "title": "Switch mode",
+      "message": "This mode has an unsubmitted draft. Switching modes will clear those inputs. Continue?",
+      "confirm": "Switch mode"
+    },
+    "source": {
+      "title": "Source Performance",
+      "splitHint": "Split mode requires exactly 1 source performance record.",
+      "mergeHint": "Merge mode requires at least 2 source performance records.",
+      "placeholder": "Select source performance",
+      "empty": "No selected source",
+      "effectiveWeight": "Effective weight",
+      "effectiveWeightSource": "Effective weight source",
+      "availableWeight": "Available weight",
+      "recordSource": "Record source"
+    },
+    "allocation": {
+      "title": "Weight Allocation",
+      "totalAllocated": "Allocated weight",
+      "targetCoilNo": "Target coil no",
+      "targetCoilNoPlaceholder": "Enter target coil no",
+      "resultCoilNo": "Result coil no",
+      "resultCoilNoPlaceholder": "Enter result coil no",
+      "allocatedWeight": "Allocated weight",
+      "remark": "Remark",
+      "noTargets": "No target coil",
+      "noSources": "No source allocation"
+    },
+    "submit": {
+      "title": "Submit",
+      "reason": "Reason",
+      "reasonPlaceholder": "Enter the reason for this split / merge"
+    },
+    "audit": {
+      "title": "Lineage Audit Summary",
+      "transformId": "Transform ID",
+      "transformType": "Transform type",
+      "status": "Status",
+      "reason": "Reason",
+      "confirmedAt": "Confirmed at",
+      "empty": "Transform and lineage summary appears after submit",
+      "noLineage": "No lineage entry",
+      "performanceId": "Performance ID",
+      "role": "Role"
+    },
+    "validation": {
+      "splitSourceRequired": "Split requires exactly 1 source performance record",
+      "splitTargetsRequired": "Split requires at least 2 target coils",
+      "splitTargetInvalid": "Target coil no and positive allocated weight are required",
+      "mergeSourcesRequired": "Merge requires at least 2 source performance records",
+      "mergeTargetRequired": "Merge result coil no is required",
+      "mergeAllocationInvalid": "Each source requires a positive allocated weight"
+    },
+    "messages": {
+      "submitSuccess": "Submit success"
+    },
+    "errors": {
+      "source_load_failed": "Failed to load source performance records",
+      "lineage_summary_unavailable": "Lineage summary is unavailable",
+      "transform_submit_failed": "Split / merge submit failed",
+      "performance_not_found": "Performance record not found",
+      "performance_transform_not_found": "Transform record not found",
+      "performance_effective_weight_required": "Effective weight is required",
+      "performance_insufficient_available_weight": "Available weight is insufficient",
+      "performance_transform_invalid_cardinality": "Source or target count violates split / merge rules",
+      "performance_lineage_double_role": "The same performance record cannot be both source and target in one transform",
+      "performance_lineage_cycle": "Lineage cycle detected"
+    },
+    "recordSources": {
+      "manual_entry": "Manual entry",
+      "split_generated": "Split generated",
+      "merge_generated": "Merge generated",
+      "unplanned_plc": "Unplanned PLC",
+      "frontend_mock": "Frontend mock"
+    },
+    "effectiveWeightSources": {
+      "collected_weight": "Collected weight",
+      "manual_override_weight": "Manual override weight",
+      "split_generated": "Split generated",
+      "merge_generated": "Merge generated",
+      "frontend_mock": "Frontend mock"
+    },
+    "transformTypes": {
+      "split": "Split",
+      "merge": "Merge"
+    },
+    "transformStatuses": {
+      "committed": "Committed",
+      "frontend_mock": "Frontend mock"
+    },
+    "lineageRoles": {
+      "source": "Source",
+      "target": "Target"
+    }
+  },
+  "messages": {
+    "printLabel": "Print label: {coilNo}",
+    "saveSuccess": "Save success",
+    "deleteSuccess": "Delete success",
+    "createSuccess": "Create success",
+    "updateSuccess": "Update success",
+    "loadFailed": "Load failed",
+    "selectBeforePrint": "Please select labels before printing",
+    "confirmDelete": "Are you sure to delete?",
+    "confirmSave": "Confirm save info?",
+    "noDataToExport": "No data to export",
+    "exportSuccess": "Export success"
+  },
+  "common": {
+    "dateRange": "Date Range",
+    "date": "Date",
+    "shift": "Shift",
+    "to": "to",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "employeeName": "Employee Name",
+    "employeeId": "Employee ID",
+    "status": "Status",
+    "dayShift": "Day Shift",
+    "middleShift": "Middle Shift",
+    "nightShift": "Night Shift",
+    "all": "All",
+    "autoGenerate": "Auto Generate",
+    "printSelected": "Print Selected",
+    "printPreview": "Print Preview",
+    "productionLabel": "Production Label",
+    "labelNo": "Label No",
+    "thickness": "Thickness",
+    "width": "Width",
+    "productionRecord": "Production Record",
+    "entryTension": "Entry Tension",
+    "entryLoopTension": "Entry Loop Tension",
+    "furnaceTension": "Furnace Tension",
+    "exitLoopTension": "Exit Loop Tension",
+    "exitTension": "Exit Tension",
+    "entrySpeed": "Entry Speed",
+    "furnaceSpeed": "Furnace Speed",
+    "exitSpeed": "Exit Speed",
+    "processParams": "Process Params",
+    "furnaceTemp": "Furnace Temp",
+    "dewPoint": "Dew Point",
+    "oxygenContent": "Oxygen Content",
+    "printTime": "Print Time",
+    "operatorSign": "Operator Sign",
+    "attainRate": "Attain Rate",
+    "actualValue": "Actual Value",
+    "concession": "Concession",
+    "light": "Light",
+    "normal": "Normal",
+    "severe": "Severe",
+    "tip": "Tip",
+    "endTime": "End Time",
+    "startTime": "Start Time",
+    "operator": "Operator",
+    "qualified": "Qualified",
+    "unqualified": "Unqualified",
+    "recheck": "Recheck",
+    "selectTime": "Select Time",
+    "selectDate": "Select Date",
+    "selectYear": "Select Year",
+    "description": "Description",
+    "daily": "Daily",
+    "today": "Today",
+    "last7days": "Last 7 Days",
+    "last30days": "Last 30 Days",
+    "thisMonth": "This Month",
+    "monthly": "Monthly",
+    "quarterly": "Quarterly",
+    "yearly": "Yearly",
+    "select": "Select",
+    "createdAt": "Created At",
+    "unit": {
+      "coil": "Coil",
+      "item": "Pcs",
+      "person": "Persons",
+      "ton": "Ton"
+    }
+  }
+}

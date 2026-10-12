@@ -22,8 +22,10 @@ English version: [PLAN.md](PLAN.md)
 | 1.0.0 源码定版 | `owner_accepted` | [ARCH-REL-001 spec](plans/ARCH-REL-001-source-release-1.0.0/spec.md) | fresh-context Verification 已通过 r3，Human Owner 已接受；§5.4 main-only governance receipt 已准备但仍待 Human Owner 手工 push |
 | 前端模块组装 | `draft` | [ARCH-FE-001 spec](plans/ARCH-FE-001-frontend-module-auto-assembly/spec.md) | manifest 驱动的菜单/权限组装；不并入 Core 提取 |
 | 项目前端角色权限与模块首批接入 | `owner_accepted` | [ARCH-FE-002 spec](plans/ARCH-FE-002-project-role-access-and-module-pilot/spec.md) | r4 品牌、配置、启动、构建与公开浏览器检查已独立通过；保留 r2/r3 历史，Human Owner 已于 2026-10-09 接受 r4，其他模块预留 003 |
-| 前端系统名称配置 | `draft` | [ARCH-FE-004 spec](plans/ARCH-FE-004-system-name-env-configuration/spec.md) | r1 定义双语构建期名称及统一 i18n/标签页行为；待 Human Owner 精确批准 Revision |
+| 剩余前端模块 manifest 适配 | `owner_accepted` | [ARCH-FE-003 spec](plans/ARCH-FE-003-remaining-module-manifest-adaptation/spec.md) | r2 价格页直调 auxiliary API；模块检查、36 项测试及隔离构建独立验证通过，Human Owner 于 2026-10-12 接受 r2，并确认 env 页面权限显示测试正常；保留 r1 历史 |
+| 前端系统名称与小标题配置 | `owner_accepted` | [ARCH-FE-004 spec](plans/ARCH-FE-004-system-name-env-configuration/spec.md) | r3 独立静态复核通过后，Human Owner 于 2026-10-10 反馈测试无误并接受；保留 r1/r2 历史与原始证据 |
 | 后端角色 API 权限配置 | `qa_passed` | [ARCH-BE-001 spec](plans/ARCH-BE-001-role-api-permissions/spec.md) | r3 已恢复十一组英文 env 标题；配置值和逐项注释保留；独立 QA 通过；待 Human Owner 最终验收 |
+| 能源价格后端 API | `draft` | [ARCH-BE-002 spec](plans/ARCH-BE-002-energy-price-api/spec.md) | 后续现价/历史/新增接口契约；消费项目归属与业务规则待确认；未实施后端，不阻塞 FE-003 |
 | CA 打包配置 | `draft` | [CA-CONFIG-001 spec](plans/CA-CONFIG-001-packaged-configuration-management/spec.md) | 数据库类型/地址设置与 YAML 上传界面 |
 
 ## 延后边界

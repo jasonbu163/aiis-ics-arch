@@ -1,0 +1,81 @@
+{
+  "title": "设备状态",
+  "productionParameters": "生产参数",
+  "drive": "传动工艺",
+  "temperature": "温控工艺",
+  "common": {
+    "set": "设定值",
+    "actual": "实际值",
+    "setActual": "设定 / 实际",
+    "deviation": "偏差",
+    "status": "状态",
+    "lastUpdate": "最后更新",
+    "tempUnitLabel": "温度(℃)",
+    "unit": {
+      "celsius": "℃"
+    }
+  },
+  "driveParams": {
+    "title": "传动部分工艺参数",
+    "processParams": "工艺参数",
+    "tensionParams": "张力参数",
+    "processHint": "实时监测关键工艺设定与实际偏差",
+    "tensionHint": "各传动工位张力设定、实际值与偏差",
+    "parameter": "参数",
+    "station": "工位",
+    "status": {
+      "normal": "正常",
+      "warning": "偏移",
+      "danger": "异常"
+    },
+    "tv": "过程TV值",
+    "km": "过程KM值",
+    "dewPoint": "露点值",
+    "oxygen": "氧含量",
+    "mufflePressure": "马弗压力",
+    "nh3Flow": "氨气流量",
+    "ngFlow": "天然气流量",
+    "tension": {
+      "uncoiler": "开卷机张力",
+      "entryLooper": "入口活套张力",
+      "furnace": "炉内张力",
+      "exitLooper": "出口活套张力",
+      "recoiler": "卷取机张力"
+    }
+  },
+  "tempParams": {
+    "title": "温控部分工艺参数",
+    "heatingZones": "加热区温度",
+    "zone": "加热区 {n}",
+    "trend": "加热区温度趋势",
+    "history": "历史温度记录",
+    "normal": "正常",
+    "offset": "偏移",
+    "abnormal": "异常"
+  },
+  "productionParams": {
+    "title": "当前生产参数",
+    "coilNo": "卷材编号",
+    "grade": "牌号",
+    "thickness": "厚度",
+    "width": "宽度",
+    "entryTime": "进入时间",
+    "totalTime": "过程总时间",
+    "weight": "重量",
+    "speed": "当前速度",
+    "processDetail": "过程详情",
+    "producing": "正在生产",
+    "status": {
+      "completed": "已完成",
+      "processing": "进行中",
+      "pending": "待执行"
+    },
+    "steps": {
+      "uncoiling": "开卷",
+      "heating": "加热",
+      "soaking": "均热",
+      "cooling": "冷却",
+      "recoiling": "卷取"
+    }
+  }
+}

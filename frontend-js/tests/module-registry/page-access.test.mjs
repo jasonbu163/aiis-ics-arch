@@ -37,7 +37,13 @@ test('role arrays reject missing, broken, duplicate, forbidden and non-subset co
 test('admin, supervisor, operator and unknown share route/menu/default decisions', () => {
   const grants = parseRolePageAccess(env(['dashboard.home', 'plan.list'], ['dashboard.home']), registry)
   const matrix = {
-    admin: { paths: ['/dashboard/home', '/plan/list', '/system/user', '/system/dict'], menus: ['dashboard', 'plan', 'system'], entry: '/dashboard/home' },
+    admin: { paths: [
+      '/dashboard/home', '/plan/list', '/performance/list', '/performance/split', '/performance/print',
+      '/performance/efficiency', '/performance/quality/:id', '/monitor/realtime', '/monitor/temperature',
+      '/monitor/energy', '/equipment/production-parameters', '/equipment/drive', '/equipment/temperature',
+      '/auxiliary/stop', '/auxiliary/shift', '/auxiliary/price', '/quality/list', '/quality/spc',
+      '/quality/control/:id', '/system/user', '/system/dict', '/maintenance/log'
+    ], menus: ['dashboard', 'plan', 'performance', 'monitor', 'equipment', 'auxiliary', 'quality', 'system', 'maintenance'], entry: '/dashboard/home' },
     supervisor: { paths: ['/dashboard/home', '/plan/list'], menus: ['dashboard', 'plan'], entry: '/dashboard/home' },
     operator: { paths: ['/dashboard/home'], menus: ['dashboard'], entry: '/dashboard/home' },
     unknown: { paths: [], menus: [], entry: '/login' }
@@ -108,4 +114,47 @@ test('pilot literal i18n keys resolve in both assembled languages', async () => 
   }
   await walk(join(root, 'src/app/dashboard'))
   await walk(join(root, 'src/app/plan'))
+})
+
+
+test('current host and Docker grant shapes never gain pages from enabled modules', () => {
+  for (const [configuration, expected] of [
+    [env(['dashboard.home', 'plan.list', 'system.user'], ['dashboard.home', 'plan.list']), {
+      supervisor: ['dashboard.home', 'plan.list', 'system.user'], operator: ['dashboard.home', 'plan.list']
+    }],
+    [env(), { supervisor: [], operator: [] }]
+  ]) {
+    const grants = parseRolePageAccess(configuration, registry)
+    for (const role of ['supervisor', 'operator', 'unknown']) {
+      const provider = { isAdmin: false, hasPageAccess: id => (grants[role] || []).includes(id) }
+      assert.deepEqual(registry.routeRecords.filter(route => canAccessRoute(route, provider))
+        .map(route => route.meta.pageId), expected[role] || [])
+      assert.deepEqual(accessibleNavigation(registry, provider).flatMap(group => group.children)
+        .map(leaf => leaf.route.meta.pageId), expected[role] || [])
+      assert.equal(defaultAuthenticatedPath(registry, provider), (expected[role] || []).length ? '/dashboard/home' : '/login')
+    }
+  }
+})
+
+test('public new-page grants align menu, route and default; parameter details stay hidden', () => {
+  for (const pageId of ['performance.list', 'performance.split', 'performance.print', 'performance.efficiency',
+    'monitor.realtime', 'monitor.temperature', 'monitor.energy', 'equipment.production-parameters',
+    'equipment.drive', 'equipment.temperature', 'quality.list', 'quality.spc', 'maintenance.log',
+    'performance.quality', 'quality.control']) {
+    const grants = parseRolePageAccess(env([pageId], [pageId]), registry)
+    const route = registry.routeRecords.find(route => route.meta.pageId === pageId)
+    for (const role of ['supervisor', 'operator']) {
+      const provider = { isAdmin: false, hasPageAccess: id => grants[role].includes(id) }
+      assert.deepEqual(registry.routeRecords.filter(record => canAccessRoute(record, provider))
+        .map(record => record.meta.pageId), [pageId])
+      const leaves = accessibleNavigation(registry, provider).flatMap(group => group.children)
+      const hidden = route.path.includes(':id')
+      assert.deepEqual(leaves.map(leaf => leaf.route.meta.pageId), hidden ? [] : [pageId])
+      assert.equal(defaultAuthenticatedPath(registry, provider), hidden ? '/login' : route.path)
+    }
+    const denied = { isAdmin: false, hasPageAccess: () => false }
+    assert.equal(canAccessRoute(route, denied), false)
+    assert.deepEqual(accessibleNavigation(registry, denied), [])
+    assert.equal(defaultAuthenticatedPath(registry, denied), '/login')
+  }
 })

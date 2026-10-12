@@ -1,0 +1,92 @@
+{
+  "title": "Maintenance Management",
+  "log": {
+    "title": "Maintenance Log",
+    "search": {
+      "equipmentName": "Equipment Name",
+      "maintenanceType": "Type",
+      "status": "Status"
+    },
+    "table": {
+      "equipmentName": "Equipment",
+      "equipmentCode": "Code",
+      "maintenanceType": "Type",
+      "maintenanceContent": "Content",
+      "lastDate": "Last Maintenance",
+      "nextDate": "Next Maintenance",
+      "cycleDays": "Cycle (Days)",
+      "status": "Status",
+      "operator": "Operator",
+      "remark": "Remark",
+      "actions": "Actions"
+    },
+    "status": {
+      "normal": "Normal",
+      "warning": "Warning",
+      "overdue": "Overdue",
+      "pending": "Pending"
+    },
+    "type": {
+      "daily": "Daily",
+      "level1": "Level 1",
+      "level2": "Level 2",
+      "level3": "Level 3"
+    },
+    "actions": {
+      "add": "Add Maintenance",
+      "edit": "Edit",
+      "delete": "Delete",
+      "complete": "Complete",
+      "updateCycle": "Update Cycle Status"
+    },
+    "dialog": {
+      "addTitle": "Add Maintenance",
+      "editTitle": "Edit Maintenance",
+      "completeTitle": "Complete Maintenance",
+      "equipmentInfo": "Equipment Info",
+      "maintenanceInfo": "Maintenance Info",
+      "timeInfo": "Time Info",
+      "otherInfo": "Other Info",
+      "selectEquipment": "Select Equipment",
+      "equipmentName": "Equipment Name",
+      "equipmentCode": "Equipment Code",
+      "maintenanceType": "Maintenance Type",
+      "cycleDays": "Cycle (Days)",
+      "maintenanceContent": "Maintenance Content",
+      "lastDate": "Last Maintenance Date",
+      "operator": "Operator",
+      "remark": "Remark",
+      "completeDate": "Completion Time",
+      "completeRemark": "Maintenance Remark",
+      "equipmentNamePlaceholder": "Please select equipment",
+      "equipmentNameAuto": "Auto-filled after selecting equipment",
+      "maintenanceTypePlaceholder": "Please select type",
+      "maintenanceContentPlaceholder": "Please enter maintenance content, detailed description of projects and precautions",
+      "lastDatePlaceholder": "Select date",
+      "operatorPlaceholder": "Please enter operator",
+      "remarkPlaceholder": "Please enter remark (optional)",
+      "completeDatePlaceholder": "Select time",
+      "completeRemarkPlaceholder": "Please enter maintenance remark"
+    },
+    "messages": {
+      "overdueAlert": "{count} maintenance records are overdue, please handle in time!",
+      "deleteConfirm": "Are you sure to delete this maintenance record?",
+      "updateConfirm": "Are you sure to update the cycle status of all maintenance records?",
+      "saveSuccess": "Saved successfully",
+      "deleteSuccess": "Deleted successfully",
+      "completeSuccess": "Maintenance completed",
+      "updateSuccess": "Maintenance cycle updated",
+      "saveFailed": "Save failed",
+      "deleteFailed": "Delete failed",
+      "loadFailed": "Load data failed",
+      "updateFailed": "Operation failed"
+    },
+    "rules": {
+      "equipmentRequired": "Please select equipment",
+      "typeRequired": "Please select type",
+      "contentRequired": "Please enter content",
+      "lastDateRequired": "Please select last maintenance date",
+      "cycleRequired": "Please enter cycle"
+    }
+  }
+}

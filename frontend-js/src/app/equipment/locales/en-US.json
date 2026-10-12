@@ -1,0 +1,81 @@
+{
+  "title": "Device Status",
+  "productionParameters": "Production Params",
+  "drive": "Drive Process",
+  "temperature": "Temp Process",
+  "common": {
+    "set": "Set",
+    "actual": "Actual",
+    "setActual": "Set / Actual",
+    "deviation": "Dev",
+    "status": "Status",
+    "lastUpdate": "Last Update",
+    "tempUnitLabel": "Temp(℃)",
+    "unit": {
+      "celsius": "℃"
+    }
+  },
+  "driveParams": {
+    "title": "Drive Process Parameters",
+    "processParams": "Process Parameters",
+    "tensionParams": "Tension Parameters",
+    "processHint": "Monitor key process setpoints and actual deviation",
+    "tensionHint": "Track setpoint, actual value, and deviation by station",
+    "parameter": "Parameter",
+    "station": "Station",
+    "status": {
+      "normal": "Normal",
+      "warning": "Offset",
+      "danger": "Abnormal"
+    },
+    "tv": "Process TV",
+    "km": "Process KM",
+    "dewPoint": "Dew Point",
+    "oxygen": "Oxygen Content",
+    "mufflePressure": "Muffle Pressure",
+    "nh3Flow": "NH3 Flow",
+    "ngFlow": "NG Flow",
+    "tension": {
+      "uncoiler": "Uncoiler Tension",
+      "entryLooper": "Entry Looper Tension",
+      "furnace": "Furnace Tension",
+      "exitLooper": "Exit Looper Tension",
+      "recoiler": "Recoiler Tension"
+    }
+  },
+  "tempParams": {
+    "title": "Temperature Control Parameters",
+    "heatingZones": "Heating Zones",
+    "zone": "Zone {n}",
+    "trend": "Temp Trend",
+    "history": "Temp History",
+    "normal": "Normal",
+    "offset": "Offset",
+    "abnormal": "Abnormal"
+  },
+  "productionParams": {
+    "title": "Current Production Parameters",
+    "coilNo": "Coil No.",
+    "grade": "Grade",
+    "thickness": "Thickness",
+    "width": "Width",
+    "entryTime": "Entry Time",
+    "totalTime": "Total Time",
+    "weight": "Weight",
+    "speed": "Current Speed",
+    "processDetail": "Process Details",
+    "producing": "Producing",
+    "status": {
+      "completed": "Completed",
+      "processing": "Processing",
+      "pending": "Pending"
+    },
+    "steps": {
+      "uncoiling": "Uncoiling",
+      "heating": "Heating",
+      "soaking": "Soaking",
+      "cooling": "Cooling",
+      "recoiling": "Recoiling"
+    }
+  }
+}

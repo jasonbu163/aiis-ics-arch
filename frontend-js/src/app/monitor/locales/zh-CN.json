@@ -1,0 +1,276 @@
+{
+  "title": "过程监控",
+  "realtime": {
+    "menu": "实时监控",
+    "title": "上位机实时监控",
+    "sourceMode": "采集模式",
+    "lastSampleAt": "最近采样",
+    "sampleCount": "采样次数",
+    "rawPointCount": "点位数量",
+    "noSnapshot": "暂无实时快照，请先启动 monitor worker 采集任务",
+    "loadFailed": "获取实时监控数据失败",
+    "heatingZones": "温区状态",
+    "actualTemp": "实际温度",
+    "setTemp": "设定温度",
+    "output": "输出",
+    "recipe": "当前配方",
+    "coilNumber": "卷材编号",
+    "coilType": "卷材种类",
+    "width": "宽度",
+    "thickness": "厚度",
+    "collectorStatus": {
+      "starting": "启动中",
+      "running": "采集中",
+      "stopped": "已停止",
+      "error": "异常",
+      "stale": "超时"
+    },
+    "metrics": {
+      "lineSpeed": "实际速度",
+      "techTension": "工艺张力",
+      "smallTension": "炉内小张力",
+      "length": "生产长度",
+      "width": "宽度",
+      "thickness": "厚度"
+    },
+    "zones": {
+      "zone1": "1#清洗",
+      "zone2": "2#清洗",
+      "zone3": "3#清洗",
+      "zone4": "1#碱洗",
+      "zone5": "2#碱洗",
+      "zone6": "3#碱洗"
+    },
+    "hmi": {
+      "tabs": {
+        "overview": "产线总览",
+        "heating": "加热与液位",
+        "motorsA": "电机状态 A",
+        "motorsB": "电机状态 B",
+        "coiler": "收放卷与张力",
+        "position": "位置与状态"
+      },
+      "overview": {
+        "collector": "采集状态",
+        "process": "过程指标",
+        "recipe": "当前配方"
+      },
+      "fields": {
+        "actualTemp": "实际温度",
+        "setTemp": "设定温度",
+        "output": "输出",
+        "liquid": "液位",
+        "actualDiameter": "实际卷径",
+        "setTension": "设定张力",
+        "actualTension": "实际张力",
+        "smallTension": "炉内小张力",
+        "lineSpeed": "实际速度",
+        "width": "宽度",
+        "thickness": "厚度",
+        "setTorque": "转矩设定"
+      },
+      "heating": {
+        "units": {
+          "drying": "烘干",
+          "clean3": "3#清洗",
+          "clean2": "2#清洗",
+          "clean1": "1#清洗",
+          "alkali3": "3#碱洗",
+          "alkali2": "2#碱洗",
+          "alkali1": "1#碱洗"
+        }
+      },
+      "motor": {
+        "rows": {
+          "rpm": "实际转速",
+          "current": "实际电流",
+          "torque": "实际转矩",
+          "status": "状态"
+        },
+        "devices": {
+          "uncoiler": "开卷",
+          "s1_1": "S1-1",
+          "s1_2": "S1-2",
+          "s2_1": "S2-1",
+          "s2_2": "S2-2",
+          "recoiler": "收卷",
+          "paperRecoiler": "收纸",
+          "squeeze1": "1#挤干辊",
+          "squeeze2": "2#挤干辊",
+          "squeeze3": "3#挤干辊",
+          "squeeze4": "4#挤干辊",
+          "squeeze5": "5#挤干辊",
+          "squeeze6": "6#挤干辊",
+          "squeeze7": "7#挤干辊",
+          "squeeze8": "8#挤干辊",
+          "squeeze9": "9#挤干辊",
+          "squeeze10": "10#挤干辊",
+          "support1": "1#支撑",
+          "support2": "2#支撑",
+          "support3": "3#支撑",
+          "support4": "4#支撑",
+          "support5": "5#支撑",
+          "support6": "6#支撑",
+          "lift1": "1#提升",
+          "lift2": "2#提升",
+          "lift3": "3#提升",
+          "lift4": "4#提升",
+          "lift5": "5#提升",
+          "lift6": "6#提升",
+          "paperUnwinder1": "1#夹送",
+          "paperUnwinder2": "2#夹送"
+        }
+      },
+      "coiler": {
+        "uncoiler": "开卷区域",
+        "furnace": "入口与炉区",
+        "recoiler": "收卷区域"
+      },
+      "position": {
+        "brush": "刷辊位置",
+        "lineState": "产线状态",
+        "items": {
+          "brush1": "1#刷辊",
+          "brush2": "2#刷辊",
+          "brush3": "3#刷辊",
+          "brush4": "4#刷辊",
+          "brush5": "5#刷辊",
+          "brush6": "6#刷辊",
+          "reset": "复位",
+          "axisEnable": "轴使能",
+          "axisFault": "轴故障",
+          "readyOk": "准备完成",
+          "running": "运行中",
+          "stopped": "停止"
+        }
+      },
+      "state": {
+        "unknown": "未知",
+        "active": "启用",
+        "inactive": "未启用"
+      }
+    }
+  },
+  "temperature": "温度曲线",
+  "energy": "能耗统计",
+  "temperatureTabs": {
+    "temperature": "温度",
+    "tension": "张力",
+    "speed": "速度",
+    "quality": "质量"
+  },
+  "temperatureControl": {
+    "date": "日期",
+    "curveType": "曲线类型"
+  },
+  "temperatureCurve": {
+    "sectionTitle": "实时炉区数据 (Z1-Z6)",
+    "zone": "炉区",
+    "setTemp": "设定温度(℃)",
+    "actTemp": "实测温度(℃)",
+    "deviation": "偏差(℃)",
+    "zoneNames": {
+      "heating1": "加热区 1",
+      "heating2": "加热区 2",
+      "heating3": "加热区 3",
+      "soaking1": "均热区 1",
+      "soaking2": "均热区 2",
+      "soaking3": "均热区 3"
+    },
+    "yAxisName": "温度 (℃)",
+    "series": {
+      "z1Act": "Z1 实测",
+      "z1Set": "Z1 设定",
+      "z2Act": "Z2 实测",
+      "z2Set": "Z2 设定",
+      "z3Act": "Z3 实测",
+      "z3Set": "Z3 设定",
+      "z4Act": "Z4 实测",
+      "z4Set": "Z4 设定",
+      "z5Act": "Z5 实测",
+      "z5Set": "Z5 设定",
+      "z6Act": "Z6 实测",
+      "z6Set": "Z6 设定"
+    },
+    "deviationSuffix": "偏差"
+  },
+  "tensionCurve": {
+    "sectionTitle": "实时张力分布",
+    "position": "位置",
+    "actTension": "实际张力",
+    "unit": "单位",
+    "positions": {
+      "uncoiler": "开卷机张力",
+      "recoiler": "收卷机张力",
+      "furnace": "炉内张力"
+    },
+    "yAxisName": "张力",
+    "series": {
+      "uncoiler": "开卷机 (%)",
+      "recoiler": "收卷机 (%)",
+      "furnace": "炉内 (kg)"
+    }
+  },
+  "speedCurve": {
+    "sectionTitle": "当前产线速度",
+    "indicator": "指标",
+    "speedUnit": "速度 (m/min)",
+    "setSpeed": "设定速度",
+    "actSpeed": "实际速度",
+    "yAxisName": "速度 (m/min)",
+    "series": {
+      "actSpeed": "实际速度",
+      "setSpeed": "设定速度"
+    }
+  },
+  "qualityCurve": {
+    "sectionTitle": "当前质量控制指标",
+    "parameter": "参数名称",
+    "currentValue": "当前值",
+    "unit": "单位",
+    "parameters": {
+      "h2Flow": "耗氢量",
+      "n2Flow": "耗氮量",
+      "oxygen": "氧含量",
+      "dewPoint": "露点值",
+      "pressure": "马弗压力"
+    },
+    "yAxisFlow": "流量 (m³/h)",
+    "yAxisOther": "其他指标",
+    "series": {
+      "h2Flow": "耗氢量",
+      "n2Flow": "耗氮量",
+      "oxygen": "氧含量",
+      "dewPoint": "露点值",
+      "pressure": "马弗压力"
+    }
+  },
+  "energyPage": {
+    "trendTitle": "能耗趋势分析",
+    "timeRange": {
+      "realtime": "实时",
+      "hour": "小时",
+      "day": "日"
+    },
+    "refresh": "刷新",
+    "loadFailed": "获取能耗数据失败"
+  },
+  "energyStats": {
+    "todayTotal": "今日总能耗",
+    "monthTotal": "本月总能耗",
+    "todayElectricity": "今日用电量",
+    "todayNitrogen": "今日氮气量",
+    "monthElectricity": "本月用电量",
+    "monthNitrogen": "本月氮气量",
+    "currentPower": "当前用电读数",
+    "currentSource": "数据来源",
+    "realtimeCurve": "实时过程曲线"
+  },
+  "energyTrendChart": {
+    "legendNaturalGas": "天然气 (n2)",
+    "legendElectricity": "电力 (elect)",
+    "yAxisName": "能耗",
+    "seriesNaturalGas": "天然气 (n2)",
+    "seriesElectricity": "电力 (elect)"
+  }
+}

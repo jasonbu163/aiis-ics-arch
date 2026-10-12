@@ -1,0 +1,139 @@
+{
+  "title": "Auxiliary Management",
+  "price": {
+    "currentEmpty": "Not configured yet",
+    "currentLoadError": "Failed to load current prices",
+    "historyLoadError": "Failed to load price history",
+    "invalidPrice": "Enter a valid non-negative price",
+    "title": "Energy Price",
+    "electric": "Electricity Price",
+    "hydrogen": "Hydrogen Price",
+    "argon": "Argon Price",
+    "electricPrice": "Electricity Price",
+    "electricRemark": "Electricity price remark",
+    "hydrogenPrice": "Hydrogen Price",
+    "hydrogenRemark": "Hydrogen price remark",
+    "argonPrice": "Argon Price",
+    "argonRemark": "Argon price remark",
+    "priceAdjustment": "Price Adjustment",
+    "price": "Price",
+    "unit": "Unit",
+    "remark": "Remark",
+    "history": "Historical Price Records",
+    "updateTime": "Update Time",
+    "operator": "Operator",
+    "units": {
+      "electric": "CNY/kWh",
+      "gas": "CNY/Nm³"
+    }
+  },
+  "shift": {
+    "title": "Team Management",
+    "calendar": "Shift Calendar",
+    "rules": "Shift Rules",
+    "ruleEdit": "Edit Shift Rule",
+    "ruleConfig": "Rule Configuration",
+    "ruleMode": "Shift Mode",
+    "twoShift": "Two-shift Rotation",
+    "threeShift": "Three-shift Rotation",
+    "middleShift": "Middle Shift",
+    "shiftTime": "Shift Time",
+    "legend": "Shift Description",
+    "dayShift": "Day Shift",
+    "nightShift": "Night Shift",
+    "rest": "Rest",
+    "cycle": "Shift Cycle",
+    "fourThree": "Four-Shift Three-Rotation",
+    "teamList": "Team List",
+    "schedule": "Shift Schedule",
+    "monthFilter": "Schedule Month",
+    "addShift": "Add Shift",
+    "adjust": "Adjust Shift",
+    "date": "Date",
+    "teamName": "Team Name",
+    "leader": "Leader",
+    "members": "Members",
+    "phone": "Phone",
+    "monthSelect": "Select Month",
+    "dayShiftTime": "08:00-20:00",
+    "nightShiftTime": "20:00-08:00",
+    "dayShiftLeader": "Day Shift Leader",
+    "nightShiftLeader": "Night Shift Leader",
+    "dayShiftGroup": "Day Shift Group",
+    "nightShiftGroup": "Night Shift Group",
+    "ruleDesc": "Current schedule: {mode}, {cycle}",
+    "dateRequired": "Please select shift date",
+    "teamRequired": "Please select team",
+    "duplicateDate": "A shift already exists for this date. Please adjust it directly.",
+    "legendDay": "Green: Day Shift Team",
+    "legendNight": "Grey: Night Shift Team",
+    "teams": {
+      "teamA": "Team A",
+      "teamB": "Team B",
+      "teamC": "Team C",
+      "teamD": "Team D"
+    }
+  },
+  "stop": {
+    "title": "Stop Performance",
+    "subTitle": "Stop Performance Record (Duration > 2 min)",
+    "search": {
+      "dateRange": "Date Range",
+      "shift": "Shift",
+      "startPlaceholder": "Start Date",
+      "endPlaceholder": "End Date",
+      "rangeSeparator": "To",
+      "shiftPlaceholder": "Select Shift"
+    },
+    "table": {
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "duration": "Duration",
+      "shift": "Shift",
+      "operator": "Operator",
+      "stopType": "Stop Type",
+      "reason": "Reason",
+      "toBeAdded": "To be added"
+    },
+    "dialog": {
+      "addTitle": "Add Stop Record",
+      "editTitle": "Edit Stop Record",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "shift": "Shift",
+      "operator": "Operator",
+      "stopType": "Stop Type",
+      "reason": "Reason",
+      "placeholder": {
+        "startTime": "Select start time",
+        "endTime": "Select end time",
+        "shift": "Select shift",
+        "operator": "Enter operator",
+        "stopType": "Select stop type",
+        "reason": "Enter reason"
+      },
+      "rules": {
+        "startTime": "Please select start time",
+        "shift": "Please select shift",
+        "operator": "Please enter operator"
+      }
+    },
+    "types": {
+      "fault": "Equipment Fault",
+      "roll": "Roll Change",
+      "material": "Material Shortage",
+      "planned": "Planned Stop",
+      "quality": "Quality Issue",
+      "other": "Other"
+    },
+    "messages": {
+      "confirmDelete": "Are you sure you want to delete this record?",
+      "deleteSuccess": "Deleted successfully",
+      "deleteError": "Delete failed",
+      "updateSuccess": "Updated successfully",
+      "createSuccess": "Created successfully",
+      "loadError": "Failed to load data",
+      "actionError": "Operation failed"
+    }
+  }
+}

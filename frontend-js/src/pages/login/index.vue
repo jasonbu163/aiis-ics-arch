@@ -15,8 +15,8 @@
         </div>
 
         <div class="hero-copy">
-          <h1 class="brand-title">{{ $t('common.systemTitle') }}</h1>
-          <p class="brand-subtitle">{{ $t('login.subtitle') }}</p>
+          <h1 class="brand-title" :class="{ 'brand-title--only': !subtitle }">{{ $t('common.systemTitle') }}</h1>
+          <p v-if="subtitle" class="brand-subtitle">{{ subtitle }}</p>
         </div>
 
         <div class="hero-ornament">
@@ -41,7 +41,7 @@
           </div>
           <div class="brand-meta">
             <span class="login-heading">{{ $t('login.login') }}</span>
-            <span class="login-caption">{{ $t('login.subtitle') }}</span>
+            <span class="login-caption">{{ $t('common.systemTitle') }}</span>
           </div>
         </div>
 
@@ -118,7 +118,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { computed, ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { ElMessage } from 'element-plus'
@@ -130,6 +130,7 @@ import BrandLogo from '@/components/shell/BrandLogo.vue'
 const router = useRouter()
 const userStore = useUserStore()
 const { t } = useI18n()
+const subtitle = computed(() => t('login.subtitle'))
 
 const loginFormRef = ref()
 const loading = ref(false)
@@ -264,6 +265,10 @@ if (rememberedUsername) {
   letter-spacing: -0.05em;
   font-weight: 590;
   color: var(--text-primary);
+}
+
+.brand-title--only {
+  margin-bottom: 0;
 }
 
 .brand-subtitle {

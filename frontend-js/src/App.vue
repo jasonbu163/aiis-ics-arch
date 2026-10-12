@@ -4,6 +4,7 @@
   主要功能:
     - 路由视图渲染
     - 全局样式定义
+    - 浏览器标题跟随全局 i18n 系统名称
 -->
 <template>
   <el-config-provider :locale="locale" :message="messageConfig">
@@ -12,12 +13,16 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import en from 'element-plus/dist/locale/en.mjs'
 
-const { locale: i18nLocale } = useI18n()
+const { locale: i18nLocale, t } = useI18n()
+
+watchEffect(() => {
+  document.title = t('common.systemTitle')
+})
 
 const locale = computed(() => {
   return i18nLocale.value === 'zh-CN' ? zhCn : en

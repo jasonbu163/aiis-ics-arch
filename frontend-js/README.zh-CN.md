@@ -73,7 +73,55 @@ pnpm check:access --mode production
 | `VITE_SUPERVISOR_PAGE_ACCESS_JSON` | supervisor 的 JSON 授权数组，元素为已启用、非 admin 专属 leaf 的 `meta.pageId`。`[]` 不授权页面；数组不改变模块 `enabled` 或后端权限。 |
 | `VITE_OPERATOR_PAGE_ACCESS_JSON` | operator 的 JSON pageId 授权数组，必须是 supervisor 子集。未知、关闭、admin 专属页面或非法数组会阻止 dev/build。admin 内置，没有 env 授权数组。 |
 | `VITE_LOGIN_DEMO_ACCOUNTS_ENABLED` | 精确为 `true` 时显示登录页的演示账号提示；它不创建账号、不完成认证、不开启 mock，也不授予页面权限。交付时保持 false。 |
+| `VITE_SYSTEM_NAME_ZH_CN` / `VITE_SYSTEM_NAME_EN_US` | 可选逐语言系统名，通过全局 `common.systemTitle` 用于登录 hero 大标题、右侧 caption、Logo alt 与浏览器标题。独立 trim，缺失/空白时保留各语言原有默认。 |
+| `VITE_SYSTEM_SUBTITLE_ZH_CN` / `VITE_SYSTEM_SUBTITLE_EN_US` | 可选逐语言登录 hero 描述，通过 `login.subtitle` 显示。独立 trim，缺失/空白时整行和间距隐藏，不回退到另一语言或名称。example 为活动 demo 署名，源码及独立 Dockerfile 默认空。 |
 | `VITE_OPEN_BROWSER`（可选，四文件当前未配置） | 精确为 `true` 时在 Vite dev 启动时打开浏览器；缺失或其他值不自动打开。仅用于开发，由 `vite.config.js` 读取。 |
+
+开发时新增公开配置字段，应同时维护两份对应 example 和现有本地 `.env` / `.env.docker.dev`
+的活动 key，并保留用户已有值。可选字段可留空，但须说明空值语义；必填或有校验约束的字段仍须
+填写合法项目值或经批准的安全默认。这是开发变更时的维护规则，不是运行时 env 同步器；
+应用不会自动改写 env 文件。本次不追溯补齐既有可选 `VITE_OPEN_BROWSER`。
+复制片段时替换已有同名赋值，不追加重复 key。
+
+### 系统名称与可选登录描述
+
+公司/组织标识使用 Logo；系统名称使用当前语言的 `common.systemTitle`。两份已跟踪 example
+提供以下可直接启用的公开 demo，两描述值有意使用相同署名：
+
+```dotenv
+VITE_SYSTEM_NAME_ZH_CN="AIIS ICS Architecture"
+VITE_SYSTEM_NAME_EN_US="AIIS ICS Architecture"
+VITE_SYSTEM_SUBTITLE_ZH_CN="Powered by AIIS ICS Architecture"
+VITE_SYSTEM_SUBTITLE_EN_US="Powered by AIIS ICS Architecture"
+```
+
+现有实际 `.env` / `.env.docker.dev` 保留原项目名称，并已补入以下可选空配置块，继续隐藏描述：
+
+```dotenv
+VITE_SYSTEM_SUBTITLE_ZH_CN=
+VITE_SYSTEM_SUBTITLE_EN_US=
+```
+
+验证 demo 时替换已有对应赋值，不追加重复 key，也不要整份覆盖真实 env。清空某语言描述即可
+隐藏该行。源码/i18n 和独立 Dockerfile 的描述默认仍为空；example 的 demo 是显式示例选择。
+
+两项系统名称分别去除首尾空白。缺失、空字符串或纯空白时，保留该语言原有默认值
+（`AIIS ICS Architecture`），不会借用另一语言的配置。名称按普通文本显示，保留内部空格和标点。
+全局 i18n 统一接入配置；登录 hero 大标题、右侧 caption、共用 Logo alt 与浏览器标签页标题均消费
+`common.systemTitle`。标题跟随语言切换、持久化语言刷新、登录和退出，不拼接页面名称。
+JavaScript 初始化前 HTML 标题仍为静态默认；认证壳不增加额外名称控件。
+
+可选 `VITE_SYSTEM_SUBTITLE_ZH_CN` / `VITE_SYSTEM_SUBTITLE_EN_US` 描述通过 `login.subtitle`
+仅显示在登录 hero 大标题下。两项独立 trim，源码默认均为空；缺失、空字符串或纯空白时移除当前
+语言的整行描述及其间距，不回退到另一语言、系统名称或默认宣传语。内部空格与标点
+（包括 `@ { } | < >`）按普通文本保留。右侧 caption、Logo alt 和浏览器标题继续使用系统名。
+独立 Dockerfile 通过 ARG/ENV 传入两描述，默认均为空。
+
+这些值公开且在构建期确定。宿主机 dev 修改后重启 Vite；Docker dev 修改 `env_file` 后，
+须按既有流程重新创建相应容器以重新读取环境，单纯 restart 不会重载 env_file 值。
+生产须重新构建 `dist` 并按既有流程交付；修改 env 或单独重启 Nginx 不会改变已有 bundle。
+独立 `Dockerfile` 通过构建 ARG/ENV 传入名称/描述，名称保持中性默认、描述保持空默认。
+正式部署继续提供宿主机预构建 dist。字段维护由开发变更完成，应用启动不会自动修改本地 env。
 
 ### 品牌 Logo 配置
 

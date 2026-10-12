@@ -79,7 +79,63 @@ build values. Updating env or restarting Nginx cannot rewrite an existing bundle
 | `VITE_SUPERVISOR_PAGE_ACCESS_JSON` | JSON array of enabled, non-admin leaf `meta.pageId` grants for supervisor. `[]` grants no pages. The array does not change module `enabled` or backend permissions. |
 | `VITE_OPERATOR_PAGE_ACCESS_JSON` | JSON array of operator pageId grants; must be a subset of supervisor. Unknown/disabled/admin-only pages and invalid arrays prevent dev/build. Admin is built in and has no env grant array. |
 | `VITE_LOGIN_DEMO_ACCOUNTS_ENABLED` | Exact `true` displays the login page's demo account hints. It does not create accounts, authenticate users, enable mocks or grant pages. Keep false for delivery. |
+| `VITE_SYSTEM_NAME_ZH_CN` / `VITE_SYSTEM_NAME_EN_US` | Optional per-language system names, applied through global `common.systemTitle` to the login hero title, right-hand caption, Logo alt and browser title. Trim independently; missing/blank values retain that language's original default. |
+| `VITE_SYSTEM_SUBTITLE_ZH_CN` / `VITE_SYSTEM_SUBTITLE_EN_US` | Optional per-language login hero descriptions through `login.subtitle`. Trim independently; missing/blank hides the whole row and its spacing, with no language/name fallback. Examples show an active demo signature; source and standalone Dockerfile defaults are empty. |
 | `VITE_OPEN_BROWSER` (optional, absent from these four files) | Exact `true` opens the browser when the Vite dev server starts; absent/other values leave it closed. This development-only setting is read by `vite.config.js`. |
+
+When adding a public configuration key during development, update both corresponding tracked examples and
+existing local `.env` / `.env.docker.dev` active keys together, preserving every existing user value.
+Optional keys may remain empty when their empty-value behavior is documented; required or validated keys
+need valid project values or an approved safe default. This is a development maintenance rule, not a runtime
+env-file synchronizer. The application does not rewrite env files. Existing optional `VITE_OPEN_BROWSER`
+is not backfilled by this change. Replace existing assignments when copying snippets; do not append duplicate keys.
+
+### System name and optional login description
+
+Company/organization identity uses the Logo; the system name uses the current language's
+`common.systemTitle`. Both tracked examples provide this directly usable public demo; the two description
+values intentionally show the same signature in either language:
+
+```dotenv
+VITE_SYSTEM_NAME_ZH_CN="AIIS ICS Architecture"
+VITE_SYSTEM_NAME_EN_US="AIIS ICS Architecture"
+VITE_SYSTEM_SUBTITLE_ZH_CN="Powered by AIIS ICS Architecture"
+VITE_SYSTEM_SUBTITLE_EN_US="Powered by AIIS ICS Architecture"
+```
+
+The existing local `.env` and `.env.docker.dev` keep their project names and now contain this optional
+empty block, so their descriptions remain hidden:
+
+```dotenv
+VITE_SYSTEM_SUBTITLE_ZH_CN=
+VITE_SYSTEM_SUBTITLE_EN_US=
+```
+
+Replace the corresponding existing assignments to try the demo; do not append duplicate keys or replace
+a real env file wholesale. Clear either description value to hide that language's row. The source/i18n and
+standalone Dockerfile description defaults remain empty; the example demo is an explicit sample choice.
+
+Each system name is trimmed independently. Missing, empty or whitespace-only names retain that language's
+existing default (`AIIS ICS Architecture`); the other language's setting is never borrowed. Names are
+plain text, including internal spaces and punctuation. Global i18n applies the values once; the login
+hero title, right-hand caption, shared Logo alt and browser tab title consume `common.systemTitle`.
+The title follows language switches, persisted language refreshes, login and logout without page-name suffixes.
+Before JavaScript initializes, the HTML title remains the static default. No additional name UI is added to the shell.
+
+The optional `VITE_SYSTEM_SUBTITLE_ZH_CN` / `VITE_SYSTEM_SUBTITLE_EN_US` descriptions use
+`login.subtitle` only below the login hero title. Each is trimmed independently; its source default is empty;
+missing, empty or whitespace-only values remove that language's entire description row and its spacing.
+There is no fallback to another language, the system name or a slogan. Internal spaces and punctuation
+(including `@ { } | < >`) remain plain text. The right-hand caption, Logo alt and browser title continue
+using the system name. The standalone Dockerfile passes both descriptions through ARG/ENV with empty defaults.
+
+These are public build-time values. For host dev, restart Vite after changes. For Docker dev, changes to
+its `env_file` require recreating the relevant container through the existing process to reload the
+environment; a simple container restart does not reload env_file values. For production, rebuild `dist`
+and deliver it through the existing process. Updating env or restarting Nginx alone cannot change bundles.
+The standalone `Dockerfile` passes names/descriptions through build ARG/ENV; the name defaults remain
+neutral and the description defaults empty. Production continues serving host-prebuilt dist. Configuration
+maintenance happens during development; application startup does not automatically modify local env files.
 
 ### Brand Logo configuration
 

@@ -249,13 +249,31 @@ test('invalid schema, dynamic visible route and incomplete bilingual title fail'
 test('actual source preserves Core route identity, shell locales and default-disabled demo', async () => {
   const root = fileURLToPath(new URL('../../', import.meta.url))
   const registry = await loadRegistry(root)
-  assert.deepEqual(registry.activeModuleNames, ['dashboard', 'plan', 'system'])
+  assert.deepEqual(registry.activeModuleNames, ['dashboard', 'plan', 'performance', 'monitor', 'equipment', 'auxiliary', 'quality', 'system', 'maintenance'])
   assert.deepEqual(registry.routes.map(route => [route.name, route.path, route.meta.pageId]), [
     ['Dashboard', 'dashboard/home', 'dashboard.home'],
     [undefined, 'dashboard', undefined],
     ['PlanList', 'plan/list', 'plan.list'],
+    ['PerformanceList', 'performance/list', 'performance.list'],
+    ['PerformanceSplit', 'performance/split', 'performance.split'],
+    ['PerformancePrint', 'performance/print', 'performance.print'],
+    ['PerformanceEfficiency', 'performance/efficiency', 'performance.efficiency'],
+    ['PerformanceQuality', 'performance/quality/:id', 'performance.quality'],
+    ['MonitorRealtime', 'monitor/realtime', 'monitor.realtime'],
+    ['MonitorTemperature', 'monitor/temperature', 'monitor.temperature'],
+    ['MonitorEnergy', 'monitor/energy', 'monitor.energy'],
+    ['EquipmentProductionParameters', 'equipment/production-parameters', 'equipment.production-parameters'],
+    ['EquipmentDrive', 'equipment/drive', 'equipment.drive'],
+    ['EquipmentTemperature', 'equipment/temperature', 'equipment.temperature'],
+    ['AuxiliaryStop', 'auxiliary/stop', 'auxiliary.stop'],
+    ['AuxiliaryShift', 'auxiliary/shift', 'auxiliary.shift'],
+    ['AuxiliaryPrice', 'auxiliary/price', 'auxiliary.price'],
+    ['QualityList', 'quality/list', 'quality.list'],
+    ['QualitySPC', 'quality/spc', 'quality.spc'],
+    ['QualityControl', 'quality/control/:id', 'quality.control'],
     ['SystemUser', 'system/user', 'system.user'],
-    ['SystemProjectionMapping', 'system/dict', 'system.projection-mapping']
+    ['SystemProjectionMapping', 'system/dict', 'system.projection-mapping'],
+    ['MaintenanceLog', 'maintenance/log', 'maintenance.log']
   ])
   assert.equal(registry.modules.find(module => module.name === 'aiis_demo').enabled, false)
   for (const locale of ['en-US', 'zh-CN']) {
@@ -274,5 +292,78 @@ test('actual source preserves Core route identity, shell locales and default-dis
         assert.equal(typeof resolveMessage(registry.messages[locale], match[1]), 'string', `${relative}:${locale}:${match[1]}`)
       }
     }
+  }
+})
+
+
+test('five adapted modules retain order, owned bilingual titles and thirteen visible leaves', async () => {
+  const registry = await loadRegistry(fileURLToPath(new URL('../../', import.meta.url)))
+  const groups = [
+    ['performance', 30, 'DataLine'], ['monitor', 40, 'Monitor'],
+    ['equipment', 50, 'Monitor'], ['quality', 70, 'CircleCheck'], ['maintenance', 90, 'Notebook']
+  ]
+  const pages = [
+    ['performance.list', 'performance.list', 10, 'List'],
+    ['performance.split', 'performance.split', 20, 'Scissor'],
+    ['performance.print', 'performance.print', 30, 'Printer'],
+    ['performance.efficiency', 'performance.modules.efficiency', 40, 'TrendCharts'],
+    ['monitor.realtime', 'monitor.realtime.menu', 10, 'Monitor'],
+    ['monitor.temperature', 'monitor.temperature', 20, 'TrendCharts'],
+    ['monitor.energy', 'monitor.energy', 30, 'Cpu'],
+    ['equipment.production-parameters', 'equipment.productionParameters', 10, 'DataLine'],
+    ['equipment.drive', 'equipment.drive', 20, 'Odometer'],
+    ['equipment.temperature', 'equipment.temperature', 30, 'Operation'],
+    ['quality.list', 'quality.list', 10, 'List'],
+    ['quality.spc', 'quality.spc', 20, 'DataAnalysis'],
+    ['maintenance.log', 'maintenance.log.title', 10, 'Document']
+  ]
+  const menu = accessibleNavigation(registry, admin)
+  assert.deepEqual(menu.map(group => group.name), registry.activeModuleNames)
+  for (const [name, order, icon] of groups) {
+    const module = registry.activeModules.find(module => module.name === name)
+    assert.equal(module.enabled, true)
+    assert.equal(module.order, order)
+    assert.equal(module.navigation.titleKey, `${name}.title`)
+    assert.equal(module.navigation.icon, icon)
+  }
+  const leaves = menu.filter(group => groups.some(([name]) => group.name === name))
+    .flatMap(group => group.children)
+  assert.deepEqual(leaves.map(leaf => leaf.route.meta.pageId), pages.map(([id]) => id))
+  for (const [id, titleKey, order, icon] of pages) {
+    const leaf = leaves.find(leaf => leaf.route.meta.pageId === id)
+    assert.equal(leaf.titleKey, titleKey)
+    assert.equal(leaf.icon, icon)
+    assert.equal(leaf.route.meta.navigation.order, order)
+  }
+  const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/', children: registry.routes }] })
+  for (const [id, titleKey] of [
+    ['performance.quality', 'performance.modules.qualityControl'], ['quality.control', 'quality.control.routeTitle']
+  ]) {
+    const route = registry.routeRecords.find(route => route.meta.pageId === id)
+    assert.equal(route.meta.titleKey, titleKey)
+    assert.equal(route.meta.navigation.visible, false)
+    assert.match(route.path, /:id$/)
+    assert.equal(router.resolve(route.path.replace(':id', '42')).name, route.name)
+    assert.equal(canAccessRoute(route, access(id)), true)
+    assert.equal(router.resolve(route.path.replace('/:id', '')).name, undefined)
+    assert.equal(leaves.some(leaf => leaf.route.meta.pageId === id), false)
+  }
+  for (const [name] of groups) {
+    const module = registry.activeModules.find(module => module.name === name)
+    for (const route of module.routeRecords) {
+      assert.equal(route.meta.parentTitleKey, `${name}.title`)
+      for (const locale of ['en-US', 'zh-CN']) {
+        for (const key of [module.navigation.titleKey, route.meta.titleKey, route.meta.parentTitleKey]) {
+          const title = resolveMessage(registry.messages[locale], key)
+          assert.equal(typeof title, 'string', `${locale}:${key}`)
+          assert.doesNotMatch(title, /[{}]/, `${locale}:${key}`)
+        }
+      }
+    }
+  }
+  assert.equal(resolveMessage(registry.messages['en-US'], 'quality.control.routeTitle'), 'Quality Control')
+  assert.equal(resolveMessage(registry.messages['zh-CN'], 'quality.control.routeTitle'), '质量控制')
+  for (const locale of ['en-US', 'zh-CN']) {
+    assert.match(resolveMessage(registry.messages[locale], 'quality.control.title'), /\{coilNo\}/)
   }
 })

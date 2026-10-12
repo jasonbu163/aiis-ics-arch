@@ -1,0 +1,276 @@
+{
+  "title": "Process Monitoring",
+  "realtime": {
+    "menu": "Realtime Monitor",
+    "title": "PC Realtime Monitor",
+    "sourceMode": "Source Mode",
+    "lastSampleAt": "Last Sample",
+    "sampleCount": "Samples",
+    "rawPointCount": "Point Count",
+    "noSnapshot": "No realtime snapshot yet. Start the monitor worker collector first.",
+    "loadFailed": "Failed to load realtime monitor data",
+    "heatingZones": "Heating Zones",
+    "actualTemp": "Actual Temp",
+    "setTemp": "Set Temp",
+    "output": "Output",
+    "recipe": "Current Recipe",
+    "coilNumber": "Coil No.",
+    "coilType": "Coil Type",
+    "width": "Width",
+    "thickness": "Thickness",
+    "collectorStatus": {
+      "starting": "Starting",
+      "running": "Collecting",
+      "stopped": "Stopped",
+      "error": "Error",
+      "stale": "Stale"
+    },
+    "metrics": {
+      "lineSpeed": "Actual Speed",
+      "techTension": "Process Tension",
+      "smallTension": "Furnace Small Tension",
+      "length": "Production Length",
+      "width": "Width",
+      "thickness": "Thickness"
+    },
+    "zones": {
+      "zone1": "Clean 1",
+      "zone2": "Clean 2",
+      "zone3": "Clean 3",
+      "zone4": "Alkali 1",
+      "zone5": "Alkali 2",
+      "zone6": "Alkali 3"
+    },
+    "hmi": {
+      "tabs": {
+        "overview": "Line Overview",
+        "heating": "Heating & Level",
+        "motorsA": "Motor Status A",
+        "motorsB": "Motor Status B",
+        "coiler": "Coiler & Tension",
+        "position": "Position & State"
+      },
+      "overview": {
+        "collector": "Collector Status",
+        "process": "Process Metrics",
+        "recipe": "Current Recipe"
+      },
+      "fields": {
+        "actualTemp": "Actual Temp",
+        "setTemp": "Set Temp",
+        "output": "Output",
+        "liquid": "Level",
+        "actualDiameter": "Actual Diameter",
+        "setTension": "Set Tension",
+        "actualTension": "Actual Tension",
+        "smallTension": "Furnace Small Tension",
+        "lineSpeed": "Actual Speed",
+        "width": "Width",
+        "thickness": "Thickness",
+        "setTorque": "Set Torque"
+      },
+      "heating": {
+        "units": {
+          "drying": "Drying",
+          "clean3": "Clean 3",
+          "clean2": "Clean 2",
+          "clean1": "Clean 1",
+          "alkali3": "Alkali 3",
+          "alkali2": "Alkali 2",
+          "alkali1": "Alkali 1"
+        }
+      },
+      "motor": {
+        "rows": {
+          "rpm": "Actual RPM",
+          "current": "Actual Current",
+          "torque": "Actual Torque",
+          "status": "Status"
+        },
+        "devices": {
+          "uncoiler": "Uncoiler",
+          "s1_1": "S1-1",
+          "s1_2": "S1-2",
+          "s2_1": "S2-1",
+          "s2_2": "S2-2",
+          "recoiler": "Recoiler",
+          "paperRecoiler": "Paper Recoiler",
+          "squeeze1": "Squeeze 1",
+          "squeeze2": "Squeeze 2",
+          "squeeze3": "Squeeze 3",
+          "squeeze4": "Squeeze 4",
+          "squeeze5": "Squeeze 5",
+          "squeeze6": "Squeeze 6",
+          "squeeze7": "Squeeze 7",
+          "squeeze8": "Squeeze 8",
+          "squeeze9": "Squeeze 9",
+          "squeeze10": "Squeeze 10",
+          "support1": "Support 1",
+          "support2": "Support 2",
+          "support3": "Support 3",
+          "support4": "Support 4",
+          "support5": "Support 5",
+          "support6": "Support 6",
+          "lift1": "Lift 1",
+          "lift2": "Lift 2",
+          "lift3": "Lift 3",
+          "lift4": "Lift 4",
+          "lift5": "Lift 5",
+          "lift6": "Lift 6",
+          "paperUnwinder1": "Paper Feed 1",
+          "paperUnwinder2": "Paper Feed 2"
+        }
+      },
+      "coiler": {
+        "uncoiler": "Uncoiler Area",
+        "furnace": "Entry & Furnace",
+        "recoiler": "Recoiler Area"
+      },
+      "position": {
+        "brush": "Brush Positions",
+        "lineState": "Line State",
+        "items": {
+          "brush1": "Brush 1",
+          "brush2": "Brush 2",
+          "brush3": "Brush 3",
+          "brush4": "Brush 4",
+          "brush5": "Brush 5",
+          "brush6": "Brush 6",
+          "reset": "Reset",
+          "axisEnable": "Axis Enable",
+          "axisFault": "Axis Fault",
+          "readyOk": "Ready",
+          "running": "Running",
+          "stopped": "Stopped"
+        }
+      },
+      "state": {
+        "unknown": "Unknown",
+        "active": "Active",
+        "inactive": "Inactive"
+      }
+    }
+  },
+  "temperature": "Temperature Curve",
+  "energy": "Energy Stats",
+  "temperatureTabs": {
+    "temperature": "Temperature",
+    "tension": "Tension",
+    "speed": "Speed",
+    "quality": "Quality"
+  },
+  "temperatureControl": {
+    "date": "Date",
+    "curveType": "Curve Type"
+  },
+  "temperatureCurve": {
+    "sectionTitle": "Live Furnace Zones (Z1-Z6)",
+    "zone": "Zone",
+    "setTemp": "Set Temp (℃)",
+    "actTemp": "Actual Temp (℃)",
+    "deviation": "Deviation (℃)",
+    "zoneNames": {
+      "heating1": "Heating Zone 1",
+      "heating2": "Heating Zone 2",
+      "heating3": "Heating Zone 3",
+      "soaking1": "Soaking Zone 1",
+      "soaking2": "Soaking Zone 2",
+      "soaking3": "Soaking Zone 3"
+    },
+    "yAxisName": "Temp (℃)",
+    "series": {
+      "z1Act": "Z1 Actual",
+      "z1Set": "Z1 Set",
+      "z2Act": "Z2 Actual",
+      "z2Set": "Z2 Set",
+      "z3Act": "Z3 Actual",
+      "z3Set": "Z3 Set",
+      "z4Act": "Z4 Actual",
+      "z4Set": "Z4 Set",
+      "z5Act": "Z5 Actual",
+      "z5Set": "Z5 Set",
+      "z6Act": "Z6 Actual",
+      "z6Set": "Z6 Set"
+    },
+    "deviationSuffix": "Deviation"
+  },
+  "tensionCurve": {
+    "sectionTitle": "Live Tension Distribution",
+    "position": "Position",
+    "actTension": "Actual Tension",
+    "unit": "Unit",
+    "positions": {
+      "uncoiler": "Uncoiler Tension",
+      "recoiler": "Recoiler Tension",
+      "furnace": "Furnace Tension"
+    },
+    "yAxisName": "Tension",
+    "series": {
+      "uncoiler": "Uncoiler (%)",
+      "recoiler": "Recoiler (%)",
+      "furnace": "Furnace (kg)"
+    }
+  },
+  "speedCurve": {
+    "sectionTitle": "Current Line Speed",
+    "indicator": "Indicator",
+    "speedUnit": "Speed (m/min)",
+    "setSpeed": "Set Speed",
+    "actSpeed": "Actual Speed",
+    "yAxisName": "Speed (m/min)",
+    "series": {
+      "actSpeed": "Actual Speed",
+      "setSpeed": "Set Speed"
+    }
+  },
+  "qualityCurve": {
+    "sectionTitle": "Current Quality Indicators",
+    "parameter": "Parameter",
+    "currentValue": "Current Value",
+    "unit": "Unit",
+    "parameters": {
+      "h2Flow": "H2 Flow",
+      "n2Flow": "N2 Flow",
+      "oxygen": "Oxygen",
+      "dewPoint": "Dew Point",
+      "pressure": "Muffle Pressure"
+    },
+    "yAxisFlow": "Flow (m³/h)",
+    "yAxisOther": "Other Indicators",
+    "series": {
+      "h2Flow": "H2 Flow",
+      "n2Flow": "N2 Flow",
+      "oxygen": "Oxygen",
+      "dewPoint": "Dew Point",
+      "pressure": "Muffle Pressure"
+    }
+  },
+  "energyPage": {
+    "trendTitle": "Energy Trend Analysis",
+    "timeRange": {
+      "realtime": "Realtime",
+      "hour": "Hour",
+      "day": "Day"
+    },
+    "refresh": "Refresh",
+    "loadFailed": "Failed to load energy data"
+  },
+  "energyStats": {
+    "todayTotal": "Today Total",
+    "monthTotal": "Month Total",
+    "todayElectricity": "Today Electricity",
+    "todayNitrogen": "Today Nitrogen",
+    "monthElectricity": "Month Electricity",
+    "monthNitrogen": "Month Nitrogen",
+    "currentPower": "Current Electricity Reading",
+    "currentSource": "Source",
+    "realtimeCurve": "Realtime Process Curve"
+  },
+  "energyTrendChart": {
+    "legendNaturalGas": "Natural Gas (n2)",
+    "legendElectricity": "Electricity (elect)",
+    "yAxisName": "Energy",
+    "seriesNaturalGas": "Natural Gas (n2)",
+    "seriesElectricity": "Electricity (elect)"
+  }
+}

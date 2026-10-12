@@ -1,0 +1,258 @@
+{
+  "title": "Quality",
+  "list": "Quality List",
+  "spc": "SPC Analysis",
+  "listPage": {
+    "title": "Quality Control List",
+    "newInspection": "New Inspection",
+    "exportReport": "Export Report",
+    "exportSuccess": "Report exported successfully",
+    "fields": {
+      "coilNo": "Coil No.",
+      "grade": "Grade",
+      "spec": "Spec",
+      "weight": "Weight(ton)",
+      "qualityGrade": "Quality Grade",
+      "judgment": "Judgment",
+      "inspector": "Inspector",
+      "inspectTime": "Inspect Time",
+      "inspectDate": "Inspect Date"
+    },
+    "placeholder": {
+      "coilNo": "Enter coil no.",
+      "grade": "Enter grade",
+      "select": "Please select",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "rangeSeparator": "to"
+    },
+    "grade": {
+      "excellent": "Excellent",
+      "firstClass": "First Grade",
+      "first": "First Grade",
+      "qualified": "Qualified",
+      "unqualified": "Unqualified",
+      "pending": "Pending Recheck",
+      "recheck": "Pending Recheck"
+    },
+    "judgment": {
+      "qualified": "Qualified",
+      "unqualified": "Unqualified",
+      "concession": "Concession",
+      "recheck": "Pending Recheck"
+    }
+  },
+  "control": {
+    "routeTitle": "Quality Control",
+    "title": "Quality Control - {coilNo}",
+    "basicInfo": "Coil Information",
+    "inspectionItems": "Inspection Items",
+    "defectRecords": "Defect Records",
+    "addDefect": "Add Defect",
+    "summary": "Quality Summary",
+    "coilImages": "Coil Images",
+    "imagePreview": "Image Preview",
+    "previewAlt": "Preview image",
+    "uploadTip": "Upload coil appearance, labels, reports, and related images. Up to 10 images.",
+    "confirmSave": "Confirm saving quality information?",
+    "saveSuccess": "Saved successfully",
+    "saveFailed": "Save failed",
+    "imageLimitExceeded": "Image limit exceeded",
+    "loadFailed": "Failed to load data",
+    "fields": {
+      "coilNo": "Coil No.",
+      "grade": "Grade",
+      "weight": "Weight",
+      "productionTime": "Production Time",
+      "completeTime": "Complete Time",
+      "operator": "Operator",
+      "shift": "Shift",
+      "item": "Inspection Item",
+      "standard": "Standard",
+      "actualValue": "Actual Value",
+      "result": "Result",
+      "inspector": "Inspector",
+      "inspectTime": "Inspection Time",
+      "remark": "Remark",
+      "position": "Defect Position",
+      "defectType": "Defect Type",
+      "defectLevel": "Defect Level",
+      "length": "Length(mm)",
+      "description": "Description",
+      "defectImage": "Defect Image",
+      "judgment": "Judgment",
+      "qualityGrade": "Quality Grade",
+      "comment": "Quality Comment",
+      "inspectDate": "Inspection Date"
+    },
+    "placeholder": {
+      "actualValue": "Enter actual value",
+      "select": "Please select",
+      "inspector": "Inspector",
+      "inspectTime": "Select time",
+      "remark": "Remark",
+      "position": "Enter defect position",
+      "level": "Level",
+      "description": "Enter defect description",
+      "judgment": "Select judgment",
+      "qualityGrade": "Select quality grade",
+      "comment": "Enter quality comment",
+      "inspectorName": "Inspector name",
+      "inspectDate": "Select date"
+    },
+    "result": {
+      "qualified": "Qualified",
+      "unqualified": "Unqualified",
+      "recheck": "Pending Recheck",
+      "concession": "Concession"
+    },
+    "defectType": {
+      "scratch": "Surface Scratch",
+      "scale": "Scale",
+      "pit": "Pit",
+      "wave": "Wave",
+      "edgeCrack": "Edge Crack",
+      "other": "Other"
+    },
+    "level": {
+      "light": "Light",
+      "normal": "Normal",
+      "severe": "Severe"
+    },
+    "grade": {
+      "excellent": "Excellent",
+      "first": "First Grade",
+      "qualified": "Qualified",
+      "unqualified": "Unqualified"
+    },
+    "items": {
+      "surfaceQuality": "Surface Quality",
+      "thicknessDeviation": "Thickness Deviation",
+      "widthDeviation": "Width Deviation",
+      "flatness": "Flatness",
+      "edgeQuality": "Edge Quality",
+      "coilShape": "Coil Shape",
+      "sideBending": "Side Bending",
+      "tensileStrength": "Tensile Strength",
+      "yieldStrength": "Yield Strength",
+      "elongation": "Elongation",
+      "hardness": "Hardness",
+      "bendingPerformance": "Bending Performance",
+      "chemicalComposition": "Chemical Composition",
+      "grainSize": "Grain Size"
+    },
+    "standards": {
+      "surfaceQuality": "No cracks, scratches, scale, or related defects",
+      "thicknessDeviation": "±0.05mm",
+      "widthDeviation": "±2mm",
+      "flatness": "≤3mm/m",
+      "edgeQuality": "No cracks or burrs",
+      "coilShape": "No telescoping, loose coil, or flat coil",
+      "sideBending": "≤3mm/2m",
+      "tensileStrength": "≥400MPa",
+      "yieldStrength": "≥300MPa",
+      "elongation": "≥20%",
+      "hardness": "HV150-200",
+      "bendingPerformance": "d=2a, no cracks at 180°",
+      "chemicalComposition": "Meets grade requirements",
+      "grainSize": "≥ Grade 5"
+    }
+  },
+  "spcPage": {
+    "form": {
+      "analysisItem": "Analysis Item",
+      "selectAnalysisItem": "Select analysis item",
+      "grade": "Grade",
+      "selectGrade": "Select grade",
+      "dateRange": "Date Range",
+      "rangeSeparator": "to",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "subgroupSize": "Subgroup Size",
+      "analyze": "Analyze",
+      "exportReport": "Export Report"
+    },
+    "items": {
+      "thickness": "Thickness",
+      "width": "Width",
+      "tensile": "Tensile Strength",
+      "yield": "Yield Strength",
+      "hardness": "Hardness",
+      "elongation": "Elongation"
+    },
+    "stats": {
+      "cp": "Process Capability Cp",
+      "cpk": "Process Capability Cpk",
+      "sigma": "Std. Dev. σ",
+      "defectRate": "Estimated Defect Rate"
+    },
+    "status": {
+      "capable": "Capable",
+      "normal": "Moderate",
+      "insufficient": "Insufficient",
+      "stable": "Stable",
+      "attention": "Needs Attention",
+      "improve": "Needs Improvement",
+      "normalPoint": "Normal",
+      "abnormalPoint": "Abnormal"
+    },
+    "charts": {
+      "xbar": "X-bar Control Chart",
+      "r": "R Control Chart",
+      "s": "S Control Chart",
+      "xbarTab": "X-bar",
+      "rTab": "R",
+      "sTab": "S",
+      "histogram": "Histogram",
+      "capability": "Capability Analysis",
+      "abnormal": "Abnormal Point Analysis",
+      "conclusion": "SPC Conclusion and Recommendations",
+      "rawData": "Raw Data",
+      "exportData": "Export Data",
+      "subgroup": "Subgroup",
+      "subgroupNo": "Subgroup No.",
+      "value": "Value",
+      "abnormalType": "Abnormal Type",
+      "rule": "Rule",
+      "time": "Time",
+      "frequency": "Frequency",
+      "density": "Density",
+      "distribution": "Distribution Curve",
+      "index": "No.",
+      "coilNo": "Coil No.",
+      "grade": "Grade",
+      "measureTime": "Measure Time",
+      "operator": "Operator",
+      "status": "Status",
+      "recommendations": "Recommendations:"
+    },
+    "abnormal": {
+      "outOfLimit": "Out of Limit",
+      "trend": "Continuous Trend",
+      "aboveUcl": "Above UCL",
+      "belowLcl": "Below LCL"
+    },
+    "conclusion": {
+      "excellentTitle": "Process Capability: Excellent",
+      "goodTitle": "Process Capability: Good",
+      "improveTitle": "Process Capability: Needs Improvement",
+      "excellentDesc": "Current Cpk={cpk}. Process capability is excellent and stable enough to meet quality requirements.",
+      "goodDesc": "Current Cpk={cpk}. Process capability is good and generally meets quality requirements.",
+      "improveDesc": "Current Cpk={cpk}. Process capability is insufficient. Analyze causes and take improvement actions.",
+      "emptyDesc": "No SPC measurement data is available under the current filters. Adjust filters and analyze again.",
+      "initialDesc": "Current Cpk=1.25. Process capability is good and stable enough to meet quality requirements. Continue monitoring."
+    },
+    "recommendations": [
+      "Continue following standard operating procedures to keep the process stable",
+      "Analyze abnormal points and define preventive actions",
+      "Regularly verify measurement system accuracy and stability",
+      "Run SPC analysis monthly to improve process capability continuously"
+    ],
+    "messages": {
+      "analyzing": "Starting SPC analysis...",
+      "analyzeFailed": "SPC analysis failed",
+      "exportReportSuccess": "SPC report exported successfully",
+      "exportDataSuccess": "Raw data exported successfully"
+    }
+  }
+}

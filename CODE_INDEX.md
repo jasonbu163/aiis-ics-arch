@@ -40,6 +40,9 @@ source topology or important entrypoints change.
 - `frontend-js/src/components/` — shared Core UI components.
 - `frontend-js/src/components/navigation/ModuleNavigation.vue` — generic group/leaf menu and icon fallback.
 - `frontend-js/src/app/dashboard/` / `frontend-js/src/app/plan/` — first enabled module onboarding pilot.
+- `frontend-js/src/config/systemName.js` — independent bilingual build-time system names and optional login descriptions consumed through global i18n.
+- `frontend-js/src/App.vue` — root view and reactive system-name browser title.
+- `frontend-js/tests/module-registry/system-name.test.mjs` — independent name fallback, optional description and literal-text i18n contracts.
 - `frontend-js/src/config/brand.js` / `brandOptions.js` — bundled Logo discovery and pure alignment/glow options.
 - `frontend-js/src/components/shell/BrandLogo.vue` — shared login/shell image contain sizing and three glow regions.
 - `frontend-js/src/assets/brand/demo-organization-logo.svg` — generic public fallback asset.

@@ -1,0 +1,454 @@
+{
+  "title": "实绩管理",
+  "list": "实绩列表",
+  "coilNo": "料卷号",
+  "parentCoilNo": "母卷号",
+  "grade": "牌号",
+  "spec": "规格",
+  "weight": "卷重",
+  "totalLength": "总长度",
+  "diameter": "直径",
+  "density": "密度",
+  "totalTime": "总时间",
+  "totalDuration": "总用时",
+  "observationStatus": "生产状态",
+  "recordSource": "记录来源",
+  "splitStatus": "分卷状态",
+  "split": "分卷管理",
+  "splitNo": "分卷号",
+  "print": "打印设置",
+  "data": "数据",
+  "edit": "编辑实绩",
+  "processData": "过程数据跟踪",
+  "temperatureCurve": "温度曲线",
+  "tensionCurve": "张力曲线",
+  "speedCurve": "速度曲线",
+  "formSections": {
+    "basicInfo": "基础信息",
+    "specParams": "规格参数",
+    "otherInfo": "其他信息"
+  },
+  "units": {
+    "celsius": "℃",
+    "kN": "kN"
+  },
+  "chart": {
+    "temperatureAxis": "温度",
+    "tensionAxis": "张力",
+    "speedAxis": "速度"
+  },
+  "splitStatusMap": {
+    "splitted": "已分卷",
+    "notSplit": "未分卷",
+    "child": "子卷"
+  },
+  "observationStatusMap": {
+    "in_production": "正在生产",
+    "not_in_production": "已结束观察",
+    "unknown": "未知",
+    "manual_historical": "手工/历史"
+  },
+  "durationSourceMap": {
+    "manual_time": "人工开始/结束时间",
+    "plc_observed": "PLC 观察时间",
+    "unavailable": "不可用"
+  },
+  "durationUnits": {
+    "second": "秒"
+  },
+  "recordSources": {
+    "manual_entry": "手工录入",
+    "split_generated": "分卷生成",
+    "merge_generated": "合卷生成",
+    "unplanned_plc": "PLC 未计划记录",
+    "frontend_mock": "前端 mock"
+  },
+  "planLink": {
+    "title": "计划关联",
+    "performanceSummary": "实绩摘要",
+    "planId": "计划 ID",
+    "statusColumn": "计划关联",
+    "linked": "已关联",
+    "unlinked": "未关联",
+    "rowAction": "关联计划",
+    "candidatesTab": "匹配已有计划",
+    "backfillTab": "补录计划",
+    "syncObservation": "同步观察",
+    "linkSelected": "关联选中计划",
+    "backfillSubmit": "补录并关联",
+    "resultLinked": "{action}，计划 ID：{planId}",
+    "resultNotLinked": "{action}，候选数：{count}",
+    "actionMap": {
+      "candidate_loaded": "候选已加载",
+      "no_matching_plan": "没有匹配计划",
+      "synced_observation": "已同步已有计划观察状态",
+      "linked_existing_plan": "已关联已有计划",
+      "backfilled_plan": "已补录计划并关联",
+      "already_linked": "实绩已关联计划",
+      "unknown": "未知结果"
+    },
+    "messages": {
+      "candidateLoadFailed": "候选计划加载失败",
+      "syncSuccess": "计划观察状态已同步",
+      "syncFailed": "同步观察失败",
+      "linkSuccess": "计划已关联",
+      "linkFailed": "关联计划失败",
+      "backfillSuccess": "计划已补录并关联",
+      "backfillFailed": "补录计划失败"
+    }
+  },
+  "modules": {
+    "qualityControl": "质量控制",
+    "efficiency": "效率统计"
+  },
+  "table": {
+    "zone": "炉区/区域",
+    "maxTemp": "最高温度",
+    "minTemp": "最低温度",
+    "avgTemp": "平均温度",
+    "duration": "停留时间",
+    "setTension": "设定张力",
+    "avgTension": "平均张力",
+    "maxTension": "最大张力",
+    "minTension": "最小张力",
+    "setSpeed": "设定速度",
+    "avgSpeed": "平均速度",
+    "maxSpeed": "最大速度",
+    "operation": "操作",
+    "info": "信息",
+    "setTemp": "设定温度"
+  },
+  "form": {
+    "coilNo": "料卷号",
+    "grade": "牌号",
+    "density": "密度",
+    "weight": "重量 (吨)",
+    "totalLength": "总长度",
+    "diameter": "直径",
+    "startTime": "开始时间",
+    "endTime": "结束时间",
+    "spec": "规格",
+    "remark": "备注",
+    "placeholder": "请输入{label}",
+    "selectPlaceholder": "请选择{label}"
+  },
+  "stats": {
+    "total": "总数",
+    "completed": "已完成",
+    "pending": "待处理",
+    "avgScore": "平均分"
+  },
+  "efficiency": {
+    "filterTitle": "统计条件",
+    "oeeFactors": "OEE要素分析",
+    "oeeOverview": "OEE概览",
+    "oeeTrend": "OEE趋势图",
+    "downtimeAnalysis": "停机原因分析",
+    "detailedData": "效率详细数据",
+    "exportReport": "导出报表",
+    "runningTime": "开机时长",
+    "downtime": "停机时长",
+    "processedCoils": "加工卷数",
+    "availability": "可用率",
+    "performance": "性能效率",
+    "quality": "质量指数",
+    "comparison": "较上期",
+    "factorDescriptions": {
+      "availability": "衡量计划时间内设备实际运行占比",
+      "performance": "衡量实际产出与理论产能的差距",
+      "quality": "衡量合格产出在总产出中的占比"
+    },
+    "factors": {
+      "plannedTime": "计划生产时间",
+      "actualTime": "实际生产时间",
+      "downtimeLoss": "停机损失",
+      "theoreticalOutput": "理论产量",
+      "actualOutput": "实际产量",
+      "speedLoss": "速度损失",
+      "totalOutput": "总产量",
+      "qualifiedOutput": "合格品",
+      "defectOutput": "不良品"
+    }
+  },
+  "quality": {
+    "basicInfo": "料卷基本信息",
+    "inspectItems": "质量检查项目",
+    "defectRecords": "缺陷记录",
+    "summary": "质量总结",
+    "standard": "标准要求",
+    "actual": "检测结果",
+    "result": "判定结果",
+    "inspector": "检验员",
+    "time": "检验时间",
+    "position": "缺陷位置",
+    "defectType": "缺陷类型",
+    "level": "缺陷等级",
+    "length": "长度(mm)",
+    "judgment": "综合判定",
+    "qualityGrade": "质量等级",
+    "comment": "质量评语"
+  },
+  "printQuality": {
+    "surfaceQuality": "表面质量",
+    "thicknessDeviation": "厚度偏差",
+    "widthDeviation": "宽度偏差",
+    "flatness": "平整度",
+    "noDefect": "无缺陷",
+    "thicknessStandard": "±0.05mm",
+    "thicknessActual": "+0.02mm",
+    "widthStandard": "±2mm",
+    "widthActual": "+1mm",
+    "flatnessStandard": "≤3mm/m",
+    "flatnessActual": "2mm/m",
+    "results": {
+      "qualified": "合格",
+      "unqualified": "不合格"
+    }
+  },
+  "printSettings": {
+    "title": "打印设置",
+    "records": "待打印记录",
+    "selectedCount": "已选 {count} 条",
+    "templateSettings": "模板设置",
+    "templatePreview": "模板预览",
+    "noPreview": "暂无模板预览",
+    "labelTitle": "标签标题",
+    "layout": "版式",
+    "paper": "纸张",
+    "labelPaper": "标签纸 100×150mm",
+    "orientation": "方向",
+    "portrait": "纵向",
+    "landscape": "横向",
+    "fontSize": "字号",
+    "scale": "缩放",
+    "appearance": "样式",
+    "enhancedStyle": "启用美化样式",
+    "margin": "页边距(mm)",
+    "marginTop": "上",
+    "marginRight": "右",
+    "marginBottom": "下",
+    "marginLeft": "左",
+    "sections": "打印区块",
+    "printDocumentTitle": "生产标签打印"
+  },
+  "splitManagement": {
+    "title": "分卷管理",
+    "actions": {
+      "add": "新增"
+    },
+    "filters": {
+      "keyword": "关键字",
+      "keywordPlaceholder": "搜索料卷号、母卷号或分卷号",
+      "statusPlaceholder": "请选择状态"
+    },
+    "table": {
+      "empty": "暂无分卷管理数据",
+      "lineageStatus": "Lineage 状态",
+      "lineageSummary": "Lineage 摘要",
+      "availableSummary": "可用卷重 {value}"
+    },
+    "dialog": {
+      "title": "新增分/合卷"
+    },
+    "status": {
+      "actionable": "可操作",
+      "split_generated": "分卷生成",
+      "merge_generated": "合卷生成",
+      "backend_unavailable": "后端不可用",
+      "unavailable": "不可用"
+    }
+  },
+  "splitWorkbench": {
+    "title": "分/合卷工作台",
+    "description": "选择来源实绩并提交分卷或合卷变换；卷号和卷重分配由操作员显式输入。",
+    "empty": "-",
+    "modes": {
+      "split": "分卷",
+      "merge": "合卷"
+    },
+    "actions": {
+      "addTarget": "新增目标卷",
+      "submit": {
+        "split": "提交分卷",
+        "merge": "提交合卷"
+      }
+    },
+    "confirmModeSwitch": {
+      "title": "切换模式",
+      "message": "当前模式有未提交草稿，切换后会清空这些输入。确认切换吗？",
+      "confirm": "确认切换"
+    },
+    "source": {
+      "title": "来源实绩",
+      "splitHint": "分卷模式需要选择 1 条来源实绩。",
+      "mergeHint": "合卷模式需要选择至少 2 条来源实绩。",
+      "placeholder": "请选择来源实绩",
+      "empty": "暂无已选择来源",
+      "effectiveWeight": "有效卷重",
+      "effectiveWeightSource": "有效卷重来源",
+      "availableWeight": "可用卷重",
+      "recordSource": "记录来源"
+    },
+    "allocation": {
+      "title": "卷重分配",
+      "totalAllocated": "已分配卷重",
+      "targetCoilNo": "目标卷号",
+      "targetCoilNoPlaceholder": "输入目标卷号",
+      "resultCoilNo": "结果卷号",
+      "resultCoilNoPlaceholder": "输入结果卷号",
+      "allocatedWeight": "分配卷重",
+      "remark": "备注",
+      "noTargets": "暂无目标卷",
+      "noSources": "暂无来源分配"
+    },
+    "submit": {
+      "title": "提交",
+      "reason": "提交原因",
+      "reasonPlaceholder": "填写本次分/合卷原因"
+    },
+    "audit": {
+      "title": "Lineage 审计摘要",
+      "transformId": "Transform ID",
+      "transformType": "Transform 类型",
+      "status": "状态",
+      "reason": "原因",
+      "confirmedAt": "确认时间",
+      "empty": "提交后显示 transform 和 lineage 摘要",
+      "noLineage": "暂无 lineage 记录",
+      "performanceId": "实绩 ID",
+      "role": "角色"
+    },
+    "validation": {
+      "splitSourceRequired": "分卷需要选择 1 条来源实绩",
+      "splitTargetsRequired": "分卷至少需要 2 条目标卷",
+      "splitTargetInvalid": "目标卷号和正数分配卷重不能为空",
+      "mergeSourcesRequired": "合卷至少需要选择 2 条来源实绩",
+      "mergeTargetRequired": "合卷结果卷号不能为空",
+      "mergeAllocationInvalid": "每条来源都需要填写正数分配卷重"
+    },
+    "messages": {
+      "submitSuccess": "提交成功"
+    },
+    "errors": {
+      "source_load_failed": "来源实绩加载失败",
+      "lineage_summary_unavailable": "Lineage summary 暂不可用",
+      "transform_submit_failed": "分/合卷提交失败",
+      "performance_not_found": "实绩记录不存在",
+      "performance_transform_not_found": "Transform 记录不存在",
+      "performance_effective_weight_required": "缺少有效卷重",
+      "performance_insufficient_available_weight": "可用卷重不足",
+      "performance_transform_invalid_cardinality": "来源或目标数量不符合分/合卷规则",
+      "performance_lineage_double_role": "同一实绩不能在一次变换中同时作为来源和目标",
+      "performance_lineage_cycle": "检测到 lineage 循环"
+    },
+    "recordSources": {
+      "manual_entry": "手工录入",
+      "split_generated": "分卷生成",
+      "merge_generated": "合卷生成",
+      "unplanned_plc": "PLC 未计划记录",
+      "frontend_mock": "前端 mock"
+    },
+    "effectiveWeightSources": {
+      "collected_weight": "采集卷重",
+      "manual_override_weight": "手工覆盖卷重",
+      "split_generated": "分卷生成",
+      "merge_generated": "合卷生成",
+      "frontend_mock": "前端 mock"
+    },
+    "transformTypes": {
+      "split": "分卷",
+      "merge": "合卷"
+    },
+    "transformStatuses": {
+      "committed": "已提交",
+      "frontend_mock": "前端 mock"
+    },
+    "lineageRoles": {
+      "source": "来源",
+      "target": "目标"
+    }
+  },
+  "messages": {
+    "printLabel": "打印标签: {coilNo}",
+    "saveSuccess": "保存成功",
+    "deleteSuccess": "删除成功",
+    "createSuccess": "创建成功",
+    "updateSuccess": "更新成功",
+    "loadFailed": "加载失败",
+    "selectBeforePrint": "请先选择要打印的标签",
+    "confirmDelete": "确定要删除吗？",
+    "confirmSave": "确认保存信息吗？",
+    "noDataToExport": "当前没有可导出的数据",
+    "exportSuccess": "报表导出成功"
+  },
+  "common": {
+    "dateRange": "时间范围",
+    "date": "日期",
+    "shift": "班次",
+    "to": "至",
+    "startDate": "开始日期",
+    "endDate": "结束日期",
+    "employeeName": "员工姓名",
+    "employeeId": "员工工号",
+    "status": "状态",
+    "dayShift": "白班",
+    "middleShift": "中班",
+    "nightShift": "夜班",
+    "all": "全部",
+    "autoGenerate": "自动生成",
+    "printSelected": "打印选中",
+    "printPreview": "打印预览",
+    "productionLabel": "生产标签",
+    "labelNo": "编号",
+    "thickness": "厚度",
+    "width": "宽度",
+    "productionRecord": "生产记录",
+    "entryTension": "入口张力",
+    "entryLoopTension": "入口活套张力",
+    "furnaceTension": "炉区张力",
+    "exitLoopTension": "出口活套张力",
+    "exitTension": "出口张力",
+    "entrySpeed": "入口速度",
+    "furnaceSpeed": "炉区速度",
+    "exitSpeed": "出口速度",
+    "processParams": "工艺参数",
+    "furnaceTemp": "炉区温度",
+    "dewPoint": "露点值",
+    "oxygenContent": "氧含量",
+    "printTime": "打印时间",
+    "operatorSign": "操作员签字",
+    "attainRate": "达成率",
+    "actualValue": "实际值",
+    "concession": "让步接收",
+    "light": "轻微",
+    "normal": "一般",
+    "severe": "严重",
+    "tip": "提示",
+    "endTime": "结束时间",
+    "startTime": "开始时间",
+    "operator": "操作员",
+    "qualified": "合格",
+    "unqualified": "不合格",
+    "recheck": "待复检",
+    "selectTime": "选择时间",
+    "selectDate": "选择日期",
+    "selectYear": "选择年份",
+    "description": "描述",
+    "daily": "按天统计",
+    "today": "今天",
+    "last7days": "近7天",
+    "last30days": "近30天",
+    "thisMonth": "本月",
+    "monthly": "月度",
+    "quarterly": "季度",
+    "yearly": "年度",
+    "select": "请选择",
+    "createdAt": "创建时间",
+    "unit": {
+      "coil": "卷",
+      "item": "个",
+      "person": "人",
+      "ton": "吨"
+    }
+  }
+}

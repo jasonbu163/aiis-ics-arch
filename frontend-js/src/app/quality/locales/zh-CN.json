@@ -1,0 +1,258 @@
+{
+  "title": "质量管理",
+  "list": "质量列表",
+  "spc": "SPC分析",
+  "listPage": {
+    "title": "质量控制列表",
+    "newInspection": "新增检验",
+    "exportReport": "导出报表",
+    "exportSuccess": "报表导出成功",
+    "fields": {
+      "coilNo": "料卷号",
+      "grade": "牌号",
+      "spec": "规格",
+      "weight": "重量(吨)",
+      "qualityGrade": "质量等级",
+      "judgment": "综合判定",
+      "inspector": "检验员",
+      "inspectTime": "检验时间",
+      "inspectDate": "检验日期"
+    },
+    "placeholder": {
+      "coilNo": "请输入料卷号",
+      "grade": "请输入牌号",
+      "select": "请选择",
+      "startDate": "开始日期",
+      "endDate": "结束日期",
+      "rangeSeparator": "至"
+    },
+    "grade": {
+      "excellent": "优等品",
+      "firstClass": "一等品",
+      "first": "一等品",
+      "qualified": "合格品",
+      "unqualified": "不合格品",
+      "pending": "待复检",
+      "recheck": "待复检"
+    },
+    "judgment": {
+      "qualified": "合格",
+      "unqualified": "不合格",
+      "concession": "让步接收",
+      "recheck": "待复检"
+    }
+  },
+  "control": {
+    "routeTitle": "质量控制",
+    "title": "质量控制 - {coilNo}",
+    "basicInfo": "料卷基本信息",
+    "inspectionItems": "质量检查项目",
+    "defectRecords": "缺陷记录",
+    "addDefect": "添加缺陷",
+    "summary": "质量总结",
+    "coilImages": "钢卷图片",
+    "imagePreview": "图片预览",
+    "previewAlt": "预览图片",
+    "uploadTip": "支持上传钢卷外观、标签、检测报告等图片，最多10张",
+    "confirmSave": "确认保存质量信息吗？",
+    "saveSuccess": "保存成功",
+    "saveFailed": "保存失败",
+    "imageLimitExceeded": "图片数量超出限制",
+    "loadFailed": "加载数据失败",
+    "fields": {
+      "coilNo": "料卷号",
+      "grade": "牌号",
+      "weight": "重量",
+      "productionTime": "生产时间",
+      "completeTime": "完成时间",
+      "operator": "操作员",
+      "shift": "班次",
+      "item": "检查项目",
+      "standard": "标准要求",
+      "actualValue": "检测结果",
+      "result": "判定结果",
+      "inspector": "检验员",
+      "inspectTime": "检验时间",
+      "remark": "备注",
+      "position": "缺陷位置",
+      "defectType": "缺陷类型",
+      "defectLevel": "缺陷等级",
+      "length": "长度(mm)",
+      "description": "描述",
+      "defectImage": "缺陷图片",
+      "judgment": "综合判定",
+      "qualityGrade": "质量等级",
+      "comment": "质量评语",
+      "inspectDate": "检验日期"
+    },
+    "placeholder": {
+      "actualValue": "请输入检测结果",
+      "select": "请选择",
+      "inspector": "检验员",
+      "inspectTime": "选择时间",
+      "remark": "备注信息",
+      "position": "请输入缺陷位置",
+      "level": "等级",
+      "description": "请输入缺陷描述",
+      "judgment": "请选择综合判定",
+      "qualityGrade": "请选择质量等级",
+      "comment": "请输入质量评语",
+      "inspectorName": "检验员姓名",
+      "inspectDate": "选择日期"
+    },
+    "result": {
+      "qualified": "合格",
+      "unqualified": "不合格",
+      "recheck": "待复检",
+      "concession": "让步接收"
+    },
+    "defectType": {
+      "scratch": "表面划伤",
+      "scale": "氧化皮",
+      "pit": "凹坑",
+      "wave": "波浪",
+      "edgeCrack": "边裂",
+      "other": "其他"
+    },
+    "level": {
+      "light": "轻微",
+      "normal": "一般",
+      "severe": "严重"
+    },
+    "grade": {
+      "excellent": "优等品",
+      "first": "一等品",
+      "qualified": "合格品",
+      "unqualified": "不合格品"
+    },
+    "items": {
+      "surfaceQuality": "表面质量",
+      "thicknessDeviation": "厚度偏差",
+      "widthDeviation": "宽度偏差",
+      "flatness": "平整度",
+      "edgeQuality": "边部质量",
+      "coilShape": "卷形",
+      "sideBending": "侧边弯曲度",
+      "tensileStrength": "抗拉强度",
+      "yieldStrength": "屈服强度",
+      "elongation": "断后伸长率",
+      "hardness": "硬度",
+      "bendingPerformance": "弯曲性能",
+      "chemicalComposition": "化学成分",
+      "grainSize": "晶粒度"
+    },
+    "standards": {
+      "surfaceQuality": "无裂纹、划伤、氧化皮等缺陷",
+      "thicknessDeviation": "±0.05mm",
+      "widthDeviation": "±2mm",
+      "flatness": "≤3mm/m",
+      "edgeQuality": "无裂纹、毛刺",
+      "coilShape": "无塔形、松卷、扁卷",
+      "sideBending": "≤3mm/2m",
+      "tensileStrength": "≥400MPa",
+      "yieldStrength": "≥300MPa",
+      "elongation": "≥20%",
+      "hardness": "HV150-200",
+      "bendingPerformance": "d=2a, 180°无裂纹",
+      "chemicalComposition": "符合牌号要求",
+      "grainSize": "≥5级"
+    }
+  },
+  "spcPage": {
+    "form": {
+      "analysisItem": "分析项目",
+      "selectAnalysisItem": "请选择分析项目",
+      "grade": "牌号",
+      "selectGrade": "请选择牌号",
+      "dateRange": "时间范围",
+      "rangeSeparator": "至",
+      "startDate": "开始日期",
+      "endDate": "结束日期",
+      "subgroupSize": "子组大小",
+      "analyze": "开始分析",
+      "exportReport": "导出报告"
+    },
+    "items": {
+      "thickness": "厚度",
+      "width": "宽度",
+      "tensile": "抗拉强度",
+      "yield": "屈服强度",
+      "hardness": "硬度",
+      "elongation": "伸长率"
+    },
+    "stats": {
+      "cp": "过程能力指数 Cp",
+      "cpk": "过程能力指数 Cpk",
+      "sigma": "标准差 σ",
+      "defectRate": "预估不良率"
+    },
+    "status": {
+      "capable": "能力充足",
+      "normal": "能力一般",
+      "insufficient": "能力不足",
+      "stable": "过程稳定",
+      "attention": "需关注",
+      "improve": "需改进",
+      "normalPoint": "正常",
+      "abnormalPoint": "异常"
+    },
+    "charts": {
+      "xbar": "X-bar 控制图",
+      "r": "R 控制图",
+      "s": "S 控制图",
+      "xbarTab": "X-bar图",
+      "rTab": "R图",
+      "sTab": "S图",
+      "histogram": "直方图分布",
+      "capability": "过程能力分析",
+      "abnormal": "异常点分析",
+      "conclusion": "SPC 分析结论与建议",
+      "rawData": "原始数据",
+      "exportData": "导出数据",
+      "subgroup": "子组",
+      "subgroupNo": "子组编号",
+      "value": "测量值",
+      "abnormalType": "异常类型",
+      "rule": "判异规则",
+      "time": "时间",
+      "frequency": "频数",
+      "density": "概率密度",
+      "distribution": "分布曲线",
+      "index": "序号",
+      "coilNo": "料卷号",
+      "grade": "牌号",
+      "measureTime": "测量时间",
+      "operator": "操作员",
+      "status": "状态",
+      "recommendations": "改进建议："
+    },
+    "abnormal": {
+      "outOfLimit": "超出控制限",
+      "trend": "连续趋势",
+      "aboveUcl": "超出上控制限UCL",
+      "belowLcl": "超出下控制限LCL"
+    },
+    "conclusion": {
+      "excellentTitle": "过程能力评价：优秀",
+      "goodTitle": "过程能力评价：良好",
+      "improveTitle": "过程能力评价：需改进",
+      "excellentDesc": "当前过程Cpk={cpk}，过程能力优秀。过程非常稳定，能够很好地满足质量要求。",
+      "goodDesc": "当前过程Cpk={cpk}，过程能力良好。过程基本稳定，能够满足质量要求。",
+      "improveDesc": "当前过程Cpk={cpk}，过程能力不足。需要分析原因并采取改进措施。",
+      "emptyDesc": "当前筛选条件下暂无 SPC 测量数据，请调整筛选条件后重新分析。",
+      "initialDesc": "当前过程Cpk=1.25，过程能力处于良好水平。过程稳定，能够满足质量要求。建议持续监控，保持过程稳定。"
+    },
+    "recommendations": [
+      "继续按照标准操作程序执行，保持过程稳定",
+      "对异常点进行原因分析，制定预防措施",
+      "定期检查测量系统的准确性和稳定性",
+      "建议每月进行一次SPC分析，持续改进过程能力"
+    ],
+    "messages": {
+      "analyzing": "开始SPC分析...",
+      "analyzeFailed": "SPC分析失败",
+      "exportReportSuccess": "SPC分析报告导出成功",
+      "exportDataSuccess": "原始数据导出成功"
+    }
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "title": "辅助管理",
+  "price": {
+    "currentEmpty": "尚未设置",
+    "currentLoadError": "当前价格加载失败",
+    "historyLoadError": "历史价格加载失败",
+    "invalidPrice": "请输入有效的非负价格",
+    "title": "能耗单价",
+    "electric": "电能单价",
+    "hydrogen": "氢气单价",
+    "argon": "氩气单价",
+    "electricPrice": "电价",
+    "electricRemark": "电能单价备注说明",
+    "hydrogenPrice": "氢气价格",
+    "hydrogenRemark": "氢气单价备注说明",
+    "argonPrice": "氩气价格",
+    "argonRemark": "氩气单价备注说明",
+    "priceAdjustment": "价格调整",
+    "price": "价格",
+    "unit": "单位",
+    "remark": "备注",
+    "history": "历史价格记录",
+    "updateTime": "更新时间",
+    "operator": "操作人",
+    "units": {
+      "electric": "元/kWh",
+      "gas": "元/Nm³"
+    }
+  },
+  "shift": {
+    "title": "班组管理",
+    "calendar": "排班日历",
+    "rules": "排班规则",
+    "ruleEdit": "编辑排班规则",
+    "ruleConfig": "规则配置",
+    "ruleMode": "班制",
+    "twoShift": "两班倒",
+    "threeShift": "三班倒",
+    "middleShift": "中班",
+    "shiftTime": "班次时间",
+    "legend": "班次说明",
+    "dayShift": "白班",
+    "nightShift": "夜班",
+    "rest": "休息",
+    "cycle": "轮班周期",
+    "fourThree": "四班三运转",
+    "teamList": "班组列表",
+    "schedule": "排班表",
+    "monthFilter": "排班月份",
+    "addShift": "新增排班",
+    "adjust": "调整班次",
+    "date": "日期",
+    "teamName": "班组名称",
+    "leader": "班长",
+    "members": "人数",
+    "phone": "联系电话",
+    "monthSelect": "选择月份",
+    "dayShiftTime": "08:00-20:00",
+    "nightShiftTime": "20:00-08:00",
+    "dayShiftLeader": "白班班长",
+    "nightShiftLeader": "夜班班长",
+    "dayShiftGroup": "白班班组",
+    "nightShiftGroup": "夜班班组",
+    "ruleDesc": "当前排班执行：{mode}，{cycle}",
+    "dateRequired": "请选择排班日期",
+    "teamRequired": "请选择班组",
+    "duplicateDate": "该日期已存在排班，请直接调整班次",
+    "legendDay": "绿色：白班班组",
+    "legendNight": "灰色：夜班班组",
+    "teams": {
+      "teamA": "甲班",
+      "teamB": "乙班",
+      "teamC": "丙班",
+      "teamD": "丁班"
+    }
+  },
+  "stop": {
+    "title": "停机实绩",
+    "subTitle": "停机实绩记录（停机时间 > 2分钟）",
+    "search": {
+      "dateRange": "日期范围",
+      "shift": "班次",
+      "startPlaceholder": "开始日期",
+      "endPlaceholder": "结束日期",
+      "rangeSeparator": "至",
+      "shiftPlaceholder": "请选择班次"
+    },
+    "table": {
+      "startTime": "开始时间",
+      "endTime": "结束时间",
+      "duration": "停机时长",
+      "shift": "班次",
+      "operator": "操作员",
+      "stopType": "停机类型",
+      "reason": "停机原因",
+      "toBeAdded": "待补充"
+    },
+    "dialog": {
+      "addTitle": "新增停机记录",
+      "editTitle": "编辑停机记录",
+      "startTime": "开始时间",
+      "endTime": "结束时间",
+      "shift": "班次",
+      "operator": "操作员",
+      "stopType": "停机类型",
+      "reason": "停机原因",
+      "placeholder": {
+        "startTime": "选择开始时间",
+        "endTime": "选择结束时间",
+        "shift": "请选择班次",
+        "operator": "请输入操作员",
+        "stopType": "请选择停机类型",
+        "reason": "请输入停机原因"
+      },
+      "rules": {
+        "startTime": "请选择开始时间",
+        "shift": "请选择班次",
+        "operator": "请输入操作员"
+      }
+    },
+    "types": {
+      "fault": "设备故障",
+      "roll": "换辊",
+      "material": "待料",
+      "planned": "计划停机",
+      "quality": "质量问题",
+      "other": "其他"
+    },
+    "messages": {
+      "confirmDelete": "确认删除该记录吗？",
+      "deleteSuccess": "删除成功",
+      "deleteError": "删除失败",
+      "updateSuccess": "更新成功",
+      "createSuccess": "创建成功",
+      "loadError": "加载数据失败",
+      "actionError": "操作失败"
+    }
+  }
+}

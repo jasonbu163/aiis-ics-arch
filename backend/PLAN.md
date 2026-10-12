@@ -4,6 +4,8 @@ Chinese version: [PLAN.zh-CN.md](PLAN.zh-CN.md)
 
 ## Current baseline
 
+- [ARCH-BE-002 r1](../plans/ARCH-BE-002-energy-price-api/spec.md): `draft`; energy-price APIs are a consuming-project follow-up. Target ownership and business rules await confirmation; no backend work is authorized and FE-003 remains independent.
+
 - Core modules: user, system, control_agent, schema_maintenance, monitor and aiis_demo.
 - Module route discovery is manifest opt-in; security/runtime boundary modules remain explicit.
 - Monitor Core is limited to collector/raw/latest field facts.

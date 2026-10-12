@@ -4,6 +4,8 @@ English version: [PLAN.md](PLAN.md)
 
 ## 当前基线
 
+- [ARCH-BE-002 r1](../plans/ARCH-BE-002-energy-price-api/spec.md)：`draft`；能源价格接口作为消费项目后续任务，目标归属与业务规则待确认；未授权后端实施，不阻塞 FE-003。
+
 - Core 模块：user、system、control_agent、schema_maintenance、monitor、aiis_demo。
 - 普通模块通过 manifest opt-in；安全/运行时边界模块保持显式挂载。
 - monitor Core 仅保留 collector/raw/latest 现场事实。

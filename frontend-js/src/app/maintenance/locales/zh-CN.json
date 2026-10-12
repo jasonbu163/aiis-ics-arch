@@ -1,0 +1,92 @@
+{
+  "title": "维保管理",
+  "log": {
+    "title": "保养日志",
+    "search": {
+      "equipmentName": "设备名称",
+      "maintenanceType": "保养类型",
+      "status": "状态"
+    },
+    "table": {
+      "equipmentName": "设备名称",
+      "equipmentCode": "设备编号",
+      "maintenanceType": "保养类型",
+      "maintenanceContent": "保养内容",
+      "lastDate": "上次保养时间",
+      "nextDate": "下次保养时间",
+      "cycleDays": "保养周期(天)",
+      "status": "状态",
+      "operator": "保养人",
+      "remark": "备注",
+      "actions": "操作"
+    },
+    "status": {
+      "normal": "正常",
+      "warning": "即将到期",
+      "overdue": "已超期",
+      "pending": "待处理"
+    },
+    "type": {
+      "daily": "日常保养",
+      "level1": "一级保养",
+      "level2": "二级保养",
+      "level3": "三级保养"
+    },
+    "actions": {
+      "add": "新增保养",
+      "edit": "编辑",
+      "delete": "删除",
+      "complete": "完成保养",
+      "updateCycle": "一键更新保养周期"
+    },
+    "dialog": {
+      "addTitle": "新增保养",
+      "editTitle": "编辑保养",
+      "completeTitle": "完成保养",
+      "equipmentInfo": "设备信息",
+      "maintenanceInfo": "保养信息",
+      "timeInfo": "时间信息",
+      "otherInfo": "其他信息",
+      "selectEquipment": "选择设备",
+      "equipmentName": "设备名称",
+      "equipmentCode": "设备编号",
+      "maintenanceType": "保养类型",
+      "cycleDays": "保养周期(天)",
+      "maintenanceContent": "保养内容",
+      "lastDate": "上次保养时间",
+      "operator": "保养人",
+      "remark": "备注",
+      "completeDate": "完成时间",
+      "completeRemark": "保养备注",
+      "equipmentNamePlaceholder": "请选择设备",
+      "equipmentNameAuto": "选择设备后自动填充",
+      "maintenanceTypePlaceholder": "请选择类型",
+      "maintenanceContentPlaceholder": "请输入保养内容，详细描述保养项目和注意事项",
+      "lastDatePlaceholder": "选择日期",
+      "operatorPlaceholder": "请输入保养人",
+      "remarkPlaceholder": "请输入备注信息（可选）",
+      "completeDatePlaceholder": "选择时间",
+      "completeRemarkPlaceholder": "请输入保养备注"
+    },
+    "messages": {
+      "overdueAlert": "有 {count} 条保养记录已超期，请及时处理！",
+      "deleteConfirm": "确认删除该保养记录吗？",
+      "updateConfirm": "确认更新所有保养记录的周期状态吗？",
+      "saveSuccess": "保存成功",
+      "deleteSuccess": "删除成功",
+      "completeSuccess": "保养完成",
+      "updateSuccess": "保养周期已更新",
+      "saveFailed": "保存失败",
+      "deleteFailed": "删除失败",
+      "loadFailed": "加载数据失败",
+      "updateFailed": "操作失败"
+    },
+    "rules": {
+      "equipmentRequired": "请选择设备",
+      "typeRequired": "请选择保养类型",
+      "contentRequired": "请输入保养内容",
+      "lastDateRequired": "请选择上次保养时间",
+      "cycleRequired": "请输入保养周期"
+    }
+  }
+}
