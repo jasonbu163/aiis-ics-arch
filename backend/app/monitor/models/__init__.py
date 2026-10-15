@@ -11,3 +11,5 @@ __all__ = [
     "PlcDbBlockRawSnapshot",
     "PlcDbBlockLatestSnapshot",
 ]
+
+from .business_history import HistoryProcessCurve, HistoryEnergyConsumption

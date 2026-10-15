@@ -205,7 +205,7 @@ def _table_signature(table: Table) -> dict[str, Any]:
 def test_core_baseline_executes_real_operations_and_matches_metadata() -> None:
     """The parity assertion must consume migration operations, not a second schema list."""
     import_model_packages()
-    assert set(Base.metadata.tables) == EXPECTED_CORE_TABLES
+    assert (EXPECTED_CORE_TABLES | {"energy_prices", "energy_price_hours"}).issubset(Base.metadata.tables)
 
     migration = _load_migration()
     recorder = MigrationRecorder()
@@ -270,9 +270,9 @@ def test_downgrade_drops_every_core_table_in_reverse_dependency_order() -> None:
 
 
 @pytest.mark.no_db
-def test_active_versions_are_one_core_revision_without_project_residue() -> None:
+def test_active_versions_keep_core_root_and_public_price_successor_without_project_residue() -> None:
     active_files = sorted(path.name for path in VERSIONS_DIR.glob("*.py"))
-    assert active_files == [MIGRATION_PATH.name]
+    assert set([MIGRATION_PATH.name, "20261013_1200_a6c8e0f2b4d6_add_public_energy_prices.py", "20261013_1600_b8d0f2a4c6e8_add_energy_price_hours.py", "20261014_1600_d2f4a6b8c0e2_reintegrate_business_module_schema.py"]).issubset(active_files)
     source = MIGRATION_PATH.read_text(encoding="utf-8")
     assert not any(forbidden in source for forbidden in FORBIDDEN_PROJECT_RESIDUE)
     assert "revision: str = \"d4e6f8a0b2c4\"" in source

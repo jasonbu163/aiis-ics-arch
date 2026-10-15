@@ -1,0 +1,119 @@
+/**
+ * File Path: /automation-world/semantic-mapping-agent/src/styles/help.css
+ * Description: Shared article navigation, readable Markdown and bounded native editor.
+ * Main Features: DTB-055 responsive reader and fixed editor actions using existing TSS surfaces.
+ */
+.help-center, .help-topic, .help-editor, .page-help-panel {
+  --help-border: #d8e2e4;
+  --help-muted: #52707a;
+  --help-surface: #fff;
+  --help-soft: #f3f7f7;
+  --help-accent: #23675c;
+  min-width: 0;
+  color: #172026;
+}
+.help-center { display: grid; grid-template-columns: 218px minmax(0, 1fr); gap: 22px; align-items: start; }
+.help-article-navigation { min-width: 0; }
+.help-article-navigation > summary { display: none; }
+.help-article-navigation > .help-article-groups { display: block; }
+.help-article-groups { max-height: calc(100vh - 138px); overflow: auto; padding: 0 10px 12px 0; }
+.help-article-groups section + section { margin-top: 22px; }
+.help-article-groups h3 { margin: 0 0 7px; color: var(--help-muted); font-size: 12px; font-weight: 650; }
+.help-article-groups button { display: block; width: 100%; padding: 8px 10px; border: 0; border-left: 3px solid transparent; border-radius: 0 5px 5px 0; background: transparent; color: inherit; text-align: start; font: inherit; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; cursor: pointer; }
+.help-article-groups button:hover { background: var(--help-soft); }
+.help-article-groups button[aria-current] { background: #e5f2ef; color: var(--help-accent); border-left-color: var(--help-accent); font-weight: 650; }
+.help-topic { container-type: inline-size; padding: 24px; background: var(--help-surface); border: 1px solid var(--help-border); border-radius: 8px; overflow-wrap: anywhere; }
+.help-topic-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.help-topic-header > div:first-child { flex: 1 1 240px; min-width: 0; }
+.help-topic-header .action-row { flex-wrap: wrap; gap: 8px; }
+.help-topic-header h2 { margin: 4px 0 8px; font-size: 23px; line-height: 1.4; }
+.help-category-label { margin: 0; font-size: 12px; color: var(--help-muted); }
+.help-reading-status { margin: 4px 0 10px; font-size: 12px; color: var(--help-muted); }
+.help-source-details { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--help-border); font-size: 12px; }
+.help-topic summary, .help-article-navigation summary, .help-editor summary { cursor: pointer; color: var(--help-accent); line-height: 1.5; }
+.help-metadata { display: grid; grid-template-columns: minmax(120px, max-content) minmax(0, 1fr); gap: 7px 14px; font-size: 12px; }
+.help-metadata dt { font-weight: 600; }.help-metadata dd { margin: 0; overflow-wrap: anywhere; }
+.help-actions { position: relative; align-self: center; font-size: 13px; }
+.help-actions-list { position: absolute; top: 100%; right: 0; z-index: 3; display: grid; gap: 8px; width: min(260px, 65vw); padding: 12px; background: var(--help-surface); border: 1px solid var(--help-border); border-radius: 6px; box-shadow: 0 6px 16px #17202618; }
+.markdown-layout { container-type: inline-size; display: grid; grid-template-columns: minmax(0, 1fr) 174px; align-items: start; gap: 24px; min-width: 0; }
+.help-toc { grid-column: 2; grid-row: 1; min-width: 0; font-size: 12px; }
+.help-toc > summary { font-weight: 650; margin-bottom: 10px; list-style: none; }
+.help-toc > nav { display: flex; flex-direction: column; gap: 3px; max-height: 64vh; overflow: auto; border-left: 1px solid var(--help-border); }
+.help-toc button { text-align: start; border: 0; border-left: 2px solid transparent; background: transparent; color: var(--help-muted); padding: 6px 4px; font: inherit; line-height: 1.5; cursor: pointer; overflow-wrap: anywhere; }
+.help-toc button[aria-current] { color: var(--help-accent); border-left-color: var(--help-accent); background: var(--help-soft); font-weight: 650; }
+.markdown-body { grid-column: 1; grid-row: 1; max-height: 65vh; overflow: auto; overscroll-behavior: contain; overflow-wrap: anywhere; min-width: 0; padding: 0 12px 20px 0; font-size: 15px; line-height: 1.85; }
+.markdown-body > * { max-width: 72ch; }
+.markdown-body h1 { margin: 0 0 22px; font-size: 26px; line-height: 1.4; }
+.markdown-body h2 { margin: 30px 0 14px; font-size: 21px; line-height: 1.45; }
+.markdown-body h3 { margin: 24px 0 12px; font-size: 17px; line-height: 1.5; }
+.markdown-body h4 { margin: 20px 0 10px; }
+.markdown-body p { margin: 0 0 16px; }
+.markdown-body ul, .markdown-body ol { margin: 12px 0 20px; padding-left: 24px; }
+.markdown-body li { margin-block: 6px; }
+.markdown-body pre { overflow: auto; padding: 14px; background: var(--help-soft); border: 1px solid var(--help-border); border-radius: 6px; line-height: 1.6; font-size: 13px; }
+.markdown-body table { display: block; overflow-x: auto; border-collapse: collapse; min-width: 0; max-width: 100%; margin-block: 18px; font-size: 13px; }
+.markdown-body td, .markdown-body th { border: 1px solid var(--help-border); padding: 9px 12px; }
+.markdown-body th { background: var(--help-soft); }
+.markdown-body img { max-width: 100%; }.markdown-body a { color: var(--help-accent); }
+.markdown-body blockquote { margin: 18px 0; padding: 10px 16px; border-left: 3px solid var(--help-border); background: var(--help-soft); }
+.help-related { padding-top: 18px; margin-top: 18px; border-top: 1px solid var(--help-border); }
+.help-related h3 { font-size: 13px; margin: 0 0 12px; }.help-related .action-row { flex-wrap: wrap; }
+.page-help-panel { position: relative; padding: 20px 54px 20px 24px; background: #eef6f4; border-bottom: 1px solid var(--help-border); }
+.page-help-panel .help-topic { padding: 0; background: transparent; border: 0; }
+.help-close { position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; color: var(--help-muted); background: var(--help-surface); border: 1px solid var(--help-border); border-radius: 6px; cursor: pointer; }
+.help-editor.standard-form-dialog { width: min(1200px, calc(100% - 32px)); max-width: calc(100% - 32px); height: min(900px, calc(100dvh - 32px)); max-height: calc(100dvh - 32px); padding: 0; }
+.help-editor .dialog-header { flex: 0 0 auto; }.help-editor .dialog-header h2 { overflow-wrap: anywhere; }
+.help-editor .dialog-content { flex: 1 1 auto; }
+.help-editor-context { margin: 0 0 12px; color: var(--help-muted); font-size: 12px; overflow-wrap: anywhere; }
+.help-editor fieldset { border: 0; padding: 0; min-width: 0; }
+.help-editor .field { margin-block: 12px; min-width: 0; }
+.help-editor textarea { width: 100%; min-height: 34vh; resize: vertical; font-family: monospace; line-height: 1.6; }
+.help-editor-tabs { display: flex; gap: 6px; margin-block: 14px; }
+.help-editor-tabs button[aria-pressed=true] { color: var(--help-accent); border-color: var(--help-accent); background: #e5f2ef; }
+.help-editor-tools { padding-block: 14px; }.help-editor-tools .action-row { margin-top: 12px; flex-wrap: wrap; }
+.help-editor-footer { display: flex; flex: 0 0 auto; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 14px 18px; border-top: 1px solid var(--help-border); background: var(--help-surface); }
+.help-editor-footer > span { font-size: 12px; color: var(--help-muted); }.help-editor-footer .action-row { flex-wrap: wrap; }
+.help-editor .history-row { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 12px; overflow-wrap: anywhere; }
+.help-editor .history-row > span { flex: 1 1 220px; min-width: 0; }
+.help-topic button:focus-visible, .help-center summary:focus-visible, .help-center button:focus-visible, .help-editor summary:focus-visible { outline: 3px solid var(--help-accent); outline-offset: 2px; }
+/* Collapse by reader width: PageHelp and editor previews share the same rule. */
+@container (max-width: 700px) {
+  .markdown-layout { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .help-toc { grid-column: 1; grid-row: 1; border-bottom: 1px solid var(--help-border); padding-bottom: 10px; }
+  .help-toc > summary { list-style: revert; margin-bottom: 0; }
+  .help-toc:not([open]) > nav { display: none; }
+  .help-toc > nav { max-height: 180px; margin-top: 10px; }
+  .markdown-body { grid-column: 1; grid-row: 2; }
+}
+@media (max-width: 1100px) { .help-center { grid-template-columns: 180px minmax(0, 1fr); gap: 16px; }.help-topic { padding: 18px; } }
+@media (max-width: 700px) {
+  .help-center { grid-template-columns: minmax(0, 1fr); }
+  .help-article-navigation > summary { display: list-item; padding: 12px; border: 1px solid var(--help-border); border-radius: 6px; background: var(--help-surface); overflow-wrap: anywhere; }
+  .help-article-navigation:not([open]) > .help-article-groups { display: none; }
+  .help-article-groups { max-height: 45vh; padding: 14px; }
+  .help-topic { padding: 16px; }.help-topic-header h2 { font-size: 21px; }
+  .help-metadata { grid-template-columns: minmax(0, 1fr); }.help-metadata dd { margin-bottom: 6px; }
+  .help-editor .form-grid { grid-template-columns: minmax(0, 1fr); }
+  .help-editor-footer { padding: 12px; }.help-editor-footer .action-row { width: 100%; }.help-editor-footer button { flex: 1; height: auto; min-height: 34px; padding-block: 8px; line-height: 1.4; white-space: normal; }
+  .page-help-panel { padding: 16px 48px 16px 16px; }
+}
+
+/* Confirmation uses its own modal top layer; Escape cannot reach the editor. */
+.help-editor-confirm { width: min(520px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); }
+.help-editor-confirm .dialog-content { overflow: auto; }
+.help-editor-confirm .help-editor-footer { justify-content: flex-end; }
+.help-editor-confirm .action-row { flex-wrap: wrap; }
+
+/* The full article owns reading scroll; editor and contextual previews retain theirs. */
+.help-center > .help-topic > .markdown-layout > .markdown-body { max-height: none; overflow: visible; }
+@media (min-width: 981px) {
+  .app-shell.help-center-active { height: 100dvh; min-height: 0; overflow: hidden; align-items: stretch; }
+  .help-center-active > .sidebar { height: 100%; min-height: 0; }
+  .help-center-active > .main-surface { display: flex; flex-direction: column; min-height: 0; }
+  .help-center-active .content-topbar { flex: 0 0 auto; }
+  .help-center-active .help-workspace { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+  .help-workspace > .help-center { flex: 1; min-height: 0; align-items: stretch; }
+  .help-center > .help-article-navigation { min-height: 0; overflow: auto; }
+  .help-center > .help-article-navigation > .help-article-groups { max-height: none; overflow: visible; }
+  .help-center > .help-topic { min-height: 0; overflow: auto; overscroll-behavior: contain; }
+}

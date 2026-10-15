@@ -1,0 +1,53 @@
+{
+  "overview": {
+    "ariaLabel": "Control Agent status overview",
+    "runtime": "Runtime instance"
+  },
+  "operations": {
+    "ariaLabel": "Control Agent operations readiness",
+    "database": "Database read path",
+    "plc": "PLC read path",
+    "authorization": "Authorization gate",
+    "ready": "Ready",
+    "observing": "Observing",
+    "locked": "Locked",
+    "blocked": "Blocked",
+    "databaseCollectionReadyDetail": "The PLC collection database destination is enabled and configured.",
+    "databaseCollectionLockedDetail": "The PLC collection database destination is disabled or not configured.",
+    "plcReadyDetail": "{driver} read {count} points in {latency} ms.",
+    "plcPendingDetail": "{driver} is selected; sample read is waiting or failed.",
+    "authorizationEnabledDetail": "Upper-system authorization is active for configured gates.",
+    "authorizationDisabledDetail": "Gate is disabled; the local self-test remains visible."
+  },
+  "facts": {
+    "agent": "Agent",
+    "version": "Version",
+    "backend": "Backend URL",
+    "backendStatus": "Backend status",
+    "accessMode": "Access mode",
+    "database": "Database config",
+    "generatedAt": "Snapshot time",
+    "localHeartbeat": "Local heartbeat",
+    "heartbeatStatus": "{status} · uptime {seconds} seconds"
+  },
+  "sectionTitle": "Runtime snapshot",
+  "status": {
+    "backend": {
+      "online": "Online",
+      "onlineWithLatency": "Online · {latency} ms",
+      "offline": "Unreachable",
+      "skipped": "Not probed"
+    },
+    "mode": {
+      "plc_collection": "PLC collection mode",
+      "plcCollectionWrite": "PLC collection write mode",
+      "loading": "Loading"
+    },
+    "config": {
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "configured": "Configured",
+      "unconfigured": "Not configured"
+    }
+  }
+}

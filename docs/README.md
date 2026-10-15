@@ -9,6 +9,9 @@
 | Document | Purpose |
 | --- | --- |
 | [Multi-Project Development Guide](multi-project-pm.md) | Durable boundaries and governance guidance for Core, reusable modules, and project repositories. |
+| [AW Whitepaper and Roadmap](AIIS_AW_Whitepaper_Roadmap_v0.4.md) | CAF/CU/DAA/SMA/CA roles, near-term local configuration and long-term direction; Chinese design text. |
+| [AW Runtime Principles and Design](AIIS_AW_Runtime_Design.md) | SQLite, S7 points, APIs, shared Flow Core and device execution/recovery design; no implementation claim. |
+
 
 ## Authority Boundaries
 

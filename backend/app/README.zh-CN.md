@@ -10,7 +10,9 @@
 
 [English version](README.md)
 
-`backend/app/` 承载 FastAPI 业务模块，以及后端组合根使用的受控 manifest 自发现。本目录 README 是结构说明，不是任务跟踪文件。后端工作状态继续归属 [../PLAN.zh-CN.md](../PLAN.zh-CN.md)，模块注册历史依据见 [../plans/B11-backend-module-manifest-autoregistration.md](../plans/B11-backend-module-manifest-autoregistration.md)。
+`backend/app/` 承载 FastAPI 业务模块，以及后端组合根使用的受控 manifest 自发现。本目录 README 是结构说明，不是任务跟踪文件。后端工作状态继续归属 [../PLAN.zh-CN.md](../PLAN.zh-CN.md)，模块注册历史依据见 [MODULE_CONTRACT.md](MODULE_CONTRACT.md)。
+
+公共模块允许包含可复用领域 Model / Schema / Service / CRUD 与业务 API。[energy](energy/README.zh-CN.md) 唯一归属能源价，[auxiliary](auxiliary/README.zh-CN.md) 归属班次/停机业务；已批准公共切片遵循[v1合同](MODULE_CONTRACT.zh-CN.md)；客户专属规则、页面、真实数据与资源仍归消费项目。
 
 ## 注册模型
 

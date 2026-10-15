@@ -5,13 +5,17 @@
     - 提供 BusinessException
     - 绑定业务错误码与响应 code/message
 """
+from enum import StrEnum
+
 from common.error_codes import ErrorCode
 
 
 class BusinessException(Exception):
     """业务异常，交由全局异常处理器转换为统一响应。"""
 
-    def __init__(self, error_code: ErrorCode, code: int = 400, message: str | None = None):
+    def __init__(self, error_code: ErrorCode | StrEnum, code: int = 400, message: str | None = None):
+        if not isinstance(error_code, StrEnum) or not error_code.value.strip():
+            raise TypeError("BusinessException requires a non-empty StrEnum error value")
         self.error_code = error_code
         self.code = code
         self.message = message or error_code.value

@@ -1,121 +1,48 @@
-<!--
-  文件路径: /frontend-next-js/src/app/auxiliary/views/price/index.vue
-  功能描述: 能耗单价设置页面
-  主要功能:
-    - 设置电能、氢气、氩气的单价
-    - 查看历史价格记录
-    - 保存价格设置
--->
+<!-- 文件路径: /frontend-js/src/app/auxiliary/views/price/index.vue
+  功能描述: 只读当前价、上海自然日小时历史与整组价格新增弹窗。 -->
 <template>
   <div class="price-page page-layout">
     <BaseCard class="price-main-card" :title="$t('auxiliary.price.title')">
       <template #actions>
-        <ActionButton variant="refresh" :loading="currentLoading || historyLoading" :disabled="formBusy || historyLoading" @click="handleRefresh">
-          <el-icon><Refresh /></el-icon>
-          {{ $t('common.refresh') }}
-        </ActionButton>
-        <ActionButton variant="primary" :loading="saveLoading" :disabled="formBusy || historyLoading" @click="handleSave">
-          <el-icon><Check /></el-icon>
-          {{ $t('common.save') }}
+        <ActionButton variant="refresh" :loading="currentLoading || historyLoading" @click="handleRefresh">
+          <el-icon><Refresh /></el-icon>{{ $t('common.refresh') }}
         </ActionButton>
       </template>
-
       <section class="price-editor-section" v-loading="currentLoading">
-        <el-alert v-if="currentEmpty" :title="$t('auxiliary.price.currentEmpty')" type="info" :closable="false" />
-        <el-form
-          ref="formRef"
-          :model="form"
-          :rules="rules"
-          :disabled="formBusy"
-          label-position="top"
-          class="price-form"
-        >
-          <div class="price-editor-grid">
-            <article class="price-editor-item">
-              <div class="price-editor-item__header">
-                <span class="price-editor-icon">
-                  <el-icon><Lightning /></el-icon>
-                </span>
-                <h3>{{ $t('auxiliary.price.electric') }}</h3>
-              </div>
-              <el-form-item :label="$t('auxiliary.price.price')" prop="electricPrice">
-                <el-input-number v-model="form.electricPrice" :min="0" :precision="4" :step="0.01" />
-              </el-form-item>
-              <div class="price-unit-row">
-                <span>{{ $t('auxiliary.price.unit') }}</span>
-                <strong>{{ $t('auxiliary.price.units.electric') }}</strong>
-              </div>
-              <el-form-item :label="$t('auxiliary.price.remark')">
-                <el-input v-model="form.electricRemark" :placeholder="$t('auxiliary.price.electricRemark')" />
-              </el-form-item>
-            </article>
-
-            <article class="price-editor-item">
-              <div class="price-editor-item__header">
-                <span class="price-editor-icon">
-                  <el-icon><WindPower /></el-icon>
-                </span>
-                <h3>{{ $t('auxiliary.price.hydrogen') }}</h3>
-              </div>
-              <el-form-item :label="$t('auxiliary.price.price')" prop="hydrogenPrice">
-                <el-input-number v-model="form.hydrogenPrice" :min="0" :precision="4" :step="0.1" />
-              </el-form-item>
-              <div class="price-unit-row">
-                <span>{{ $t('auxiliary.price.unit') }}</span>
-                <strong>{{ $t('auxiliary.price.units.gas') }}</strong>
-              </div>
-              <el-form-item :label="$t('auxiliary.price.remark')">
-                <el-input v-model="form.hydrogenRemark" :placeholder="$t('auxiliary.price.hydrogenRemark')" />
-              </el-form-item>
-            </article>
-
-            <article class="price-editor-item">
-              <div class="price-editor-item__header">
-                <span class="price-editor-icon">
-                  <el-icon><Aim /></el-icon>
-                </span>
-                <h3>{{ $t('auxiliary.price.argon') }}</h3>
-              </div>
-              <el-form-item :label="$t('auxiliary.price.price')" prop="argonPrice">
-                <el-input-number v-model="form.argonPrice" :min="0" :precision="4" :step="0.1" />
-              </el-form-item>
-              <div class="price-unit-row">
-                <span>{{ $t('auxiliary.price.unit') }}</span>
-                <strong>{{ $t('auxiliary.price.units.gas') }}</strong>
-              </div>
-              <el-form-item :label="$t('auxiliary.price.remark')">
-                <el-input v-model="form.argonRemark" :placeholder="$t('auxiliary.price.argonRemark')" />
-              </el-form-item>
-            </article>
-          </div>
-        </el-form>
+        <el-alert v-if="currentError" :title="$t('auxiliary.price.currentLoadError')" type="error" :closable="false" />
+        <div class="price-editor-grid">
+          <article v-for="item in priceTypes" :key="item.key" class="price-editor-item">
+            <h3>{{ $t(`auxiliary.price.${item.key}`) }}</h3>
+            <strong class="price-value">{{ currentPrice == null ? $t('auxiliary.price.currentEmpty') : displayPrice(currentPrice[item.key + 'Price']) }}</strong>
+            <span>{{ $t(`auxiliary.price.units.${item.unit}`) }}</span>
+            <span class="price-note">{{ currentPrice?.[item.key + 'Remark'] || '—' }}</span>
+          </article>
+        </div>
       </section>
-
       <section class="price-history-section">
         <div class="section-title-row">
           <h3>{{ $t('auxiliary.price.history') }}</h3>
+          <div class="table-actions">
+            <el-date-picker v-model="selectedDate" type="date" size="large" value-format="YYYY-MM-DD" :clearable="false"
+              :aria-label="$t('auxiliary.price.historyDate')" @change="loadHistory" />
+            <ActionButton variant="primary" @click="openAdd">{{ $t('auxiliary.price.add') }}</ActionButton>
+          </div>
         </div>
+        <el-alert v-if="historyError" :title="$t('auxiliary.price.historyLoadError')" type="error" :closable="false" />
         <div class="table-scroll">
-          <el-table :data="priceHistory" class="vibe-table" border v-loading="historyLoading">
-            <el-table-column prop="createdAt" :label="$t('auxiliary.price.updateTime')" width="180">
-              <template #default="{ row }">
-                {{ formatDateTime(row.createdAt) }}
-              </template>
+          <el-table :data="priceHistory" class="vibe-table" border v-loading="historyLoading" :empty-text="$t('auxiliary.price.historyEmpty')">
+            <el-table-column prop="observedAt" :label="$t('auxiliary.price.observedAt')" width="185">
+              <template #default="{ row }">{{ businessDateTime(row.observedAt) }}</template>
             </el-table-column>
-            <el-table-column prop="electricPrice" :label="`${$t('auxiliary.price.electric')}(${$t('auxiliary.price.units.electric')})`" width="160">
-              <template #default="{ row }">
-                {{ Number(row.electricPrice).toFixed(4) }}
-              </template>
+            <el-table-column prop="hourStart" :label="$t('auxiliary.price.hourStart')" width="100">
+              <template #default="{ row }">{{ businessDateTime(row.hourStart).slice(11, 16) }}</template>
             </el-table-column>
-            <el-table-column prop="hydrogenPrice" :label="`${$t('auxiliary.price.hydrogen')}(${$t('auxiliary.price.units.gas')})`" width="160">
-              <template #default="{ row }">
-                {{ Number(row.hydrogenPrice).toFixed(4) }}
-              </template>
+            <el-table-column prop="updatedAt" :label="$t('auxiliary.price.lastModified')" width="185">
+              <template #default="{ row }">{{ businessDateTime(row.updatedAt) }}</template>
             </el-table-column>
-            <el-table-column prop="argonPrice" :label="`${$t('auxiliary.price.argon')}(${$t('auxiliary.price.units.gas')})`" width="160">
-              <template #default="{ row }">
-                {{ Number(row.argonPrice).toFixed(4) }}
-              </template>
+            <el-table-column v-for="item in priceTypes" :key="item.key" :prop="item.key + 'Price'"
+              :label="`${$t('auxiliary.price.' + item.key)} (${$t('auxiliary.price.units.' + item.unit)})`" width="170">
+              <template #default="{ row }">{{ displayPrice(row[item.key + 'Price']) }}</template>
             </el-table-column>
             <el-table-column prop="operator" :label="$t('auxiliary.price.operator')" width="120" />
             <el-table-column prop="remark" :label="$t('auxiliary.price.remark')" min-width="220" />
@@ -123,131 +50,145 @@
         </div>
       </section>
     </BaseCard>
+    <el-dialog v-model="dialogVisible" :title="$t('auxiliary.price.add')" width="720px" class="standard-form-dialog"
+      :close-on-click-modal="!saveLoading" :close-on-press-escape="!saveLoading" :show-close="!saveLoading" :before-close="beforeClose">
+      <el-form ref="formRef" :model="form" :rules="rules" :disabled="saveLoading" label-position="top" class="price-dialog-form">
+        <el-form-item :label="$t('auxiliary.price.observedAt')">
+          <el-date-picker v-model="form.observedAt" type="datetime" value-format="YYYY-MM-DDTHH:mm:ss"
+            :editable="false" clearable :disabled="saveLoading" :placeholder="$t('auxiliary.price.serverTimeHint')" />
+        </el-form-item>
+        <el-alert :title="$t('auxiliary.price.serverTimeHint')" type="info" :closable="false" />
+        <el-alert :title="$t('auxiliary.price.overwriteHint')" type="warning" :closable="false" />
+        <template v-for="item in priceTypes" :key="item.key">
+          <el-form-item :label="$t('auxiliary.price.' + item.key)" :prop="item.key + 'Price'">
+            <el-input v-model="form[item.key + 'Price']" inputmode="decimal" />
+          </el-form-item>
+          <el-form-item :label="$t('auxiliary.price.' + item.key + 'Remark')" :prop="item.key + 'Remark'">
+            <el-input v-model="form[item.key + 'Remark']" :maxlength="500" show-word-limit />
+          </el-form-item>
+        </template>
+        <el-form-item :label="$t('auxiliary.price.remark')" prop="remark">
+          <el-input v-model="form.remark" type="textarea" :maxlength="2000" show-word-limit />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="core-dialog-footer">
+          <ActionButton :disabled="saveLoading" @click="cancelAdd">{{ $t('common.cancel') }}</ActionButton>
+          <ActionButton variant="primary" :loading="saveLoading" :disabled="saveLoading" @click="handleSave">{{ $t('common.save') }}</ActionButton>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import ActionButton from '@/components/common/ActionButton.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
 import { getCurrentPrice, createPrice, getPriceList } from '@/app/auxiliary/api'
-import { formatDateTime } from '@/utils/date'
 
-const { t } = useI18n()
-const formRef = ref()
-const currentLoading = ref(false)
-const saveLoading = ref(false)
-const historyLoading = ref(false)
-const currentEmpty = ref(false)
-const formBusy = computed(() => currentLoading.value || saveLoading.value)
-const priceFields = ['electricPrice', 'hydrogenPrice', 'argonPrice']
-const form = reactive({
-  electricPrice: undefined,
-  hydrogenPrice: undefined,
-  argonPrice: undefined,
-  electricRemark: '',
-  hydrogenRemark: '',
-  argonRemark: ''
-})
-
-const normalizePrice = value => {
-  if (typeof value !== 'number' && typeof value !== 'string') return undefined
-  if (typeof value === 'string' && !value.trim()) return undefined
-  const price = Number(value)
-  return Number.isFinite(price) && price >= 0 ? price : undefined
+const { t, locale } = useI18n()
+const businessParts = value => Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit',
+  hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+}).formatToParts(new Date(value)).map(part => [part.type, part.value]))
+const businessDate = value => { const p = businessParts(value); return `${p.year}-${p.month}-${p.day}` }
+const businessDateTime = value => { const p = businessParts(value); return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}` }
+// Resolve picker civil fields in Shanghai independently of the browser timezone.
+// Multiple instants in a repeated hour choose the earliest (fold=0); gaps are invalid.
+const encodeObservedAt = value => {
+  if (!value) return null
+  const civil = Date.parse(`${value}Z`)
+  if (!Number.isFinite(civil)) throw new Error('invalid_observed_at')
+  const offsets = new Set()
+  for (let hour = -14; hour <= 14; hour++) {
+    const sample = civil + hour * 3600000
+    offsets.add(Date.parse(`${businessDateTime(sample).replace(' ', 'T')}Z`) - sample)
+  }
+  const candidates = [...offsets].map(offset => civil - offset)
+    .filter(instant => businessDateTime(instant).replace(' ', 'T') === value)
+  if (!candidates.length) throw new Error('nonexistent_observed_at')
+  return new Date(Math.min(...candidates)).toISOString()
 }
-const rules = Object.fromEntries(priceFields.map(field => [field, [{
-  validator: (_rule, value, callback) => callback(normalizePrice(value) === undefined
-    ? new Error(t('auxiliary.price.invalidPrice')) : undefined),
-  trigger: 'blur'
-}]]))
+const displayPrice = value => new Intl.NumberFormat(locale.value, { minimumFractionDigits: 4, maximumFractionDigits: 4 }).format(Number(value))
+const priceTypes = [{ key: 'electric', unit: 'electric' }, { key: 'hydrogen', unit: 'gas' }, { key: 'argon', unit: 'gas' }]
+const priceFields = priceTypes.map(item => item.key + 'Price')
+const blankForm = () => ({ observedAt: null, electricPrice: '', hydrogenPrice: '', argonPrice: '', electricRemark: '', hydrogenRemark: '', argonRemark: '', remark: '' })
+const form = reactive(blankForm())
+const formRef = ref()
+const dialogVisible = ref(false)
+const saveLoading = ref(false)
+const currentPrice = ref(null)
+const currentLoading = ref(false)
+const currentError = ref(false)
+const historyLoading = ref(false)
+const historyError = ref(false)
 const priceHistory = ref([])
+const selectedDate = ref(businessDate(Date.now()))
+let currentRequest = 0, historyRequest = 0, alive = true
+
+// Keep decimal lexemes until the backend validates; never silently round user input.
+const validPrice = value => typeof value === 'number' || typeof value === 'string'
+  ? /^[+]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)$/.test(String(value)) && Number(value) >= 0 && Number(value) <= 999999.9999
+    && !/\.[0-9]{4}[0-9]*[1-9]/.test(String(value)) : false
+const rules = Object.fromEntries(priceFields.map(field => [field, [{
+  validator: (_rule, value, callback) => callback(validPrice(value) ? undefined : new Error(t('auxiliary.price.invalidPrice'))), trigger: 'blur'
+}]]))
+for (const field of ['electricRemark', 'hydrogenRemark', 'argonRemark', 'remark']) rules[field] = [{ max: field === 'remark' ? 2000 : 500, message: t('auxiliary.price.remarkTooLong'), trigger: 'blur' }]
 
 const loadCurrent = async () => {
+  const request = ++currentRequest
   currentLoading.value = true
+  currentError.value = false
   try {
     const record = await getCurrentPrice()
-    if (record == null) {
-      Object.assign(form, {
-        electricPrice: undefined, hydrogenPrice: undefined, argonPrice: undefined,
-        electricRemark: '', hydrogenRemark: '', argonRemark: ''
-      })
-      currentEmpty.value = true
-      return
-    }
-    const prices = Object.fromEntries(priceFields.map(field => [field, normalizePrice(record[field])]))
-    if (priceFields.some(field => prices[field] === undefined)) throw new Error('Invalid current price')
-    Object.assign(form, prices, {
-      electricRemark: record.electricRemark || '',
-      hydrogenRemark: record.hydrogenRemark || '',
-      argonRemark: record.argonRemark || ''
-    })
-    currentEmpty.value = false
+    if (!alive || request !== currentRequest) return
+    if (record != null && priceFields.some(field => !validPrice(record[field]))) throw new Error('invalid_current')
+    currentPrice.value = record
   } catch (error) {
-    ElMessage.error(t('auxiliary.price.currentLoadError'))
-  } finally {
-    currentLoading.value = false
-  }
+    if (alive && request === currentRequest) { currentError.value = true; ElMessage.error(t('auxiliary.price.currentLoadError')) }
+  } finally { if (alive && request === currentRequest) currentLoading.value = false }
 }
-
 const loadHistory = async () => {
+  const request = ++historyRequest, date = selectedDate.value
   historyLoading.value = true
+  historyError.value = false
+  priceHistory.value = []
   try {
-    const res = await getPriceList({ page: 1, pageSize: 10 })
-    priceHistory.value = res.items || []
+    const result = await getPriceList({ date, page: 1, pageSize: 24 })
+    if (alive && request === historyRequest && date === selectedDate.value) priceHistory.value = result.items
   } catch (error) {
-    ElMessage.error(t('auxiliary.price.historyLoadError'))
-  } finally {
-    historyLoading.value = false
-  }
+    if (alive && request === historyRequest && date === selectedDate.value) { historyError.value = true; ElMessage.error(t('auxiliary.price.historyLoadError')) }
+  } finally { if (alive && request === historyRequest && date === selectedDate.value) historyLoading.value = false }
 }
-
+const handleRefresh = () => Promise.all([loadCurrent(), loadHistory()])
+const openAdd = () => { if (saveLoading.value) return; Object.assign(form, blankForm()); formRef.value?.clearValidate?.(); dialogVisible.value = true }
+const cancelAdd = () => { if (!saveLoading.value) dialogVisible.value = false }
+const beforeClose = done => { if (!saveLoading.value) done() }
 const handleSave = async () => {
-  if (!formRef.value || formBusy.value || historyLoading.value) return
-  // 校验开始即锁定本次提交，避免异步校验期间重复点击。
+  if (!dialogVisible.value || !formRef.value || saveLoading.value) return
   saveLoading.value = true
+  const snapshot = { ...form }
   try {
-    try {
-      if (await formRef.value.validate() === false) return
-    } catch (error) {
-      return
-    }
-    const snapshot = { ...form }
-    for (const field of priceFields) {
-      snapshot[field] = normalizePrice(snapshot[field])
-      if (snapshot[field] === undefined) {
-        ElMessage.error(t('auxiliary.price.invalidPrice'))
-        return
-      }
-    }
-    const remarks = []
-    if (snapshot.electricRemark) remarks.push(`${t('auxiliary.price.electric')}: ${snapshot.electricRemark}`)
-    if (snapshot.hydrogenRemark) remarks.push(`${t('auxiliary.price.hydrogen')}: ${snapshot.hydrogenRemark}`)
-    if (snapshot.argonRemark) remarks.push(`${t('auxiliary.price.argon')}: ${snapshot.argonRemark}`)
-    await createPrice({
-      ...snapshot,
-      remark: remarks.length > 0 ? remarks.join('; ') : t('auxiliary.price.priceAdjustment')
-    })
-    Object.assign(form, snapshot)
-    currentEmpty.value = false
+    try { if (await formRef.value.validate() === false) return } catch (error) { return }
+    if (priceFields.some(field => !validPrice(snapshot[field]))) { ElMessage.error(t('auxiliary.price.invalidPrice')); return }
+    try { snapshot.observedAt = encodeObservedAt(snapshot.observedAt) }
+    catch (error) { ElMessage.error(t('auxiliary.price.invalidObservedAt')); return }
+    let record
+    try { record = await createPrice(snapshot) }
+    catch (error) { if (alive) ElMessage.error(t('common.error')); return }
+    if (!alive) return
+    dialogVisible.value = false
     ElMessage.success(t('common.success'))
-    // 历史刷新自行反馈错误；成功保存的快照不再被固定 mock 或旧 GET 覆盖。
-    await loadHistory()
-  } catch (error) {
-    ElMessage.error(t('common.error'))
-  } finally {
-    saveLoading.value = false
-  }
+    selectedDate.value = businessDate(record.observedAt)
+    // POST historical data is never assigned to current. Each GET owns its error feedback.
+    await handleRefresh()
+  } finally { if (alive) saveLoading.value = false }
 }
-
-const handleRefresh = async () => {
-  if (formBusy.value || historyLoading.value) return
-  await Promise.all([loadCurrent(), loadHistory()])
-}
-
 onMounted(handleRefresh)
+onBeforeUnmount(() => { alive = false; currentRequest++; historyRequest++ })
 </script>
 
 <style scoped>
@@ -336,9 +277,12 @@ onMounted(handleRefresh)
   font-weight: 700;
 }
 
-.section-title-row {
-  margin-bottom: 18px;
-}
+.section-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.price-value { font-size: 28px; color: var(--text-primary); }
+.price-note { color: var(--text-secondary); overflow-wrap: anywhere; }
+.price-dialog-form { display: grid; gap: 16px; }
+.price-dialog-form :deep(.el-date-editor) { max-width: 100%; }
+@media (max-width: 600px) { .price-editor-section, .price-history-section { padding: 20px 16px; } }
 
 @media (max-width: 1200px) {
   .price-editor-grid {

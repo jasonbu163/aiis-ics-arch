@@ -1,0 +1,22 @@
+{
+  "app": {
+    "title": "Control Agent",
+    "subtitle": "Local operations console for the AIIS field runtime",
+    "status": "Framework ready"
+  },
+  "actions": {
+    "refresh": "Refresh",
+    "switchLanguage": "Switch language",
+    "switchToDark": "Switch to dark mode",
+    "switchToLight": "Switch to light mode",
+    "switchToChineseShort": "中",
+    "switchToEnglishShort": "EN"
+  },
+  "operationDialog": {
+    "cancel": "Cancel",
+    "close": "Close confirmation dialog",
+    "confirm": "Confirm",
+    "message": "Confirm this local field operation.",
+    "title": "Operation confirmation"
+  }
+}

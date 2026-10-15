@@ -13,13 +13,15 @@ app/
 ├── control_agent/    # backend-side CA authorization contract
 ├── schema_maintenance/
 ├── monitor/          # collector/raw/latest facts only
+├── auxiliary/        # shifts and stop records
+├── energy/           # unique price owner
 ├── aiis_demo/        # opt-in reference module
 └── module_registry.py
 ~~~
 
 Every ordinary module opts in with app/<module>/manifest.py. enabled=False hides its API routes; Registry discovery never creates tables. New tables require an explicit Alembic revision or approved schema-maintenance action. user and control_agent remain explicit security/runtime boundaries in app/router.py.
 
-The monitor Core surface returns collector health and project-neutral PLC DB-block raw/latest facts. HMI, temperature, energy, process curves and production records belong to a consuming project module.
+The monitor Core surface returns collector health and project-neutral PLC DB-block raw/latest facts. The public monitor history queries require the separate monitor-business-read key; HMI and customer-specific rules/data remain in consuming projects. Public modules may own reusable domain Models / Schemas / Services / CRUD and business APIs; [energy](app/energy/README.md) owns prices and auxiliary owns shifts/stop records, without customer data or rules.
 
 ## Runtime boundaries
 
@@ -27,8 +29,9 @@ The monitor Core surface returns collector health and project-neutral PLC DB-blo
 - The resident Rust/Tauri control-agent owns PLC collection and writes field facts through the approved contract.
 - Celery, Redis, Beat, Flower and Python Worker runtime are not dependencies of this Core.
 - The Core baseline is the single `d4e6f8a0b2c4` Alembic root for fourteen Core tables. Its upgrade operations and
-  current SQLAlchemy metadata are mechanically checked by `tests/test_core_migration_baseline.py`; private project
-  repositories retain their own historical migration graphs.
+  fourteen-table SQLAlchemy metadata subset are mechanically checked by `tests/test_core_migration_baseline.py`; private project
+  repositories retain their own historical migration graphs. The `a6c8e0f2b4d6` successor adds only `energy_prices`;
+  `b8d0f2a4c6e8` adds only `energy_price_hours`, bringing full metadata to sixteen tables. Prepare schema explicitly before runtime adoption.
 
 ## Local checks
 
@@ -87,6 +90,8 @@ do not change authenticated-only APIs or admin-only guards. Granting one key nev
 | `monitor` | Collector and raw/latest field facts; excludes customer business curves and frontend monitor-page access. |
 | `control-agent-read` | CA action-scope catalog queries. |
 | `control-agent` | Gate-token issuance permission guard; does not remotely execute device actions and retains independent role restrictions. |
+| `energy-price-read` | Energy GET current/history only; independent from manage. |
+| `energy-price-manage` | Energy hourly whole-group POST upsert; does not grant reads. |
 | `aiis_demo` | Default-disabled reference manifest; a configured grant warns and is ignored. The array does not enable it. |
 
 Projection management routes pass `actor_user_id` to record the actor; this is not a role check.
@@ -297,3 +302,9 @@ writes with independent actor restrictions; `control-agent-read` covers action-s
 explicit grant choice, not the public templates' safe `[]` defaults. The approved local three-environment
 migration adds monitor for host/prod operator and adds all three supervisor keys plus monitor for dev operator;
 it is not merely an equivalent variable rename. Future interfaces added under a key require renewed review.
+
+Hourly energy-price adoption uses the existing three API paths, Shanghai observedAt buckets and a new explicit b8d0f2a4c6e8 successor (sixteen total tables). Legacy append rows remain intact; read [the module contract and gated conversion SQL](app/energy/README.md) before adoption. Source validation does not authorize real migration or deployment.
+
+## Public module admission
+
+See the [v1 Python module contract](app/MODULE_CONTRACT.md) for dependencies, exports, errors and conflict checks. The explicit d2f4a6b8c0e2 successor adds 42 tables to the protected sixteen (58 in the reintegration fixture); HR remains disabled, and imports/GETs do not seed or apply schema. Real MySQL/Docker/runtime actions remain separately gated.

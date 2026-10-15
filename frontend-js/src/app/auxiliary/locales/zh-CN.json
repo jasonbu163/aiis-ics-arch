@@ -25,7 +25,17 @@
     "units": {
       "electric": "元/kWh",
       "gas": "元/Nm³"
-    }
+    },
+    "historyDate": "历史日期",
+    "add": "新增价格",
+    "observedAt": "记录时间（上海时区）",
+    "hourStart": "小时归属",
+    "lastModified": "最后修改时间",
+    "historyEmpty": "该日暂无价格记录",
+    "serverTimeHint": "留空由服务器保存当前时刻（上海时区）",
+    "overwriteHint": "同小时将覆盖整组价格",
+    "remarkTooLong": "备注超出长度限制",
+    "invalidObservedAt": "请选择上海时区实际存在的日期时间"
   },
   "shift": {
     "title": "班组管理",
@@ -72,7 +82,8 @@
       "teamB": "乙班",
       "teamC": "丙班",
       "teamD": "丁班"
-    }
+    },
+    "ruleNotConfigured": "排班规则尚未配置。首次初始化需通过明确授权的配置操作完成。"
   },
   "stop": {
     "title": "停机实绩",

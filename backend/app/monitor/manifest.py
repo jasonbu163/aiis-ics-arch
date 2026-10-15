@@ -10,10 +10,15 @@ from app.module_registry import ModuleManifest
 
 
 manifest = ModuleManifest(
+    core_contract="aiis.backend-module/v1",
+    requires=(),
+    model_requires=(),
+    exports=('app.monitor.models:PlcDbBlockRawSnapshot',),
+    error_codes=(),
     name="monitor",
     enabled=True,
     order=35,
     routers=("app.monitor.api.routes:router",),
     models_package="app.monitor.models",
-    permissions=("monitor",),
+    permissions=("monitor", "monitor-business-read"),
 )

@@ -36,6 +36,11 @@ class ModuleManifest:
     routers: tuple[str, ...] = ()
     models_package: str | None = None
     permissions: tuple[str, ...] = ()
+    core_contract: str = "aiis.backend-module/v1"
+    requires: tuple[str, ...] = ()
+    model_requires: tuple[str, ...] = ()
+    exports: tuple[str, ...] = ()
+    error_codes: tuple[str, ...] = ()
 
 
 class ModuleRegistryError(RuntimeError):
@@ -362,6 +367,11 @@ def _discover_module_manifests(
             )
         by_name[manifest.name] = manifest
 
+    from app.module_preflight import validate_manifests, check_source
+    validate_manifests(manifests)
+    if module_names is None:
+        from pathlib import Path
+        check_source(Path(__file__).resolve().parent.parent)
     ordered = tuple(sorted(manifests, key=lambda manifest: (manifest.order, manifest.name)))
     _publish_diagnostics(diagnostics)
     return ordered
@@ -406,11 +416,16 @@ def include_module_routers(
     """Include enabled manifest routers in the ordinary business router."""
     loaded_router_paths: list[str] = []
     selected_manifests = (
-        tuple(manifest for manifest in manifests if manifest.enabled)
+        tuple(manifests)
         if manifests is not None
-        else get_enabled_module_manifests()
+        else get_module_manifests()
     )
+    from app.module_preflight import validate_manifests
+    validate_manifests(selected_manifests)
+    router_owners = {}
     for manifest in selected_manifests:
+        if not manifest.enabled:
+            continue
         for router_path in manifest.routers:
             try:
                 module_router = resolve_import_path(router_path)
@@ -436,6 +451,9 @@ def include_module_routers(
                     stage="router-export",
                     reason="router path did not resolve to APIRouter",
                 )
+            if id(module_router) in router_owners:
+                raise ModuleRegistryError(f"router-object conflict {router_path}: {router_owners[id(module_router)]} / {manifest.name}")
+            router_owners[id(module_router)] = manifest.name
             parent_router.include_router(module_router)
             loaded_router_paths.append(router_path)
     return loaded_router_paths
@@ -468,6 +486,8 @@ def import_model_packages(
                 reason="model package import failed",
             ) from exc
         imported_packages.append(manifest.models_package)
+    from app.module_preflight import check_model_objects
+    check_model_objects(selected_manifests)
     return imported_packages
 
 

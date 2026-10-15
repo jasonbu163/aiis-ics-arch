@@ -1,0 +1,31 @@
+[package]
+name = "aiis-ics-control-agent"
+version = "0.1.0"
+description = "AIIS ICS Control Agent"
+authors = ["AIIS ICS Contributors"]
+edition = "2021"
+default-run = "aiis-ics-control-agent"
+
+[lib]
+name = "aiis_ics_control_agent_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[features]
+default = []
+rust-snap7-driver = ["dep:rust-snap7"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+sea-orm = { version = "1.1", default-features = false, features = ["macros", "runtime-tokio-rustls", "sqlx-mysql", "with-chrono", "with-json"] }
+rust-snap7 = { version = "1.142.2", optional = true }
+tracing = "0.1"
+tracing-appender = "0.2"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
+libc = "0.2"

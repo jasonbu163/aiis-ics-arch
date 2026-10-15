@@ -10,7 +10,7 @@ AIIS ICS Architecture 是可复用工业信息系统架构的公开源码基线�
 .
 ├── backend/       # FastAPI、SQLAlchemy、Alembic 与 Core 模块
 ├── frontend-js/   # Vue 3 + Vite JavaScript Core 前端
-├── control-agent/ # Rust/Tauri 现场事实采集运行时
+├── automation-world/ # CA冻结兼容基线与独立DAA/SMA工程
 ├── tools/         # 独立的项目级工具
 ├── contracts/     # 根目录 Core 跨运行时合同中心
 ├── docs/          # 跨仓库与流程类长期文档
@@ -18,6 +18,8 @@ AIIS ICS Architecture 是可复用工业信息系统架构的公开源码基线�
 ```
 
 项目仓库使用锁定的源码版本，并按同一垂直模块约定增加自己的模块。本仓库不包含项目业务页面、PLC 点表、客户数据、真实地址、凭据或构建产物。
+
+公共模块允许包含可复用领域 Model、Schema、Service、CRUD 与业务 API；已批准的 [energy 能源单价切片](backend/app/energy/README.zh-CN.md) 属于公共能力。客户专属规则、页面、真实数据与资源仍归消费项目。
 
 ## 源码版本模型
 
@@ -50,9 +52,9 @@ cd ../frontend-js
 pnpm install
 pnpm build
 
-cd ../control-agent
-cargo fmt --check
-cargo test --workspace
+cd ../automation-world/control-agent
+cargo fmt --manifest-path src-tauri/Cargo.toml --check
+cargo test --manifest-path src-tauri/Cargo.toml --locked
 ```
 
 这些命令只做源码/静态验证，不启动 Docker、不修改真实数据库、不连接 PLC，也不发布版本。运行时必须使用项目自有的环境文件和获批的非生产夹具。
@@ -75,3 +77,5 @@ cargo test --workspace
 `docker-compose.database-only.yml` 提供独立 MySQL `8.4.6`，供宿主机源码或 prod 使用。`docker-compose.prod.yml` 运行镜像内源码的 backend 与 Nginx，前端只读挂载宿主机预构建的 `frontend-js/dist`；数据库位于该 Compose 项目外。当前统一使用 dev、database-only、prod 三个入口，命令必须通过 `-f` 显式选择。
 
 环境文件、准备步骤、显式迁移、账号初始化、重启和排障见[初始化与部署说明](INITIALIZATION.zh-CN.md#单机部署)。配置校验通过不代表已完成运行部署。
+
+AW 的归属、CA冻结、DAA/SMA独立启动与后续边界见 [Automation World](automation-world/README.zh-CN.md)。

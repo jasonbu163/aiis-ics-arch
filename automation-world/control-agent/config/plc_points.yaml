@@ -1,0 +1,37 @@
+# Public example PLC point contract.
+#
+# This file is a disabled-by-default shape example only. Replace it with a
+# reviewed, site-owned contract before enabling any PLC gate. It contains no
+# customer endpoint or production point data.
+PLC_1:
+  ip: 127.0.0.1
+  port: 102
+  rack: 0
+  slot: 1
+  point_count: 3
+  groups:
+    - name: example_group
+      db_number: 1
+      start: 0
+      size: 12
+      point_count: 3
+      points:
+        - name: example_value
+          type: Real
+          offset: 0
+          desc: Public example point; replace before enabling PLC access.
+          readable: true
+          writable: false
+        - name: example_status
+          type: Bool
+          offset: 4
+          bit: 0
+          desc: Public example status point; replace before enabling PLC access.
+          readable: true
+          writable: false
+        - name: example_counter
+          type: DInt
+          offset: 8
+          desc: Public example counter point; replace before enabling PLC access.
+          readable: true
+          writable: false

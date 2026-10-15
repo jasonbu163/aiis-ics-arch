@@ -16,7 +16,7 @@ To test [full dev](#source-development-stack) afterwards, stop prod and database
 
 - Python and `uv` compatible with `backend/`.
 - Node.js and `pnpm` compatible with `frontend-js/`.
-- Rust/Cargo compatible with `control-agent/`.
+- Rust/Cargo compatible with `automation-world/control-agent/`.
 - No checked-in `.env`, customer input, generated output or real connection address.
 
 ## Sequence

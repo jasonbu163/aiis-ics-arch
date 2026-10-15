@@ -173,5 +173,7 @@ def create_app(testing: bool | None = None) -> FastAPI:
     register_exception_handlers(app)
     register_routers(app)
     register_health_endpoints(app)
+    from app.module_preflight import check_routes
+    check_routes(app)
     
     return app

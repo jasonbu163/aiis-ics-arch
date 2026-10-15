@@ -41,12 +41,16 @@ const makeStopRecord = (apiName, index) => createMockRecord(apiName, index, {
   reason: `${MOCK_LABEL}-STOP-REASON`
 })
 
-const makePrice = (apiName, index) => createMockRecord(apiName, index, {
-  electricPrice: 99.99 + index,
-  hydrogenPrice: 88.88 + index,
-  argonPrice: 77.77 + index,
-  operator: `${MOCK_LABEL}-OPERATOR-${index}`
-})
+const makePrice = (apiName, index, observedAt = new Date().toISOString()) => {
+  const time = new Date(observedAt)
+  time.setUTCMinutes(0, 0, 0)
+  return createMockRecord(apiName, index, {
+    electricPrice: 99.99 + index, hydrogenPrice: 88.88 + index, argonPrice: 77.77 + index,
+    electricRemark: MOCK_LABEL, hydrogenRemark: MOCK_LABEL, argonRemark: MOCK_LABEL, remark: MOCK_LABEL,
+    observedAt, hourStart: time.toISOString(), createdAt: observedAt, updatedAt: observedAt,
+    operator: `${MOCK_LABEL}-OPERATOR-${index}`
+  })
+}
 
 export async function getShiftTeamList(params) {
   const apiName = 'auxiliary.getShiftTeamList'
@@ -135,9 +139,12 @@ export async function getCurrentPrice() {
 
 export async function getPriceList(params) {
   const apiName = 'auxiliary.getPriceList'
-  return createMockPage(apiName, params, [makePrice(apiName, 1), makePrice(apiName, 2)])
+  const day = params?.date
+  const rows = day ? [makePrice(apiName, 1, `${day}T10:30:00+08:00`), makePrice(apiName, 2, `${day}T09:30:00+08:00`)]
+    : [makePrice(apiName, 1), makePrice(apiName, 2)]
+  return createMockPage(apiName, params, rows)
 }
 
 export async function createPrice(data) {
-  return createMockMutation('auxiliary.createPrice', data)
+  return { ...makePrice('auxiliary.createPrice', 1, data.observedAt || new Date().toISOString()), ...data, observedAt: data.observedAt || new Date().toISOString() }
 }

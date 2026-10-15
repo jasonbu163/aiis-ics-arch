@@ -10,7 +10,7 @@ AIIS ICS Architecture is the public source baseline for reusable industrial info
 .
 ├── backend/       # FastAPI, SQLAlchemy, Alembic and Core modules
 ├── frontend-js/   # Vue 3 + Vite JavaScript Core frontend
-├── control-agent/ # Rust/Tauri field-fact collection runtime
+├── automation-world/ # CA compatibility baseline and independent DAA/SMA projects
 ├── tools/         # Independent project-level tools
 ├── contracts/     # Root Core cross-runtime contract hub
 ├── docs/          # Durable cross-repository and process documents
@@ -18,6 +18,8 @@ AIIS ICS Architecture is the public source baseline for reusable industrial info
 ```
 
 Project repositories consume a pinned source version and add their own modules under the same vertical module conventions. This repository does not contain project-specific pages, PLC workbooks, customer data, real addresses, credentials, or build output.
+
+Reusable public modules may include domain Models, Schemas, Services, CRUD and business APIs. The approved [energy-price slice](backend/app/energy/README.md) is one such capability. Customer-specific rules, pages, real data and resources remain in consuming projects.
 
 ## Source version model
 
@@ -51,9 +53,9 @@ cd ../frontend-js
 pnpm install
 pnpm build
 
-cd ../control-agent
-cargo fmt --check
-cargo test --workspace
+cd ../automation-world/control-agent
+cargo fmt --manifest-path src-tauri/Cargo.toml --check
+cargo test --manifest-path src-tauri/Cargo.toml --locked
 ```
 
 These commands are source/static checks. They do not start Docker, modify a real database, connect to a PLC, or publish a release. Use explicit project-owned environment files and approved non-production fixtures for runtime work.
@@ -76,3 +78,5 @@ Read [AGENTS.md](AGENTS.md) before making changes. Current architecture status i
 `docker-compose.database-only.yml` provides isolated MySQL `8.4.6` for host-source development or the prod stack. `docker-compose.prod.yml` runs an image-built backend and Nginx serving the host's prebuilt `frontend-js/dist`; its database is external to that Compose project. The three supported entries are dev, database-only and prod; always select one explicitly with `-f`.
 
 See [initialization and deployment](INITIALIZATION.md#single-host-deployment) for environment files, preparation, explicit migrations, account setup, restart behavior and troubleshooting. Configuration validation does not establish successful runtime deployment.
+
+See [Automation World](automation-world/README.md) for CA freezing, independent DAA/SMA startup and later-stage boundaries.

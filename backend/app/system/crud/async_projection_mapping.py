@@ -12,7 +12,7 @@ from sqlalchemy import delete, distinct, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.monitor.models.monitor import PlcDbBlockRawSnapshot
+from app.monitor.models import PlcDbBlockRawSnapshot
 from app.system.models.projection_mapping import (
     ProjectionMappingAuditEvent,
     ProjectionMappingBinding,

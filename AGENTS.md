@@ -6,13 +6,13 @@
 
 非琐碎工作开始前，依次阅读本文件、`README.md` / `README.zh-CN.md`、`PLAN.md` / `PLAN.zh-CN.md`，再阅读最近触达目录的 README 与 PLAN。STD 写入任务及 BACKFILL 回填现有任务时还必须完整阅读所属 `spec.md`、`tasks.md`，以及交接后由 Verification 创建的 `checklist.md`。
 
-根目录只放跨仓库架构入口，不承载项目客户业务。稳定的模块规则写在对应模块 README；持续工作的阶段状态写在 PLAN；具体范围和证据写在任务 bundle。
+根目录只放跨仓库架构入口，不承载项目客户业务。公共模块可以包含可复用领域 Model / Schema / Service / CRUD 与业务 API；`backend/app/energy/` 的能源单价及已批准公共业务切片属于已批准公共能力。客户专属规则、页面、真实数据与资源仍归消费项目。稳定的模块规则写在对应模块 README；持续工作的阶段状态写在 PLAN；具体范围和证据写在任务 bundle。
 
 ## 2. 仓库边界
 
 - `backend/` 是 FastAPI、SQLAlchemy、Alembic 和 Core Service 的源码。
 - `frontend-js/` 是保留 JavaScript 语言形态的 Vue 3 + Vite Core 前端模板。
-- `control-agent/` 是独立的 Rust/Tauri 现场事实采集运行时；它不依赖 backend 进程内轮询 PLC。
+- `automation-world/` 统一管理现场采集和语义映射；`automation-world/control-agent/` 是迁移后冻结的 Rust/Tauri 兼容运行时，DAA/SMA 为独立工程，均不依赖 backend 进程内轮询 PLC。
 - `tools/` 是不默认导入 backend、数据库或 `.env` 的项目级独立工具。
 - `contracts/` 是根目录 Core 跨运行时公开合同中心；源码版本由 Git refs 固定，不建立实体 `release/` 源码目录。
 - `docs/` 保存跨仓库与流程类长期文档，由根目录 PLAN 统一管理，只建立双语 README 索引而不建立独立 PLAN。

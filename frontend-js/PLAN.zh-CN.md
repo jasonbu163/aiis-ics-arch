@@ -4,6 +4,8 @@ English version: [PLAN.md](PLAN.md)
 
 ## 当前基线
 
+- [ARCH-BE-004 r2](../plans/ARCH-BE-004-energy-price-hourly-history/spec.md)：`owner_accepted`；记录时间小时覆盖、选日历史与新增弹窗已独立验证，F-001 已关闭；Human Owner 于 2026-10-13 完成人工试用并接受，真实数据迁移另行授权。
+
 - Core 页面：login、system/user、system/dict。
 - 路由、导航、默认入口和文案共同消费规范化模块 Registry。
 - ARCH-FE-002 已接入获批的 dashboard/plan 首批模块及 `dashboard.home`、`plan.list` 页面；其余业务模块由后续 003 迁移任务处理。

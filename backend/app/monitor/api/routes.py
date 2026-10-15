@@ -14,7 +14,11 @@ from core.deps import require_permissions
 
 router = APIRouter(
     prefix="/monitor",
-    dependencies=[Depends(require_permissions("monitor"))],
 )
-router.include_router(collector_router)
-router.include_router(realtime_router)
+router.include_router(collector_router, dependencies=[Depends(require_permissions("monitor"))])
+router.include_router(realtime_router, dependencies=[Depends(require_permissions("monitor"))])
+
+from .temperature import router as temperature_router
+from .energy import router as energy_router
+router.include_router(temperature_router, dependencies=[Depends(require_permissions("monitor-business-read"))])
+router.include_router(energy_router, dependencies=[Depends(require_permissions("monitor-business-read"))])

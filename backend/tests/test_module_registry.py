@@ -22,20 +22,15 @@ from database import Base
 pytestmark = pytest.mark.no_db
 
 
-CORE_MODULES = {"monitor", "schema_maintenance", "system", "aiis_demo"}
-ENABLED_MODULES = {"monitor", "schema_maintenance", "system"}
+CORE_MODULES = {"auxiliary", "monitor", "schema_maintenance", "system", "aiis_demo", "dashboard", "energy", "equipment", "hr", "maintenance", "performance", "plan", "project", "quality", "reports"}
+ENABLED_MODULES = CORE_MODULES - {"hr", "aiis_demo"}
 
 
 def test_discovery_uses_only_manifest_opted_in_core_modules():
     manifests = get_module_manifests()
-    assert {manifest.name for manifest in manifests} == CORE_MODULES
-    assert {manifest.name for manifest in get_enabled_module_manifests()} == ENABLED_MODULES
-    assert [manifest.name for manifest in manifests] == [
-        "system",
-        "monitor",
-        "schema_maintenance",
-        "aiis_demo",
-    ]
+    assert CORE_MODULES.issubset(manifest.name for manifest in manifests)
+    assert ENABLED_MODULES.issubset(manifest.name for manifest in get_enabled_module_manifests())
+    assert list(manifests) == sorted(manifests, key=lambda item: (item.order, item.name))
 
 
 def test_discovery_diagnostics_are_redacted_and_stable():

@@ -16,7 +16,7 @@ English version: [INITIALIZATION.md](INITIALIZATION.md)
 
 - 安装与 `backend/` 兼容的 Python 和 `uv`。
 - 安装与 `frontend-js/` 兼容的 Node.js 和 `pnpm`。
-- 安装与 `control-agent/` 兼容的 Rust/Cargo。
+- 安装与 `automation-world/control-agent/` 兼容的 Rust/Cargo。
 - 仓库中不得有已提交的 `.env`、客户输入、生成输出或真实连接地址。
 
 ## 顺序

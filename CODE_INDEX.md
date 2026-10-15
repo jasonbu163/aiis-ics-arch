@@ -7,7 +7,7 @@ source topology or important entrypoints change.
 
 - `backend/` — FastAPI, SQLAlchemy, Alembic and Core module registry.
 - `frontend-js/` — JavaScript Core web shell, route/locale discovery and system UI.
-- `control-agent/` — optional Rust/Tauri field runtime and operations console.
+- `automation-world/control-agent/` — optional Rust/Tauri field runtime and operations console.
 - `tools/` — offline lineage, PLC mapping and simulator tools.
 - `contracts/` — root Core hub for cross-runtime public contracts; source truth remains in code.
 - `docs/` — root-PLAN-owned durable cross-repository and process documentation, indexed by a bilingual README pair.
@@ -22,6 +22,12 @@ source topology or important entrypoints change.
 - `backend/tests/test_role_api_permission_startup.py` — no-DB composition, configuration-source and maintenance-order regressions.
 - `backend/app/module_registry.py` — manifest-based module discovery and router/model registration.
 - `backend/app/router.py` — explicit Core/user/control-agent route boundary.
+- `backend/app/energy/manifest.py` — unique price owner and independent read/manage permissions.
+- `backend/app/energy/api/energy_price.py` — current/date-filtered history/hourly upsert HTTP APIs.
+- `backend/app/energy/models/energy_price.py` / `schemas/energy_price.py` — constrained snapshot persistence and local JSON number contract.
+- `backend/app/energy/crud/async_energy_price.py` / `services/async_energy_price.py` — async atomic hourly SQL, observedAt ordering and whole-group transaction.
+- `backend/alembic/versions/20261013_1200_a6c8e0f2b4d6_add_public_energy_prices.py` — one-table successor to the unchanged Core root.
+- `backend/tests/test_energy_price_api.py` / `test_energy_price_service.py` / `test_energy_price_migration.py` — no-DB HTTP, transaction, SQL and metadata checks.
 - `backend/app/monitor/` — collector health and generic raw/latest PLC snapshot facts.
 - `backend/alembic/` — single `d4e6f8a0b2c4` Core root migration for fourteen tables plus static parity coverage.
 - `backend/scripts/` — generic maintenance and smoke helpers.
@@ -67,12 +73,12 @@ Manifest-driven navigation shares the Registry and consumer-supplied page access
 
 ## Control Agent entrypoints
 
-- `control-agent/src-tauri/src/commands/` — thin Tauri and headless command adapters.
-- `control-agent/src-tauri/src/domain/` — runtime contracts and state types.
-- `control-agent/src-tauri/src/services/` — PLC collection and snapshot orchestration.
-- `control-agent/src-tauri/src/infrastructure/` — configuration, PLC/S7, logging and database adapters.
-- `control-agent/src/app/` — module-local console views and translations.
-- `control-agent/config/` — sanitized, default-off YAML shape examples.
+- `automation-world/control-agent/src-tauri/src/commands/` — thin Tauri and headless command adapters.
+- `automation-world/control-agent/src-tauri/src/domain/` — runtime contracts and state types.
+- `automation-world/control-agent/src-tauri/src/services/` — PLC collection and snapshot orchestration.
+- `automation-world/control-agent/src-tauri/src/infrastructure/` — configuration, PLC/S7, logging and database adapters.
+- `automation-world/control-agent/src/app/` — module-local console views and translations.
+- `automation-world/control-agent/config/` — sanitized, default-off YAML shape examples.
 
 Database engine settings and YAML upload are deferred to `CA-CONFIG-001`.
 
@@ -96,3 +102,29 @@ Database engine settings and YAML upload are deferred to `CA-CONFIG-001`.
 README files own stable usage and boundaries; PLAN files own current workstream
 indexes; task bundles own scope and verification facts. Do not run global
 documentation initialization in this repository.
+
+## ARCH-BE-004 hourly price entries
+
+- `backend/app/energy/models/energy_price_hour.py` — UTC observedAt/hourStart hourly snapshots with a unique hour key.
+- `backend/alembic/versions/20261013_1600_b8d0f2a4c6e8_add_energy_price_hours.py` — explicit hours-table successor; preserves the append archive.
+- `frontend-js/src/app/auxiliary/views/price/index.vue` — readonly current prices, Shanghai daily history and whole-group add dialog.
+
+## Public module admission and reintegration
+
+- `backend/app/MODULE_CONTRACT.md` / `MODULE_CONTRACT.zh-CN.md` — durable Python v1 module handbook.
+- `backend/app/module_contract.py` — public symbols and bounded legacy compatibility inventory.
+- `backend/app/module_preflight.py` — source dependencies/public symbols and actual route/model conflicts; help-only bare CLI.
+- `backend/app/auxiliary/api/auxiliary.py` / `models/auxiliary.py` / `services/async_auxiliary.py` — four non-price entities, read-only empty rules and explicit write transactions.
+- `backend/app/monitor/models/business_history.py` / `api/temperature.py` / `api/energy.py` — two history entities and independently guarded read queries.
+- `backend/app/{dashboard,energy,equipment,hr,maintenance,performance,plan,project,quality,reports}/manifest.py` — opt-in public business slices; HR disabled.
+- `backend/alembic/versions/20261014_1600_d2f4a6b8c0e2_reintegrate_business_module_schema.py` — explicit 42-table successor, no seed.
+- `backend/tests/module_admission_fixtures.py` / `test_module_{contract,dependencies,conflicts,admission}.py` — reconstructable C2/E source profiles and admission matrices.
+- `backend/tests/test_business_module_{reintegration,migration,permissions}.py` / `test_auxiliary_business.py` / `test_monitor_business.py` — F schema/guard/zero-write regressions.
+- `frontend-js/src/app/auxiliary/views/shift/index.vue` / `tests/module-registry/shift-rule-empty-state.test.mjs` — legal unconfigured-rule state and existing-rule SFC regression.
+- `backend/tests_mysql/test_module_admission.py` / `test_business_module_reintegration.py` — opt-in disposable MySQL E/F entrypoints; no shared destructive fixtures, execution requires separate approval.
+
+## Automation World Agent foundation
+
+- `automation-world/README.*`, `PLAN.*`, `plans/README.*` — lifecycle owner and unique root task references.
+- `automation-world/data-acquisition-agent/` — independent frozen-CA derivative; DAA-only config/identity and existing headless runtime.
+- `automation-world/semantic-mapping-agent/` — filtered TSS HTTP mapping/facts console, native gates and local help; no customer/SQL/legacy command closure.

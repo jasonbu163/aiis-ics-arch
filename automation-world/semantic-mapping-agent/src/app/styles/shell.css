@@ -1,0 +1,324 @@
+/* File Path: /automation-world/semantic-mapping-agent/src/app/styles/shell.css
+ * Description: Shell layout, sidebar, sticky top bar, workspace, and help.
+ * Main Features:
+ *   - Defines the desktop shell, navigation, workspace header, and help surface
+ */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 256px minmax(0, 1fr);
+  align-items: start;
+  min-height: 100vh;
+}
+
+.app-shell.sidebar-collapsed {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: auto;
+  padding: 18px 14px;
+  color: #dce8eb;
+  background: #11181d;
+  border-right: 1px solid #253239;
+}
+
+.brand-block {
+  position: relative;
+  padding: 8px 8px 18px;
+  border-bottom: 1px solid #253239;
+}
+
+.sidebar-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  color: #3d535b;
+  background: #f7fafb;
+  border: 1px solid #d4dee2;
+  border-radius: 10px;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    color 120ms ease,
+    background 120ms ease,
+    border-color 120ms ease;
+}
+
+.sidebar-toggle:hover {
+  color: #23675c;
+  background: #e5f2ef;
+  border-color: #75a79c;
+}
+
+.sidebar-toggle-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: #89a6ae;
+  font-size: 12px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  color: #89a6ae;
+  font-size: 13px;
+}
+
+.status {
+  color: #2f6f62;
+  white-space: nowrap;
+}
+
+.sidebar-nav {
+  display: grid;
+  gap: 6px;
+  margin-top: 18px;
+}
+
+.nav-group {
+  display: grid;
+  gap: 4px;
+}
+
+.nav-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  color: #c8d7dc;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  color: #ffffff;
+  background: #1a252b;
+  border-color: #2d3c44;
+}
+
+.nav-item small {
+  overflow: hidden;
+  max-width: 94px;
+  color: #89a6ae;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-chevron {
+  color: #89a6ae;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.nav-submenu {
+  display: grid;
+  gap: 2px;
+  padding: 0 0 4px 12px;
+}
+
+.nav-subitem {
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 10px;
+  color: #9fb2b8;
+  background: transparent;
+  border: 0;
+  border-left: 2px solid #2d3c44;
+  border-radius: 0 5px 5px 0;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav-subitem:hover,
+.nav-subitem.active {
+  color: #fff;
+  background: #1a252b;
+  border-left-color: #45a08e;
+}
+
+.sidebar-footer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: auto;
+  padding: 14px 8px 4px;
+  color: #a8bcc3;
+  font-size: 12px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: #36b37e;
+  border-radius: 999px;
+}
+
+.main-surface {
+  min-width: 0;
+}
+
+.content-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 82px;
+  padding: 16px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #d9e2e5;
+}
+
+.title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.page-kicker {
+  margin: 0 0 5px;
+  color: #52707a;
+  font-size: 12px;
+}
+
+.connection-summary {
+  display: grid;
+  gap: 2px;
+  min-width: 220px;
+  color: #52707a;
+  font-size: 12px;
+  text-align: right;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.icon-action {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  color: #23675c;
+  background: #ffffff;
+  border: 1px solid #9fb5bb;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.icon-action:hover {
+  background: #e5f2ef;
+  border-color: #75a79c;
+}
+
+.connection-summary span {
+  color: #172026;
+  font-size: 13px;
+}
+
+.connection-summary strong {
+  color: #23675c;
+  font-weight: 600;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  padding: 24px;
+}
+
+.workspace-segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+  padding: 5px;
+  background: #eaf0f2;
+  border: 1px solid #d4dee2;
+  border-radius: 8px;
+}
+
+.workspace-segmented button {
+  min-height: 36px;
+  padding: 7px 12px;
+  color: #3d535b;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.workspace-segmented button:hover,
+.workspace-segmented button.active {
+  color: #174f46;
+  background: #ffffff;
+  border-color: #9fb5bb;
+}
+
+.workspace-module-host {
+  display: grid;
+  min-width: 0;
+  gap: 18px;
+}
+
+.nav-item:focus-visible,
+.nav-subitem:focus-visible,
+.workspace-segmented button:focus-visible,
+.icon-action:focus-visible,
+.sidebar-toggle:focus-visible,
+.projection-mapping-scroll:focus-visible,
+.projection-detail-scroll:focus-visible {
+  outline: 3px solid #2f7f70;
+  outline-offset: 2px;
+}

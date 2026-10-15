@@ -1,0 +1,22 @@
+{
+  "app": {
+    "title": "Control Agent",
+    "subtitle": "面向 AIIS 现场运行时的本地运维控制台",
+    "status": "框架已就绪"
+  },
+  "actions": {
+    "refresh": "刷新",
+    "switchLanguage": "切换语言",
+    "switchToDark": "切换到深色模式",
+    "switchToLight": "切换到浅色模式",
+    "switchToChineseShort": "中",
+    "switchToEnglishShort": "EN"
+  },
+  "operationDialog": {
+    "cancel": "取消",
+    "close": "关闭确认弹窗",
+    "confirm": "确认",
+    "message": "请确认本地现场操作。",
+    "title": "操作确认"
+  }
+}

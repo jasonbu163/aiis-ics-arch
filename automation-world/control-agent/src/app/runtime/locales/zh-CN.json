@@ -1,0 +1,53 @@
+{
+  "overview": {
+    "ariaLabel": "Control Agent 状态总览",
+    "runtime": "运行实例"
+  },
+  "operations": {
+    "ariaLabel": "Control Agent 运维就绪状态",
+    "database": "数据库读取路径",
+    "plc": "PLC 读取路径",
+    "authorization": "授权门禁",
+    "ready": "就绪",
+    "observing": "观察中",
+    "locked": "已锁定",
+    "blocked": "受阻",
+    "databaseCollectionReadyDetail": "PLC 采集数据库目标已启用并完成配置。",
+    "databaseCollectionLockedDetail": "PLC 采集数据库目标未启用或尚未配置。",
+    "plcReadyDetail": "{driver} 已读取 {count} 个点，用时 {latency} ms。",
+    "plcPendingDetail": "当前选择 {driver}；样本读取等待执行或读取失败。",
+    "authorizationEnabledDetail": "上位系统授权已对配置门禁生效。",
+    "authorizationDisabledDetail": "门禁未启用；本地自检仍保持可见。"
+  },
+  "facts": {
+    "agent": "Agent",
+    "version": "版本",
+    "backend": "后端地址",
+    "backendStatus": "后端状态",
+    "accessMode": "接入方式",
+    "database": "数据库配置",
+    "generatedAt": "快照时间",
+    "localHeartbeat": "本地 heartbeat",
+    "heartbeatStatus": "{status} · 已运行 {seconds} 秒"
+  },
+  "sectionTitle": "运行时快照",
+  "status": {
+    "backend": {
+      "online": "在线",
+      "onlineWithLatency": "在线 · {latency} ms",
+      "offline": "不可达",
+      "skipped": "未探测"
+    },
+    "mode": {
+      "plc_collection": "PLC 采集模式",
+      "plcCollectionWrite": "PLC 采集写入模式",
+      "loading": "加载中"
+    },
+    "config": {
+      "enabled": "已启用",
+      "disabled": "未启用",
+      "configured": "已配置",
+      "unconfigured": "未配置"
+    }
+  }
+}

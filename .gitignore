@@ -177,7 +177,7 @@ celerybeat.pid
 
 # Rust / Tauri build outputs
 desktop-tauri/src-tauri/target/
-control-agent/src-tauri/target/
+automation-world/**/src-tauri/target/
 
 # ============================================================================
 # Frontend / 前端 (Vite + Vue)
@@ -273,3 +273,12 @@ coverage
 .codeartsdoer
 
 .local-links/
+
+# AW new-app generated schemas and local runtime products
+automation-world/data-acquisition-agent/src-tauri/gen/
+automation-world/semantic-mapping-agent/src-tauri/gen/
+automation-world/**/.local/
+automation-world/**/outputs/
+automation-world/**/*.db
+automation-world/**/*.sqlite
+automation-world/**/*.sqlite3

@@ -24,19 +24,8 @@ def test_celery_worker_surfaces_and_dependencies_are_absent():
     assert '"flower' not in pyproject
 
 
-def test_public_backend_source_has_no_old_business_app_directories():
-    app_dir = BACKEND_ROOT / "app"
-    for module_name in (
-        "auxiliary",
-        "dashboard",
-        "energy",
-        "equipment",
-        "hr",
-        "maintenance",
-        "performance",
-        "plan",
-        "project",
-        "quality",
-        "reports",
-    ):
-        assert not (app_dir / module_name).exists()
+def test_public_backend_source_has_no_old_business_app_directories_in_c2(tmp_path):
+    from tests.module_admission_fixtures import generate_core_profile, run_python
+    profile = generate_core_profile(tmp_path / "C2")
+    result = run_python(profile, 'import pytest\nraise SystemExit(pytest.main(["--noconftest", "-q", "-m", "no_db", "tests/test_celery_retirement.py"]))')
+    assert result.returncode == 0, result.stdout + result.stderr

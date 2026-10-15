@@ -4,6 +4,8 @@ Chinese version: [PLAN.zh-CN.md](PLAN.zh-CN.md)
 
 ## Current baseline
 
+- [ARCH-BE-004 r2](../plans/ARCH-BE-004-energy-price-hourly-history/spec.md): `owner_accepted`; observedAt hourly upsert, daily history and add dialog independently verified, F-001 closed; Human Owner accepted on 2026-10-13 after successful manual use, live data migration separately gated.
+
 - Core pages: login, system/user and system/dict.
 - Route, navigation, default entry and locale assembly share the normalized module Registry.
 - ARCH-FE-002 adds the approved dashboard/plan pilot with page IDs `dashboard.home` and `plan.list`; remaining business modules require the subsequent 003 migration task.

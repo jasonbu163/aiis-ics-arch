@@ -30,11 +30,11 @@
 
           <BaseCard :title="$t('auxiliary.shift.rules')" compact>
             <template #actions>
-              <ActionButton v-if="canManageShift" variant="secondary" size="small" @click="handleEditRule">
+              <ActionButton v-if="canManageShift && shiftRule.id" variant="secondary" size="small" @click="handleEditRule">
                 {{ $t('common.edit') }}
               </ActionButton>
             </template>
-            <div class="rule-content">
+            <div v-if="shiftRule.id" class="rule-content">
               <p class="rule-desc">{{ ruleDescription }}</p>
               <div class="rule-item">
                 <span>{{ $t('auxiliary.shift.dayShift') }}</span>
@@ -53,6 +53,7 @@
                 <strong>{{ shiftRule.cycleName || $t('auxiliary.shift.fourThree') }}</strong>
               </div>
             </div>
+            <p v-else class="rule-desc">{{ $t('auxiliary.shift.ruleNotConfigured') }}</p>
           </BaseCard>
         </div>
 
@@ -118,12 +119,12 @@
           <div class="table-scroll">
             <el-table v-loading="shiftLoading" :data="shiftList" border stripe class="vibe-table">
               <el-table-column prop="date" :label="$t('auxiliary.shift.date')" width="130" />
-              <el-table-column :label="`${$t('auxiliary.shift.dayShift')} (${$t('auxiliary.shift.dayShiftTime')})`" min-width="180">
+              <el-table-column :label="shiftRule.id ? `${$t('auxiliary.shift.dayShift')} (${$t('auxiliary.shift.dayShiftTime')})` : $t('auxiliary.shift.dayShift')" min-width="180">
                 <template #default="{ row }">
                   <el-tag type="success">{{ getTeamName(row.dayLeader) }}</el-tag>
                 </template>
               </el-table-column>
-              <el-table-column :label="`${$t('auxiliary.shift.nightShift')} (${$t('auxiliary.shift.nightShiftTime')})`" min-width="180">
+              <el-table-column :label="shiftRule.id ? `${$t('auxiliary.shift.nightShift')} (${$t('auxiliary.shift.nightShiftTime')})` : $t('auxiliary.shift.nightShift')" min-width="180">
                 <template #default="{ row }">
                   <el-tag type="info">{{ getTeamName(row.nightLeader) }}</el-tag>
                 </template>
@@ -263,7 +264,7 @@
       <template #footer>
         <div class="vibe-dialog-footer">
           <ActionButton variant="secondary" @click="ruleDialogVisible = false">{{ $t('common.cancel') }}</ActionButton>
-          <ActionButton variant="primary" @click="handleRuleSubmit">{{ $t('common.confirm') }}</ActionButton>
+          <ActionButton variant="primary" :disabled="!shiftRule.id || !ruleForm.id" @click="handleRuleSubmit">{{ $t('common.confirm') }}</ActionButton>
         </div>
       </template>
     </el-dialog>
@@ -325,18 +326,12 @@ const shiftForm = reactive({
   nightLeader: ''
 })
 
-const shiftRule = reactive({
-  id: null,
-  name: 'default',
-  shiftMode: 'two_shift',
-  cycleName: '',
-  dayShiftStart: '08:00',
-  dayShiftEnd: '20:00',
-  middleShiftStart: '08:00',
-  middleShiftEnd: '16:00',
-  nightShiftStart: '20:00',
-  nightShiftEnd: '08:00'
-})
+const emptyShiftRule = {
+  id: null, name: '', shiftMode: '', cycleName: '',
+  dayShiftStart: '', dayShiftEnd: '', middleShiftStart: '', middleShiftEnd: '',
+  nightShiftStart: '', nightShiftEnd: ''
+}
+const shiftRule = reactive({ ...emptyShiftRule })
 
 const ruleDialogVisible = ref(false)
 const ruleForm = reactive({ ...shiftRule })
@@ -413,6 +408,11 @@ const loadShifts = async () => {
 const loadShiftRule = async () => {
   try {
     const res = await getShiftRule()
+    if (res === null) {
+      Object.assign(shiftRule, emptyShiftRule)
+      ruleDialogVisible.value = false
+      return
+    }
     Object.assign(shiftRule, {
       id: res.id,
       name: res.name || 'default',
@@ -567,7 +567,7 @@ const handleShiftSubmit = async () => {
 }
 
 const handleEditRule = () => {
-  if (!canManageShift.value) return
+  if (!canManageShift.value || !shiftRule.id) return
   Object.assign(ruleForm, { ...shiftRule })
   ruleDialogVisible.value = true
 }

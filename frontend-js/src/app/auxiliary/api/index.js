@@ -84,6 +84,7 @@ export async function getCurrentPrice() {
   return callApi(() => mockApi.getCurrentPrice(), () => request.get('/energy/current'), 'auxiliary.getCurrentPrice')
 }
 
+// date selects a Shanghai business day; page/pageSize keep the existing response contract.
 export async function getPriceList(params) {
   return callApi(() => mockApi.getPriceList(params), () => request.get('/energy', { params }), 'auxiliary.getPriceList')
 }

@@ -12,6 +12,9 @@ from app.module_registry import ModuleManifest
 
 manifest = ModuleManifest(
     name="system",
+    core_contract="aiis.backend-module/v1",
+    requires=(),
+    model_requires=("monitor",),
     enabled=True,
     order=25,
     routers=(

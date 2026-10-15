@@ -25,7 +25,17 @@
     "units": {
       "electric": "CNY/kWh",
       "gas": "CNY/Nm³"
-    }
+    },
+    "historyDate": "History date",
+    "add": "Add prices",
+    "observedAt": "Recorded at (Shanghai time)",
+    "hourStart": "Hour",
+    "lastModified": "Last modified",
+    "historyEmpty": "No prices recorded on this date",
+    "serverTimeHint": "Leave empty to use the server current time (Shanghai time)",
+    "overwriteHint": "Saving to an existing hour replaces the whole price group",
+    "remarkTooLong": "Remark exceeds the length limit",
+    "invalidObservedAt": "Select an existing Shanghai date and time"
   },
   "shift": {
     "title": "Team Management",
@@ -72,7 +82,8 @@
       "teamB": "Team B",
       "teamC": "Team C",
       "teamD": "Team D"
-    }
+    },
+    "ruleNotConfigured": "Shift rules are not configured. Initial setup requires an explicitly authorized configuration operation."
   },
   "stop": {
     "title": "Stop Performance",

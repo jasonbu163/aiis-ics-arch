@@ -6,14 +6,16 @@ English version: [PLAN.md](PLAN.md)
 
 - 源码基线版本：`1.0.0`（annotated `v1.0.0` tag 与 `release/1.x.x` 维护分支已复核；不代表已创建托管
   Release 或完成部署）。
-- Core 表面：`backend/`、`frontend-js/`、`control-agent/`、`tools/`、`contracts/`。
+- 当前工作树表面：`backend/`、`frontend-js/`、`automation-world/`、`tools/`、`contracts/`；CA 已迁入 AW 并冻结，DAA/SMA 初始化状态见下方任务。
 - 项目业务模块和项目输入归使用方项目仓库。
 
 ## 架构工作流
 
 | 工作流 | 状态 | 记录 | 边界 |
 | --- | --- | --- | --- |
-| v1/v2 技术栈与多后端路线 | `draft` | [ARCH-MULTI-001 spec](plans/ARCH-MULTI-001-versioned-stack-roadmap/spec.md) | 已记录 Owner 方向：1.x 增加 .NET 与原生交付；2.x 默认 Rust/PostgreSQL，采用 Vue TS/Ant Design Vue；待细化实施范围与验证 |
+| 三界架构发展蓝本 | `qa_passed` | [ARCH-MULTI-001 spec](plans/ARCH-MULTI-001-versioned-stack-roadmap/spec.md) | r2 [双语 ROADMAP](ROADMAP.zh-CN.md) 已交付；独立文档 QA 通过 AC1–AC10，待 Human Owner 最终审阅；未改代码 |
+| AW Agent 工程前置初始化 | `owner_accepted` | [ARCH-AW-001 spec](plans/ARCH-AW-001-agent-foundation/spec.md) | CA 已迁入并冻结，DAA/SMA 初始化并可独立启动；定向复核通过，Human Owner 于 2026-10-14 接受 r1；本轮未追加测试；UI/SQLite 后续另立任务 |
+| AW 白皮书与运行原理设计 | `qa_passed` | [ARCH-AW-002 spec](plans/ARCH-AW-002-agent-runtime-design/spec.md) | r2 白皮书与详细原理设计已交付；独立文档 QA 通过 AC1–AC11；待 Human Owner 最终审阅；未改代码 |
 | 通用 Docker 部署 | `developer_handoff` | [ARCH-DOCKER-002 spec](plans/ARCH-DOCKER-002-reusable-deployment/spec.md) | r2 实施完成；三份 Compose 静态检查通过，旧根入口已退下，待独立 Verification，运行验证另行批准 |
 | 公开 Core 提取 | `owner_accepted` | [ARCH-001 spec](plans/ARCH-001-public-architecture-baseline-extraction/spec.md) | fresh-context Verification 通过 public-safe Core、smoke/dev/release-check 与清理审计后，Human Owner 已接受 r3 |
 | Core migration baseline | `owner_accepted` | [ARCH-MIG-001 spec](plans/ARCH-MIG-001-core-migration-baseline/spec.md) | Human Owner 已接受单一 `d4e6f8a0b2c4` Core root 与十四表 source/static/no-DB 基线 |
@@ -25,7 +27,10 @@ English version: [PLAN.md](PLAN.md)
 | 剩余前端模块 manifest 适配 | `owner_accepted` | [ARCH-FE-003 spec](plans/ARCH-FE-003-remaining-module-manifest-adaptation/spec.md) | r2 价格页直调 auxiliary API；模块检查、36 项测试及隔离构建独立验证通过，Human Owner 于 2026-10-12 接受 r2，并确认 env 页面权限显示测试正常；保留 r1 历史 |
 | 前端系统名称与小标题配置 | `owner_accepted` | [ARCH-FE-004 spec](plans/ARCH-FE-004-system-name-env-configuration/spec.md) | r3 独立静态复核通过后，Human Owner 于 2026-10-10 反馈测试无误并接受；保留 r1/r2 历史与原始证据 |
 | 后端角色 API 权限配置 | `qa_passed` | [ARCH-BE-001 spec](plans/ARCH-BE-001-role-api-permissions/spec.md) | r3 已恢复十一组英文 env 标题；配置值和逐项注释保留；独立 QA 通过；待 Human Owner 最终验收 |
-| 能源价格后端 API | `draft` | [ARCH-BE-002 spec](plans/ARCH-BE-002-energy-price-api/spec.md) | 后续现价/历史/新增接口契约；消费项目归属与业务规则待确认；未实施后端，不阻塞 FE-003 |
+| 能源价格后端 API | `owner_accepted` | [ARCH-BE-002 spec](plans/ARCH-BE-002-energy-price-api/spec.md) | r3 已批准在本仓库实施可复用 auxiliary；三个 API、独立权限与显式迁移；独立 QA 通过，Human Owner 已于 2026-10-13 验收 r3，真实数据库操作另行授权 |
+| 映射 Service API 试点 | `draft` | [ARCH-BE-003 spec](plans/ARCH-BE-003-mapping-service-api-pilot/spec.md) | r2 已确定本仓库 equipment；四项业务选择已确认、小时存储分析已记录；温控存储粒度及精确范围待批准；现有 backend 映射保留 |
+| 小时价格与按日历史 | `owner_accepted` | [ARCH-BE-004 spec](plans/ARCH-BE-004-energy-price-hourly-history/spec.md) | r2 独立 QA 通过：211 后端、38 前端及浏览器验证；F-001 已关闭，Human Owner 于 2026-10-13 完成人工试用并接受；真实数据迁移另行授权 |
+| 后端业务模块回迁修复 | `qa_blocked` | [ARCH-BE-005 spec](plans/ARCH-BE-005-backend-business-module-reintegration/spec.md) | r3 A 独立通过：319 项源码测试及浏览器检查；B MySQL/Docker 具体操作待批准和验证，最终验收 pending |
 | CA 打包配置 | `draft` | [CA-CONFIG-001 spec](plans/CA-CONFIG-001-packaged-configuration-management/spec.md) | 数据库类型/地址设置与 YAML 上传界面 |
 
 ## 延后边界

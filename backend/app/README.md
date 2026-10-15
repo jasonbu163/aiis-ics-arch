@@ -10,7 +10,9 @@
 
 [中文版本](README.zh-CN.md)
 
-`backend/app/` owns FastAPI business modules and the controlled manifest discovery used by the backend composition root. This directory README is a structure guide, not a task tracker. Backend work state remains in [../PLAN.md](../PLAN.md), with detailed module-registration history in [../plans/B11-backend-module-manifest-autoregistration.md](../plans/B11-backend-module-manifest-autoregistration.md).
+`backend/app/` owns FastAPI business modules and the controlled manifest discovery used by the backend composition root. This directory README is a structure guide, not a task tracker. Backend work state remains in [../PLAN.md](../PLAN.md), with detailed module-registration history in [MODULE_CONTRACT.md](MODULE_CONTRACT.md).
+
+Public modules may own reusable domain Models / Schemas / Services / CRUD and business APIs. [energy](energy/README.md) uniquely owns prices; [auxiliary](auxiliary/README.md) owns shifts and stop records. The approved public business slices follow the [v1 contract](MODULE_CONTRACT.md). Customer-specific rules, pages, real data and resources remain in consuming projects.
 
 ## Registration Model
 

@@ -1,0 +1,360 @@
+/* File Path: /automation-world/semantic-mapping-agent/src/app/styles/shared.css
+ * Description: Shared panels, form controls, action rows, and tables.
+ * Main Features:
+ *   - Defines reusable panel, control, status, table, and empty-state presentation
+ */
+
+.panel {
+  width: 100%;
+  max-width: min(1280px, 100%);
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid #d9e2e5;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.panel-kicker {
+  margin: 0 0 4px;
+  color: #52707a;
+  font-size: 12px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: 14px;
+}
+
+.connection-status {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 34px;
+  margin: 0 0 16px;
+  padding: 6px 10px;
+  color: #52707a;
+  background: #f7fafb;
+  border: 1px solid #d9e2e5;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.connection-status.connected {
+  color: #23675c;
+  background: #e5f2ef;
+  border-color: #bdd8d2;
+}
+
+.connection-status.failed {
+  color: #8f3d2e;
+  background: #fff8f6;
+  border-color: #d6aaa0;
+}
+
+.connection-status .status-dot {
+  background: #9fb5bb;
+}
+
+.connection-status.connected .status-dot {
+  background: #36b37e;
+}
+
+.connection-status.failed .status-dot {
+  background: #d95c48;
+}
+
+.field,
+.check-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #3d535b;
+  font-size: 13px;
+}
+
+.field small {
+  color: #6b828a;
+  line-height: 1.35;
+}
+
+.field-warning {
+  color: #9a5b1f;
+}
+
+.check-field {
+  justify-content: end;
+  flex-direction: row;
+  align-items: center;
+  min-height: 64px;
+}
+
+input {
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  color: #172026;
+  background: #fbfcfd;
+  border: 1px solid #c7d3d8;
+  border-radius: 6px;
+  font: inherit;
+}
+
+select,
+textarea {
+  min-width: 0;
+  padding: 8px 10px;
+  color: #172026;
+  background: #fbfcfd;
+  border: 1px solid #c7d3d8;
+  border-radius: 6px;
+  font: inherit;
+}
+
+select {
+  height: 36px;
+}
+
+select:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+.hint,
+.warning,
+.notice {
+  margin: 14px 0 0;
+  color: #52707a;
+  font-size: 13px;
+}
+
+.warning {
+  color: #9a5b1f;
+}
+
+.notice {
+  color: #2f6f62;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.primary-action,
+.secondary-action,
+.danger-action {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 6px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.primary-action {
+  color: #ffffff;
+  background: #23675c;
+  border: 1px solid #23675c;
+}
+
+.secondary-action {
+  color: #23675c;
+  background: #ffffff;
+  border: 1px solid #9fb5bb;
+}
+
+.danger-action {
+  color: #8f3d2e;
+  background: #fff8f6;
+  border: 1px solid #d6aaa0;
+}
+
+.primary-action:disabled,
+.secondary-action:disabled,
+.danger-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.table-wrap {
+  overflow: auto;
+  border: 1px solid #d9e2e5;
+}
+
+.mapping-page-stack {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: 16px;
+}
+
+.mapping-page-stack > .panel {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+
+.mapping-list-scroll {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-gutter: stable;
+}
+
+.mapping-list-table th:last-child,
+.mapping-list-table td:last-child {
+  position: sticky;
+  right: 0;
+  width: 210px;
+  min-width: 210px;
+  box-shadow: -1px 0 0 #d9e2e5;
+}
+
+.mapping-list-table th:last-child {
+  z-index: 2;
+  background: #f7fafb;
+}
+
+.mapping-list-table td:last-child {
+  z-index: 1;
+  background: #ffffff;
+}
+
+.mapping-list-row-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+}
+
+table {
+  width: 100%;
+  min-width: 920px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+th,
+td {
+  padding: 9px 10px;
+  text-align: left;
+  border-bottom: 1px solid #e6edf0;
+  white-space: nowrap;
+}
+
+th {
+  color: #52707a;
+  background: #f7fafb;
+  font-weight: 600;
+}
+
+td {
+  color: #172026;
+}
+
+tbody tr {
+  transition: background 120ms ease;
+}
+
+tbody tr.selected,
+tbody tr:hover {
+  background: #eef6f4;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 2px 8px;
+  color: #23675c;
+  background: #e5f2ef;
+  border: 1px solid #bdd8d2;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.empty-panel {
+  padding: 24px;
+  color: #52707a;
+  background: #fbfcfd;
+  border: 1px solid #e6edf0;
+  font-size: 13px;
+}
+
+.execution-log-panel {
+  max-width: none;
+}
+
+.execution-log-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.execution-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  color: #3d535b;
+  background: #f7fafb;
+  border: 1px solid #d9e2e5;
+}
+
+.execution-summary strong {
+  color: #172026;
+}
+
+/* List pages use the available workspace; form panels keep their existing width. */
+.panel.list-panel { max-width: none; min-width: 0; }
+.list-filters { margin-bottom: 16px; }
+.list-panel > .panel-header { flex-wrap: wrap; }
+.list-panel > .panel-header .action-row { flex-wrap: wrap; }
+
+.standard-form-dialog {
+  width: min(1000px, calc(100% - 32px));
+  max-width: calc(100% - 32px);
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  color: inherit;
+  overflow: hidden;
+}
+.standard-form-dialog[open] { display: flex; flex-direction: column; }
+.standard-form-dialog::backdrop { background: rgb(23 32 38 / 35%); }
+.standard-form-dialog .dialog-header {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 18px;
+  border-bottom: 1px solid #d9e2e5;
+}
+.standard-form-dialog .dialog-feedback { flex: 0 0 auto; padding: 0 18px; overflow-wrap: anywhere; }
+.standard-form-dialog .dialog-content { min-height: 0; overflow: auto; padding: 18px; }
+@media (max-width: 600px) {
+  .list-panel > .panel-header { align-items: flex-start; }
+  .standard-form-dialog .dialog-header, .standard-form-dialog .dialog-content { padding: 12px; }
+}

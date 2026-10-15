@@ -4,7 +4,12 @@ English version: [PLAN.md](PLAN.md)
 
 ## 当前基线
 
-- [ARCH-BE-002 r1](../plans/ARCH-BE-002-energy-price-api/spec.md)：`draft`；能源价格接口作为消费项目后续任务，目标归属与业务规则待确认；未授权后端实施，不阻塞 FE-003。
+- [ARCH-BE-005 r3](../plans/ARCH-BE-005-backend-business-module-reintegration/spec.md)：`qa_blocked`；A 独立通过 319 项源码测试、离线迁移和浏览器检查；B MySQL/Docker 具体操作待批准和验证，最终验收 pending；先前 QA 历史与并行 AW 文档变更均保留；任务完成后再重核 BE003 基线。
+
+- [ARCH-BE-004 r2](../plans/ARCH-BE-004-energy-price-hourly-history/spec.md)：`owner_accepted`；记录时间小时覆盖、选日历史与新增弹窗已独立验证，F-001 已关闭；Human Owner 于 2026-10-13 完成人工试用并接受，真实数据迁移另行授权。
+
+- [ARCH-BE-002 r3](../plans/ARCH-BE-002-energy-price-api/spec.md)：`owner_accepted`；在本仓库新增可复用 auxiliary 价格切片、三个 API 与后继迁移；独立 QA 通过，Human Owner 已于 2026-10-13 验收 r3，真实数据库/运行验证另行授权。
+- [ARCH-BE-003 r2](../plans/ARCH-BE-003-mapping-service-api-pilot/spec.md)：`draft`；本仓库 equipment 温控接口面向第三方/映射 agent；四项选择已确认、九类存储策略已分析；温控粒度及精确范围待批准，未实施后端。
 
 - Core 模块：user、system、control_agent、schema_maintenance、monitor、aiis_demo。
 - 普通模块通过 manifest opt-in；安全/运行时边界模块保持显式挂载。

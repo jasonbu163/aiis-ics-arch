@@ -13,22 +13,26 @@ app/
 ├── control_agent/    # 后端侧 CA 授权合同
 ├── schema_maintenance/
 ├── monitor/          # 只保留 collector/raw/latest 事实
+├── auxiliary/        # 班次与停机记录
+├── energy/           # 能源价唯一owner
 ├── aiis_demo/        # manifest 参考模块
 └── module_registry.py
 ~~~
 
 普通模块通过 app/<module>/manifest.py opt-in。enabled=False 会隐藏模块 API；Registry 不会创建数据表。新增表必须走显式 Alembic revision 或获批的 schema-maintenance 动作。user 与 control_agent 是安全/运行时边界，继续在 app/router.py 显式挂载。
 
-monitor Core 只返回 collector 健康状态和项目无关的 PLC DB-block raw/latest 事实。HMI、温度、能耗、过程曲线和生产实绩由项目仓库自己的模块负责。
+monitor Core 只返回 collector 健康状态和项目无关的 PLC DB-block raw/latest 事实。公共monitor历史查询使用独立monitor-business-read权限；客户专属HMI、规则与真实数据仍归消费项目。公共模块允许包含可复用领域 Model / Schema / Service / CRUD 与业务 API；[energy](app/energy/README.zh-CN.md) 唯一归属能源价，auxiliary归属班次/停机记录，不包含客户数据或独有规则。
 
 ## 运行边界
 
 - FastAPI handler 调用 async Service/CRUD，不能轮询 PLC。
 - 常驻 Rust/Tauri control-agent 负责 PLC 采集，并通过批准的合同写入现场事实。
 - Celery、Redis、Beat、Flower 和 Python Worker runtime 不是 Core 依赖。
-- Core baseline 现在是只包含十四张 Core 表的单一 `d4e6f8a0b2c4` Alembic root。其 upgrade 实际操作与当前
-  SQLAlchemy metadata 由 `tests/test_core_migration_baseline.py` 机械核对；私有项目仓继续保留自己的历史
+- Core baseline 现在是只包含十四张 Core 表的单一 `d4e6f8a0b2c4` Alembic root。其 upgrade 实际操作与十四表
+  SQLAlchemy metadata 子集由 `tests/test_core_migration_baseline.py` 机械核对；私有项目仓继续保留自己的历史
   migration 图。
+
+后继 `a6c8e0f2b4d6` 仅增加 `energy_prices`，`b8d0f2a4c6e8` 后继仅增加 `energy_price_hours`，完整 metadata 为十六表；运行采用前须显式准备 schema。
 
 ## 本地检查
 
@@ -86,6 +90,8 @@ admin-only guard；授予一个 key 不会自动授予另一个 key。
 | `monitor` | collector 与 raw/latest 现场事实；不包含客户业务曲线或前端 monitor 页面授权。 |
 | `control-agent-read` | CA action-scope 目录查询。 |
 | `control-agent` | gate-token 签发 permission guard；不会远程执行设备动作，仍有独立角色限制。 |
+| `energy-price-read` | energy 现价/历史 GET；独立于 manage。 |
+| `energy-price-manage` | energy 小时整组价格 POST upsert；不隐含授予读取。 |
 | `aiis_demo` | 默认关闭示例 manifest；配置后告警并忽略，数组不会启用该模块。 |
 
 Projection 管理路由传入 `actor_user_id` 记录操作者；此字段不构成角色校验。
@@ -284,3 +290,9 @@ GET `/monitor/realtime/latest`，operator 获得的是这两个事实查询。`s
 仍受独立 actor 限制；`control-agent-read` 是 action-scope 查询。这是显式授权选择，不是公开模板
 安全 `[]` 缺省。本轮获批本机三环境迁移为 host/prod operator 新增 monitor，dev supervisor 新增
 三项且 operator 新增 monitor；不是单纯等值变量改名。未来在同 key 下新增接口需要重新审查。
+
+小时能源价沿用三API路径，按上海observedAt归桶；显式后继b8d0f2a4c6e8令完整metadata为十六表，原追加记录全留。采用前阅读[模块合同与独立gate归并SQL](app/energy/README.zh-CN.md)，源码验证不授权真实迁移或部署。
+
+## 公共模块接入
+
+[v1 Python模块合同](app/MODULE_CONTRACT.zh-CN.md)定义依赖、导出、错误和冲突预检。显式d2f4a6b8c0e2在受保护16表后新增42表（回迁fixture共58）；HR保持关闭，import/GET不seed或应用结构。真实MySQL/Docker/运行动作仍分别经过后续gate。

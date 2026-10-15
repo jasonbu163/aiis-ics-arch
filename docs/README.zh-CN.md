@@ -9,6 +9,9 @@
 | 文档 | 用途 |
 | --- | --- |
 | [多项目开发指南](multi-project-pm.md) | Core、复用模块仓和项目仓之间的长期边界与治理指引。 |
+| [AW 白皮书与演进路线](AIIS_AW_Whitepaper_Roadmap_v0.4.md) | CAF/CU/DAA/SMA/CA 角色、近期本地配置与长期路线；中文设计正文。 |
+| [AW 运行原理与详细设计](AIIS_AW_Runtime_Design.md) | SQLite、S7 点位、API、共享流程 Core 与设备执行/恢复的设计依据；非实现声明。 |
+
 
 ## 权威边界
 

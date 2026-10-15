@@ -1,0 +1,263 @@
+/* File Path: /automation-world/semantic-mapping-agent/src/app/connection/styles.css
+ * Description: API, WebSocket, and loaded OpenAPI catalog layouts.
+ * Main Features:
+ *   - Arranges diagnostics controls, catalog operations, and scrollable payloads
+ *   - Lets direct Connection workspace panels span the available width
+ */
+
+.workspace-module-host > .connection-panel,
+.workspace-module-host > .openapi-catalog {
+  min-width: 0;
+  max-width: none;
+}
+
+.diagnostics-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 8fr) minmax(360px, 4fr);
+  gap: 16px;
+  width: 100%;
+  align-items: start;
+}
+
+.diagnostics-main,
+.diagnostics-controls {
+  align-self: start;
+  display: grid;
+  grid-template-rows: auto auto;
+  gap: 14px;
+  min-width: 0;
+}
+
+.probe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+  gap: 12px;
+}
+
+.probe-card {
+  min-width: 0;
+  border: 1px solid #d9e2e5;
+  background: #fbfcfd;
+}
+
+.probe-card header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #d9e2e5;
+}
+
+.probe-card pre {
+  overflow: auto;
+  min-height: 180px;
+  max-height: 320px;
+  margin: 0;
+  padding: 12px;
+  color: #172026;
+  background: #f7fafb;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.probe-status {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  color: #52707a;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.probe-status[data-state="ok"] {
+  color: #23675c;
+}
+
+.probe-status[data-state="error"] {
+  color: #8f3d2e;
+}
+
+.probe-status[data-state="pending"] {
+  color: #9a5b1f;
+}
+
+.probe-status[data-state="ok"] .status-dot {
+  background: #36b37e;
+}
+
+.probe-status[data-state="error"] .status-dot {
+  background: #d95c48;
+}
+
+.probe-status[data-state="pending"] .status-dot {
+  background: #e2a72e;
+}
+
+.diagnostics-form {
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+}
+
+.diagnostics-log {
+  display: grid;
+  grid-template-rows: auto auto;
+  align-self: start;
+  min-width: 0;
+  margin-top: 0;
+}
+
+.diagnostics-log h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.diagnostics-log pre {
+  overflow: auto;
+  height: clamp(240px, 34vh, 380px);
+  min-height: 0;
+  max-height: clamp(240px, 34vh, 380px);
+  margin: 0;
+  padding: 10px;
+  color: #dce8eb;
+  background: #11181d;
+  border: 1px solid #253239;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.openapi-catalog {
+  margin-top: 16px;
+}
+
+.openapi-catalog-count {
+  color: #52707a;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.openapi-operation-list {
+  display: grid;
+  gap: 8px;
+}
+
+.openapi-operation {
+  border: 1px solid #d9e2e5;
+  background: #fbfcfd;
+}
+
+.openapi-operation summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.openapi-operation-route {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: 8px;
+}
+
+.openapi-method {
+  min-width: 54px;
+  padding: 3px 6px;
+  color: #21556b;
+  background: #e8f3f6;
+  border: 1px solid #c5dce3;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.openapi-method[data-method="POST"],
+.openapi-method[data-method="PUT"],
+.openapi-method[data-method="PATCH"] {
+  color: #23675c;
+  background: #e8f5ee;
+  border-color: #bee1cd;
+}
+
+.openapi-method[data-method="DELETE"] {
+  color: #8f3d2e;
+  background: #fbecea;
+  border-color: #ecc7bf;
+}
+
+.openapi-path,
+.openapi-operation-detail pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.openapi-path {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.openapi-operation-title {
+  min-width: 0;
+  color: #52707a;
+  font-size: 13px;
+  text-align: right;
+}
+
+.openapi-operation-detail {
+  padding: 0 12px 12px;
+  border-top: 1px solid #d9e2e5;
+}
+
+.openapi-operation-detail h3 {
+  margin: 12px 0 8px;
+  font-size: 13px;
+}
+
+.openapi-operation-detail pre {
+  overflow: auto;
+  max-height: 280px;
+  margin: 0;
+  padding: 10px;
+  color: #172026;
+  background: #f3f7f8;
+  border: 1px solid #d9e2e5;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1240px) {
+  .diagnostics-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .diagnostics-controls {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.45fr);
+    grid-template-rows: none;
+    align-items: start;
+  }
+
+  .diagnostics-log pre {
+    height: clamp(220px, 28vh, 320px);
+    max-height: clamp(220px, 28vh, 320px);
+  }
+}
+
+@media (max-width: 760px) {
+  .openapi-operation summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .openapi-operation-title {
+    text-align: left;
+  }
+}
