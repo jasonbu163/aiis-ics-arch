@@ -16,7 +16,7 @@ The machine source is [module_contract.py](module_contract.py), including `CORE_
 | `common.response` | `SuccessResponse`, `StandardResponse`, `serialize_api_data`; existing envelope, aliases and pagination shapes |
 | `common.exceptions` / `core.deps` | `BusinessException`; `get_current_user`, `get_current_active_admin`, `require_permissions` |
 | Explicit user types | `app.user.models.user:User`, `app.user.schemas.user_out:UserResponse`; read-only types, no arbitrary user CRUD |
-| `common.log` / `settings` | `log_event`, `logger`; only `settings.BACKEND_MOCK_ENABLED` for new modules |
+| `common.log` / `settings` | `log_event`, `logger`; `settings.BACKEND_MOCK_ENABLED` and the pure path helper `resolve_env_file` for new modules |
 | Optional CRUD helpers | `common.async_crud_base:BaseService`, `common.sync_crud_base:SyncBaseCRUD`; existing get/list/create/update/delete and no-commit semantics |
 | Optional Projection declarations | `projection.registry:ProjectionHandlerDescriptor`, `ProjectionHandlerInput`, `ProjectionHandlerGroupIdentity`, `ProjectionInvocationContext`; local synchronous declarations, no runner/runtime internals |
 
@@ -76,3 +76,11 @@ uv run python tests/module_admission_fixtures.py --profile F --output /private/t
 ```
 
 Use public explicit process configuration, the approved project uv environment and the generator's DB-denying subprocess guard for A/no_db checks. Source composition, mocks, recorder/offline SQL and frontend fixtures do not prove real persistence. Separately approved disposable MySQL 8.4.6 migrations/API/constraint/rollback tests remain required before runtime adoption. Docker, database actions, deployment, real devices and publishing have separate gates.
+
+## Module-local runtime configuration
+
+`settings.resolve_env_file() -> Path` is the one additive public helper: it computes the backend-directory `.env` in source mode and the executable-directory `.env` in frozen mode (the existing Docker entry uses `/app/.env`). The function only computes a path; importing the settings module still performs its existing module-level Settings initialization. This does not expose additional private Settings fields.
+
+Approved equipment scope belongs to its local BaseSettings and lazy dependency. Explicit parameters override process env, which overrides the selected dotenv; tests explicitly pass a synthetic file or `_env_file=None`. No cross-app cache or import-time config instance is introduced. This helper is not authorization, a device directory or a new configuration platform. Real env adoption/restart and MySQL verification remain separate operational gates.
+
+BE003 callers of `generate_full_profile` explicitly pass `profile_name="BE003", expected_table_count=60, target_revision="e4f6a8b0c2d4"`; this new full-tree snapshot must not be labelled the frozen BE005 F/58 profile. C2/E 14/15/16 guarantees and original assertions remain unchanged.

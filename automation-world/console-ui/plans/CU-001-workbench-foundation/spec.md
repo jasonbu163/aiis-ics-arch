@@ -1,9 +1,9 @@
 Task ID: CU-001
 Revision: r1
-Status: draft
+Status: owner_approved
 Owner Role: PM
 Allowed Writers: PM, Human Owner
-Handoff: Human Owner review of CU-001 r1 scope pending; implementation not started
+Handoff: Human Owner approved CU-001 r1 on 2026-10-15; Development may start within the CU-only allowlist
 Task Namespace: aiis-ics-arch
 Classification: root
 Capability: 独立 Console UI 设计工作台与可由各 Agent 编译消费的公共 UI 源码
@@ -22,7 +22,7 @@ Execution Mode: agent_team_same_session
 
 2026-10-15 只读核对：CU 仍使用 `aiis-ics-control-agent` package/Cargo 身份、`com.aiis.ics.controlagent` identifier 与 15190/14190 端口；README/PLAN 仍描述冻结 CA。
 现有 `App.vue`、壳层和状态模块依赖 `runtimeSnapshot`；Rust 启动与命令注册仍包含 PLC、数据库和 headless 采集能力。
-`src/ui/`、`src/workbench/` 与本任务 bundle 此前不存在。本轮只创建本草案，未构建、测试或启动应用。
+`src/ui/`、`src/workbench/` 与本任务 bundle 在草案创建前不存在。PM 草案阶段未构建、测试或启动应用；本次仅记录范围批准并交接 Development。
 
 ## 2. 归属与交付边界
 
@@ -69,7 +69,7 @@ Execution Mode: agent_team_same_session
 
 ## 4. 写入 allowlist 与角色分工
 
-以下路径除特别注明外均相对 `automation-world/console-ui/`，仅允许完成 R1–R4 所需修改：
+以下路径全部相对 `automation-world/console-ui/`，仅允许完成 R1–R4 所需修改；Human Owner 最新批准明确本轮只改 CU：
 
 | 表面 | 获批后的允许范围 |
 | --- | --- |
@@ -80,12 +80,12 @@ Execution Mode: agent_team_same_session
 | 桌面壳与旧 runtime 清理 | `src-tauri/{Cargo.toml,Cargo.lock,build.rs,tauri.conf.json}`、`src-tauri/capabilities/default.json`、`src-tauri/src/{main.rs,lib.rs}`、`src-tauri/src/{bin,commands,config,domain,infrastructure,services}/**` |
 | 工业样例清理 | `.env.example`、`config/plc_points.yaml`、`config/plc_snapshot_policy.yaml`；仅处理 CU 副本，不改真实 `.env` 或现场文件 |
 | 稳定说明 | `README.md`、`README.zh-CN.md`、`src/app/README.md`、`src/app/README.zh-CN.md` |
-| 代码索引 | 仓库根 `CODE_INDEX.md` 仅 CU 新增/迁移/移除条目，确有结构变化时才更新 |
+| CU 任务索引 | `PLAN.md`、`PLAN.zh-CN.md`、`plans/README.md`、`plans/README.zh-CN.md`，由主协调机械同步 |
 
-PM 本轮只写本 `spec.md`。Development 获批后创建本任务 `tasks.md`；fresh-context Verification 在 `developer_handoff` 后创建 `checklist.md`。
-主协调只机械同步 CU `PLAN.*`、CU `plans/README.*` 与 AW `PLAN.*`/catalog 的相关链接、聚合状态及下一 gate；它们不承载第二份任务正文。
+PM 本轮只写本 `spec.md`。Development 按已批准 r1 创建本任务 `tasks.md`；fresh-context Verification 在 `developer_handoff` 后创建 `checklist.md`。
+主协调只机械同步 CU `PLAN.*`、CU `plans/README.*` 的相关链接、聚合状态及下一 gate；它们不承载第二份任务正文。根 `CODE_INDEX.md` 与 AW 索引本轮不改，外部汇总由总体会话处理。
 生成的依赖、`dist`、Cargo target 与 Tauri 产物保持未跟踪；验证临时产物优先放 `/private/tmp`，不手改生成 schema 或既有图标。
-禁止修改上述范围以外的实现、其他任务 bundle、根 AGENTS/README/PLAN/ROADMAP、AW README/总体文档、其他 Agent、backend、frontend-js、真实配置或 Git refs。
+禁止修改上述范围以外的实现、其他任务 bundle、根 AGENTS/README/PLAN/ROADMAP/CODE_INDEX、AW README/PLAN/catalog/总体文档、其他 Agent、backend、frontend-js、真实配置或 Git refs。
 
 ## 5. 验收标准
 
@@ -101,7 +101,7 @@ PM 本轮只写本 `spec.md`。Development 获批后创建本任务 `tasks.md`�
 | AC8 | R4/治理 | README pair 身份、命令与消费教程一致；文档链接有效，必要 CU 索引与任务元数据正确，diff 不触达其他工程 |
 
 Development 记录实际环境、命令、退出码和一次启动/界面证据；Verification 独立复核对应结果，必要时仅复跑有疑点的项目。
-不要求全 CA/TSS 功能回归、多 cwd 污染矩阵、完整端口或截图矩阵、长时间 GUI 轮询、复制 hash 清单或为本次文档草案构建软件。
+验收维持必要构建、一次启动与公共入口消费；不要求全 CA/TSS 功能回归、多 cwd 污染矩阵、完整端口或截图矩阵、长时间 GUI 轮询、复制 hash 清单或为本次批准记录构建软件。
 原生构建或启动缺少环境时如实报告阻塞，不能用浏览器预览冒充原生证明；独立 QA 通过后仍待 Human Owner 最终验收。
 
 ## 6. 风险、恢复与排除项
@@ -113,15 +113,19 @@ Development 记录实际环境、命令、退出码和一次启动/界面证据�
 - 排除完整浏览器拖拽低代码、任意源码在线编辑、配置保存/代码生成平台、SQLite 业务配置、新 AW API、Rust Flow Core、真实 PLC/DB、生产部署和发布。
 - 实际 Agent 接入、公共库版本发布、更多组件或工业业务页另立任务；CU 工作台可运行不表示 AW 业务链已贯通。
 
-## 7. Handoff、待决定项与修订记录
+## 7. Handoff、批准与修订记录
 
-后续 Development 加载 `frontend-ui`（设计与工程边界）、`i18n-workflow`、`desktop-tauri`；清理继承 Rust runtime 时加载 `rust-runtime`，结构索引变化时加载 `code-document-indexer`；治理文档继续遵循 `project-governance` 与 `aiis`。
-批准前只允许评审本草案与机械索引同步；批准后由命名 Development 实施并交接 fresh-context Verification，PM 不代做技术实现或验证。
-Human Owner 待审：是否批准 CU-001 r1 全部范围，含默认应用身份、15193/14193 端口、CU 内遗留采集能力脱离/清理，以及首批源码共享和样例工作台边界。
+后续 Development 加载 `frontend-ui`（设计与工程边界）、`i18n-workflow`、`desktop-tauri`；清理继承 Rust runtime 时加载 `rust-runtime`，关键源码头部说明需要时加载 `code-document-indexer`；治理文档继续遵循 `project-governance` 与 `aiis`，根索引保持本轮禁写。
+Human Owner 于 2026-10-15 明确批准精确 `CU-001 r1`，包括默认应用身份、15193/14193 端口、CU 内遗留采集能力脱离/清理及源码共享和样例工作台边界。批准原话：
+
+> 可以，批准 CU-001 r1，按这个范围开始实施。只改 CU，先完成设计工作台和公共组件出口，其他 Agent 不动。验证能构建、能启动、能引用就行，不用做全量回归。
+
+按该批准将原草案的根 CODE_INDEX/AW 索引写入例外收回，本轮实际写入全部限制在 CU 内。下一 gate 为命名 Development 实施并交接 fresh-context Verification；PM 不代做技术实现或验证，Human Owner 最终验收仍在 QA 之后。
 若上述选择、allowlist、验收或风险发生实质改变，PM 修订新 Revision 并重新提交批准；未指定的组件内部组织由 Development 在已批准边界内确定。
 
 | 日期 | Revision | 记录 |
 | --- | --- | --- |
-| 2026-10-15 | r1 | PM 创建范围草案；Human Owner 精确范围批准 pending，未开始实施，未创建 tasks/checklist |
+| 2026-10-15 | r1 | PM 创建范围草案；当时尚未获得 Human Owner 精确批准，未开始实施，未创建 tasks/checklist |
+| 2026-10-15 | r1 | Human Owner 明确批准 CU-001 r1 开始实施；按原话收敛为只改 CU，根 CODE_INDEX/AW 索引本轮不改，验证维持构建/一次启动/公共入口消费 |
 
 执行合同：[根 AGENTS](../../../../AGENTS.md)、[Development Lifecycle Workflow](../../../../.codex/workflows/development-lifecycle-workflow.md)。本任务归属 [CU PLAN](../../PLAN.md)，总体依赖见 [AW PLAN](../../../PLAN.md)。

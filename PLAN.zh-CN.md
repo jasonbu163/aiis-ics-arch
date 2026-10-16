@@ -13,6 +13,7 @@ English version: [PLAN.md](PLAN.md)
 
 | 工作流 | 状态 | 记录 | 边界 |
 | --- | --- | --- | --- |
+| DAA 详细设计与配合合同 | `draft` | [ARCH-AW-003 spec](plans/ARCH-AW-003-daa-detailed-design/spec.md) | r1 文档范围已整理，待 Human Owner 精确批准；正式正文尚未写入；无代码变更 |
 | 三界架构发展蓝本 | `qa_passed` | [ARCH-MULTI-001 spec](plans/ARCH-MULTI-001-versioned-stack-roadmap/spec.md) | r2 [双语 ROADMAP](ROADMAP.zh-CN.md) 已交付；独立文档 QA 通过 AC1–AC10，待 Human Owner 最终审阅；未改代码 |
 | AW Agent 工程前置初始化 | `owner_accepted` | [ARCH-AW-001 spec](plans/ARCH-AW-001-agent-foundation/spec.md) | CA 已迁入并冻结，DAA/SMA 初始化并可独立启动；定向复核通过，Human Owner 于 2026-10-14 接受 r1；本轮未追加测试；UI/SQLite 后续另立任务 |
 | AW 白皮书与运行原理设计 | `qa_passed` | [ARCH-AW-002 spec](plans/ARCH-AW-002-agent-runtime-design/spec.md) | r2 白皮书与详细原理设计已交付；独立文档 QA 通过 AC1–AC11；待 Human Owner 最终审阅；未改代码 |
@@ -28,9 +29,9 @@ English version: [PLAN.md](PLAN.md)
 | 前端系统名称与小标题配置 | `owner_accepted` | [ARCH-FE-004 spec](plans/ARCH-FE-004-system-name-env-configuration/spec.md) | r3 独立静态复核通过后，Human Owner 于 2026-10-10 反馈测试无误并接受；保留 r1/r2 历史与原始证据 |
 | 后端角色 API 权限配置 | `qa_passed` | [ARCH-BE-001 spec](plans/ARCH-BE-001-role-api-permissions/spec.md) | r3 已恢复十一组英文 env 标题；配置值和逐项注释保留；独立 QA 通过；待 Human Owner 最终验收 |
 | 能源价格后端 API | `owner_accepted` | [ARCH-BE-002 spec](plans/ARCH-BE-002-energy-price-api/spec.md) | r3 已批准在本仓库实施可复用 auxiliary；三个 API、独立权限与显式迁移；独立 QA 通过，Human Owner 已于 2026-10-13 验收 r3，真实数据库操作另行授权 |
-| 映射 Service API 试点 | `draft` | [ARCH-BE-003 spec](plans/ARCH-BE-003-mapping-service-api-pilot/spec.md) | r2 已确定本仓库 equipment；四项业务选择已确认、小时存储分析已记录；温控存储粒度及精确范围待批准；现有 backend 映射保留 |
+| 映射 Service API 试点 | `qa_passed` | [ARCH-BE-003 spec](plans/ARCH-BE-003-mapping-service-api-pilot/spec.md) | r3 A/B 独立通过：当前源码 483 通过/30 未选及编译通过，两轮 MySQL 各三场景全部通过；F-001/B-001 关闭，专用资源和测试口令已清理，待 Human Owner 最终验收 |
 | 小时价格与按日历史 | `owner_accepted` | [ARCH-BE-004 spec](plans/ARCH-BE-004-energy-price-hourly-history/spec.md) | r2 独立 QA 通过：211 后端、38 前端及浏览器验证；F-001 已关闭，Human Owner 于 2026-10-13 完成人工试用并接受；真实数据迁移另行授权 |
-| 后端业务模块回迁修复 | `qa_blocked` | [ARCH-BE-005 spec](plans/ARCH-BE-005-backend-business-module-reintegration/spec.md) | r3 A 独立通过：319 项源码测试及浏览器检查；B MySQL/Docker 具体操作待批准和验证，最终验收 pending |
+| 后端业务模块回迁修复 | `owner_accepted` | [ARCH-BE-005 spec](plans/ARCH-BE-005-backend-business-module-reintegration/spec.md) | 独立 A 及两轮隔离 MySQL 各五场景通过，专用资源已清理；Human Owner 于 2026-10-16 最终验收 r3 |
 | CA 打包配置 | `draft` | [CA-CONFIG-001 spec](plans/CA-CONFIG-001-packaged-configuration-management/spec.md) | 数据库类型/地址设置与 YAML 上传界面 |
 
 ## 延后边界

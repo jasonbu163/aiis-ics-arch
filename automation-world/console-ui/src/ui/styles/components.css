@@ -1,0 +1,87 @@
+/** 公共壳层、卡片、按钮和状态样式；不包含工作台或全局应用启动样式。 */
+.aw-ui { color: var(--agent-text); background: var(--agent-bg); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.aw-ui, .aw-ui * { box-sizing: border-box; }
+.aw-ui h1, .aw-ui h2, .aw-ui p { margin-top: 0; }
+.aw-ui button { font: inherit; }
+.agent-layout { display: flex; min-height: 100vh; height: 100vh; overflow: hidden; }
+.agent-sidebar { flex: 0 0 var(--agent-sidebar-width); width: var(--agent-sidebar-width); border-right: 1px solid var(--agent-border); background: var(--agent-sidebar-bg); box-shadow: var(--agent-shell-shadow); backdrop-filter: blur(24px); overflow: auto; }
+.agent-sidebar-shell { display: flex; flex-direction: column; min-height: 100%; }
+.agent-menu { flex: 1; border-right: 0; padding: 12px 10px; background: transparent; }
+.agent-menu .el-menu-item { height: 42px; margin-bottom: 6px; border-radius: var(--agent-menu-radius); color: var(--agent-text-muted); font-weight: 560; }
+.agent-menu .el-menu-item.is-active, .agent-menu .el-menu-item:hover { background: var(--agent-sidebar-active-bg); color: var(--agent-accent-strong); }
+.sidebar-footer-brand { display: grid; gap: 5px; margin: 0 16px 16px; padding-top: 14px; border-top: 1px solid var(--agent-border); min-width: 0; }
+.sidebar-footer-brand strong { font-size: 18px; overflow-wrap: anywhere; }
+.sidebar-footer-brand small { font-size: 12px; color: var(--agent-text-muted); }
+.agent-workspace { flex: 1; min-width: 0; overflow: auto; }
+.agent-topbar { position: sticky; top: 0; z-index: 10; padding: 10px 18px 0; }
+.agent-topbar-shell { display: flex; align-items: center; justify-content: space-between; min-height: 64px; gap: 16px; padding: 10px 12px; border: 1px solid var(--agent-border); border-radius: 22px; background: var(--agent-header-glass-bg); box-shadow: var(--agent-header-glass-shadow); backdrop-filter: blur(34px) saturate(1.08); }
+.topbar-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.sidebar-toggle-button { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 40px; height: 40px; border: 1px solid var(--agent-border); border-radius: var(--agent-control-radius); background: transparent; color: var(--agent-text-muted); cursor: pointer; }
+.sidebar-toggle-button:hover { color: var(--agent-accent); border-color: var(--agent-accent); }
+.topbar-title { min-width: 0; }
+.topbar-title h1 { font-size: 22px; margin-bottom: 4px; line-height: 1.2; }
+.topbar-title p { color: var(--agent-text-muted); font-size: 13px; margin: 0; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.aw-ui .topbar-actions > .status-capsule { height: 44px; }
+.agent-main { min-width: 0; padding: 20px 18px 18px; }
+.console-card { display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid var(--agent-card-border); border-radius: var(--agent-card-radius); background: var(--agent-card-bg); box-shadow: var(--agent-card-shadow); }
+.console-card__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 68px; padding: 14px 24px; border-bottom: 1px solid var(--agent-card-border); flex-wrap: wrap; }
+.console-card__title-wrap, .console-card__actions { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.console-card__title-wrap h2 { margin: 0; font-size: 16px; line-height: 1.3; }
+.console-card__icon { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 1px solid var(--agent-card-border); border-radius: 10px; background: var(--agent-surface-muted); color: var(--agent-accent); }
+.console-card__body { min-width: 0; padding: var(--agent-card-padding); }
+.console-card__tools, .console-card__footer { padding: 14px 24px; background: var(--agent-surface-muted); }
+.console-card__tools { border-bottom: 1px solid var(--agent-card-border); }
+.console-card__footer { border-top: 1px solid var(--agent-card-border); }
+.console-card--compact .console-card__header { min-height: 56px; padding: 12px 18px; }
+.console-card--compact .console-card__body { padding: var(--agent-card-padding-compact); }
+.console-action-button.el-button { border-radius: var(--agent-control-radius); box-shadow: none; font-weight: 590; }
+.console-action-button.el-button + .console-action-button.el-button { margin-left: 0; }
+.console-action-button--large.el-button { height: 40px; padding: 0 18px; }
+.console-action-button--small.el-button { height: 30px; padding: 0 12px; border-radius: var(--agent-control-radius-small); }
+.status-capsule { --status-color: var(--agent-accent-strong); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; gap: 8px; min-height: 36px; padding: 8px 14px; border: 1px solid color-mix(in srgb, var(--status-color) 24%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--status-color) 10%, transparent); color: var(--status-color); font-size: 13px; font-weight: 560; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.status-capsule--success { --status-color: var(--agent-success); }
+.status-capsule--warning { --status-color: var(--agent-warning); }
+.status-capsule--danger { --status-color: var(--agent-danger); }
+@media (max-width: 900px) {
+  .agent-sidebar { flex-basis: 180px; width: 180px; }
+  .agent-topbar-shell { align-items: flex-start; flex-wrap: wrap; }
+  .topbar-actions { justify-content: flex-start; }
+  .topbar-title h1 { font-size: 18px; }
+}
+@media (max-width: 600px) {
+  .agent-layout { flex-direction: column; height: auto; min-height: 100vh; }
+  .agent-sidebar { width: 100%; flex-basis: auto; }
+  .agent-sidebar-shell { min-height: 0; }
+  .agent-menu { display: flex; flex-wrap: wrap; }
+  .sidebar-footer-brand { display: none; }
+  .agent-topbar { padding: 8px; }
+  .agent-main { padding: 12px 8px; }
+}
+
+/* 主题与语言公共工具控件；仅消费现有 CU tokens。 */
+.aw-ui .aw-theme-toggle, .aw-ui .aw-language-switch { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; height: 44px; border: 1px solid var(--agent-border); border-radius: 999px; background: var(--agent-card-bg); color: var(--agent-text-muted); cursor: pointer; user-select: none; transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s; }
+.aw-ui .aw-theme-toggle { width: 44px; padding: 0; }
+.aw-ui .aw-theme-toggle:hover, .aw-ui .aw-language-switch:hover { border-color: var(--agent-border-strong); color: var(--agent-text); box-shadow: var(--agent-card-shadow); }
+.aw-ui .aw-theme-toggle.is-dark { background: var(--agent-accent); border-color: var(--agent-accent); color: var(--agent-on-accent); }
+.aw-ui .aw-theme-toggle.is-dark:hover { background: var(--agent-accent-strong); border-color: var(--agent-accent-strong); }
+.aw-ui .aw-language-switch { gap: 4px; padding: 0 16px; font-size: 13px; font-weight: 510; }
+.aw-ui .aw-language-switch:hover { background: var(--agent-surface-muted); }
+.aw-ui .aw-language-switch__text { padding: 2px 4px; border-radius: 4px; color: var(--agent-text-muted); }
+.aw-ui .aw-language-switch__text.is-active { color: var(--agent-accent-strong); font-weight: 590; }
+.aw-ui .aw-language-switch__divider { color: var(--agent-text-muted); font-weight: 400; }
+.aw-ui .aw-theme-toggle:focus-visible, .aw-ui .aw-language-switch:focus-visible { outline: 2px solid var(--agent-accent-strong); outline-offset: 3px; }
+
+/* 原生 Element Plus 组合语义；布局由各宿主负责。 */
+.aw-ui .aw-data-table { --el-table-bg-color: var(--agent-surface); --el-table-tr-bg-color: var(--agent-surface); --el-table-header-bg-color: var(--agent-table-label-bg); --el-table-row-hover-bg-color: var(--agent-table-row-hover); --el-table-border-color: var(--agent-table-grid); --el-table-text-color: var(--agent-text); --el-table-header-text-color: var(--agent-text-muted); }
+.aw-ui .aw-data-table.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell { background: var(--agent-table-stripe-bg); }
+.aw-ui .aw-sample-form .el-select { width: 100%; }
+.aw-ui .aw-form-actions { display: flex; gap: var(--agent-action-gap); justify-content: flex-end; flex-wrap: wrap; }
+.aw-ui .aw-page-state { min-height: 180px; }
+.aw-ui .aw-page-state > p { color: var(--agent-text-muted); }
+.aw-ui .el-dialog { border: 1px solid var(--agent-border); border-radius: var(--agent-card-radius-compact); box-shadow: var(--agent-shadow); }
+.aw-ui .el-select-dropdown__item.is-hovering { background: var(--agent-surface-muted); }
+
+/* 方案密度作用于表头与表体单元格，保持原生 Element Plus 结构。 */
+.aw-ui .aw-data-table .el-table__cell { padding-top: var(--agent-table-cell-padding); padding-bottom: var(--agent-table-cell-padding); }

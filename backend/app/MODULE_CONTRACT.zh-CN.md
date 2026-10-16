@@ -20,7 +20,7 @@
 | common.response | SuccessResponse、StandardResponse、serialize_api_data；既有信封、别名、分页形状 |
 | common.exceptions / core.deps | BusinessException；get_current_user、get_current_active_admin、require_permissions |
 | 显式user类型 | app.user.models.user:User、app.user.schemas.user_out:UserResponse；只读类型，不公开任意user CRUD |
-| common.log / settings | log_event、logger；新模块只读取settings.BACKEND_MOCK_ENABLED |
+| common.log / settings | log_event、logger；新模块只读取settings.BACKEND_MOCK_ENABLED及纯路径helper resolve_env_file |
 | 可选CRUD | common.async_crud_base:BaseService、common.sync_crud_base:SyncBaseCRUD；既有get/list/create/update/delete及不commit语义 |
 | 可选Projection | projection.registry的ProjectionHandlerDescriptor、ProjectionHandlerInput、ProjectionHandlerGroupIdentity、ProjectionInvocationContext；本地同步声明，不公开runner/runtime内部 |
 
@@ -89,3 +89,11 @@ A/no_db使用公开显式进程配置、项目既有uv环境及生成器拒绝DB
 和前端合成fixture不证明真实持久化；采用前仍需独立批准的可丢弃MySQL8.4.6迁移/API/约束/回滚证据。
 Docker、数据库动作、部署、真实设备与发布分别经过后续gate。
 
+
+## 模块本地运行配置
+
+`settings.resolve_env_file() -> Path`是唯一加法公开helper：源码计算backend同目录.env，冻结计算可执行同目录.env（既有Docker入口为/app/.env）。函数本身只算路径；导入settings模块仍有原模块级Settings初始化，不能宣称整个import无env副作用，也不公开其他私有Settings字段。
+
+获批equipment scope归其本地BaseSettings及懒依赖。显式参数优先process env、process优先选定dotenv；测试明确合成文件或_env_file=None，不建立跨应用缓存或import时配置实例。helper不是设备目录、授权或新配置平台。真实env采用/重启及MySQL验证仍经独立运行gate。
+
+BE003调用generate_full_profile须显式传profile_name="BE003", expected_table_count=60, target_revision="e4f6a8b0c2d4"；新全树副本不能冒称冻结BE005 F/58。C2/E原14/15/16保证和断言保持。

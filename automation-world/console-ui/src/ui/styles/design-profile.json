@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "themes": {
+    "light": {
+      "background": "#f3f6f8",
+      "surface": "#ffffff",
+      "surfaceMuted": "#edf3f7",
+      "text": "#17212b",
+      "textMuted": "#5a6875",
+      "border": "#cbd6de",
+      "accent": "#0891b2",
+      "accentStrong": "#0e7490",
+      "onAccent": "#f7feff"
+    },
+    "dark": {
+      "background": "#111820",
+      "surface": "#18222c",
+      "surfaceMuted": "#202c37",
+      "text": "#e6edf2",
+      "textMuted": "#a4b1bd",
+      "border": "#334452",
+      "accent": "#22d3ee",
+      "accentStrong": "#67e8f9",
+      "onAccent": "#06212a"
+    }
+  },
+  "shared": {
+    "cardPaddingPx": 18,
+    "actionGapPx": 12,
+    "cardRadiusPx": 20,
+    "controlRadiusPx": 14,
+    "tableDensity": "standard"
+  }
+}

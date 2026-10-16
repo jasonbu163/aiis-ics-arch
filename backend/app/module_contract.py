@@ -13,7 +13,7 @@ PUBLIC_SYMBOLS = {
     "common.async_crud_base": ("BaseService",),
     "common.sync_crud_base": ("SyncBaseCRUD",),
     "projection.registry": ("ProjectionHandlerDescriptor", "ProjectionHandlerInput", "ProjectionHandlerGroupIdentity", "ProjectionInvocationContext"),
-    "settings": ("settings.BACKEND_MOCK_ENABLED",),
+    "settings": ("settings.BACKEND_MOCK_ENABLED", "resolve_env_file"),
 }
 # 本批旧源码的有界兼容面；未来模块使用自有domain/data_keys及命名空间StrEnum。
 LEGACY_MODULES = ("dashboard", "equipment", "hr", "maintenance", "performance", "plan", "project", "quality", "reports", "auxiliary", "monitor", "energy")

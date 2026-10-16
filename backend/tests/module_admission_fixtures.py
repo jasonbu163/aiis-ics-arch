@@ -96,7 +96,7 @@ def generate_core_profile(destination, source_root=None):
     return destination
 
 
-def generate_full_profile(destination, source_root=None):
+def generate_full_profile(destination, source_root=None, *, profile_name="F", expected_table_count=58, target_revision=None):
     source_root = Path(source_root or Path(__file__).resolve().parents[1])
     destination = Path(destination)
     def ignore(directory, names):
@@ -105,7 +105,7 @@ def generate_full_profile(destination, source_root=None):
     frontend = source_root.parent / "frontend-js"
     if frontend.is_dir() and not (destination.parent / "frontend-js").exists():
         shutil.copytree(frontend, destination.parent / "frontend-js", ignore=ignore)
-    (destination / "profile.json").write_text(json.dumps(dict(profile="F", c0=C0, expected_table_count=58), indent=2))
+    (destination / "profile.json").write_text(json.dumps(dict(profile=profile_name, c0=C0, expected_table_count=expected_table_count, target_revision=target_revision), indent=2))
     return destination
 
 
@@ -118,8 +118,8 @@ def run_python(profile, code, *, source_root=None):
     environment["PYTHONPATH"] = str(profile)
     environment["UV_PROJECT_ENVIRONMENT"] = os.environ.get("UV_PROJECT_ENVIRONMENT", str(source_root / ".venv"))
     environment["ARCH_BE005_REPOSITORY"] = os.environ.get("ARCH_BE005_REPOSITORY", str(source_root.parent))
-    environment["UV_CACHE_DIR"] = "/private/tmp/arch-be-005-r2-development/uv-cache"
-    environment["PYTHONPYCACHEPREFIX"] = "/private/tmp/arch-be-005-r2-development/pycache"
+    environment["UV_CACHE_DIR"] = os.environ.get("UV_CACHE_DIR", "/private/tmp/arch-be-005-r2-development/uv-cache")
+    environment["PYTHONPYCACHEPREFIX"] = os.environ.get("PYTHONPYCACHEPREFIX", "/private/tmp/arch-be-005-r2-development/pycache")
     guard = """
 import sqlalchemy.engine.base, sqlalchemy.ext.asyncio.engine
 from unittest.mock import patch

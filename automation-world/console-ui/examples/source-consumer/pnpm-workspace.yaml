@@ -1,0 +1,3 @@
+npmOnFail: ignore
+allowBuilds:
+  esbuild: true

@@ -1,39 +1,87 @@
-# AIIS ICS Control Agent
+# AIIS AW Console UI
 
-`automation-world/control-agent/` 是 AIIS ICS Architecture 配套的可选 Rust/Tauri 现场运行时
-和本地运维控制台。它负责 PLC 采集以及后端拥有的 raw/latest 快照合同；它
-不是第二套 Web 后端，也不替代后端模块注册机制。
+[English](README.md)
 
-## 公开基线
+Console UI（CU）是轻量 Tauri 设计工作台与可复用 Vue / TypeScript / CSS 源码表面。它预览既有 Element Plus 壳层、卡片、动作、状态胶囊与参数。所有数据均标识为**设计样例**，不代表在线 Agent 事实。
 
-- `src/` 保存 Tauri 控制台和模块内翻译。
-- `src-tauri/` 保存 Rust 运行时、只读 PLC 合同适配器和显式快照写入器。
-- `config/plc_points.yaml` 与 `config/plc_snapshot_policy.yaml` 只是脱敏的
-  结构示例。
-- `.env.example` 默认关闭 PLC、数据库和端点探测门禁。
+## 源码边界
 
-默认配置不包含客户端点、真实点位表、密钥或数据库 URL。现场启用任何
-外部 I/O 前，必须提供单独审核过的现场配置。PostgreSQL/MSSQL 选择、YAML
-上传和设置页面属于后续 `CA-CONFIG-001`，不属于当前基线。
+- `src/ui/index.ts`：唯一公共代码入口，导出 `AgentLayout`、`AgentSidebar`、`AgentTopbar`、`ConsoleCard`、`ConsoleActionButton`、`StatusCapsule`、`ThemeToggle`、`LanguageSwitch` 与展示类型。
+- `src/ui/styles/index.css`：唯一公共样式入口，提供日夜主题 tokens 和组件样式。沿用既有 `--agent-*` 命名与视觉值，以 `.aw-ui` 限定默认作用域，`[data-aw-theme="dark"]` 选择暗色。
+- `src/workbench/`：私有设计样例与组合；工作台和消费端使用同一公共组件。
+- `src/workbench/useSharedDesignProfile.ts`：私有本机开发客户端；跨源码 HMR 在内存保留提交快照、结果与参数页状态，不新增 storage key。
+- `scripts/shared-design-profile.js`：CLI 与开发插件共用的固定公共 JSON/CSS I/O 与内容版本，导入时无读写。`scripts/shared-design-profile-dev.js` 仅注册本机 Vite 开发通道；相邻 `.d.ts` 只声明插件工厂。
+- `src/locales/`：CU 私有双语资源与 i18n 实例；组件通过 props/slots 接收翻译结果，公共 UI 不依赖 i18n。
+- `src-tauri/`：只负责窗口启动，无业务命令处理器或工业配置读取器。
+- [source-consumer](examples/source-consumer/README.zh-CN.md)：独立最小 Vue/Vite 应用与源码消费教程，由 [CU PLAN](PLAN.zh-CN.md) 管理。
 
-## 本地检查
+CU 来源于 CA 源码副本，本次已移除可执行 PLC/数据库/headless 逻辑、样例 YAML/env、驱动 features、工业脚本及专属依赖。[CA](../control-agent/README.zh-CN.md)、DAA、SMA 均为独立工程，CU 不改变它们的实现或职责。CU 不读取工业配置、不采集数据、不保存业务配置；`cu.theme` 和 `cu.locale` 持久化 UI 偏好，下述独立版本化草稿仅保存样式值；不迁移旧 Agent 键。
+
+## 运行与构建
+
+使用 pnpm / Cargo 并保留锁文件。当前验证版本：Node 22.19.0、pnpm 11.11.0、Vue 3.5.38、Element Plus 2.14.2、icons 2.3.2、vue-i18n 9.14.5、Vite 5.4.21、TypeScript 5.9.3、vue-tsc 2.2.12；本任务保留既有依赖代际。
 
 ```bash
-pnpm install
-pnpm build
+pnpm install --frozen-lockfile
+pnpm dev                          # strict 15193
+pnpm build                        # 类型检查 + 自身 dist
+pnpm preview                      # strict 14193
 cargo fmt --manifest-path src-tauri/Cargo.toml --check
-cargo test --manifest-path src-tauri/Cargo.toml
+cargo check --manifest-path src-tauri/Cargo.toml --locked
+pnpm tauri dev                    # 配合 Vite 启动桌面
+pnpm tauri build --no-bundle       # 当前平台原生可执行文件
 ```
 
-以上只检查本地源码，不启动 Docker、不连接真实 PLC 或数据库，也不发布
-构建产物。构建目录和依赖目录不纳入仓库。
+原生前置依赖见 [Tauri](https://tauri.app/start/prerequisites/)。产品/窗口名 `AIIS AW Console UI`，package/bin 为 `aiis-aw-console-ui`，lib 为 `aiis_aw_console_ui_lib`，identifier 为 `com.aiis.aw.consoleui`。Tauri 通过 `../dist` 嵌入 CU 自身产物；不代表签名、分发或部署。依赖、dist、target 和生成的原生产物保持未跟踪。
 
-## 运行边界
+## 消费公共源码
 
-后端可以通过 Core API 暴露采集与快照状态；PLC 读取始终由常驻 Control
-Agent 完成。数据库写入必须同时通过本地显式门禁和现场合同审核。任何 Web
-请求都不能变成 PLC 轮询循环。
+完整步骤见[消费者教程](examples/source-consumer/README.zh-CN.md)。编译时需可访问 CU 公共源码，设置 `@aw-ui` 指向 `src/ui/index.ts`，`@aw-ui-styles` 指向 `src/ui/styles/index.css`。消费端自行安装兼容 Vue、Element Plus 和 icons，并通过 Vite `resolve.dedupe` 保持单实例。示例自行安装 i18n，再把翻译文案传给公共组件。
 
-## 冻结兼容基线
+```ts
+import { AgentLayout, ConsoleCard, StatusCapsule, type UiTheme } from '@aw-ui'
+import 'element-plus/dist/index.css'
+import '@aw-ui-styles'
+```
 
-CA 归属 [Automation World](../README.zh-CN.md)。ARCH-AW-001 r1 整体迁移本程序，不改运行时源码和应用身份。迁移验证后，[Development tasks](../../plans/ARCH-AW-001-agent-foundation/tasks.md) 中的 freeze receipt 固定本源码基线。后续采集工作进入 DAA；CA 不导入 DAA/SMA/shared 源码。冻结不停止现有 CA 运行，也不授权现场切换。历史任务证据仍保留于根 plans。
+消费端自行创建/挂载 Vue app，通过 `AgentLayout` 的 `theme` 属性显式提供 `light`/`dark`，提供本地化文案并管理状态和事件。公共导入不会挂载应用、读写偏好、调用 IPC、读取运行快照或 CU 私有文件。单独组合组件时可使用 `.aw-ui` 与 `data-aw-theme` 包裹，公共组件应处于该主题作用域内；body reset 和页面布局由消费端负责。
+
+`ThemeToggle` 接收 `theme: UiTheme` 和翻译后的目标动作 `label`；`LanguageSwitch` 接收 `locale: 'zh-CN' | 'en-US'`、翻译后的 `zhLabel` / `enLabel`（通常为“中” / “EN”）及目标动作 `label`。二者均仅发出 `toggle`，不修改状态或写入 storage。label 同时提供原生 tooltip 与可访问名称，主题按钮还表达当前暗色状态。通过 `@aw-ui` 导入并放在公共样式作用域内，由宿主处理事件和更新 props。CU 保留既有 UI 偏好，消费者拥有独立状态且不持久化；消费者构建产物无需 CU 在线。
+
+源码编译完成后，消费端只运行**自身** `dist`，无需 CU 进程、源码 checkout 或 CU node_modules。首版仅提供源码出口，不建立 npm 发布、根 workspace、在线 CU 服务，也未实际接入其他 Agent。层次说明见 [src/app](src/app/README.zh-CN.md)，批准范围见 [spec](plans/CU-001-workbench-foundation/spec.md)。
+
+## Element Plus 页面组合
+
+CU 私有的**页面样例**演示表格、校验表单、编辑弹窗及手动选择的正常/加载/空数据/失败状态。数据与重试/提交/编辑反馈只在内存中，刷新会重置样例。八个公共组件及 API 保持不变。独立消费者直接用自身 Element Plus 依赖组合更小的表格/表单/弹窗，拥有自己的 locale 与状态，不导入 PageSamples 或工作台文件。
+
+先导入 Element Plus CSS，再导入 `@aw-ui-styles`。`ElTable` 使用 `aw-data-table`，`ElForm` 使用 `aw-sample-form`，动作区使用 `aw-form-actions`，状态内容使用 `aw-page-state`。公共 CSS 将 Element Plus 变量映射到当前作用域的 `--agent-*` tokens；页面布局由各宿主负责。这些类是样式约定，不是新增公共 Vue 组件。
+
+脱离布局的弹窗需要显式主题作用域。本例用 Vue `Teleport to="body"` 包裹 `<div class="aw-ui aw-sample-overlays" :data-aw-theme="theme">`，其内嵌套 `:append-to-body="false"` 的 `ElDialog`。每个 `ElSelect`（包括弹窗内）使用 `:teleported="false"`，使下拉继承该作用域。主题容器持续绑定宿主主题，并通过 `ElConfigProvider` 提供宿主 Element Plus 语言；不设置全局 html/body 主题变量。标签、校验、反馈及所有状态切换归宿主负责。页面样例业务数据仅在内存中；下述独立参数编辑器管理样式草稿。
+
+## 样式方案：预览、草稿与共享源码
+
+CU 参数页编辑有限的 schemaVersion 1 方案：明暗 palette 各有 background、surface、surfaceMuted、text、textMuted、border、accent、accentStrong、onAccent（仅 `#RRGGBB`，规范化为小写）。共享整数为 cardPaddingPx 12–32（默认24）、actionGapPx 4–24（12）、cardRadiusPx 8–28（20）、controlRadiusPx 4–20（14），单位均为px；tableDensity 为 standard（默认，单元格垂直padding为8px）或 compact（4px）。compact卡片内边距/圆角及small控件圆角由其派生。默认配色值仅归公共JSON；状态色、装饰玻璃/阴影、布局与44px顶栏控件保持固定。
+
+参数页左侧为有限编辑器，右侧为实时设计样例。桌面滚动时预览保持可见，窄窗时上下排列。仅展开当前日间/夜间配色；显式模式选择与顶栏共用宿主主题及 `cu.theme` 偏好，两套配色分别保留。每项颜色包含色块、Element Plus 拾色器和六位 HEX 输入；合法修改无需保存、导出或重启即可生效。工作台、实时样例、拾色弹层及样例弹窗共用最近有效方案与当前主题。表面色作用于 Element Plus 控件、表格基础表面和弹层；卡片装饰背景、玻璃与阴影仍固定。原标题/色调/compact 控件保留于编辑器下方次级区域。编辑颜色不会自动切换主题或语言。无效字段保留上一次有效预览，在字段旁和常驻预览状态显示对应模式/字段并禁用保存/导出，修正后立即恢复。首次打开始终使用编译时公共默认。保存/恢复/重置均显式执行，只触达 `cu.design-profile.draft.v1`；主题/语言键和业务样例分离。草稿仅属于当前CU浏览器/WebView/origin，消费者及其他Agent不读取。缺失/损坏草稿回到公共默认并反馈，存储失败如实提示。重置恢复公共默认并仅删除本草稿。JSON导出为可复制文本，不是原生文件写入或源码更新。
+
+[design-profile.json](src/ui/styles/design-profile.json) 是唯一可编辑的公共默认源；[design-profile.generated.css](src/ui/styles/design-profile.generated.css) 是确定性生成结果，不可手改。纯JS校验/映射由预览和CLI复用，固定主题tokens保留在theme.css。公共样式按固定主题→生成方案→组件顺序加载，消费者继续用同一公共样式入口和组件API。
+
+在CU目录执行：
+
+```bash
+pnpm design:profile                         # 仅帮助，无读写
+pnpm design:profile --help                  # 同上
+# 先将导出JSON复制到明确的本地文件：
+pnpm design:profile --import /absolute/path/profile.json
+pnpm design:profile --generate              # 从公共JSON重新生成固定CSS
+pnpm design:profile --check                 # 只读一致性检查
+pnpm build                                 # 先check，不隐式生成
+```
+
+所有字段必填；未知字段、路径、任意CSS/脚本、非法类型/颜色/范围/版本在目标写入前拒绝。导入只通过单文件安全替换更新固定CU公共JSON/CSS，不承诺两文件事务。CSS缺失/stale时执行 `--generate` 再 `--check`；公共JSON损坏时先从有效备份恢复，再生成。I/O失败返回非零，应检查两个目标、必要时恢复有效JSON，再generate/check；导入前自行备份有效公共方案。
+
+共享流程为导出→显式工程导入→generate/check→宿主开发刷新或重构建。既有消费者源码不变，通过正常公共样式入口消费生成CSS，自身dist不需要CU在线且不读CU草稿。DAA/SMA本任务未接入；后续宿主自行同步与构建，已安装桌面二进制须重构建及分发，不承诺实时传播或依赖在线CU。
+
+本机源码开发模式（`pnpm dev` 或 `pnpm tauri dev`）下，预览合法编辑后点击**应用到公共样式**，显式将完整明暗配色与共享尺寸写入上述同一公共 JSON 并生成 CSS；CU 自己也消费这些公共源。无效编辑或通道不可用时禁用按钮；应用中保留提交快照并防止重复提交。成功反馈跨本次 HMR 保留且参数页保持打开；刷新/启动采用更新后的公共默认。应用不保存草稿，也不修改主题/语言偏好。preview 与打包版不注册源码写入端点，禁用应用并提示导出/CLI 路径。
+
+私有 `/__cu/design-profile` 通道仅接受实际 loopback 连接及既有 15193 本地 Host；受保护 GET 建立进程会话与两文件内容版本，POST 须匹配本机 Origin、会话 token 与受限 JSON 请求。无跨域 CORS，不接受输出路径、任意 CSS/脚本或消费者目录。版本冲突拒绝写入：先导出当前编辑、刷新、核对公共默认后重试。应用时不要并行运行 CLI 或手工编辑公共目标；进程内串行与乐观版本检查不是跨进程锁。I/O/网络失败不代表已确认应用：检查两个目标，必要时恢复有效 JSON，再执行 `pnpm design:profile --generate` 和 `pnpm design:profile --check`，最后刷新。两次单文件安全替换不等于双文件事务。其他 Agent 仍消费原公共样式入口，自行同步源码、刷新开发态或重构建并分发已安装二进制。

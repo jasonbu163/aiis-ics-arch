@@ -1,0 +1,23 @@
+{
+  "name": "cu-source-consumer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 15194 --strictPort",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 14194 --strictPort"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "2.3.2",
+    "element-plus": "2.14.2",
+    "vue": "3.5.38",
+    "vue-i18n": "9.14.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "5.2.4",
+    "typescript": "5.9.3",
+    "vite": "5.4.21",
+    "vue-tsc": "2.2.12"
+  }
+}

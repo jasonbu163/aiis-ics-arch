@@ -1,0 +1,4 @@
+/** Console UI 唯一公共样式出口；消费端自行加载 Element Plus 基础样式。 */
+@import './theme.css';
+@import './design-profile.generated.css';
+@import './components.css';

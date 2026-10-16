@@ -32,7 +32,7 @@ monitor Core 只返回 collector 健康状态和项目无关的 PLC DB-block raw
   SQLAlchemy metadata 子集由 `tests/test_core_migration_baseline.py` 机械核对；私有项目仓继续保留自己的历史
   migration 图。
 
-后继 `a6c8e0f2b4d6` 仅增加 `energy_prices`，`b8d0f2a4c6e8` 后继仅增加 `energy_price_hours`，完整 metadata 为十六表；运行采用前须显式准备 schema。
+后继 `a6c8e0f2b4d6` 仅增加 `energy_prices`，`b8d0f2a4c6e8` 后继仅增加 `energy_price_hours`，价格独立fixture为十六表；回迁及样本后继见下方说明，运行采用前须显式准备schema。
 
 ## 本地检查
 
@@ -92,6 +92,8 @@ admin-only guard；授予一个 key 不会自动授予另一个 key。
 | `control-agent` | gate-token 签发 permission guard；不会远程执行设备动作，仍有独立角色限制。 |
 | `energy-price-read` | energy 现价/历史 GET；独立于 manage。 |
 | `energy-price-manage` | energy 小时整组价格 POST upsert；不隐含授予读取。 |
+| `equipment-temperature-read` | 仅新完整样本GET；所有caller另须唯一配置设备scope。 |
+| `equipment-temperature-ingest` | 仅新完整样本POST；admin-only且设备scope约束，不隐含read。 |
 | `aiis_demo` | 默认关闭示例 manifest；配置后告警并忽略，数组不会启用该模块。 |
 
 Projection 管理路由传入 `actor_user_id` 记录操作者；此字段不构成角色校验。
@@ -151,7 +153,7 @@ Bootstrap 继续是显式账号维护动作：数组不会创建/删除账号或
 
 ## 配置逐项说明
 
-以下表格覆盖三份公开 env 示例的相同 68 个活动 key。源码缺省来自 Settings；“必填”表示缺失会在配置加载时失败。模板列列出 host/dev/prod 的公开值差异（相同值合并），口令/秘密只标为 placeholder；公开模板不是本机实际配置。bool 使用 True/False，字符串可单/双引号包裹；JSON 数组用外层单引号、内部双引号。
+以下表格覆盖三份公开 env 示例的相同 69 个活动 key。源码缺省来自 Settings；“必填”表示缺失会在配置加载时失败。模板列列出 host/dev/prod 的公开值差异（相同值合并），口令/秘密只标为 placeholder；公开模板不是本机实际配置。bool 使用 True/False，字符串可单/双引号包裹；JSON 数组用外层单引号、内部双引号。
 
 ### 应用/API
 
@@ -296,3 +298,15 @@ GET `/monitor/realtime/latest`，operator 获得的是这两个事实查询。`s
 ## 公共模块接入
 
 [v1 Python模块合同](app/MODULE_CONTRACT.zh-CN.md)定义依赖、导出、错误和冲突预检。显式d2f4a6b8c0e2在受保护16表后新增42表（回迁fixture共58）；HR保持关闭，import/GET不seed或应用结构。真实MySQL/Docker/运行动作仍分别经过后续gate。
+
+## 完整温控样本试点
+
+[equipment模块](app/equipment/README.zh-CN.md)新增独立async POST/GET /equipment/temperature-samples，逐样本保存完整精确值与投递回执；独立read/ingest权限及唯一空值拒绝设备scope。显式e4f6a8b0c2d4接d2新增两表（BE003 fixture60），原58表回迁子集和旧temperature-control/Projection/前端来源不改。settings.resolve_env_file() -> Path仅公开路径选择，其他私有Settings不开放。数据库/Docker和真实采用仍须具体批准。
+
+### 模块本地温控scope
+
+| key | 用途/类型 | 源码缺省 | 公开模板值 |
+| --- | --- | --- | --- |
+| `EQUIPMENT_TEMPERATURE_PILOT_ID` | 新样本API唯一精确业务设备key；空/非法值拒绝所有caller含admin。模块本地BaseSettings，重启采用。 (str) | `''` | `''` |
+
+新增后每公开env example共69项，原十一组英文标题及全部旧值/grants保留。合成文档使用temperature-pilot-01。源码/冻结/Docker dotenv路径沿既有公开helper；process覆盖dotenv、显式注入覆盖process。该key不授予permission、不改旧GET。[独立MySQL入口](tests_mysql/test_equipment_temperature.py)只准备另批可丢弃验证，不使用共享破坏性conftest。

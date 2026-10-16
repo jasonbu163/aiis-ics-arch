@@ -1,64 +1,8 @@
-/**
- * File Path: /control-agent/src/main.ts
- * Description: Vue application bootstrap for the Control Agent console
- * Main Features:
- *   - Creates the Vue app
- *   - Installs Element Plus for the operations console shell
- *   - Installs the local i18n instance
- *   - Loads global theme and application styles
- */
+/** CU 私有应用启动：安装工作台 i18n，公共 UI 无启动副作用。 */
 import { createApp } from 'vue'
-import {
-  ElAlert,
-  ElAside,
-  ElButton,
-  ElCol,
-  ElConfigProvider,
-  ElContainer,
-  ElDescriptions,
-  ElDescriptionsItem,
-  ElHeader,
-  ElIcon,
-  ElMain,
-  ElMenu,
-  ElMenuItem,
-  ElPagination,
-  ElRow,
-  ElTable,
-  ElTableColumn,
-  ElTag
-} from 'element-plus'
 import 'element-plus/dist/index.css'
+import './ui/styles/index.css'
+import './workbench/workbench.css'
 import App from './App.vue'
 import { i18n } from './locales'
-import './styles/theme.css'
-import './styles/app.css'
-
-const app = createApp(App)
-
-const elementPlusComponents = [
-  ElAlert,
-  ElAside,
-  ElButton,
-  ElCol,
-  ElConfigProvider,
-  ElContainer,
-  ElDescriptions,
-  ElDescriptionsItem,
-  ElHeader,
-  ElIcon,
-  ElMain,
-  ElMenu,
-  ElMenuItem,
-  ElPagination,
-  ElRow,
-  ElTable,
-  ElTableColumn,
-  ElTag
-]
-
-for (const component of elementPlusComponents) {
-  app.use(component)
-}
-
-app.use(i18n).mount('#app')
+createApp(App).use(i18n).mount('#app')

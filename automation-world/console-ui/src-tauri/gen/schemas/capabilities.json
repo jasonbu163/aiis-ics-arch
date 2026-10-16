@@ -1,1 +1,1 @@
-{"default":{"identifier":"default","description":"Default capability for the main Control Agent window.","local":true,"windows":["main"],"permissions":["core:default"]}}
+{"default":{"identifier":"default","description":"Default core window capability for Console UI.","local":true,"windows":["main"],"permissions":["core:default"]}}

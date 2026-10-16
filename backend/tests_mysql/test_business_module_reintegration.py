@@ -44,6 +44,12 @@ def test_explicit_mysql_f_reintegration(monkeypatch):
                 failure.write_text('from alembic import op\nimport sqlalchemy as sa\nrevision="be005_failure"\ndown_revision="b8d0f2a4c6e8"\ndef upgrade():\n    op.create_table("users", sa.Column("id", sa.Integer(), primary_key=True))\ndef downgrade():\n    pass\n')
                 try:
                     result = subprocess.run([sys.executable, "-m", "alembic", "upgrade", "be005_failure"], cwd=target.root, capture_output=True, text=True)
+                    failure_log = f"exit_code={result.returncode}\n{result.stdout}\n{result.stderr}"
+                    for secret_key in ("MYSQL_PASSWORD", "MYSQL_ROOT_PASSWORD"):
+                        secret = os.environ.get(secret_key)
+                        if secret:
+                            failure_log = failure_log.replace(secret, "[REDACTED]")
+                    (target.root / "migration-failure.log").write_text(failure_log)
                     assert result.returncode != 0, "Intentional duplicate-table migration must fail"
                     with target.engine.connect() as connection:
                         assert connection.exec_driver_sql("SELECT version_num FROM alembic_version").scalar_one() == "b8d0f2a4c6e8"
@@ -85,9 +91,10 @@ def test_explicit_mysql_f_reintegration(monkeypatch):
                 response = await client.request(method, "/api/v1" + path, **kwargs)
                 assert response.status_code == 200, (method, path, response.status_code, response.text)
                 body = response.json()
-                if "code" in body:
+                if isinstance(body, dict) and {"code", "message", "data"}.issubset(body):
                     assert body["code"] == 200, (path, body)
-                return body.get("data", body)
+                    return body["data"]
+                return body
             try:
                 async with AsyncClient(transport=ASGITransport(app=app), base_url="http://disposable") as client:
                     assert (await client.get("/api/v1/hr/health")).status_code == 404
@@ -119,7 +126,7 @@ def test_explicit_mysql_f_reintegration(monkeypatch):
                     quality = await request(client, "POST", "/quality", json={"coilNo": coil, "grade": "Q235", "judgment": "qualified", "defects": [{"defectType": "synthetic"}]})
                     assert (await request(client, "GET", f'/quality/{quality["id"]}'))["coilNo"] == coil
                     report = await request(client, "POST", "/reports/generate", params={"report_type": "daily", "report_date": date.today().isoformat()})
-                    assert (await request(client, "GET", f'/reports/{report["id"]}'))["total_coils"] >= 1
+                    assert (await request(client, "GET", f'/reports/{report["id"]}'))["totalCoils"] >= 1
                     efficiency = await request(client, "GET", "/statistics/efficiency", params={"startDate": date.today().isoformat(), "endDate": date.today().isoformat()})
                     assert efficiency["summary"]["downtime"] >= 0.5
                     assert coil in str(await request(client, "GET", "/dashboard/recent-plans"))
@@ -128,7 +135,7 @@ def test_explicit_mysql_f_reintegration(monkeypatch):
                         session.add(HistoryProcessCurve(device_id=1, coil_number=coil, z1_temp_act=789, created_at=now))
                         session.add(HistoryEnergyConsumption(device_id=1, coil_number=coil, elect_consum=12, n2_total=34, created_at=now))
                         await session.commit()
-                    assert (await request(client, "GET", "/equipment/drive"))["process_params"]["tv"] == 1234
+                    assert (await request(client, "GET", "/equipment/drive"))["processParams"]["tv"] == 1234
                     assert (await request(client, "GET", "/monitor/temperature", params={"date": date.today().isoformat()}))["latest"]["z1TempAct"] == 789
                     assert (await request(client, "GET", "/monitor/energy"))["todayTotal"]["elect"] == 12
                     price = {"electricPrice": 1.2345, "hydrogenPrice": 2, "argonPrice": 3}
@@ -158,15 +165,22 @@ def test_explicit_mysql_f_reintegration(monkeypatch):
                     # 仅测试副本中的HR manifest对象启用；源文件开关不变。
                     from dataclasses import replace
                     import app.hr.manifest as hr_manifest
-                    monkeypatch.setattr(hr_manifest, "manifest", replace(hr_manifest.manifest, enabled=True))
-                    hr_app, hr_engine, _ = target.api()
+                    import app.router as router_module
                     try:
-                        async with AsyncClient(transport=ASGITransport(app=hr_app), base_url="http://disposable") as hr_client:
-                            department = await request(hr_client, "POST", "/departments", json={"name": "B-department"})
-                            assert department["name"] == "B-department"
-                            assert "B-department" in str(await request(hr_client, "GET", "/departments"))
+                        with monkeypatch.context() as isolated:
+                            isolated.setattr(hr_manifest, "manifest", replace(hr_manifest.manifest, enabled=True))
+                            # 重新组合副本，不把已缓存router当成manifest热启用能力。
+                            importlib.reload(router_module)
+                            hr_app, hr_engine, _ = target.api()
+                            try:
+                                async with AsyncClient(transport=ASGITransport(app=hr_app), base_url="http://disposable") as hr_client:
+                                    department = await request(hr_client, "POST", "/departments", json={"name": "B-department"})
+                                    assert department["name"] == "B-department"
+                                    assert "B-department" in str(await request(hr_client, "GET", "/departments"))
+                            finally:
+                                await hr_engine.dispose()
                     finally:
-                        await hr_engine.dispose()
+                        importlib.reload(router_module)
             finally:
                 await engine.dispose()
         asyncio.run(run())

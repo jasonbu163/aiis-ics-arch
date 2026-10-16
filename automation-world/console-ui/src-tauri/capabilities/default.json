@@ -1,7 +1,11 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Default capability for the main Control Agent window.",
-  "windows": ["main"],
-  "permissions": ["core:default"]
+  "description": "Default core window capability for Console UI.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default"
+  ]
 }

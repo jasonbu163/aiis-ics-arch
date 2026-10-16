@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 from types import SimpleNamespace
@@ -47,7 +48,16 @@ class DisposableTarget:
 
     def migrate(self, revision, direction="upgrade"):
         # Credentials remain in the process environment; never written to a command or evidence file.
-        subprocess.run([sys.executable, "-m", "alembic", direction, revision], cwd=self.root, check=True)
+        command = [sys.executable, "-m", "alembic", direction, revision]
+        result = subprocess.run(command, cwd=self.root, capture_output=True, text=True)
+        output = result.stdout + result.stderr
+        for key in ("MYSQL_PASSWORD", "MYSQL_ROOT_PASSWORD"):
+            secret = os.environ.get(key)
+            if secret:
+                output = output.replace(secret, "[REDACTED]")
+        with (self.root / "migration-commands.jsonl").open("a") as stream:
+            stream.write(json.dumps(dict(command=command, exit_code=result.returncode, output=output)) + "\n")
+        result.check_returncode()
 
     def checksum(self, names):
         from sqlalchemy import MetaData, Table, select
@@ -57,6 +67,8 @@ class DisposableTarget:
                 table = Table(name, MetaData(), autoload_with=connection)
                 rows = sorted([tuple(map(str, row)) for row in connection.execute(select(table))])
                 result[name] = hashlib.sha256(json.dumps(rows).encode()).hexdigest()
+        with (self.root / "checksum-snapshots.jsonl").open("a") as stream:
+            stream.write(json.dumps(result, sort_keys=True) + "\n")
         return result
 
     def assert_schema(self):
@@ -66,29 +78,72 @@ class DisposableTarget:
         from database import Base
         from app.module_registry import import_model_packages
         import_model_packages()
+        from app.control_agent.models.gate_token import ControlAgentGateToken
         from app.user.models.token_blacklist import TokenBlacklist
         inspector = inspect(self.engine)
         assert set(inspector.get_table_names()) == set(Base.metadata.tables) | {"alembic_version"}
+        def expression(value):
+            if value is None:
+                return None
+            tokens = re.findall(r"'(?:''|\\.|[^'])*'|\"(?:\"\"|\\.|[^\"])*\"|`[^`]*`|[a-zA-Z_][a-zA-Z_0-9]*|\d+(?:\.\d+)?|>=|<=|<>|!=|[^\s]", str(value))
+            tokens = [token if token.startswith(("'", '"')) else token.strip("`").lower() for token in tokens]
+            tokens = [token for position, token in enumerate(tokens) if not (token == "_utf8mb4" and position + 1 < len(tokens) and tokens[position + 1].startswith(("'", '"')))]
+            # 引号内内容保持原字节；只剥完整外层和已观察的三token原子比较括号。
+            while tokens and tokens[0] == "(" and tokens[-1] == ")":
+                depth = 0
+                for position, token in enumerate(tokens):
+                    depth += (token == "(") - (token == ")")
+                    if depth == 0:
+                        break
+                if position != len(tokens) - 1:
+                    break
+                tokens = tokens[1:-1]
+            position = 0
+            while position + 4 < len(tokens):
+                group = tokens[position:position + 5]
+                if group[0] == "(" and group[4] == ")" and group[2] in {">=", "<=", "=", "<", ">", "!=", "<>"} and all(token not in {"(", ")", "and", "or", "xor", "not"} for token in (group[1], group[3])):
+                    tokens[position:position + 5] = group[1:4]
+                position += 1
+            if tokens in (["current_timestamp"], ["current_timestamp", "(", ")"]):
+                tokens = ["now", "(", ")"]
+            return tuple(tokens)
+        def action(value):
+            return "RESTRICT" if value in {None, "NO ACTION", "RESTRICT"} else value
+        report = {"database": self.database, "tables": sorted(Base.metadata.tables), "comparisons": {}}
         for name, table in Base.metadata.tables.items():
             actual = inspector.get_columns(name)
             assert [column["name"] for column in actual] == list(table.columns.keys()), name
             for column, expected in zip(actual, table.columns):
                 def normalized(value):
-                    text = str(value).upper().replace("INTEGER", "INT")
+                    text = str(value).upper().replace("INTEGER", "INT").replace("NUMERIC", "DECIMAL")
+                    if text == "DECIMAL":
+                        text = "DECIMAL(10, 0)"  # MySQL对裸Numeric()的实际默认精度。
                     return "TINYINT(1)" if text in {"BOOL", "BOOLEAN"} else text
                 assert normalized(column["type"].compile(dialect=mysql.dialect())) == normalized(expected.type.compile(dialect=mysql.dialect())), (name, expected.name)
                 assert column["nullable"] == expected.nullable, (name, expected.name)
+                default = str(expected.server_default.arg) if expected.server_default is not None else None
+                assert expression(column["default"]) == expression(default), (name, expected.name, column["default"], default)
             assert inspector.get_pk_constraint(name)["constrained_columns"] == [c.name for c in table.primary_key]
             expected_fk = {(tuple(fk.parent.name for fk in constraint.elements), tuple(fk.column.table.name for fk in constraint.elements), tuple(fk.column.name for fk in constraint.elements)) for constraint in table.foreign_key_constraints}
             actual_fk = {(tuple(fk["constrained_columns"]), tuple([fk["referred_table"]] * len(fk["referred_columns"])), tuple(fk["referred_columns"])) for fk in inspector.get_foreign_keys(name)}
             assert actual_fk == expected_fk, name
+            expected_options = {tuple(fk.parent.name for fk in constraint.elements): (action(constraint.ondelete), action(constraint.onupdate)) for constraint in table.foreign_key_constraints}
+            actual_options = {tuple(fk["constrained_columns"]): (action(fk.get("options", {}).get("ondelete")), action(fk.get("options", {}).get("onupdate"))) for fk in inspector.get_foreign_keys(name)}
+            assert actual_options == expected_options, name
             expected_unique = {tuple(c.name for c in constraint.columns) for constraint in table.constraints if isinstance(constraint, UniqueConstraint)}
+            # MySQL唯一Index同时由get_unique_constraints反射为唯一约束；只并入unique=True。
+            expected_unique |= {tuple(c.name for c in index.columns) for index in table.indexes if index.unique}
             assert {tuple(c["column_names"]) for c in inspector.get_unique_constraints(name)} == expected_unique, name
             actual_indexes = {index["name"]: (tuple(index["column_names"]), bool(index["unique"])) for index in inspector.get_indexes(name)}
             for index in table.indexes:
                 assert actual_indexes[index.name] == (tuple(c.name for c in index.columns), index.unique), (name, index.name)
             expected_checks = {constraint.name for constraint in table.constraints if isinstance(constraint, CheckConstraint)}
             assert {constraint["name"] for constraint in inspector.get_check_constraints(name)} == expected_checks, name
+            actual_check_sql = {constraint["name"]: expression(constraint["sqltext"]) for constraint in inspector.get_check_constraints(name)}
+            expected_check_sql = {constraint.name: expression(constraint.sqltext) for constraint in table.constraints if isinstance(constraint, CheckConstraint)}
+            assert actual_check_sql == expected_check_sql, name
+            report["comparisons"][name] = dict(columns=[dict(name=c["name"], type=str(c["type"]), nullable=c["nullable"], default=c["default"]) for c in actual], foreign_keys=inspector.get_foreign_keys(name), unique=inspector.get_unique_constraints(name), indexes=inspector.get_indexes(name), checks=inspector.get_check_constraints(name))
+        (self.root / "schema-reflection.json").write_text(json.dumps(report, indent=2, default=str))
 
     def api(self):
         from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
@@ -97,11 +152,16 @@ class DisposableTarget:
         from core.deps import get_current_user
         from database import get_db
         engine = create_async_engine(settings.DATABASE_URL, pool_pre_ping=True)
-        sessions = async_sessionmaker(engine, expire_on_commit=False)
+        sessions = async_sessionmaker(engine, expire_on_commit=False, autoflush=False)
         app = create_app(testing=True)
         async def get_session():
             async with sessions() as session:
-                yield session
+                try:
+                    yield session
+                    await session.commit()
+                except Exception:
+                    await session.rollback()
+                    raise
         app.dependency_overrides[get_db] = get_session
         app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(id=1, role="admin", username="disposable")
         return app, engine, sessions

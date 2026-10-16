@@ -3,7 +3,7 @@ Revision: r3
 Status: developer_handoff
 Owner Role: Development
 Allowed Writers: Development
-Handoff: 第二轮QA返工DEV自检完成；319 no_db通过，交fresh Verification；两轮qa_failed历史保留，B未授权未执行
+Handoff: B第一轮五场景真实MySQL自检通过并清理专用栈；最终token比较已重检原始反射及正负边界；交fresh Verification第二轮，既有A与全部失败历史保留
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 
@@ -304,3 +304,85 @@ F `f8f17a199f891e7ab651359621e2983d8f644350570dc3ca87909e3ef83845a7`；新patch�
 未连接/写任何DB（含SQLite）、未在线Alembic/真实API/Projection/PLC、未Docker/改env/依赖/提交/推送。B两入口及五独立schema/ACK/环境/命令沿上方准备，仍未运行、没有pass。用户“真实DB测试前先Alembic升最新”的条件已由入口迁移先于CRUD满足；旧head场景明确old head→合成旧记录→latest→新业务检查，此提醒不构成真实库升级授权。AC-007/008与AC-r2-006真实MySQL gate仍未验证。
 
 当前为**Development developer_handoff**，协调者另启fresh-context Verification。新增资源仅本轮tmp证据及新r3-rework2文件，无listener/browser/tab/branch/worktree；全部保留供复核。AST静态定位仍不是Python安全沙箱或任意动态数据流证明；inactive runtime来源只在该运行面真正启用后严格激活，metadata闭包从未豁免。
+
+# r3 B第一轮恢复与具体动作批准收据（2026-10-16）
+
+主协调者转递Human Owner明确原话：“批准，按现有隔离 MySQL 方案完成 BE005 两轮验证及专用资源清理；温控采用逐样本保存。同时按 STD 修订 BE003 r3，先给我确认 spec，暂不改接口代码。”本Development仅接续BE005 r3 B第一轮；不修改BE003规格或新接口。B具体动作授权覆盖已审阅提案的本地独立MySQL8.4.6、五个空schema、合成数据/迁移/约束/并发/回退及本project新资源清理。第二轮由协调者准备并交fresh-context Verification独立执行。
+
+批准spec SHA仍为`6a0edd601b172f34039c67fd70c48a86b5d98e32b897bd43a8e7cbf037a3b53d`。本轮入口HEAD为`1a5aa2d2fe7089b5671218865238cfaa240f9a30`；C2历史C0仍固定`363b297bffe65e020108f5504766b4fb1ec3b381`，不将新HEAD或并行Console UI变化归为BE005增量。入口tasks SHA为`59a71c4b810659dc4755ad4ec23792868ddc0138bb26a0da4f10ac89ab7aa87e`，checklist SHA为`6f106797f4e62b5295e26acad35e9e006a1c2f027e88fe0eae25fe0e41d7259d`。
+
+本轮基线、非秘密文件快照与操作证据目录为`/private/tmp/arch-be005-r3-b-development/`；入口`baseline-files.json`记录1577个非忽略、非env文件，`git-status.txt`保留并行dirty。已核对上次DEV128非共享BE路径全部指纹相同；上次fresh QA的654个backend/frontend文件仅backend PLAN pair为协调者索引差异，其余652相同。因此既有A独立319 no_db及前端证据适用于本轮入口，未从头重做A。后续若真实B暴露缺陷，先保存失败并报告协调者，按影响面必要复测。
+
+写入前完整阅读根AGENTS/README/PLAN pair、canonical workflow、Development TOML、完整BE005 bundle、backend/app及auxiliary/energy/monitor说明/PLAN、七份backend-arch references、两份Docker skills、两个tests_mysql入口、profile生成器及提案四文件。提案文件均匹配`proposal-files.json`，proof SHA为`c36e3c80a243907d8c2cf0c20d1c140e30b59000f929a967f924c28de572978a`。初始化SQL只建空schema/受限用户权限，真实结构由每场景入口先执行Alembic；不用create_all/stamp，共享破坏性conftest不参与。
+
+首次sandbox `proof.py assert-absent` exit1；只读诊断明确本机`unix:///Users/jason/.docker/run/docker.sock`被sandbox拒绝。以Owner已批准动作申请工具权限升级后assert-absent exit0；未遇auto-review拒绝。另精确inspect卷`arch-be005-r3-proof_proof_mysql_data`及网络`arch-be005-r3-proof_default`均不存在（各exit1/no such resource），避免采用无标签同名资源。prepare --round1已完成五个公开profile及两个0600随机secret；口令不输出/不写入命令或文档，保留供第二轮，最终由协调者清理。当前尚无DB测试通过事实，第一轮实际结果继续追加于后。
+
+# r3 B第一轮 Developer handoff（2026-10-16，当前）
+
+本节是Development self-check及精确交接，不授予QA verdict或Human Owner最终验收。第一轮五场景真实MySQL均exit0，专用栈已清理；第二轮尚未prepare或启动，由协调者重新创建新空栈并实际启动fresh-context Verification。上方全部A/B未授权文字及失败记录保留为当时事实，当前性以本节和B批准收据为准。
+
+## 本轮精确变更与失败保全
+
+仓库增量仅`backend/tests_mysql/test_module_admission.py`、`backend/tests_mysql/test_business_module_reintegration.py`及本tasks。生产API、Service、Model、预检、profile生成器、旧三migration/新d2迁移、真实env、依赖/lock、spec/checklist和六索引均未由本Development改动。六索引/BE003 draft与Console UI等并行变化单列，不据Git总diff归己；HEAD仍为`1a5aa2d2fe7089b5671218865238cfaa240f9a30`，无commit/push/refs。
+
+第一轮在同一批准方案中先后使用七个新空卷尝试；前六次失败及其实际执行源码、日志、results原字节保存在提案根的`round-1-attempt-1`至`round-1-attempt-6`。每次均先停止测试、down专用新栈、核对专用标签和精确卷/网络不存在，再prepare新的round-1；没有清空/采用既有库，没有覆盖失败证据。归档旧新路径与SHA分别在DEV证据目录`attempt1-archive.json`至`attempt6-archive.json`，执行源码副本在`attempt-*/`；第二、三次失败后仅相应E1/F-empty公开副本叠加只读反射核对helper，另保存失败时真正执行的源码，明确区分后续audit overlay。
+
+| 尝试 | 实际失败与最小修复；不是生产迁移/业务缺陷结论 |
+| --- | --- |
+| 1 | E1已真实base→d4→e1；反射差集仅`control_agent_gate_tokens`。测试metadata只导入普通Registry及TokenBlacklist，遗漏显式安全边界Model；添加ControlAgentGateToken导入，完整表集合断言保留。 |
+| 2 | MySQL将unique Index同时反射为unique constraint（sys_dicts.dict_type）；expected unique集合合并UniqueConstraint与unique=True Index，仍exact比较并保留索引名/列/unique核验。 |
+| 3 | E1/E2通过；F迁移到d2后NUMERIC/DECIMAL显示名不同；同精度/scale规范化，仅裸Numeric()按MySQL实际默认DECIMAL(10,0)。BOOL/TINYINT(1)原规范化保留；不同precision/scale/unsigned仍拒绝。当前F58表只读反射收敛后才重建。 |
+| 4 | E1/E2通过；F到maintenance POST，领域`code='B001'`被helper误当信封code。仅dict且code/message/data三键齐全时验共享信封，bare/list保持；源码核对同时修正报告totalCoils和设备processParams两个既有camelCase测试期待，数值/关系断言不缩减。 |
+| 5 | 维保POST后下一独立请求GET404；测试override缺真实get_db的成功commit/异常rollback。仅复制现有依赖生命周期及autoflush=False，跨请求持久化断言和直接Service失败rollback均保留，不改生产事务。 |
+| 6 | F其他全部业务矩阵通过，到HR副本CRUD404；测试改manifest后复用首次关闭状态缓存router。测试显式启用副本后reload(app.router)并构造新App，finally恢复manifest/组合缓存；正常组合HR404保留，不宣称热启用或改源码开关。 |
+
+另补证据持久化：每次真实Alembic命令、exit及脱敏输出写公开profile的`migration-commands.jsonl`，不改变非0传播；每次checksum写`checksum-snapshots.jsonl`；演练首条DDL失败脱敏stderr写`migration-failure.log`。完整反射额外比较server default、FK ondelete/onupdate及Check SQL，实际type/null/PK/FK/unique/index/check原断言保持。无新增业务/表/API或运行配置。
+
+## 第七次完整真实执行（round1最终运行）
+
+沿原`proof.py`与Compose/SQL，project=`arch-be005-r3-proof`，固定镜像`mysql:8.4.6`，本地Unix socket，最终端口`127.0.0.1:54767`（已关闭）。镜像arm64/linux，ID/digest=`sha256:869218921e61d6c3c89820955d63cca42971f0e3e6c1e2792247bbd944ebc6e9`。实际五库连接身份均`be005_proof@%`，只获这五schema权限；不使用root连接。原runtime DB、3307、真实env/PLC/Projection/bootstrap均未触及。最终身份/版本/表集合/revision与SHOW GRANTS保存于`final-target-audit.json`，其只读核验exit0。
+
+每场景以对应公开profile为cwd，真实入口均为`uv run --frozen --no-sync python -m pytest --noconftest -q tests_mysql/<入口>`，复用既有backend/.venv/uv.lock；无安装或构建。E两个入口为test_module_admission.py，F为test_business_module_reintegration.py。TESTING=True，mock/Projection/bootstrap=False，逐库/endpoint ACK匹配；初始化SQL只创建空schema及受限用户权限，先Alembic再业务API/Service。所有业务HTTP均进程内ASGI，无API listener。
+
+| 场景/schema | 真实结果、迁移/反射/数据/业务事实 |
+| --- | --- |
+| E1 / be005_admission_e1_proof | exit0，1 passed/2.18s；base→d4→e1a3c5e7b9d1，15表逐表比较；真实POST→GET、自有错误/权限、同unique并发一成功一rollback；14 Core表两次checksum完全相同。 |
+| E2 / be005_admission_e2_proof | exit0，1 passed/2.17s；base→d4→e1→e2a4c6e8b0d2，16表；公开Model/DTO/key组合API，真实缺失provider FK拒绝且rollback、唯一并发；14 Core表两次checksum相同。 |
+| F空库 / be005_reintegration_proof | exit0，1 passed/12.05s；base→d4→a6→b8→d2f4a6b8c0e2，58表；auxiliary四实体、project/maintenance/plan/performance/quality/reports代表写入及独立请求读回，reports跨StopRecord、plan↔performance/quality关系、dashboard/equipment/monitor合成fixture读取，价格三API及同小时并发整组一致/唯一行，唯一冲突Service rollback；默认HR404，显式重建启用副本HR部门CRUD。 |
+| F旧head / be005_existing_head_proof | exit0，1 passed/13.60s；先base→b8，再显式合成User+旧追加价+2020小时价；16表逐表checksum在d2升级前后完全相同；完整F业务矩阵通过，最后两个legacy价格原remark仍在。 |
+| F演练 / be005_rehearsal_proof | exit0，1 passed/13.24s；base→b8+上述合成旧记录；临时副本revision首条重复users DDL实际exit1/MySQL1050，revision仍b8、16表checksum不变；删除自建失败文件后正常升d2，显式downgrade b8仅撤42且旧16保持，再upgrade d2及58表反射通过；5份16表checksum全部相同。 |
+
+结果为`round-1/results.json`与五个`*.log`，摘要为DEV证据目录`round1-summary.json`。每profile反射报告`schema-reflection.json`保存真实columns/defaults/FK/unique/index/Checks；各profile的migration/checksum日志保留逐次实际输出。首DDL失败不证明MySQL中途DDL自动rollback；downgrade仅为获批可丢弃副本演练，会丢新增业务数据，不用于现有现场回退。
+
+## 最终表达式比较加严与证据版本区别
+
+协调者review指出初版expression全串lower/去空白及宽括号regex可能混同字符串或AND/OR分组。实际五场景执行的admission测试SHA为`43c61d2eba0b8681593ac6fa297dd69f3cd39d779a4ebddc388d3ce53edc1514`，business测试SHA为`3d9a1bd4ec676e76394315f91850e6c4fa0b4220dcf437bcb8214206b4a36d6a`；这些原执行副本和真实反射报告均未覆写。
+
+清理后仅加严admission测试expression：token级保留单/双引号literal原内容/大小写/空格和未知非空白字符，返回token tuple以保存token边界；只规范化literal外语法、已观察_utf8mb4标记/current_timestamp↔now、完整冗余外层及三token简单原子比较括号，不剥含AND/OR/NOT或嵌套函数的非冗余分组。最终admission测试SHA为`1cd71e770ef8cfa71e175b53bcdef9943562748d90f170586229a2bad864b03d`，business SHA不变。
+
+`expression-recheck.py`直接从最终源码AST抽取实际函数，14项正负expression边界及3项type边界exit0：Active/active、A B/AB、quoted括号、None/0/NULL、0/1、不同AND/OR/NOT分组、token边界/未知字符、不同precision/scale/unsigned保持不等，已观察MySQL等价表达式同等。`run-captured-recheck.py`在公开uv环境、DB连接拒绝guard下，对原五schema真实反射逐项重检最终函数：E1 159列default/2 checks、E2 162/2、各F 688/16，合计2385列default/52 checks，全部零不等；三个子进程exit0。原始反射SHA固定于`raw-reflection-sha256.json`，未改raw数据。
+
+此项明确是**已保存真实反射的加严比较重检**，不是最终token版本又连接MySQL或重新执行五场景。最终两个测试源码已单独compileall exit0、collect-only 2项/exit0，输出为`compile-token-final.log`、`collect-token-final.log`。第二轮fresh Verification须在全新MySQL上使用最终源码完整执行，不能把本轮重检冒称该独立验证。
+
+## 精确命令、清理、限制与第二轮输入
+
+最终一轮实际操作依次为以下原提案命令；除检查资源不存在的inspect返回预期1外均exit0：
+
+```text
+python3 /private/tmp/arch-be005-r3-b-proposal/proof.py assert-absent
+python3 /private/tmp/arch-be005-r3-b-proposal/proof.py prepare --round 1
+docker compose --env-file /dev/null --project-directory /private/tmp/arch-be005-r3-b-proposal -p arch-be005-r3-proof -f /private/tmp/arch-be005-r3-b-proposal/compose.yaml config --quiet
+docker compose --env-file /dev/null --project-directory /private/tmp/arch-be005-r3-b-proposal -p arch-be005-r3-proof -f /private/tmp/arch-be005-r3-b-proposal/compose.yaml up -d --wait --wait-timeout 180 mysql
+python3 /private/tmp/arch-be005-r3-b-proposal/proof.py run --round 1
+docker compose --env-file /dev/null --project-directory /private/tmp/arch-be005-r3-b-proposal -p arch-be005-r3-proof -f /private/tmp/arch-be005-r3-b-proposal/compose.yaml down --volumes --remove-orphans
+```
+
+最终日志分别为DEV目录`attempt6-project-absent.log`、`prepare-retry6.log`、`compose-config-retry6.log`、`compose-up-retry6.log`、`proof-run-retry6.log`、`compose-down-final.log`。更早六次尝试命令同形，真实run均exit1，归档/清理exit0；首次prepare工具yield后未保留其独立终态退出码，仅据完整产物记录完成，不补造退出码，后续六次prepare退出码均实际获取0。所有实际命令、环境安全字段/内部Alembic命令与日志索引归`commands.jsonl`及各profile日志。
+
+最终容器ID=`434a56aeb451243fbc6a4719d00f843a792686e4d0bde22f58002e153c54f832`；网络ID=`2d52ac438f8122047287f586bb8d4a7f0568370d55e14d402eb79c515bd8b72a`，新卷精确名`arch-be005-r3-proof_proof_mysql_data`。每次创建前精确同名资源不存在；各次identity与up日志证明本轮创建。最终down exit0，`cleanup-audit.py` exit0：本project标签容器/卷/网络全部为空，精确卷/网络inspect各exit1/not found。仅这些本轮新资源被删除；镜像保留，没有prune、其他容器/卷删除或真实库变更。
+
+保留提案根两个secret文件，权限均0600，内容未进入命令/文档/log；仅给第二轮使用，最终由协调者删除。DEV新建临时资源仅本证据目录及提案根round-1/六个attempt归档/uv-cache/pycache/secret（无其他worktree/branch/listener）；全部非秘密测试输出保留审计，真实数据库合成数据随卷销毁。旧A/失败QA/原baseline等资源未清理。
+
+第二轮输入：同一approved r3/spec SHA、当前HEAD、最终两个test SHA、未变生成器SHA=`e840f495ea61ce4f307b17c97d43b2ca399e6c3f69d5de2734e0f6da175d8798`、未变preflight SHA=`0035aaf4c4421d65f7ef15eb86f5337c92cdef57c20fbf727234be06f3e7787f`、原提案根四文件及同一C0。协调者先确认标签及精确名称均absent，再原helper prepare --round2/config/up；fresh Verification独立读取完整bundle/diff并run --round2，结束后按独立职责交协调者清理。不得复用round1任何数据库状态、将token重检当真实第二轮或将DEV结果写为QA结论。
+
+本轮生产/A源码指纹仍适用；实际差异仅两MySQL测试与tasks，未重跑全319/前端且不冒称新独立A结果。范围匹配compile/collect、最终函数边界与原反射重检、文档/增量diff及保护指纹已执行；最终tasks/delta/完整证据SHA由`developer-handoff.json`和交接消息给出，避免自引用。已知边界仍包括AST预检不是沙箱、文本schema比较仅针对本次C2/E/F既有表达式、未验证生产/现场/备份恢复/真实mapping/PLC、未经Human Owner最终验收。

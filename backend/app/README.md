@@ -181,3 +181,7 @@ Broader backend changes should run the relevant focused tests and, when appropri
 ```bash
 uv run python -m compileall -q app core database scripts tests
 ```
+
+## Independent complete temperature samples
+
+[equipment](equipment/README.md) owns the new async POST/GET temperature-samples slice, independent read/ingest permissions and a fail-closed module-local device scope. Two explicit new tables follow d2 via e4f6a8b0c2d4; no old temperature rows or Projection descriptors change. Existing frontend temperature-control continues its old source. Public `settings.resolve_env_file` computes the shared dotenv path; private Settings remain private. Source checks do not replace separately approved database/runtime adoption.

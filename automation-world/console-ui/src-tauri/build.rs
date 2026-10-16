@@ -1,9 +1,4 @@
-// File Path: /control-agent/src-tauri/build.rs
-// Description: Tauri build script for the Control Agent runtime
-// Main Features:
-//   - Generates Tauri build metadata
-//   - Keeps Rust build integration aligned with Tauri v2
-
+// Console UI Tauri 构建元数据入口。
 fn main() {
     tauri_build::build()
 }

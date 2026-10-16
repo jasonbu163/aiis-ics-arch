@@ -128,3 +128,16 @@ documentation initialization in this repository.
 - `automation-world/README.*`, `PLAN.*`, `plans/README.*` — lifecycle owner and unique root task references.
 - `automation-world/data-acquisition-agent/` — independent frozen-CA derivative; DAA-only config/identity and existing headless runtime.
 - `automation-world/semantic-mapping-agent/` — filtered TSS HTTP mapping/facts console, native gates and local help; no customer/SQL/legacy command closure.
+
+
+## ARCH-BE-003 complete temperature sample slice
+
+- `backend/app/equipment/config.py`, `error_codes.py`, `temperature_sample_domain.py`: module-local lazy scope, stable errors, strict decimal/time normalization and canonical fingerprint.
+- `backend/app/equipment/api/temperature_samples.py`, `temperature_http.py`: independent async POST/GET and local sanitized HTTP adapter.
+- `backend/app/equipment/schemas/temperature_sample_in.py`, `temperature_sample_query.py`, `temperature_sample_out.py`: strict camelCase complete sample/query/output contracts.
+- `backend/app/equipment/models/temperature_sample.py`: immutable observations and actor delivery receipts, exact decimals/UTC milliseconds/binary unique keys.
+- `backend/app/equipment/crud/async_temperature_sample.py`, `services/async_temperature_sample.py`: scoped SQL and atomic commit/rollback with bounded unique-race recovery.
+- `backend/alembic/versions/20261016_1600_e4f6a8b0c2d4_add_equipment_temperature_samples.py`: two-table explicit d2 successor; no old-row migration.
+- `backend/tests/test_equipment_temperature_api.py`, `test_equipment_temperature_service.py`, `test_equipment_temperature_migration.py`, `test_equipment_temperature_config.py`: no-DB HTTP/auth/transaction/config/recorder contracts.
+- `backend/tests_mysql/test_equipment_temperature.py`: separately gated disposable MySQL proof outside destructive shared conftest.
+- [Equipment guide](backend/app/equipment/README.md) / [中文说明](backend/app/equipment/README.zh-CN.md): separate old/new sources and runtime gates.

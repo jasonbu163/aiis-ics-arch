@@ -62,3 +62,18 @@ def test_camel_case_success_contract():
     assert wire["code"] == 200 and wire["message"] == "success"
     assert isinstance(wire["timestamp"], int)
     assert wire["data"] == {"nestedItems": [{"stableKey": "active"}]}
+
+
+def test_temperature_env_helper_is_only_additive_public_setting(tmp_path):
+    from pathlib import Path
+    from app.module_preflight import check_source, ModulePreflightError
+    from tests.module_admission_fixtures import generate_core_profile, add_probe
+    assert PUBLIC_SYMBOLS["settings"] == ("settings.BACKEND_MOCK_ENABLED", "resolve_env_file")
+    profile=generate_core_profile(tmp_path/"core")
+    add_probe(profile)
+    domain=profile/"app/admission_probe/domain.py"
+    domain.write_text('from settings import resolve_env_file\nACTIVE = "active"\ndef valid_label(value): return bool(value.strip())\n')
+    check_source(profile)
+    domain.write_text('from settings import settings\nACTIVE = settings.MYSQL_PASSWORD\ndef valid_label(value): return bool(value.strip())\n')
+    with pytest.raises(ModulePreflightError,match="private-setting"):
+        check_source(profile)

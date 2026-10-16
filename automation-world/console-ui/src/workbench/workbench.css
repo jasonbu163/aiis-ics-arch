@@ -1,0 +1,46 @@
+/** CU 私有样例布局与应用基础样式，不从公共样式出口导出。 */
+html, body, #app { margin: 0; min-width: 320px; min-height: 100vh; }
+.workbench-page { display: grid; gap: 18px; }
+.workbench-notice { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; padding: 14px 18px; border: 1px solid var(--agent-accent-surface); border-radius: var(--agent-control-radius); background: var(--agent-accent-soft); font-size: 13px; }
+.workbench-notice strong { color: var(--agent-accent-strong); }
+.workbench-notice span, .workbench-preview-note { color: var(--agent-text-muted); }
+.workbench-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.workbench-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+.workbench-facts { display: grid; gap: 14px; margin-bottom: 0; }
+.workbench-facts div { display: grid; grid-template-columns: 130px 1fr; gap: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--agent-card-border); }
+.workbench-facts dt { color: var(--agent-text-muted); font-size: 13px; }
+.workbench-facts dd { margin: 0; overflow-wrap: anywhere; line-height: 1.6; }
+.workbench-feedback { margin: 18px 0 0; color: var(--agent-success); }
+.workbench-preview-note { margin-top: 18px; line-height: 1.6; }
+@media (max-width: 900px) { .workbench-columns { grid-template-columns: 1fr; } }
+
+.workbench-samples { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 1100px) { .workbench-samples { grid-template-columns: 1fr; } }
+
+/* 参数页私有布局：桌面编辑/常驻样例，窄窗解除粘性与高度限制。 */
+.design-profile-layout { display: grid; grid-template-columns: minmax(340px, 0.9fr) minmax(460px, 1.3fr); gap: 18px; align-items: start; }
+.design-profile-controls { min-width: 0; }
+.design-profile-preview { position: sticky; top: 104px; display: flex; flex-direction: column; min-width: 0; max-height: calc(100vh - 122px); }
+.design-profile-preview-status { flex: 0 0 auto; padding: 12px 16px; border: 1px solid var(--agent-border); border-radius: var(--agent-control-radius); background: var(--agent-surface); }
+.design-profile-preview-status p { margin: 6px 0 0; font-size: 13px; line-height: 1.5; }
+.design-profile-preview-content { display: grid; grid-auto-rows: max-content; align-content: start; gap: 18px; min-height: 0; overflow: auto; margin-top: 12px; padding-bottom: 2px; }
+.design-profile-preview .workbench-samples { grid-template-columns: minmax(0, 1fr); }
+.design-profile-secondary { margin-top: 18px; }
+.design-profile-secondary summary { cursor: pointer; padding: 12px 0; color: var(--agent-text-muted); }
+.design-profile-palette { min-width: 0; margin: 0; padding: 16px; border: 1px solid var(--agent-border); border-radius: var(--agent-control-radius); }
+.design-profile-palette legend { color: var(--agent-text); }
+.design-profile-color-row { display: flex; align-items: center; gap: 10px; width: 100%; }
+.design-profile-color-row .el-input { flex: 1; min-width: 0; }
+.design-profile-swatch { flex: 0 0 24px; height: 24px; border: 1px solid var(--agent-border); border-radius: 4px; }
+.design-profile-color-help { display: block; color: var(--agent-text-muted); line-height: 1.5; margin-top: 6px; }
+.design-profile-shared { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 18px; }
+.design-profile-shared .el-select { width: 150px; }
+.design-profile-error { color: var(--agent-danger); }
+.design-profile-actions { margin-top: 18px; }
+/* 弹层在独立 body 主题容器内；只覆盖本拾色器的表面，复用现有 EP 映射。 */
+.cu-color-overlays .cu-color-picker-popup { background: var(--agent-surface); border-color: var(--agent-border); color: var(--agent-text); }
+@media (max-width: 1180px) {
+  .design-profile-layout { grid-template-columns: minmax(0, 1fr); }
+  .design-profile-preview { position: static; max-height: none; }
+  .design-profile-preview-content { overflow: visible; }
+}

@@ -1,0 +1,95 @@
+/** 固定公共主题与 Element Plus 映射；可编辑方案值归 design-profile.json/生成 CSS。 */
+.aw-ui {
+  color-scheme: light;
+  --agent-surface-strong: #162734;
+  --agent-border-strong: #94a8b6;
+  --agent-text-inverse: #eef6f8;
+  --agent-success: #26835d;
+  --agent-warning: #b7791f;
+  --agent-danger: #b13f35;
+  --agent-card-bg: rgba(255, 255, 255, 0.84);
+  --agent-card-border: rgba(23, 33, 43, 0.08);
+  --agent-card-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+  --agent-card-shadow-hover: 0 18px 40px rgb(15 23 42 / 0.06);
+  --agent-table-grid: rgba(23, 33, 43, 0.08);
+  --agent-table-label-bg: rgba(237, 243, 247, 0.72);
+  --agent-table-shell-bg: rgba(255, 255, 255, 0.36);
+  --agent-table-header-bg: rgba(255, 255, 255, 0.16);
+  --agent-table-stripe-bg: rgba(237, 243, 247, 0.72);
+  --agent-table-fixed-bg: rgba(255, 255, 255, 0.92);
+  --agent-info-label-bg: rgba(237, 243, 247, 0.56);
+  --agent-shadow: 0 10px 24px rgb(23 33 43 / 0.08);
+  --agent-shell-shadow: 0 18px 42px rgb(15 23 42 / 0.1);
+  --agent-header-glass-bg: rgba(255, 255, 255, 0.68);
+  --agent-header-glass-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.62) inset,
+    0 0 0 1px rgb(8 145 178 / 0.08),
+    0 12px 28px rgb(15 23 42 / 0.08),
+    0 24px 54px rgb(15 23 42 / 0.1);
+  --agent-sidebar-bg: rgba(255, 255, 255, 0.74);
+  --agent-menu-radius: 12px;
+  --agent-sidebar-width: 236px;
+  --agent-topbar-height: 76px;
+  --el-color-primary: var(--agent-accent);
+  --el-color-primary-light-3: color-mix(in srgb, var(--agent-accent) 70%, var(--agent-surface));
+  --el-color-primary-light-5: color-mix(in srgb, var(--agent-accent) 50%, var(--agent-surface));
+  --el-color-primary-light-9: var(--agent-accent-soft);
+  --el-color-primary-light-7: var(--agent-accent-surface);
+  --el-color-primary-dark-2: var(--agent-accent-strong);
+  --el-text-color-primary: var(--agent-text);
+  --el-text-color-regular: var(--agent-text-muted);
+  --el-fill-color-blank: var(--agent-surface);
+  --el-fill-color-light: var(--agent-surface-muted);
+  --el-bg-color: var(--agent-surface);
+  --el-border-color: var(--agent-border);
+  --el-border-color-light: var(--agent-card-border);
+  /* Element Plus 数据控件与宿主弹层，均继承本作用域当前 tokens。 */
+  --el-text-color-secondary: var(--agent-text-muted);
+  --el-text-color-placeholder: var(--agent-text-muted);
+  --el-text-color-disabled: var(--agent-text-muted);
+  --el-bg-color-overlay: var(--agent-surface);
+  --el-bg-color-page: var(--agent-bg);
+  --el-border-color-lighter: var(--agent-table-grid);
+  --el-border-color-extra-light: var(--agent-table-grid);
+  --el-fill-color: var(--agent-surface-muted);
+  --el-fill-color-lighter: var(--agent-surface-muted);
+  --el-fill-color-extra-light: var(--agent-surface-muted);
+  --el-fill-color-dark: var(--agent-border);
+  --el-disabled-bg-color: var(--agent-surface-muted);
+  --el-disabled-text-color: var(--agent-text-muted);
+  --el-color-success: var(--agent-success);
+  --el-color-warning: var(--agent-warning);
+  --el-color-danger: var(--agent-danger);
+  --el-color-error: var(--agent-danger);
+  --el-mask-color: color-mix(in srgb, var(--agent-surface) 85%, transparent);
+  --el-color-white: var(--agent-on-accent);
+}
+.aw-ui[data-aw-theme="dark"] {
+  color-scheme: dark;
+    --agent-surface-strong: #0f202b;
+    --agent-border-strong: #4b6477;
+    --agent-text-inverse: #e6edf2;
+    --agent-success: #55bf8d;
+    --agent-warning: #f0b95b;
+    --agent-danger: #e06d61;
+    --agent-card-bg: rgba(255, 255, 255, 0.04);
+    --agent-card-border: rgba(255, 255, 255, 0.07);
+    --agent-card-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+    --agent-card-shadow-hover: 0 18px 48px rgb(0 0 0 / 0.32);
+    --agent-table-grid: rgba(255, 255, 255, 0.07);
+    --agent-table-label-bg: rgba(255, 255, 255, 0.045);
+    --agent-table-shell-bg: rgba(255, 255, 255, 0.025);
+    --agent-table-header-bg: rgba(255, 255, 255, 0.025);
+    --agent-table-stripe-bg: rgba(255, 255, 255, 0.045);
+    --agent-table-fixed-bg: rgba(24, 34, 44, 0.96);
+    --agent-info-label-bg: rgba(255, 255, 255, 0.04);
+    --agent-shadow: 0 12px 28px rgb(0 0 0 / 0.24);
+    --agent-shell-shadow: 0 20px 44px rgb(0 0 0 / 0.32);
+    --agent-header-glass-bg: rgba(18, 28, 36, 0.74);
+    --agent-header-glass-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.06) inset,
+      0 0 0 1px rgb(34 211 238 / 0.12),
+      0 14px 34px rgb(0 0 0 / 0.34),
+      0 30px 70px rgb(0 0 0 / 0.38);
+    --agent-sidebar-bg: rgba(18, 30, 39, 0.82);
+}

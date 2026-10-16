@@ -1,0 +1,10 @@
+/** Console UI 唯一公共代码出口；导入无应用启动、偏好或 IPC 副作用。 */
+export { default as AgentLayout } from './components/AgentLayout.vue'
+export { default as AgentSidebar } from './components/AgentSidebar.vue'
+export { default as AgentTopbar } from './components/AgentTopbar.vue'
+export { default as ConsoleCard } from './components/ConsoleCard.vue'
+export { default as ConsoleActionButton } from './components/ConsoleActionButton.vue'
+export { default as StatusCapsule } from './components/StatusCapsule.vue'
+export { default as ThemeToggle } from './components/ThemeToggle.vue'
+export { default as LanguageSwitch } from './components/LanguageSwitch.vue'
+export type { UiTheme, UiTone, ActionTone, NavigationItem } from './types'

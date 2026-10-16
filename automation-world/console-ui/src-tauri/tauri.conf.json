@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "AIIS ICS Control Agent",
+  "productName": "AIIS AW Console UI",
   "version": "0.1.0",
-  "identifier": "com.aiis.ics.controlagent",
+  "identifier": "com.aiis.aw.consoleui",
   "build": {
     "beforeDevCommand": {
       "cwd": ".",
@@ -14,13 +14,13 @@
       "script": "pnpm build",
       "wait": true
     },
-    "devUrl": "http://localhost:15190",
+    "devUrl": "http://localhost:15193",
     "frontendDist": "../dist"
   },
   "app": {
     "windows": [
       {
-        "title": "AIIS ICS Control Agent",
+        "title": "AIIS AW Console UI",
         "label": "main",
         "width": 1280,
         "height": 820,
@@ -46,7 +46,7 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "shortDescription": "AIIS ICS control-agent diagnostics console",
-    "longDescription": "Tauri operations console for the AIIS ICS Rust control agent."
+    "shortDescription": "AIIS AW Console UI design workbench",
+    "longDescription": "Lightweight Tauri design workbench and reusable Vue UI source."
   }
 }

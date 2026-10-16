@@ -1,0 +1,49 @@
+/** 自动生成自 design-profile.json；不可手改。运行 pnpm design:profile --generate。 */
+.aw-ui {
+  --agent-bg: #f3f6f8;
+  --agent-surface: #ffffff;
+  --agent-surface-muted: #edf3f7;
+  --agent-text: #17212b;
+  --agent-text-muted: #5a6875;
+  --agent-border: #cbd6de;
+  --agent-accent: #0891b2;
+  --agent-accent-strong: #0e7490;
+  --agent-on-accent: #f7feff;
+  --agent-accent-soft: rgba(8, 145, 178, 0.1);
+  --agent-accent-surface: rgba(8, 145, 178, 0.16);
+  --agent-sidebar-active-bg: rgba(8, 145, 178, 0.1);
+  --agent-card-border-hover: rgba(8, 145, 178, 0.22);
+  --agent-table-row-hover: rgba(8, 145, 178, 0.06);
+  --agent-card-padding: 18px;
+  --agent-card-padding-compact: 12px;
+  --agent-action-gap: 12px;
+  --agent-card-radius: 20px;
+  --agent-card-radius-compact: 16px;
+  --agent-control-radius: 14px;
+  --agent-control-radius-small: 10px;
+  --agent-table-cell-padding: 8px;
+}
+.aw-ui[data-aw-theme="dark"] {
+  --agent-bg: #111820;
+  --agent-surface: #18222c;
+  --agent-surface-muted: #202c37;
+  --agent-text: #e6edf2;
+  --agent-text-muted: #a4b1bd;
+  --agent-border: #334452;
+  --agent-accent: #22d3ee;
+  --agent-accent-strong: #67e8f9;
+  --agent-on-accent: #06212a;
+  --agent-accent-soft: rgba(34, 211, 238, 0.14);
+  --agent-accent-surface: rgba(34, 211, 238, 0.2);
+  --agent-sidebar-active-bg: rgba(34, 211, 238, 0.12);
+  --agent-card-border-hover: rgba(34, 211, 238, 0.24);
+  --agent-table-row-hover: rgba(34, 211, 238, 0.08);
+  --agent-card-padding: 18px;
+  --agent-card-padding-compact: 12px;
+  --agent-action-gap: 12px;
+  --agent-card-radius: 20px;
+  --agent-card-radius-compact: 16px;
+  --agent-control-radius: 14px;
+  --agent-control-radius-small: 10px;
+  --agent-table-cell-padding: 8px;
+}

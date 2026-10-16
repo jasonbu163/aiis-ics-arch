@@ -176,3 +176,7 @@ rg -n --glob '!**/*.md' "api/mock\\.py" app
 ```bash
 uv run python -m compileall -q app core database scripts tests
 ```
+
+## 独立完整温控样本
+
+[equipment](equipment/README.zh-CN.md)管理新async POST/GET temperature-samples、独立read/ingest权限及空值拒绝的模块本地设备scope。两表由d2后继e4f6a8b0c2d4显式增加；旧温控行和Projection descriptor不改，旧前端temperature-control仍用旧源。公开settings.resolve_env_file只计算共享dotenv路径，其他私有Settings不开放。源码检查不能替代另批数据库/运行采用。

@@ -31,7 +31,7 @@ The monitor Core surface returns collector health and project-neutral PLC DB-blo
 - The Core baseline is the single `d4e6f8a0b2c4` Alembic root for fourteen Core tables. Its upgrade operations and
   fourteen-table SQLAlchemy metadata subset are mechanically checked by `tests/test_core_migration_baseline.py`; private project
   repositories retain their own historical migration graphs. The `a6c8e0f2b4d6` successor adds only `energy_prices`;
-  `b8d0f2a4c6e8` adds only `energy_price_hours`, bringing full metadata to sixteen tables. Prepare schema explicitly before runtime adoption.
+  `b8d0f2a4c6e8` adds only `energy_price_hours`, bringing the price-only fixture to sixteen tables. The reintegration and sample successors are described below. Prepare schema explicitly before runtime adoption.
 
 ## Local checks
 
@@ -92,6 +92,8 @@ do not change authenticated-only APIs or admin-only guards. Granting one key nev
 | `control-agent` | Gate-token issuance permission guard; does not remotely execute device actions and retains independent role restrictions. |
 | `energy-price-read` | Energy GET current/history only; independent from manage. |
 | `energy-price-manage` | Energy hourly whole-group POST upsert; does not grant reads. |
+| `equipment-temperature-read` | New complete sample GET only; every caller also needs the one configured equipment scope. |
+| `equipment-temperature-ingest` | New complete sample POST only; admin-only and equipment-scoped, with no implicit read grant. |
 | `aiis_demo` | Default-disabled reference manifest; a configured grant warns and is ignored. The array does not enable it. |
 
 Projection management routes pass `actor_user_id` to record the actor; this is not a role check.
@@ -156,7 +158,7 @@ change passwords. Keep using the [host-source initialization tutorial](../INITIA
 
 ## Configuration reference
 
-These tables cover the same 68 active keys in the three public env examples. Source defaults come from Settings; required fields fail configuration loading when absent. Template values show distinct public host/dev/prod values, merging equal entries; passwords/secrets are shown only as placeholder. Templates are not local effective configuration. Use True/False for booleans, single or double quotes for strings, and outer single quotes with inner double quotes for JSON arrays.
+These tables cover the same 69 active keys in the three public env examples. Source defaults come from Settings; required fields fail configuration loading when absent. Template values show distinct public host/dev/prod values, merging equal entries; passwords/secrets are shown only as placeholder. Templates are not local effective configuration. Use True/False for booleans, single or double quotes for strings, and outer single quotes with inner double quotes for JSON arrays.
 
 ### App/API
 
@@ -308,3 +310,15 @@ Hourly energy-price adoption uses the existing three API paths, Shanghai observe
 ## Public module admission
 
 See the [v1 Python module contract](app/MODULE_CONTRACT.md) for dependencies, exports, errors and conflict checks. The explicit d2f4a6b8c0e2 successor adds 42 tables to the protected sixteen (58 in the reintegration fixture); HR remains disabled, and imports/GETs do not seed or apply schema. Real MySQL/Docker/runtime actions remain separately gated.
+
+## Complete temperature sample pilot
+
+The [equipment module](app/equipment/README.md) adds independent async POST/GET `/equipment/temperature-samples`. It owns exact complete per-sample values and delivery receipts, with separate read/ingest permissions and one fail-closed module-local scope. Explicit e4f6a8b0c2d4 adds two tables after d2 (60 in the BE003 fixture); the original 58-table reintegration subset and old temperature-control/Projection/frontend data sources remain unchanged. `settings.resolve_env_file() -> Path` is public only for path selection; other private Settings remain private. Database/Docker and real adoption require their own concrete approval.
+
+### Module-local temperature scope
+
+| Key | Purpose/type | Source default | Public template value |
+| --- | --- | --- | --- |
+| `EQUIPMENT_TEMPERATURE_PILOT_ID` | One exact business equipment key for the new sample APIs; empty/invalid denies every caller including admin. Module-local BaseSettings, restart to adopt. (str) | `''` | `''` |
+
+This additional key brings each public env example to 69 assignments; the original eleven English section headings and all prior values/grants are preserved. Synthetic documentation uses `temperature-pilot-01`. Source, frozen and Docker dotenv paths follow the existing public path helper; process environment overrides dotenv, explicit injected config overrides process env. This setting neither grants permissions nor alters old GET behavior. The dedicated [MySQL entry](tests_mysql/test_equipment_temperature.py) only prepares gated disposable verification and never runs through the shared destructive conftest.
