@@ -13,6 +13,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [features]
 default = []
 rust-snap7-driver = ["dep:rust-snap7"]
+local-validation = []
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
@@ -30,3 +31,13 @@ tracing = "0.1"
 tracing-appender = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
 libc = "0.2"
+
+rusqlite = { version = "=0.32.1", features = ["bundled"] }
+uuid = { version = "=1.23.3", features = ["v4"] }
+sha2 = "=0.10.9"
+fs2 = "=0.4.3"
+
+[[bin]]
+name = "daa-local-validation"
+path = "src/bin/daa-local-validation.rs"
+required-features = ["local-validation"]

@@ -2,8 +2,17 @@
 <template>
   <ElConfigProvider :locale="locale === 'zh-CN' ? zhCn : en">
   <AgentLayout :theme="theme" :sidebar-hidden="hidden">
-    <template #sidebar><AgentSidebar active-id="sample" :items="[{ id: 'sample', label: t('nav') }]" :brand="t('brand')" :detail="t('detail')" /></template>
+    <template #sidebar><AgentSidebar :active-id="navigationActive" :items="navigation" :brand="t('brand')" :detail="t('detail')" @select="selectNavigation" /></template>
     <template #topbar><AgentTopbar :title="t('title')" :subtitle="t('subtitle')" :sidebar-label="t('sidebar')" :sidebar-hidden="hidden" @toggle-sidebar="hidden = !hidden"><template #actions><ThemeToggle :theme="theme" :label="theme === 'light' ? t('switchToDark') : t('switchToLight')" @toggle="theme = theme === 'light' ? 'dark' : 'light'" /><LanguageSwitch :locale="locale === 'zh-CN' ? 'zh-CN' : 'en-US'" :zh-label="t('zhLabel')" :en-label="t('enLabel')" :label="locale === 'zh-CN' ? t('switchToEnglish') : t('switchToChinese')" @toggle="locale = locale === 'en-US' ? 'zh-CN' : 'en-US'" /></template></AgentTopbar></template>
+    <ConsoleCard class="consumer-navigation" :title="t('navigationSample.title')">
+      <ElRadioGroup v-model="navigationMode" :aria-label="t('navigationSample.mode')">
+        <ElRadio value="flat">{{ t('navigationSample.flat') }}</ElRadio><ElRadio value="grouped">{{ t('navigationSample.grouped') }}</ElRadio>
+      </ElRadioGroup>
+      <p>{{ t('navigationSample.note') }}</p>
+      <p role="status">{{ t('navigationSample.current', { label: navigationLabel }) }}</p>
+      <p>{{ t('navigationSample.selections', { count: navigationSelections }) }}</p>
+      <ConsoleActionButton :label="t('navigationSample.external')" @click="navigationActive = navigationActive === 'panel-b' ? 'panel-a' : 'panel-b'" />
+    </ConsoleCard>
     <ConsoleCard :title="t('sample')"><StatusCapsule :label="t('sample')" tone="warning" /><p class="consumer-note">{{ t('note') }}</p><ConsoleActionButton tone="primary" :label="t('button')" @click="clicked = true" /><p v-if="clicked" role="status">{{ t('result') }}</p></ConsoleCard>
     <ConsoleCard class="consumer-sample" :title="t('pageSample.list')">
       <ElTable class="aw-data-table" :data="[sample]" stripe>
@@ -36,14 +45,27 @@
 </template>
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
-import { ElConfigProvider, ElDialog, ElForm, ElFormItem, ElInput, ElOption, ElSelect, ElTable, ElTableColumn, type FormInstance, type FormRules } from 'element-plus'
+import { ElConfigProvider, ElDialog, ElForm, ElFormItem, ElInput, ElOption, ElRadio, ElRadioGroup, ElSelect, ElTable, ElTableColumn, type FormInstance, type FormRules } from 'element-plus'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import en from 'element-plus/es/locale/lang/en'
 import { useI18n } from 'vue-i18n'
-import { AgentLayout, AgentSidebar, AgentTopbar, ConsoleCard, ConsoleActionButton, StatusCapsule, ThemeToggle, LanguageSwitch, type UiTheme } from '@aw-ui'
+import { AgentLayout, AgentSidebar, AgentTopbar, ConsoleCard, ConsoleActionButton, StatusCapsule, ThemeToggle, LanguageSwitch, type UiTheme, type NavigationChildItem, type NavigationItem } from '@aw-ui'
 const { t, locale } = useI18n()
 const theme = ref<UiTheme>('light')
 const hidden = ref(false)
+const navigationMode = ref<'flat' | 'grouped'>('flat')
+const navigationActive = ref('panel-a')
+const navigationSelections = ref(0)
+const navigationLeaves = computed<NavigationChildItem[]>(() => [
+  { id: 'overview', label: t('navigationSample.overview') },
+  { id: 'panel-a', label: t('navigationSample.alpha') },
+  { id: 'panel-b', label: t('navigationSample.beta') }
+])
+const navigation = computed<NavigationItem[]>(() => navigationMode.value === 'flat' ? navigationLeaves.value : [
+  navigationLeaves.value[0], { id: 'panels', label: t('navigationSample.group'), children: navigationLeaves.value.slice(1) }
+])
+const navigationLabel = computed(() => navigationLeaves.value.find(item => item.id === navigationActive.value)?.label ?? '')
+function selectNavigation(id: string) { navigationActive.value = id; navigationSelections.value++ }
 const clicked = ref(false)
 const kinds = ['standard', 'compact'] as const
 const sample = reactive({ name: '', kind: 'standard' })
@@ -71,5 +93,7 @@ async function confirmEdit() {
 /* 消费端拥有全局 reset 与页面布局。 */
 html, body, #app { margin: 0; min-height: 100vh; }
 .consumer-sample { margin-top: 18px; }
+.consumer-navigation { margin-bottom: 18px; }
+.consumer-navigation .console-action-button { max-width: 100%; min-height: 40px; height: auto; white-space: normal; }
 .consumer-note { margin: 20px 0; line-height: 1.6; }
 </style>

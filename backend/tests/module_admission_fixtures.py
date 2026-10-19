@@ -109,6 +109,12 @@ def generate_full_profile(destination, source_root=None, *, profile_name="F", ex
     return destination
 
 
+def generate_mapping_business_profile(destination, source_root=None):
+    """独立BE006/64/f6公开fixture；不改变冻结F/58、BE003/60默认合同。"""
+    return generate_full_profile(destination, source_root, profile_name="BE006", expected_table_count=64,
+                                 target_revision="f6a8c0e2b4d6")
+
+
 def run_python(profile, code, *, source_root=None):
     """复用项目已锁定环境；子进程cwd及PYTHONPATH只指公开fixture，拒绝DB连接。"""
     source_root = Path(source_root or Path(__file__).resolve().parents[1])

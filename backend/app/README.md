@@ -185,3 +185,27 @@ uv run python -m compileall -q app core database scripts tests
 ## Independent complete temperature samples
 
 [equipment](equipment/README.md) owns the new async POST/GET temperature-samples slice, independent read/ingest permissions and a fail-closed module-local device scope. Two explicit new tables follow d2 via e4f6a8b0c2d4; no old temperature rows or Projection descriptors change. Existing frontend temperature-control continues its old source. Public `settings.resolve_env_file` computes the shared dotenv path; private Settings remain private. Source checks do not replace separately approved database/runtime adoption.
+
+
+## HTTP mapping business observations
+
+Equipment, performance and monitor own separate HTTP observation domains. Each module requires one exact,
+case-sensitive business equipment key: `EQUIPMENT_MAPPING_INGEST_ID`, `PERFORMANCE_MAPPING_INGEST_ID` and
+`MONITOR_MAPPING_INGEST_ID`. Empty scopes deny every caller, including admin. Public examples leave them empty.
+POST requires active admin and the independent ingest permission; GET uses the matching read permission.
+`equipment-mapping-ingest/read`, `performance-mapping-ingest/read` and `monitor-curve-ingest/read` do not grant
+legacy module CRUD, page access or one another. BE003 temperature keeps its own temperature scope and permissions.
+
+The explicit successor `f6a8c0e2b4d6` adds three module receipts, one production observation watermark and nullable
+HTTP keys on seven existing business tables (64-table complete fixture). Legacy rows retain NULL equipment keys,
+existing values/defaults and seconds; no identity backfill, cleanup, seed or automatic DDL occurs. New binary
+coil/zone keys use full `VARBINARY(200)` comparison. The original five migrations and sync Services are retained.
+Deploying schema and running disposable MySQL/browser proofs require separate concrete approval; source checks
+are not runtime adoption. Downgrade refuses HTTP data, nullable legacy measurements or fractional seconds that
+cannot be restored without loss. Normal business fallback preserves accepted data and selects the legacy source.
+
+HTTP observations use timezone-bearing UTC millisecond source times, strict camelCase JSON and stable sampleId.
+Omitted measurements persist NULL; explicit null is rejected. Numeric fields preserve their declared decimal scale;
+FLOAT fields use bounded binary32 normalization (relative error <=1e-6, absolute error <=max(1e-6,abs(input)*1e-6));
+nonzero underflow is rejected. Receipts and business changes commit together, with bounded named-unique race
+recovery. Unknown commits return retryable failure; retry the same sampleId. No PLC provenance is invented.

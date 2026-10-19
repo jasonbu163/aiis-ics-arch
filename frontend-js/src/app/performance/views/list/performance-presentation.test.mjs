@@ -58,3 +58,12 @@ test('status and optional datetime display use stable fallback keys', () => {
   assert.equal(displayText(''), '-')
   assert.equal(displayText('S-01'), 'S-01')
 })
+
+test('HTTP duration source keys resolve in both module locales', async () => {
+  const { readFile } = await import('node:fs/promises')
+  for (const language of ['en-US', 'zh-CN']) {
+    const messages=JSON.parse(await readFile(new URL(`../../locales/${language}.json`,import.meta.url),'utf8'))
+    for (const key of ['manual_time','reported_time','external_observed']) assert.ok(messages.durationSourceMap[key])
+    assert.ok(messages.recordSources.external_observation)
+  }
+})

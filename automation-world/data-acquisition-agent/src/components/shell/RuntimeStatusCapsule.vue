@@ -1,19 +1,9 @@
-<!--
-  File Path: /automation-world/data-acquisition-agent/src/components/shell/RuntimeStatusCapsule.vue
-  Description: Compact runtime mode capsule for the Control Agent topbar
-  Main Features:
-    - Shows the current CA mode or write-mode status in the topbar
-    - Uses CA theme tokens only
-    - Does not represent business session state
--->
+<!-- 当前模式仅作展示；不将模式色解释为设备或上传成功。 -->
 <template>
-  <div class="runtime-status-capsule">
-    <span class="status-dot" aria-hidden="true"></span>
-    <span>{{ statusText }}</span>
-  </div>
+  <StatusCapsule :label="statusText" tone="neutral" />
 </template>
-
 <script setup lang="ts">
+import { StatusCapsule } from '@aw-ui'
 defineProps<{
   statusText: string
 }>()

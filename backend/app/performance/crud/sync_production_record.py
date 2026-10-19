@@ -29,6 +29,7 @@ def get_by_device_and_coil_for_update(
     result = db.execute(
         select(Performance)
         .where(
+            Performance.equipment_id.is_(None),
             Performance.device_id == device_id,
             Performance.coil_no == coil_no,
         )
@@ -46,6 +47,7 @@ def list_active_for_device_for_update(
     result = db.execute(
         select(Performance)
         .where(
+            Performance.equipment_id.is_(None),
             Performance.device_id == device_id,
             Performance.observation_status.in_(ACTIVE_OBSERVATION_STATUSES),
         )
@@ -63,6 +65,7 @@ def get_latest_raw_snapshot_id_for_device(
     """Return the latest accepted raw fact for device-level replay protection."""
     result = db.execute(
         select(func.max(Performance.last_raw_snapshot_id)).where(
+            Performance.equipment_id.is_(None),
             Performance.device_id == device_id,
         )
     )

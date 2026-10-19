@@ -30,5 +30,19 @@
     "confirm": "Confirm preview",
     "cancel": "Cancel",
     "alpha": "Panel A"
+  },
+  "navigationSample": {
+    "title": "Grouped navigation · Design sample",
+    "overview": "Overview sample",
+    "group": "Sample panels",
+    "alpha": "Panel A",
+    "beta": "Panel B · Extended navigation sample",
+    "current": "Current panel: {label}",
+    "external": "Switch current panel externally",
+    "note": "Host-owned selection; groups only expand or collapse.",
+    "selections": "Selection events: {count}",
+    "mode": "Navigation mode",
+    "flat": "Flat",
+    "grouped": "Grouped"
   }
 }

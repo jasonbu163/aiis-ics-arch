@@ -1,0 +1,57 @@
+{
+  "basis": "DAA-004 r1 R05 fixed leaf table, manually authored before source fixtures; not parser output",
+  "dbNumber": 21,
+  "dbName": "MinimalImport",
+  "udtName": "MinimalPayload",
+  "counts": {
+    "sources": 2,
+    "dbs": 1,
+    "points": 3,
+    "groups": 0
+  },
+  "db": {
+    "complete": true,
+    "flat": false,
+    "treeRequired": true
+  },
+  "points": [
+    {
+      "sourcePath": "payload.ready",
+      "dataType": "BOOL",
+      "enabled": false,
+      "groupId": null,
+      "address": null
+    },
+    {
+      "sourcePath": "payload.count",
+      "dataType": "INT",
+      "enabled": false,
+      "groupId": null,
+      "address": null
+    },
+    {
+      "sourcePath": "payload.temperature",
+      "dataType": "REAL",
+      "enabled": false,
+      "groupId": null,
+      "address": null
+    }
+  ],
+  "relations": {
+    "allObjectsUseSelectedPlcId": true,
+    "allPointsUseImportedDbId": true,
+    "dbUsesDbSourceId": true,
+    "idsStableAfterReload": true,
+    "sourceContentSha256MatchesFiles": true,
+    "etagStableAfterReload": true
+  },
+  "protected": {
+    "privateReceiptBytesUnchanged": true,
+    "activeEmpty": true,
+    "runtimeBusinessTablesEmpty": true
+  },
+  "limitations": [
+    "Handwritten controlled source-import validation only; not a TIA export or live PLC address proof.",
+    "No inferred offsets or evidenced DB length; addresses remain null."
+  ]
+}

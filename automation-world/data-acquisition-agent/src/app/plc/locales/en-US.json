@@ -33,7 +33,7 @@
   "aggregatePointValues": "{groups} groups / {points} points across all PLCs",
   "selectOneForSample": "Select one PLC for a targeted sample read.",
   "controls": {
-    "readOnce": "Read once",
+    "readOnce": "Read selected PLC samples once",
     "select": "Select",
     "selected": "Selected",
     "startRead": "Start read",
@@ -97,5 +97,38 @@
       "failed": "Failed",
       "stopped": "Stopped"
     }
+  },
+  "currentConfiguration": "Current connection configuration (read only)",
+  "openPoints": "View points and samples",
+  "configCapability": "Current configuration is read from YAML/env. View and select a PLC here; editing, connection tests and managed persistent connections are planned for later stages.",
+  "pointsCapability": "Files are identified automatically. Enter each actual DB number, select blocks, then preview the delta. UDTs have no DB number. Existing blocks update only with valid source proof; renumbering, renaming or leaf removal is blocked. For changed sources, explicitly select an existing target. Unselected blocks retain their old versions.",
+  "sourceImport": {
+    "help": "Files are identified automatically. Enter each actual DB number, select blocks, then preview the delta. UDTs have no DB number. Existing blocks update only with valid source proof; renumbering, renaming or leaf removal is blocked. For changed sources, explicitly select an existing target. Unselected blocks retain their old versions.",
+    "counts": "{files} files · {dbs} DBs · {udts} UDTs",
+    "selected": "Selected",
+    "selectBlock": "Select block {name}",
+    "block": "Source / block",
+    "leaves": "{count} expandable leaves",
+    "target": "Existing target (explicit update)",
+    "newBlock": "New block",
+    "updateCandidate": "Update candidate; confirm after preview",
+    "diagnostics": "Status / diagnostics",
+    "types": "UDT dependencies (no DB numbers)",
+    "ready": "The selected set can be confirmed as a draft. Acquisition readiness still requires separate review.",
+    "blocked": "The selected set has blocking issues. The current draft is unchanged. Deselect problem blocks and preview again.",
+    "preservation": "Keep {points} existing points / {manual} manual addresses; invalidate {invalidated} address confirmations.",
+    "layoutChanged": "Declaration order, type or layout dependencies changed. All address confirmations in this target DB are invalidated; address values and manual reasons are retained.",
+    "commentsChanged": "Source comments changed.",
+    "udtIsolation": "Only selected DBs use the new UDT version. Other DBs retain the old version.",
+    "added": "Added paths",
+    "changedTypes": "Changed type paths",
+    "readiness": "Existing draft readiness (advisory for structural import)",
+    "structure": "View complete structure",
+    "manualConflict": "Manual address differs from the theoretical layout; its value and reason are retained.",
+    "layoutProfile": "Profile: {profile}; complete explicitly non-optimized standard layout only. Preview does not save addresses. Confirmation changes non-manual addresses only. Field addresses require separate site verification.",
+    "chooseHint": "Choose .db / .udt files. Cancelling keeps the previous input.",
+    "closePreview": "Close preview",
+    "lengthEditHint": "Length edits remain unsaved in the draft. After closing, use Save draft in the configuration bar. Closing does not save.",
+    "lengths": "Configured DB length: {current} bytes · Calculated length: {calculated} bytes"
   }
 }

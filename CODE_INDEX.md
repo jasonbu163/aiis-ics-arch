@@ -126,7 +126,21 @@ documentation initialization in this repository.
 ## Automation World Agent foundation
 
 - `automation-world/README.*`, `PLAN.*`, `plans/README.*` — lifecycle owner and unique root task references.
-- `automation-world/data-acquisition-agent/` — independent frozen-CA derivative; DAA-only config/identity and existing headless runtime.
+- `automation-world/data-acquisition-agent/` — independent DAA runtime; CU public-source shell, workbench plus PLC/points/storage leaves, one local owner, pure preference/navigation shell and local PLAN; legacy YAML/direct-DB/headless graph retired.
+- `automation-world/data-acquisition-agent/src-tauri/src/config/local_bootstrap.rs` — SQLite-only ordinary startup, retired-key provenance and the unchanged owned debug validation factory.
+- `automation-world/data-acquisition-agent/src-tauri/src/domain/local_{configuration,sample,runtime}.rs` — local schema v1, stable IDs, group/read budgets, self-describing cycle/sample and runtime DTOs.
+- `automation-world/data-acquisition-agent/src-tauri/src/services/local_{configuration,activation,supervisor,scheduler,storage,queries,recovery}.rs` — protected derived configuration/CAS, token activation, unique PLC actors, fair groups, admission, bounded history and stopped recovery.
+- `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/` — explicit dual SQLite DELETE/EXTRA schema, serial work, atomic complete cycles, capacity/protected cleanup and focused tests; paired schema READMEs.
+- `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/{tia_source,plc_layout,local_decode,managed_s7,local_profile_lock,local_logging,local_fixture}.rs` — full bounded source expansion, verified standard nested layout inference, typed values, persistent S7, OS lock, bounded logs and compile-gated owned fixtures.
+- `automation-world/data-acquisition-agent/src-tauri/src/commands/local_{acquisition,validation}.rs` / `src/bin/daa-local-validation.rs` — named local IPC and nondefault debug JSON Lines adapter; no ACK/upload/SQL executor.
+- `automation-world/data-acquisition-agent/src/services/localAcquisition.ts` / `src/console/composables/useLocalAcquisitionConsole.ts` — bootstrap-first IPC contract, local edit-base CAS and one runtime refresh owner.
+- `automation-world/data-acquisition-agent/src/components/console/{ConfigRevisionBar,LocalHistoryPanel,LocalLogPanel}.vue` — draft/active/loaded/used facts; existing collapsed runtime/version details host migration-time history and compact unknown/retryable-failure entry, alongside bounded immutable history/events.
+- `automation-world/data-acquisition-agent/src-tauri/src/domain/yaml_migration.rs` / `services/local_yaml_migration.rs` — 有界迁入状态/白名单receipt与锁后首次迁入、显式双CAS重试；无设备连接。
+- `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/yaml_migration.rs` / `yaml_migration_tests.rs` — 固定两来源有界安全读取、严格多PLC/DB/组/点停用转换和私有提交断点测试。
+- `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/yaml_migration.rs` — v1现有表DML，空资格/CAS/配置来源及私有receipt同事务，不改schema。
+- `automation-world/data-acquisition-agent/src/console/composables/useAgentConsoleShell.ts` / `components/console/YamlMigrationNotice.vue` — 纯壳偏好导航与配置栏原折叠详情内的有界迁入时历史/安全重试；无桥预览无外发/假保存。
+- `automation-world/data-acquisition-agent/vite.validation.config.ts` / `src-tauri/tests/fixtures/local-acquisition/` — env-isolated validation build and bounded sanitized parser/layout/transport fixtures.
+- `automation-world/data-acquisition-agent/src-tauri/tests/fixtures/source-import-minimal/` — handwritten DB21/UDT three-leaf controlled import pair, independent expected checklist and paired notes; no TIA export or live address proof.
 - `automation-world/semantic-mapping-agent/` — filtered TSS HTTP mapping/facts console, native gates and local help; no customer/SQL/legacy command closure.
 
 
@@ -141,3 +155,26 @@ documentation initialization in this repository.
 - `backend/tests/test_equipment_temperature_api.py`, `test_equipment_temperature_service.py`, `test_equipment_temperature_migration.py`, `test_equipment_temperature_config.py`: no-DB HTTP/auth/transaction/config/recorder contracts.
 - `backend/tests_mysql/test_equipment_temperature.py`: separately gated disposable MySQL proof outside destructive shared conftest.
 - [Equipment guide](backend/app/equipment/README.md) / [中文说明](backend/app/equipment/README.zh-CN.md): separate old/new sources and runtime gates.
+
+
+## Mapping business HTTP domains
+
+- `backend/app/{equipment,performance,monitor}/mapping_{config,domain,error_codes}.py` — local scopes, strict numbers/source times/presence fingerprints and stable errors.
+- `backend/app/{equipment,performance,monitor}/models/mapping_ingest.py` — three typed receipts, exact FK targets and production observation watermark; explicit migration owns DDL.
+- `backend/app/equipment/api/{mapping_samples,temperature_dashboard,mapping_http}.py` / `schemas/{drive_sample_in,production_parameter_sample_in,mapping_sample_query}.py` — equipment HTTP boundaries and complete-temperature read adapter.
+- `backend/app/equipment/services/{async_drive_sample,async_production_parameter_sample,async_temperature_dashboard}.py` / `crud/{async_drive_sample,async_production_parameter_sample,async_mapping_ingest}.py` — bounded merge/receipt transactions and scoped reads.
+- `backend/app/performance/api/{mapping_observations,process_samples,mapping_http}.py` / `schemas/{production_observation_in,process_sample_in,mapping_query}.py` — ordered production/parent process inputs and local HTTP lifecycle.
+- `backend/app/performance/services/{async_production_observation,async_process_sample,async_mapping_query}.py` / `crud/{async_production_observation,async_process_sample,async_mapping_ingest}.py` — production watermark, manual priority, scoped parent/child transactions and read adapters.
+- `backend/app/monitor/api/{process_curve_samples,mapping_http}.py` / `schemas/{process_curve_in,process_curve_query}.py` / `services/async_process_curve_sample.py` / `crud/{async_process_curve_sample,async_mapping_ingest}.py` — immutable complete-curve source domain and Shanghai-day reads.
+- `backend/alembic/versions/20261016_1900_f6a8c0e2b4d6_expand_mapping_business_api.py` — sole e4 successor, seven-table nullable HTTP increments, three receipts and observation state, guarded downgrade.
+- `frontend-js/src/components/BusinessDataSourceSelect.vue` / `src/utils/businessDataSource.mjs` — source/equipment URL selection and pure request-generation guard.
+- `backend/tests/test_mapping_{api,service,migration,compatibility}.py` / `test_{equipment,performance,monitor}_mapping.py` — no-DB source/HTTP/transaction/SQL/schema contracts.
+- `backend/tests_mysql/test_mapping_business_api.py` — separately gated BE006/64/f6 disposable MySQL entry, outside shared destructive fixtures.
+- `frontend-js/src/utils/businessDataSource.test.mjs` / `src/app/{equipment,monitor}/api/mapping-source.test.mjs` — source paths, empty selection and stale-response contracts.
+
+- `automation-world/data-acquisition-agent/src-tauri/src/domain/source_import.rs` — explicit per-block mapping, immutable lineage/UDT binding, identification and delta preview DTOs.
+- `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/tia_source/{parser,reconcile,tests}.rs` — safe declaration boundaries/limited syntax, selected immutable-version reconciliation and preservation tests.
+- `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/plc_layout/tests.rs` — prior independent Siemens standard-word oracle and whole-DB/manual-address guards.
+- `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/source_import_tests.rs` — owned-temp real-store/engine CAS, atomic rollback, physical archive reuse and old history/receipt preservation tests.
+- `automation-world/data-acquisition-agent/src/app/plc/components/SourceImportPanel.vue` — private paged block selection/number table and bounded import/structure dialogs; state remains with the single console owner.
+- `automation-world/data-acquisition-agent/src-tauri/tests/fixtures/source-import-multi-db/` — handwritten six-DB/three-UDT inputs, independent structure expectations and prior per-leaf layout oracle; no private source or field-address proof.

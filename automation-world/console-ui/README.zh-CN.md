@@ -50,6 +50,23 @@ import '@aw-ui-styles'
 
 源码编译完成后，消费端只运行**自身** `dist`，无需 CU 进程、源码 checkout 或 CU node_modules。首版仅提供源码出口，不建立 npm 发布、根 workspace、在线 CU 服务，也未实际接入其他 Agent。层次说明见 [src/app](src/app/README.zh-CN.md)，批准范围见 [spec](plans/CU-001-workbench-foundation/spec.md)。
 
+## 平铺与分组导航
+
+`AgentSidebar` 保留 `activeId: string`、`items: NavigationItem[]`、`brand: string`、可选 `detail` 及 `select(id: string)`。公共入口导出以下有限非递归类型（可选 icon 使用 Vue 的 `Component` 类型）：
+
+```ts
+interface NavigationChildItem { id: string; label: string; icon?: Component }
+interface NavigationItem extends NavigationChildItem { children?: NavigationChildItem[] }
+```
+
+无 children 或 `children: []` 的顶层项为可选叶项；非空组只展开/折叠，直接子项为可选叶项。宿主为组和叶项提供全树非空、唯一、稳定的 id；翻译只改 label，不改 id。嵌套组和重复 id 不属于有效合同。空 items 保留品牌区；未知或误传组 activeId 不选中任何叶项，不发默认选择事件。
+
+宿主翻译文案、拥有 active 状态并处理每次激活的一次 select，可从外部更新 active 或拒绝选择；最终叶项高亮与 aria-current 跟随 prop。初始子项、外部 active 改到子项及 active 子项改属新组会展开其父组，不合成选择、不移动焦点。含当前项的父组用标题强调色区分于当前叶项背景；手动折叠它仍保留选择。允许多组同时展开。文案/主题变化保留展开状态；手动展开只存在 Sidebar 实例内存。AgentLayout 隐藏会卸载 Sidebar，恢复时保留宿主 active 并重新展开其父组，不恢复其他手动展开组，也不从开关抢焦点。公共层不提供导航存储、路由、权限模型或业务/IPC 副作用。
+
+Tab/Shift+Tab 可遍历可见叶项与组标题并离开菜单；上下键在可见项间移动，右键展开组并进入首子项，左键从子项回父组或折叠当前组。Enter/Space 单次激活叶项或切换组。折叠包含焦点的子树时焦点回父标题；已折叠子项不进入 Tab，外部 prop 变化不移动焦点。组 aria-expanded、叶项 aria-current、父组标题强调色及焦点轮廓均在当前明暗主题作用域内。窄窗分组内联展开并局部滚动，平铺菜单保留换行。
+
+工作台保留四个平铺主导航，在壳层预览增加受控分组“设计样例”。独立消费者可在相同稳定 id 的平铺/分组模式间切换，提供宿主外部 active 按钮与事件计数，表格/表单/弹窗状态保持挂载。其 [App.vue](examples/source-consumer/src/App.vue) 通过公共导出实际编译；导航无需 CU 服务在线。固定未提交源码时应引用精确 CU-008 Revision 与 [Development handoff](plans/CU-008-grouped-sidebar-navigation/tasks.md) 的完整路径/SHA-256 清单，以及之后真实形成的独立 Verification/Owner 依据；HEAD 本身不能代表这些工作树字节。DAA 接入及其验收继续归 DAA 自身任务。
+
 ## Element Plus 页面组合
 
 CU 私有的**页面样例**演示表格、校验表单、编辑弹窗及手动选择的正常/加载/空数据/失败状态。数据与重试/提交/编辑反馈只在内存中，刷新会重置样例。八个公共组件及 API 保持不变。独立消费者直接用自身 Element Plus 依赖组合更小的表格/表单/弹窗，拥有自己的 locale 与状态，不导入 PageSamples 或工作台文件。

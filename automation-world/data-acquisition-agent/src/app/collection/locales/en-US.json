@@ -58,7 +58,7 @@
     "statusOnly": "This page controls PLC read and persistence per unit through the supervisor in this Tauri process."
   },
   "snapshotPolicy": {
-    "title": "Snapshot history policy",
+    "title": "Current snapshot storage policy (read only)",
     "status": "Policy status",
     "path": "Config path",
     "latestMode": "Latest scope",
@@ -68,17 +68,17 @@
     "loaded": "Loaded · v{version}",
     "loadedWithWarnings": "Read / warnings",
     "missing": "Not loaded",
-    "retentionValues": "raw rows {raw} days from CA env",
+    "retentionValues": "raw rows {raw} days from DAA env",
     "pointValues": "full {full} / policy rows {policy} / raw {raw} / latest {latest} / every_sample {every} / on_change {change}",
     "validationValues": "missing policy points {missing} / unknown points {unknown} / invalid policies {invalid}",
     "messages": {
       "loaded": "Latest stays as the full real-time mirror; long-term history keeps only selected points from the policy.",
-      "pending": "No policy is loaded; CA continues to use the existing raw/latest write path."
+      "pending": "No policy is loaded; DAA continues to use the existing raw/latest write path."
     }
   },
   "controls": {
-    "start": "Start collection",
-    "stop": "Stop collection",
+    "start": "Start collection for all PLCs",
+    "stop": "Stop collection for all PLCs",
     "startRead": "Start read",
     "stopRead": "Stop read",
     "enablePersistence": "Enable write",
@@ -101,7 +101,7 @@
     "confirmStop": "Stop",
     "cancel": "Cancel",
     "resultTitle": "{action} result · {status} · {target}",
-    "resultDescription": "{message} Target: {target}. Affected PLCs: {affected}. Gate details: {gates}",
+    "resultDescription": "{message} Target: {target}. Affected PLCs: {affected}. Gate details: {gates} accepted: {accepted}",
     "actions": {
       "start": "Start",
       "stop": "Stop",
@@ -158,5 +158,12 @@
       "enabling": "Enabling",
       "failed_write": "Write failed"
     }
-  }
+  },
+  "collectionFeedback": "Collection diagnostics (current snapshot)",
+  "uploadFeedback": "Upload log",
+  "uploadUnavailable": "Independent API reporting is not connected. Upload logs, backlog and capacity data are unavailable. Existing read and raw/latest database controls remain on this workbench.",
+  "storageCapability": "The existing raw/latest direct database path and read-only snapshot policy remain. API/JSON configuration, independent reporting, replay, dual SQLite and local limits are planned for later stages; no save or upload action is available here.",
+  "currentLink": "Current data path (read only)",
+  "backendProbe": "Backend health probe",
+  "gateDetailsTitle": "Collection gate details"
 }

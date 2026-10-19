@@ -30,5 +30,19 @@
     "confirm": "确认预览",
     "cancel": "取消",
     "alpha": "面板 A"
+  },
+  "navigationSample": {
+    "title": "分组导航 · 设计样例",
+    "overview": "概览样例",
+    "group": "面板样例",
+    "alpha": "面板 A",
+    "beta": "面板 B · 较长导航标签样例",
+    "current": "当前面板：{label}",
+    "external": "从外部切换当前面板",
+    "note": "选择由宿主控制；分组仅展开或折叠。",
+    "selections": "选择事件次数：{count}",
+    "mode": "导航模式",
+    "flat": "平铺",
+    "grouped": "分组"
   }
 }

@@ -19,7 +19,7 @@ async def list_curves_by_date(
 ) -> list[HistoryProcessCurve]:
     result = await db.execute(
         select(HistoryProcessCurve)
-        .where(func.date(HistoryProcessCurve.created_at) == date_str)
+        .where(HistoryProcessCurve.equipment_id.is_(None), func.date(HistoryProcessCurve.created_at) == date_str)
         .order_by(HistoryProcessCurve.created_at)
     )
     return list(result.scalars().all())
@@ -28,7 +28,7 @@ async def list_curves_by_date(
 async def count_curves_by_date(db: AsyncSession, date_str: str) -> int:
     value = await db.scalar(
         select(func.count()).select_from(HistoryProcessCurve).where(
-            func.date(HistoryProcessCurve.created_at) == date_str
+            HistoryProcessCurve.equipment_id.is_(None), func.date(HistoryProcessCurve.created_at) == date_str
         )
     )
     return int(value or 0)

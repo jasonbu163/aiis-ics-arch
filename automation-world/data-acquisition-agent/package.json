@@ -16,7 +16,8 @@
     "plc:collect-once": "cargo run --quiet --bin aiis-data-acquisition-agent --manifest-path src-tauri/Cargo.toml --features rust-snap7-driver -- --ca-collect-plc-snapshots-once",
     "plc:collect-loop": "cargo run --quiet --bin aiis-data-acquisition-agent --manifest-path src-tauri/Cargo.toml --features rust-snap7-driver -- --ca-collect-plc-snapshots-loop",
     "plc:collect-loop-smoke": "cargo run --quiet --bin aiis-data-acquisition-agent --manifest-path src-tauri/Cargo.toml --features rust-snap7-driver -- --ca-smoke-plc-collection-loop",
-    "plc:runtime": "cargo run --quiet --bin aiis-data-acquisition-agent-runtime --manifest-path src-tauri/Cargo.toml --features rust-snap7-driver"
+    "plc:runtime": "cargo run --quiet --bin aiis-data-acquisition-agent-runtime --manifest-path src-tauri/Cargo.toml --features rust-snap7-driver",
+    "dev:local-validation": "vite --config vite.validation.config.ts --host 127.0.0.1"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",

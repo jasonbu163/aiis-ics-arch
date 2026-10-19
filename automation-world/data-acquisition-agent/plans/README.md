@@ -1,0 +1,15 @@
+# DAA Task Catalog
+
+[中文](README.zh-CN.md)
+
+DAA implementation tasks have one local bundle each. Only existing role documents are linked; Development and Verification records are created at their actual lifecycle gates.
+
+| Task | Status | PM scope | Development | Verification |
+| --- | --- | --- | --- | --- |
+| DAA-001 CU Layout and Existing-page Migration | owner_accepted | [spec.md](DAA-001-cu-layout-migration/spec.md); exact r1 scope approved on 2026-10-17 | [tasks.md](DAA-001-cu-layout-migration/tasks.md), section 7; latest exact Stage A handoff and focused rework self-check | [checklist.md](DAA-001-cu-layout-migration/checklist.md); new fresh Verification qa_passed, F-001/F-002 closed with prior failure history retained; Human Owner accepted r1 on 2026-10-17, section 7 |
+| DAA-002 Local Acquisition Loop | qa_passed | [spec.md](DAA-002-local-acquisition-loop/spec.md); r2 exact scope remains approved | [tasks.md](DAA-002-local-acquisition-loop/tasks.md); exact r2 implementation and document rework handed off, code/binary and 76 original samples retained | [checklist.md](DAA-002-local-acquisition-loop/checklist.md); independent QA4 passed AC01–AC20, F-001–F-004 closed and QA1–QA3 failures retained; Human Owner final acceptance pending |
+| DAA-003 SQLite-only Startup and YAML Migration | qa_passed | [spec.md](DAA-003-sqlite-only-startup/spec.md); exact r1 approved on 2026-10-19 | [tasks.md](DAA-003-sqlite-only-startup/tasks.md); exact implementation and QA1 frontend rework handed off, prior failures and limitations retained | [checklist.md](DAA-003-sqlite-only-startup/checklist.md); new independent QA2 passed, F-001/F-002 closed and QA1 failure history retained; Human Owner final acceptance pending |
+| DAA-004 Migration Notice and Minimal Source Import Validation | qa_passed | [spec.md](DAA-004-migration-notice-and-source-import-validation/spec.md); exact r1 approved on 2026-10-19 | [tasks.md](DAA-004-migration-notice-and-source-import-validation/tasks.md); final developer_handoff with native evidence and limitations retained | [checklist.md](DAA-004-migration-notice-and-source-import-validation/checklist.md); new independent AC01–AC08 passed; operator variation and observation limits retained; Human Owner final acceptance pending |
+| DAA-005 Multi-DB Import and Nested Offsets | owner_accepted | [spec.md](DAA-005-multi-db-source-import-and-nested-offsets/spec.md); exact r1 approved on 2026-10-19 | [tasks.md](DAA-005-multi-db-source-import-and-nested-offsets/tasks.md); exact r1 rework handoff and original failure evidence retained | [checklist.md](DAA-005-multi-db-source-import-and-nested-offsets/checklist.md); exact r1 accepted by Owner on 2026-10-19 after QA2 AC01–AC13; original failures retained; acceptance-only, no new tests |
+
+The [DAA PLAN](../PLAN.md) is the local dashboard; the [AW PLAN](../../PLAN.md) owns cross-project dependencies. Historical root bundles remain in place.

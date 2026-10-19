@@ -58,13 +58,13 @@ const props = defineProps({
 const tableData = computed(() => {
   const latest = props.data.latest || {}
   return [
-    { zone: t('monitor.temperatureCurve.zoneNames.heating1'), set: latest.z1TempSet || 0, act: latest.z1TempAct || 0 },
-    { zone: t('monitor.temperatureCurve.zoneNames.heating2'), set: latest.z2TempSet || 0, act: latest.z2TempAct || 0 },
-    { zone: t('monitor.temperatureCurve.zoneNames.heating3'), set: latest.z3TempSet || 0, act: latest.z3TempAct || 0 },
-    { zone: t('monitor.temperatureCurve.zoneNames.soaking1'), set: latest.z4TempSet || 0, act: latest.z4TempAct || 0 },
-    { zone: t('monitor.temperatureCurve.zoneNames.soaking2'), set: latest.z5TempSet || 0, act: latest.z5TempAct || 0 },
-    { zone: t('monitor.temperatureCurve.zoneNames.soaking3'), set: latest.z6TempSet || 0, act: latest.z6TempAct || 0 },
-  ].map(row => ({ ...row, deviation: (row.act - row.set).toFixed(1) }))
+    { zone: t('monitor.temperatureCurve.zoneNames.heating1'), set: latest.z1TempSet ?? '-', act: latest.z1TempAct ?? '-' },
+    { zone: t('monitor.temperatureCurve.zoneNames.heating2'), set: latest.z2TempSet ?? '-', act: latest.z2TempAct ?? '-' },
+    { zone: t('monitor.temperatureCurve.zoneNames.heating3'), set: latest.z3TempSet ?? '-', act: latest.z3TempAct ?? '-' },
+    { zone: t('monitor.temperatureCurve.zoneNames.soaking1'), set: latest.z4TempSet ?? '-', act: latest.z4TempAct ?? '-' },
+    { zone: t('monitor.temperatureCurve.zoneNames.soaking2'), set: latest.z5TempSet ?? '-', act: latest.z5TempAct ?? '-' },
+    { zone: t('monitor.temperatureCurve.zoneNames.soaking3'), set: latest.z6TempSet ?? '-', act: latest.z6TempAct ?? '-' },
+  ].map(row => ({ ...row, deviation: typeof row.act === 'number' && typeof row.set === 'number' ? (row.act - row.set).toFixed(1) : '-' }))
 })
 
 const initChart = () => {

@@ -13,6 +13,7 @@
 | CU-005 | owner_accepted | [r1](plans/CU-005-design-profile-editor/spec.md) | Human Owner 于 2026-10-16 验收 r1，保留编辑、本地草稿及公共 JSON/CSS 生成的原独立 QA 证据；本轮仅 CU 状态收尾，未追加测试。 |
 | CU-006 | owner_accepted | [r1](plans/CU-006-live-design-preview/spec.md) | Human Owner 于 2026-10-16 验收 r1，保留颜色控件与左右同屏预览的原独立 QA 证据；本轮仅 CU 状态收尾，未追加测试。 |
 | CU-007 | owner_accepted | [r1](plans/CU-007-apply-shared-design-profile/spec.md) | Human Owner 于 2026-10-16 确认公共样式应用后重启仍保留并接受 r1；保留原独立 QA，用户应用的卡内边距18保持不变。本轮仅状态收尾，未追加应用测试。 |
+| CU-008 | owner_accepted | [r1](plans/CU-008-grouped-sidebar-navigation/spec.md) | 仅 CU 二级导航，复用 frontend-js 设计；[Development 证据](plans/CU-008-grouped-sidebar-navigation/tasks.md)与[QA / Owner 终验](plans/CU-008-grouped-sidebar-navigation/checklist.md)已记录两处构建、导航/焦点/窄窗明暗定向检查及 Human Owner 于 2026-10-17 的验收。保留卡内边距18；仅状态收尾，未追加测试。DAA 接入另项处理。 |
 
 CU 当前包含轻量 Tauri 设计工作台与公共 UI 源码出口。旧采集执行链已移除，实际 Agent 接入由后续独立任务处理。
 

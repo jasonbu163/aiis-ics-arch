@@ -36,6 +36,23 @@ impl AgentConfig {
         }
     }
 
+    /// 只公开键名和发现来源；退役提示不消费或输出其值。
+    pub(crate) fn configured_keys(&self) -> std::collections::BTreeSet<String> {
+        self.values
+            .keys()
+            .cloned()
+            .chain(std::env::vars_os().filter_map(|(k, _)| k.into_string().ok()))
+            .collect()
+    }
+    pub(crate) fn locator(&self, key: &str, fallback: &str) -> (PathBuf, String) {
+        if let Some(v) = std::env::var(key).ok().filter(|v| !v.trim().is_empty()) {
+            return (resolve_runtime_path(v.trim()), "process".into());
+        }
+        if let Some(v) = self.values.get(key).filter(|v| !v.trim().is_empty()) {
+            return (resolve_runtime_path(v.trim()), "env_file".into());
+        }
+        (resolve_runtime_path(fallback), "application_default".into())
+    }
     pub(crate) fn value_or_default(&self, key: &str, default_value: &str) -> String {
         std::env::var(key)
             .ok()
@@ -142,9 +159,20 @@ fn load_env_file(path: &Path, values: &mut HashMap<String, String>) {
             continue;
         };
 
-        values
-            .entry(key.trim().to_string())
-            .or_insert_with(|| trim_env_value(value));
+        values.entry(key.trim().to_string()).or_insert_with(|| {
+            if [
+                "DAA_RUNTIME_MODE",
+                "DAA_PLC_READ_ALLOWED",
+                "DAA_PLC_CONFIG_PATH",
+                "DAA_PLC_SNAPSHOT_POLICY_PATH",
+            ]
+            .contains(&key.trim())
+            {
+                trim_env_value(value)
+            } else {
+                String::new()
+            }
+        });
     }
 }
 
@@ -202,3 +230,5 @@ mod isolation_tests {
         assert!(!config.bool_or_default("DAA_DATABASE_ENABLED", false));
     }
 }
+
+pub(crate) mod local_bootstrap;

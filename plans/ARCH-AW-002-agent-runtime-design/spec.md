@@ -1,19 +1,21 @@
 Task ID: ARCH-AW-002
-Revision: r2
+Revision: r3
 Status: owner_approved
 Owner Role: PM
 Allowed Writers: PM, Human Owner
-Handoff: Existing Human Owner authorization for the bounded documentation task recorded below; Development to revise the whitepaper first, then deliver the detailed design, without code changes
+Handoff: Human Owner approved the DS documentation addition recorded in section 9; Development to update only the two existing design documents for r3, preserving r2 QA history and making no code changes
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch
 Classification: independent_governance
-Capability: AW 白皮书原位修订与 CAF/CU/DAA/SMA/CA 详细原理设计文档
+Capability: AW 白皮书与详细运行原理设计文档维护，含 DS 设备模拟器设计增补
 Owner: Automation World
-Acceptance Chain Reference: Human Owner 文档范围批准 -> 本 r2 范围归档 -> Development 文档交付与 tasks.md -> fresh-context Verification checklist.md -> Human Owner 最终验收
+Acceptance Chain Reference: Human Owner DS 文档增补批准 -> 本 r3 范围归档 -> Development 文档交付与 tasks.md -> fresh-context Verification checklist.md -> Human Owner 最终验收
 Related Task: aiis-ics-arch::ARCH-AW-001; aiis-ics-arch::ARCH-MULTI-001; aiis-ics-arch::ARCH-BE-003; aiis-ics-arch::CA-CONFIG-001
 
 # AW 白皮书修订与详细原理设计文档
+
+**当前有效 Revision 为 r3。** 第 1–8 节保留 r2 的范围、批准与验收依据；第 9 节是 2026-10-18 获授权的 DS 小型增补，并覆盖本轮写入 allowlist 和执行范围。r2 已有 `qa_passed` 只作为原文档历史证据，不表示 r3 已验证或 Human Owner 已最终验收。
 
 ## 1. 目标与真实批准依据
 
@@ -181,3 +183,48 @@ Vue Flow 仅为画布候选，具体依赖未定；完整 Node-RED 作为 Node.j
 - `r2 owner_approved`，2026-10-15：依据第 1 节 Human Owner 实际原话，将同一 ARCH-AW-002 限定为白皮书先行、详细原理设计随后、允许索引/ROADMAP 同步的文档任务；纳入 CAF/CU 和本次三个 Agent 讨论。编号由 PM 赋予，不伪称用户原话包含 r2，不批准任何代码或现场动作。
 
 PM 仅写本 spec。`contract_only` 不构成平台 ACL 或强制路由；主会话、完整任务 bundle、当前工作树和 diff 审计仍是必要控制。
+
+## 9. r3：DS 设备模拟器文档增补（2026-10-18）
+
+### 9.1 批准依据与历史保护
+
+Human Owner 本轮实际原话：
+
+> 好的，就叫DS，先把设备模拟器的定位、多实例、DB10自动模拟和DB11写入保持这些设计补充到AW白皮书和详细原理设计文档里，后续Modbus和响应模拟作为扩展，先不改代码。
+
+这次实际批准限定为 DS 设计文档增补；`r3` 为 PM 赋予的 Revision 标识，不声称用户原话包含该编号。r2 的开发记录、2026-10-15 独立 QA `AC1–AC11 / qa_passed`、内容指纹及 final acceptance pending 原样保留为历史，不倒填最终验收，也不把原 verdict 移用给新范围。
+
+### 9.2 R10：两份正文必须覆盖的 DS 设计
+
+- **定位**：DS = Device Simulator，是开发、测试和联调工具，不是新的生产 Agent，也不是 DAA/SMA/CA 生产运行前提；模拟结果不证明真实 PLC 行为、安全联锁或物理动作完成。不复刻完整 PLC 执行系统。
+- **UI 与核心**：管理 UI 可采用 Tauri 并复用 DAA/CU 的适用页面或组件，属于设计复用方向；模拟核心语言不强制 Rust，协议库、运行形态和语言选择留待实施评审。本轮不创建工程或宣称库已支持服务端读写。
+- **多实例**：每个实例具有独立实例 ID、endpoint、内存、模拟规则和日志；实例停止、重置或客户端写入不影响其他实例。同机可用不同端口区分 endpoint，但须明确目标客户端/驱动支持自定义端口，不能声称所有 S7 客户端均可连接任意端口。
+- **区域角色**：DB10 自动模拟、DB11 写入保持是可配置的示例默认角色，不能硬编码为协议固有含义或仅支持两个 DB。自动模拟区按规则更新，其默认客户端权限为只读；内部规则写入与客户端写入的权限区别必须明确。
+- **写入保持**：写入保持区仅在实例初始化或显式重置时应用初始值一次，之后接收允许的客户端写入并保持当前值，不能被周期模拟器反复覆盖；客户端重连不应触发初始化。跨进程重启是否持久保持另列待决项。固定值是持续固定策略，初始值只是初始化值，两种配置和预期行为分开说明。
+- **统一内存写入**：模拟规则、客户端、UI 手动修改及重置统一进入实例内受控内存写入入口，检查实例、区域、地址范围、长度/类型与来源权限，并明确规则冲突处理；不让某种写入来源绕过边界。读写策略、权限及协议错误映射是设计要求，不是现有支持事实。
+- **扩展**：后续 Modbus 保留协议自己的地址空间与寻址模型，不能套用 S7 DB 编号；命令与响应联动/状态机等响应模拟列为后续扩展，本轮不设计成完整 PLC 程序仿真或同时实施多协议。
+
+白皮书简述 DS 定位、角色关系与演进边界；详细原理设计展开多实例、内存/规则/权限、自动模拟与写入保持的示例和待决项。两文以相同术语说明“设计”效力，保留文件名、既有来源和 2026-10-15/r2 修订记录，新增 2026-10-18/r3 修订说明，不重写已确认的 DAA/SMA/CA、SQLite 或 Flow Runtime 边界。
+
+### 9.3 r3 精确写入范围与交接
+
+本节替代第 4–5 节中 r2 的本轮执行范围：Development 只增补 `docs/AIIS_AW_Whitepaper_Roadmap_v0.4.md`、`docs/AIIS_AW_Runtime_Design.md` 与本任务 `tasks.md`；PM 只更新本 `spec.md`。developer_handoff 后，由 fresh-context Verification 更新本任务 `checklist.md`。各角色先保留 r2 历史，再添加本轮记录并按实际阶段更新自身元数据。
+
+主会话只可机械同步 `PLAN.md`、`PLAN.zh-CN.md`、`plans/README.md`、`plans/README.zh-CN.md` 的本任务 Revision、状态、证据和下一 gate。**本 r3 不修改 ROADMAP pair、docs README pair、其他设计/任务、代码、依赖、协议服务、配置或运行环境**，既有名称入口保持不变。后续 DS 实施需要另行精确范围批准。
+
+复用 `aiis` 与 `project-governance`；对技术选型不作强制定案，不代 Development/Verification 实施。交接顺序是先增补白皮书，再增补详细设计，记录文档检查与 diff，交新的 fresh-context 文档 QA，最后交 Human Owner 最终验收；不对 r2 重新实施或追加工程测试。
+
+### 9.4 r3 验收增量与修订记录
+
+| AC | r3 文档验收标准 |
+| --- | --- |
+| AC12 | 两份正文一致定义 DS=Device Simulator、开发联调工具、非 Agent/非生产前置；UI 可复用与核心语言待定清楚 |
+| AC13 | 多实例 ID/endpoint/内存/规则/日志隔离与生命周期边界齐全；同机不同端口受客户端能力约束 |
+| AC14 | DB10/DB11 是可配置示例角色；自动模拟区默认客户端只读，未假称已有库或实现支持 |
+| AC15 | 初始值仅初始化/显式重置一次，客户端写入保持且不被周期覆盖；重连、固定值和初始值语义区分，重启持久性待定 |
+| AC16 | 所有来源通过统一内存写入口和范围/类型/权限检查；Modbus 地址模型与响应模拟明确延期，不承诺完整 PLC 仿真 |
+| AC17 | 两文新增 r3 来源/日期且保留 r2 历史；新增链接/围栏/表格、scoped diff 与根四索引一致，无本轮范围外写入；r2 QA 不被冒充为 r3 结果 |
+
+必要检查限于 AC12–AC17 文档覆盖、两文术语对应、受影响链接/Markdown、写入范围与 r2 既有边界无回归；不运行设备、工程构建或实现测试。Development 和 Verification 分别记录真实命令、退出码、限制与 verdict。对现有协议库能力、端口支持和跨重启保存缺少证据时如实列待决，不以猜测补全。
+
+修订记录：`r3 owner_approved`，2026-10-18，依第 9.1 节用户原话追加 DS 文档范围与 AC12–AC17；未修改两份正文或其他角色文件。r1/r2 来源和 r2 QA 历史保留；本次范围批准不等于 r3 最终验收或 DS 实施授权。

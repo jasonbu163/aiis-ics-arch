@@ -1,12 +1,9 @@
-//! File Path: /automation-world/data-acquisition-agent/src-tauri/src/services/mod.rs
-//! Description: Control Agent service module registry
-//! Main Features:
-//!   - Groups authorization gate diagnostics
-//!   - Groups PLC diagnostics service orchestration
-//!   - Groups runtime snapshot assembly
-//!   - Keeps Tauri command adapters thin
-
-pub(crate) mod authorization_gate;
-pub(crate) mod plc_collection;
-pub(crate) mod plc_diagnostics;
-pub(crate) mod runtime_snapshot;
+//! DAA SQLite唯一执行图；旧YAML/直库运行模块保留源码但不注册。
+pub(crate) mod local_activation;
+pub(crate) mod local_configuration;
+pub(crate) mod local_queries;
+pub(crate) mod local_recovery;
+pub(crate) mod local_scheduler;
+pub(crate) mod local_storage;
+pub(crate) mod local_supervisor;
+pub(crate) mod local_yaml_migration;

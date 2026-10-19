@@ -21,8 +21,8 @@ export function useAgentLocale() {
 
   const localeSwitchLabel = computed(() => {
     return locale.value === 'zh-CN'
-      ? t('common.actions.switchToEnglishShort')
-      : t('common.actions.switchToChineseShort')
+      ? t('common.actions.switchToEnglish')
+      : t('common.actions.switchToChinese')
   })
 
   const toggleLocale = () => {
@@ -32,6 +32,7 @@ export function useAgentLocale() {
   }
 
   return {
+    appLocale: computed(() => locale.value as 'zh-CN' | 'en-US'),
     elementLocale,
     localeSwitchLabel,
     toggleLocale

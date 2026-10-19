@@ -9,6 +9,7 @@
 import request from '@/utils/request'
 import { callApi } from '@/api/mockMode'
 import * as mockApi from './mock'
+import { requireBusinessSource } from '@/utils/businessDataSource.mjs'
 
 export async function getEquipmentList(params) {
   return callApi(() => mockApi.getEquipmentList(params), () => request.get('/equipments', { params }), 'equipment.getEquipmentList')
@@ -55,7 +56,12 @@ export async function deleteMaintenanceLog(id) {
  * @param {Object} params - 查询参数
  * @returns {Promise<Object>} 传动监控数据
  */
-export async function getDriveData(params) {
+export async function getDriveData(params = {}) {
+  const selected = requireBusinessSource(params)
+  if (selected.dataSource === 'http') {
+    const data = await request.get('/equipment/drive-samples', { params: { equipmentId: selected.equipmentId, recordId: params.recordId, limit: params.limit } })
+    return data.dashboard
+  }
   return callApi(() => mockApi.getDriveData(params), () => request.get('/equipment/drive', { params }), 'equipment.getDriveData')
 }
 
@@ -64,7 +70,12 @@ export async function getDriveData(params) {
  * @param {Object} params - 查询参数
  * @returns {Promise<Object>} 温控监控数据
  */
-export async function getTemperatureControlData(params) {
+export async function getTemperatureControlData(params = {}) {
+  const selected = requireBusinessSource(params)
+  if (selected.dataSource === 'http') {
+    const data = await request.get('/equipment/temperature-sample-dashboard', { params: { equipmentId: selected.equipmentId, recordId: params.recordId, limit: params.limit } })
+    return data
+  }
   return callApi(() => mockApi.getTemperatureControlData(params), () => request.get('/equipment/temperature-control', { params }), 'equipment.getTemperatureControlData')
 }
 
@@ -73,7 +84,12 @@ export async function getTemperatureControlData(params) {
  * @param {Object} params - 查询参数
  * @returns {Promise<Object>} 生产参数数据
  */
-export async function getProductionParametersData(params) {
+export async function getProductionParametersData(params = {}) {
+  const selected = requireBusinessSource(params)
+  if (selected.dataSource === 'http') {
+    const data = await request.get('/equipment/production-parameter-samples', { params: { equipmentId: selected.equipmentId, recordId: params.recordId, limit: params.limit } })
+    return data.dashboard
+  }
   return callApi(
     () => mockApi.getProductionParametersData(params),
     () => request.get('/equipment/production-parameters', { params }),

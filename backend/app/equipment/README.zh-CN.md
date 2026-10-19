@@ -33,3 +33,15 @@ POST复用active User认证、admin角色及equipment-temperature-ingest；GET�
 旧GET /equipment/temperature-control继续读取equipment_temperature，包含原limit行为；旧前端数据源保持，不自动展示新HTTP样本。不union、不双写、不迁移旧行、不停writer、不伪造PLC provenance。前端/writer统一、保留期、聚合及现场采用另案。
 
 A源码/no-DB和offline DDL不能证明MySQL持久化、约束、精度或并发。[独立MySQL入口](../../tests_mysql/test_equipment_temperature.py)位于共享破坏性conftest之外，必须另批精确disposable目标与动作后才运行。数据库（含SQLite）、Docker、部署和真实设备分别gate。见根[spec](../../../plans/ARCH-BE-003-mapping-service-api-pilot/spec.md)、[Development](../../../plans/ARCH-BE-003-mapping-service-api-pilot/tasks.md)及本地[PLAN](PLAN.zh-CN.md)。
+
+
+## HTTP看板来源
+
+新增POST/GET `/equipment/drive-samples`与`/equipment/production-parameter-samples`使用独立HTTP域。
+传动20项至少提供1项；生产参数须精确coilNo及grade/entryTime/thickness/width/totalTime/weight/speed至少1项，processSteps不可写。
+同设备/业务键/来源毫秒只补原NULL指标，任何已有异值整次409。GET须equipmentId，可选正recordId及1–1000的limit（默认100），
+items与dashboard来自同一选中来源行；缺测不产生零偏差或normal状态。
+
+新增GET `/equipment/temperature-sample-dashboard`只读BE003完整样本，保持独立温控read/scope，原POST/GET不变。
+历史保留recordId与完整来源时间。设备三页在URL保存`dataSource=legacy|http`与`equipmentId`，默认旧表来源；外部上报须设备键，
+不fallback到旧表/mock。切换清空前来源数据并忽略晚响应；不能借PLC身份猜旧数据设备。TV/KM单位仍未定义，set仅为观测，不是控制命令。

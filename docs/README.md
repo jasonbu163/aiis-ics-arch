@@ -11,6 +11,9 @@
 | [Multi-Project Development Guide](multi-project-pm.md) | Durable boundaries and governance guidance for Core, reusable modules, and project repositories. |
 | [AW Whitepaper and Roadmap](AIIS_AW_Whitepaper_Roadmap_v0.4.md) | CAF/CU/DAA/SMA/CA roles, near-term local configuration and long-term direction; Chinese design text. |
 | [AW Runtime Principles and Design](AIIS_AW_Runtime_Design.md) | SQLite, S7 points, APIs, shared Flow Core and device execution/recovery design; no implementation claim. |
+| [DAA Detailed Design](AIIS_DAA_Detailed_Design.md) | Chinese target design for multi-PLC acquisition, dual SQLite, bounded latest-first replay and a maximum three-calendar-month Backend window; includes CU consumption, workspace/configuration pages, runtime data flows, DB-packet/batch examples and phased implementation; no implementation authorization. |
+| [SMA Detailed Design](AIIS_SMA_Detailed_Design.md) | Chinese target design for local form-based bindings, API materials/manual targets, definition checks, transformations, persistent progress/outbox and reliable business API delivery; no implementation authorization. |
+| [DS Detailed Design](AIIS_DS_Detailed_Design.md) | Chinese r2 target design for multi-instance S7 simulation, DB/UDT import and policies, configurable 16-session targets, bounded fair queues, one-shot hold maintenance and compatible in-process value retention; prototype/load gates remain; no implementation authorization. |
 
 
 ## Authority Boundaries

@@ -59,7 +59,7 @@ import '@aw-ui-styles'
 </AgentLayout>
 ```
 
-上述组件从 `@aw-ui` 导入。`AgentLayout` 接收 `theme: 'light' | 'dark'`、`sidebarHidden`，提供 sidebar/topbar/default slots。`AgentSidebar` 接收翻译后的 `{id,label,icon?}` 导航，发出 `select(id)`。`AgentTopbar` 接收 title/subtitle/sidebarLabel，发出 `toggle-sidebar`。`ConsoleCard` 支持 actions/tools/default/footer slots 与 compact。`ConsoleActionButton` 接收已翻译 label/title 或 slot、tone、small/large 尺寸，发出 click。`StatusCapsule` 接收 label 及 neutral/success/warning/danger 展示色调；这些是展示值，不是设备状态。
+上述组件从 `@aw-ui` 导入。`AgentLayout` 接收 `theme: 'light' | 'dark'`、`sidebarHidden`，提供 sidebar/topbar/default slots。`AgentSidebar` 接收下述翻译后的平铺/分组导航，叶项发出 `select(id)`。`AgentTopbar` 接收 title/subtitle/sidebarLabel，发出 `toggle-sidebar`。`ConsoleCard` 支持 actions/tools/default/footer slots 与 compact。`ConsoleActionButton` 接收已翻译 label/title 或 slot、tone、small/large 尺寸，发出 click。`StatusCapsule` 接收 label 及 neutral/success/warning/danger 展示色调；这些是展示值，不是设备状态。
 
 语言安装完全归消费端：创建或复用自己的 vue-i18n，加载对称 locale，再传入 `t(...)` 结果。主题通过 AgentLayout 显式安装；单独使用组件时用 `.aw-ui` 与 `data-aw-theme="light"` / `"dark"` 包裹，Element Plus 控件也应置于该作用域。body reset 和样例间距由消费端 CSS 管理。公共代码/样式不写 storage、不创建 app、不联系 CU；本示例刻意不持久化偏好。
 
@@ -68,6 +68,35 @@ import '@aw-ui-styles'
 6. 执行 `pnpm build`，停止 CU，然后 `pnpm preview`。编译后的 JS/CSS 全在自己的 dist，无 chunk 指向 CU dist 或开发端口。实际 Agent 接入、发布与业务配置属于另行批准工作。
 
 归属见 [CU README](../../README.zh-CN.md)，本基础任务由 [CU PLAN](../../PLAN.zh-CN.md) 索引。
+
+## 受控导航示例
+
+组件及 `NavigationItem`、`NavigationChildItem` 均从 `@aw-ui` 导入。宿主脚本中保持 id 与翻译分离：
+
+```ts
+const activeId = ref('panel-a')
+const items = computed<NavigationItem[]>(() => [
+  { id: 'overview', label: t('navigationSample.overview') },
+  { id: 'panels', label: t('navigationSample.group'), children: [
+    { id: 'panel-a', label: t('navigationSample.alpha') },
+    { id: 'panel-b', label: t('navigationSample.beta') }
+  ] }
+])
+// 平铺形态：去掉 panels 组，保留相同三个叶项。
+```
+
+```vue
+<AgentSidebar :items="items" :active-id="activeId" :brand="t('brand')"
+  @select="activeId = $event" />
+```
+
+`NavigationChildItem` 为 `{ id: string; label: string; icon?: Component }`；`NavigationItem` 仅增加可选 `children?: NavigationChildItem[]`，不是递归组。全树 id 非空且唯一。无 children 或空 children 都是可选顶层叶项；非空组仅开合、不发 select。空 items 保留品牌；未知/组 activeId 不选择叶项、不产生默认选择。每次叶项激活仅发一次，由宿主决定是否接受；初始化/外部更新不发选择。翻译、主题、active、页面及业务动作均由宿主拥有。
+
+初始子项 active、外部 active 变为子项或 active 子项改属其他组时展开父组；包含当前项的父组用标题强调色表示，当前叶项与焦点轮廓各自可辨。手动折叠当前组保留选择，多组可同时展开。label/主题变化不重置开合。展开状态只归 Sidebar 当前实例；AgentLayout 隐藏会卸载，恢复只重新展开 active 父组，不恢复其他组，也不抢焦点。公共层无导航存储、路由或权限机制。
+
+Tab/Shift+Tab 可进入和离开可见项；上下键遍历可见项，右键展开/进入组，左键回父组或折叠组，Enter/Space 单次选择或开合。折叠含焦点子树后焦点回父标题；折叠子项不可 Tab，外部更新不移动焦点。组 aria-expanded、叶项 aria-current、当前父组标题强调色及焦点轮廓支持明暗主题；窄窗分组内联展开并局部滚动，平铺仍换行。
+
+实际 App.vue 初始平铺，用单选切换分组，叶项 id 不变且表格/表单/弹窗保持挂载；显示当前选择/事件次数并提供外部 active 按钮。两模式均为纯内存“设计样例”。CU 壳层预览保留四平铺主导航并提供独立分组样例，完整合同见 [CU README](../../README.zh-CN.md#平铺与分组导航)。源码消费沿用上述 alias、CSS 顺序、dedupe 和依赖版本，自行构建，无 CU 在线前提。精确未提交字节由 CU-008 r1 [Development 源码 SHA 清单](../../plans/CU-008-grouped-sidebar-navigation/tasks.md) 及之后真实形成的独立 QA/Owner 依据固定；上下文 HEAD 不代表发布版本。DAA 自行固定并验证其接入。
 
 ## Element Plus 页面组合
 

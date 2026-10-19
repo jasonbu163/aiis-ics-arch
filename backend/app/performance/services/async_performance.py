@@ -28,6 +28,7 @@ from app.performance.schemas.performance_in import (
 from common.data_keys import PerformanceEffectiveWeightSource, PerformanceRecordSource
 from common.error_codes import ErrorCode
 from common.exceptions import BusinessException
+from app.performance.mapping_error_codes import MappingError
 
 
 class PerformanceService:
@@ -123,6 +124,55 @@ class PerformanceService:
             raise BusinessException(ErrorCode.PERFORMANCE_INVALID_TIME_RANGE) from exc
         
         return await PerformanceService.crud(db).save_performance(performance)
+
+    @staticmethod
+    async def update_mapping_weight(db, performance_id, equipment, payload, actor):
+        from app.performance.mapping_domain import decimal_number, observation_text
+        from app.performance.mapping_error_codes import MappingError
+        from app.performance.crud.async_production_observation import by_id
+        from app.performance.services.async_production_observation import apply_duration, rollback
+        from app.performance.services.async_mapping_query import record_out
+        from sqlalchemy import func
+        from sqlalchemy.exc import DBAPIError
+        from common.log import log_event
+        if not isinstance(payload, dict) or "weight" not in payload or set(payload) - {"weight", "remark"}:
+            raise BusinessException(MappingError.INVALID_SAMPLE, code=422)
+        try:
+            weight = decimal_number(payload["weight"], 10, 4, True)
+            reason = observation_text(payload["remark"], 500) if "remark" in payload else None
+        except ValueError:
+            raise BusinessException(MappingError.INVALID_SAMPLE, code=422) from None
+        committing = False
+        try:
+            row = await by_id(db, equipment, performance_id, lock=True)
+            if row is None:
+                raise BusinessException(MappingError.PARENT_NOT_FOUND, code=404)
+            row.weight = weight
+            row.manual_override_weight = weight
+            row.effective_weight = weight
+            row.effective_weight_source = "manual_override_weight"
+            row.manual_override_by_id = actor
+            row.manual_override_at = func.now()
+            row.manual_override_reason = reason or "manual_update"
+            if reason is not None:
+                row.remark = reason
+            apply_duration(row)
+            await db.flush()
+            await db.refresh(row)
+            result = record_out(row)
+            committing = True
+            await db.commit()
+        except BusinessException:
+            await rollback(db)
+            raise
+        except Exception as exc:
+            await rollback(db)
+            if committing or isinstance(exc, DBAPIError):
+                raise BusinessException(MappingError.UNAVAILABLE, code=503) from None
+            raise BusinessException(MappingError.INTERNAL_ERROR, code=500) from None
+        log_event("INFO", "performance_mapping_manual_weight", actor_user_id=actor, equipment_id=equipment,
+                  record_id=performance_id, outcome="updated")
+        return result
 
     @staticmethod
     async def delete(db: AsyncSession, performance_id: int) -> bool:

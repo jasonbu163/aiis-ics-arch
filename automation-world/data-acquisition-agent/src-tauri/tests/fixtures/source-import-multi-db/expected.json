@@ -1,0 +1,108 @@
+{
+  "origin": "Independent handwritten structure expectations, synthetic numbers only; no parser/layout output.",
+  "dbCount": 6,
+  "udtCount": 3,
+  "default": {
+    "enabled": false,
+    "groupId": null,
+    "address": null
+  },
+  "blocks": {
+    "Alpha": [
+      [
+        "ready",
+        "BOOL"
+      ],
+      [
+        "count",
+        "INT"
+      ]
+    ],
+    "Beta": [
+      [
+        "unit.running",
+        "BOOL"
+      ],
+      [
+        "unit.value",
+        "REAL"
+      ],
+      [
+        "bytes[3]",
+        "BYTE"
+      ],
+      [
+        "bytes[4]",
+        "BYTE"
+      ]
+    ],
+    "Gamma": [
+      [
+        "box.flag",
+        "BOOL"
+      ],
+      [
+        "box.code",
+        "BYTE"
+      ],
+      [
+        "tail",
+        "WORD"
+      ]
+    ],
+    "Delta": [
+      [
+        "frame.sample.running",
+        "BOOL"
+      ],
+      [
+        "frame.sample.value",
+        "REAL"
+      ],
+      [
+        "frame.status",
+        "WORD"
+      ]
+    ],
+    "Epsilon": [
+      [
+        "items[-1].code",
+        "BYTE"
+      ],
+      [
+        "items[-1].flag",
+        "BOOL"
+      ],
+      [
+        "items[0].code",
+        "BYTE"
+      ],
+      [
+        "items[0].flag",
+        "BOOL"
+      ]
+    ],
+    "Zeta": [
+      [
+        "part.code",
+        "USINT"
+      ],
+      [
+        "part.ready",
+        "BOOL"
+      ],
+      [
+        "label",
+        "STRING[8]"
+      ]
+    ]
+  },
+  "syntheticNumbers": {
+    "Alpha": 501,
+    "Beta": 502,
+    "Gamma": 503,
+    "Delta": 504,
+    "Epsilon": 505,
+    "Zeta": 506
+  }
+}

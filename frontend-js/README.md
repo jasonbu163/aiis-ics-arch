@@ -240,3 +240,18 @@ an Nginx runtime image. The runtime has no source or `node_modules` bind mount a
 ## Prebuilt dist deployment
 
 The root `docker-compose.prod.yml` uses pinned Nginx with this directory's existing `nginx.conf` and mounts `dist` read-only at `/usr/share/nginx/html/current`. Build with the checked-in pnpm lockfile before startup; a missing `dist/index.html` fails startup explicitly. Use `/api/v1` and disable mocks/demo accounts for the production build. The frontend Dockerfile remains available as a standalone image-build recipe; prod uses host-built dist. See [deployment preparation](../INITIALIZATION.md#single-host-deployment).
+
+
+## Business observation source selection
+
+Equipment's three dashboards, the performance list/process dialog and the monitor curve page persist
+`dataSource=legacy|http` and `equipmentId` in their URL. Default legacy preserves historical behavior and states
+that legacy rows have no business equipment identity. HTTP requires an explicit scoped key; invalid source,
+empty key, empty data, 403 and service failure never select another source or diagnostic mock. Switching clears
+previous data; request generations prevent late responses from repopulating the new selection. Missing values
+remain missing, including chart gaps and zero-valued real observations.
+
+HTTP performance edits use the existing PUT with explicit source/equipment and only weight plus optional reason;
+other fields are read-only. Collected weight never overrides manual weight (including 0). Effective duration is
+computed by the backend from manual times, reported times or external observation interval in that priority.
+Browser/API/database runtime proof remains a separately approved verification gate.

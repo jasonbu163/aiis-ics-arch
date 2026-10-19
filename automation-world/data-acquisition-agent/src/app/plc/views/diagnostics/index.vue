@@ -1,227 +1,79 @@
-<!--
-  File Path: /automation-world/data-acquisition-agent/src/app/plc/views/diagnostics/index.vue
-  Description: PLC diagnostics view for the Control Agent console
-  Main Features:
-    - Displays PLC point-contract and endpoint state
-    - Provides a targeted one-shot sample read without owning a polling loop
-    - Receives all Tauri command actions from the composition root
--->
+<!-- PLC配置：SQLite草稿与显式连接测试；迁入历史归配置栏详情，保存不连接。 -->
 <template>
-  <section id="plc" class="console-section">
-    <ConsoleCard :icon="Cpu" title-key="plc.runtimeUnits">
-      <PlcRuntimeUnitPicker
-        :format-plc-endpoint="formatPlcEndpoint"
-        :plc-collection-status-text="plcCollectionStatusText"
-        :plc-runtime-status-text="plcRuntimeStatusText"
-        :plc-sample-status-text="plcSampleStatusText"
-        :selected-plc-key="selectedPlcKey"
-        :status-tag-type="statusTagType"
-        :units="runtimeSnapshot.plcCollectionStatus.plcUnits"
-        @select="selectPlcKey"
-      />
+  <template v-if="local">
+    <ConsoleCard title-key="common.local.plcConfiguration" body-class="console-card__body--table">
+      <template #actions><ConsoleActionButton label-key="common.local.addPlc" tone="primary" :disabled="local.busy || !!plcEditor || local.plcs.length >= 4" @click="addLocalPlc" /></template>
+      <template #tools><div class="console-stack"><p class="daa-capability-note">{{ t('common.local.workflowHint') }}</p><div class="console-action-group"><ConsoleActionButton label-key="common.local.configurePoints" :disabled="!local.plcs.length || !!plcEditor || local.busy" @click="emit('open-points')" /></div><p class="daa-capability-note">{{ t('common.local.plcLimits') }}</p></div></template>
+      <ConsoleTableShell :current-page="1" :page-size="4" :total="local.plcs.length" :pagination="false">
+        <el-table :data="local.plcs" row-key="id" :empty-text="t(local.draft ? 'common.local.emptyPlcs' : 'common.feedback.notLoaded')" :tooltip-options="{ appendTo: '#daa-feedback' }">
+          <el-table-column prop="name" :label="t('common.local.name')" min-width="170" show-overflow-tooltip />
+          <el-table-column :label="t('common.local.endpoint')" min-width="220"><template #default="{ row }"><span>{{ row.host || '—' }}:{{ row.port }}</span><small class="muted-cell">{{ t('common.local.rack') }} {{ row.rack }} · {{ t('common.local.slot') }} {{ row.slot }}</small></template></el-table-column>
+          <el-table-column :label="t('common.local.enabled')" width="95"><template #default="{ row }"><el-tag :type="row.enabled ? 'success' : 'info'" effect="plain">{{ local.label(String(row.enabled)) }}</el-tag></template></el-table-column>
+          <el-table-column :label="t('common.local.state')" min-width="130"><template #default="{ row }"><el-tag :type="local.state(row.id)?.connected ? 'success' : 'info'" effect="plain">{{ local.snapshot ? local.label(local.state(row.id)?.phase ?? 'stopped') : '—' }}</el-tag></template></el-table-column>
+          <el-table-column :label="t('common.local.actions')" width="220"><template #default="{ row }"><div class="row-actions"><ConsoleActionButton size="small" label-key="common.local.edit" :disabled="local.busy || !!plcEditor" @click="editLocalPlc(row)" /><ConsoleActionButton size="small" label-key="common.local.testConnection" :disabled="local.busy || !local.view?.active" @click="local.control('daa_test_connection', [row.id])" /></div></template></el-table-column>
+        </el-table>
+      </ConsoleTableShell>
+      <p class="daa-capability-note">{{ t('common.local.testActiveHint') }}</p>
+      <Teleport to="#daa-feedback">
+        <ElDialog :model-value="!!plcEditor" :title="t('common.local.editPlc') + ' · ' + (plcEditor?.name ?? '')" :append-to-body="false" :close-on-click-modal="false" :close-on-press-escape="!local.busy" :show-close="!local.busy" width="min(780px, calc(100vw - 32px))" @update:model-value="$event || cancelLocalEdit()">
+          <div v-if="plcEditor" class="console-stack">
+            <el-alert v-if="local.error" :title="local.label(local.error)" type="error" :closable="false" show-icon />
+        <p class="daa-capability-note">{{ t('common.local.editHint') }}</p>
+        <ElForm :disabled="local.busy" label-position="top" class="daa-local-form-grid" @submit.prevent>
+          <ElFormItem :label="t('common.local.name')"><ElInput v-model="plcEditor.name" maxlength="100" /></ElFormItem>
+          <ElFormItem :label="t('common.local.enabled')"><ElSwitch v-model="plcEditor.enabled" /></ElFormItem>
+          <ElFormItem :label="t('common.local.host')"><ElInput v-model="plcEditor.host" /></ElFormItem>
+          <ElFormItem :label="t('common.local.port')"><ElInputNumber v-model="plcEditor.port" :min="1" :max="65535" :precision="0" controls-position="right" /></ElFormItem>
+          <ElFormItem :label="t('common.local.rack')"><ElInputNumber v-model="plcEditor.rack" :min="0" :max="7" :precision="0" controls-position="right" /></ElFormItem>
+          <ElFormItem :label="t('common.local.slot')"><ElInputNumber v-model="plcEditor.slot" :min="0" :max="31" :precision="0" controls-position="right" /></ElFormItem>
+        </ElForm>
+        <div class="console-action-group"><ConsoleActionButton label-key="common.local.cancelEdit" :disabled="local.busy" @click="cancelLocalEdit" /><ConsoleActionButton label-key="common.local.save" :disabled="local.busy" tone="primary" @click="applyLocalEdit" /><ConsoleActionButton v-if="!addedPlcId" label-key="common.local.remove" :disabled="local.busy" tone="danger" @click="removeLocalPlc(plcEditor.id)" /></div>
+        <details class="daa-details"><summary>{{ t('common.local.identityDetails') }}</summary><code>{{ plcEditor.id }}</code><p class="diagnostic-message">{{ t('common.local.plcTimeouts') }}</p></details>
+          </div>
+        </ElDialog>
+      </Teleport>
+      <details class="daa-details"><summary>{{ t('common.local.operations') }}</summary><div v-for="op in local.snapshot?.operations.filter(o => o.action === 'test')" :key="op.operationId"><p>{{ local.plcs.find(p => p.id === op.plcId)?.name }} · {{ local.label(op.phase) }} · {{ local.label(op.reason) }}</p><pre class="daa-local-raw">{{ op.result }}</pre></div></details>
     </ConsoleCard>
-
-    <el-row :gutter="16">
-      <el-col :lg="10" :md="24">
-        <ConsoleCard :icon="Cpu" title-key="plc.sectionTitle">
-          <template #actions>
-            <div class="console-action-group">
-              <ConsoleActionButton
-                :disabled="plcReadStartDisabled"
-                :icon="Refresh"
-                label-key="plc.controls.readOnce"
-                :loading="plcReadBusy"
-                :title="plcReadDisabledReason"
-                tone="success"
-                @click="readPlcSampleOnce"
-              />
-            </div>
-          </template>
-
-          <ConsoleInfoGrid>
-            <el-descriptions-item :label="t('plc.status')">
-              {{ plcContractStatusText }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('plc.path')">
-              {{ runtimeSnapshot.plcPointContract.configuredPath }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('plc.selectedPlc')">
-              {{ selectedPlcTargetLabel }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('plc.endpoint')">
-              {{ plcEndpointText }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('plc.endpointProbe')">
-              {{ plcEndpointProbeText }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('plc.sampleRead')">
-              {{ plcSampleReadText }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('plc.runtimeUnit')">
-              {{ selectedPlcRuntimeStatusText }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('plc.collectionUnit')">
-              {{ selectedPlcCollectionStatusText }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('plc.driver')">
-              {{ runtimeSnapshot.plcSampleRead.driver }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('plc.plcCount')">
-              {{ runtimeSnapshot.plcPointContract.plcCount }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('plc.groupCount')">
-              {{ runtimeSnapshot.plcPointContract.groupCount }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('plc.pointCount')">
-              {{ selectedPlcPointSummaryText }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('plc.readableWritable')">
-              {{ readableWritableText }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('plc.issues')">
-              {{ pointContractIssuesText }}
-            </el-descriptions-item>
-          </ConsoleInfoGrid>
-          <p v-if="selectedPlcKey === 'all'" class="diagnostic-message">
-            {{ t('plc.selectOneForSample') }}
-          </p>
-          <div class="tag-row tag-row-spaced">
-            <el-tag
-              v-for="item in runtimeSnapshot.plcPointContract.typeCounts"
-              :key="item.dataType"
-              effect="plain"
-            >
-              {{ item.dataType }}: {{ item.count }}
-            </el-tag>
-          </div>
-          <el-alert
-            v-if="plcReadMessage"
-            :closable="false"
-            :description="plcReadMessage"
-            :title="t('plc.controls.resultTitle')"
-            :type="plcReadMessageType"
-            class="collection-control-result"
-            show-icon
-          />
-        </ConsoleCard>
-      </el-col>
-
-      <el-col :lg="14" :md="24">
-        <ConsoleCard
-          body-class="console-card__body--table"
-          :icon="Grid"
-          title-key="plc.sampleValues"
-        >
-          <div class="tag-row">
-            <el-tag effect="plain">
-              {{ t('plc.selectedPlc') }}: {{ selectedPlcTargetLabel }}
-            </el-tag>
-          </div>
-          <ConsoleTableShell
-            v-model:current-page="samplePageModel"
-            v-model:page-size="samplePageSizeModel"
-            :page-sizes="tablePageSizeOptions"
-            :total="plcSampleValueCount"
-          >
-            <el-table
-              :data="pagedPlcSamples"
-              border
-              class="agent-table agent-table--sample-values"
-              empty-text="-"
-              size="small"
-              stripe
-            >
-              <el-table-column
-                prop="name"
-                :label="t('plc.pointName')"
-                min-width="180"
-                show-overflow-tooltip
-              />
-              <el-table-column prop="dataType" :label="t('plc.dataType')" width="110" />
-              <el-table-column
-                prop="value"
-                :label="t('plc.value')"
-                min-width="120"
-                show-overflow-tooltip
-              />
-              <el-table-column :label="t('plc.dbOffset')" min-width="150">
-                <template #default="{ row }">
-                  DB{{ row.dbNumber }} / {{ row.offset }} / {{ row.bit }}
-                </template>
-              </el-table-column>
-            </el-table>
-          </ConsoleTableShell>
-        </ConsoleCard>
-      </el-col>
-    </el-row>
-  </section>
+  </template>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Cpu, Grid, Refresh } from '@element-plus/icons-vue'
-import { useI18n } from 'vue-i18n'
-import ConsoleActionButton from '../../../../components/console/ConsoleActionButton.vue'
-import ConsoleCard from '../../../../components/console/ConsoleCard.vue'
-import ConsoleInfoGrid from '../../../../components/console/ConsoleInfoGrid.vue'
-import PlcRuntimeUnitPicker from '../../../../components/console/PlcRuntimeUnitPicker.vue'
-import ConsoleTableShell from '../../../../components/console/ConsoleTableShell.vue'
-import type {
-  PlcSampleValue,
-  PlcRuntimeUnitSnapshot,
-  RuntimeSnapshot
-} from '../../../../services/runtimeSnapshot'
+import { ref, watch, onUnmounted } from 'vue';
+import { ElDialog, ElForm, ElFormItem, ElInput, ElInputNumber, ElSwitch } from 'element-plus';
+import ConsoleTableShell from '../../../../components/console/ConsoleTableShell.vue';
+import type { Plc } from '../../../../services/localAcquisition';
 
-const props = defineProps<{
-  formatPlcEndpoint: (unit: PlcRuntimeUnitSnapshot) => string
-  pagedPlcSamples: PlcSampleValue[]
-  plcContractStatusText: string
-  plcEndpointProbeText: string
-  plcEndpointText: string
-  plcReadBusy: boolean
-  plcReadDisabledReason: string
-  plcReadMessage: string
-  plcReadMessageType: 'success' | 'warning' | 'error' | 'info'
-  plcReadStartDisabled: boolean
-  plcSampleValueCount: number
-  plcSampleReadText: string
-  plcCollectionStatusText: (status: string) => string
-  plcRuntimeStatusText: (status: string) => string
-  plcSampleStatusText: (status: string) => string
-  pointContractIssuesText: string
-  readableWritableText: string
-  runtimeSnapshot: RuntimeSnapshot
-  selectedPlcCollectionStatusText: string
-  selectedPlcKey: string
-  selectedPlcPointSummaryText: string
-  selectedPlcRuntimeStatusText: string
-  selectedPlcTargetLabel: string
-  samplePage: number
-  samplePageSize: number
-  readPlcSampleOnce: () => Promise<void>
-  statusTagType: (status: string) => string
-  tablePageSizeOptions: number[]
-}>()
+import { inject } from 'vue';
+import { localConsoleKey } from '../../../../console/composables/useLocalAcquisitionConsole';
+const local = inject(localConsoleKey);
+import { Cpu } from '@element-plus/icons-vue';
+import { useI18n } from 'vue-i18n';
+import ConsoleCard from '../../../../components/console/ConsoleCard.vue';
+import ConsoleActionButton from '../../../../components/console/ConsoleActionButton.vue';
+const emit = defineEmits<{ 'open-points': [] }>();
+const { t } = useI18n();
+async function removeLocalPlc(id: string) { if (await local?.confirmAction('common.local.removeConfirm')) { local?.removePlc(id); plcEditor.value = null; addedPlcId.value = ''; } }
 
-const emit = defineEmits<{
-  'update:sample-page': [page: number]
-  'update:sample-page-size': [pageSize: number]
-  'update:selected-plc-key': [value: string]
-}>()
-
-const { t } = useI18n()
-
-const samplePageModel = computed({
-  get: () => props.samplePage,
-  set: (page: number) => emit('update:sample-page', page)
-})
-
-const samplePageSizeModel = computed({
-  get: () => props.samplePageSize,
-  set: (pageSize: number) => emit('update:sample-page-size', pageSize)
-})
-
-function selectPlcKey(value: string) {
-  emit('update:selected-plc-key', value)
+const plcEditor = ref<Plc | null>(null);
+const addedPlcId = ref('');
+function editLocalPlc(p: Plc) { if (local) local.selectedPlc = p.id; plcEditor.value = JSON.parse(JSON.stringify(p)); }
+function addLocalPlc() {
+    if (!local?.draft || local.plcs.length >= 4) return;
+    const id = crypto.randomUUID(); addedPlcId.value = id;
+    plcEditor.value = { id, name: t('common.local.newPlc'), enabled: false, host: '', port: 102, rack: 0, slot: 1, connectTimeoutMs: 1000, ioTimeoutMs: 500, deadlineMs: 5000 };
 }
+function cancelLocalEdit() { plcEditor.value = null; addedPlcId.value = ''; }
+async function applyLocalEdit() {
+    const owner = local, edit = plcEditor.value;
+    if (!owner?.draft || !edit) return;
+    const candidate = JSON.parse(JSON.stringify(owner.draft));
+    const index = candidate.plcs.findIndex((p: Plc) => p.id === edit.id);
+    if (index < 0) candidate.plcs.push(JSON.parse(JSON.stringify(edit)));
+    else candidate.plcs[index] = JSON.parse(JSON.stringify(edit));
+    if (await owner.saveCandidate(candidate)) { owner.selectedPlc = edit.id; plcEditor.value = null; addedPlcId.value = ''; }
+}
+
+watch(plcEditor, v => { if (local) local.editing = !!v; });
+watch(() => local?.view, () => { plcEditor.value = null; addedPlcId.value = ''; });
+onUnmounted(() => { if (local) local.editing = false; });
 </script>

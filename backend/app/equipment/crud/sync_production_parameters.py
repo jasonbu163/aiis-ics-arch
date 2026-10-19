@@ -24,6 +24,7 @@ def get_by_business_key_for_update(
     result = db.execute(
         select(EquipmentProductionParameters)
         .where(
+            EquipmentProductionParameters.equipment_id.is_(None),
             EquipmentProductionParameters.coil_no == coil_no,
             EquipmentProductionParameters.timestamp == timestamp,
         )

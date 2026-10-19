@@ -57,5 +57,14 @@
     "speed": "m/min",
     "hour": "小时",
     "second": "秒"
+  },
+  "businessDataSource": {
+    "label": "数据来源",
+    "legacy": "本地映射",
+    "http": "外部上报",
+    "equipment": "业务设备编号",
+    "invalid": "数据来源无效，请选择有效来源。",
+    "legacyNotice": "旧数据未标识业务设备。",
+    "chooseEquipment": "请选择业务设备编号。"
   }
 }

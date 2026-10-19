@@ -69,6 +69,35 @@ Language installation is entirely consumer-owned: create or reuse your vue-i18n 
 
 The [CU README](../../README.md) defines ownership and [CU PLAN](../../PLAN.md) indexes this foundation.
 
+## Controlled navigation example
+
+Import `NavigationItem` and `NavigationChildItem` with the components from `@aw-ui`. In the host's script, keep IDs independent of translations:
+
+```ts
+const activeId = ref('panel-a')
+const items = computed<NavigationItem[]>(() => [
+  { id: 'overview', label: t('navigationSample.overview') },
+  { id: 'panels', label: t('navigationSample.group'), children: [
+    { id: 'panel-a', label: t('navigationSample.alpha') },
+    { id: 'panel-b', label: t('navigationSample.beta') }
+  ] }
+])
+// Flat form: the same three leaves without the panels group.
+```
+
+```vue
+<AgentSidebar :items="items" :active-id="activeId" :brand="t('brand')"
+  @select="activeId = $event" />
+```
+
+`NavigationChildItem` is `{ id: string; label: string; icon?: Component }`; `NavigationItem` extends it with optional `children?: NavigationChildItem[]`, never recursive groups. All IDs are non-empty and globally unique. No children or empty children means a selectable top-level leaf; a non-empty group toggles only and emits no select. Empty items show the brand; unknown/group active IDs do not select a leaf or generate a fallback. Each leaf activation emits once, and the host decides whether to accept it; initialization/external updates emit nothing. The host owns translations, theme, active state, pages and any business action.
+
+Initial child active, external active changes to a child, or an active child's move between groups opens its parent. A parent with the current child has active title text; the selected leaf and focus outline remain distinct. Manually closing the current group retains selection; multiple groups may stay open. Labels/theme do not reset open groups. Open state lives only in each Sidebar instance; hiding via AgentLayout unmounts it, and restoring reopens the active parent without restoring other groups or taking focus. There is no navigation storage, router or permission mechanism.
+
+Tab/Shift+Tab enter/leave visible menu items. Up/Down move between visible items, Right expands/enters a group, Left returns to its parent or collapses a group, and Enter/Space select once or toggle. Collapsing a subtree containing focus returns focus to the parent; closed children are not tabbable. External updates do not move focus. Group aria-expanded, leaf aria-current, active-parent text and focus outline work in both themes. Narrow grouped menus stay inline with local scrolling; flat menus wrap.
+
+The actual App.vue starts flat and uses a radio to switch grouping without changing leaf IDs or remounting its table/form/dialog. It shows current selection/event count and an external active button. Both modes are Design samples held only in memory. CU's Shell preview retains its four flat primary items and shows a separate grouped sample. See the [CU navigation contract](../../README.md#flat-and-grouped-navigation). Source consumption keeps the aliases, CSS order, dedupe and dependency versions above; build your own output, with no CU runtime prerequisite. For exact uncommitted bytes use the CU-008 r1 [Development source SHA manifest](../../plans/CU-008-grouped-sidebar-navigation/tasks.md) and the subsequent independent QA/Owner evidence when formed; context HEAD is not a published source version. DAA pins and verifies its own integration separately.
+
 ## Element Plus page composition
 
 CU's private **Page samples** page demonstrates a table, validated form, edit dialog and manually selected normal/loading/empty/failed states. Data and retry/submit/edit feedback exist only in memory; reload resets samples. The eight public components and their APIs stay unchanged. The independent consumer composes a smaller table/form/dialog directly from its own Element Plus dependency, with its own locale and state; it never imports PageSamples or workbench files.

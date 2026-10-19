@@ -16,6 +16,7 @@
           {{ $t('common.refresh') }}
         </ActionButton>
       </template>
+      <BusinessDataSourceSelect v-model="sourceSelection" />
 
       <section class="production-parameters-summary-section">
         <div class="production-parameters-summary-panel">
@@ -67,7 +68,11 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import BusinessDataSourceSelect from '@/components/BusinessDataSourceSelect.vue'
+import { parseBusinessDataSource, businessDataSourceQuery, createRequestGeneration } from '@/utils/businessDataSource.mjs'
+
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
@@ -76,33 +81,30 @@ import BaseCard from '@/components/common/BaseCard.vue'
 import { getProductionParametersData } from '@/app/equipment/api'
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const sourceSelection = computed({
+  get: () => parseBusinessDataSource(route.query),
+  set: value => router.replace({ query: businessDataSourceQuery(route.query, value) })
+})
+const requestGeneration = createRequestGeneration()
+
 
 const UPDATE_INTERVAL = 5000
 const loading = ref(false)
 const updateTime = ref(new Date().toLocaleString())
 let updateTimer = null
 
-const productionParameters = ref({
-  coilNo: '-',
-  grade: '-',
-  status: 'producing',
-  lastUpdate: '',
-  thickness: 0,
-  width: 0,
-  entryTime: '-',
-  totalTime: 0,
-  weight: 0,
-  speed: 0
-})
+const productionParameters = ref({})
 
 const processSteps = ref([])
 
 const statusText = computed(() => {
   if (productionParameters.value.status === 'producing') return t('equipment.productionParams.producing')
-  return t(`equipment.productionParams.status.${productionParameters.value.status}`)
+  return productionParameters.value.status ? t(`equipment.productionParams.status.${productionParameters.value.status}`) : '-'
 })
 const statusType = computed(() => productionParameters.value.status === 'producing' ? 'success' : getStepStatusType(productionParameters.value.status))
-const lastUpdateText = computed(() => productionParameters.value.lastUpdate || updateTime.value)
+const lastUpdateText = computed(() => productionParameters.value.lastUpdate || (sourceSelection.value.dataSource === 'http' ? '-' : updateTime.value))
 
 const summaryItems = computed(() => [
   { label: t('equipment.productionParams.coilNo'), value: productionParameters.value.coilNo || '-' },
@@ -115,7 +117,7 @@ const summaryItems = computed(() => [
   { label: t('equipment.productionParams.totalTime'), value: `${formatNumber(productionParameters.value.totalTime)} ${t('common.unit.min')}` }
 ])
 
-const formatNumber = (value) => Number(value || 0).toLocaleString(undefined, {
+const formatNumber = (value) => value === null || value === undefined ? '-' : Number(value).toLocaleString(undefined, {
   maximumFractionDigits: 2
 })
 
@@ -143,23 +145,39 @@ const handleRefresh = () => {
 }
 
 const loadData = async () => {
+  const generation = requestGeneration.begin()
+  if (!sourceSelection.value.ready) { clearSourceData(); loading.value = false; return }
   loading.value = true
   try {
-    const data = await getProductionParametersData()
+    const data = await getProductionParametersData(sourceSelection.value)
+    if (!requestGeneration.isCurrent(generation)) return
     if (data) {
       productionParameters.value = data.productionParameters || data
       processSteps.value = data.processSteps || []
     }
   } catch (error) {
+    if (!requestGeneration.isCurrent(generation)) return
+    clearSourceData()
     console.error('Failed to load production parameters data:', error)
     ElMessage.error(t('common.loadFailed'))
   } finally {
-    loading.value = false
+    if (requestGeneration.isCurrent(generation)) loading.value = false
     updateTime.value = new Date().toLocaleString()
   }
 }
 
+const clearSourceData = () => {
+  productionParameters.value = {}
+  processSteps.value = []
+}
+watch(() => [route.query.dataSource, route.query.equipmentId], () => {
+  requestGeneration.invalidate()
+  clearSourceData()
+  loadData()
+})
+
 onMounted(() => {
+  clearSourceData()
   loadData()
   updateTimer = setInterval(loadData, UPDATE_INTERVAL)
 })

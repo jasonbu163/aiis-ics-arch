@@ -1,0 +1,32 @@
+﻿TYPE "Driver_Read_HMI_DW"
+VERSION : 0.1
+   STRUCT
+      ActRPM : Real;   // 实际转速
+      ActCurr_A : Real;   // 实际电流A
+      ActCurr_P : Real;   // 实际电流%
+      ActTorq : Real;   // 实际转矩%
+   END_STRUCT;
+
+END_TYPE
+
+TYPE "Driver_Read_HMI_W"
+VERSION : 0.1
+   STRUCT
+      ActTemp : Int;   // 实际温度
+      Fault_Code_S : Word;   // 故障代码子
+      Fault_Code_M : Word;   // 故障代码主
+   END_STRUCT;
+
+END_TYPE
+
+TYPE "Driver_Write_HMI"
+VERSION : 0.1
+   STRUCT
+      GR : Real;   // 速比
+      Speed_DM : Real;   // 给定速度
+      Dia : Real;   // 最大直径
+      MaxRPM : Real;   // 最大转速rpm
+   END_STRUCT;
+
+END_TYPE
+

@@ -53,9 +53,11 @@
     "manual_historical": "Manual / Historical"
   },
   "durationSourceMap": {
-    "manual_time": "Manual Start / End Time",
+    "manual_time": "Manual production times",
     "plc_observed": "PLC Observed Time",
-    "unavailable": "Unavailable"
+    "unavailable": "Unavailable",
+    "reported_time": "Reported production times",
+    "external_observed": "External observation interval"
   },
   "durationUnits": {
     "second": "s"
@@ -65,7 +67,8 @@
     "split_generated": "Split Generated",
     "merge_generated": "Merge Generated",
     "unplanned_plc": "Unplanned PLC",
-    "frontend_mock": "Frontend Mock"
+    "frontend_mock": "Frontend Mock",
+    "external_observation": "External observation"
   },
   "planLink": {
     "title": "Plan Linkage",

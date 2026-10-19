@@ -22,6 +22,7 @@ def get_parent_by_device_and_coil_for_update(
     result = db.execute(
         select(Performance)
         .where(
+            Performance.equipment_id.is_(None),
             Performance.device_id == device_id,
             Performance.coil_no == coil_no,
         )

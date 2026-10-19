@@ -3,7 +3,11 @@
     "target": "ES2020",
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "allowJs": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -14,8 +18,32 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "@aw-ui": [
+        "../console-ui/src/ui/index.ts"
+      ],
+      "vue": [
+        "./node_modules/vue"
+      ],
+      "element-plus": [
+        "./node_modules/element-plus"
+      ],
+      "@element-plus/icons-vue": [
+        "./node_modules/@element-plus/icons-vue"
+      ]
+    }
   },
-  "include": ["src/**/*.ts", "src/**/*.vue"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "../console-ui/src/ui/**/*.ts",
+    "../console-ui/src/ui/**/*.vue"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }

@@ -4,15 +4,15 @@
  * Main Features:
  *   - Declares the local overview section id and title key
  *   - Binds the section to its Vue view component
- *   - Keeps navigation metadata local to the CA UI
+ *   - Keeps navigation metadata local to the DAA UI
  */
 import { DataBoard } from '@element-plus/icons-vue'
 import RuntimeOverviewView from './views/overview/index.vue'
 import type { ConsoleSectionManifest } from '../../console/types'
 
 export const runtimeSectionManifest = {
-  id: 'overview',
-  titleKey: 'navigation.overview',
+  id: 'workbench',
+  titleKey: 'navigation.workbench',
   icon: DataBoard,
   order: 10,
   component: RuntimeOverviewView

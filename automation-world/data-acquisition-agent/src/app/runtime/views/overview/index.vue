@@ -1,70 +1,23 @@
-<!--
-  File Path: /automation-world/data-acquisition-agent/src/app/runtime/views/overview/index.vue
-  Description: Runtime overview view for the Control Agent console
-  Main Features:
-    - Shows runtime identity, counts and readiness signals
-    - Displays the runtime snapshot descriptions
-    - Receives all runtime data from the console composition root
--->
+<!-- DAA本地SQLite视图：唯一local owner提供状态/动作，导航不驱动PLC或health。 -->
 <template>
-  <section id="overview" class="console-section">
-    <MetricGrid
-      accessibility-label-key="runtime.overview.ariaLabel"
-      featured-label-key="runtime.overview.runtime"
-      :featured-value="runtimeSnapshot.agentName"
-      :featured-detail="`${runtimeSnapshot.version} · ${runtimeSnapshot.accessMode}`"
-      :items="summaryItems"
-    />
+  <template v-if="local">
 
-    <ReadinessGrid accessibility-label-key="runtime.operations.ariaLabel" :items="operationItems" />
-
-    <el-row :gutter="16">
-      <el-col :lg="24" :md="24">
-        <ConsoleCard :icon="Monitor" title-key="runtime.sectionTitle">
-          <ConsoleInfoGrid>
-            <el-descriptions-item :label="t('runtime.facts.agent')">
-              {{ runtimeSnapshot.agentName }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('runtime.facts.backend')">
-              {{ runtimeSnapshot.backendBaseUrl }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('runtime.facts.accessMode')">
-              {{ runtimeSnapshot.accessMode }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('runtime.facts.database')">
-              {{ databaseConfigText }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('runtime.facts.generatedAt')">
-              {{ generatedAtText }}
-            </el-descriptions-item>
-            <el-descriptions-item :label="t('runtime.facts.localHeartbeat')">
-              {{ localHeartbeatText }}
-            </el-descriptions-item>
-          </ConsoleInfoGrid>
-        </ConsoleCard>
-      </el-col>
-    </el-row>
-  </section>
+    <div class="daa-local-metrics">
+      <ConsoleMetricCard label-key="common.local.connectedCount" :value="local.snapshot ? String(local.snapshot.plcs.filter(p => p.connected).length) + ' / ' + String(local.plcs.length) : '—'" />
+      <ConsoleMetricCard label-key="common.local.collectionCount" :value="local.snapshot ? String(local.snapshot.plcs.filter(p => p.phase === 'collecting').length) : '—'" />
+      <ConsoleMetricCard label-key="common.local.pendingSummary" :value="local.snapshot ? String(local.snapshot.capacity.pendingCount) : '—'" />
+      <ConsoleMetricCard label-key="common.local.capacity" :value="local.label(local.snapshot?.capacity.state)" />
+    </div>
+  </template>
 </template>
 
 <script setup lang="ts">
-import { Monitor } from '@element-plus/icons-vue'
-import { useI18n } from 'vue-i18n'
-import MetricGrid from '../../../../components/common/MetricGrid.vue'
-import ConsoleCard from '../../../../components/console/ConsoleCard.vue'
-import ConsoleInfoGrid from '../../../../components/console/ConsoleInfoGrid.vue'
-import ReadinessGrid from '../../../../components/console/ReadinessGrid.vue'
-import type { MetricItem, OperationItem } from '../../../../console/types'
-import type { RuntimeSnapshot } from '../../../../services/runtimeSnapshot'
+import ConsoleMetricCard from '../../../../components/console/ConsoleMetricCard.vue';
 
-defineProps<{
-  databaseConfigText: string
-  generatedAtText: string
-  localHeartbeatText: string
-  operationItems: OperationItem[]
-  runtimeSnapshot: RuntimeSnapshot
-  summaryItems: MetricItem[]
-}>()
+import { inject } from 'vue';
+import { localConsoleKey } from '../../../../console/composables/useLocalAcquisitionConsole';
+const local = inject(localConsoleKey);
+import { Monitor } from '@element-plus/icons-vue';
+import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n()
 </script>

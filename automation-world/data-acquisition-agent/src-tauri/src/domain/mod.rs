@@ -1,12 +1,7 @@
-//! File Path: /automation-world/data-acquisition-agent/src-tauri/src/domain/mod.rs
-//! Description: Domain model module registry for the Control Agent runtime
-//! Main Features:
-//!   - Groups authorization gate domain structures
-//!   - Groups runtime snapshot domain structures
-//!   - Groups PLC diagnostics domain structures
+//! DAA SQLite唯一执行图；旧YAML/直库运行模块保留源码但不注册。
+pub(crate) mod local_configuration;
+pub(crate) mod local_runtime;
+pub(crate) mod local_sample;
+pub(crate) mod yaml_migration;
 
-pub(crate) mod authorization;
-pub(crate) mod headless_runtime;
-pub(crate) mod plc;
-pub(crate) mod plc_collection;
-pub(crate) mod runtime;
+pub(crate) mod source_import;

@@ -2,5 +2,10 @@
   "overview": "Overview",
   "collection": "Collection status",
   "plc": "PLC points",
-  "gates": "Authorization gates"
+  "gates": "Authorization gates",
+  "workbench": "Workbench",
+  "configuration": "Configuration",
+  "plcConfig": "PLC configuration",
+  "pointsGroups": "Points and collection groups",
+  "reportingStorage": "Reporting and storage"
 }

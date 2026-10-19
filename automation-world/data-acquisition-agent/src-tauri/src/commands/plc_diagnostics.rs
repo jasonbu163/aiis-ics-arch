@@ -8,11 +8,17 @@ use crate::domain::plc::PlcSampleReadSnapshot;
 use crate::services::plc_diagnostics;
 
 #[tauri::command]
-pub(crate) fn read_plc_samples_once() -> PlcSampleReadSnapshot {
-    plc_diagnostics::read_plc_samples_once_from_console()
+pub(crate) fn read_plc_samples_once() -> Result<PlcSampleReadSnapshot, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(plc_diagnostics::read_plc_samples_once_from_console())
 }
 
 #[tauri::command]
-pub(crate) fn read_plc_samples_once_for_plc(plc_key: String) -> PlcSampleReadSnapshot {
-    plc_diagnostics::read_plc_samples_once_for_plc_from_console(plc_key)
+pub(crate) fn read_plc_samples_once_for_plc(
+    plc_key: String,
+) -> Result<PlcSampleReadSnapshot, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(plc_diagnostics::read_plc_samples_once_for_plc_from_console(
+        plc_key,
+    ))
 }

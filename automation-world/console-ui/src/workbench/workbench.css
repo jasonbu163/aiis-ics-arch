@@ -44,3 +44,11 @@ html, body, #app { margin: 0; min-width: 320px; min-height: 100vh; }
   .design-profile-preview { position: static; max-height: none; }
   .design-profile-preview-content { overflow: visible; }
 }
+
+/* 壳预览中的有限导航样例；不改变工作台整体布局或公共间距方案。 */
+.workbench-navigation-sample { margin-top: 24px; }
+.workbench-navigation-sample__body { display: grid; grid-template-columns: minmax(180px, 240px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.workbench-navigation-sample__body > .agent-sidebar-shell { min-width: 0; border: 1px solid var(--agent-border); border-radius: var(--agent-control-radius); }
+.workbench-navigation-sample__status { min-width: 0; overflow-wrap: anywhere; }
+.workbench-navigation-sample__status .console-action-button { max-width: 100%; height: auto; min-height: 40px; white-space: normal; }
+@media (max-width: 600px) { .workbench-navigation-sample__body { grid-template-columns: minmax(0, 1fr); } }

@@ -11,3 +11,5 @@ __all__ = ["EquipmentDrive", "EquipmentProductionParameters", "EquipmentTemperat
 from app.equipment.models.temperature_sample import EquipmentTemperatureSample, EquipmentTemperatureSampleReceipt
 
 __all__ += ["EquipmentTemperatureSample", "EquipmentTemperatureSampleReceipt"]
+
+from app.equipment.models.mapping_ingest import EquipmentMappingReceipt

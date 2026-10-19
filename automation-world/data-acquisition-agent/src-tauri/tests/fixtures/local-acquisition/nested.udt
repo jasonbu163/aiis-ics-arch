@@ -1,0 +1,7 @@
+TYPE "Sensor"
+VERSION : 0.1
+STRUCT
+ value : Real; // source precision
+ status : Bool;
+END_STRUCT;
+END_TYPE

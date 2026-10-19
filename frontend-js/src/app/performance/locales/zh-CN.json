@@ -49,9 +49,11 @@
     "manual_historical": "手工/历史"
   },
   "durationSourceMap": {
-    "manual_time": "人工开始/结束时间",
+    "manual_time": "人工作业时间",
     "plc_observed": "PLC 观察时间",
-    "unavailable": "不可用"
+    "unavailable": "不可用",
+    "reported_time": "来源报告时间",
+    "external_observed": "外部观察区间"
   },
   "durationUnits": {
     "second": "秒"
@@ -61,7 +63,8 @@
     "split_generated": "分卷生成",
     "merge_generated": "合卷生成",
     "unplanned_plc": "PLC 未计划记录",
-    "frontend_mock": "前端 mock"
+    "frontend_mock": "前端 mock",
+    "external_observation": "外部观察"
   },
   "planLink": {
     "title": "计划关联",

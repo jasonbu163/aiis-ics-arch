@@ -9,6 +9,7 @@ use crate::domain::runtime::RuntimeSnapshot;
 use crate::services::runtime_snapshot::build_runtime_snapshot;
 
 #[tauri::command]
-pub(crate) fn get_runtime_snapshot() -> RuntimeSnapshot {
-    build_runtime_snapshot()
+pub(crate) fn get_runtime_snapshot() -> Result<RuntimeSnapshot, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(build_runtime_snapshot())
 }

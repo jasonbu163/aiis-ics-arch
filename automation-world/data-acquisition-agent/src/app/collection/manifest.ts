@@ -7,14 +7,14 @@
  *   - Keeps collection UI routing independent from the business frontend
  */
 import { Operation } from '@element-plus/icons-vue'
-import CollectionStatusView from './views/status/index.vue'
+import CollectionStatusView from './views/storage/index.vue'
 import type { ConsoleSectionManifest } from '../../console/types'
 
 export const collectionSectionManifest = {
-  id: 'collection',
-  titleKey: 'navigation.collection',
+  id: 'reporting-storage',
+  titleKey: 'navigation.reportingStorage',
   icon: Operation,
-  order: 20,
+  order: 40,
   component: CollectionStatusView
 } satisfies ConsoleSectionManifest
 

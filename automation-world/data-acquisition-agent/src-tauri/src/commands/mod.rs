@@ -1,13 +1,4 @@
-//! File Path: /automation-world/data-acquisition-agent/src-tauri/src/commands/mod.rs
-//! Description: Tauri command adapter module registry
-//! Main Features:
-//!   - Groups thin Tauri command handlers
-//!   - Keeps command handlers separate from runtime services
-//!   - Exposes read-only runtime snapshot commands
-//!   - Exposes gated PLC collection lifecycle controls
-//!   - Exposes operator-triggered PLC diagnostic read controls
-
-pub(crate) mod headless_runtime;
-pub(crate) mod plc_collection;
-pub(crate) mod plc_diagnostics;
-pub(crate) mod runtime_snapshot;
+//! DAA SQLite唯一执行图；旧YAML/直库运行模块保留源码但不注册。
+pub(crate) mod local_acquisition;
+#[cfg(feature = "local-validation")]
+pub(crate) mod local_validation;

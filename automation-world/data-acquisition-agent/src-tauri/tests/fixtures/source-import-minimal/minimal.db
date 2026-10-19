@@ -1,0 +1,9 @@
+// DAA-004 controlled import source: DB number 21 is supplied explicitly in the UI.
+DATA_BLOCK "MinimalImport"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+VAR
+ payload : "MinimalPayload";
+END_VAR
+BEGIN
+END_DATA_BLOCK

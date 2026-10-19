@@ -1,52 +1,37 @@
-<!--
-  File Path: /automation-world/data-acquisition-agent/src/components/shell/AgentSidebar.vue
-  Description: Sidebar shell for the Control Agent operations console
-  Main Features:
-    - Renders CA-local section manifests
-    - Displays runtime identity only in the resident sidebar footer
-    - Avoids business frontend shell dependencies
--->
+<!-- DAA 导航薄适配：公共 Sidebar 管理分组/焦点，宿主拥有翻译与叶子状态。 -->
 <template>
-  <div class="agent-sidebar-shell">
-    <el-menu :default-active="activeSection" class="agent-menu" @select="handleSelect">
-      <el-menu-item v-for="section in sections" :key="section.id" :index="section.id">
-        <el-icon>
-          <component :is="section.icon" />
-        </el-icon>
-        <span>{{ t(section.titleKey) }}</span>
-      </el-menu-item>
-    </el-menu>
-
-    <div v-if="showFooterBrand" class="sidebar-footer-brand">
-      <strong>{{ t('common.app.title') }}</strong>
-      <small>{{ runtimeSnapshot.version }} · {{ runtimeSnapshot.accessMode }}</small>
-    </div>
-  </div>
+  <CuSidebar
+    :active-id="activeSection"
+    :items="items"
+    :brand="t('common.app.title')"
+    :detail="identityDetail"
+    @select="select"
+  />
 </template>
-
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Setting } from '@element-plus/icons-vue'
+import { AgentSidebar as CuSidebar, type NavigationItem } from '@aw-ui'
 import type { ConsoleSectionId, ConsoleSectionManifest } from '../../console/types'
-import type { RuntimeSnapshot } from '../../services/runtimeSnapshot'
-
 const props = defineProps<{
   activeSection: ConsoleSectionId
-  runtimeSnapshot: RuntimeSnapshot
+  identityDetail: string
   sections: ConsoleSectionManifest[]
-  showFooterBrand: boolean
 }>()
-
 const emit = defineEmits<{
-  'select-section': [section: ConsoleSectionId]
+  'select-section': [
+    section: ConsoleSectionId
+  ]
 }>()
-
 const { t } = useI18n()
-
-function handleSelect(index: string) {
-  const target = props.sections.find((section) => section.id === index)
-
-  if (target) {
-    emit('select-section', target.id)
-  }
+const items = computed<NavigationItem[]>(() => {
+  const leaves = props.sections.map(s => ({ id: s.id, label: t(s.titleKey), icon: s.icon }))
+  return [leaves[0], { id: 'configuration', label: t('navigation.configuration'), icon: Setting, children: leaves.slice(1) }]
+})
+function select(id: string) {
+  const s = props.sections.find(s => s.id === id)
+  if (s)
+    emit('select-section', s.id)
 }
 </script>

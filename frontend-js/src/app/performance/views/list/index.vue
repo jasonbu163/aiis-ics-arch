@@ -16,6 +16,7 @@
       <template #actions>
         <div class="table-actions">
           <ActionButton
+            v-if="!isHttpSource"
             variant="primary"
             :disabled="!selectedRows.length"
             :loading="printing"
@@ -31,6 +32,7 @@
         </div>
       </template>
 
+      <BusinessDataSourceSelect v-model="sourceSelection" />
       <div class="filter-section">
         <el-form :model="searchForm" class="filter-form" label-position="top">
           <el-form-item :label="$t('performance.coilNo')">
@@ -158,7 +160,7 @@
                 <ActionButton variant="row" size="small" @click="handleEdit(row)">
                   {{ $t('common.edit') }}
                 </ActionButton>
-                <ActionButton variant="success" size="small" @click="handlePrint(row)">
+                <ActionButton v-if="!isHttpSource" variant="success" size="small" @click="handlePrint(row)">
                   {{ $t('common.print') }}
                 </ActionButton>
                 <ActionButton variant="warning" size="small" @click="handleChart(row)">
@@ -203,7 +205,7 @@
       <el-form
         ref="formRef"
         :model="form"
-        :rules="rules"
+        :rules="isHttpSource ? {} : rules"
         label-position="top"
         class="standard-dialog-form"
       >
@@ -218,14 +220,14 @@
               </el-input>
             </el-form-item>
             <el-form-item :label="$t('performance.form.grade')" prop="grade">
-              <el-input v-model="form.grade" :placeholder="$t('performance.form.placeholder', { label: $t('performance.form.grade') })">
+              <el-input v-model="form.grade" :disabled="isHttpSource" :placeholder="$t('performance.form.placeholder', { label: $t('performance.form.grade') })">
                 <template #prefix>
                   <el-icon><PriceTag /></el-icon>
                 </template>
               </el-input>
             </el-form-item>
             <el-form-item :label="$t('performance.form.density')" prop="density">
-              <el-input-number v-model="form.density" :min="0" :precision="4" :step="0.001" :value-on-clear="null" clearable />
+              <el-input-number v-model="form.density" :disabled="isHttpSource" :min="0" :precision="4" :step="0.001" :value-on-clear="null" clearable />
             </el-form-item>
           </div>
         </section>
@@ -234,28 +236,28 @@
           <h3 class="dialog-section__title">{{ $t('performance.formSections.specParams') }}</h3>
           <div class="dialog-form-grid">
             <el-form-item :label="$t('performance.form.weight')" prop="weight">
-              <el-input-number v-model="form.weight" :min="0" :precision="3" :step="0.1" :value-on-clear="null" clearable>
+              <el-input-number v-model="form.weight" :min="0" :precision="isHttpSource ? 4 : 3" :step="0.1" :value-on-clear="null" clearable>
                 <template #suffix>
                   <span class="unit-text">{{ $t('common.unit.ton') }}</span>
                 </template>
               </el-input-number>
             </el-form-item>
             <el-form-item :label="$t('performance.form.spec')" prop="spec">
-              <el-input v-model="form.spec" :placeholder="$t('performance.form.placeholder', { label: $t('performance.form.spec') })">
+              <el-input v-model="form.spec" :disabled="isHttpSource" :placeholder="$t('performance.form.placeholder', { label: $t('performance.form.spec') })">
                 <template #prefix>
                   <el-icon><Grid /></el-icon>
                 </template>
               </el-input>
             </el-form-item>
             <el-form-item :label="$t('performance.form.totalLength')" prop="totalLength">
-              <el-input-number v-model="form.totalLength" :min="0" :precision="2" :step="1" :value-on-clear="null" clearable>
+              <el-input-number v-model="form.totalLength" :disabled="isHttpSource" :min="0" :precision="2" :step="1" :value-on-clear="null" clearable>
                 <template #suffix>
                   <span class="unit-text">{{ $t('common.unit.m') }}</span>
                 </template>
               </el-input-number>
             </el-form-item>
             <el-form-item :label="$t('performance.form.diameter')" prop="diameter">
-              <el-input-number v-model="form.diameter" :min="0" :precision="2" :step="1" :value-on-clear="null" clearable>
+              <el-input-number v-model="form.diameter" :disabled="isHttpSource" :min="0" :precision="2" :step="1" :value-on-clear="null" clearable>
                 <template #suffix>
                   <span class="unit-text">{{ $t('common.unit.mm') }}</span>
                 </template>
@@ -263,7 +265,7 @@
             </el-form-item>
             <el-form-item :label="$t('performance.form.startTime')" prop="startTime">
               <el-date-picker
-                v-model="form.startTime"
+                v-model="form.startTime" :disabled="isHttpSource"
                 type="datetime"
                 :placeholder="$t('performance.form.selectPlaceholder', { label: $t('performance.form.startTime') })"
                 value-format="YYYY-MM-DD HH:mm:ss"
@@ -272,7 +274,7 @@
             </el-form-item>
             <el-form-item :label="$t('performance.form.endTime')" prop="endTime">
               <el-date-picker
-                v-model="form.endTime"
+                v-model="form.endTime" :disabled="isHttpSource"
                 type="datetime"
                 :placeholder="$t('performance.form.selectPlaceholder', { label: $t('performance.form.endTime') })"
                 value-format="YYYY-MM-DD HH:mm:ss"
@@ -321,17 +323,17 @@
               <el-table-column prop="zone" :label="$t('performance.table.zone')" width="120" />
               <el-table-column prop="maxTemp" :label="`${$t('performance.table.maxTemp')}(${$t('performance.units.celsius')})`" width="120">
                 <template #default="{ row }">
-                  {{ row.maxTemp ? Number(row.maxTemp).toFixed(2) : '-' }}
+                  {{ formatNullableNumber(row.maxTemp, 2) }}
                 </template>
               </el-table-column>
               <el-table-column prop="minTemp" :label="`${$t('performance.table.minTemp')}(${$t('performance.units.celsius')})`" width="120">
                 <template #default="{ row }">
-                  {{ row.minTemp ? Number(row.minTemp).toFixed(2) : '-' }}
+                  {{ formatNullableNumber(row.minTemp, 2) }}
                 </template>
               </el-table-column>
               <el-table-column prop="avgTemp" :label="`${$t('performance.table.avgTemp')}(${$t('performance.units.celsius')})`" width="120">
                 <template #default="{ row }">
-                  {{ row.avgTemp ? Number(row.avgTemp).toFixed(2) : '-' }}
+                  {{ formatNullableNumber(row.avgTemp, 2) }}
                 </template>
               </el-table-column>
               <el-table-column prop="duration" :label="`${$t('performance.table.duration')}(${$t('common.unit.min')})`" width="120">
@@ -349,22 +351,22 @@
               <el-table-column prop="zone" :label="$t('performance.table.zone')" width="150" />
               <el-table-column prop="setTension" :label="`${$t('performance.table.setTension')}(${$t('performance.units.kN')})`" width="120">
                 <template #default="{ row }">
-                  {{ row.setTension ? Number(row.setTension).toFixed(2) : '-' }}
+                  {{ formatNullableNumber(row.setTension, 2) }}
                 </template>
               </el-table-column>
               <el-table-column prop="avgTension" :label="`${$t('performance.table.avgTension')}(${$t('performance.units.kN')})`" width="120">
                 <template #default="{ row }">
-                  {{ row.avgTension ? Number(row.avgTension).toFixed(2) : '-' }}
+                  {{ formatNullableNumber(row.avgTension, 2) }}
                 </template>
               </el-table-column>
               <el-table-column prop="maxTension" :label="`${$t('performance.table.maxTension')}(${$t('performance.units.kN')})`" width="120">
                 <template #default="{ row }">
-                  {{ row.maxTension ? Number(row.maxTension).toFixed(2) : '-' }}
+                  {{ formatNullableNumber(row.maxTension, 2) }}
                 </template>
               </el-table-column>
               <el-table-column prop="minTension" :label="`${$t('performance.table.minTension')}(${$t('performance.units.kN')})`" width="120">
                 <template #default="{ row }">
-                  {{ row.minTension ? Number(row.minTension).toFixed(2) : '-' }}
+                  {{ formatNullableNumber(row.minTension, 2) }}
                 </template>
               </el-table-column>
             </el-table>
@@ -377,17 +379,17 @@
               <el-table-column prop="zone" :label="$t('performance.table.zone')" width="150" />
               <el-table-column prop="setSpeed" :label="`${$t('performance.table.setSpeed')}(${$t('common.unit.speed')})`" width="140">
                 <template #default="{ row }">
-                  {{ row.setSpeed ? Number(row.setSpeed).toFixed(2) : '-' }}
+                  {{ formatNullableNumber(row.setSpeed, 2) }}
                 </template>
               </el-table-column>
               <el-table-column prop="avgSpeed" :label="`${$t('performance.table.avgSpeed')}(${$t('common.unit.speed')})`" width="140">
                 <template #default="{ row }">
-                  {{ row.avgSpeed ? Number(row.avgSpeed).toFixed(2) : '-' }}
+                  {{ formatNullableNumber(row.avgSpeed, 2) }}
                 </template>
               </el-table-column>
               <el-table-column prop="maxSpeed" :label="`${$t('performance.table.maxSpeed')}(${$t('common.unit.speed')})`" width="140">
                 <template #default="{ row }">
-                  {{ row.maxSpeed ? Number(row.maxSpeed).toFixed(2) : '-' }}
+                  {{ formatNullableNumber(row.maxSpeed, 2) }}
                 </template>
               </el-table-column>
             </el-table>
@@ -405,7 +407,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import BusinessDataSourceSelect from '@/components/BusinessDataSourceSelect.vue'
+import { parseBusinessDataSource, businessDataSourceQuery, createRequestGeneration } from '@/utils/businessDataSource.mjs'
+
+import { ref, reactive, onMounted, onUnmounted, nextTick, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import echarts, { getEChartsTheme } from '@/utils/echarts'
@@ -432,6 +438,16 @@ import BaseCard from '@/components/common/BaseCard.vue'
 import PerformancePlanLinkDialog from '@/app/performance/components/PerformancePlanLinkDialog.vue'
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const sourceSelection = computed({
+  get: () => parseBusinessDataSource(route.query),
+  set: value => router.replace({ query: businessDataSourceQuery(route.query, value) })
+})
+const requestGeneration = createRequestGeneration()
+const processGeneration = createRequestGeneration()
+const isHttpSource = computed(() => sourceSelection.value.dataSource === 'http')
+
 const themeStore = useThemeStore()
 
 const searchForm = reactive({
@@ -440,12 +456,12 @@ const searchForm = reactive({
   dateRange: []
 })
 
-const observationStatusOptions = [
+const observationStatusOptions = computed(() => [
   'in_production',
   'not_in_production',
   'unknown',
-  'manual_historical'
-]
+  ...(isHttpSource.value ? [] : ['manual_historical'])
+])
 
 const pagination = reactive({
   currentPage: 1,
@@ -536,9 +552,12 @@ const isPlanLinkable = (row) => {
 }
 
 const loadData = async () => {
+  const generation = requestGeneration.begin()
+  if (!sourceSelection.value.ready) { tableData.value = []; pagination.total = 0; loading.value = false; return }
   loading.value = true
   try {
     const params = {
+      ...sourceSelection.value,
       page: pagination.currentPage,
       pageSize: pagination.pageSize
     }
@@ -555,6 +574,7 @@ const loadData = async () => {
     }
     
     const res = await getPerformanceList(params)
+    if (!requestGeneration.isCurrent(generation)) return
     
     if (res && res.items) {
       tableData.value = res.items || []
@@ -563,10 +583,13 @@ const loadData = async () => {
       ElMessage.error(res?.message || t('performance.messages.loadFailed'))
     }
   } catch (error) {
+    if (!requestGeneration.isCurrent(generation)) return
+    tableData.value = []
+    pagination.total = 0
     console.error('加载数据失败:', error)
     ElMessage.error(t('performance.messages.loadFailed'))
   } finally {
-    loading.value = false
+    if (requestGeneration.isCurrent(generation)) loading.value = false
   }
 }
 
@@ -606,8 +629,8 @@ const handleEdit = (row) => {
   form.spec = row.spec || ''
   form.totalLength = normalizeNullableNumber(row.totalLength)
   form.diameter = normalizeNullableNumber(row.diameter)
-  form.startTime = normalizeNullableDateTime(row.startTime)
-  form.endTime = normalizeNullableDateTime(row.endTime)
+  form.startTime = normalizeNullableDateTime(isHttpSource.value ? row.effectiveStartTime : row.startTime)
+  form.endTime = normalizeNullableDateTime(isHttpSource.value ? row.effectiveEndTime : row.endTime)
   form.remark = row.remark || ''
   dialogVisible.value = true
 }
@@ -631,7 +654,10 @@ const handleSubmit = async () => {
           remark: form.remark
         }
         
-        const res = await updatePerformance(form.id, updateData)
+        const submitted = isHttpSource.value
+          ? { weight: normalizeNullableNumber(form.weight), ...(form.remark ? { remark: form.remark } : {}) }
+          : updateData
+        const res = await updatePerformance(form.id, submitted, sourceSelection.value)
         
         if (res) {
           ElMessage.success(t('performance.messages.saveSuccess'))
@@ -694,12 +720,18 @@ const handlePrintSelected = () => {
 }
 
 const handleChart = async (row) => {
+  const generation = processGeneration.begin()
+  const selection = { ...sourceSelection.value }
+  tempTableData.value = []
+  tensionTableData.value = []
+  speedTableData.value = []
   currentCoilNo.value = row.coilNo
   chartDialogVisible.value = true
   activeChartTab.value = 'temperature'
   
   try {
-    const res = await getProcessData(row.id)
+    const res = await getProcessData(row.id, selection)
+    if (!processGeneration.isCurrent(generation)) return
     
     if (res) {
       tempTableData.value = res.temperature || []
@@ -709,6 +741,7 @@ const handleChart = async (row) => {
       ElMessage.error(res.message || t('performance.messages.loadFailed'))
     }
   } catch (error) {
+    if (!processGeneration.isCurrent(generation)) return
     console.error('获取过程数据失败:', error)
     ElMessage.error(t('performance.messages.loadFailed'))
   }
@@ -727,8 +760,8 @@ const drawTempChart = () => {
   }
   tempChartInstance = echarts.init(tempChartRef.value, getEChartsTheme(themeStore.isDark ? 'dark' : 'light'))
   const zones = tempTableData.value.map(item => item.zone)
-  const setTemps = tempTableData.value.map(item => Number(item.setTemp) || 0)
-  const avgTemps = tempTableData.value.map(item => Number(item.avgTemp) || 0)
+  const setTemps = tempTableData.value.map(item => normalizeNullableNumber(item.setTemp))
+  const avgTemps = tempTableData.value.map(item => normalizeNullableNumber(item.avgTemp))
   const tokens = getChartTokens()
   const axisStyle = getChartAxis(tokens)
   
@@ -793,8 +826,8 @@ const drawTensionChart = () => {
   }
   tensionChartInstance = echarts.init(tensionChartRef.value, getEChartsTheme(themeStore.isDark ? 'dark' : 'light'))
   const zones = tensionTableData.value.map(item => item.zone)
-  const setTensions = tensionTableData.value.map(item => Number(item.setTension) || 0)
-  const avgTensions = tensionTableData.value.map(item => Number(item.avgTension) || 0)
+  const setTensions = tensionTableData.value.map(item => normalizeNullableNumber(item.setTension))
+  const avgTensions = tensionTableData.value.map(item => normalizeNullableNumber(item.avgTension))
   const tokens = getChartTokens()
   const axisStyle = getChartAxis(tokens)
   
@@ -859,8 +892,8 @@ const drawSpeedChart = () => {
   }
   speedChartInstance = echarts.init(speedChartRef.value, getEChartsTheme(themeStore.isDark ? 'dark' : 'light'))
   const zones = speedTableData.value.map(item => item.zone)
-  const setSpeeds = speedTableData.value.map(item => Number(item.setSpeed) || 0)
-  const avgSpeeds = speedTableData.value.map(item => Number(item.avgSpeed) || 0)
+  const setSpeeds = speedTableData.value.map(item => normalizeNullableNumber(item.setSpeed))
+  const avgSpeeds = speedTableData.value.map(item => normalizeNullableNumber(item.avgSpeed))
   const tokens = getChartTokens()
   const axisStyle = getChartAxis(tokens)
   
@@ -944,6 +977,22 @@ const handleResize = () => {
   tensionChartInstance?.resize()
   speedChartInstance?.resize()
 }
+
+watch(() => [route.query.dataSource, route.query.equipmentId], () => {
+  requestGeneration.invalidate()
+  processGeneration.invalidate()
+  tableData.value = []
+  pagination.total = 0
+  pagination.currentPage = 1
+  selectedRows.value = []
+  tempTableData.value = []
+  tensionTableData.value = []
+  speedTableData.value = []
+  chartDialogVisible.value = false
+  dialogVisible.value = false
+  searchForm.observationStatus = ''
+  loadData()
+})
 
 onMounted(() => {
   loadData()

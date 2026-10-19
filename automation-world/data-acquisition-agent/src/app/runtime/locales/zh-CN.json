@@ -49,5 +49,6 @@
       "configured": "已配置",
       "unconfigured": "未配置"
     }
-  }
+  },
+  "details": "运行详情与就绪状态"
 }

@@ -71,8 +71,8 @@ class PerformanceResponse(ApiSchema):
     production_date: datetime.date
     start_time: Optional[datetime.datetime] = None
     end_time: Optional[datetime.datetime] = None
-    output_quantity: Decimal
-    qualified_quantity: Decimal
+    output_quantity: Decimal | None
+    qualified_quantity: Decimal | None
     efficiency_rate: Optional[Decimal] = None
     quality_score: Optional[Decimal] = None
     collected_weight: Optional[Decimal] = None

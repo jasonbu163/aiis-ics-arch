@@ -16,7 +16,7 @@ class AsyncEquipmentCRUD:
     """设备模块 SQL 执行层。"""
 
     async def get_latest_drive(self, db: AsyncSession) -> EquipmentDrive | None:
-        result = await db.execute(select(EquipmentDrive).order_by(desc(EquipmentDrive.timestamp)).limit(1))
+        result = await db.execute(select(EquipmentDrive).where(EquipmentDrive.equipment_id.is_(None)).order_by(desc(EquipmentDrive.timestamp)).limit(1))
         return result.scalar_one_or_none()
 
     async def get_temperature_history(self, db: AsyncSession, limit: int = 10) -> list[EquipmentTemperature]:
@@ -25,7 +25,7 @@ class AsyncEquipmentCRUD:
 
     async def get_latest_production_parameters(self, db: AsyncSession) -> EquipmentProductionParameters | None:
         result = await db.execute(
-            select(EquipmentProductionParameters).order_by(desc(EquipmentProductionParameters.timestamp)).limit(1)
+            select(EquipmentProductionParameters).where(EquipmentProductionParameters.equipment_id.is_(None)).order_by(desc(EquipmentProductionParameters.timestamp)).limit(1)
         )
         return result.scalar_one_or_none()
 

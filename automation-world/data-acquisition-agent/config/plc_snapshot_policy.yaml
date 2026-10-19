@@ -1,7 +1,6 @@
-# Public example raw/latest snapshot policy.
-#
-# The runtime gates in .env.example remain disabled. Replace this example with
-# a reviewed site policy together with plc_points.yaml before enabling PLC I/O.
+# Retired raw/latest policy: ONE-TIME whitelist archive only.
+# It never enables points, changes pending/retention, or starts a direct DB writer.
+# SQLite owns configuration; this file is never written by migration.
 PLC_1:
   snapshot_policy_version: 2
   groups:

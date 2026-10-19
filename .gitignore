@@ -280,5 +280,10 @@ automation-world/semantic-mapping-agent/src-tauri/gen/
 automation-world/**/.local/
 automation-world/**/outputs/
 automation-world/**/*.db
+!automation-world/data-acquisition-agent/src-tauri/tests/fixtures/source-import-minimal/minimal.db
 automation-world/**/*.sqlite
 automation-world/**/*.sqlite3
+
+# DAA-005 handwritten public source fixtures (exact paths only)
+!/automation-world/data-acquisition-agent/src-tauri/tests/fixtures/source-import-multi-db/multi.db
+!/automation-world/data-acquisition-agent/src-tauri/tests/fixtures/source-import-multi-db/layout.db

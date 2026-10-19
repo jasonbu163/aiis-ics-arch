@@ -9,7 +9,11 @@
     - 过程数据查询（温度、张力、速度）
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query, Body
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Body, Request
+from app.performance.api.mapping_http import PerformanceLegacyRoute
+from app.performance.mapping_config import get_mapping_config
+from app.performance.services import async_mapping_query
+from app.performance.mapping_error_codes import MappingError
 from typing import Optional, List
 from datetime import date
 from app.performance.schemas.performance_in import (
@@ -33,7 +37,7 @@ from database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.user.models.user import User
 
-router = APIRouter(prefix="/performances", tags=["Performance"])
+router = APIRouter(prefix="/performances", tags=["Performance"], route_class=PerformanceLegacyRoute)
 
 
 @router.get("", response_model=SuccessResponse)
@@ -127,11 +131,16 @@ async def get_performance(
 @router.put("/{performance_id}", response_model=SuccessResponse)
 async def update_performance(
     performance_id: int,
+    request: Request,
     performance_data: PerformanceUpdate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_permissions("performance"))
 ):
     
+    if request.query_params.get("dataSource") == "http":
+        equipment = get_mapping_config(request).allowed_equipment(request.query_params.get("equipmentId"))
+        result = await async_performance_service.update_mapping_weight(db, performance_id, equipment, await request.json(), current_user.id)
+        return SuccessResponse(data=result)
     try:
         performance = await async_performance_service.update(db, performance_id, performance_data)
         if not performance:
@@ -150,10 +159,15 @@ async def update_performance(
 @router.delete("/{performance_id}", response_model=SuccessResponse)
 async def delete_performance(
     performance_id: int,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(require_permissions("performance"))
 ):
     
+    if request.query_params.get("dataSource") == "http":
+        equipment = get_mapping_config(request).allowed_equipment(request.query_params.get("equipmentId"))
+        await async_mapping_query.read_record(db, equipment, performance_id)
+        raise BusinessException(MappingError.DELETE_FORBIDDEN, code=409)
     try:
         success = await async_performance_service.delete(db, performance_id)
         if not success:

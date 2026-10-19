@@ -58,7 +58,7 @@
     "statusOnly": "当前页面按 PLC 控制读取和写库；按钮只控制本 Tauri 进程内的 supervisor。"
   },
   "snapshotPolicy": {
-    "title": "快照历史策略",
+    "title": "现行快照存储策略（只读）",
     "status": "策略状态",
     "path": "配置路径",
     "latestMode": "latest 范围",
@@ -68,17 +68,17 @@
     "loaded": "已加载 · v{version}",
     "loadedWithWarnings": "已读取 / 有警告",
     "missing": "未加载",
-    "retentionValues": "raw 行按 CA env 保留 {raw} 天",
+    "retentionValues": "raw 行按 DAA env 保留 {raw} 天",
     "pointValues": "全量 {full} / policy 行 {policy} / raw {raw} / latest {latest} / every_sample {every} / on_change {change}",
     "validationValues": "缺少策略点位 {missing} / 未知点位 {unknown} / 非法策略 {invalid}",
     "messages": {
       "loaded": "latest 继续保持全量实时镜像；长期 history 将只保留策略选中的点位。",
-      "pending": "策略尚未加载；当前 CA 仍按既有 raw/latest 链路运行。"
+      "pending": "策略尚未加载；当前 DAA 仍按既有 raw/latest 链路运行。"
     }
   },
   "controls": {
-    "start": "启动采集",
-    "stop": "停止采集",
+    "start": "全部 PLC 启动采集",
+    "stop": "全部 PLC 停止采集",
     "startRead": "启动读取",
     "stopRead": "停止读取",
     "enablePersistence": "开启写库",
@@ -101,7 +101,7 @@
     "confirmStop": "确认停止",
     "cancel": "取消",
     "resultTitle": "{action}结果 · {status} · {target}",
-    "resultDescription": "{message} 目标：{target}。影响 PLC：{affected}。门禁详情：{gates}",
+    "resultDescription": "{message} 目标：{target}。影响 PLC：{affected}。门禁详情：{gates} accepted: {accepted}",
     "actions": {
       "start": "启动",
       "stop": "停止",
@@ -158,5 +158,12 @@
       "enabling": "开启中",
       "failed_write": "写库失败"
     }
-  }
+  },
+  "collectionFeedback": "采集诊断（当前快照）",
+  "uploadFeedback": "上报日志",
+  "uploadUnavailable": "独立 API 上报尚未接入，暂无上报日志、积压或容量数据。读取和旧 raw/latest 写库控制见当前工作台。",
+  "storageCapability": "当前仍是旧 raw/latest 直库链路与只读快照策略。API/JSON 配置、独立上报、补传、双 SQLite 和本地容量管理将在后续阶段实现；此处不提供保存或上报按钮。",
+  "currentLink": "当前数据链路（只读）",
+  "backendProbe": "Backend 健康探测",
+  "gateDetailsTitle": "采集门禁详情"
 }

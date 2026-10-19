@@ -49,9 +49,9 @@ const props = defineProps({
 const tableData = computed(() => {
   const latest = props.data.latest || {}
   return [
-    { position: t('monitor.tensionCurve.positions.uncoiler'), value: latest.uncTension || 0, unit: '%' },
-    { position: t('monitor.tensionCurve.positions.recoiler'), value: latest.recTension || 0, unit: '%' },
-    { position: t('monitor.tensionCurve.positions.furnace'), value: latest.furnTension || 0, unit: 'kg' },
+    { position: t('monitor.tensionCurve.positions.uncoiler'), value: latest.uncTension ?? '-', unit: '%' },
+    { position: t('monitor.tensionCurve.positions.recoiler'), value: latest.recTension ?? '-', unit: '%' },
+    { position: t('monitor.tensionCurve.positions.furnace'), value: latest.furnTension ?? '-', unit: 'kg' },
   ]
 })
 

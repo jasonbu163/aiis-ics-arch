@@ -1,8 +1,6 @@
-# Public example PLC point contract.
-#
-# This file is a disabled-by-default shape example only. Replace it with a
-# reviewed, site-owned contract before enabling any PLC gate. It contains no
-# customer endpoint or production point data.
+# Public sanitized ONE-TIME migration example; never an active runtime source.
+# SQLite owns configuration. First empty startup imports disabled/unconfirmed
+# candidates only. Review .db/.udt structure and addresses before explicit activation.
 PLC_1:
   ip: 127.0.0.1
   port: 102

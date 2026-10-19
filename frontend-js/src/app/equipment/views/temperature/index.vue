@@ -18,6 +18,7 @@
           {{ $t('common.refresh') }}
         </ActionButton>
       </template>
+      <BusinessDataSourceSelect v-model="sourceSelection" />
 
       <section class="temperature-zone-section">
         <div class="zone-grid">
@@ -84,6 +85,10 @@
 </template>
 
 <script setup>
+import { useRoute, useRouter } from 'vue-router'
+import BusinessDataSourceSelect from '@/components/BusinessDataSourceSelect.vue'
+import { parseBusinessDataSource, businessDataSourceQuery, createRequestGeneration } from '@/utils/businessDataSource.mjs'
+
 import { ref, onMounted, onBeforeUnmount, nextTick, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
@@ -94,6 +99,14 @@ import ActionButton from '@/components/common/ActionButton.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const sourceSelection = computed({
+  get: () => parseBusinessDataSource(route.query),
+  set: value => router.replace({ query: businessDataSourceQuery(route.query, value) })
+})
+const requestGeneration = createRequestGeneration()
+
 const themeStore = useThemeStore()
 const currentTheme = computed(() => themeStore.isDark ? 'dark' : 'light')
 
@@ -122,13 +135,7 @@ let updateTimer = null
 const overviewChartRef = ref()
 let overviewChart = null
 
-const heatingZones = ref([
-  { setTemp: 0, actualTemp: 0 },
-  { setTemp: 0, actualTemp: 0 },
-  { setTemp: 0, actualTemp: 0 },
-  { setTemp: 0, actualTemp: 0 },
-  { setTemp: 0, actualTemp: 0 }
-])
+const heatingZones = ref([])
 
 const temperatureHistory = ref([])
 
@@ -145,7 +152,7 @@ const getDeviation = (actual, set) => {
   return diff > 0 ? `+${formattedDiff}` : formattedDiff
 }
 
-const formatTemperature = (value) => Number(value || 0).toFixed(1)
+const formatTemperature = (value) => value === null || value === undefined ? '-' : Number(value).toFixed(1)
 
 const initOverviewChart = () => {
   if (!overviewChartRef.value) return
@@ -201,7 +208,7 @@ const updateOverviewChart = () => {
     }))
   }
   
-  overviewChart.setOption(option)
+  overviewChart.setOption(option, true)
 }
 
 const handleRefresh = () => {
@@ -216,32 +223,27 @@ const applyTemperatureData = (data) => {
 }
 
 const loadData = async () => {
+  const generation = requestGeneration.begin()
+  if (!sourceSelection.value.ready) { clearSourceData(); loading.value = false; return }
   loading.value = true
   try {
-    const data = await getTemperatureControlData()
+    const data = await getTemperatureControlData(sourceSelection.value)
+    if (!requestGeneration.isCurrent(generation)) return
     applyTemperatureData(data)
     
     await nextTick()
     initOverviewChart()
   } catch (error) {
+    if (!requestGeneration.isCurrent(generation)) return
+    clearSourceData()
     console.error('Failed to load temperature data:', error)
     ElMessage.error(t('common.loadFailed'))
   } finally {
-    loading.value = false
+    if (requestGeneration.isCurrent(generation)) loading.value = false
   }
 }
 
-const updateData = async () => {
-  try {
-    const data = await getTemperatureControlData()
-    applyTemperatureData(data)
-    
-    await nextTick()
-    initOverviewChart()
-  } catch (error) {
-    console.error('Auto update failed:', error)
-  }
-}
+const updateData = () => loadData()
 
 // 监听主题变化，重新初始化图表
 watch(currentTheme, () => {
@@ -251,7 +253,19 @@ watch(currentTheme, () => {
   })
 })
 
+const clearSourceData = () => {
+  heatingZones.value = []
+  temperatureHistory.value = []
+  overviewChart?.clear()
+}
+watch(() => [route.query.dataSource, route.query.equipmentId], () => {
+  requestGeneration.invalidate()
+  clearSourceData()
+  loadData()
+})
+
 onMounted(() => {
+  clearSourceData()
   loadData()
   updateTimer = setInterval(updateData, 5000)
   

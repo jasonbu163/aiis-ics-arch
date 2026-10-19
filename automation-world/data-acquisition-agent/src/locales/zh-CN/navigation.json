@@ -2,5 +2,10 @@
   "overview": "总览",
   "collection": "采集状态",
   "plc": "PLC 点位",
-  "gates": "授权门禁"
+  "gates": "授权门禁",
+  "workbench": "工作台",
+  "configuration": "配置中心",
+  "plcConfig": "PLC 配置",
+  "pointsGroups": "点位与采集组配置",
+  "reportingStorage": "上报与存储"
 }

@@ -11,5 +11,6 @@
 | CU-005 | owner_accepted | [r1 spec](CU-005-design-profile-editor/spec.md) | [tasks](CU-005-design-profile-editor/tasks.md)；保留原 r1 DEV 证据 | [checklist](CU-005-design-profile-editor/checklist.md)；保留原独立 QA，Human Owner 于 2026-10-16 验收 r1，未追加测试 |
 | CU-006 | owner_accepted | [r1 spec](CU-006-live-design-preview/spec.md) | [tasks](CU-006-live-design-preview/tasks.md)；保留原 r1 DEV 证据 | [checklist](CU-006-live-design-preview/checklist.md)；保留原独立 QA，Human Owner 于 2026-10-16 验收 r1，未追加测试 |
 | CU-007 | owner_accepted | [r1 spec](CU-007-apply-shared-design-profile/spec.md)；Human Owner 于 2026-10-16 批准 r1 | [tasks](CU-007-apply-shared-design-profile/tasks.md)；developer_handoff，保留构建/启动/编辑应用的有限证据 | [checklist](CU-007-apply-shared-design-profile/checklist.md)；保留原独立 QA，Human Owner 于 2026-10-16 验收 r1，未追加应用测试 |
+| CU-008 | owner_accepted | [r1 spec](CU-008-grouped-sidebar-navigation/spec.md)；Human Owner 于 2026-10-17 批准 r1 | [tasks](CU-008-grouped-sidebar-navigation/tasks.md) | [QA / Owner 终验](CU-008-grouped-sidebar-navigation/checklist.md)；Human Owner 于 2026-10-17 验收 r1；仅状态收尾，未追加测试 |
 
 本目录拥有 CU 专属任务 bundle。[CU PLAN](../PLAN.zh-CN.md) 跟踪实施，[AW PLAN](../../PLAN.zh-CN.md) 汇总整体阶段和跨工程依赖。仅链接已经存在的角色文档。

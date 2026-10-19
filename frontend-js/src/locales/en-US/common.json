@@ -57,5 +57,14 @@
     "speed": "m/min",
     "hour": "hour",
     "second": "s"
+  },
+  "businessDataSource": {
+    "label": "Data source",
+    "legacy": "Local mapping",
+    "http": "External reporting",
+    "equipment": "Business equipment ID",
+    "invalid": "Invalid data source; select a valid source.",
+    "legacyNotice": "Legacy data has no business equipment identity.",
+    "chooseEquipment": "Select a business equipment ID."
   }
 }

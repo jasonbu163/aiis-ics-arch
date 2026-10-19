@@ -48,8 +48,8 @@ const props = defineProps({
 const tableData = computed(() => {
   const latest = props.data.latest || {}
   return [
-    { label: t('monitor.speedCurve.setSpeed'), value: latest.lineSpeedSet || 0 },
-    { label: t('monitor.speedCurve.actSpeed'), value: latest.lineSpeedAct || 0 },
+    { label: t('monitor.speedCurve.setSpeed'), value: latest.lineSpeedSet ?? '-' },
+    { label: t('monitor.speedCurve.actSpeed'), value: latest.lineSpeedAct ?? '-' },
   ]
 })
 

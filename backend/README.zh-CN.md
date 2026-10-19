@@ -310,3 +310,23 @@ GET `/monitor/realtime/latest`，operator 获得的是这两个事实查询。`s
 | `EQUIPMENT_TEMPERATURE_PILOT_ID` | 新样本API唯一精确业务设备key；空/非法值拒绝所有caller含admin。模块本地BaseSettings，重启采用。 (str) | `''` | `''` |
 
 新增后每公开env example共69项，原十一组英文标题及全部旧值/grants保留。合成文档使用temperature-pilot-01。源码/冻结/Docker dotenv路径沿既有公开helper；process覆盖dotenv、显式注入覆盖process。该key不授予permission、不改旧GET。[独立MySQL入口](tests_mysql/test_equipment_temperature.py)只准备另批可丢弃验证，不使用共享破坏性conftest。
+
+
+## HTTP映射业务观测
+
+equipment、performance与monitor分别拥有HTTP观测域，每个模块仅接受一个精确且区分大小写的业务设备键：
+`EQUIPMENT_MAPPING_INGEST_ID`、`PERFORMANCE_MAPPING_INGEST_ID`、`MONITOR_MAPPING_INGEST_ID`。
+空scope拒绝包括admin在内的全部caller，公开示例保持为空。POST须active admin及独立ingest权限，GET用对应read权限；
+`equipment-mapping-ingest/read`、`performance-mapping-ingest/read`、`monitor-curve-ingest/read`不互授，不授予旧模块CRUD或页面权限。
+BE003温控继续使用独立温控scope与权限。
+
+显式后继`f6a8c0e2b4d6`增加三个模块回执、一个生产观察水位及七个业务表的nullable HTTP键，完整fixture为64表。
+旧行设备键保持NULL，既有行值、整秒时间及数值默认保留，不回填身份、不清理、seed或自动DDL。
+两个equipment时间列的服务器默认从`now()`改为匹配`DATETIME(3)`的`CURRENT_TIMESTAMP(3)`，未来省略timestamp的插入可能产生毫秒；
+downgrade仅在可无损恢复后还原秒默认。卷/zone精确键使用完整`VARBINARY(200)`比较。
+原五条迁移及sync Services保留。数据库采用、可丢弃MySQL与浏览器运行证明仍需另行具体批准；源码检查不代表运行采用。
+downgrade遇到HTTP数据、旧非空指标的NULL或不能无损恢复的非零毫秒即拒绝；业务回退保留全部已接收数据并选择旧来源。
+
+HTTP采用带时区的UTC毫秒来源时间、严格camelCase JSON和稳定sampleId。省略观测保存NULL，显式null拒绝。
+Numeric保持声明的小数位；FLOAT采用有界binary32规范化，相对误差≤1e-6、绝对误差≤max(1e-6,abs(input)×1e-6)，非零下溢拒绝。
+回执与业务同事务提交，仅命名unique竞争有界恢复；提交未知返回可重试失败，客户端保持同sampleId。不伪造PLC来源。

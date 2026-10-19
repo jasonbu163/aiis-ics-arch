@@ -1,7 +1,8 @@
 """监控业务历史切片；不覆盖现场Core三模型。"""
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import func, Index, String, DateTime, Float, Integer, Numeric
+from sqlalchemy import func, Index, String, DateTime, Float, Integer, Numeric, UniqueConstraint
+from app.monitor.models.mapping_ingest import identifier_type, millisecond_type
 from sqlalchemy.orm import Mapped, mapped_column
 from database import Base, IntPk, Timestamp, UpdatedAt
 class HistoryProcessCurve(Base):
@@ -18,9 +19,16 @@ class HistoryProcessCurve(Base):
     - N2_Total_m3 / ElectConsum                  → 能耗瞬时值 (2)
     """
     __tablename__ = "monitor_history_process_curves"
+    __table_args__ = (
+        UniqueConstraint("equipment_id", "sampled_at", name="uq_monitor_curve_http_business"),
+        UniqueConstraint("id", "equipment_id", name="uq_monitor_curve_http_target"),
+    )
+    equipment_id: Mapped[str | None] = mapped_column(identifier_type(), nullable=True)
+    sampled_at: Mapped[datetime | None] = mapped_column(millisecond_type(), nullable=True)
+    fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    device_id: Mapped[int] = mapped_column(Integer, index=True)
+    device_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
     coil_number: Mapped[Optional[str]] = mapped_column(String(50), index=True, comment="当前生产钢卷号")
 
     # ── 线速度 ──

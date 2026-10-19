@@ -36,7 +36,7 @@ class PerformanceCRUD:
         end_date,
     ):
         query = select(Performance).options(selectinload(Performance.plan))
-        conditions = []
+        conditions = [Performance.equipment_id.is_(None)]
 
         if coil_no:
             conditions.append(Performance.coil_no.ilike(f"%{coil_no}%"))
@@ -84,7 +84,7 @@ class PerformanceCRUD:
             selectinload(Performance.temperature_records),
             selectinload(Performance.tension_records),
             selectinload(Performance.speed_records),
-        ).where(Performance.id == performance_id)
+        ).where(Performance.id == performance_id, Performance.equipment_id.is_(None)).with_for_update()
 
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
@@ -107,7 +107,7 @@ class PerformanceCRUD:
     async def list_temperature_records(self, performance_id: int):
         result = await self.db.execute(
             select(ProcessTemperature)
-            .where(ProcessTemperature.performance_id == performance_id)
+            .where(ProcessTemperature.performance_id == performance_id, ProcessTemperature.equipment_id.is_(None))
             .order_by(ProcessTemperature.record_time)
         )
         return result.scalars().all()
@@ -115,7 +115,7 @@ class PerformanceCRUD:
     async def list_tension_records(self, performance_id: int):
         result = await self.db.execute(
             select(ProcessTension)
-            .where(ProcessTension.performance_id == performance_id)
+            .where(ProcessTension.performance_id == performance_id, ProcessTension.equipment_id.is_(None))
             .order_by(ProcessTension.record_time)
         )
         return result.scalars().all()
@@ -123,7 +123,7 @@ class PerformanceCRUD:
     async def list_speed_records(self, performance_id: int):
         result = await self.db.execute(
             select(ProcessSpeed)
-            .where(ProcessSpeed.performance_id == performance_id)
+            .where(ProcessSpeed.performance_id == performance_id, ProcessSpeed.equipment_id.is_(None))
             .order_by(ProcessSpeed.record_time)
         )
         return result.scalars().all()

@@ -3,7 +3,7 @@
  * Description: Local theme preference state for the Data Acquisition Agent console shell
  * Main Features:
  *   - Resolves the initial light/dark theme
- *   - Applies CA theme attributes and color-scheme values
+ *   - Persists DAA preference and exposes explicit scoped CU theme
  *   - Exposes localized theme toggle labels
  */
 import { computed, ref } from 'vue'
@@ -32,8 +32,6 @@ function applyAgentTheme(theme: AgentTheme) {
     return
   }
 
-  document.documentElement.setAttribute('data-agent-theme', theme)
-  document.documentElement.style.colorScheme = theme
   window.localStorage.setItem(THEME_STORAGE_KEY, theme)
 }
 

@@ -25,3 +25,5 @@ __all__ = [
     "ProcessSpeed",
     "PushDownRecord",
 ]
+
+from app.performance.models.mapping_ingest import PerformanceMappingReceipt, PerformanceObservationState

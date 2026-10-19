@@ -49,5 +49,6 @@
       "configured": "Configured",
       "unconfigured": "Not configured"
     }
-  }
+  },
+  "details": "Runtime details and readiness"
 }

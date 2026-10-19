@@ -9,6 +9,7 @@
 <template>
   <div class="monitor-temperature-page page-layout">
     <BaseCard class="monitor-workspace-card" :title="$t('monitor.temperature')" v-loading="loading">
+      <BusinessDataSourceSelect v-model="sourceSelection" />
       <section class="monitor-control-section">
         <el-form class="monitor-control-form" label-position="top">
           <el-form-item :label="$t('monitor.temperatureControl.date')">
@@ -53,7 +54,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import BusinessDataSourceSelect from '@/components/BusinessDataSourceSelect.vue'
+import { parseBusinessDataSource, businessDataSourceQuery, createRequestGeneration } from '@/utils/businessDataSource.mjs'
+
+import { ref, onMounted, computed, watch } from 'vue'
 import { Refresh, Search } from '@element-plus/icons-vue'
 import ActionButton from '@/components/common/ActionButton.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
@@ -63,6 +68,14 @@ import TemperatureCurve from '@/app/monitor/components/TemperatureCurve.vue'
 import TensionCurve from '@/app/monitor/components/TensionCurve.vue'
 import SpeedCurve from '@/app/monitor/components/SpeedCurve.vue'
 import QualityCurve from '@/app/monitor/components/QualityCurve.vue'
+
+const route = useRoute()
+const router = useRouter()
+const sourceSelection = computed({
+  get: () => parseBusinessDataSource(route.query),
+  set: value => router.replace({ query: businessDataSourceQuery(route.query, value) })
+})
+const requestGeneration = createRequestGeneration()
 
 const activeTab = ref('temperature')
 const selectedDate = ref(formatDate(new Date()))
@@ -79,14 +92,18 @@ const resetForm = () => {
  * 获取监控数据
  */
 const fetchData = async () => {
+  const generation = requestGeneration.begin()
+  curveData.value = { trends: [], latest: {} }
+  if (!sourceSelection.value.ready) { loading.value = false; return }
   loading.value = true
   try {
-    const data = await getTemperatureData({ date: selectedDate.value })
+    const data = await getTemperatureData({ ...sourceSelection.value, date: selectedDate.value })
+    if (!requestGeneration.isCurrent(generation)) return
     curveData.value = data || {}
   } catch (error) {
     console.error('Failed to fetch monitoring data:', error)
   } finally {
-    loading.value = false
+    if (requestGeneration.isCurrent(generation)) loading.value = false
   }
 }
 
@@ -94,6 +111,12 @@ const handleReset = () => {
   resetForm()
   fetchData()
 }
+
+watch(() => [route.query.dataSource, route.query.equipmentId, selectedDate.value], () => {
+  requestGeneration.invalidate()
+  curveData.value = { trends: [], latest: {} }
+  fetchData()
+})
 
 onMounted(() => {
   fetchData()

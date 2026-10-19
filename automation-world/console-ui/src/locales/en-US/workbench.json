@@ -150,5 +150,19 @@
       "io_failed": "Source I/O failed; the two files may be partially updated. Export your edits, inspect both public targets, restore valid JSON if needed, run pnpm design:profile --generate and --check, then refresh.",
       "network_failed": "Apply result could not be confirmed. Export your edits, inspect both public targets, run pnpm design:profile --check (restore valid JSON and --generate if needed), then refresh before retrying."
     }
+  },
+  "navigationSample": {
+    "title": "Grouped navigation · Design sample",
+    "overview": "Overview sample",
+    "group": "Sample panels",
+    "alpha": "Panel A",
+    "beta": "Panel B · Extended navigation sample",
+    "current": "Current panel: {label}",
+    "external": "Switch current panel externally",
+    "note": "Host-owned selection; groups only expand or collapse.",
+    "selections": "Selection events: {count}",
+    "mode": "Navigation mode",
+    "flat": "Flat",
+    "grouped": "Grouped"
   }
 }

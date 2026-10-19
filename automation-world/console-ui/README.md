@@ -50,6 +50,23 @@ The consumer creates/mounts its own Vue app, provides the `theme` prop (`light`/
 
 After source compilation, the consumer serves its **own** `dist`. Running built output needs no CU process, source checkout or CU node_modules. This first version provides source exports, not an npm publication, root workspace, online CU service or actual integration into another Agent. See [source layers](src/app/README.md) and [approved scope](plans/CU-001-workbench-foundation/spec.md).
 
+## Flat and grouped navigation
+
+`AgentSidebar` keeps `activeId: string`, `items: NavigationItem[]`, `brand: string`, optional `detail`, and `select(id: string)`. The public entrypoint exports these finite, non-recursive types (Vue's `Component` is the optional icon type):
+
+```ts
+interface NavigationChildItem { id: string; label: string; icon?: Component }
+interface NavigationItem extends NavigationChildItem { children?: NavigationChildItem[] }
+```
+
+A top-level item without children, including `children: []`, is a selectable leaf. A non-empty group only expands/collapses; its children are selectable leaves. Supply non-empty, globally unique stable IDs for groups and leaves; translations change labels, never IDs. Nested groups and duplicate IDs are outside this contract. Empty items retain the brand region. Unknown or group `activeId` selects no leaf and emits no fallback event.
+
+The host translates labels, owns active state and handles `select` once per activation. It may update active externally or decline a selection; final leaf highlighting and `aria-current` follow the prop. Initial active children, external active changes to a child and a child's move to another parent expand that parent without selecting or moving focus. A selected child's parent has active title text distinct from the selected leaf background. Users can collapse it while keeping the selection. Multiple groups may remain open. Label/theme changes preserve expansion; manual expansion exists only in Sidebar memory. `AgentLayout` hiding unmounts Sidebar; restoring keeps host active and expands its parent again, without restoring other manually open groups or taking focus from the toggle. No navigation storage, router, permission model or business/IPC side effect is provided.
+
+Tab/Shift+Tab traverse visible leaves and group titles and can leave the menu. Up/Down move among visible items; Right opens a group and enters its first child; Left returns a child to its parent or collapses a focused group. Enter/Space activate a leaf once or toggle a group. Collapsing a subtree containing focus returns it to its parent. Closed children are excluded from Tab; external prop changes do not move focus. Group `aria-expanded`, leaf `aria-current`, active-parent text and focus outline remain scoped to the current light/dark theme. Narrow grouped menus expand inline and scroll locally; flat menus retain wrapping.
+
+The workbench keeps four flat primary items and adds a controlled grouped Design sample in Shell preview. The independent consumer switches between flat and grouped forms of the same IDs, with a host-owned external active button and event count; table/form/dialog state remains mounted. Its [App.vue](examples/source-consumer/src/App.vue) compiles through public exports. Navigation has no CU service prerequisite. To pin an uncommitted source, use the exact CU-008 revision and the complete path/SHA-256 manifest in [Development handoff](plans/CU-008-grouped-sidebar-navigation/tasks.md), then its independent Verification/Owner evidence when available; HEAD alone does not identify these working-tree bytes. DAA integration and its acceptance stay in DAA's own task.
+
 ## Element Plus page composition
 
 CU's private **Page samples** page demonstrates a table, validated form, edit dialog and manually selected normal/loading/empty/failed states. Data and retry/submit/edit feedback exist only in memory; reload resets samples. The eight public components and their APIs stay unchanged. The independent consumer composes a smaller table/form/dialog directly from its own Element Plus dependency, with its own locale and state; it never imports PageSamples or workbench files.

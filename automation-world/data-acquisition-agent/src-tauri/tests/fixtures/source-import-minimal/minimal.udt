@@ -1,0 +1,9 @@
+// DAA-004 controlled import source: no offsets or runtime values are asserted.
+TYPE "MinimalPayload"
+VERSION : 0.1
+STRUCT
+ ready : Bool;
+ count : Int;
+ temperature : Real;
+END_STRUCT;
+END_TYPE

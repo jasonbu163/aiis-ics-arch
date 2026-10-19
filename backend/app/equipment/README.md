@@ -33,3 +33,20 @@ Explicit successor [e4f6a8b0c2d4](../../alembic/versions/20261016_1600_e4f6a8b0c
 The old `GET /equipment/temperature-control` still reads `equipment_temperature`, including its existing limit behavior. Existing frontend pages keep that old data source and do not display new HTTP observations automatically. There is no union, dual-write, old-row migration, writer shutdown or PLC provenance fabrication. Frontend/writer unification, retention, aggregation and field adoption need separate tasks.
 
 A source/no-DB checks and offline DDL do not prove MySQL persistence, constraints, precision or concurrency. The independent [MySQL entry](../../tests_mysql/test_equipment_temperature.py) runs only after explicit disposable target/actions approval, outside shared destructive conftest. Database (including SQLite), Docker, deployment and real-device actions remain separate gates. See the root [task spec](../../../plans/ARCH-BE-003-mapping-service-api-pilot/spec.md), [Development](../../../plans/ARCH-BE-003-mapping-service-api-pilot/tasks.md), and local [plan](PLAN.md).
+
+
+## HTTP dashboard sources
+
+New POST/GET `/equipment/drive-samples` and `/equipment/production-parameter-samples` use the HTTP domain above.
+Drive accepts at least one of twenty measurements; production parameters require exact coilNo and at least one
+of grade/entryTime/thickness/width/totalTime/weight/speed. processSteps is never writable. Same equipment/business
+key/source millisecond only fills existing NULL measurements; conflicting populated values return 409 atomically.
+GET requires equipmentId, optional positive recordId and limit 1–1000 (default 100), returning items and a dashboard
+from the same selected source row. Missing metrics never produce a zero deviation or normal status.
+
+GET `/equipment/temperature-sample-dashboard` reads only BE003 complete samples and retains its temperature
+read/scope rules; original temperature POST/GET remain unchanged. Dashboard histories retain recordId and full
+source time. The three equipment pages keep `dataSource=legacy|http` and `equipmentId` in the URL. Default legacy
+reads the old tables; external reporting requires a business equipment key and never falls back to legacy/mock.
+Switching sources clears the old data and ignores late responses. Legacy rows cannot be filtered by guessed PLC
+identity. TV/KM units remain unspecified; set values are observations, never control commands.

@@ -1,237 +1,50 @@
-<!--
-  File Path: /automation-world/data-acquisition-agent/src/App.vue
-  Description: Composition root for the Control Agent operations console
-  Main Features:
-    - Installs the Element Plus locale provider
-    - Mounts the CA-owned shell layout and section views
-    - Keeps runtime state and Tauri actions in the app composition layer
--->
+<!-- DAA 唯一local owner与纯壳；无桥/启动失败不伪造SQLite状态。 -->
 <template>
   <el-config-provider :locale="elementLocale">
-    <AgentLayout
-      :active-section="activeSection"
-      :backend-status-text="backendStatusText"
-      :is-dark-theme="isDarkTheme"
-      :locale-switch-label="localeSwitchLabel"
-      :mode-status-text="modeStatusText"
-      :runtime-snapshot="runtimeSnapshot"
-      :sections="consoleSections"
-      :theme-switch-label="themeSwitchLabel"
-      @refresh-runtime="refreshRuntime"
-      @select-section="handleSectionSelect"
-      @toggle-locale="toggleLocale"
-      @toggle-theme="toggleTheme"
-    >
-      <RuntimeOverviewView
-        v-if="activeSection === 'overview'"
-        :database-config-text="databaseConfigText"
-        :generated-at-text="generatedAtText"
-        :local-heartbeat-text="localHeartbeatText"
-        :operation-items="operationItems"
-        :runtime-snapshot="runtimeSnapshot"
-        :summary-items="summaryItems"
-      />
-
-      <CollectionStatusView
-        v-else-if="activeSection === 'collection'"
-        :collection-control-busy="collectionControlBusy"
-        :collection-control-result="collectionControlResult"
-        :collection-control-result-description="collectionControlResultDescription"
-        :collection-control-result-title="collectionControlResultTitle"
-        :collection-control-result-type="collectionControlResultType"
-        :collection-durations-text="collectionDurationsText"
-        :collection-gate-items="collectionGateItems"
-        :collection-message-text="collectionMessageText"
-        :collection-metric-items="collectionMetricItems"
-        :collection-page="collectionPage"
-        :collection-page-size="collectionPageSize"
-        :collection-start-disabled="collectionStartDisabled"
-        :collection-status-text="collectionStatusText"
-        :collection-stop-disabled="collectionStopDisabled"
-        :confirm-start-collection="confirmStartCollection"
-        :confirm-stop-collection="confirmStopCollection"
-        :format-collection-timing="formatCollectionTiming"
-        :format-group-counts="formatGroupCounts"
-        :format-optional="formatOptional"
-        :format-plc-endpoint="formatPlcEndpoint"
-        :is-plc-control-disabled="isPlcControlDisabled"
-        :paged-collection-groups="pagedCollectionGroups"
-        :plc-control-disabled-reason="plcControlDisabledReason"
-        :plc-collection-status-text="plcCollectionStatusText"
-        :plc-runtime-status-text="plcRuntimeStatusText"
-        :plc-sample-status-text="plcSampleStatusText"
-        :runtime-snapshot="runtimeSnapshot"
-        :run-plc-control="runPlcControl"
-        :snapshot-policy-message-text="snapshotPolicyMessageText"
-        :snapshot-policy-point-text="snapshotPolicyPointText"
-        :snapshot-policy-retention-text="snapshotPolicyRetentionText"
-        :snapshot-policy-status-text="snapshotPolicyStatusText"
-        :snapshot-policy-validation-text="snapshotPolicyValidationText"
-        :status-tag-type="statusTagType"
-        :table-page-size-options="tablePageSizeOptions"
-        @update:collection-page="setCollectionPage"
-        @update:collection-page-size="setCollectionPageSize"
-      />
-
-      <PlcDiagnosticsView
-        v-else-if="activeSection === 'plc'"
-        :format-plc-endpoint="formatPlcEndpoint"
-        :read-plc-sample-once="readPlcSampleOnce"
-        :paged-plc-samples="pagedPlcSamples"
-        :plc-contract-status-text="plcContractStatusText"
-        :plc-endpoint-probe-text="plcEndpointProbeText"
-        :plc-endpoint-text="plcEndpointText"
-        :plc-read-busy="plcReadBusy"
-        :plc-read-disabled-reason="plcReadDisabledReason"
-        :plc-read-message="plcReadMessage"
-        :plc-read-message-type="plcReadMessageType"
-        :plc-read-start-disabled="plcReadStartDisabled"
-        :plc-sample-value-count="plcSampleValueCount"
-        :plc-sample-read-text="plcSampleReadText"
-        :plc-collection-status-text="plcCollectionStatusText"
-        :plc-runtime-status-text="plcRuntimeStatusText"
-        :plc-sample-status-text="plcSampleStatusText"
-        :point-contract-issues-text="pointContractIssuesText"
-        :readable-writable-text="readableWritableText"
-        :runtime-snapshot="runtimeSnapshot"
-        :selected-plc-collection-status-text="selectedPlcCollectionStatusText"
-        :selected-plc-key="selectedPlcKey"
-        :selected-plc-point-summary-text="selectedPlcPointSummaryText"
-        :selected-plc-runtime-status-text="selectedPlcRuntimeStatusText"
-        :selected-plc-target-label="selectedPlcTargetLabel"
-        :sample-page="samplePage"
-        :sample-page-size="samplePageSize"
-        :status-tag-type="statusTagType"
-        :table-page-size-options="tablePageSizeOptions"
-        @update:sample-page="setSamplePage"
-        @update:sample-page-size="setSamplePageSize"
-        @update:selected-plc-key="setSelectedPlcKey"
-      />
-
-      <AuthorizationGateView
-        v-else-if="activeSection === 'gates'"
-        :authorization-gate-status-text="authorizationGateStatusText"
-        :authorization-gate-upper-system-text="authorizationGateUpperSystemText"
-        :authorization-self-test-text="authorizationSelfTestText"
-        :runtime-snapshot="runtimeSnapshot"
-      />
+    <Teleport to="body"><div class="aw-ui aw-sample-overlays" :data-aw-theme="agentTheme"><div id="daa-feedback"></div></div></Teleport>
+    <AgentLayout :active-section="activeSection" :app-locale="appLocale" :refresh-busy="local.busy"
+      :backend-status-text="t('common.local.uploadPending')" :is-dark-theme="isDarkTheme"
+      :locale-switch-label="localeSwitchLabel" :mode-status-text="t('common.local.mode')"
+      :identity-detail="identityDetail" :sections="consoleSections" :theme-switch-label="themeSwitchLabel"
+      @refresh-runtime="local.refresh()" @select-section="selectConsoleSection" @toggle-locale="toggleLocale" @toggle-theme="toggleTheme">
+      <div class="console-stack">
+        <el-alert v-if="!local.available" :title="t(bootstrapError ? 'common.local.bootstrapFailed' : 'common.local.desktopPreview')"
+          :description="bootstrapError ? local.label(bootstrapError) : t('common.local.desktopPreviewHelp')" :closable="false" :type="bootstrapError ? 'error' : 'info'" show-icon />
+        <el-alert v-if="bootstrap.ignoredKeys.length" :title="t('common.local.retiredKeys')" :description="bootstrap.ignoredKeys.join(', ')" type="info" :closable="false" />
+        <template v-if="local.available">
+          <ConfigRevisionBar />
+          <template v-if="activeSection === 'workbench'"><RuntimeOverviewView /><CollectionStatusView /></template>
+          <PlcDiagnosticsView v-else-if="activeSection === 'plc-config'" @open-points="selectConsoleSection('points-groups')" />
+          <PlcPointsView v-else-if="activeSection === 'points-groups'" />
+          <StorageView v-else-if="activeSection === 'reporting-storage'" />
+        </template>
+      </div>
     </AgentLayout>
-
-    <ConsoleOperationDialog
-      v-model="operationDialogVisible"
-      :cancel-label-key="operationDialog.cancelLabelKey"
-      :confirm-label-key="operationDialog.confirmLabelKey"
-      :loading="operationDialogBusy"
-      :message-key="operationDialog.messageKey"
-      :message-params="operationDialog.messageParams"
-      :title-key="operationDialog.titleKey"
-      :confirm-tone="operationDialog.confirmTone"
-      :tone="operationDialog.tone"
-      @confirm="confirmOperationDialog"
-    />
   </el-config-provider>
 </template>
-
 <script setup lang="ts">
-import AgentLayout from './layouts/AgentLayout.vue'
-import CollectionStatusView from './app/collection/views/status/index.vue'
-import AuthorizationGateView from './app/gates/views/authorization/index.vue'
-import PlcDiagnosticsView from './app/plc/views/diagnostics/index.vue'
-import RuntimeOverviewView from './app/runtime/views/overview/index.vue'
-import ConsoleOperationDialog from './components/console/ConsoleOperationDialog.vue'
+import { computed, provide } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { bootstrap, bootstrapError } from './services/localAcquisition'
+import { useAgentConsoleShell } from './console/composables/useAgentConsoleShell'
+import { localConsoleKey, useLocalAcquisitionConsole } from './console/composables/useLocalAcquisitionConsole'
+import type { ConsoleSectionId } from './console/types'
 import { consoleSections } from './console/sections'
-import { useControlAgentConsole } from './console/composables/useControlAgentConsole'
-
-const {
-  activeSection,
-  authorizationGateStatusText,
-  authorizationGateUpperSystemText,
-  authorizationSelfTestText,
-  backendStatusText,
-  collectionControlBusy,
-  collectionControlResult,
-  collectionControlResultDescription,
-  collectionControlResultTitle,
-  collectionControlResultType,
-  collectionDurationsText,
-  collectionGateItems,
-  collectionMessageText,
-  collectionMetricItems,
-  collectionPage,
-  collectionPageSize,
-  collectionStartDisabled,
-  collectionStatusText,
-  collectionStopDisabled,
-  confirmOperationDialog,
-  confirmStartCollection,
-  confirmStopCollection,
-  databaseConfigText,
-  elementLocale,
-  formatCollectionTiming,
-  formatGroupCounts,
-  formatOptional,
-  formatPlcEndpoint,
-  generatedAtText,
-  handleSectionSelect,
-  isDarkTheme,
-  isPlcControlDisabled,
-  plcControlDisabledReason,
-  localHeartbeatText,
-  localeSwitchLabel,
-  modeStatusText,
-  operationDialog,
-  operationDialogBusy,
-  operationDialogVisible,
-  operationItems,
-  pagedCollectionGroups,
-  pagedPlcSamples,
-  plcCollectionStatusText,
-  plcContractStatusText,
-  plcEndpointProbeText,
-  plcEndpointText,
-  plcReadBusy,
-  plcReadDisabledReason,
-  plcReadMessage,
-  plcReadMessageType,
-  plcReadStartDisabled,
-  plcSampleValueCount,
-  plcRuntimeStatusText,
-  plcSampleStatusText,
-  plcSampleReadText,
-  pointContractIssuesText,
-  readableWritableText,
-  readPlcSampleOnce,
-  refreshRuntime,
-  runtimeSnapshot,
-  samplePage,
-  samplePageSize,
-  selectedPlcCollectionStatusText,
-  selectedPlcKey,
-  selectedPlcPointSummaryText,
-  selectedPlcRuntimeStatusText,
-  selectedPlcTargetLabel,
-  setSelectedPlcKey,
-  setCollectionPageSize,
-  setSamplePageSize,
-  snapshotPolicyMessageText,
-  snapshotPolicyPointText,
-  snapshotPolicyRetentionText,
-  snapshotPolicyStatusText,
-  snapshotPolicyValidationText,
-  statusTagType,
-  runPlcControl,
-  summaryItems,
-  tablePageSizeOptions,
-  themeSwitchLabel,
-  toggleLocale,
-  toggleTheme
-} = useControlAgentConsole()
-
-function setCollectionPage(page: number) {
-  collectionPage.value = page
-}
-
-function setSamplePage(page: number) {
-  samplePage.value = page
+import AgentLayout from './layouts/AgentLayout.vue'
+import ConfigRevisionBar from './components/console/ConfigRevisionBar.vue'
+import RuntimeOverviewView from './app/runtime/views/overview/index.vue'
+import CollectionStatusView from './app/collection/views/status/index.vue'
+import PlcDiagnosticsView from './app/plc/views/diagnostics/index.vue'
+import PlcPointsView from './app/plc/views/points/index.vue'
+import StorageView from './app/collection/views/storage/index.vue'
+const { t } = useI18n()
+const { activeSection, appLocale, elementLocale, localeSwitchLabel, toggleLocale, agentTheme, isDarkTheme, themeSwitchLabel, toggleTheme } = useAgentConsoleShell()
+const local = useLocalAcquisitionConsole()
+provide(localConsoleKey, local)
+const identityDetail = computed(() => `${bootstrap.version ?? '—'} · ${t('common.local.mode')}`)
+async function selectConsoleSection(section: ConsoleSectionId) {
+  if (section === activeSection.value) return
+  if (local.editing && !(await local.confirmAction('common.local.discardEditorConfirm'))) return
+  activeSection.value = section
 }
 </script>

@@ -21,6 +21,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
+from app.performance.models.mapping_ingest import identifier_type, millisecond_type, binary_key_type
 
 
 class Performance(Base):
@@ -29,6 +30,8 @@ class Performance(Base):
 
     __table_args__ = (
         UniqueConstraint("device_id", "coil_no", name="uq_performance_main_device_coil"),
+        UniqueConstraint("equipment_id", "http_coil_key", name="uq_performance_main_http_business"),
+        UniqueConstraint("id", "equipment_id", name="uq_performance_main_http_target"),
         Index(
             "ix_performance_main_device_observation_status",
             "device_id",
@@ -36,6 +39,10 @@ class Performance(Base):
         ),
     )
 
+    equipment_id: Mapped[str | None] = mapped_column(identifier_type(), nullable=True)
+    http_coil_key: Mapped[bytes | None] = mapped_column(binary_key_type(), nullable=True)
+    reported_start_time: Mapped[datetime | None] = mapped_column(millisecond_type(), nullable=True)
+    reported_end_time: Mapped[datetime | None] = mapped_column(millisecond_type(), nullable=True)
     id: Mapped[int] = mapped_column(primary_key=True, index=True, autoincrement=True)
     plan_id: Mapped[int | None] = mapped_column(ForeignKey("plans.id"), nullable=True)
     coil_no: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -49,8 +56,8 @@ class Performance(Base):
     production_date: Mapped[date] = mapped_column(nullable=False)
     start_time: Mapped[datetime | None] = mapped_column(nullable=True)
     end_time: Mapped[datetime | None] = mapped_column(nullable=True)
-    output_quantity: Mapped[Decimal] = mapped_column(Numeric(10, 4), nullable=False, default=0)
-    qualified_quantity: Mapped[Decimal] = mapped_column(Numeric(10, 4), nullable=False, default=0)
+    output_quantity: Mapped[Decimal | None] = mapped_column(Numeric(10, 4), nullable=True, default=0)
+    qualified_quantity: Mapped[Decimal | None] = mapped_column(Numeric(10, 4), nullable=True, default=0)
     efficiency_rate: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), default=0, server_default="0.00")
     quality_score: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), default=0, server_default="0.00")
     collected_weight: Mapped[Decimal | None] = mapped_column(Numeric(10, 4), nullable=True)
@@ -69,8 +76,8 @@ class Performance(Base):
     device_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     observation_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
     record_source: Mapped[str | None] = mapped_column(String(32), nullable=True)
-    first_observed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    last_observed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    first_observed_at: Mapped[datetime | None] = mapped_column(millisecond_type(), nullable=True)
+    last_observed_at: Mapped[datetime | None] = mapped_column(millisecond_type(), nullable=True)
     first_raw_snapshot_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     last_raw_snapshot_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     plc_key: Mapped[str | None] = mapped_column(String(80), nullable=True)
@@ -108,6 +115,12 @@ class Split(Base):
 class ProcessTemperature(Base):
     """温度过程数据模型"""
     __tablename__ = "performance_process_temperature"
+    __table_args__ = (
+        UniqueConstraint("equipment_id", "performance_id", "http_zone_key", "record_time", name="uq_process_temperature_http_business"),
+        UniqueConstraint("id", "equipment_id", "performance_id", name="uq_process_temperature_http_target"),
+    )
+    equipment_id: Mapped[str | None] = mapped_column(identifier_type(), nullable=True)
+    http_zone_key: Mapped[bytes | None] = mapped_column(binary_key_type(), nullable=True)
     
     id: Mapped[int] = mapped_column(primary_key=True, index=True, autoincrement=True)
     performance_id: Mapped[int] = mapped_column(ForeignKey('performance_main.id'), nullable=False, index=True)
@@ -117,7 +130,7 @@ class ProcessTemperature(Base):
     min_temp: Mapped[Decimal | None] = mapped_column(Numeric(8, 2))
     avg_temp: Mapped[Decimal | None] = mapped_column(Numeric(8, 2))
     duration: Mapped[Decimal | None] = mapped_column()
-    record_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    record_time: Mapped[datetime] = mapped_column(millisecond_type(), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -127,6 +140,12 @@ class ProcessTemperature(Base):
 class ProcessTension(Base):
     """张力过程数据模型"""
     __tablename__ = "performance_process_tension"
+    __table_args__ = (
+        UniqueConstraint("equipment_id", "performance_id", "http_zone_key", "record_time", name="uq_process_tension_http_business"),
+        UniqueConstraint("id", "equipment_id", "performance_id", name="uq_process_tension_http_target"),
+    )
+    equipment_id: Mapped[str | None] = mapped_column(identifier_type(), nullable=True)
+    http_zone_key: Mapped[bytes | None] = mapped_column(binary_key_type(), nullable=True)
     
     id: Mapped[int] = mapped_column(primary_key=True, index=True, autoincrement=True)
     performance_id: Mapped[int] = mapped_column(ForeignKey('performance_main.id'), nullable=False, index=True)
@@ -135,7 +154,7 @@ class ProcessTension(Base):
     avg_tension: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     max_tension: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     min_tension: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
-    record_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    record_time: Mapped[datetime] = mapped_column(millisecond_type(), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -145,6 +164,12 @@ class ProcessTension(Base):
 class ProcessSpeed(Base):
     """速度过程数据模型"""
     __tablename__ = "performance_process_speed"
+    __table_args__ = (
+        UniqueConstraint("equipment_id", "performance_id", "http_zone_key", "record_time", name="uq_process_speed_http_business"),
+        UniqueConstraint("id", "equipment_id", "performance_id", name="uq_process_speed_http_target"),
+    )
+    equipment_id: Mapped[str | None] = mapped_column(identifier_type(), nullable=True)
+    http_zone_key: Mapped[bytes | None] = mapped_column(binary_key_type(), nullable=True)
     
     id: Mapped[int] = mapped_column(primary_key=True, index=True, autoincrement=True)
     performance_id: Mapped[int] = mapped_column(ForeignKey('performance_main.id'), nullable=False, index=True)
@@ -152,7 +177,7 @@ class ProcessSpeed(Base):
     set_speed: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     avg_speed: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     max_speed: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
-    record_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    record_time: Mapped[datetime] = mapped_column(millisecond_type(), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
 

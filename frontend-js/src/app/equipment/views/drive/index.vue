@@ -16,6 +16,7 @@
           {{ $t('common.refresh') }}
         </ActionButton>
       </template>
+      <BusinessDataSourceSelect v-model="sourceSelection" />
 
       <section class="drive-content-section">
         <BaseCard class="drive-table-card" :title="$t('equipment.driveParams.processParams')" compact>
@@ -97,7 +98,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import BusinessDataSourceSelect from '@/components/BusinessDataSourceSelect.vue'
+import { parseBusinessDataSource, businessDataSourceQuery, createRequestGeneration } from '@/utils/businessDataSource.mjs'
+
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import { Refresh } from '@element-plus/icons-vue'
@@ -106,37 +111,45 @@ import ActionButton from '@/components/common/ActionButton.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const sourceSelection = computed({
+  get: () => parseBusinessDataSource(route.query),
+  set: value => router.replace({ query: businessDataSourceQuery(route.query, value) })
+})
+const requestGeneration = createRequestGeneration()
+
 let updateTimer = null
 const loading = ref(false)
 
 const processParams = ref([
-  { id: 'tv', nameKey: 'equipment.driveParams.tv', kind: 'single', value: 1250, unit: '', decimals: 0 },
-  { id: 'km', nameKey: 'equipment.driveParams.km', kind: 'single', value: 0.85, unit: '', decimals: 2 },
-  { id: 'oxygen', nameKey: 'equipment.driveParams.oxygen', kind: 'single', value: 8, unit: 'ppm', decimals: 0 },
-  { id: 'mufflePressure', nameKey: 'equipment.driveParams.mufflePressure', kind: 'single', value: 150, unit: 'Pa', decimals: 0 },
-  { id: 'dewPoint', nameKey: 'equipment.driveParams.dewPoint', kind: 'compare', set: -45, actual: -46, deviation: -1, status: 'normal', unit: '℃', decimals: 2 },
-  { id: 'nh3Flow', nameKey: 'equipment.driveParams.nh3Flow', kind: 'compare', set: 50, actual: 49, deviation: -1, status: 'normal', unit: 'm³/h', decimals: 2 },
-  { id: 'ngFlow', nameKey: 'equipment.driveParams.ngFlow', kind: 'compare', set: 120, actual: 118, deviation: -2, status: 'normal', unit: 'm³/h', decimals: 2 }
+  { id: 'tv', nameKey: 'equipment.driveParams.tv', kind: 'single', value: null, unit: '', decimals: 0 },
+  { id: 'km', nameKey: 'equipment.driveParams.km', kind: 'single', value: null, unit: '', decimals: 2 },
+  { id: 'oxygen', nameKey: 'equipment.driveParams.oxygen', kind: 'single', value: null, unit: 'ppm', decimals: 0 },
+  { id: 'mufflePressure', nameKey: 'equipment.driveParams.mufflePressure', kind: 'single', value: null, unit: 'Pa', decimals: 0 },
+  { id: 'dewPoint', nameKey: 'equipment.driveParams.dewPoint', kind: 'compare', set: null, actual: null, deviation: null, status: null, unit: '℃', decimals: 2 },
+  { id: 'nh3Flow', nameKey: 'equipment.driveParams.nh3Flow', kind: 'compare', set: null, actual: null, deviation: null, status: null, unit: 'm³/h', decimals: 2 },
+  { id: 'ngFlow', nameKey: 'equipment.driveParams.ngFlow', kind: 'compare', set: null, actual: null, deviation: null, status: null, unit: 'm³/h', decimals: 2 }
 ])
 
 const tensionParams = ref([
-  { id: 'uncoiler', nameKey: 'equipment.driveParams.tension.uncoiler', set: 15, actual: 14.8, deviation: -0.2, status: 'normal' },
-  { id: 'entryLooper', nameKey: 'equipment.driveParams.tension.entryLooper', set: 12, actual: 12.1, deviation: 0.1, status: 'normal' },
-  { id: 'furnace', nameKey: 'equipment.driveParams.tension.furnace', set: 10, actual: 9.8, deviation: -0.2, status: 'normal' },
-  { id: 'exitLooper', nameKey: 'equipment.driveParams.tension.exitLooper', set: 12, actual: 12.2, deviation: 0.2, status: 'normal' },
-  { id: 'recoiler', nameKey: 'equipment.driveParams.tension.recoiler', set: 18, actual: 17.9, deviation: -0.1, status: 'normal' }
+  { id: 'uncoiler', nameKey: 'equipment.driveParams.tension.uncoiler', set: null, actual: null, deviation: null, status: null },
+  { id: 'entryLooper', nameKey: 'equipment.driveParams.tension.entryLooper', set: null, actual: null, deviation: null, status: null },
+  { id: 'furnace', nameKey: 'equipment.driveParams.tension.furnace', set: null, actual: null, deviation: null, status: null },
+  { id: 'exitLooper', nameKey: 'equipment.driveParams.tension.exitLooper', set: null, actual: null, deviation: null, status: null },
+  { id: 'recoiler', nameKey: 'equipment.driveParams.tension.recoiler', set: null, actual: null, deviation: null, status: null }
 ])
 
 const hasValue = (value) => value !== undefined && value !== null
 
 const getStatusText = (status) => {
-  return t(`equipment.driveParams.status.${status || 'normal'}`)
+  return status ? t(`equipment.driveParams.status.${status}`) : '-'
 }
 
 const getTagType = (status) => {
   if (status === 'danger') return 'danger'
   if (status === 'warning') return 'warning'
-  return 'success'
+  return status ? 'success' : 'info'
 }
 
 const getValueClass = (row) => {
@@ -144,7 +157,7 @@ const getValueClass = (row) => {
 }
 
 const formatValue = (value, decimals = 0) => {
-  if (!hasValue(value)) return ''
+  if (!hasValue(value)) return '-'
   return Number(value).toFixed(decimals)
 }
 
@@ -155,7 +168,7 @@ const formatCurrentValue = (row) => {
 }
 
 const formatSignedValue = (value, decimals = 2) => {
-  if (!hasValue(value)) return ''
+  if (!hasValue(value)) return '-'
   const number = Number(value)
   return `${number > 0 ? '+' : ''}${number.toFixed(decimals)}`
 }
@@ -165,17 +178,22 @@ const handleRefresh = () => {
 }
 
 const loadData = async () => {
+  const generation = requestGeneration.begin()
+  if (!sourceSelection.value.ready) { clearSourceData(); loading.value = false; return }
   loading.value = true
   try {
-    const data = await getDriveData()
+    const data = await getDriveData(sourceSelection.value)
+    if (!requestGeneration.isCurrent(generation)) return
     if (data) {
       mapApiData(data)
     }
   } catch (error) {
+    if (!requestGeneration.isCurrent(generation)) return
+    clearSourceData()
     console.error('Failed to load drive data:', error)
     ElMessage.error(t('common.error'))
   } finally {
-    loading.value = false
+    if (requestGeneration.isCurrent(generation)) loading.value = false
   }
 }
 
@@ -246,7 +264,18 @@ const updateData = () => {
   loadData()
 }
 
+const clearSourceData = () => {
+  processParams.value.forEach(row => Object.assign(row, { value:null, set:null, actual:null, deviation:null, status:null }))
+  tensionParams.value.forEach(row => Object.assign(row, { set:null, actual:null, deviation:null, status:null }))
+}
+watch(() => [route.query.dataSource, route.query.equipmentId], () => {
+  requestGeneration.invalidate()
+  clearSourceData()
+  loadData()
+})
+
 onMounted(() => {
+  clearSourceData()
   loadData()
   updateTimer = setInterval(updateData, 3000)
 })

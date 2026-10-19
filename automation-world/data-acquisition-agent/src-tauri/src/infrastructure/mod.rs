@@ -1,16 +1,11 @@
-//! File Path: /automation-world/data-acquisition-agent/src-tauri/src/infrastructure/mod.rs
-//! Description: Infrastructure adapter module registry
-//! Main Features:
-//!   - Groups PLC snapshot database adapters
-//!   - Groups PLC driver, decoder, point and S7 helpers
-//!   - Keeps external protocol details out of services and Tauri commands
-
-pub(crate) mod database;
-pub(crate) mod logging;
-pub(crate) mod minimal_s7_adapter;
-pub(crate) mod plc_client;
-pub(crate) mod plc_decode;
-pub(crate) mod plc_points;
-pub(crate) mod plc_s7;
-pub(crate) mod plc_snapshot_policy;
-pub(crate) mod rust_snap7_adapter;
+//! DAA SQLite唯一执行图；旧YAML/直库运行模块保留源码但不注册。
+pub(crate) mod local_decode;
+#[cfg(any(test, feature = "local-validation"))]
+pub(crate) mod local_fixture;
+pub(crate) mod local_logging;
+pub(crate) mod local_profile_lock;
+pub(crate) mod local_store;
+pub(crate) mod managed_s7;
+pub(crate) mod plc_layout;
+pub(crate) mod tia_source;
+pub(crate) mod yaml_migration;

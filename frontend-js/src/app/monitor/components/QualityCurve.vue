@@ -49,11 +49,11 @@ const props = defineProps({
 const tableData = computed(() => {
   const latest = props.data.latest || {}
   return [
-    { parameter: t('monitor.qualityCurve.parameters.h2Flow'), value: latest.h2Flow || 0, unit: 'm³/h' },
-    { parameter: t('monitor.qualityCurve.parameters.n2Flow'), value: latest.n2Flow || 0, unit: 'm³/h' },
-    { parameter: t('monitor.qualityCurve.parameters.oxygen'), value: latest.oxygen || 0, unit: 'ppm' },
-    { parameter: t('monitor.qualityCurve.parameters.dewPoint'), value: latest.dewPoint || 0, unit: '℃' },
-    { parameter: t('monitor.qualityCurve.parameters.pressure'), value: latest.pressure || 0, unit: 'Pa' },
+    { parameter: t('monitor.qualityCurve.parameters.h2Flow'), value: latest.h2Flow ?? '-', unit: 'm³/h' },
+    { parameter: t('monitor.qualityCurve.parameters.n2Flow'), value: latest.n2Flow ?? '-', unit: 'm³/h' },
+    { parameter: t('monitor.qualityCurve.parameters.oxygen'), value: latest.oxygen ?? '-', unit: 'ppm' },
+    { parameter: t('monitor.qualityCurve.parameters.dewPoint'), value: latest.dewPoint ?? '-', unit: '℃' },
+    { parameter: t('monitor.qualityCurve.parameters.pressure'), value: latest.pressure ?? '-', unit: 'Pa' },
   ]
 })
 

@@ -25,6 +25,7 @@ def get_by_process_key_for_update(
     result = db.execute(
         select(ProcessTension)
         .where(
+            ProcessTension.equipment_id.is_(None),
             ProcessTension.performance_id == performance_id,
             ProcessTension.zone == zone,
             ProcessTension.record_time == record_time,

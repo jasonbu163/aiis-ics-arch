@@ -6,6 +6,8 @@ Source: DTB TSS a87c107c10e8d9d9d3e389e357b50d203d2aebf7. Lifecycle belongs to [
 
 SMA retains generic HTTP facts/materials/targets/mapping logic and the applicable TSS UI. Customer/SQL/legacy IPC and cross-DTB help generation are excluded. Existing /api/tss/v1 and collection-facts HTTP contracts remain unchanged; no backend is bundled.
 
+The [SMA detailed design](../../docs/AIIS_SMA_Detailed_Design.md) defines the target local SQLite authority, form-based bindings, API materials/manual targets, definition checks, persistent progress/outbox and reliable API delivery. Its [DAA counterpart](../../docs/AIIS_DAA_Detailed_Design.md) defines facts and the Backend retention window. Current Backend-held TSS configuration and HTTP compatibility remain the baseline; these target capabilities require separate approved implementation tasks.
+
 ```bash
 pnpm install --frozen-lockfile
 pnpm build

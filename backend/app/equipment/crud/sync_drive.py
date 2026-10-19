@@ -18,7 +18,7 @@ def get_by_timestamp_for_update(db: Session, *, timestamp: datetime) -> Equipmen
     """Lock one drive row by the r1 timestamp idempotency key."""
     result = db.execute(
         select(EquipmentDrive)
-        .where(EquipmentDrive.timestamp == timestamp)
+        .where(EquipmentDrive.equipment_id.is_(None), EquipmentDrive.timestamp == timestamp)
         .with_for_update()
     )
     return result.scalar_one_or_none()

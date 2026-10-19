@@ -11,10 +11,10 @@ import PlcDiagnosticsView from './views/diagnostics/index.vue'
 import type { ConsoleSectionManifest } from '../../console/types'
 
 export const plcSectionManifest = {
-  id: 'plc',
-  titleKey: 'navigation.plc',
+  id: 'plc-config',
+  titleKey: 'navigation.plcConfig',
   icon: Cpu,
-  order: 30,
+  order: 20,
   component: PlcDiagnosticsView
 } satisfies ConsoleSectionManifest
 

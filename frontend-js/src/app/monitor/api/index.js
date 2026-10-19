@@ -9,13 +9,18 @@
 import request from '@/utils/request'
 import { callApi } from '@/api/mockMode'
 import * as mockApi from './mock'
+import { requireBusinessSource } from '@/utils/businessDataSource.mjs'
 
 /**
  * 获取温度监控数据
  * @param {Object} params - 查询参数
  * @returns {Promise<Object>} 温度监控数据
  */
-export async function getTemperatureData(params) {
+export async function getTemperatureData(params = {}) {
+  const selected = requireBusinessSource(params)
+  if (selected.dataSource === 'http') {
+    return request.get('/monitor/process-curve-samples', { params: { equipmentId: selected.equipmentId, date: params.date, recordId: params.recordId, limit: params.limit } })
+  }
   return callApi(() => mockApi.getTemperatureData(params), () => request.get('/monitor/temperature', { params }), 'monitor.getTemperatureData')
 }
 

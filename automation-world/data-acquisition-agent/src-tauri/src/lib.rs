@@ -1,9 +1,12 @@
 //! File Path: /automation-world/data-acquisition-agent/src-tauri/src/lib.rs
-//! Description: Control Agent Tauri runtime composition root
+//! Description: DAA SQLite唯一Tauri composition root
 //! Main Features:
 //!   - Registers internal Rust modules
 //!   - Registers Tauri command adapters
 //!   - Starts the AIIS Data Acquisition Agent desktop runtime
+
+#[cfg(all(feature = "local-validation", not(debug_assertions)))]
+compile_error!("local-validation is forbidden in release builds");
 
 mod commands;
 mod config;
@@ -11,93 +14,19 @@ mod domain;
 mod infrastructure;
 mod services;
 
-pub(crate) fn autostart_plc_collection_loop_from_env() {
-    let config = crate::config::AgentConfig::load();
-
-    let mode = services::plc_collection::plc_autostart_mode(&config);
-    if mode == "stopped" {
-        return;
+/// 旧CLI/headless入口在配置、锁及任何设备I/O之前拒绝。
+pub fn run_headless_command(args: impl IntoIterator<Item = String>) -> Result<bool, String> {
+    if args.into_iter().any(|arg| arg.starts_with("--ca-")) {
+        return Err("legacy_entry_retired".into());
     }
-
-    let env_errors = services::plc_collection::plc_autostart_gate_errors(&config);
-    if !env_errors.is_empty() {
-        tracing::warn!(
-            event = "plc_collection_startup_autostart_rejected",
-            accepted = false,
-            running = false,
-            status = "blocked",
-            message = "blocked_by_env_conflict",
-            gate_errors = ?env_errors,
-        );
-        return;
-    }
-
-    let result = match mode.as_str() {
-        "read_only" => services::plc_collection::start_plc_read_from_console(),
-        "collect" => services::plc_collection::start_plc_collection_from_console(),
-        _ => return,
-    };
-
-    tracing::info!(
-        event = "plc_collection_startup_autostart",
-        accepted = result.accepted,
-        running = result.running,
-        status = %result.status,
-        message = %result.message,
-        gate_errors = ?result.gate_errors,
-    );
+    Ok(false)
 }
-
-pub fn run_headless_command(args: impl IntoIterator<Item = String>) -> bool {
-    let args = args.into_iter().collect::<Vec<_>>();
-
-    if args
-        .iter()
-        .any(|arg| arg == "--ca-collect-plc-snapshots-once")
-    {
-        let result = services::plc_collection::collect_plc_db_blocks_once();
-        println!(
-            "{}",
-            serde_json::to_string(&result).unwrap_or_else(|_| {
-                "{\"status\":\"failed\",\"message\":\"serialize_failed\"}".to_string()
-            })
-        );
-        return true;
-    }
-
-    if args
-        .iter()
-        .any(|arg| arg == "--ca-collect-plc-snapshots-loop")
-    {
-        let result = services::plc_collection::collect_plc_db_blocks_loop();
-        println!(
-            "{}",
-            serde_json::to_string(&result).unwrap_or_else(|_| {
-                "{\"status\":\"failed\",\"message\":\"serialize_failed\"}".to_string()
-            })
-        );
-        return true;
-    }
-
-    if args
-        .iter()
-        .any(|arg| arg == "--ca-smoke-plc-collection-loop")
-    {
-        let result = services::plc_collection::smoke_plc_collection_loop_from_console();
-        println!(
-            "{}",
-            serde_json::to_string(&result).unwrap_or_else(|_| {
-                "{\"status\":\"failed\",\"message\":\"serialize_failed\"}".to_string()
-            })
-        );
-        return true;
-    }
-
-    false
-}
-
 pub fn run_headless_runtime() -> i32 {
-    commands::headless_runtime::run()
+    eprintln!(
+        "{}",
+        serde_json::json!({"event":"legacy_entry_rejected","process":"daa","resource":"headless","result":"rejected","error_code":"legacy_entry_retired","next":"Use pnpm tauri dev; YAML is a one-time migration source"})
+    );
+    2
 }
 
 #[cfg(test)]
@@ -155,37 +84,54 @@ mod boundary_tests {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let config = config::AgentConfig::load();
-    let logging_guards = infrastructure::logging::init_logging(&config);
-    infrastructure::logging::emit_startup_event(&config);
-
+    let bootstrap = config::local_bootstrap::current()
+        .cloned()
+        .unwrap_or_else(|| {
+            config::local_bootstrap::load(std::env::args().skip(1).collect())
+                .expect("invalid runtime bootstrap")
+        });
+    let local = services::local_recovery::open(bootstrap.clone()).expect("local runtime refused");
+    let shutdown = local.clone();
     tauri::Builder::default()
-        .manage(logging_guards)
-        .setup(|_app| {
-            autostart_plc_collection_loop_from_env();
-            Ok(())
+        .manage(commands::local_acquisition::LocalState {
+            bootstrap,
+            engine: Some(local),
         })
         .invoke_handler(tauri::generate_handler![
-            commands::plc_collection::start_plc_read,
-            commands::plc_collection::start_plc_read_for_plc,
-            commands::plc_collection::stop_plc_read,
-            commands::plc_collection::stop_plc_read_for_plc,
-            commands::plc_collection::enable_plc_persistence,
-            commands::plc_collection::enable_plc_persistence_for_plc,
-            commands::plc_collection::pause_plc_persistence,
-            commands::plc_collection::pause_plc_persistence_for_plc,
-            commands::plc_collection::start_plc_collection,
-            commands::plc_collection::start_plc_collection_for_plc,
-            commands::plc_collection::stop_plc_collection,
-            commands::plc_collection::stop_plc_collection_for_plc,
-            commands::plc_collection::start_plc_collection_loop,
-            commands::plc_collection::start_plc_collection_loop_for_plc,
-            commands::plc_collection::stop_plc_collection_loop,
-            commands::plc_collection::stop_plc_collection_loop_for_plc,
-            commands::plc_diagnostics::read_plc_samples_once,
-            commands::plc_diagnostics::read_plc_samples_once_for_plc,
-            commands::runtime_snapshot::get_runtime_snapshot
+            commands::local_acquisition::daa_get_bootstrap,
+            commands::local_acquisition::daa_get_configuration,
+            commands::local_acquisition::daa_get_yaml_migration,
+            commands::local_acquisition::daa_retry_yaml_migration,
+            commands::local_acquisition::daa_save_draft,
+            commands::local_acquisition::daa_import_sources,
+            commands::local_acquisition::daa_preview_offsets,
+            commands::local_acquisition::daa_confirm_offsets,
+            commands::local_acquisition::daa_activate_configuration,
+            commands::local_acquisition::daa_set_connection,
+            commands::local_acquisition::daa_set_collection,
+            commands::local_acquisition::daa_test_connection,
+            commands::local_acquisition::daa_diagnose_point,
+            commands::local_acquisition::daa_get_local_snapshot,
+            commands::local_acquisition::daa_list_history,
+            commands::local_acquisition::daa_get_sample,
+            commands::local_acquisition::daa_get_logs
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running AIIS Data Acquisition Agent");
+        .build(tauri::generate_context!())
+        .expect("error while building AIIS Data Acquisition Agent")
+        .run(move |_app, event| {
+            if matches!(
+                event,
+                tauri::RunEvent::ExitRequested { .. } | tauri::RunEvent::Exit
+            ) {
+                shutdown.shutdown();
+            }
+        });
+}
+
+#[cfg(feature = "local-validation")]
+pub fn run_local_validation_command(args: Vec<String>) -> i32 {
+    commands::local_validation::run(args)
+}
+pub fn prepare_runtime(args: Vec<String>) -> Result<(), String> {
+    config::local_bootstrap::load(args).map(|_| ())
 }

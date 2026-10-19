@@ -1,0 +1,56 @@
+// Handwritten public synthetic sources, unrelated to site inputs.
+DATA_BLOCK "Alpha"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+NON_RETAIN
+VAR
+ ready { S7_SetPoint := 'False' } : BOOL;
+ count : INT := 7;
+END_VAR
+BEGIN
+END_DATA_BLOCK
+
+DATA_BLOCK "Beta"
+{ S7_Optimized_Access := 'FALSE' }
+VERSION : 0.1
+RETAIN
+VAR
+ unit : "Measure";
+ bytes : ARRAY[3..4] OF BYTE;
+END_VAR
+BEGIN
+END_DATA_BLOCK
+
+DATA_BLOCK "Gamma"
+{ S7_Optimized_Access := 'FALSE' }
+VAR
+ box : STRUCT flag: BOOL; code: BYTE; END_STRUCT;
+ tail : WORD;
+END_VAR
+BEGIN
+END_DATA_BLOCK
+
+DATA_BLOCK "Delta"
+{ S7_Optimized_Access := 'FALSE' }
+VAR
+ frame : "Frame";
+END_VAR
+BEGIN
+END_DATA_BLOCK
+
+DATA_BLOCK "Epsilon"
+{ S7_Optimized_Access := 'FALSE' }
+VAR
+ items : ARRAY[-1..0] OF STRUCT code: BYTE; flag: BOOL; END_STRUCT;
+END_VAR
+BEGIN
+END_DATA_BLOCK
+
+DATA_BLOCK "Zeta"
+{ S7_Optimized_Access := 'FALSE' }
+VAR
+ part : "Spare";
+ label : STRING[8];
+END_VAR
+BEGIN
+END_DATA_BLOCK

@@ -1,0 +1,22 @@
+// Handwritten public UDT definitions; no field permissions or initial sampling values.
+TYPE "Measure"
+VERSION : 0.1
+STRUCT
+ running { S7_SetPoint := 'tRuE' } : BOOL;
+ value : REAL;
+END_STRUCT;
+END_TYPE
+TYPE "Frame"
+VERSION : 0.1
+STRUCT
+ sample : "Measure";
+ status : WORD;
+END_STRUCT;
+END_TYPE
+TYPE "Spare"
+VERSION : 0.1
+STRUCT
+ code : USINT;
+ ready : BOOL;
+END_STRUCT;
+END_TYPE

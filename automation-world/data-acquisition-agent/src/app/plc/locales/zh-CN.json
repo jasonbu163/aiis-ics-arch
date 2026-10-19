@@ -33,7 +33,7 @@
   "aggregatePointValues": "全部 PLC 共 {groups} 个 group / {points} 个点位",
   "selectOneForSample": "样本读取请选择一个具体 PLC。",
   "controls": {
-    "readOnce": "读取一次",
+    "readOnce": "读取所选 PLC 样本一次",
     "select": "选择",
     "selected": "已选择",
     "startRead": "启动读取",
@@ -97,5 +97,38 @@
       "failed": "失败",
       "stopped": "已停止"
     }
+  },
+  "currentConfiguration": "当前连接配置（只读）",
+  "openPoints": "查看点位与样本",
+  "configCapability": "当前从 YAML/env 读取配置，仅支持查看和选择 PLC。配置编辑、独立连接测试与受管理长连接将在后续阶段实现。",
+  "pointsCapability": "选择文件后自动识别每个 DB；逐块填写实际编号并勾选，再预览差异。UDT 不填编号。已有块只在来源证明有效时更新；改号、改名或删叶将阻断。来源修改后可显式选择已有目标块，未选块保留旧版本。",
+  "sourceImport": {
+    "help": "选择文件后自动识别每个 DB；逐块填写实际编号并勾选，再预览差异。UDT 不填编号。已有块只在来源证明有效时更新；改号、改名或删叶将阻断。来源修改后可显式选择已有目标块，未选块保留旧版本。",
+    "counts": "{files} 个文件 · {dbs} 个 DB · {udts} 个 UDT",
+    "selected": "选中",
+    "selectBlock": "选择块 {name}",
+    "block": "来源 / 块",
+    "leaves": "{count} 个可展开叶",
+    "target": "已有目标（显式更新）",
+    "newBlock": "新增块",
+    "updateCandidate": "更新候选，预览后确认",
+    "diagnostics": "状态 / 诊断",
+    "types": "UDT 依赖摘要（无 DB 编号）",
+    "ready": "所选集合可确认；保存为草稿，仍需单独复核采集准入。",
+    "blocked": "所选集合存在阻断问题；当前草稿未改变。可取消问题块后重新预览。",
+    "preservation": "保留 {points} 个既有点 / {manual} 个人工地址；{invalidated} 个地址确认将失效。",
+    "layoutChanged": "声明顺序、类型或布局依赖已变，整个目标 DB 的地址确认失效，原地址值与人工理由保留。",
+    "commentsChanged": "来源注释发生变化。",
+    "udtIsolation": "只有所选 DB 使用新 UDT 版本，其他 DB 保留旧版本。",
+    "added": "新增路径",
+    "changedTypes": "类型变化路径",
+    "readiness": "既有草稿采集准入提示（不阻断结构导入）",
+    "structure": "查看完整结构",
+    "manualConflict": "人工地址与理论布局不同，保留人工值和理由。",
+    "layoutProfile": "建议依据：{profile}；仅完整、明确非优化的标准布局。预览不保存地址，确认只覆盖非人工地址。真实地址需现场另行校核。",
+    "chooseHint": "选择 .db / .udt 文件，取消选择不会清空已有输入。",
+    "closePreview": "关闭预览",
+    "lengthEditHint": "这里修改的是未保存草稿。关闭弹窗后，请使用配置栏的“保存草稿”；关闭不会保存。",
+    "lengths": "当前 DB 长度：{current} 字节 · 理论长度：{calculated} 字节"
   }
 }

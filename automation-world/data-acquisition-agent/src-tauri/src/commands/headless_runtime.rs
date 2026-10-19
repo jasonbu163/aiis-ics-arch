@@ -168,6 +168,16 @@ impl HeadlessRuntimeExecutor for ProductionRuntimeExecutor {
 }
 
 pub(crate) fn run() -> i32 {
+    if crate::config::local_bootstrap::legacy_guard()
+        .and_then(|_| crate::infrastructure::local_profile_lock::legacy_lock())
+        .is_err()
+    {
+        eprintln!(
+            "{}",
+            serde_json::json!({"errorCode":"wrong_runtime_mode_or_profile_locked"})
+        );
+        return 2;
+    }
     let config = AgentConfig::load();
     let _logging_guards = init_logging(&config);
     emit_startup_event(&config);

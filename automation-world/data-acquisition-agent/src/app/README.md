@@ -1,10 +1,17 @@
-# Control Agent app modules
+# DAA app modules
 
-The console follows a vertical `src/app/<module>` layout. Each module owns its
-views, local components, translations and route metadata. Shared shell and
-runtime adapters stay outside a module.
+[中文](README.zh-CN.md)
 
-Keep module imports local and keep user-visible text in the module locale files.
-The console is an operations surface, not a copy of the Core web application's
-business pages or CSS. New field modules must document their runtime boundary
-and remain disabled until their site configuration is reviewed.
+Vertical `src/app/<module>` modules own views, translations and pure navigation metadata. `runtime/manifest.ts` registers workbench, `plc/manifest.ts` PLC configuration, `plc/points-manifest.ts` points/groups, and `collection/manifest.ts` reporting/storage. `console/sections.ts` explicitly assembles four leaves; the host groups the last three under Configuration using CU. No Vue Router or automatic permission/menu assembly is introduced. Collection status remains a workbench panel; the old authorization view and PLC runtime picker are retired.
+
+`App.vue` instantiates only `useLocalAcquisitionConsole`. `useAgentConsoleShell` owns navigation/theme/language only and performs no IPC/fetch. Four leaf views inject the local owner; Layout/Sidebar consume safe bootstrap identity/version. Browser no-bridge preview and native bootstrap failure remain distinct, with no fake database, save or Backend health request. YAML migration is a lock-owned startup service, while normal editor source import accepts only .db/.udt. The configuration bar places its bounded migration-time history and Rust-authorized empty-instance retry inside the existing initially collapsed runtime/version details. Only unknown persistence or a retryable failure adds a compact details entry outside it; the PLC view has no standing migration card. Opening details performs no mutation.
+
+To create a module manually, add `views/<page>/index.vue`, paired `locales/zh-CN.json` / `en-US.json`, and a pure `ConsoleSectionManifest`. Under separately approved scope, explicitly register it in `console/sections.ts`, update the finite section ID and root composition, and document its runtime boundary. To copy a module, rename folder, manifest IDs, imports and locale namespace together. Copying does not register a page or authorize runtime calls. Keep imports local and no long-lived demo/mock data in product views.
+
+Validate with DAA `pnpm build`, locale keys/placeholders/literal-key checks and isolated browser navigation/state checks with IPC and health blocked before mount. New field capabilities require separate implementation and review.
+
+Local mode uses `useLocalAcquisitionConsole` for the edit-base ETag, configuration/runtime versions, bounded operation/history state and one 1Hz refresh. Polling never replaces the edit-base ETag and therefore cannot silently grant a stale editor a newer CAS token. All four leaf views inject that owner. `services/localAcquisition.ts` calls named Tauri IPC without a browser fake bridge. Rust owns source structure and derived-field proof; UI confirmation does not replace service validation. Native evidence and delivery state belong to DAA-002 tasks.
+
+Local pages reuse the CU card/action/table adapters and Element Plus forms. PLC and point edit dialogs submit the complete candidate with Save draft through the same Rust/CAS call as the top bar. Only a successful receipt closes the editor; failures retain input and Cancel writes nothing. Activate stays explicit. Version identities, full source trees, address helpers and physical storage details are available on demand. Unsaved edits block source/offset confirmation so a server response cannot silently replace the current candidate.
+
+The Points source region uses the private `plc/components/SourceImportPanel.vue`. The single local owner holds strict byte decoding/proofs, automatic Rust identification, all paged block mappings and preview/ETag qualification. This component is presentation only: it owns no parser, polling or IPC. Main content stays compact; import differences, located diagnostics and complete trees use a dialog, and offset details use their own dialog. Closing a preview writes nothing and retains choices. One explicit dialog confirmation saves a draft; manual-address protection and source identity are rechecked by Rust. Mapping/edit/reload conflicts invalidate confirmation. Stable procedure and supported syntax/layout are in the [DAA README](../../README.md).

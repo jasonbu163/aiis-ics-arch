@@ -18,6 +18,18 @@
         <ConsoleCard v-if="section === 'shell'" :title="t('workbench.shellTitle')" :icon="Monitor">
           <p>{{ t('workbench.shellNote') }}</p>
           <dl class="workbench-facts"><div><dt>{{ t('workbench.contract') }}</dt><dd><code>src/ui/index.ts</code><br /><code>src/ui/styles/index.css</code></dd></div><div><dt>{{ t('workbench.source') }}</dt><dd>{{ t('workbench.sourceNote') }}</dd></div></dl>
+          <section class="workbench-navigation-sample" :aria-label="t('workbench.navigationSample.title')">
+            <h3>{{ t('workbench.navigationSample.title') }}</h3>
+            <p>{{ t('workbench.navigationSample.note') }}</p>
+            <div class="workbench-navigation-sample__body">
+              <AgentSidebar :items="sampleNavigation" :active-id="sampleActive" :brand="t('workbench.sample')" @select="selectSample" />
+              <div class="workbench-navigation-sample__status">
+                <p role="status">{{ t('workbench.navigationSample.current', { label: sampleLabel }) }}</p>
+                <p>{{ t('workbench.navigationSample.selections', { count: sampleSelections }) }}</p>
+                <ConsoleActionButton :label="t('workbench.navigationSample.external')" @click="sampleActive = sampleActive === 'panel-b' ? 'panel-a' : 'panel-b'" />
+              </div>
+            </div>
+          </section>
           <template #footer>{{ t('workbench.footer') }}</template>
         </ConsoleCard>
         <ConsoleCard v-if="section === 'components'" :title="t('workbench.componentTitle')" :icon="Grid">
@@ -72,7 +84,7 @@ import { ElConfigProvider, ElForm, ElFormItem, ElInput, ElRadio, ElRadioGroup, E
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import en from 'element-plus/es/locale/lang/en'
 import { Grid, Monitor, Operation } from '@element-plus/icons-vue'
-import { AgentLayout, AgentSidebar, AgentTopbar, ConsoleCard, ConsoleActionButton, StatusCapsule, ThemeToggle, LanguageSwitch, type UiTone, type UiTheme } from '../ui'
+import { AgentLayout, AgentSidebar, AgentTopbar, ConsoleCard, ConsoleActionButton, StatusCapsule, ThemeToggle, LanguageSwitch, type UiTone, type UiTheme, type NavigationItem } from '../ui'
 const { t, locale } = useI18n()
 const storedTheme = localStorage.getItem('cu.theme')
 const theme = ref<UiTheme>(storedTheme === 'dark' ? 'dark' : 'light')
@@ -97,6 +109,17 @@ const customLabel = ref('')
 const actionShown = ref(false)
 const tones: UiTone[] = ['neutral', 'success', 'warning', 'danger']
 const navigation = computed(() => [{ id: 'shell', label: t('workbench.shell'), icon: Monitor }, { id: 'components', label: t('workbench.components'), icon: Grid }, { id: 'parameters', label: t('workbench.parameters'), icon: Operation }, { id: 'pages', label: t('workbench.pageSamples.pages'), icon: Grid }])
+const sampleActive = ref('panel-a')
+const sampleSelections = ref(0)
+const sampleNavigation = computed<NavigationItem[]>(() => [
+  { id: 'overview', label: t('workbench.navigationSample.overview'), icon: Monitor },
+  { id: 'panels', label: t('workbench.navigationSample.group'), icon: Grid, children: [
+    { id: 'panel-a', label: t('workbench.navigationSample.alpha'), icon: Monitor },
+    { id: 'panel-b', label: t('workbench.navigationSample.beta') }
+  ] }
+])
+const sampleLabel = computed(() => t(`workbench.navigationSample.${sampleActive.value === 'overview' ? 'overview' : sampleActive.value === 'panel-a' ? 'alpha' : 'beta'}`))
+function selectSample(id: string) { sampleActive.value = id; sampleSelections.value++ }
 function setTheme(value: UiTheme) { theme.value = value; localStorage.setItem('cu.theme', value) }
 function toggleTheme() { setTheme(theme.value === 'light' ? 'dark' : 'light') }
 function toggleLocale() { locale.value = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'; localStorage.setItem('cu.locale', locale.value) }

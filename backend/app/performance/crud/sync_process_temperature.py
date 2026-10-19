@@ -25,6 +25,7 @@ def get_by_process_key_for_update(
     result = db.execute(
         select(ProcessTemperature)
         .where(
+            ProcessTemperature.equipment_id.is_(None),
             ProcessTemperature.performance_id == performance_id,
             ProcessTemperature.zone == zone,
             ProcessTemperature.record_time == record_time,

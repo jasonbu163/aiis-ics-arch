@@ -18,81 +18,111 @@ use crate::services::plc_collection::{
 };
 
 #[tauri::command]
-pub(crate) fn start_plc_read() -> PlcCollectionControlResult {
-    start_plc_read_from_console()
+pub(crate) fn start_plc_read() -> Result<PlcCollectionControlResult, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(start_plc_read_from_console())
 }
 
 #[tauri::command]
-pub(crate) fn start_plc_read_for_plc(plc_key: String) -> PlcCollectionControlResult {
-    start_plc_read_for_plc_from_console(plc_key)
+pub(crate) fn start_plc_read_for_plc(
+    plc_key: String,
+) -> Result<PlcCollectionControlResult, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(start_plc_read_for_plc_from_console(plc_key))
 }
 
 #[tauri::command]
-pub(crate) fn stop_plc_read() -> PlcCollectionControlResult {
-    stop_plc_read_from_console()
+pub(crate) fn stop_plc_read() -> Result<PlcCollectionControlResult, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(stop_plc_read_from_console())
 }
 
 #[tauri::command]
-pub(crate) fn stop_plc_read_for_plc(plc_key: String) -> PlcCollectionControlResult {
-    stop_plc_read_for_plc_from_console(plc_key)
+pub(crate) fn stop_plc_read_for_plc(plc_key: String) -> Result<PlcCollectionControlResult, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(stop_plc_read_for_plc_from_console(plc_key))
 }
 
 #[tauri::command]
-pub(crate) fn enable_plc_persistence() -> PlcCollectionControlResult {
-    enable_plc_persistence_from_console()
+pub(crate) fn enable_plc_persistence() -> Result<PlcCollectionControlResult, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(enable_plc_persistence_from_console())
 }
 
 #[tauri::command]
-pub(crate) fn enable_plc_persistence_for_plc(plc_key: String) -> PlcCollectionControlResult {
-    enable_plc_persistence_for_plc_from_console(plc_key)
+pub(crate) fn enable_plc_persistence_for_plc(
+    plc_key: String,
+) -> Result<PlcCollectionControlResult, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(enable_plc_persistence_for_plc_from_console(plc_key))
 }
 
 #[tauri::command]
-pub(crate) fn pause_plc_persistence() -> PlcCollectionControlResult {
-    pause_plc_persistence_from_console()
+pub(crate) fn pause_plc_persistence() -> Result<PlcCollectionControlResult, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(pause_plc_persistence_from_console())
 }
 
 #[tauri::command]
-pub(crate) fn pause_plc_persistence_for_plc(plc_key: String) -> PlcCollectionControlResult {
-    pause_plc_persistence_for_plc_from_console(plc_key)
+pub(crate) fn pause_plc_persistence_for_plc(
+    plc_key: String,
+) -> Result<PlcCollectionControlResult, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(pause_plc_persistence_for_plc_from_console(plc_key))
 }
 
 #[tauri::command]
-pub(crate) fn start_plc_collection() -> PlcCollectionControlResult {
-    start_plc_collection_from_console()
+pub(crate) fn start_plc_collection() -> Result<PlcCollectionControlResult, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(start_plc_collection_from_console())
 }
 
 #[tauri::command]
-pub(crate) fn start_plc_collection_for_plc(plc_key: String) -> PlcCollectionControlResult {
-    start_plc_collection_for_plc_from_console(plc_key)
+pub(crate) fn start_plc_collection_for_plc(
+    plc_key: String,
+) -> Result<PlcCollectionControlResult, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(start_plc_collection_for_plc_from_console(plc_key))
 }
 
 #[tauri::command]
-pub(crate) fn stop_plc_collection() -> PlcCollectionControlResult {
-    stop_plc_collection_from_console()
+pub(crate) fn stop_plc_collection() -> Result<PlcCollectionControlResult, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(stop_plc_collection_from_console())
 }
 
 #[tauri::command]
-pub(crate) fn stop_plc_collection_for_plc(plc_key: String) -> PlcCollectionControlResult {
-    stop_plc_collection_for_plc_from_console(plc_key)
+pub(crate) fn stop_plc_collection_for_plc(
+    plc_key: String,
+) -> Result<PlcCollectionControlResult, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(stop_plc_collection_for_plc_from_console(plc_key))
 }
 
 #[tauri::command]
-pub(crate) fn start_plc_collection_loop() -> PlcCollectionControlResult {
-    start_plc_collection_loop_from_console()
+pub(crate) fn start_plc_collection_loop() -> Result<PlcCollectionControlResult, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(start_plc_collection_loop_from_console())
 }
 
 #[tauri::command]
-pub(crate) fn start_plc_collection_loop_for_plc(plc_key: String) -> PlcCollectionControlResult {
-    start_plc_collection_loop_for_plc_from_console(plc_key)
+pub(crate) fn start_plc_collection_loop_for_plc(
+    plc_key: String,
+) -> Result<PlcCollectionControlResult, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(start_plc_collection_loop_for_plc_from_console(plc_key))
 }
 
 #[tauri::command]
-pub(crate) fn stop_plc_collection_loop() -> PlcCollectionControlResult {
-    stop_plc_collection_loop_from_console()
+pub(crate) fn stop_plc_collection_loop() -> Result<PlcCollectionControlResult, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(stop_plc_collection_loop_from_console())
 }
 
 #[tauri::command]
-pub(crate) fn stop_plc_collection_loop_for_plc(plc_key: String) -> PlcCollectionControlResult {
-    stop_plc_collection_loop_for_plc_from_console(plc_key)
+pub(crate) fn stop_plc_collection_loop_for_plc(
+    plc_key: String,
+) -> Result<PlcCollectionControlResult, String> {
+    crate::config::local_bootstrap::legacy_guard()?;
+    Ok(stop_plc_collection_loop_for_plc_from_console(plc_key))
 }

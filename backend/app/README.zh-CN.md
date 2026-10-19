@@ -180,3 +180,21 @@ uv run python -m compileall -q app core database scripts tests
 ## 独立完整温控样本
 
 [equipment](equipment/README.zh-CN.md)管理新async POST/GET temperature-samples、独立read/ingest权限及空值拒绝的模块本地设备scope。两表由d2后继e4f6a8b0c2d4显式增加；旧温控行和Projection descriptor不改，旧前端temperature-control仍用旧源。公开settings.resolve_env_file只计算共享dotenv路径，其他私有Settings不开放。源码检查不能替代另批数据库/运行采用。
+
+
+## HTTP映射业务观测
+
+equipment、performance与monitor分别拥有HTTP观测域，每个模块仅接受一个精确且区分大小写的业务设备键：
+`EQUIPMENT_MAPPING_INGEST_ID`、`PERFORMANCE_MAPPING_INGEST_ID`、`MONITOR_MAPPING_INGEST_ID`。
+空scope拒绝包括admin在内的全部caller，公开示例保持为空。POST须active admin及独立ingest权限，GET用对应read权限；
+`equipment-mapping-ingest/read`、`performance-mapping-ingest/read`、`monitor-curve-ingest/read`不互授，不授予旧模块CRUD或页面权限。
+BE003温控继续使用独立温控scope与权限。
+
+显式后继`f6a8c0e2b4d6`增加三个模块回执、一个生产观察水位及七个业务表的nullable HTTP键，完整fixture为64表。
+旧行设备键保持NULL，既有值/default/秒精度保留，不回填身份、不清理、seed或自动DDL。卷/zone精确键使用完整`VARBINARY(200)`比较。
+原五条迁移及sync Services保留。数据库采用、可丢弃MySQL与浏览器运行证明仍需另行具体批准；源码检查不代表运行采用。
+downgrade遇到HTTP数据、旧非空指标的NULL或不能无损恢复的非零毫秒即拒绝；业务回退保留全部已接收数据并选择旧来源。
+
+HTTP采用带时区的UTC毫秒来源时间、严格camelCase JSON和稳定sampleId。省略观测保存NULL，显式null拒绝。
+Numeric保持声明的小数位；FLOAT采用有界binary32规范化，相对误差≤1e-6、绝对误差≤max(1e-6,abs(input)×1e-6)，非零下溢拒绝。
+回执与业务同事务提交，仅命名unique竞争有界恢复；提交未知返回可重试失败，客户端保持同sampleId。不伪造PLC来源。

@@ -1,399 +1,54 @@
-<!--
-  File Path: /automation-world/data-acquisition-agent/src/app/collection/views/status/index.vue
-  Description: PLC collection status view for the Control Agent console
-  Main Features:
-    - Displays collection metrics, gates, policy and latest groups
-    - Shows per-PLC read and persistence controls backed by runtime state
-    - Receives all runtime actions from the console composition root
--->
+<!-- DAA本地SQLite视图：唯一local owner提供状态/动作，导航不驱动PLC或health。 -->
 <template>
-  <section id="collection" class="console-section">
-    <MetricGrid
-      accessibility-label-key="collection.ariaLabel"
-      collection
-      featured-label-key="collection.collector"
-      :featured-value="runtimeSnapshot.plcCollectionStatus.gates.collectorKey"
-      :featured-detail="collectionStatusText"
-      :items="collectionMetricItems"
-    />
+  <template v-if="local">
 
-    <ReadinessGrid
-      accessibility-label-key="collection.gatesAriaLabel"
-      :items="collectionGateItems"
-    />
-
-    <ConsoleCard
-      body-class="console-card__body--table"
-      :icon="Cpu"
-      title-key="collection.plcUnits"
-    >
-      <ConsoleTableShell
-        :current-page="1"
-        :page-size="20"
-        :pagination="false"
-        :total="runtimeSnapshot.plcCollectionStatus.plcUnits.length"
-      >
-        <el-table
-          v-if="runtimeSnapshot.plcCollectionStatus.plcUnits.length > 0"
-          :data="runtimeSnapshot.plcCollectionStatus.plcUnits"
-          border
-          class="agent-table agent-table--plc-units"
-          empty-text="-"
-          row-key="plcKey"
-          size="small"
-          stripe
-        >
-          <el-table-column
-            prop="plcKey"
-            :label="t('collection.plcKey')"
-            width="112"
-            show-overflow-tooltip
-          />
-          <el-table-column :label="t('collection.endpoint')" min-width="210" show-overflow-tooltip>
-            <template #default="{ row }">
-              {{ formatPlcEndpoint(row) }}
-            </template>
-          </el-table-column>
-          <el-table-column :label="t('collection.readState')" width="128">
-            <template #default="{ row }">
-              <el-tag :type="statusTagType(row.readState)" effect="plain">
-                {{ plcRuntimeStatusText(row.readState) }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column :label="t('collection.persistenceState')" width="128">
-            <template #default="{ row }">
-              <el-tag :type="statusTagType(row.persistenceState)" effect="plain">
-                {{ plcCollectionStatusText(row.persistenceState) }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column :label="t('collection.sampleState')" width="112">
-            <template #default="{ row }">
-              <el-tag :type="statusTagType(row.sampleStatus)" effect="plain">
-                {{ plcSampleStatusText(row.sampleStatus) }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column :label="t('collection.groupPointCounts')" width="124">
-            <template #default="{ row }">
-              {{ row.groupCount }} / {{ row.pointCount }}
-            </template>
-          </el-table-column>
-          <el-table-column :label="t('collection.lastSuccess')" width="170" show-overflow-tooltip>
-            <template #default="{ row }">
-              {{ formatOptional(row.lastSuccessAt) }}
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="failureCount"
-            :label="t('collection.failureCount')"
-            width="88"
-          />
-          <el-table-column
-            prop="lastError"
-            :label="t('collection.lastError')"
-            min-width="220"
-            show-overflow-tooltip
-          />
-          <el-table-column :label="t('collection.actions')" width="236" fixed="right" align="center">
-            <template #default="{ row }">
-              <div class="plc-unit-actions">
-                <ConsoleActionButton
-                  v-if="isPlcReadActive(row)"
-                  :disabled="isPlcControlDisabled('stop_read', row)"
-                  :icon="SwitchButton"
-                  label-key="collection.controls.stopRead"
-                  :loading="collectionControlBusy"
-                  size="small"
-                  :title="plcControlDisabledReason('stop_read', row)"
-                  tone="warning"
-                  @click="runPlcControl('stop_read', row.plcKey)"
-                />
-                <ConsoleActionButton
-                  v-else
-                  :disabled="isPlcControlDisabled('start_read', row)"
-                  :icon="VideoPlay"
-                  label-key="collection.controls.startRead"
-                  :loading="collectionControlBusy"
-                  size="small"
-                  :title="plcControlDisabledReason('start_read', row)"
-                  tone="success"
-                  @click="runPlcControl('start_read', row.plcKey)"
-                />
-                <ConsoleActionButton
-                  v-if="row.persistenceState === 'enabled'"
-                  :disabled="isPlcControlDisabled('pause_persistence', row)"
-                  :icon="SwitchButton"
-                  label-key="collection.controls.pausePersistence"
-                  :loading="collectionControlBusy"
-                  size="small"
-                  :title="plcControlDisabledReason('pause_persistence', row)"
-                  tone="secondary"
-                  @click="runPlcControl('pause_persistence', row.plcKey)"
-                />
-                <ConsoleActionButton
-                  v-else
-                  :disabled="isPlcControlDisabled('enable_persistence', row)"
-                  :icon="VideoPlay"
-                  label-key="collection.controls.enablePersistence"
-                  :loading="collectionControlBusy"
-                  size="small"
-                  :title="plcControlDisabledReason('enable_persistence', row)"
-                  tone="primary"
-                  @click="runPlcControl('enable_persistence', row.plcKey)"
-                />
-              </div>
-            </template>
-          </el-table-column>
-        </el-table>
-        <p v-else class="diagnostic-message">{{ t('collection.noUnits') }}</p>
-      </ConsoleTableShell>
+    <ConsoleCard title-key="common.local.collection" body-class="console-card__body--table">
+      <template #tools><el-alert v-if="local.snapshot && !local.snapshot.capacity.admission" :title="t('common.local.capacityRisk')" :description="local.label(local.snapshot.capacity.state)" type="warning" :closable="false" show-icon /><p class="daa-capability-note">{{ t('common.local.runtimeActiveHint') }}</p>
+        <div v-if="local.selectedTargets.length" class="console-action-group"><el-tag effect="plain">{{ t('common.local.selectedTargets', { count: local.selectedTargets.length }) }}</el-tag><ConsoleActionButton size="small" label-key="common.local.connectSelected" :disabled="local.busy || !local.view?.active" @click="confirmControl('daa_set_connection', true, local.selectedTargets)" /><ConsoleActionButton size="small" label-key="common.local.disconnectSelected" :disabled="local.busy || !local.view?.active" @click="confirmControl('daa_set_connection', false, local.selectedTargets)" /><ConsoleActionButton size="small" label-key="common.local.startSelected" :disabled="local.busy || !local.view?.active || !local.snapshot?.capacity.admission" @click="confirmControl('daa_set_collection', true, local.selectedTargets)" /><ConsoleActionButton size="small" label-key="common.local.pauseSelected" :disabled="local.busy || !local.view?.active" @click="confirmControl('daa_set_collection', false, local.selectedTargets)" /></div>
+      </template>
+      <ElCheckboxGroup v-model="local.selectedTargets">
+        <ConsoleTableShell :current-page="1" :page-size="4" :total="local.plcs.length" :pagination="false">
+          <el-table :data="local.plcs" row-key="id" :empty-text="local.draft ? t('common.local.emptyPlcs') : t('common.feedback.notLoaded')" :tooltip-options="{ appendTo: '#daa-feedback' }">
+            <el-table-column width="48"><template #default="{ row }"><ElCheckbox :value="row.id" :aria-label="t('common.local.selectTarget')" /></template></el-table-column>
+            <el-table-column prop="name" :label="t('common.local.plc')" min-width="165" />
+            <el-table-column :label="t('common.local.state')" min-width="135"><template #default="{ row }"><el-tag v-if="local.snapshot" :type="local.state(row.id)?.error ? 'warning' : local.state(row.id)?.connected ? 'success' : 'info'" effect="plain">{{ local.label(local.state(row.id)?.phase ?? 'stopped') }}</el-tag><span v-else>—</span></template></el-table-column>
+            <el-table-column :label="t('common.local.admission')" min-width="140"><template #default="{ row }">{{ local.label(local.state(row.id)?.admission) }}<small v-if="local.state(row.id)?.error" class="muted-cell">{{ local.label(local.state(row.id)?.error) }}</small></template></el-table-column>
+            <el-table-column :label="t('common.local.savedCycles')" min-width="130"><template #default="{ row }">{{ local.state(row.id)?.savedCycles ?? '—' }}</template></el-table-column>
+            <el-table-column :label="t('common.local.actions')" min-width="230"><template #default="{ row }"><div class="row-actions">
+              <ConsoleActionButton v-if="!local.state(row.id)?.connected && !local.state(row.id)?.desiredConnection" size="small" label-key="common.local.connect" :disabled="local.busy || !local.view?.active" @click="local.control('daa_set_connection', [row.id], true)" />
+              <ConsoleActionButton v-else size="small" label-key="common.local.disconnect" :disabled="local.busy || !local.view?.active" @click="local.control('daa_set_connection', [row.id], false)" />
+              <ConsoleActionButton v-if="local.state(row.id)?.desiredCollection" size="small" label-key="common.local.pause" tone="warning" :disabled="local.busy" @click="local.control('daa_set_collection', [row.id], false)" />
+              <ConsoleActionButton v-else size="small" label-key="common.local.start" tone="primary" :disabled="local.busy || !local.state(row.id)?.connected || !local.snapshot?.capacity.admission" @click="local.control('daa_set_collection', [row.id], true)" />
+            </div></template></el-table-column>
+          </el-table>
+        </ConsoleTableShell>
+      </ElCheckboxGroup>
+      <details class="daa-details"><summary>{{ t('common.local.allControls') }}</summary><div class="console-action-group"><ConsoleActionButton label-key="common.local.connectAll" :disabled="local.busy || !local.view?.active" @click="confirmControl('daa_set_connection', true)" /><ConsoleActionButton label-key="common.local.disconnectAll" :disabled="local.busy || !local.view?.active" @click="confirmControl('daa_set_connection', false)" /><ConsoleActionButton label-key="common.local.startAll" :disabled="local.busy || !local.view?.active || !local.snapshot?.capacity.admission" @click="confirmControl('daa_set_collection', true)" /><ConsoleActionButton label-key="common.local.pauseAll" :disabled="local.busy || !local.view?.active" @click="confirmControl('daa_set_collection', false)" /></div></details>
+      <details class="daa-details"><summary>{{ t('common.local.runtimeDetails') }}</summary><section v-for="p in local.plcs" :key="p.id" class="daa-local-edit-section"><h3>{{ p.name }}</h3><p>{{ t('common.local.intents', { connection: local.state(p.id) ? local.label(String(local.state(p.id)?.desiredConnection)) : '—', collection: local.state(p.id) ? local.label(String(local.state(p.id)?.desiredCollection)) : '—', actual: local.state(p.id) ? local.label(String(local.state(p.id)?.connected)) : '—' }) }}</p><p class="daa-capability-note">{{ t('common.local.used') }}: {{ local.state(p.id)?.usedRevision ?? '—' }}</p><p v-for="g in local.state(p.id)?.groups" :key="g.groupId">{{ local.draft?.groups.find(x => x.id === g.groupId)?.name ?? g.groupId }} · {{ g.intervalMs }} ms · {{ t('common.local.duration') }} {{ g.durationMs }} ms · {{ t('common.local.missed') }} {{ g.missedTicks }}</p></section></details>
+      <details class="daa-details"><summary>{{ t('common.local.operations') }}</summary><div v-for="op in local.snapshot?.operations" :key="op.operationId"><p>{{ local.plcs.find(p => p.id === op.plcId)?.name }} · {{ local.label(op.action) }} · {{ local.label(op.phase) }} · {{ local.label(op.reason) }}</p><pre class="daa-local-raw">{{ op.operationId }}
+{{ op.result }}</pre></div></details>
     </ConsoleCard>
-
-    <el-row :gutter="16">
-      <el-col :lg="10" :md="24">
-        <div class="console-column-stack">
-          <ConsoleCard :icon="Operation" title-key="collection.sectionTitle">
-            <template #actions>
-              <div class="console-action-group">
-                <ConsoleActionButton
-                  :disabled="collectionStartDisabled"
-                  :icon="VideoPlay"
-                  label-key="collection.controls.start"
-                  :loading="collectionControlBusy"
-                  tone="success"
-                  @click="confirmStartCollection"
-                />
-                <ConsoleActionButton
-                  :disabled="collectionStopDisabled"
-                  :icon="SwitchButton"
-                  label-key="collection.controls.stop"
-                  :loading="collectionControlBusy"
-                  tone="warning"
-                  @click="confirmStopCollection"
-                />
-              </div>
-            </template>
-
-            <ConsoleInfoGrid>
-              <el-descriptions-item :label="t('collection.status')">
-                {{ collectionStatusText }}
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('collection.target')">
-                {{ t('collection.targets.all') }}
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('collection.worker')">
-                {{ formatOptional(runtimeSnapshot.plcCollectionStatus.collectorState.workerId) }}
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('collection.mode')">
-                {{ formatOptional(runtimeSnapshot.plcCollectionStatus.collectorState.mode) }}
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('collection.heartbeat')">
-                {{ formatOptional(runtimeSnapshot.plcCollectionStatus.collectorState.lastHeartbeatAt) }}
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('collection.lastSample')">
-                {{ formatOptional(runtimeSnapshot.plcCollectionStatus.collectorState.lastSampleAt) }}
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('collection.durations')">
-                {{ collectionDurationsText }}
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('collection.lastError')">
-                {{ formatOptional(runtimeSnapshot.plcCollectionStatus.collectorState.lastError) }}
-              </el-descriptions-item>
-            </ConsoleInfoGrid>
-            <el-alert
-              v-if="collectionControlResult"
-              :closable="false"
-              :description="collectionControlResultDescription"
-              :title="collectionControlResultTitle"
-              :type="collectionControlResultType"
-              class="collection-control-result"
-              show-icon
-            />
-            <p class="diagnostic-message">{{ collectionMessageText }}</p>
-          </ConsoleCard>
-
-          <ConsoleCard :icon="Tickets" title-key="collection.snapshotPolicy.title">
-            <ConsoleInfoGrid>
-              <el-descriptions-item :label="t('collection.snapshotPolicy.status')">
-                {{ snapshotPolicyStatusText }}
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('collection.snapshotPolicy.path')">
-                {{ runtimeSnapshot.plcCollectionStatus.snapshotPolicy.configuredPath }}
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('collection.snapshotPolicy.latestMode')">
-                {{ runtimeSnapshot.plcCollectionStatus.snapshotPolicy.latestMode }}
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('collection.snapshotPolicy.retention')">
-                {{ snapshotPolicyRetentionText }}
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('collection.snapshotPolicy.selectedPoints')">
-                {{ snapshotPolicyPointText }}
-              </el-descriptions-item>
-              <el-descriptions-item :label="t('collection.snapshotPolicy.validation')">
-                {{ snapshotPolicyValidationText }}
-              </el-descriptions-item>
-            </ConsoleInfoGrid>
-            <p class="diagnostic-message">{{ snapshotPolicyMessageText }}</p>
-          </ConsoleCard>
-        </div>
-      </el-col>
-
-      <el-col :lg="14" :md="24">
-        <ConsoleCard
-          body-class="console-card__body--table"
-          :icon="Grid"
-          title-key="collection.latestGroups"
-        >
-          <ConsoleTableShell
-            v-model:current-page="collectionPageModel"
-            v-model:page-size="collectionPageSizeModel"
-            :page-sizes="tablePageSizeOptions"
-            :total="runtimeSnapshot.plcCollectionStatus.latestGroups.length"
-          >
-            <el-table
-              :data="pagedCollectionGroups"
-              border
-              class="agent-table agent-table--latest-groups"
-              empty-text="-"
-              :row-key="collectionGroupRowKey"
-              size="small"
-              stripe
-            >
-              <el-table-column
-                :label="t('collection.group')"
-                width="190"
-                fixed="left"
-                show-overflow-tooltip
-              >
-                <template #default="{ row }">
-                  <strong>DB{{ row.dbNumber }}</strong>
-                  <span class="muted-cell">{{ row.plcKey }} / {{ row.groupName }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column :label="t('collection.quality')" width="130">
-                <template #default="{ row }">
-                  <el-tag :type="statusTagType(row.quality)" effect="plain">
-                    {{ row.quality }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column :label="t('collection.counts')" min-width="170">
-                <template #default="{ row }">
-                  {{ formatGroupCounts(row.decodedCount, row.unsupportedCount) }}
-                </template>
-              </el-table-column>
-              <el-table-column :label="t('collection.rawSnapshot')" width="130">
-                <template #default="{ row }">
-                  {{ row.rawSnapshotId > 0 ? `#${row.rawSnapshotId}` : '-' }}
-                </template>
-              </el-table-column>
-              <el-table-column :label="t('collection.timing')" min-width="220" show-overflow-tooltip>
-                <template #default="{ row }">
-                  {{ formatCollectionTiming(row.collectedAt, row.readDurationMs) }}
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="errorMessage"
-                :label="t('collection.error')"
-                min-width="180"
-                show-overflow-tooltip
-              />
-            </el-table>
-          </ConsoleTableShell>
-        </ConsoleCard>
-      </el-col>
-    </el-row>
-  </section>
+    <details class="daa-details"><summary>{{ t('common.local.logs') }}</summary><LocalLogPanel /></details>
+  </template>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Cpu, Grid, Operation, SwitchButton, Tickets, VideoPlay } from '@element-plus/icons-vue'
-import { useI18n } from 'vue-i18n'
-import MetricGrid from '../../../../components/common/MetricGrid.vue'
-import ConsoleActionButton from '../../../../components/console/ConsoleActionButton.vue'
-import ConsoleCard from '../../../../components/console/ConsoleCard.vue'
-import ConsoleInfoGrid from '../../../../components/console/ConsoleInfoGrid.vue'
-import ConsoleTableShell from '../../../../components/console/ConsoleTableShell.vue'
-import ReadinessGrid from '../../../../components/console/ReadinessGrid.vue'
-import type { MetricItem, OperationItem } from '../../../../console/types'
-import type {
-  PlcCollectionControlResult,
-  PlcLatestGroupSnapshot,
-  PlcRuntimeUnitSnapshot,
-  RuntimeSnapshot
-} from '../../../../services/runtimeSnapshot'
+import { ElCheckbox, ElCheckboxGroup } from 'element-plus';
 
-const props = defineProps<{
-  collectionControlBusy: boolean
-  collectionControlResult: PlcCollectionControlResult | null
-  collectionControlResultDescription: string
-  collectionControlResultTitle: string
-  collectionControlResultType: 'success' | 'warning' | 'error' | 'info'
-  collectionDurationsText: string
-  collectionGateItems: OperationItem[]
-  collectionMessageText: string
-  collectionMetricItems: MetricItem[]
-  collectionPage: number
-  collectionPageSize: number
-  collectionStartDisabled: boolean
-  collectionStatusText: string
-  collectionStopDisabled: boolean
-  confirmStartCollection: () => Promise<void>
-  confirmStopCollection: () => Promise<void>
-  formatCollectionTiming: (collectedAt: string, readDurationMs: number) => string
-  formatGroupCounts: (decodedCount: number, unsupportedCount: number) => string
-  formatOptional: (value: string) => string
-  formatPlcEndpoint: (unit: PlcRuntimeUnitSnapshot) => string
-  isPlcControlDisabled: (
-    action: 'start_read' | 'stop_read' | 'enable_persistence' | 'pause_persistence',
-    unit: PlcRuntimeUnitSnapshot
-  ) => boolean
-  plcControlDisabledReason: (
-    action: 'start_read' | 'stop_read' | 'enable_persistence' | 'pause_persistence',
-    unit: PlcRuntimeUnitSnapshot
-  ) => string
-  pagedCollectionGroups: PlcLatestGroupSnapshot[]
-  plcCollectionStatusText: (status: string) => string
-  plcRuntimeStatusText: (status: string) => string
-  plcSampleStatusText: (status: string) => string
-  runtimeSnapshot: RuntimeSnapshot
-  runPlcControl: (
-    action: 'start_read' | 'stop_read' | 'enable_persistence' | 'pause_persistence',
-    target: string
-  ) => Promise<PlcCollectionControlResult>
-  snapshotPolicyMessageText: string
-  snapshotPolicyPointText: string
-  snapshotPolicyRetentionText: string
-  snapshotPolicyStatusText: string
-  snapshotPolicyValidationText: string
-  statusTagType: (status: string) => string
-  tablePageSizeOptions: number[]
-}>()
-
-const emit = defineEmits<{
-  'update:collection-page': [page: number]
-  'update:collection-page-size': [pageSize: number]
-}>()
-
-const { t } = useI18n()
-
-const collectionPageModel = computed({
-  get: () => props.collectionPage,
-  set: (page: number) => emit('update:collection-page', page)
-})
-
-const collectionPageSizeModel = computed({
-  get: () => props.collectionPageSize,
-  set: (pageSize: number) => emit('update:collection-page-size', pageSize)
-})
-
-function isPlcReadActive(unit: PlcRuntimeUnitSnapshot) {
-  return ['starting', 'running', 'stopping'].includes(unit.readState)
+import { inject } from 'vue';
+import LocalLogPanel from '../../../../components/console/LocalLogPanel.vue';
+import { localConsoleKey } from '../../../../console/composables/useLocalAcquisitionConsole';
+const local = inject(localConsoleKey);
+import { computed } from 'vue';
+import { Cpu } from '@element-plus/icons-vue';
+import { useI18n } from 'vue-i18n';
+import ConsoleActionButton from '../../../../components/console/ConsoleActionButton.vue';
+import ConsoleCard from '../../../../components/console/ConsoleCard.vue';
+import ConsoleTableShell from '../../../../components/console/ConsoleTableShell.vue';
+const { t } = useI18n();
+async function confirmControl(command: 'daa_set_connection' | 'daa_set_collection', desired: boolean, targets?: string[]) {
+    const ids = (targets ?? local?.plcs.map(p => p.id) ?? []).slice();
+    if (await local?.confirmAction('common.local.controlTargetsConfirm', { count: ids.length })) await local?.control(command, ids, desired);
 }
 
-const collectionGroupRowKey = (row: PlcLatestGroupSnapshot) =>
-  `${row.plcKey}:${row.dbNumber}:${row.groupName}`
 </script>

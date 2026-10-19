@@ -150,5 +150,19 @@
       "io_failed": "源码读写失败，两个文件可能只更新了一部分。请导出编辑内容，检查两个公共目标，必要时恢复有效 JSON，再执行 pnpm design:profile --generate 和 --check，最后刷新。",
       "network_failed": "无法确认应用结果。请导出编辑内容，检查两个公共目标并执行 pnpm design:profile --check（必要时恢复有效 JSON 并 --generate），刷新后再重试。"
     }
+  },
+  "navigationSample": {
+    "title": "分组导航 · 设计样例",
+    "overview": "概览样例",
+    "group": "面板样例",
+    "alpha": "面板 A",
+    "beta": "面板 B · 较长导航标签样例",
+    "current": "当前面板：{label}",
+    "external": "从外部切换当前面板",
+    "note": "选择由宿主控制；分组仅展开或折叠。",
+    "selections": "选择事件次数：{count}",
+    "mode": "导航模式",
+    "flat": "平铺",
+    "grouped": "分组"
   }
 }

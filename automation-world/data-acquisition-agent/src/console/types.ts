@@ -8,7 +8,7 @@
  */
 import type { Component } from 'vue'
 
-export type ConsoleSectionId = 'overview' | 'collection' | 'plc' | 'gates'
+export type ConsoleSectionId = 'workbench' | 'plc-config' | 'points-groups' | 'reporting-storage'
 
 export interface ConsoleSectionManifest {
   id: ConsoleSectionId

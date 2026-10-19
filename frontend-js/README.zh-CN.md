@@ -222,3 +222,14 @@ runtime。runtime 不挂载源码或 `node_modules`，`/api/v1` 反向代理到 
 ## 预构建 dist 部署
 
 根 `docker-compose.prod.yml` 使用固定版本 Nginx 和本目录现有 `nginx.conf`，把 `dist` 只读挂载到 `/usr/share/nginx/html/current`。启动前使用已提交的 pnpm 锁文件构建；缺少 `dist/index.html` 会明确启动失败。生产构建使用 `/api/v1`，关闭 mock 和演示账号。前端 Dockerfile 保留为独立镜像构建配方；prod 使用宿主机构建的 dist。详见[部署准备](../INITIALIZATION.zh-CN.md#单机部署)。
+
+
+## 业务观测来源选择
+
+设备三看板、实绩列表/过程弹窗及monitor曲线页通过URL保存`dataSource=legacy|http`和`equipmentId`。
+默认legacy并说明旧数据未标识业务设备；HTTP必须显式填写获scope批准的业务键。
+非法来源、空设备、空数据、403及故障均不切换来源或使用诊断mock。切换清空前数据，请求代次阻止晚响应覆盖新选择。
+缺测保持缺测/曲线断点，真实0正常显示。
+
+HTTP实绩人工编辑沿原PUT且显式附来源/设备，仅提交weight及可选原因，其他字段只读。采集重量不覆盖人工重量（包括0）。
+后端按人工时间→来源报告时间→外部观察区间计算有效总用时。浏览器/API/数据库运行证明仍为另批验证gate。
