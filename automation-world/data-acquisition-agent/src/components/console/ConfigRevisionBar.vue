@@ -1,4 +1,4 @@
-<!-- 本地配置工作流：真实草稿与显式保存/激活；原折叠详情承接运行版本及迁入历史。 -->
+<!-- 本地配置工作流：真实草稿与显式保存/激活；保留运行版本详情，当前迁入故障按需小弹窗。 -->
 <template>
   <ConsoleCard v-if="local" class="daa-revision-bar" compact title-key="common.local.configuration">
     <template #actions>
@@ -17,7 +17,8 @@
         <span class="daa-capability-note">{{ t(migrationAttention) }}</span>
         <ConsoleActionButton size="small" label-key="common.local.migration.openDetails" @click="openMigrationDetails" />
       </div>
-      <details ref="configurationDetails" class="daa-details">
+      <YamlMigrationNotice v-if="migrationAttention" v-model="migrationOpen" />
+      <details class="daa-details">
         <summary>{{ t('common.local.configurationDetails') }}</summary>
         <p class="daa-source-note">{{ t('common.local.boundary', { origin: local.bootstrap.origin }) }}</p>
         <dl class="daa-local-facts">
@@ -28,14 +29,13 @@
           <ConsoleActionButton size="small" label-key="common.local.reload" :disabled="local.busy" @click="reload" />
           <ConsoleActionButton size="small" label-key="common.local.rollback" :disabled="local.busy || !local.view?.previous" @click="activate(true)" />
         </div>
-        <YamlMigrationNotice />
       </details>
       <ul v-if="local.view?.issues.length" class="daa-local-issues"><li v-for="(issue, i) in local.view.issues" :key="i">{{ local.label(issue.code) }} · {{ issue.file }}:{{ issue.line }} {{ issue.path }}</li></ul>
     </div>
   </ConsoleCard>
 </template>
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { localConsoleKey } from '../../console/composables/useLocalAcquisitionConsole'
 import ConsoleCard from './ConsoleCard.vue'
@@ -43,12 +43,13 @@ import ConsoleActionButton from './ConsoleActionButton.vue'
 import YamlMigrationNotice from './YamlMigrationNotice.vue'
 const local = inject(localConsoleKey)
 const { t } = useI18n()
-const configurationDetails = ref<HTMLDetailsElement | null>(null)
+const migrationOpen = ref(false)
 const migrationAttention = computed(() => local?.migration?.statusPersistence === 'unknown'
   ? 'common.local.migration.unknownHint'
   : local?.migration?.status === 'failed' && local.migration.retryAllowed === true
     ? 'common.local.migration.failedHint' : '')
-function openMigrationDetails() { if (configurationDetails.value) configurationDetails.value.open = true }
+watch(() => [migrationAttention.value, local?.migration?.attemptId], () => { migrationOpen.value = false })
+function openMigrationDetails() { migrationOpen.value = true }
 async function activate(rollback: boolean) { if (await local?.confirmAction(rollback ? 'common.local.rollbackConfirm' : 'common.local.activateConfirm')) await local?.activate(rollback) }
 async function reload() { if (await local?.confirmAction('common.local.reloadConfirm')) await local?.reload() }
 </script>

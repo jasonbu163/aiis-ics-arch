@@ -1,0 +1,100 @@
+{
+  "schema": "ds-g0-resource-closeout-v1",
+  "task_id": "ARCH-AW-005",
+  "revision": "r4",
+  "status": "DEV owned runtime stopped; retained dependencies and evidence for fresh Verification and subsequent approved integration",
+  "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+  "known_spawn_pids_checked": 260,
+  "matching_live_owned_runtime_pids": [],
+  "fixed_listeners": [],
+  "ports": [
+    30102,
+    30103,
+    30104
+  ],
+  "pipeline_session": {
+    "session_id": 77459,
+    "exit_code": 0,
+    "scope": "final38 runner invocations completed; not a retained launcher"
+  },
+  "final_case_raw": "evidence-index.json current_case_runs dev0151–0188; all cleanup clean/server_exit0/evidence_complete/sampler_complete; X02 N/A retains common cleanup",
+  "native_actual_close": "dev0067 three normal visible closes/2IPC each/code0; actual Owner receipt; legacy forced TERM diagnostics never counted as normal close",
+  "explicit_profile": "/private/tmp/arch-aw-005-r4-exec/profile/dev/native",
+  "os_webview_paths": [
+    {
+      "event": "retained_resource_metadata",
+      "path": "/Users/jason/Library/WebKit/com.aiis.aw.devicesimulator/WebsiteData",
+      "is_symlink": false,
+      "uid": 501,
+      "gid": 20,
+      "mode": "0o40755",
+      "inode": 76499253,
+      "mtime_ns": 1792501671254288284,
+      "ctime_ns": 1792501671254288284,
+      "exists": true,
+      "deleted": false,
+      "at_unix_ns": 1792511374858785000
+    },
+    {
+      "event": "retained_resource_metadata",
+      "path": "/Users/jason/Library/Caches/com.aiis.aw.devicesimulator/WebKit",
+      "is_symlink": false,
+      "uid": 501,
+      "gid": 20,
+      "mode": "0o40755",
+      "inode": 76499245,
+      "mtime_ns": 1792507670543215667,
+      "ctime_ns": 1792507670543215667,
+      "exists": true,
+      "deleted": false,
+      "at_unix_ns": 1792511374858872000
+    }
+  ],
+  "system_profile_scope": "Observed DS identifier WebKit/Cache directories, distinct from explicit DS_PROFILE_DIR. uid501 and identifier do not prove exclusive/new task ownership or deletion authorization. Exact current lsof metadata is in final raw; not retroactive dev67 5s proof. No user content read or directory deleted.",
+  "retained": [
+    {
+      "path": "automation-world/device-simulator/",
+      "reason": "formal source delivery; never temporary cleanup"
+    },
+    {
+      "path": "automation-world/device-simulator/node_modules",
+      "reason": "explicitly ignored owned offline DS dependencies; retained for serial QA build, not borrowed DAA node_modules"
+    },
+    {
+      "path": "automation-world/device-simulator/src-tauri/gen/schemas",
+      "reason": "explicitly ignored Tauri generated schemas for QA rebuild; not source manifest"
+    },
+    {
+      "path": "/private/tmp/arch-aw-005-r3-exec",
+      "reason": "r3 interrupted original diagnostics/cache/build; persistent113-member archive verified, retained until ownership/dependency review"
+    },
+    {
+      "path": "/private/tmp/arch-aw-005-r4-exec",
+      "reason": "isolated role dev build/native/runtime/desktop/DAA/frontend, cargo/pnpm caches, tmp helpers/profile, original raw; future role qa uses distinct build/cache/tmp/profile/runs paths, never overwrites dev"
+    },
+    {
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence",
+      "reason": "immutable necessary original raw and SHA inventories, including all failures and r3-stop-snapshot; keep through later joint acceptance review"
+    },
+    {
+      "path": "two exact com.aiis.aw.devicesimulator WebView paths above",
+      "reason": "observed system-managed DS identifier data/cache; current handles checked but newness/exclusive ownership unknown; retain for QA, no deletion"
+    }
+  ],
+  "cleanup_trigger": "After fresh QA/Owner final acceptance and subsequent separately approved DAA–DS joint validation dependencies end, coordinator must verify ownership and no live users, persistent A complete, then explicitly decide cleanup. No cache/source/raw cleanup performed now.",
+  "excluded_actions": [
+    "no foreign kill/port switching/SO_REUSEPORT",
+    "no shared Cargo/pnpm cache mutation",
+    "no .app registration/system security changes",
+    "no SQLite/configuration/product importer/DAA application run or Stage C",
+    "no Git refs/commit/push/publish/deploy"
+  ],
+  "QA": "pending fresh-context independent Verification; this is DEV resource accounting only",
+  "DEV_final_self_check": {
+    "run": "dev-0189",
+    "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0189",
+    "inventory_sha256": "838cc0a861da766266facbd1618ec9c5b2dd2e2fd26a907226bfef09269fb601",
+    "members": 4,
+    "status": "DEV_self_check_pass"
+  }
+}

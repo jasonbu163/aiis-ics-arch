@@ -30,7 +30,7 @@ pnpm tauri dev
 - 缺失/空白/注释/null/空 YAML 持久记录 `skipped_empty`；仅策略存在时只归档，不制造 PLC。
 - 坏语法/根形/字段类型/重复语义对象/策略映射歧义/超限整份拒绝，空 SQLite 界面仍可手工编辑；失败不会吞成空成功。
 - 限额：每 YAML 1MiB、合计2MiB，深度16、节点100000，拒 alias/tag/多文档；沿用4 PLC、每PLC8组/32DB/4096点、配置16MiB。规范 receipt/白名单归档≤8MiB，诊断最多200条并说明省略数，只读摘要≤256KiB。
-- 迁入历史与安全重试位于配置栏既有、默认折叠的“运行配置与版本详情”内。折叠区外仅在持久状态 unknown 或迁入失败且 Rust 返回 `retryAllowed=true` 时显示紧凑入口；不再可重试的持久失败只留作历史。失败/空/仅策略仅在 Rust 仍允许时带草稿 ETag/attemptId 双 CAS 显式重试，先保存或取消编辑。成功/已有 SQLite 没有覆盖动作。unknown 不能宣称已持久记住，须检查存储/日志并重开。计数、诊断及停用/未确认/不完整说明均为迁入时记录，不描述后续编辑状态。
+- 正常四页及运行/版本详情不展示迁入历史或入口。仅持久化unknown（优先）或failed且Rust返回retryAllowed=true时显示紧凑当前故障入口和小弹窗；unknown无重试，安全重试沿busy/dirty/editing门禁及ETag/attempt双CAS。开关弹窗零写，正常/null摘要卸载弹窗。SQLite配置、历史和私有receipt保持。
 
 文件角色：YAML 仅为一次性来源，SQLite 是业务配置权威，`.db/.udt` 是编辑时显式结构导入。普通导入不接收 YAML。复用差异预览、地址确认、组配置，随后另行显式激活、连接和启采。
 
@@ -76,4 +76,10 @@ pnpm tauri dev
 
 [手写多DB样例与先行布局oracle](src-tauri/tests/fixtures/source-import-multi-db/README.zh-CN.md)记录有限profile。新增可选JSON lineage/binding不需DDL，读取旧v1不会自动写回；新程序读旧数据不等于旧binary能读新元数据，降级另核。来源版本仍计入128来源、16MiB配置及物理写预算，不删除未选来源腾空间。
 
-DAA的机器身份是opaque `point.id`（样本字典也按此ID），`sourcePath`保留PLC原始路径及中文，`name`是可编辑显示名。旧YAML工具的`name`承担运行时key，故不直接移植其ASCII/地址兜底；新导入地址为null。未来面向集成的人可读ASCII key需另定合同。
+DAA机器身份仍是opaque `point.id`，历史样本字典亦按ID。`name`现为ASCII技术名称，`sourcePath`保留原路径及中文。无可选JSON `nameMode`的存量仍是legacy，只有明确选中才转换；读取/重启/无关保存不转换。新合法结构路径立即成名；中文、数组、标点及超长路径停用/pending且name为空，既有地址确认在同一草稿事务中生成地址名。manual为显式ASCII人工改名；完整PLC namespace包含停用/legacy/manual，最终冲突整次拒绝。enabled pending阻断激活，停用pending和未选legacy保持原准入边界。
+
+点位页按稳定ID勾选，跨页保留（10/20/50），预览旧→新和冲突后显式确认；取消零写、保留选择。原编辑器预览有限用户字段patch并与派生名一起保存；原偏移确认同时成名，无第三次确认。token300秒过期并绑定输入/ETag。None/manual在重导、无关地址/类型变化后保名；直接受影响的managed遵循固定profile。旧历史/receipt/active版本原bytes不改，新元数据的旧binary降级需另证。
+
+[共享导入核心](../shared/tia-import-core/README.zh-CN.md)只保留一套纯parser/展开/布局/命名，DAA保留不可变源证明、闭包、ID及SQLite/CAS。没有DDL/第二技术key或YAML运行模式。共享不等于DS已实现或阶段B完成；还需DS独立接受的协议基线、另批DAA–DS读取至SQLite联调后，才整体接受B并推进C。
+
+普通`pnpm tauri dev`使用本仓package→Tauri beforeDevCommand→Vite15191与`src/main.ts`及本仓`src-tauri`入口。验收不自动复制临时代码或更新安装包。`yaml_migration_skipped`伴随persisted的imported状态表示既有receipt阻止重扫；`runtime_started` stopped和`runtime_stopped` clean描述启动意图和正常关闭，不表示失败。

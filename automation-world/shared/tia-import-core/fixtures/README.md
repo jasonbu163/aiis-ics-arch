@@ -1,0 +1,3 @@
+# TIA fixtures v1
+
+Handwritten synthetic names.db/names.udt plus independently frozen expected-v1.json define naming fixture v1. DB mappings are Names28=28, Names60=60, Names47=47. Each expected-v1 case is an independent namespace; the collision batch is explicitly separate. No customer source or actual endpoint is included. daa005-layout-oracle.json is the byte-for-byte mirror of the original DAA-005 oracle, SHA-256 `2f2f6fe79eea60b48357b72f8a4f352016da4c8d95220ba2e06005133c24e633`. The original remains the single layout-rule version; never independently edit/reformat either mirror. Consumers use their own existing JSON reader; core tests need only std. Full delivery hashes are in DAA-006 tasks.

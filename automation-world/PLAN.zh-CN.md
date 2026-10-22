@@ -4,6 +4,8 @@
 
 | Task ID | 状态 | 规格 | 最新事实 / 下一 gate |
 | --- | --- | --- | --- |
+| ARCH-AW-007 | owner_accepted | [r2](../plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md) | Human Owner 于 2026-10-21 最终验收精确 r2 文档，原独立 AC01–AC14 QA 保留。DAA、SMA 表格、CA 通用编排/内部连接器及未来全类型健康分工明确，首版无登录；完整 r1 历史/QA 保留，证据已归档，两处自有临时目录共 49 文件已清理，未改代码、未追加测试。 |
+| ARCH-AW-006 | owner_approved | [r2](../plans/ARCH-AW-006-unified-flow-agent-design/spec.md) | 精确 r2 设计已批准：DAA 大量采集、SMA 表格/工作台、CA 节点编排/版本/上下文/扩展；首版无登录。完整 r1 保留，文档实施统一归 007 r2，软件工作另立范围。 |
 | ARCH-AW-001 | owner_accepted | [r1](../plans/ARCH-AW-001-agent-foundation/spec.md) | CA已迁入并冻结，DAA/SMA可构建并独立启动；定向复核通过，Human Owner于2026-10-14接受r1；本轮未追加测试。UI与SQLite后续处理。 |
 
 CA保留冻结兼容基线；后续采集发展由DAA承接。S1 API合同、AW事实上传、业务闭环、共享UI、SQLite配置及映射存储另立spec。完整索引见[任务目录](plans/README.zh-CN.md)。
@@ -11,6 +13,8 @@ CA保留冻结兼容基线；后续采集发展由DAA承接。S1 API合同、AW�
 ## 子工程计划
 
 AW 管理整体阶段和跨工程依赖。各子工程 PLAN 管理自身实施任务，并链接唯一的本地 bundle；根目录历史任务保持原位。
+
+[DAA-006 r3](data-acquisition-agent/plans/DAA-006-point-naming-and-import-reuse/checklist.md#owner-acceptance-r3) 于2026-10-20获Human Owner最终验收。独立AC01–AC20核验及另行DIRECT界面确认层次分开记录，原blocked历史及原生观察限度保留。验收源码清单已固定，任务临时资源已归档/清理；本次仅验收收尾，未追加测试。DAA 阶段 B 整体仍未关闭，已有受控本地证据和已验收增量继续有效；仍需取得满足联调要求且独立验收的 DS 协议基线，再另批 DAA–DS S7 读取至 SQLite 联调，完成 fresh QA 与 Human Owner 验收。阶段 C 实施在 B 整体验收及 Backend API 合同稳定后推进。下表各任务状态保留其原有有限范围。
 
 | 工程 | 所属计划 | 当前阶段 |
 | --- | --- | --- |

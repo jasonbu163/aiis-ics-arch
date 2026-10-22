@@ -1,0 +1,2 @@
+{"package":"rust-snap7","version":"1.142.2","probe_mode":"native_split_budgeted","connect_elapsed_ms":3,"write_elapsed_ms":10,"read_elapsed_ms":10,"write_success":false,"read_success":false,"write_requests":1,"protocol_ack":"pdu_ref=0100 header_error=0000 status=ff","read_hex":"00000000000000000000000000000000","native_server_exitcode":0,"proxy_joined":true,"ports_released":[31102,31103]}
+{"native_server_memory_hex":"a5a5a5a5002aa5a5a5a5a5a5a5a5a5a5"}

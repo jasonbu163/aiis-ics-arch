@@ -49,6 +49,7 @@ export interface Point {
     dbId: string;
     sourcePath: string;
     name: string;
+    nameMode?: NameMode | null;
     dataType: string;
     comment: string;
     enabled: boolean;
@@ -221,6 +222,7 @@ export interface DbDelta { dbId: string; blockName: string; number: number; stat
 export interface ImportPreview {
     configuration: Configuration;
     changes: string[];
+    nameChanges: NameChange[];
     readiness: Issue[]; deltas: DbDelta[]; canConfirm: boolean; unchanged: boolean; previewToken: string | null; inputDigest: string; etag: string;
     issues: Issue[];
 }
@@ -231,6 +233,8 @@ export interface Offset {
     protectedManual: boolean;
     manualConflict: boolean; profile: string; layoutDigest: string;
     dbLength: number;
+    proposedName: string | null;
+    proposedNameMode: NameMode | null;
 }
 export class LocalCommandError extends Error {
     currentEtag?: string;
@@ -245,3 +249,11 @@ export function localCall<T>(command: string, request: unknown = {}): Promise<T>
         currentActiveRevision?: string | null;
     } : null; const error = new LocalCommandError(body?.errorCode ?? String(reason)); error.currentEtag = body?.currentEtag; error.currentActiveRevision = body?.currentActiveRevision; throw error; });
 }
+
+export type NameMode = 'pending' | 'auto_path' | 'auto_address' | 'manual';
+export interface NamePatch { name?: string; comment?: string; enabled?: boolean; groupId?: string | null; address?: Address | null; }
+export interface NameRequest { expectedEtag: string; plcId: string; pointIds: string[]; intent: 'generate' | 'edit'; patch: NamePatch | null; }
+export interface NameChange { pointId: string; sourcePath: string; oldName: string; oldMode: NameMode | null; proposedName: string; proposedMode: NameMode | null; addressConfirmed: boolean; reason: string; }
+export interface NamePreview { rows: NameChange[]; readiness: Issue[]; canConfirm: boolean; unchanged: boolean; inputDigest: string; previewToken: string; etag: string; }
+export const previewPointNames = (request: NameRequest) => localCall<NamePreview>('daa_preview_point_names', request);
+export const confirmPointNames = (input: NameRequest, preview: NamePreview) => localCall<ConfigurationView>('daa_confirm_point_names', { input, inputDigest: preview.inputDigest, previewToken: preview.previewToken });

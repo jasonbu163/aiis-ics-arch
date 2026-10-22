@@ -1,0 +1,2185 @@
+{
+  "revision": "r4",
+  "r3_stop_archive": {
+    "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/r3-stop-snapshot",
+    "inventory_sha256": "4cd2ff3b3053283129c471c3ab7239d4162f8fcc5a776e8591fc9810dca2192d"
+  },
+  "r4_runs": [
+    {
+      "run": "dev-0001",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0001",
+      "inventory_sha256": "4c6a49671294bb5730e3e544f1318c051cac3bd171c4b3e1da733e1e67711830",
+      "members": 12,
+      "status": "superseded_before_any_listener"
+    },
+    {
+      "run": "dev-0002",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0002",
+      "inventory_sha256": "e3b1cd3401fc7bb518402c6d8df7c373a7d332a2b5eb6d2e0490090887004dc8",
+      "members": 4,
+      "status": "intermediate_build_diagnostic"
+    },
+    {
+      "run": "dev-0003",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0003",
+      "inventory_sha256": "00ca7e4258eb7fde89cae33de957643a05d38c1236cd38fb223d1f9cd9f39e8f",
+      "members": 4,
+      "status": "intermediate_build_diagnostic"
+    },
+    {
+      "run": "dev-0004",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0004",
+      "inventory_sha256": "3a41ef0c01a196285722a8296a099498d629ac40e1ee77e3ff0488e1c3f5eb90",
+      "members": 4,
+      "status": "intermediate_build_diagnostic"
+    },
+    {
+      "run": "dev-0005",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0005",
+      "inventory_sha256": "dc6eb56cd793c6519ede9a8084e1748a78c2bbc795f1cfc3f5756b749850d160",
+      "members": 4,
+      "status": "intermediate_build_diagnostic"
+    },
+    {
+      "run": "dev-0006",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0006",
+      "inventory_sha256": "296672f171a64d50744e4ac1fc11235618228e55612276a2cd69d1d789fd21ec",
+      "members": 12,
+      "status": "superseded_b0_before_protocol_identity_metadata_fix"
+    },
+    {
+      "run": "dev-0007",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0007",
+      "inventory_sha256": "2cb109425eb4b1378d3b98fa30c5a92f227233ffaac6cef12c679e41823268f7",
+      "members": 4,
+      "status": "intermediate_build_diagnostic"
+    },
+    {
+      "run": "dev-0008",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0008",
+      "inventory_sha256": "4aec3bee41ea494f01d0525fd612cce2a0cbfe1c70089510c17a8e5c1d4fbad3",
+      "members": 11,
+      "status": "blocked_gui_environment_interrupted_clean"
+    },
+    {
+      "run": "dev-0009",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0009",
+      "inventory_sha256": "bd857998a442421422d9d08d449c1bd07d2d56512d0b43db0a889eda80eb15fe",
+      "members": 11,
+      "status": "interrupted_cua_bare_binary_binding_diagnostic"
+    },
+    {
+      "run": "dev-0010",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0010",
+      "inventory_sha256": "da988fa3c9ad4de3c8a19df2e44cabfb0792cb41f8d5bb3578a8c012300c3eec",
+      "members": 11,
+      "status": "superseded_before_protocol_exit_audit_fix"
+    },
+    {
+      "run": "dev-0011",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0011",
+      "inventory_sha256": "085bcf88b7d7a285b64bc8f0335e769c3d734e5defe6c421dd26d1c201f29191",
+      "members": 4,
+      "status": "intermediate_native_build"
+    },
+    {
+      "run": "dev-0012",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0012",
+      "inventory_sha256": "d94a99e5ba7f1fcfdbd8bc6da01d24cdf8623b5ac2c47c28d46a5963801f3336",
+      "members": 9,
+      "status": "interrupted_metadata_cua_binding_diagnostic"
+    },
+    {
+      "run": "dev-0013",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0013",
+      "inventory_sha256": "c0fac468077965e6287db5fcbfc0fc326f3e763056c483ac2d295d2c3af1dd6c",
+      "members": 11,
+      "status": "superseded_b0_before_shell_correction"
+    },
+    {
+      "run": "dev-0014",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0014",
+      "inventory_sha256": "b066d470c054b77d44cef9875c3638c4b6410465e0042ebf7f146079785f69b1",
+      "members": 4,
+      "status": "intermediate_build"
+    },
+    {
+      "run": "dev-0015",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0015",
+      "inventory_sha256": "18aa13d8533bd72f664de9a5b526a33f746327b6db58aa2d46f712f185c5064c",
+      "members": 9,
+      "status": "failed_exit_audit_and_owner_shell_rejected"
+    },
+    {
+      "run": "dev-0016",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0016",
+      "inventory_sha256": "bf3f65b69fafd99c30f486081da3ff6ab413ec983d6e8616db97d6b3eeaf25a4",
+      "members": 12,
+      "status": "current_b0_closed"
+    },
+    {
+      "run": "dev-0017",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0017",
+      "inventory_sha256": "02a3d8519bc91bb6fb5bdaddae41de2097c1bee1e2f7ae70522dc45365def318",
+      "members": 4,
+      "status": "intermediate_desktop_build"
+    },
+    {
+      "run": "dev-0018",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0018",
+      "inventory_sha256": "e761022764ac0f86ed43f569b52ed5933adb349c85a40b21ae4dd8a33d22e3bb",
+      "members": 4,
+      "status": "current_corrected_desktop_build"
+    },
+    {
+      "run": "dev-0019",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0019",
+      "inventory_sha256": "1bd2b1ac7991ff3a1e03e1cf56624930ad8b467f00c6fe52de2f24c67e6f0517",
+      "members": 8,
+      "status": "DEV_native_gate_closed_owner_observed"
+    },
+    {
+      "run": "dev-0020",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0020",
+      "inventory_sha256": "ae5ea75f564fca66b2e665de355778ae8f7a9d8b790e8e90c303733ef435b174",
+      "members": 18,
+      "case": "W01",
+      "status": "pass",
+      "source_candidate_sha256": "06a5a85261a28a2416521caa036f2f2d1843cb3025fdeeaa44516f31189821f9"
+    },
+    {
+      "run": "dev-0021",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0021",
+      "inventory_sha256": "2ba5962b298f7339ee8b508640a83fd2117069781d6cc5ebaee5dbd890332b81",
+      "members": 18,
+      "case": "W01",
+      "status": "pass",
+      "source_candidate_sha256": "06a5a85261a28a2416521caa036f2f2d1843cb3025fdeeaa44516f31189821f9"
+    },
+    {
+      "run": "dev-0022",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0022",
+      "inventory_sha256": "ab21e8f6feee291d3fc04157b78cf10f7661a34637d039828fb519cb13197cac",
+      "members": 18,
+      "case": "W01",
+      "status": "pass",
+      "source_candidate_sha256": "06a5a85261a28a2416521caa036f2f2d1843cb3025fdeeaa44516f31189821f9"
+    },
+    {
+      "run": "dev-0023",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0023",
+      "inventory_sha256": "5369dd93a954af697f044043f72588cf1a4219b6344f19a9a057cc381b5906eb",
+      "members": 28,
+      "case": "W02",
+      "status": "pass",
+      "source_candidate_sha256": "06a5a85261a28a2416521caa036f2f2d1843cb3025fdeeaa44516f31189821f9"
+    },
+    {
+      "run": "dev-0024",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0024",
+      "inventory_sha256": "1e484ed7161a3ec9aa1a99d07f6f60899a58d3bffc9246ac9fbe2248a0812291",
+      "members": 28,
+      "case": "W02",
+      "status": "pass",
+      "source_candidate_sha256": "06a5a85261a28a2416521caa036f2f2d1843cb3025fdeeaa44516f31189821f9"
+    },
+    {
+      "run": "dev-0025",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0025",
+      "inventory_sha256": "e3c9307176e78acd71238a9ffcbd6c90c88b07e0cb7e339c9cc13a56c9021740",
+      "members": 28,
+      "case": "W02",
+      "status": "pass",
+      "source_candidate_sha256": "06a5a85261a28a2416521caa036f2f2d1843cb3025fdeeaa44516f31189821f9"
+    },
+    {
+      "run": "dev-0026",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0026",
+      "inventory_sha256": "9acbe3b792d3084737f7e3810539e9a23aaadeeec64054c588ad64682c130a16",
+      "members": 18,
+      "case": "W03",
+      "status": "blocked",
+      "source_candidate_sha256": "06a5a85261a28a2416521caa036f2f2d1843cb3025fdeeaa44516f31189821f9"
+    },
+    {
+      "run": "dev-0027",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0027",
+      "inventory_sha256": "7af000ca3c3cd602c448c57618dd66ac72ddb18e0961ed9ed3c4fc64df38e489",
+      "members": 11,
+      "status": "intermediate_b0_closed",
+      "case": null
+    },
+    {
+      "run": "dev-0028",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0028",
+      "inventory_sha256": "0225c04a82d33041f1b697b1b62b848cf850facee11f5084b33815f39f7424b2",
+      "members": 18,
+      "status": "pass",
+      "case": "W03"
+    },
+    {
+      "run": "dev-0029",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0029",
+      "inventory_sha256": "21ddb2de290bb024e4373ed4b9b5309c76aee48ad0ca55e85ab5c8f9651a5b12",
+      "members": 18,
+      "status": "pass",
+      "case": "W01"
+    },
+    {
+      "run": "dev-0030",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0030",
+      "inventory_sha256": "421c643f89e66e8af6db9281bae444495432a33ba5c47304bb18a8191004a285",
+      "members": 18,
+      "status": "pass",
+      "case": "W01"
+    },
+    {
+      "run": "dev-0031",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0031",
+      "inventory_sha256": "4ca3703dd3bf2b184dd9b8d2978d3faeea31449240aa100146ed4b9f80f65080",
+      "members": 18,
+      "status": "pass",
+      "case": "W01"
+    },
+    {
+      "run": "dev-0032",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0032",
+      "inventory_sha256": "b63c5871693e8c7638570be10a9859b14c2583555665850435ef9aab202d1c8d",
+      "members": 28,
+      "status": "pass",
+      "case": "W02"
+    },
+    {
+      "run": "dev-0033",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0033",
+      "inventory_sha256": "c0b77977a04136de1d49593f01b4f0440c1b6e7dde21df03bd22eaf7f7b9ffc8",
+      "members": 28,
+      "status": "pass",
+      "case": "W02"
+    },
+    {
+      "run": "dev-0034",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0034",
+      "inventory_sha256": "dbd39b74bb19f014f4c3ee025a99d86803929db0c5b46b9ae4f28c63b6c841e5",
+      "members": 28,
+      "status": "pass",
+      "case": "W02"
+    },
+    {
+      "run": "dev-0035",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0035",
+      "inventory_sha256": "d264df02d5579b1813b18a1d122d25d83b3f580882c823597beeee832944b02d",
+      "members": 18,
+      "status": "pass",
+      "case": "W03"
+    },
+    {
+      "run": "dev-0036",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0036",
+      "inventory_sha256": "cef7a19f0046fa02f18e59858eee69b31b987db17294642e3d307473a459e6ad",
+      "members": 18,
+      "status": "pass",
+      "case": "W03"
+    },
+    {
+      "run": "dev-0037",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0037",
+      "inventory_sha256": "a404721beedd7f8d3204904db6f0800f92d59fb0d6f57300490bc6b0848286a2",
+      "members": 42,
+      "status": "pass",
+      "case": "W04"
+    },
+    {
+      "run": "dev-0038",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0038",
+      "inventory_sha256": "80670e85e5c95cd98183972957a38d3d7fc109a054bbc5308462b6c66549070e",
+      "members": 42,
+      "status": "pass",
+      "case": "W04"
+    },
+    {
+      "run": "dev-0039",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0039",
+      "inventory_sha256": "32367b8d76b01d3b73029243fa3eb2ad18d0fff9796aaaa8655519fb688d6cf4",
+      "members": 42,
+      "status": "pass",
+      "case": "W04"
+    },
+    {
+      "run": "dev-0040",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0040",
+      "inventory_sha256": "3a6f46af2a305dcd110163cd2d84704e4e0f6dca7adc0ab29e452f909a1fd615",
+      "members": 36,
+      "status": "pass",
+      "case": "W05"
+    },
+    {
+      "run": "dev-0041",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0041",
+      "inventory_sha256": "3c1efadbd5933125bd9c2d854a82b048371f54ebb5e47e59cdddd1a3ef71e50f",
+      "members": 36,
+      "status": "pass",
+      "case": "W05"
+    },
+    {
+      "run": "dev-0042",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0042",
+      "inventory_sha256": "36ca2e9918bfdbde2b8c1dab2ad62caf89b6272df288bdc1b55238956a371ed5",
+      "members": 36,
+      "status": "pass",
+      "case": "W05"
+    },
+    {
+      "run": "dev-0043",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0043",
+      "inventory_sha256": "70addec5a153c8f507c720cc1cbe46f586579f2c06424e7c164672b156ad0cb6",
+      "members": 18,
+      "status": "pass",
+      "case": "W06"
+    },
+    {
+      "run": "dev-0044",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0044",
+      "inventory_sha256": "ffa6e9781a9d4d7e4dbc36f9eba3fc0c08996561981a9fd6bc84a2ebefd4f39f",
+      "members": 18,
+      "status": "pass",
+      "case": "W06"
+    },
+    {
+      "run": "dev-0045",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0045",
+      "inventory_sha256": "574d82b4d99254cffcd331d3a2b0198c47b10754fc7d1a6f8e5409e132687cbf",
+      "members": 18,
+      "status": "pass",
+      "case": "W06"
+    },
+    {
+      "run": "dev-0046",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0046",
+      "inventory_sha256": "c34bf9f21d20f7a8b5625c29ea600f49743a7802e767a3fddf30696a07985ae9",
+      "members": 23,
+      "status": "pass",
+      "case": "W07"
+    },
+    {
+      "run": "dev-0047",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0047",
+      "inventory_sha256": "c851d3d29b2a345aab3fa3f120b198e70ac1da1b41874d0bfa1d2d5c7b52d677",
+      "members": 23,
+      "status": "pass",
+      "case": "W07"
+    },
+    {
+      "run": "dev-0048",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0048",
+      "inventory_sha256": "cbf4ddd1195747c070ea151a9ba3d8092f79bcf669541ed2d13c2b3a9f93eb60",
+      "members": 23,
+      "status": "pass",
+      "case": "W07"
+    },
+    {
+      "run": "dev-0049",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0049",
+      "inventory_sha256": "7c92962e142f8ca9588f8f6ab7b7d667e2712810777036b240515bccdcb66842",
+      "members": 18,
+      "status": "pass",
+      "case": "W08"
+    },
+    {
+      "run": "dev-0050",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0050",
+      "inventory_sha256": "247b0768e0c0f50f215d8823006ee476a62501c55d54daa1502e969c53b484bc",
+      "members": 18,
+      "status": "pass",
+      "case": "W08"
+    },
+    {
+      "run": "dev-0051",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0051",
+      "inventory_sha256": "f460d9a62c3648b660419a54bc4a66911c230c7204243c696311b980fe677842",
+      "members": 18,
+      "status": "pass",
+      "case": "W08"
+    },
+    {
+      "run": "dev-0052",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0052",
+      "inventory_sha256": "cf142edffa585c95b9125438c1fd3620c1c0d7fe3ed6e6bd0c447a3617002d70",
+      "members": 16,
+      "status": "fail",
+      "case": "W09"
+    },
+    {
+      "run": "dev-0053",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0053",
+      "inventory_sha256": "7c0475be29ef0a171da50bfca4d702c1c9884655595c3c8575e0eed91ad5b214",
+      "members": 10,
+      "status": "superseded_b0",
+      "case": null
+    },
+    {
+      "run": "dev-0054",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0054",
+      "inventory_sha256": "407acfc0312e28ac033290cc7e71ba19f797af3c1c790e0a70ab0f3ae79ee58e",
+      "members": 24,
+      "status": "pass",
+      "case": "W09"
+    },
+    {
+      "run": "dev-0055",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0055",
+      "inventory_sha256": "8fb66ad5b7a8b10be358b4261d47e5a50735c43278181503c9c156eab5e7a628",
+      "members": 18,
+      "status": "pass",
+      "case": "W01"
+    },
+    {
+      "run": "dev-0056",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0056",
+      "inventory_sha256": "6202d33dc9cc68b914d7594a2a53036bc63150c9ee09d14176285ab8e3f00cad",
+      "members": 18,
+      "status": "pass",
+      "case": "W01"
+    },
+    {
+      "run": "dev-0057",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0057",
+      "inventory_sha256": "e3182f510f2b6c15c74adf7fd837c4c42ef9e856e20fb5cbe378d4d340e4db0f",
+      "members": 18,
+      "status": "pass",
+      "case": "W01"
+    },
+    {
+      "run": "dev-0058",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0058",
+      "inventory_sha256": "6df1045c1d9455bf785dfe39c737c76bb9a4b420b2e06a32623f3cbbb72dd520",
+      "members": 28,
+      "status": "pass",
+      "case": "W02"
+    },
+    {
+      "run": "dev-0059",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0059",
+      "inventory_sha256": "09c4d1c5fe94e527d0fee0190adca4c9f1505223d553eeb03fe0187bded39f4f",
+      "members": 28,
+      "status": "pass",
+      "case": "W02"
+    },
+    {
+      "run": "dev-0060",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0060",
+      "inventory_sha256": "44e9adccc85513aece317ea24bfad360342dee1d8d8c933654840f8b545b5b89",
+      "members": 28,
+      "status": "pass",
+      "case": "W02"
+    },
+    {
+      "run": "dev-0061",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0061",
+      "inventory_sha256": "8ecdc7ad309cbd4e9c60060f6a46ff49377ece70c777a4adfff3502f6cbcbc2f",
+      "members": 18,
+      "status": "pass",
+      "case": "W03"
+    },
+    {
+      "run": "dev-0062",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0062",
+      "inventory_sha256": "f4515a4858207c768a979e9162bb44ac0a259647c56fa361388f4790c5bb4d48",
+      "members": 18,
+      "status": "pass",
+      "case": "W03"
+    },
+    {
+      "run": "dev-0063",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0063",
+      "inventory_sha256": "25fc228b8398c1e11a85c9abfb9bc1139e2f83dd3c841fe1aadc9a0ddd26a2cb",
+      "members": 18,
+      "status": "blocked",
+      "case": "W03"
+    },
+    {
+      "run": "dev-0064",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0064",
+      "inventory_sha256": "c6a3e58cc12e280b9a903df59dc07eaf54e95cccb463bc09b540976854791e0c",
+      "members": 11,
+      "status": "closed_b0"
+    },
+    {
+      "run": "dev-0065",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0065",
+      "inventory_sha256": "7aa655b7deac3c1b27e8af63089a99409928b59766cb2facc70fe9e4a6cb8645",
+      "members": 3,
+      "status": "intermediate_build"
+    },
+    {
+      "run": "dev-0066",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0066",
+      "inventory_sha256": "0abddf92fb6ba5b61dcb3c5a0709795362cea7fa3afac903a97fbffaff3ad187",
+      "members": 3,
+      "status": "final_scaffold_build"
+    },
+    {
+      "run": "dev-0068",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0068",
+      "inventory_sha256": "6b029e996e8f14985bda8a236287dac3c4f0adbd3b3a0214801da3dde19f1e59",
+      "members": 3,
+      "status": "exact_logging_probe_original_persisted"
+    },
+    {
+      "run": "dev-0067",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0067",
+      "inventory_sha256": "20d47cf9516f17e1642e8a9d58de1191a575c4a459e9f45c337ec03cb38bc8f9",
+      "members": 8,
+      "status": "native_scaffold_dev_pass"
+    },
+    {
+      "run": "dev-0069",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0069",
+      "inventory_sha256": "7d0776b2a9f4efe7463a4463780c372508bc56c2e19c491dd793fbc85ddcfca0",
+      "members": 18,
+      "case": "W03",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0070",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0070",
+      "inventory_sha256": "d59a8b80c726d6e65ae8a7456c642cd766b95278de65b770b81b112f06fc40b2",
+      "members": 18,
+      "case": "W03",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0071",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0071",
+      "inventory_sha256": "c69b71252f43f53381af45e71b78deee773ef758967eefa34e22eab55b338c06",
+      "members": 18,
+      "case": "W03",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0072",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0072",
+      "inventory_sha256": "44ca815fc502ee489e29c43e59695d67842ae6b06f17423ba2018eb924d10057",
+      "members": 18,
+      "case": "W01",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0073",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0073",
+      "inventory_sha256": "39aa973e75cab2a08e56034d26f6df21a7c514548a9e4e2ea6838c46b288bb84",
+      "members": 18,
+      "case": "W01",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0074",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0074",
+      "inventory_sha256": "a917fb3f3c233bff2ee9fb58ee6bf24f57430ee5722b7409f112cae238a9aa6e",
+      "members": 18,
+      "case": "W01",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0075",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0075",
+      "inventory_sha256": "3f9e804e4923c53d5f3e0113eac1a3df08e1632bb0499c17fce04cd8079423f6",
+      "members": 28,
+      "case": "W02",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0076",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0076",
+      "inventory_sha256": "9b3a082eda055e548d4fe2158f841c13fa52c046fc7af5118d9e37ca90473bb9",
+      "members": 28,
+      "case": "W02",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0077",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0077",
+      "inventory_sha256": "686e084139410fcee1ded77d458947f1534b7846ea262da3df7e45f256714203",
+      "members": 28,
+      "case": "W02",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0078",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0078",
+      "inventory_sha256": "96a3a5f166daf50839b4f546a32b0873a53fccb361bb34021daeacd4f6861f35",
+      "members": 42,
+      "case": "W04",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0079",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0079",
+      "inventory_sha256": "abf5ab184563d5322fd96fe6014f2e0191363ea2d749f8f4150c3e1b87360616",
+      "members": 42,
+      "case": "W04",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0080",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0080",
+      "inventory_sha256": "d630b167fdf92e7de083dae64a3db6257e77fd5597ba77ca2108463d5b1240fb",
+      "members": 42,
+      "case": "W04",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0081",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0081",
+      "inventory_sha256": "fc049241d1feda502ac2315d95a37ec26714f1f572abc706038b73ffa78863e8",
+      "members": 36,
+      "case": "W05",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0082",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0082",
+      "inventory_sha256": "04641eb88fda8f7f17ded33af7867c364f920d31e7be4c0c459e05e2da9cf945",
+      "members": 36,
+      "case": "W05",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0083",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0083",
+      "inventory_sha256": "d754886c8844b7c56e094ea7a6caff15f1dbcc0429078172bfdbeba7af28e0a8",
+      "members": 36,
+      "case": "W05",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0084",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0084",
+      "inventory_sha256": "05afee30082a247f7ad5c48ca6e70135edbc6828bfcea2accae6543ee30f230c",
+      "members": 18,
+      "case": "W06",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0085",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0085",
+      "inventory_sha256": "ac26852d36512fdc4ac2770b533d76c06cba9e089cfc5d3b379657ad0470d2f5",
+      "members": 18,
+      "case": "W06",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0086",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0086",
+      "inventory_sha256": "608d6ba8c909641afd3bd93f7c01833d6302e01c26d4cbde1268dd5fb810499e",
+      "members": 18,
+      "case": "W06",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0087",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0087",
+      "inventory_sha256": "99d856d50695e26095836287565d6568482c82792f9d17b71c9c8ab9fca21033",
+      "members": 23,
+      "case": "W07",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0088",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0088",
+      "inventory_sha256": "585f41558c4c2229dd40bd248dec2b27bda89a855121d414b095bd55a7e43889",
+      "members": 23,
+      "case": "W07",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0089",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0089",
+      "inventory_sha256": "0a61a62659a93bfd165a255e24b19ac4719c1d3c40a9b9eb7cf09a5fc6cdd5a3",
+      "members": 23,
+      "case": "W07",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0090",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0090",
+      "inventory_sha256": "d413c1f2529ea28bc9a94731b8ed550e81a1e24a1f7a5ffccd3865e4bfc96055",
+      "members": 18,
+      "case": "W08",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0091",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0091",
+      "inventory_sha256": "79a28e35e832b474b58dfaf3f24e91cd25dda577b9044fcbafc540be4afe6fe5",
+      "members": 18,
+      "case": "W08",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0092",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0092",
+      "inventory_sha256": "f97f74074c0a4cf7069338214f22d26e935f812cd700fe309b353d610a65e977",
+      "members": 18,
+      "case": "W08",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0093",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0093",
+      "inventory_sha256": "2f70b7c7e27550dfd2dbf1f2d025fa4a0022d4562ea28f4a98d3ace96cfe7b43",
+      "members": 24,
+      "case": "W09",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0094",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0094",
+      "inventory_sha256": "06e3d4b8523ac3baf5ed6d05b8e82201e7332b4fc209e31973291d0da1d60625",
+      "members": 24,
+      "case": "W09",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0095",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0095",
+      "inventory_sha256": "cfc258ccd0de10ad27d5bc11a9df8e61f670828625b9fff002eb9deea59fbcb6",
+      "members": 24,
+      "case": "W09",
+      "status": "pass",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0096",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0096",
+      "inventory_sha256": "f44318cd2ddb3ec047345f3269dc4207d044077a8e8274cbb65ec467037c029f",
+      "members": 16,
+      "case": "C01/C02",
+      "status": "wire_and_DS_threshold_pass_but_external_resource_categories_incomplete",
+      "source_candidate_sha256": "41611d47448afd78761430092db948eb409f3f9040efc4797fa1522e9b986cd7"
+    },
+    {
+      "run": "dev-0097",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0097",
+      "inventory_sha256": "d1baf3e2ce576db75ce5962174c05095471a64af8cd1936956c4e51ead6a3719",
+      "members": 12,
+      "status": "closed_b0_resource_observer_patch"
+    },
+    {
+      "run": "dev-0098",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0098",
+      "inventory_sha256": "0747430130bcff0abf8197b48f7715ee047169a00fe4731da684982719f4930a",
+      "members": 18,
+      "case": "W03",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0099",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0099",
+      "inventory_sha256": "22ca6b0790ddbefc1adb828a2e31f70151b8cf186a888c7a31b3127082ca81fd",
+      "members": 18,
+      "case": "W03",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0100",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0100",
+      "inventory_sha256": "ee366c414f5a1bf1bb64c3364115db565bb242476c5b264bc261c3671848f3d4",
+      "members": 18,
+      "case": "W03",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0101",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0101",
+      "inventory_sha256": "d788fcbf3222611adaf003924a8382dcae8fdcad68c8599ea3ac44209e41cce3",
+      "members": 18,
+      "case": "W01",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0102",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0102",
+      "inventory_sha256": "d4a83e463eb031c12a98cc363c063ad915735edb6be09d1811e422adb3c11423",
+      "members": 18,
+      "case": "W01",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0103",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0103",
+      "inventory_sha256": "116e3b13fbb75fc32624bb03bc03db9eae151f1b5db9bb8c25a9b88d09c4610a",
+      "members": 18,
+      "case": "W01",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0104",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0104",
+      "inventory_sha256": "1b6228b9ab1bb200f269663210e403162d6107c3cca92c73dec9171f81d56ddc",
+      "members": 28,
+      "case": "W02",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0105",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0105",
+      "inventory_sha256": "3751ea85b8a3fb4771b0f3e56b753c4a89088bcccef70034d8e933b96af11d18",
+      "members": 28,
+      "case": "W02",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0106",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0106",
+      "inventory_sha256": "6cfd6ea9c6eb021c3011bd9a92da72218720bbb14286c563da19dfd56d70e3e3",
+      "members": 28,
+      "case": "W02",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0107",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0107",
+      "inventory_sha256": "28ea4c5461e4606b09e98ec2643edc38d833fc00fd2656f323e787f5ced0186b",
+      "members": 42,
+      "case": "W04",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0108",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0108",
+      "inventory_sha256": "57e0ed849fc135921388cdc676ab05e0599fcd18e87ddfb155f7323fc305d1f0",
+      "members": 42,
+      "case": "W04",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0109",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0109",
+      "inventory_sha256": "265c4bd221c1b7cab8d66467d176c40150903d90578c8f6e540687193fa4fa5c",
+      "members": 42,
+      "case": "W04",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0110",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0110",
+      "inventory_sha256": "a8abcc06c531e92e7c6e7d7cf127f891c53eb96fc72912362b0c005b63dee440",
+      "members": 36,
+      "case": "W05",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0111",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0111",
+      "inventory_sha256": "0656b80fb9f1ca9e2fc1fa3196807dffc2dacaaf2f2fd1c21038165f6eab873d",
+      "members": 36,
+      "case": "W05",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0112",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0112",
+      "inventory_sha256": "769e7871fbcd61654078aa36eb34bd1916826ea4a2c38993160b6d789778acaf",
+      "members": 36,
+      "case": "W05",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0113",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0113",
+      "inventory_sha256": "cc7ed40d3c7c137ccca43231ab80d7a063c4479a5d88523c6345838a2adaccf8",
+      "members": 18,
+      "case": "W06",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0114",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0114",
+      "inventory_sha256": "ce5cd7da0396852b22b8f9c8ce8c2dd1ba01644f86d8958a151763fa0af82ed8",
+      "members": 18,
+      "case": "W06",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0115",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0115",
+      "inventory_sha256": "2213248ce4473d645bd671188e283be190ec8f642f6b6a71a0647a4acd2f45a2",
+      "members": 18,
+      "case": "W06",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0116",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0116",
+      "inventory_sha256": "94695c14070b95e10b98e89427021f563a7b53b1fe1e7e44649645eeeecaf320",
+      "members": 23,
+      "case": "W07",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0117",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0117",
+      "inventory_sha256": "3d64c386e1601752348b1d0c6871d5729852b283e4598e3fcdb53bb8b0e7748b",
+      "members": 23,
+      "case": "W07",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0118",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0118",
+      "inventory_sha256": "f22f5d62e63f7fb7143b29f5646d7d75ba5e7ae9baa54fd97eb016d8388bd1ca",
+      "members": 23,
+      "case": "W07",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0119",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0119",
+      "inventory_sha256": "e8dada78acd6fe4f79750c07888592d4633b77b32d444d82167f8fc0413b626c",
+      "members": 18,
+      "case": "W08",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0120",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0120",
+      "inventory_sha256": "aed2d047e328e9b0fffe747e2982d511dcfde2932196c29629ecc65805f3f82d",
+      "members": 18,
+      "case": "W08",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0121",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0121",
+      "inventory_sha256": "f90249a03b68abc07abb7dbb96f77b75571ff458c82a6fbf54a9e0591c5d58a1",
+      "members": 18,
+      "case": "W08",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0122",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0122",
+      "inventory_sha256": "4e498c19e789e234a3da5aab71f5fc1e0a816c43e17ae51ab9d25e83e1362116",
+      "members": 24,
+      "case": "W09",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0123",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0123",
+      "inventory_sha256": "2f33478d54f3b3e842ddbb55e1cdb31d23b45a363cafaf4cd3375710fe795246",
+      "members": 24,
+      "case": "W09",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0124",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0124",
+      "inventory_sha256": "08367b727ee06a1c27f8d42eb382b125dea52aa0a2bdda2729ffc1059487ed49",
+      "members": 24,
+      "case": "W09",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0125",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0125",
+      "inventory_sha256": "b80fa2b1cacf59007eeb23eea600ac0d70a8167257d619eb37d414d5bfff3201",
+      "members": 16,
+      "case": "C01/C02",
+      "status": "pass",
+      "source_candidate_sha256": "1b3f16988c6b410e96ab7b93da01207b5b5c7a48d7bf7f8261f12e39883c2d6e"
+    },
+    {
+      "run": "dev-0126",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0126",
+      "inventory_sha256": "92eebb824235c53682c57189e77ab3ca1a17caed80294572d93ed808241ba163",
+      "members": 16,
+      "status": "pass",
+      "case": "C03"
+    },
+    {
+      "run": "dev-0127",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0127",
+      "inventory_sha256": "aedf5f94ded5e57a9a422868742850de3473db05562fc8472a876a6ffbfed9a8",
+      "members": 24,
+      "status": "fail",
+      "case": "C04"
+    },
+    {
+      "run": "dev-0128",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0128",
+      "inventory_sha256": "5207cf64043059ede5a54c1b2b43e45f1db2e2d31d2c5fd48db3b99152761e99",
+      "members": 10,
+      "status": "superseded_b0",
+      "case": null
+    },
+    {
+      "run": "dev-0129",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0129",
+      "inventory_sha256": "779d51a0a9280cf79fc0a4506b0a045bd96caa46d4cee21855c6badb466c4067",
+      "members": 24,
+      "status": "fail",
+      "case": "C04"
+    },
+    {
+      "run": "dev-0130",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0130",
+      "inventory_sha256": "a4781e4b54c70506718daf3ccc39e60e0d54441ef8aa48e00f87b855da472584",
+      "members": 10,
+      "status": "superseded_b0",
+      "case": null
+    },
+    {
+      "run": "dev-0131",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0131",
+      "inventory_sha256": "105677e1306e492103f85c65820a628e28968a6ab39ae5e68ad70ae4ece37e79",
+      "members": 24,
+      "status": "fail",
+      "case": "C04"
+    },
+    {
+      "run": "dev-0132",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0132",
+      "inventory_sha256": "6a6cff2ba556224e765eceb1c8cb6170bbbdbfdf668c64f31be841badfe3b920",
+      "members": 10,
+      "status": "superseded_b0",
+      "case": null
+    },
+    {
+      "run": "dev-0133",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0133",
+      "inventory_sha256": "eead343b5d6623c700732ebf541bf0588ac74abb7d1a806946d4325765345eec",
+      "members": 24,
+      "status": "fail",
+      "case": "C04"
+    },
+    {
+      "run": "dev-0134",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0134",
+      "inventory_sha256": "30481f29b23d9e3547ee3cd091efeb6aeeea18373a720f6392d68334f1942e54",
+      "members": 10,
+      "status": "superseded_b0",
+      "case": null
+    },
+    {
+      "run": "dev-0135",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0135",
+      "inventory_sha256": "65f0bb9441754a857dc5af881ff3354a6033dad2914fabbb1ab4a80edfac1277",
+      "members": 24,
+      "status": "fail",
+      "case": "C04"
+    },
+    {
+      "run": "dev-0136",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0136",
+      "inventory_sha256": "ab7310ba4c5ddeaae5e7ed0825e876747d50affae442f150ee47049148850e1c",
+      "members": 10,
+      "status": "b0_closed_superseded",
+      "case": null
+    },
+    {
+      "run": "dev-0137",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0137",
+      "inventory_sha256": "799f7fd3a2008aff104ba916e4bb889de21e2421f7becb0b0facb63bae9ea73b",
+      "members": 24,
+      "status": "fail",
+      "case": "C04"
+    },
+    {
+      "run": "dev-0138",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0138",
+      "inventory_sha256": "7adae4b4ee3e82c6b0b9cbd32b2593a2ac4ddce6089e539ca5be73f3039c5263",
+      "members": 10,
+      "status": "b0_closed_superseded",
+      "case": null
+    },
+    {
+      "run": "dev-0139",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0139",
+      "inventory_sha256": "fe155b4f3ee9984b36e3901fd9a33fe56c8d8a19dc1596b7a9eb7386914a9d94",
+      "members": 24,
+      "status": "pass",
+      "case": "C04"
+    },
+    {
+      "run": "dev-0140",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0140",
+      "inventory_sha256": "34d33669b068917e021328e3ed70ffebdf7e9e6abb5feeb18f7f1b91b5d69cb3",
+      "members": 10,
+      "status": "b0_closed_superseded",
+      "case": null
+    },
+    {
+      "run": "dev-0141",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0141",
+      "inventory_sha256": "dd613a95921fc8efdec5ed7f693c6a53780d25e7fa46d05b99baf12f661590b8",
+      "members": 25,
+      "status": "pass",
+      "case": "C05"
+    },
+    {
+      "run": "dev-0142",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0142",
+      "inventory_sha256": "b1da223c3b91689b7a0f9657a67701d4172077d95bdb6b31da5f8ec97fd795c0",
+      "members": 16,
+      "status": "pass",
+      "case": "C06"
+    },
+    {
+      "run": "dev-0143",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0143",
+      "inventory_sha256": "2e5402378225474f348ab49eb58e5706562879aa396435be925577aa232393cb",
+      "members": 16,
+      "status": "pass",
+      "case": "D01"
+    },
+    {
+      "run": "dev-0144",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0144",
+      "inventory_sha256": "308af8644fe6834b1d0e7469083c71e6a1ba36fdbdde07549e86cfc6f733420a",
+      "members": 16,
+      "status": "fail",
+      "case": "D02"
+    },
+    {
+      "run": "dev-0145",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0145",
+      "inventory_sha256": "a147b57eef133508247c51a67a5482216ca6deb19274a1cba4ae2e6b906ea7cb",
+      "members": 11,
+      "status": "b0_closed_current",
+      "case": null
+    },
+    {
+      "run": "dev-0146",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0146",
+      "inventory_sha256": "52845d32a2888543bdbc90a3aa7f06662ca7c4c830d527510874da69456576b2",
+      "members": 16,
+      "status": "pass",
+      "case": "D02"
+    },
+    {
+      "run": "dev-0147",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0147",
+      "inventory_sha256": "38ba4ee678f512fdafd76e5e612e023c7c352a35df426d4a16cca0a06d8b43ab",
+      "members": 24,
+      "status": "pass",
+      "case": "X01"
+    },
+    {
+      "run": "dev-0148",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0148",
+      "inventory_sha256": "5196389f533c9d05dff8234f0e4ec629622ccfbd456ce16baccab7a439f39fa6",
+      "members": 24,
+      "status": "pass",
+      "case": "X01"
+    },
+    {
+      "run": "dev-0149",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0149",
+      "inventory_sha256": "b241272f4f77e0973b2a741bbedb9194d725de1c3d8d18df78630015d4367271",
+      "members": 24,
+      "status": "pass",
+      "case": "X01"
+    },
+    {
+      "run": "dev-0150",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0150",
+      "inventory_sha256": "9ff913cd8483d3d54277dc75d76b956c884108fe19c00d45053c11c7425ce86c",
+      "members": 15,
+      "status": "not_applicable",
+      "case": "X02"
+    },
+    {
+      "run": "dev-0151",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0151",
+      "inventory_sha256": "e45834a09840438bcfff88c12feb5de6be8e2e06d83088c1b7dfdd6c63776647",
+      "members": 18,
+      "status": "pass",
+      "case": "W03"
+    },
+    {
+      "run": "dev-0152",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0152",
+      "inventory_sha256": "1c5d0507b3b1bb38c3248cbe16db4779608fc6cdc993dc96c09d5c345c46480a",
+      "members": 18,
+      "status": "pass",
+      "case": "W03"
+    },
+    {
+      "run": "dev-0153",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0153",
+      "inventory_sha256": "291c157b073818db982747354b5afab847c19e5e3decb03f3ad5683c183727aa",
+      "members": 18,
+      "status": "pass",
+      "case": "W03"
+    },
+    {
+      "run": "dev-0154",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0154",
+      "inventory_sha256": "3d916665b8ef3ea070ad01974b37575d3cca1c244ea82fe7432232852f0ae51b",
+      "members": 18,
+      "status": "pass",
+      "case": "W01"
+    },
+    {
+      "run": "dev-0155",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0155",
+      "inventory_sha256": "a562544caf92a2ee828573deb89012aa22c754aec63931f0843c451d93714efb",
+      "members": 18,
+      "status": "pass",
+      "case": "W01"
+    },
+    {
+      "run": "dev-0156",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0156",
+      "inventory_sha256": "d90c86b42d6f55108a38dc65673bb02ba47f9af7eace3b176788229f29511b88",
+      "members": 18,
+      "status": "pass",
+      "case": "W01"
+    },
+    {
+      "run": "dev-0157",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0157",
+      "inventory_sha256": "2be36714bb892f205fa6c6bef370672f5110433a554d6b35d079cfee1e23677a",
+      "members": 28,
+      "status": "pass",
+      "case": "W02"
+    },
+    {
+      "run": "dev-0158",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0158",
+      "inventory_sha256": "f3386b51481da4fcd3c9fc58c33488e842720b5686c183947fd950a37889b636",
+      "members": 28,
+      "status": "pass",
+      "case": "W02"
+    },
+    {
+      "run": "dev-0159",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0159",
+      "inventory_sha256": "464e6de3e4f08439d65c946f82d67bf101807350c40c4b4e2a8e28f5298f86fe",
+      "members": 28,
+      "status": "pass",
+      "case": "W02"
+    },
+    {
+      "run": "dev-0160",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0160",
+      "inventory_sha256": "b2375d714b9efb3e4546a4bfbe8a8f8227c6d991d0512dc36aac1e9122455e39",
+      "members": 42,
+      "status": "pass",
+      "case": "W04"
+    },
+    {
+      "run": "dev-0161",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0161",
+      "inventory_sha256": "7ac9b112385bd03f56632475da82803abea091a6ed3e70336878898b224ea04c",
+      "members": 42,
+      "status": "pass",
+      "case": "W04"
+    },
+    {
+      "run": "dev-0162",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0162",
+      "inventory_sha256": "0092564cc9759a2dd7157ea674ab0c1199ffb2ea9583605e9b3d597c817ca9f0",
+      "members": 42,
+      "status": "pass",
+      "case": "W04"
+    },
+    {
+      "run": "dev-0163",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0163",
+      "inventory_sha256": "59e8d6e14168fc660c0944c7d0cb58f1ad970e643ba1396a76d01660a61e27c8",
+      "members": 36,
+      "status": "pass",
+      "case": "W05"
+    },
+    {
+      "run": "dev-0164",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0164",
+      "inventory_sha256": "b01f937209241c582001f08637142e158a7efba8bb1754f8023e7e2bddda62cc",
+      "members": 36,
+      "status": "pass",
+      "case": "W05"
+    },
+    {
+      "run": "dev-0165",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0165",
+      "inventory_sha256": "447018bc6a095d331869fd918e50ecd0a6d29bba637543f2d1722e15430e08f5",
+      "members": 36,
+      "status": "pass",
+      "case": "W05"
+    },
+    {
+      "run": "dev-0166",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0166",
+      "inventory_sha256": "3db1bc5844dee9aa32ebfa5ae19bd6ff6f68979b089aaecb1080963b80af15ec",
+      "members": 18,
+      "status": "pass",
+      "case": "W06"
+    },
+    {
+      "run": "dev-0167",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0167",
+      "inventory_sha256": "d730ad3af7967e4357a73063212a50263bf92cab53dd2d69292ee4a8814e68d4",
+      "members": 18,
+      "status": "pass",
+      "case": "W06"
+    },
+    {
+      "run": "dev-0168",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0168",
+      "inventory_sha256": "3d99101e5ee180459be8bcf62b287036c3bf6d7366b563b7ca83c96850c664e2",
+      "members": 18,
+      "status": "pass",
+      "case": "W06"
+    },
+    {
+      "run": "dev-0169",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0169",
+      "inventory_sha256": "045c25e23c1505a1ee0ea6ab8695a9407273e50003f1b3847cbd2e2b7c7dde5f",
+      "members": 23,
+      "status": "pass",
+      "case": "W07"
+    },
+    {
+      "run": "dev-0170",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0170",
+      "inventory_sha256": "274554fe4d9aee4ae71188c318c0e132117ef8d9059348bf8e3f2f06be29ee52",
+      "members": 23,
+      "status": "pass",
+      "case": "W07"
+    },
+    {
+      "run": "dev-0171",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0171",
+      "inventory_sha256": "dca92ecd1b7d5db45e897a4a7daeb706f5b4a05a629c9950efba21747ed837be",
+      "members": 23,
+      "status": "pass",
+      "case": "W07"
+    },
+    {
+      "run": "dev-0172",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0172",
+      "inventory_sha256": "20d45697dc67df3f1e3111fdb49161d4908091a41bcda38f54fb66cf8da4e311",
+      "members": 18,
+      "status": "pass",
+      "case": "W08"
+    },
+    {
+      "run": "dev-0173",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0173",
+      "inventory_sha256": "60354743aca6adadfef38f4992b8d1f054b9a3d2c8a017f2d062f25d87e477df",
+      "members": 18,
+      "status": "pass",
+      "case": "W08"
+    },
+    {
+      "run": "dev-0174",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0174",
+      "inventory_sha256": "62f751c984b6b11d05e33d29a04f15faca3fceb0831112afb362ecf5de300340",
+      "members": 18,
+      "status": "pass",
+      "case": "W08"
+    },
+    {
+      "run": "dev-0175",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0175",
+      "inventory_sha256": "746b18e7ce90aea2d8f65b838ebe02c255a233d9f55ac08003b042b127d0a529",
+      "members": 24,
+      "status": "pass",
+      "case": "W09"
+    },
+    {
+      "run": "dev-0176",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0176",
+      "inventory_sha256": "d43b99bf3f4ad346d9345aa8a303e2453d3d31529db1259b1997fe9026e3f2ce",
+      "members": 24,
+      "status": "pass",
+      "case": "W09"
+    },
+    {
+      "run": "dev-0177",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0177",
+      "inventory_sha256": "bf0c10dc84ac9ea9c042ce7a0060d706547939c60e17798c78b6a04a9e1c64ad",
+      "members": 24,
+      "status": "pass",
+      "case": "W09"
+    },
+    {
+      "run": "dev-0178",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0178",
+      "inventory_sha256": "b1694c0be5eefc5b31ae27f81be68d2a11f12e02dcbe66cb061715274013a3c1",
+      "members": 16,
+      "status": "pass",
+      "case": "C01"
+    },
+    {
+      "run": "dev-0179",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0179",
+      "inventory_sha256": "c9b7d21265c639c1e4b60fb6a968cc13e87501cd11311fefc624e6def2268ba3",
+      "members": 16,
+      "status": "pass",
+      "case": "C03"
+    },
+    {
+      "run": "dev-0180",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0180",
+      "inventory_sha256": "adde30bba14778bd58802206c4e6141bfeef1ad748dd726cabbb1edc7707341e",
+      "members": 24,
+      "status": "pass",
+      "case": "C04"
+    },
+    {
+      "run": "dev-0181",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0181",
+      "inventory_sha256": "98ef44ae3bb728799021fd01432241bd13c6fdba38f820c6433efd23e9fa90bc",
+      "members": 25,
+      "status": "pass",
+      "case": "C05"
+    },
+    {
+      "run": "dev-0182",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0182",
+      "inventory_sha256": "981f028b90280c793b1b56951897294c2d15edd80ae15d052fc039f001251b2f",
+      "members": 16,
+      "status": "pass",
+      "case": "C06"
+    },
+    {
+      "run": "dev-0183",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0183",
+      "inventory_sha256": "d351d2e255e90df0967d9087a2c168a599a638171c3da5608a60a49a9aa01b94",
+      "members": 16,
+      "status": "pass",
+      "case": "D01"
+    },
+    {
+      "run": "dev-0184",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0184",
+      "inventory_sha256": "f6cdee880bae43f9ee0fac7e56c17de0ab9ffde116d333afbafdc04bb5fdaad6",
+      "members": 16,
+      "status": "pass",
+      "case": "D02"
+    },
+    {
+      "run": "dev-0185",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0185",
+      "inventory_sha256": "c4f7678645f6a8b8c5047139a5f01c142612d03456eaace39cd0131e413d6048",
+      "members": 24,
+      "status": "pass",
+      "case": "X01"
+    },
+    {
+      "run": "dev-0186",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0186",
+      "inventory_sha256": "67b013d8a023b6f92587b65ad70bf5c6f840ca3ca9810bc548b1c2a2bad185db",
+      "members": 24,
+      "status": "pass",
+      "case": "X01"
+    },
+    {
+      "run": "dev-0187",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0187",
+      "inventory_sha256": "acebdbe9baa47a8df725137f5078c133d54f00ad7aae07ee597db158a0bedba6",
+      "members": 24,
+      "status": "pass",
+      "case": "X01"
+    },
+    {
+      "run": "dev-0188",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0188",
+      "inventory_sha256": "6912bb91544096b58e0d96d0f2d32756754c70c852ccd4c1df9493773cf4dc00",
+      "members": 15,
+      "status": "not_applicable",
+      "case": "X02"
+    },
+    {
+      "run": "dev-0189",
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0189",
+      "inventory_sha256": "838cc0a861da766266facbd1618ec9c5b2dd2e2fd26a907226bfef09269fb601",
+      "members": 4,
+      "status": "DEV_self_check_pass"
+    }
+  ],
+  "current_b0_run": "dev-0145",
+  "current_source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+  "native_scaffold": "Current desktop931b: A67 three actual normal visible cycles plus Owner close observation; A19 theme/language/refresh visual-only reuse under34 exact unchanged inputs; current eight binaries identical to dev64, only runner changed",
+  "protocol_cases": {
+    "distinct": 19,
+    "applicable": 18,
+    "not_applicable": [
+      "X02"
+    ],
+    "actual_runner_commands": 38,
+    "note": "C02 is measured within C01 same sessions; W and X01 independent repetitions retained"
+  },
+  "QA": "pending new fresh-context Verification; no DEV QA verdict",
+  "native_scaffold_carry_forward": {
+    "event": "native_gate_exact_binary_carry_forward",
+    "current_b0": "dev-0145",
+    "current_source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+    "eight_binaries_identical_to": "dev-0064",
+    "native_actual_cycles": "dev-0067",
+    "desktop_sha256": "931b1ab402ce6f8eaee8c5233245db92db7c8ffe9c21855aeaba09a81c670b30",
+    "visual_only_old_evidence": "dev-0019 (34 unchanged UI inputs); not a new desktop run",
+    "scope": "since dev64 only formal Python runner changed; runtime/native/frontend and all eight executable inputs identical"
+  },
+  "current_b0": {
+    "run": "dev-0145",
+    "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+    "state": "closed"
+  },
+  "protocol_status": "DEV original19 complete:18 applicable pass, X02 in-process not_applicable; fresh QA and Owner pending",
+  "native_scaffold_current": {
+    "run": "dev-0067",
+    "state": "native_scaffold_dev_pass",
+    "visual_source": "A19 Owner observation, strictly unchanged34 UI inputs/CU/exit-path; dev64/results.jsonl",
+    "binary_sha256": "931b1ab402ce6f8eaee8c5233245db92db7c8ffe9c21855aeaba09a81c670b30",
+    "completed_normal_cycles": 3,
+    "owned_pid": null,
+    "launcher_pid": null,
+    "session_id": 37465,
+    "ports": "30102/30103/30104 LISTEN empty; lsof exit1",
+    "resource_receipt": "/private/tmp/arch-aw-005-r4-exec/tmp/dev/native67-wait-resource.json",
+    "raw_state": "A67 sealed SHA-verified",
+    "resume": "Owner confirms this new candidate three visible windows/normal closes; same exact r4 approval remains valid",
+    "human_receipt": "/private/tmp/arch-aw-005-r3-refresh-ii4zqye9/execution-coordinator/r4-resume-004/owner-native-close-observation.json",
+    "shutdown_upper_ns": [
+      220683000,
+      183823000,
+      185876000
+    ],
+    "affected_scope_reuse": "Current B0dev145 confirms all8 binaries exact vs dev64, runtime/native/frontend/UI exit paths unchanged; A67 actual three normal visible cycles reused, A19 visual-only inputs separate"
+  },
+  "previous_41611d_case_runs": {
+    "W03": [
+      "dev-0069",
+      "dev-0070",
+      "dev-0071"
+    ],
+    "W01": [
+      "dev-0072",
+      "dev-0073",
+      "dev-0074"
+    ],
+    "W02": [
+      "dev-0075",
+      "dev-0076",
+      "dev-0077"
+    ],
+    "W04": [
+      "dev-0078",
+      "dev-0079",
+      "dev-0080"
+    ],
+    "W05": [
+      "dev-0081",
+      "dev-0082",
+      "dev-0083"
+    ],
+    "W06": [
+      "dev-0084",
+      "dev-0085",
+      "dev-0086"
+    ],
+    "W07": [
+      "dev-0087",
+      "dev-0088",
+      "dev-0089"
+    ],
+    "W08": [
+      "dev-0090",
+      "dev-0091",
+      "dev-0092"
+    ],
+    "W09": [
+      "dev-0093",
+      "dev-0094",
+      "dev-0095"
+    ]
+  },
+  "previous_1b3f_case_runs": {
+    "W03": [
+      "dev-0098",
+      "dev-0099",
+      "dev-0100"
+    ],
+    "W01": [
+      "dev-0101",
+      "dev-0102",
+      "dev-0103"
+    ],
+    "W02": [
+      "dev-0104",
+      "dev-0105",
+      "dev-0106"
+    ],
+    "W04": [
+      "dev-0107",
+      "dev-0108",
+      "dev-0109"
+    ],
+    "W05": [
+      "dev-0110",
+      "dev-0111",
+      "dev-0112"
+    ],
+    "W06": [
+      "dev-0113",
+      "dev-0114",
+      "dev-0115"
+    ],
+    "W07": [
+      "dev-0116",
+      "dev-0117",
+      "dev-0118"
+    ],
+    "W08": [
+      "dev-0119",
+      "dev-0120",
+      "dev-0121"
+    ],
+    "W09": [
+      "dev-0122",
+      "dev-0123",
+      "dev-0124"
+    ],
+    "C01": [
+      "dev-0125"
+    ],
+    "C02": [
+      "dev-0125 same sixteen sessions"
+    ]
+  },
+  "current_case_runs": {
+    "W03": [
+      {
+        "run": "dev-0151",
+        "status": "pass",
+        "duration_seconds": 1.4153162499999998,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0151",
+        "inventory_sha256": "e45834a09840438bcfff88c12feb5de6be8e2e06d83088c1b7dfdd6c63776647",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0152",
+        "status": "pass",
+        "duration_seconds": 1.443606583,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0152",
+        "inventory_sha256": "1c5d0507b3b1bb38c3248cbe16db4779608fc6cdc993dc96c09d5c345c46480a",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0153",
+        "status": "pass",
+        "duration_seconds": 1.430977792,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0153",
+        "inventory_sha256": "291c157b073818db982747354b5afab847c19e5e3decb03f3ad5683c183727aa",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "W01": [
+      {
+        "run": "dev-0154",
+        "status": "pass",
+        "duration_seconds": 1.362283208,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0154",
+        "inventory_sha256": "3d916665b8ef3ea070ad01974b37575d3cca1c244ea82fe7432232852f0ae51b",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0155",
+        "status": "pass",
+        "duration_seconds": 1.3464209580000002,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0155",
+        "inventory_sha256": "a562544caf92a2ee828573deb89012aa22c754aec63931f0843c451d93714efb",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0156",
+        "status": "pass",
+        "duration_seconds": 1.365185084,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0156",
+        "inventory_sha256": "d90c86b42d6f55108a38dc65673bb02ba47f9af7eace3b176788229f29511b88",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "W02": [
+      {
+        "run": "dev-0157",
+        "status": "pass",
+        "duration_seconds": 1.415776375,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0157",
+        "inventory_sha256": "2be36714bb892f205fa6c6bef370672f5110433a554d6b35d079cfee1e23677a",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0158",
+        "status": "pass",
+        "duration_seconds": 1.4150073749999998,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0158",
+        "inventory_sha256": "f3386b51481da4fcd3c9fc58c33488e842720b5686c183947fd950a37889b636",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0159",
+        "status": "pass",
+        "duration_seconds": 1.426143333,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0159",
+        "inventory_sha256": "464e6de3e4f08439d65c946f82d67bf101807350c40c4b4e2a8e28f5298f86fe",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "W04": [
+      {
+        "run": "dev-0160",
+        "status": "pass",
+        "duration_seconds": 1.592713292,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0160",
+        "inventory_sha256": "b2375d714b9efb3e4546a4bfbe8a8f8227c6d991d0512dc36aac1e9122455e39",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0161",
+        "status": "pass",
+        "duration_seconds": 1.65335575,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0161",
+        "inventory_sha256": "7ac9b112385bd03f56632475da82803abea091a6ed3e70336878898b224ea04c",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0162",
+        "status": "pass",
+        "duration_seconds": 1.625316875,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0162",
+        "inventory_sha256": "0092564cc9759a2dd7157ea674ab0c1199ffb2ea9583605e9b3d597c817ca9f0",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "W05": [
+      {
+        "run": "dev-0163",
+        "status": "pass",
+        "duration_seconds": 1.472856875,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0163",
+        "inventory_sha256": "59e8d6e14168fc660c0944c7d0cb58f1ad970e643ba1396a76d01660a61e27c8",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0164",
+        "status": "pass",
+        "duration_seconds": 1.474622958,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0164",
+        "inventory_sha256": "b01f937209241c582001f08637142e158a7efba8bb1754f8023e7e2bddda62cc",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0165",
+        "status": "pass",
+        "duration_seconds": 1.439625209,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0165",
+        "inventory_sha256": "447018bc6a095d331869fd918e50ecd0a6d29bba637543f2d1722e15430e08f5",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "W06": [
+      {
+        "run": "dev-0166",
+        "status": "pass",
+        "duration_seconds": 1.36521,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0166",
+        "inventory_sha256": "3db1bc5844dee9aa32ebfa5ae19bd6ff6f68979b089aaecb1080963b80af15ec",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0167",
+        "status": "pass",
+        "duration_seconds": 1.3406299590000001,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0167",
+        "inventory_sha256": "d730ad3af7967e4357a73063212a50263bf92cab53dd2d69292ee4a8814e68d4",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0168",
+        "status": "pass",
+        "duration_seconds": 1.3472600829999999,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0168",
+        "inventory_sha256": "3d99101e5ee180459be8bcf62b287036c3bf6d7366b563b7ca83c96850c664e2",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "W07": [
+      {
+        "run": "dev-0169",
+        "status": "pass",
+        "duration_seconds": 1.941256791,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0169",
+        "inventory_sha256": "045c25e23c1505a1ee0ea6ab8695a9407273e50003f1b3847cbd2e2b7c7dde5f",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0170",
+        "status": "pass",
+        "duration_seconds": 1.924094917,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0170",
+        "inventory_sha256": "274554fe4d9aee4ae71188c318c0e132117ef8d9059348bf8e3f2f06be29ee52",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0171",
+        "status": "pass",
+        "duration_seconds": 1.931201958,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0171",
+        "inventory_sha256": "dca92ecd1b7d5db45e897a4a7daeb706f5b4a05a629c9950efba21747ed837be",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "W08": [
+      {
+        "run": "dev-0172",
+        "status": "pass",
+        "duration_seconds": 1.479879167,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0172",
+        "inventory_sha256": "20d45697dc67df3f1e3111fdb49161d4908091a41bcda38f54fb66cf8da4e311",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0173",
+        "status": "pass",
+        "duration_seconds": 1.494214666,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0173",
+        "inventory_sha256": "60354743aca6adadfef38f4992b8d1f054b9a3d2c8a017f2d062f25d87e477df",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0174",
+        "status": "pass",
+        "duration_seconds": 1.507576708,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0174",
+        "inventory_sha256": "62f751c984b6b11d05e33d29a04f15faca3fceb0831112afb362ecf5de300340",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "W09": [
+      {
+        "run": "dev-0175",
+        "status": "pass",
+        "duration_seconds": 3.796192417,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0175",
+        "inventory_sha256": "746b18e7ce90aea2d8f65b838ebe02c255a233d9f55ac08003b042b127d0a529",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0176",
+        "status": "pass",
+        "duration_seconds": 3.8560792079999997,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0176",
+        "inventory_sha256": "d43b99bf3f4ad346d9345aa8a303e2453d3d31529db1259b1997fe9026e3f2ce",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0177",
+        "status": "pass",
+        "duration_seconds": 3.822364708,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0177",
+        "inventory_sha256": "bf0c10dc84ac9ea9c042ce7a0060d706547939c60e17798c78b6a04a9e1c64ad",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "C01": [
+      {
+        "run": "dev-0178",
+        "status": "pass",
+        "duration_seconds": 335.971036,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0178",
+        "inventory_sha256": "b1694c0be5eefc5b31ae27f81be68d2a11f12e02dcbe66cb061715274013a3c1",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "C03": [
+      {
+        "run": "dev-0179",
+        "status": "pass",
+        "duration_seconds": 55.706906916,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0179",
+        "inventory_sha256": "c9b7d21265c639c1e4b60fb6a968cc13e87501cd11311fefc624e6def2268ba3",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "C04": [
+      {
+        "run": "dev-0180",
+        "status": "pass",
+        "duration_seconds": 19.345297208,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0180",
+        "inventory_sha256": "adde30bba14778bd58802206c4e6141bfeef1ad748dd726cabbb1edc7707341e",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "C05": [
+      {
+        "run": "dev-0181",
+        "status": "pass",
+        "duration_seconds": 77.30883325,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0181",
+        "inventory_sha256": "98ef44ae3bb728799021fd01432241bd13c6fdba38f820c6433efd23e9fa90bc",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "C06": [
+      {
+        "run": "dev-0182",
+        "status": "pass",
+        "duration_seconds": 224.074457208,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0182",
+        "inventory_sha256": "981f028b90280c793b1b56951897294c2d15edd80ae15d052fc039f001251b2f",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "D01": [
+      {
+        "run": "dev-0183",
+        "status": "pass",
+        "duration_seconds": 61.348028417,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0183",
+        "inventory_sha256": "d351d2e255e90df0967d9087a2c168a599a638171c3da5608a60a49a9aa01b94",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "D02": [
+      {
+        "run": "dev-0184",
+        "status": "pass",
+        "duration_seconds": 6.039935625,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0184",
+        "inventory_sha256": "f6cdee880bae43f9ee0fac7e56c17de0ab9ffde116d333afbafdc04bb5fdaad6",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "X01": [
+      {
+        "run": "dev-0185",
+        "status": "pass",
+        "duration_seconds": 3.9779943329999994,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0185",
+        "inventory_sha256": "c4f7678645f6a8b8c5047139a5f01c142612d03456eaace39cd0131e413d6048",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0186",
+        "status": "pass",
+        "duration_seconds": 3.9788060419999995,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0186",
+        "inventory_sha256": "67b013d8a023b6f92587b65ad70bf5c6f840ca3ca9810bc548b1c2a2bad185db",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0187",
+        "status": "pass",
+        "duration_seconds": 3.999654417,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0187",
+        "inventory_sha256": "acebdbe9baa47a8df725137f5078c133d54f00ad7aae07ee597db158a0bedba6",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "X02": [
+      {
+        "run": "dev-0188",
+        "status": "not_applicable",
+        "duration_seconds": 1.261776958,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0188",
+        "inventory_sha256": "6912bb91544096b58e0d96d0f2d32756754c70c852ccd4c1df9493773cf4dc00",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "C02": [
+      {
+        "run": "dev-0178",
+        "status": "pass",
+        "duration_seconds": 335.971036,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0178",
+        "inventory_sha256": "b1694c0be5eefc5b31ae27f81be68d2a11f12e02dcbe66cb061715274013a3c1",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true,
+        "nested_in": "C01 same 16 live sessions; not a separate reset or short substitute"
+      }
+    ]
+  },
+  "DEV_final_self_check": {
+    "run": "dev-0189",
+    "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0189",
+    "inventory_sha256": "838cc0a861da766266facbd1618ec9c5b2dd2e2fd26a907226bfef09269fb601",
+    "members": 4,
+    "status": "DEV_self_check_pass"
+  }
+}

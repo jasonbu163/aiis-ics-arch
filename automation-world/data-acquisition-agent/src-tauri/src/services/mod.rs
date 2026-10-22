@@ -7,3 +7,5 @@ pub(crate) mod local_scheduler;
 pub(crate) mod local_storage;
 pub(crate) mod local_supervisor;
 pub(crate) mod local_yaml_migration;
+
+pub(crate) mod local_point_naming;

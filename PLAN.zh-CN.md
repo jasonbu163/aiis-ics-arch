@@ -6,14 +6,20 @@ English version: [PLAN.md](PLAN.md)
 
 - 源码基线版本：`1.0.0`（annotated `v1.0.0` tag 与 `release/1.x.x` 维护分支已复核；不代表已创建托管
   Release 或完成部署）。
-- 当前工作树表面：`backend/`、`frontend-js/`、`automation-world/`、`tools/`、`contracts/`；CA 已迁入 AW 并冻结，DAA/SMA 初始化状态见下方任务。
+- 当前工作树表面：`backend/`、`frontend-js/`、`automation-world/`、`field-flow/`、`tools/`、`contracts/`；CA 已迁入 AW 并冻结，DAA/SMA 初始化状态见下方任务。Field Flow 已有局部 Rust 候选，因 S7 确认关联问题阻塞；Python 未开始。
 - 项目业务模块和项目输入归使用方项目仓库。
 
 ## 架构工作流
 
+DAA 阶段 B 整体仍未关闭，已有受控本地证据和已验收增量继续有效；仍需取得满足联调要求且独立验收的 DS 协议基线，再另批 DAA–DS S7 读取至 SQLite 联调，完成 fresh QA 与 Human Owner 验收。阶段 C 实施在 B 整体验收及 Backend API 合同稳定后推进。下表各任务状态保留其原有有限范围。
+
 | 工作流 | 状态 | 记录 | 边界 |
 | --- | --- | --- | --- |
-| DS G0 技术原型验证 | `draft` | [ARCH-AW-005 r2 spec](plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md) | Human Owner 于 2026-10-19 批准 r1；P0 只读核查与 r2 精确执行提案已写入 spec，完整 r1 历史保留。未构建、运行 ABI 探针或原型；待精确 r2 执行范围获批。 |
+| 最新三界总图与状态快照 | `qa_passed` | [ARCH-MULTI-002 r1 spec](plans/ARCH-MULTI-002-three-worlds-diagram-sync/spec.md) | 独立 AC01–AC10 文档 QA 结论已写入 checklist；结论保存后的 Agent 最终回报遇到模型容量错误。Mermaid 未渲染，待 Human Owner 最终验收；仅文档改动。 |
+| Field Flow 独立现场运行程序 | `draft`（FF-001 r3）；r2 `dev_blocked` | [FF 计划](field-flow/PLAN.zh-CN.md)；[FF-001 r3 spec](field-flow/plans/FF-001-dual-runtime-demo01/spec.md) | r2 已有可编译 Rust 候选及局部本机证据，但未匹配 S7 写 ACK 被提交 confirmed。PM 提议经原库公开 raw ISO API 增加受限 INT 适配，精确 r3 待批准。全部源码/历史/证据保留；Python、完整交接及 QA 待完成，ARCH-TOOL-001 r2 不变。 |
+| DAA/SMA/CA 三应用发展路线 | `owner_accepted` | [ARCH-AW-007 r2 spec](plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md) | Human Owner 于 2026-10-21 最终验收精确 r2 文档，原 fresh-context AC01–AC14 QA 保留。DAA 专用采集、TSS 派生 SMA 表格/工作台、CA 通用编排/内部连接器及未来全类型健康明确，首版无登录。完整 r1 历史/QA 保留，证据已归档，两处自有临时目录共 49 文件已清理；未改代码、未追加测试，软件另立范围。 |
+| DAA/SMA/CA 与 CA 通用流程设计 | `owner_approved` | [ARCH-AW-006 r2 spec](plans/ARCH-AW-006-unified-flow-agent-design/spec.md) | Human Owner 已批准 r2 设计：DAA 大量采集、TSS 派生 SMA 映射表/工作台、CA 节点/版本/上下文及扩展；首版无登录认证。产线/实验室案例及完整 r1 保留，文档实施统一归 007 r2，软件实施另立范围。 |
+| DS 产品实施与 G0 退役 | `qa_passed` | [ARCH-AW-005 r5 spec](plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md)；[r5 开发交接](plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md)；[Verification 记录](plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md) | 源码 306a09d5 独立核验通过：34 项核心测试、普通启动、N1–N3 和原协议适用矩阵，含 16 客户端通信及第 17 条连接拒绝。F-r5-003 已关闭，废弃 G0 已退役，失败历史保留。Owner 最终验收待完成；DAA–DS SQLite 联调另批，阶段 C 排除。 |
 | DS 多实例 S7 详细设计 | `owner_accepted` | [ARCH-AW-004 r2 spec](plans/ARCH-AW-004-ds-detailed-design/spec.md) | Human Owner 于 2026-10-18 验收精确 r2 详细设计，独立 AC1–AC29 文档 QA 与 r1 历史保留，文档收尾已记录。G0、软件实施、原生/S7 联调及容量实证须另行立项批准。 |
 | DAA/SMA 详细设计与配合合同 | `owner_accepted` | [ARCH-AW-003 spec](plans/ARCH-AW-003-daa-detailed-design/spec.md) | Human Owner 于 2026-10-17 验收 r3，独立 AC21–AC35/R26 文档 QA 保留；r1/r2 历史保留，SMA/AW Runtime 原字节未改；仅设计验收，实施另需获批 spec |
 | DAA 阶段 A：CU 布局与既有页面 | `owner_accepted` | [DAA-001 r1 spec](automation-world/data-acquisition-agent/plans/DAA-001-cu-layout-migration/spec.md) | Human Owner 于 2026-10-17 验收 r1；新的 fresh Verification 通过，F-001/F-002 关闭，原失败历史保留。仅阶段 A 布局与既有功能兼容，B/C 实施另批。 |
@@ -21,6 +27,7 @@ English version: [PLAN.md](PLAN.md)
 | DAA SQLite 唯一入口与 YAML 迁入 | `qa_passed` | [DAA-003 r1 spec](automation-world/data-acquisition-agent/plans/DAA-003-sqlite-only-startup/spec.md) | 新的独立QA2已通过，[checklist](automation-world/data-acquisition-agent/plans/DAA-003-sqlite-only-startup/checklist.md) 确认F-001/F-002解除并完整保留QA1失败历史。普通入口采用唯一SQLite，YAML仅首次空实例迁入停用草稿，已有配置/历史优先保留。必要增量与原受控原生保存重开证据已核准，自有测试进程/15191已释放、证据保留；Human Owner最终验收待定。 |
 | DAA 迁入提示收敛与最小源码导入验证 | `qa_passed` | [DAA-004 r1 spec](automation-world/data-acquisition-agent/plans/DAA-004-migration-notice-and-source-import-validation/spec.md) | 新的独立Verification通过AC01–AC08，有限README/界面调整及受控三点DB/UDT导入闭环已完成；操作差异和观察限制保留，已有配置/历史与SQLite防重回执保持。待Human Owner最终验收；阶段C和真实TIA/PLC联调仍属范围外。 [checklist](automation-world/data-acquisition-agent/plans/DAA-004-migration-notice-and-source-import-validation/checklist.md) |
 | DAA 多DB导入与嵌套辅助偏移 | `owner_accepted` | [DAA-005 r1 spec](automation-world/data-acquisition-agent/plans/DAA-005-multi-db-source-import-and-nested-offsets/spec.md) | Human Owner已于2026-10-19最终验收精确DAA-005 r1，独立QA2已通过AC01–AC13。本次仅验收收尾，原失败和原生证据保留，未追加测试或实现改动。 [checklist](automation-world/data-acquisition-agent/plans/DAA-005-multi-db-source-import-and-nested-offsets/checklist.md). |
+| DAA 点位技术命名与导入能力复用准备 | `owner_accepted` | [DAA-006 r3 spec](automation-world/data-acquisition-agent/plans/DAA-006-point-naming-and-import-reuse/spec.md) | Human Owner于2026-10-20最终验收r3及另行DIRECT界面调整；独立AC01–AC20核验、原blocked历史及原生限度保留。验收源码已固定，临时资源已归档/清理；整体B、DS及阶段C门禁保持。 |
 | 三界架构发展蓝本 | `qa_passed` | [ARCH-MULTI-001 spec](plans/ARCH-MULTI-001-versioned-stack-roadmap/spec.md) | r2 [双语 ROADMAP](ROADMAP.zh-CN.md) 已交付；独立文档 QA 通过 AC1–AC10，待 Human Owner 最终审阅；未改代码 |
 | AW Agent 工程前置初始化 | `owner_accepted` | [ARCH-AW-001 spec](plans/ARCH-AW-001-agent-foundation/spec.md) | CA 已迁入并冻结，DAA/SMA 初始化并可独立启动；定向复核通过，Human Owner 于 2026-10-14 接受 r1；本轮未追加测试；UI/SQLite 后续另立任务 |
 | AW 白皮书与运行原理设计 | `owner_accepted` | [ARCH-AW-002 spec](plans/ARCH-AW-002-agent-runtime-design/spec.md) | r3 DS 增补独立 QA 通过 AC12–AC17，Human Owner 于 2026-10-18 验收 r3 文档；未开始代码实现；r2 文档 QA 保留为历史；未授权功能实施 |

@@ -14,91 +14,39 @@ pub(crate) struct OffsetChange {
     pub db_length: u32,
     pub profile: String,
     pub layout_digest: String,
+    pub proposed_name: Option<String>,
+    pub proposed_name_mode: Option<crate::domain::point_naming::NameMode>,
 }
-fn aligned(bits: u32) -> LocalResult<u32> {
-    bits.checked_add(15)
-        .map(|n| n / 16 * 16)
-        .ok_or("layout_overflow".into())
-}
+#[cfg(test)]
 fn layout(
     nodes: &[FieldNode],
     cursor: &mut u32,
     out: &mut Vec<(String, u32, Option<u8>)>,
     depth: usize,
 ) -> LocalResult<()> {
-    if depth > 8 {
-        return Err("expansion_depth".into());
-    }
-    for n in nodes {
-        let result = (|| -> LocalResult<()> {
-            if !n.children.is_empty() {
-                *cursor = aligned(*cursor)?;
-                if n.data_type == "ARRAY" {
-                    let lo = n.lower.ok_or("array_bounds")?;
-                    let hi = n.upper.ok_or("array_bounds")?;
-                    let count = i64::from(hi) - i64::from(lo) + 1;
-                    if !(1..=1024).contains(&count) || n.children.len() != count as usize {
-                        return Err("array_bounds".into());
-                    }
-                    if has_array(&n.children) {
-                        return Err("nested_array".into());
-                    }
-                }
-                layout(&n.children, cursor, out, depth + 1)?;
-                *cursor = aligned(*cursor)?;
-            } else {
-                if n.data_type.starts_with("STRING[")
-                    || n.data_type == "ARRAY"
-                    || n.data_type == "STRUCT"
-                {
-                    return Err("offset_inference_unsupported".into());
-                }
-                let width = width(&n.data_type).ok_or("unsupported_type")?;
-                let (byte, bit) = if n.data_type == "BOOL" {
-                    let at = (*cursor / 8, Some((*cursor % 8) as u8));
-                    *cursor = cursor.checked_add(1).ok_or("layout_overflow")?;
-                    at
-                } else {
-                    let mut byte = cursor.checked_add(7).ok_or("layout_overflow")? / 8;
-                    if width >= 2 {
-                        byte = byte.checked_add(1).ok_or("layout_overflow")? / 2 * 2;
-                    }
-                    *cursor = byte
-                        .checked_add(width)
-                        .and_then(|b| b.checked_mul(8))
-                        .ok_or("layout_overflow")?;
-                    (byte, None)
-                };
-                out.push((n.path.clone(), byte, bit));
-            }
-            if *cursor > 65536 * 8 {
-                return Err("layout_overflow".into());
-            }
-            Ok(())
-        })();
-        result.map_err(|e| {
-            format!(
-                "{}:path={}:line={}",
-                e.split(':').next().unwrap_or("layout_invalid"),
-                n.path,
-                n.line
-            )
-        })?;
-    }
-    Ok(())
-}
-fn has_array(nodes: &[FieldNode]) -> bool {
-    nodes
-        .iter()
-        .any(|n| n.data_type == "ARRAY" || has_array(&n.children))
+    aiis_tia_import_core::layout::layout_nodes(
+        &super::tia_source::parser::tree_to_core(nodes),
+        cursor,
+        out,
+        depth,
+    )
 }
 pub(crate) fn preview(c: &Configuration, db_id: &str) -> LocalResult<Vec<OffsetChange>> {
     let d = c.dbs.iter().find(|d| d.id == db_id).ok_or("db_missing")?;
     super::tia_source::verify_db(c, d)?;
-    let mut cursor = 0;
-    let mut rows = vec![];
-    layout(&d.tree, &mut cursor, &mut rows, 0)?;
-    let length = aligned(cursor)? / 8;
+    let tree = super::tia_source::parser::tree_to_core(&d.tree);
+    let plan = aiis_tia_import_core::layout_standard(
+        &aiis_tia_import_core::ExpandedDb {
+            name: d.name.clone(),
+            leaves: aiis_tia_import_core::structured_leaves(&tree),
+            tree,
+            standard: true,
+        },
+        aiis_tia_import_core::LayoutProfile::SiemensStep7V20StandardWordV1,
+    )
+    .map_err(|v| v[0].code.clone())?;
+    let length = plan.length;
+    let rows = plan.leaves.into_iter().map(|r| (r.path, r.byte, r.bit));
     if length == 0 || length > d.length || length > 65536 {
         return Err("layout_db_length".into());
     }
@@ -138,6 +86,8 @@ pub(crate) fn preview(c: &Configuration, db_id: &str) -> LocalResult<Vec<OffsetC
                 .unwrap_or(false);
         changes.push(OffsetChange {
             point_id: p.id.clone(),
+            proposed_name: None,
+            proposed_name_mode: None,
             old: p.address.clone(),
             proposed: Address {
                 offset,
@@ -152,6 +102,47 @@ pub(crate) fn preview(c: &Configuration, db_id: &str) -> LocalResult<Vec<OffsetC
             profile: PROFILE.into(),
             layout_digest: layout_digest.clone(),
         });
+    }
+    let mut named = c.clone();
+    let ids: BTreeSet<_> = changes
+        .iter()
+        .filter(|x| !x.protected_manual)
+        .filter_map(|x| {
+            let p = c.points.iter().find(|p| p.id == x.point_id)?;
+            matches!(
+                p.name_mode,
+                Some(crate::domain::point_naming::NameMode::Pending)
+                    | Some(crate::domain::point_naming::NameMode::AutoAddress)
+            )
+            .then_some(p.id.clone())
+        })
+        .collect();
+    for row in &changes {
+        if !row.protected_manual {
+            let p = named
+                .points
+                .iter_mut()
+                .find(|p| p.id == row.point_id)
+                .unwrap();
+            let mut a = row.proposed.clone();
+            a.confirmed = true;
+            p.address = Some(a)
+        }
+    }
+    let proven = named
+        .dbs
+        .iter()
+        .filter(|d| super::tia_source::verify_db(&named, d).is_ok())
+        .map(|d| d.id.clone())
+        .collect();
+    crate::domain::point_naming::generated(&mut named, &ids, &proven, None, true)
+        .map_err(|es| es[0].code.clone())?;
+    for row in &mut changes {
+        if ids.contains(&row.point_id) {
+            let p = named.points.iter().find(|p| p.id == row.point_id).unwrap();
+            row.proposed_name = Some(p.name.clone());
+            row.proposed_name_mode = p.name_mode.clone();
+        }
     }
     Ok(changes)
 }
@@ -196,6 +187,28 @@ pub(crate) fn confirm(c: &mut Configuration, db_id: &str, ids: &[String]) -> Loc
                 .length = n;
         }
     }
+    let selected = ids
+        .iter()
+        .filter(|id| {
+            c.points.iter().any(|p| {
+                p.id.as_str() == id.as_str()
+                    && matches!(
+                        p.name_mode,
+                        Some(crate::domain::point_naming::NameMode::Pending)
+                            | Some(crate::domain::point_naming::NameMode::AutoAddress)
+                    )
+            })
+        })
+        .cloned()
+        .collect();
+    let proven = c
+        .dbs
+        .iter()
+        .filter(|d| super::tia_source::verify_db(c, d).is_ok())
+        .map(|d| d.id.clone())
+        .collect();
+    crate::domain::point_naming::generated(c, &selected, &proven, None, true)
+        .map_err(|es| es[0].code.clone())?;
     Ok(())
 }
 #[cfg(test)]

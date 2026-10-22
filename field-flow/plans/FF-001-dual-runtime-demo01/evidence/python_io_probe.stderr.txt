@@ -1,0 +1,8 @@
+Error handling client ('127.0.0.1', 54266): Expected COTP DT, got 0x80
+Traceback (most recent call last):
+  File "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/plans/FF-001-dual-runtime-demo01/evidence/python_io_probe.py", line 155, in <module>
+    main()
+  File "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/plans/FF-001-dual-runtime-demo01/evidence/python_io_probe.py", line 152, in main
+    assert observations["write_elapsed_ms"] <= 5500, "FF-001 R04 synchronous IO hard cap violated"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: FF-001 R04 synchronous IO hard cap violated

@@ -1,0 +1,4 @@
+Stale packet (attempt 1/3), retrying receive
+Stale packet (attempt 2/3), retrying receive
+Stale packet (attempt 3/3), retrying receive
+Error handling client ('127.0.0.1', 54396): Expected COTP DT, got 0x80

@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "sourceVersions": [],
+  "instances": [
+    {
+      "id": "8a160b20-1be6-58f7-a130-7267b2b7ce41",
+      "name": "A",
+      "host": "127.0.0.1",
+      "port": 30102,
+      "slot": 1,
+      "maxConnections": 16,
+      "maxHandshakes": 4,
+      "policy": {
+        "owner": "client",
+        "clientRead": true,
+        "clientWrite": true
+      },
+      "dbs": [
+        {
+          "id": "45d69488-51e1-5214-9c94-23f707b03dfa",
+          "name": "AData71",
+          "number": 71,
+          "length": 32,
+          "enabled": true,
+          "manual": true,
+          "points": [
+            {
+              "id": "40311dfa-006d-583e-99c4-cfe85003d6cd",
+              "name": "ValueA71",
+              "dataType": "DINT",
+              "byte": 0,
+              "bit": null,
+              "manual": true,
+              "manualReason": "explicit independent product topology",
+              "policy": {
+                "initial": 17
+              }
+            }
+          ]
+        },
+        {
+          "id": "5d4a694e-026e-5e48-b9c3-c067f473588a",
+          "name": "AData88",
+          "number": 88,
+          "length": 32,
+          "enabled": true,
+          "manual": true,
+          "points": [
+            {
+              "id": "1722884e-393d-533e-bc17-299740d8de8d",
+              "name": "ValueA88",
+              "dataType": "REAL",
+              "byte": 0,
+              "bit": null,
+              "manual": true,
+              "manualReason": "explicit independent product topology",
+              "policy": {
+                "initial": 1.5
+              }
+            }
+          ]
+        },
+        {
+          "id": "7a75fb2c-e80f-5b07-8253-b419c074447a",
+          "name": "AData109",
+          "number": 109,
+          "length": 32,
+          "enabled": true,
+          "manual": true,
+          "points": [
+            {
+              "id": "b00603a9-8590-5206-97cf-d7cb7ac553e1",
+              "name": "ValueA109",
+              "dataType": "STRING[8]",
+              "byte": 0,
+              "bit": null,
+              "manual": true,
+              "manualReason": "explicit independent product topology",
+              "policy": {
+                "initial": "A"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "57eb7f86-41b4-531e-a38c-04156606ce6c",
+      "name": "B",
+      "host": "127.0.0.1",
+      "port": 30103,
+      "slot": 2,
+      "maxConnections": 16,
+      "maxHandshakes": 4,
+      "policy": {
+        "owner": "client",
+        "clientRead": true,
+        "clientWrite": true
+      },
+      "dbs": [
+        {
+          "id": "0fecbba9-c6f4-5669-b78f-2848919de568",
+          "name": "BData94",
+          "number": 94,
+          "length": 32,
+          "enabled": true,
+          "manual": true,
+          "points": [
+            {
+              "id": "75faed14-c901-5c56-99b3-770d403e6e62",
+              "name": "ValueB94",
+              "dataType": "DINT",
+              "byte": 0,
+              "bit": null,
+              "manual": true,
+              "manualReason": "explicit independent product topology",
+              "policy": {
+                "initial": 29
+              }
+            }
+          ]
+        },
+        {
+          "id": "e300ed1b-1fff-5e6c-bd59-28b650fcae17",
+          "name": "BData130",
+          "number": 130,
+          "length": 32,
+          "enabled": true,
+          "manual": true,
+          "points": [
+            {
+              "id": "273b94a9-22cf-5b1f-bc11-111bedd666dc",
+              "name": "ValueB130",
+              "dataType": "UINT",
+              "byte": 0,
+              "bit": null,
+              "manual": true,
+              "manualReason": "explicit independent product topology",
+              "policy": {
+                "initial": 31
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

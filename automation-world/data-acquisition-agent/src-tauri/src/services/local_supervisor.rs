@@ -54,6 +54,7 @@ pub(crate) struct LocalEngine {
             Instant,
         )>,
     >,
+    pub name_preview: Mutex<Option<crate::domain::point_naming::CachedNames>>,
     pub offset_preview: Mutex<Option<(String, String, String, Instant)>>,
     #[cfg(any(test, feature = "local-validation"))]
     pub fixture: Option<Arc<crate::infrastructure::local_fixture::FixtureSet>>,
@@ -123,6 +124,7 @@ impl LocalEngine {
             _lock: lock,
             import_preview: Mutex::new(None),
             offset_preview: Mutex::new(None),
+            name_preview: Mutex::new(None),
             active_io: Mutex::new(BTreeMap::new()),
             cached_snapshot: Mutex::new(None),
             #[cfg(any(test, feature = "local-validation"))]

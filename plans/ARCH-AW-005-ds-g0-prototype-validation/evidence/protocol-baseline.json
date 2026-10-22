@@ -1,0 +1,780 @@
+{
+  "schema": "ds-g0-protocol-candidate-v1",
+  "task_id": "ARCH-AW-005",
+  "namespace": "aiis-ics-arch",
+  "revision": "r4",
+  "profile_id": "ds-g0-s7-v1",
+  "status": "developer_candidate_pending_independent_verification_and_owner_acceptance",
+  "spec_sha256": "4f1b03ec618bd0a40295bf273339538bc1491f8082380a009449f681ef56c2fc",
+  "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+  "verifiedCandidateSha256": null,
+  "independent_verification": "pending fresh-context Verification checklist.md",
+  "human_owner_final_acceptance": "pending",
+  "delivery_source_manifest": {
+    "path": "delivery-source-manifest.json",
+    "sha256": "40abc09b39790c9dd98bd8285cb170cc783b59a57a444fd9a06c8f512bf30e4d"
+  },
+  "source_inputs_sha256": "1e1ae973328b7a4f1d8611d2596ccb64bd1289c75f4bb8a2c767d59521349c80",
+  "native_patch_sha256": "3c3fa385e760f4f9549b14d70545962f0ebebe121d0c4d7401048840fc850ed9",
+  "b0": {
+    "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0145",
+    "inventory_sha256": "a147b57eef133508247c51a67a5482216ca6deb19274a1cba4ae2e6b906ea7cb"
+  },
+  "binaries": {
+    "libds_g0_native.dylib": {
+      "path": "native/libds_g0_native.dylib",
+      "sha256": "e6e03de8227629dc6e8f4344b1f419ac89804b07ce54989c0a1c1a0ec51e5b08",
+      "bytes": 262200
+    },
+    "libds_g0_reference.dylib": {
+      "path": "native/libds_g0_reference.dylib",
+      "sha256": "33221aa62be3e35759017df557985e63b2945587d436a00a778288427173d07d",
+      "bytes": 255048
+    },
+    "ds-g0-reference": {
+      "path": "native/ds-g0-reference",
+      "sha256": "9e308caac3a20c2daf8281f15cf21c3b2fe9cf30d38c2d97afc022507b90be4d",
+      "bytes": 65696
+    },
+    "ds-g0-native-abi-probe": {
+      "path": "native/ds-g0-native-abi-probe",
+      "sha256": "09699696674711e22303d26e5c35ff25aacfbfa8493ca5a67ca750086397b06e",
+      "bytes": 37288
+    },
+    "ds-g0-server": {
+      "path": "runtime/aarch64-apple-darwin/release/ds-g0-server",
+      "sha256": "694d5e82bf4a8b2487df78c52821ad7ca7996ab98ad289119e2743df12b3dd62",
+      "bytes": 1077792
+    },
+    "ds-g0-abi-probe": {
+      "path": "runtime/aarch64-apple-darwin/release/ds-g0-abi-probe",
+      "sha256": "7f0b0849025caa3f5cc2cbba9aaa1f0f7e36fc430f484cb204bb81074ade7c05",
+      "bytes": 510416
+    },
+    "ds-g0-daa": {
+      "path": "daa/aarch64-apple-darwin/release/ds-g0-daa",
+      "sha256": "2693af25bb281853583c849129f2519a9bc118a8e65d1665a79e348920d9a729",
+      "bytes": 577328
+    },
+    "aiis-device-simulator": {
+      "path": "desktop/aarch64-apple-darwin/release/aiis-device-simulator",
+      "sha256": "931b1ab402ce6f8eaee8c5233245db92db7c8ffe9c21855aeaba09a81c670b30",
+      "bytes": 9107584
+    }
+  },
+  "versions": {
+    "rustc_cargo": "1.89.0 stable aarch64-apple-darwin",
+    "clang": "17",
+    "sdk": "26.1",
+    "cmake": "4.0.2",
+    "python": "/usr/bin/python3 3.9.6 -B stdlib only",
+    "node": "22.19.0",
+    "pnpm": "11.11.0",
+    "macOS": "15.7.7 build24G720 arm64",
+    "host_logical_cpus": 10,
+    "host_memory_bytes": 34359738368
+  },
+  "build_and_run_contract": {
+    "formal_paths": {
+      "D": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/automation-world/device-simulator",
+      "R": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/automation-world/device-simulator/runtime",
+      "S": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/automation-world/device-simulator/g0",
+      "T": "/private/tmp/arch-aw-005-r4-exec"
+    },
+    "build": "spec §3.3 exact offline/locked role build commands; native CMake then Rust runtime/DAA and build_skeleton.py; required environment and tool versions are not inferred from PATH",
+    "native_skeleton_argv": [
+      "/usr/bin/python3",
+      "-B",
+      "/Users/jason/Desktop/DreamCode/aiis-ics-arch/automation-world/device-simulator/g0/scripts/build_skeleton.py",
+      "--project-root",
+      "/Users/jason/Desktop/DreamCode/aiis-ics-arch/automation-world/device-simulator",
+      "--run-root",
+      "/private/tmp/arch-aw-005-r4-exec",
+      "--role",
+      "qa"
+    ],
+    "record_role_b0_argv": [
+      "/usr/bin/python3",
+      "-B",
+      "/Users/jason/Desktop/DreamCode/aiis-ics-arch/automation-world/device-simulator/g0/scripts/verify_evidence.py",
+      "--source-root",
+      "/Users/jason/Desktop/DreamCode/aiis-ics-arch/automation-world/device-simulator/g0",
+      "--run-root",
+      "/private/tmp/arch-aw-005-r4-exec",
+      "--role",
+      "qa",
+      "--run",
+      "/private/tmp/arch-aw-005-r4-exec/runs/qa-NNNN",
+      "--record-b0"
+    ],
+    "role_b0_note": "QA independently obtains actual ABI/clock/static limits and eight binaries in build/qa; record-b0 hashes that role binaries. DEV P manifests are read-only, not overwritten for QA. No assumption of reproducible Mach-O SHA across roles.",
+    "case_argv": [
+      "/usr/bin/python3",
+      "-B",
+      "/Users/jason/Desktop/DreamCode/aiis-ics-arch/automation-world/device-simulator/g0/scripts/run_cases.py",
+      "--source-root",
+      "/Users/jason/Desktop/DreamCode/aiis-ics-arch/automation-world/device-simulator/g0",
+      "--runtime-root",
+      "/Users/jason/Desktop/DreamCode/aiis-ics-arch/automation-world/device-simulator/runtime",
+      "--run-root",
+      "/private/tmp/arch-aw-005-r4-exec",
+      "--role",
+      "qa",
+      "--b0-run",
+      "/private/tmp/arch-aw-005-r4-exec/runs/qa-NNNN",
+      "--case",
+      "W01"
+    ],
+    "native_cycles": "build_skeleton.py --native-cycles --b0-run <same role B0> with explicit DS_PROFILE_DIR/profile marker, manual actual visibility/normal close evidence required",
+    "headless_start": "Rust ds-g0-server explicit --profile-json/--limits/--points/--fixture-a/--fixture-b/--port-a 30102/--port-b 30103/--run-root; starts stopped, stdin start A and start B opt in",
+    "headless_stop": [
+      "stop A",
+      "stop B",
+      "quit"
+    ],
+    "help": "bare executable/script entries print help without default input side effects"
+  },
+  "wire_profile": {
+    "bind": "127.0.0.1 only",
+    "ports": {
+      "A": 30102,
+      "B": 30103,
+      "negative_only": 30104
+    },
+    "calling_tsap": 256,
+    "called_tsap": {
+      "A": 257,
+      "B": 258
+    },
+    "rack_slot": {
+      "A": [
+        0,
+        1
+      ],
+      "B": [
+        0,
+        2
+      ]
+    },
+    "DB41_bytes": 1024,
+    "DB57_bytes": 64,
+    "DB57_marker_prefix_hex": {
+      "A": "4453473041303031",
+      "B": "4453473042303031"
+    },
+    "pdu_bytes": 480,
+    "frame_bytes": 512,
+    "max_items": 4,
+    "max_item_bytes": 256,
+    "amq": 1,
+    "default_C_H_TCP": [
+      16,
+      4,
+      20
+    ],
+    "config_stopped_C": [
+      1,
+      64
+    ],
+    "config_stopped_H": [
+      1,
+      16
+    ],
+    "global_C_H_TCP": [
+      128,
+      32,
+      160
+    ],
+    "capacity_over_16": "unproved",
+    "bytes": "big endian finite INT/DINT/REAL and full ASCII STRING8/254; BOOL mask preserves neighbours; reserved/padding/unlisted bit touches denied",
+    "permissions_template": "g0/fixtures/g0/points.tsv is exact finite allowlist; client byte0bit0/byte1bits/INT2/REAL4/STRING64,128/slots512..639; UI48; hold56 maintenance default off; rules byte0bit1 and400..424; DB57 read marker only",
+    "atomicity": "single item validation and commit only; ordered multi-item may partly succeed, no PDU rollback; timeout/disconnect after a commit is unknown acknowledgement, never automatic retry",
+    "ownership": "one Rust image owner per instance; native synchronous callback borrows cannot escape; all six sources converge; no executable C++ business owner or second image",
+    "budgets": {
+      "q_bytes": 2208,
+      "connection_B0_upper": 18420,
+      "fixed_instance_B0_upper": 66592,
+      "configured_connection_limit": 65536,
+      "configured_instance_limit": 1048576,
+      "configured_global_limit": 4194304,
+      "joint_worker_cap": 53,
+      "baseline_threads_upper": 11,
+      "thread_limit": 64,
+      "actual_extra_waiting_PDU_per_connection": 0
+    }
+  },
+  "native_evidence": {
+    "current_binary_cycles": "dev-0067",
+    "current_desktop_sha256": "931b1ab402ce6f8eaee8c5233245db92db7c8ffe9c21855aeaba09a81c670b30",
+    "actual_three_shutdown_upper_ns": [
+      220683000,
+      183823000,
+      185876000
+    ],
+    "owner_visible_close_receipt": "execution-coordinator/r4-resume-004/owner-native-close-observation.json",
+    "visual_only_reused": "dev-0019 source06a5/desktop86c2; 34 exact unchanged UI inputs; separate old Owner theme/language/refresh observations",
+    "carry_forward": "Only Python runner changed since dev64; all eight binaries and runtime/native/frontend/exit paths byte identical. No new native runs are claimed."
+  },
+  "cases": {
+    "W03": [
+      {
+        "run": "dev-0151",
+        "status": "pass",
+        "duration_seconds": 1.4153162499999998,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0151",
+        "inventory_sha256": "e45834a09840438bcfff88c12feb5de6be8e2e06d83088c1b7dfdd6c63776647",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0152",
+        "status": "pass",
+        "duration_seconds": 1.443606583,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0152",
+        "inventory_sha256": "1c5d0507b3b1bb38c3248cbe16db4779608fc6cdc993dc96c09d5c345c46480a",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0153",
+        "status": "pass",
+        "duration_seconds": 1.430977792,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0153",
+        "inventory_sha256": "291c157b073818db982747354b5afab847c19e5e3decb03f3ad5683c183727aa",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "W01": [
+      {
+        "run": "dev-0154",
+        "status": "pass",
+        "duration_seconds": 1.362283208,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0154",
+        "inventory_sha256": "3d916665b8ef3ea070ad01974b37575d3cca1c244ea82fe7432232852f0ae51b",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0155",
+        "status": "pass",
+        "duration_seconds": 1.3464209580000002,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0155",
+        "inventory_sha256": "a562544caf92a2ee828573deb89012aa22c754aec63931f0843c451d93714efb",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0156",
+        "status": "pass",
+        "duration_seconds": 1.365185084,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0156",
+        "inventory_sha256": "d90c86b42d6f55108a38dc65673bb02ba47f9af7eace3b176788229f29511b88",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "W02": [
+      {
+        "run": "dev-0157",
+        "status": "pass",
+        "duration_seconds": 1.415776375,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0157",
+        "inventory_sha256": "2be36714bb892f205fa6c6bef370672f5110433a554d6b35d079cfee1e23677a",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0158",
+        "status": "pass",
+        "duration_seconds": 1.4150073749999998,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0158",
+        "inventory_sha256": "f3386b51481da4fcd3c9fc58c33488e842720b5686c183947fd950a37889b636",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0159",
+        "status": "pass",
+        "duration_seconds": 1.426143333,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0159",
+        "inventory_sha256": "464e6de3e4f08439d65c946f82d67bf101807350c40c4b4e2a8e28f5298f86fe",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "W04": [
+      {
+        "run": "dev-0160",
+        "status": "pass",
+        "duration_seconds": 1.592713292,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0160",
+        "inventory_sha256": "b2375d714b9efb3e4546a4bfbe8a8f8227c6d991d0512dc36aac1e9122455e39",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0161",
+        "status": "pass",
+        "duration_seconds": 1.65335575,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0161",
+        "inventory_sha256": "7ac9b112385bd03f56632475da82803abea091a6ed3e70336878898b224ea04c",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0162",
+        "status": "pass",
+        "duration_seconds": 1.625316875,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0162",
+        "inventory_sha256": "0092564cc9759a2dd7157ea674ab0c1199ffb2ea9583605e9b3d597c817ca9f0",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "W05": [
+      {
+        "run": "dev-0163",
+        "status": "pass",
+        "duration_seconds": 1.472856875,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0163",
+        "inventory_sha256": "59e8d6e14168fc660c0944c7d0cb58f1ad970e643ba1396a76d01660a61e27c8",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0164",
+        "status": "pass",
+        "duration_seconds": 1.474622958,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0164",
+        "inventory_sha256": "b01f937209241c582001f08637142e158a7efba8bb1754f8023e7e2bddda62cc",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0165",
+        "status": "pass",
+        "duration_seconds": 1.439625209,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0165",
+        "inventory_sha256": "447018bc6a095d331869fd918e50ecd0a6d29bba637543f2d1722e15430e08f5",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "W06": [
+      {
+        "run": "dev-0166",
+        "status": "pass",
+        "duration_seconds": 1.36521,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0166",
+        "inventory_sha256": "3db1bc5844dee9aa32ebfa5ae19bd6ff6f68979b089aaecb1080963b80af15ec",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0167",
+        "status": "pass",
+        "duration_seconds": 1.3406299590000001,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0167",
+        "inventory_sha256": "d730ad3af7967e4357a73063212a50263bf92cab53dd2d69292ee4a8814e68d4",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0168",
+        "status": "pass",
+        "duration_seconds": 1.3472600829999999,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0168",
+        "inventory_sha256": "3d99101e5ee180459be8bcf62b287036c3bf6d7366b563b7ca83c96850c664e2",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "W07": [
+      {
+        "run": "dev-0169",
+        "status": "pass",
+        "duration_seconds": 1.941256791,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0169",
+        "inventory_sha256": "045c25e23c1505a1ee0ea6ab8695a9407273e50003f1b3847cbd2e2b7c7dde5f",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0170",
+        "status": "pass",
+        "duration_seconds": 1.924094917,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0170",
+        "inventory_sha256": "274554fe4d9aee4ae71188c318c0e132117ef8d9059348bf8e3f2f06be29ee52",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0171",
+        "status": "pass",
+        "duration_seconds": 1.931201958,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0171",
+        "inventory_sha256": "dca92ecd1b7d5db45e897a4a7daeb706f5b4a05a629c9950efba21747ed837be",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "W08": [
+      {
+        "run": "dev-0172",
+        "status": "pass",
+        "duration_seconds": 1.479879167,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0172",
+        "inventory_sha256": "20d45697dc67df3f1e3111fdb49161d4908091a41bcda38f54fb66cf8da4e311",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0173",
+        "status": "pass",
+        "duration_seconds": 1.494214666,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0173",
+        "inventory_sha256": "60354743aca6adadfef38f4992b8d1f054b9a3d2c8a017f2d062f25d87e477df",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0174",
+        "status": "pass",
+        "duration_seconds": 1.507576708,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0174",
+        "inventory_sha256": "62f751c984b6b11d05e33d29a04f15faca3fceb0831112afb362ecf5de300340",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "W09": [
+      {
+        "run": "dev-0175",
+        "status": "pass",
+        "duration_seconds": 3.796192417,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0175",
+        "inventory_sha256": "746b18e7ce90aea2d8f65b838ebe02c255a233d9f55ac08003b042b127d0a529",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0176",
+        "status": "pass",
+        "duration_seconds": 3.8560792079999997,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0176",
+        "inventory_sha256": "d43b99bf3f4ad346d9345aa8a303e2453d3d31529db1259b1997fe9026e3f2ce",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0177",
+        "status": "pass",
+        "duration_seconds": 3.822364708,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0177",
+        "inventory_sha256": "bf0c10dc84ac9ea9c042ce7a0060d706547939c60e17798c78b6a04a9e1c64ad",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "C01": [
+      {
+        "run": "dev-0178",
+        "status": "pass",
+        "duration_seconds": 335.971036,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0178",
+        "inventory_sha256": "b1694c0be5eefc5b31ae27f81be68d2a11f12e02dcbe66cb061715274013a3c1",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "C03": [
+      {
+        "run": "dev-0179",
+        "status": "pass",
+        "duration_seconds": 55.706906916,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0179",
+        "inventory_sha256": "c9b7d21265c639c1e4b60fb6a968cc13e87501cd11311fefc624e6def2268ba3",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "C04": [
+      {
+        "run": "dev-0180",
+        "status": "pass",
+        "duration_seconds": 19.345297208,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0180",
+        "inventory_sha256": "adde30bba14778bd58802206c4e6141bfeef1ad748dd726cabbb1edc7707341e",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "C05": [
+      {
+        "run": "dev-0181",
+        "status": "pass",
+        "duration_seconds": 77.30883325,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0181",
+        "inventory_sha256": "98ef44ae3bb728799021fd01432241bd13c6fdba38f820c6433efd23e9fa90bc",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "C06": [
+      {
+        "run": "dev-0182",
+        "status": "pass",
+        "duration_seconds": 224.074457208,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0182",
+        "inventory_sha256": "981f028b90280c793b1b56951897294c2d15edd80ae15d052fc039f001251b2f",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "D01": [
+      {
+        "run": "dev-0183",
+        "status": "pass",
+        "duration_seconds": 61.348028417,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0183",
+        "inventory_sha256": "d351d2e255e90df0967d9087a2c168a599a638171c3da5608a60a49a9aa01b94",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "D02": [
+      {
+        "run": "dev-0184",
+        "status": "pass",
+        "duration_seconds": 6.039935625,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0184",
+        "inventory_sha256": "f6cdee880bae43f9ee0fac7e56c17de0ab9ffde116d333afbafdc04bb5fdaad6",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "X01": [
+      {
+        "run": "dev-0185",
+        "status": "pass",
+        "duration_seconds": 3.9779943329999994,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0185",
+        "inventory_sha256": "c4f7678645f6a8b8c5047139a5f01c142612d03456eaace39cd0131e413d6048",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0186",
+        "status": "pass",
+        "duration_seconds": 3.9788060419999995,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0186",
+        "inventory_sha256": "67b013d8a023b6f92587b65ad70bf5c6f840ca3ca9810bc548b1c2a2bad185db",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      },
+      {
+        "run": "dev-0187",
+        "status": "pass",
+        "duration_seconds": 3.999654417,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0187",
+        "inventory_sha256": "acebdbe9baa47a8df725137f5078c133d54f00ad7aae07ee597db158a0bedba6",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "X02": [
+      {
+        "run": "dev-0188",
+        "status": "not_applicable",
+        "duration_seconds": 1.261776958,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0188",
+        "inventory_sha256": "6912bb91544096b58e0d96d0f2d32756754c70c852ccd4c1df9493773cf4dc00",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true
+      }
+    ],
+    "C02": [
+      {
+        "run": "dev-0178",
+        "status": "pass",
+        "duration_seconds": 335.971036,
+        "raw": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0178",
+        "inventory_sha256": "b1694c0be5eefc5b31ae27f81be68d2a11f12e02dcbe66cb061715274013a3c1",
+        "source_candidate_sha256": "ba08e83eb3c13ece431c87b304c8bdc2d0e1f8122e24c2477acc2ea9863b9b3e",
+        "command_exit_code": 0,
+        "cleanup_clean": true,
+        "evidence_complete": true,
+        "nested_in": "C01 same 16 live sessions; not a separate reset or short substitute"
+      }
+    ]
+  },
+  "DEV_C01_recomputed": {
+    "requests": 9600,
+    "payload_bytes": 345600,
+    "per_connection_p95_max_ms": 0.362458,
+    "per_connection_p99_max_ms": 5.08117,
+    "queue_p99_ms": 0.05,
+    "A_rule_due": 24000,
+    "A_rule_missed": 0,
+    "DS_cpu_core_fraction": 0.08446858251350785,
+    "DS_rss_peak": 6782976,
+    "DS_rss_net": -491520,
+    "DS_threads_peak": 25,
+    "DS_fd_plus_mach_peak": 83,
+    "resource_errors": []
+  },
+  "methods_and_limits": [
+    "1Hz short-lived negative client with one actual sample: CPU mean null/unavailable; RSS/threads/FD sampled observations only, not lifetime peaks; no false zero. Per-PID start/exit/raw preserved.",
+    "Cross-process Mach task privileges not requested; external Mach counts unknown/null; DS/reference self counts preserved. DS whole-server threshold uses its own actual samples, external observer/client costs separately reported.",
+    "C04 actual SO_RCVBUF/SO_SNDBUF <=16KiB readbacks distinct from FIONREAD/past advertised credit; 65KiB unread preserved, no physical kernel16KiB claim. Standard owned slow-peer TCP_NOOPT and MSS256 options only; original20Hz/256B/30s/2.5s retained.",
+    "C01 9600 requests/345600 application payload bytes; C05 F1200PDU/4800items plus A/B120each/UI60. No divisor changes; C02 same16 established sessions.",
+    "B0 allocator/struct budget excludes kernel socket memory and OS thread stacks; those remain reflected in DS RSS/resource observations, not silently folded into protocol backing.",
+    "Only synthetic DB41/57 finite profile; no full PLC/three platforms/>16 capacity/production device safety claim. No product configuration SQLite/import consumer/full UI; no DAA application S7-to-SQLite integration or Stage C.",
+    "In-process native hard crash may affect A and B, X02 sidecar-only test is not_applicable; protocol faults/lifecycle isolation do not imply OS crash isolation.",
+    "Candidate only: DEV case assertions and raw integrity do not grant independent QA or Human Owner acceptance."
+  ],
+  "coverage_evidence": {
+    "AC1": "spec approval identity/tasks history, independent D/R/S, no 004 acceptance transfer",
+    "AC2": "A145 source/ABI/limits/clock/features/file/otool/nm and original r4 builds before listener",
+    "AC3": "spec §2 source research; unmodified Snap7 rejected; controlled eight-file candidate only",
+    "AC4": "W01 raw wire/commit/images",
+    "AC5": "W02/W09 full affected bytes/hash/point version and raw item rejection",
+    "AC6": "W07 six-source permissions/CAS/init/reset/pause",
+    "AC7": "W03 three independent 100-round BOOL contention runs",
+    "AC8": "W04 scalar/raw boundary/transport/REAL cases",
+    "AC9": "W05 STRING8/254 full-package and negative images",
+    "AC10": "W06/W08 multi-item order/partial success and non-whitelist system denial",
+    "AC11": "C01/C02 16 live read/write sessions and20 extra refusals",
+    "AC12": "C03/C04 actual handshake/frame/idle/send absolute deadline and real join",
+    "AC13": "B0 limits plus C04 actual whole-PDU/input/output reservation and injected small-budget boundaries",
+    "AC14": "C05 full60s F1200PDU/4800items, A/B120 each,UI60, real backlog/control/stop/fair scheduling trace",
+    "AC15": "D01 actual external five frozen DAA modules/core/driver and240 reads/60s",
+    "AC16": "D02 TSAP/port/isolation/owned conflict/recovery",
+    "AC17": "W09/X01 close/stop admission/barriers/unknown acknowledgement plus continuous B reads",
+    "AC18": "C06 160 reconnects/20 start-stop/3 reset,10s stopped samples/resource trend",
+    "AC19": "X02 justified not_applicable: native is in-process, no sidecar crash isolation claim",
+    "AC20": "all final raw resources/clock/commands/log integrity; C01 recomputation and separate observer/client PID reports",
+    "AC21": "tasks preserved failed/blocked/superseded runs, exact DEV handoff only; QA/Owner pending",
+    "AC22": "source-inputs288, accepted60/61 plus navigation-only exception, DAA37/CU17/core0.1/v1/lock feature graphs",
+    "AC23": "canonical DS §13 multi-source/UDT/IDs/lineage/limits design; product consumer deferred",
+    "AC24": "canonical DS §13 restricted layout/naming/initial/encode boundaries; no product import claim",
+    "AC25": "canonical DS §13 saved/selected/loaded/value compatibility/lifecycle design; no SQLite product implementation",
+    "AC26": "delivery-source-manifest180 plus native patch, formal D/R/S, eight role binaries and role-specific B0 entry",
+    "AC27": "this bounded protocol candidate and actual case map; application SQLite/Stage C excluded; QA/Owner pending",
+    "AC28": "A all immutable inventories, r3 archive, P five compact indexes, resource ownership/retention",
+    "AC29": "Rust unique business image/six sources/scheduler/control, C++ six archived then retired; same R library for shell/headless",
+    "AC30": "A145 fresh100 brackets/int0/37/Tag20/align1/offsets/callback table, W06/W09 actual wire/join",
+    "AC31": "A67 actual three desktop931b cycles plus Owner receipt; A19 visual-only34 unchanged inputs; no S7 listener; frontend/CU/i18n fixed",
+    "AC32": "r3-stop-snapshot113 immutable members, r3 not_closed/not_run preserved; unified CLOCK_MONOTONIC and independent role reproduction"
+  },
+  "historical_failures": "evidence-index r4_runs and tasks §5–7 preserve withdrawn/blocked/failed candidates including dev15/26/52/63/96 resource gap/127–137 slow peer/144 conflict fixture; no historical pass relabeling",
+  "dependency_lock_graphs": {
+    "runtime": {
+      "sha256": "399d6d5e4d780a64f13e69d0b32d662da9776d93e9ea94438894747ef9d65a79",
+      "actual_registry_count": 54
+    },
+    "desktop": {
+      "sha256": "2b1dd4f579c9d6ee8674c82fd030842b32f0f5b38d4108a5b272c9a34dd043f6",
+      "actual_registry_count": 430
+    },
+    "daa": {
+      "sha256": "96d0e596e7896c377d8aaf68b6378a1506112befe0aa4b37c039434b3272e5c8",
+      "actual_registry_count": 60
+    }
+  },
+  "dependency_boundary": {
+    "desktop_runtime_bank": 548,
+    "original_client_static_allowlist": 66,
+    "actual_client_registry_graph": 60,
+    "path_core": "automation-world/shared/tia-import-core 0.1.0 std-only six API; G0 client-domain compile closure only, no DS product importer",
+    "native_package_sha256": "1f4270cde8684957770a10a1d311c226e670d9589c69841a9012e818f7b9f80e",
+    "frozen_source_inputs": 288,
+    "technical_source_files": 180,
+    "readonly_input_files": 108,
+    "accepted_manifest_status": "60 of61 byte-identical, one explicitly approved CODE_INDEX navigation-only exception; not61/61"
+  },
+  "DEV_final_self_check": {
+    "run": "dev-0189",
+    "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r4-evidence/dev-run-0189",
+    "inventory_sha256": "838cc0a861da766266facbd1618ec9c5b2dd2e2fd26a907226bfef09269fb601",
+    "members": 4,
+    "status": "DEV_self_check_pass"
+  }
+}

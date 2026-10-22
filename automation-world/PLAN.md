@@ -4,6 +4,8 @@
 
 | Task ID | Status | Spec | Latest fact / next gate |
 | --- | --- | --- | --- |
+| ARCH-AW-007 | owner_accepted | [r2](../plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md) | Human Owner accepted exact r2 documents on 2026-10-21 after independent AC01–AC14 QA. DAA, tabular SMA, general CA/internal connectors and future all-kind health remain distinct; first version has no login. Full r1 history/QA retained; evidence archived, two owned temporary roots/49 files cleaned. No code changes or additional tests. |
+| ARCH-AW-006 | owner_approved | [r2](../plans/ARCH-AW-006-unified-flow-agent-design/spec.md) | Exact r2 design approved: bulk DAA, tabular SMA/workbench and CA node orchestration/version/context/extensions; first version has no login. Complete r1 retained; 007 r2 owns document implementation, software separately scoped. |
 | ARCH-AW-001 | owner_accepted | [r1](../plans/ARCH-AW-001-agent-foundation/spec.md) | CA relocated/frozen; DAA/SMA build and start independently; focused review passed; Human Owner accepted r1 on 2026-10-14; no further tests added. UI and SQLite work remain future tasks. |
 
 CA retains the frozen compatibility baseline; DAA owns continuing acquisition development. S1 APIs, AW fact upload, the business chain, shared UI and SQLite configuration/mapping storage require separate specs. See the [task catalog](plans/README.md).
@@ -11,6 +13,8 @@ CA retains the frozen compatibility baseline; DAA owns continuing acquisition de
 ## Subproject plans
 
 AW tracks overall stages and cross-project dependencies. Each subproject PLAN owns its implementation tasks and links its unique local bundles; historical root bundles remain in place.
+
+[DAA-006 r3](data-acquisition-agent/plans/DAA-006-point-naming-and-import-reuse/checklist.md#owner-acceptance-r3) was accepted by the Human Owner on 2026-10-20. Independent AC01–AC20 QA and separate DIRECT UI confirmation remain distinct; prior blocked history and native limits are retained. Accepted source hashes are pinned and task resources archived/cleaned; this acceptance closeout added no tests. DAA Stage B remains open as an overall stage. Its controlled local evidence and accepted increments remain valid; a suitable independently accepted DS protocol baseline and a separately approved DAA–DS S7 read-to-SQLite joint validation, fresh QA and Human Owner acceptance are still required. Stage C implementation follows overall B acceptance and a stable Backend API contract. The task statuses below retain their original bounded scopes.
 
 | Project | Owning plan | Current stage |
 | --- | --- | --- |

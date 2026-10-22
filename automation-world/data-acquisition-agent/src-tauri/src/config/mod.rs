@@ -1,9 +1,9 @@
 //! File Path: /automation-world/data-acquisition-agent/src-tauri/src/config/mod.rs
-//! Description: Control Agent configuration loading helpers
+//! Description: DAA 自有环境加载、活动路径与类型配置
 //! Main Features:
 //!   - Loads local .env values without taking backend .env ownership
 //!   - Resolves runtime-relative file paths
-//!   - Provides typed parsing and non-empty override helpers for services and infrastructure
+//!   - 保留活动值/布尔读取与自有 profile；输出路径仅用于既有测试
 
 use std::collections::HashMap;
 use std::fs;
@@ -60,26 +60,6 @@ impl AgentConfig {
             .unwrap_or_else(|| default_value.to_string())
     }
 
-    pub(crate) fn raw_value(&self, key: &str) -> Option<String> {
-        std::env::var(key)
-            .ok()
-            .or_else(|| self.values.get(key).cloned())
-    }
-
-    pub(crate) fn non_empty_value(&self, key: &str) -> Option<String> {
-        match std::env::var(key) {
-            Ok(value) => {
-                let value = value.trim().to_string();
-                (!value.is_empty()).then_some(value)
-            }
-            Err(_) => self
-                .values
-                .get(key)
-                .map(|value| value.trim().to_string())
-                .filter(|value| !value.is_empty()),
-        }
-    }
-
     pub(crate) fn bool_or_default(&self, key: &str, default_value: bool) -> bool {
         match self
             .value_or_default(key, if default_value { "true" } else { "false" })
@@ -89,17 +69,6 @@ impl AgentConfig {
             "0" | "false" | "FALSE" | "False" | "no" | "NO" | "off" | "OFF" => false,
             _ => default_value,
         }
-    }
-
-    pub(crate) fn is_configured(&self, key: &str) -> bool {
-        std::env::var(key)
-            .map(|value| !value.trim().is_empty())
-            .unwrap_or_else(|_| {
-                self.values
-                    .get(key)
-                    .map(|value| !value.trim().is_empty())
-                    .unwrap_or(false)
-            })
     }
 }
 
@@ -134,6 +103,7 @@ pub(crate) fn profile_dir() -> PathBuf {
         })
 }
 
+#[cfg(test)]
 pub(crate) fn resolve_output_path(value: &str) -> PathBuf {
     let path = PathBuf::from(value);
     if path.is_absolute() {
@@ -189,14 +159,6 @@ pub(crate) fn trim_env_value(value: &str) -> String {
     }
 
     trimmed.to_string()
-}
-
-pub(crate) fn parse_u16_or_default(value: &str, default_value: u16) -> u16 {
-    value.parse::<u16>().unwrap_or(default_value)
-}
-
-pub(crate) fn parse_u64_or_default(value: &str, default_value: u64) -> u64 {
-    value.parse::<u64>().unwrap_or(default_value)
 }
 
 pub(crate) fn resolve_runtime_path(path_value: &str) -> PathBuf {

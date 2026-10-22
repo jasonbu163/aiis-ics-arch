@@ -1,0 +1,25 @@
+{
+  "app": {
+    "title": "AIIS Device Simulator",
+    "subtitle": "Independent S7 simulator"
+  },
+  "actions": {
+    "refresh": "Refresh",
+    "switchLanguage": "Switch language",
+    "switchToDark": "Switch to dark mode",
+    "switchToLight": "Switch to light mode",
+    "switchToChineseShort": "中",
+    "switchToEnglishShort": "EN",
+    "toggleSidebar": "Toggle sidebar",
+    "switchToEnglish": "Switch to English",
+    "switchToChinese": "Switch to Chinese"
+  },
+  "local": {
+    "mode": "Stopped",
+    "running": "Running",
+    "loading": "Loading snapshot",
+    "readOnlyIpc": "Read-only desktop snapshot",
+    "bootstrapFailed": "Rust IPC unavailable",
+    "desktopPreview": "Desktop bridge unavailable in browser"
+  }
+}

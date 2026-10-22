@@ -10,6 +10,8 @@
 **详细原理：[AW 运行原理设计](AIIS_AW_Runtime_Design.md)**  
 **配套资料：[AIIS 三界协作与跨域设计背景资料 v0.1](AIIS_Three_Worlds_Background_Notes_v0.1.md)**
 
+> **方向更新（ARCH-AW-007 r2）：** 新路线保留 DAA、SMA、CA 三应用：DAA 负责大量持续采集，SMA 沿已过滤 TSS 基线精简表格化批量 HTTP 映射与工作台，CA 承担通用节点编排及内部多协议连接器。AWB/AWC 未来统一管理三类实例，先登记/心跳与只读健康，再配置/远程操作。全项目 [中文 ROADMAP](../ROADMAP.zh-CN.md)、[English ROADMAP](../ROADMAP.md) 与 [007 r2](../plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design)、[006 r2](../plans/ARCH-AW-006-unified-flow-agent-design/spec.md#r2-design) 提供当前方向；精确批准、交付、独立 QA 与最终验收状态归所属 bundle，原设计正文/来源及 r1 验证历史保留。DAA 当前 SQLite 本地采集且新上传未接入；SMA 当前 Backend-held TSS/Facts→POST 与逐项 await 调度，子集/逐行常驻、任意 HTTP 源、本地 SQLite/可靠 outbox 和容量优化分期，不强制近期迁库；CA 自身版本化存储仍为目标。本文旧表单/共享 Core/角色节点限制等按当时范围解释，不构成三 App 统一迁移或 CA 能力总界限；CAF/旧 CA 保持冻结。CA 首版 HTTP GET/POST、明确受支持 S7 与无登录前提依 006 r2；原可靠投递、PW Service/API owner、版本固定及 unknown 核实原则仍为适用参考，后续实施 spec 明确采用/替代条款。本提示不宣称软件、QA、设备或部署许可。
+
 > **现阶段继续保持 `aiis-ics-arch` 的现有结构与正常开发，不因本文启动 PW/AW/AIW 拆分。**
 >
 > 三界是职责、权限和协作关系的指导模型，不是代码目录模板。现在和未来都不要求创建 `pw/`、`aw/`、`aiw/` 顶层目录，也不要求每一界对应一个仓库、服务或安装包。

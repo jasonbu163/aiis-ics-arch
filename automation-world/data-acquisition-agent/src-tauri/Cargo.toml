@@ -19,6 +19,7 @@ local-validation = []
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
+aiis-tia-import-core = { path = "../../shared/tia-import-core" }
 dirs = "6"
 tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }

@@ -401,6 +401,7 @@ fn delta_preserves_configuration_and_blocks_deletion_rename() {
     });
     for p in &mut old.points {
         p.name = "User name".into();
+        p.name_mode = None;
         p.comment = "User annotation".into();
         p.group_id = Some(old.groups[0].id.clone());
         p.address = Some(Address {

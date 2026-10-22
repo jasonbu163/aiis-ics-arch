@@ -570,6 +570,7 @@ fn convert(points: &Value, policy: &Value, out: &mut Candidate) -> LocalResult<(
                         r.summary.diagnostic("yaml_window_mismatch", &pp);
                     }
                     c.points.push(Point {
+                        name_mode: None,
                         id: assign(&mut r.ids, &pp),
                         plc_id: plc.id.clone(),
                         db_id: dbid.clone(),

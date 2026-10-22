@@ -1,0 +1,475 @@
+{
+  "taskId": "ARCH-AW-005",
+  "revision": "r5",
+  "sourceCandidate": "306a09d5317931482a59f45da5eafcb9d3ee739199799f475ade1891fb0b00b4",
+  "specSha256": "67155fe4fca3068ef8e616dcf0ade69a5cdc614e7175a2f1ef4c6bf98f935419",
+  "status": "qa_passed",
+  "qaVerdict": "qa_passed",
+  "ownerFinalAcceptance": null,
+  "verificationState": "human_owner_final_acceptance_pending",
+  "name": "DS-MVP-S7-v1 candidate",
+  "phase": "dev-0288",
+  "phaseSource": "306a09d5317931482a59f45da5eafcb9d3ee739199799f475ade1891fb0b00b4",
+  "limits": [
+    "IPv4 loopback only; actual tests127.0.0.1:30102/30103,30104negative",
+    "single process native crash can affect every instance;X02 conditional N/A",
+    "C16/H4 and global64threads; no8x16 capacity extrapolation",
+    "no DAA app-S7-SQLite/StageC/real device/complete PLC CPU/cross-platform/L1-L5 proof"
+  ],
+  "caseRuns": [
+    {
+      "case": "W01",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0290",
+        "inventorySha256": "b4ccfa3acad7cf11332fa212058d8880e5078516d17892e83aa581be54d5228d",
+        "member": "summary.json",
+        "memberSha256": "e778966bc9ee53bc629290a2c54fbedf9b8afdfd0cb44fb1b7c6a2a286588ac6"
+      },
+      "durationSeconds": 1.475281042
+    },
+    {
+      "case": "W01",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0291",
+        "inventorySha256": "e1ac9b925d443fcbdb9c6f1cb9b079e711ac09a6121a90d514077b09ba330a6f",
+        "member": "summary.json",
+        "memberSha256": "0b1260300894ba3bef1b1ea6bab58565e847d952877406612ab00e531a5b3c2b"
+      },
+      "durationSeconds": 1.4631934999999998
+    },
+    {
+      "case": "W01",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0292",
+        "inventorySha256": "e253712dd58ee65a5a8defb47fad41f2af3d999a8e74f67a614b9e9f96a01023",
+        "member": "summary.json",
+        "memberSha256": "16e7c520f74ac17109ebeb73fd9ceec3c6876eff388526f15483fc6747b520a3"
+      },
+      "durationSeconds": 1.475432084
+    },
+    {
+      "case": "W02",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0293",
+        "inventorySha256": "07286de215dcfe10851f1233b0a82725f0fd534d1548800cd189eb5d9ef77c69",
+        "member": "summary.json",
+        "memberSha256": "f44a6c23814241374c3724962aebffb890c147aab4c3c43b8b93f1c069e25bc8"
+      },
+      "durationSeconds": 1.544104792
+    },
+    {
+      "case": "W02",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0294",
+        "inventorySha256": "901cf957e8090901a557ae0c1734ff1fd3e83a7dd3a855926c03483ec448c159",
+        "member": "summary.json",
+        "memberSha256": "d36afad0f58f6f75ea69a2322feb567b131c97408c5f62d8a52116a3b8c7940c"
+      },
+      "durationSeconds": 1.531498334
+    },
+    {
+      "case": "W02",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0295",
+        "inventorySha256": "611ae57a74c476a01a4f1f2f4eabb47cf9ab040ab5a073dbc0b7540efa571a23",
+        "member": "summary.json",
+        "memberSha256": "c0a3c4c45f504eccaa424012deff976693096bc184fd156417ba413e9fc91596"
+      },
+      "durationSeconds": 1.551977584
+    },
+    {
+      "case": "W03",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0296",
+        "inventorySha256": "fc86fd929fe67fef2a2836bf1650e445275bf595132ece8e7761811b1fc1e4dc",
+        "member": "summary.json",
+        "memberSha256": "0d6064953182307d54f800996905e1357561ff10ccdcdf6944ba5ab101fe804e"
+      },
+      "durationSeconds": 1.566183083
+    },
+    {
+      "case": "W03",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0297",
+        "inventorySha256": "d69080ff73c3ea02c19bf184342bd9da806a23d8370dc627ce6b8a7210761441",
+        "member": "summary.json",
+        "memberSha256": "76b7791612514b523fa0314bfd50fc58c8cacfbc311f66953c7c0544b78817e8"
+      },
+      "durationSeconds": 1.5929462090000002
+    },
+    {
+      "case": "W03",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0298",
+        "inventorySha256": "900685f525ce551b6cac6a1d289c619b6b5ea4157cf8fad6675c3bef3a93123c",
+        "member": "summary.json",
+        "memberSha256": "a793b0dfb38f6fc253f7089dc6e3a40ca3a4f31c4067cc39935cc5567f588911"
+      },
+      "durationSeconds": 1.566050625
+    },
+    {
+      "case": "W04",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0299",
+        "inventorySha256": "94657fa47c215ea28b7f6c7c3ebb5fffc9368321de2d2871ef053a8cfa3602a2",
+        "member": "summary.json",
+        "memberSha256": "712329e0a83b65c9e0fb08d90469fe0e33015cb85d85df8dc28ee6b12250170d"
+      },
+      "durationSeconds": 1.747654166
+    },
+    {
+      "case": "W04",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0300",
+        "inventorySha256": "2fe5d58942f295752b7e5fc0592c3de045d1efce5d4505fd855c82096db1eb7d",
+        "member": "summary.json",
+        "memberSha256": "e540d98f8b1b6e57796a21304101f98791bd0a6b73139074cb52150b9089f0bd"
+      },
+      "durationSeconds": 1.709613166
+    },
+    {
+      "case": "W04",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0301",
+        "inventorySha256": "e2df670a532d81f87f1bea02c552be3de1fa82f42f1174cf5909be646bff9c88",
+        "member": "summary.json",
+        "memberSha256": "f9e94c3129bb00b901ea82d869dda1ba70d94d5976ad938ead0888af9dedffc1"
+      },
+      "durationSeconds": 1.6811857499999998
+    },
+    {
+      "case": "W05",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0302",
+        "inventorySha256": "e281feebe661e2b3e5df3a00c80eef4ef22c3a9afe507f62569ab239b0673c3f",
+        "member": "summary.json",
+        "memberSha256": "e52c1ee2e3c5c5a2c39448b0d7963a2572a08312e69a7ee6f5651e9af38d8707"
+      },
+      "durationSeconds": 1.58460775
+    },
+    {
+      "case": "W05",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0303",
+        "inventorySha256": "a84d86cad82e0f32a13708f24c32a821cb7323f55485361ecb2a24621a31c1b5",
+        "member": "summary.json",
+        "memberSha256": "fc0cfe98f8e7624018f02f2bbe551feadbbeab772a0ccab7358fdd5376e3865f"
+      },
+      "durationSeconds": 1.609566333
+    },
+    {
+      "case": "W05",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0304",
+        "inventorySha256": "12e6316efb8dafb02e91e5ab0349cf9ef2372e3a6b64876f4ec1f65510bdb510",
+        "member": "summary.json",
+        "memberSha256": "c253320e5748a913825e3243db30eab31627aabfd752fdd6082af83edcc7eedc"
+      },
+      "durationSeconds": 1.598775
+    },
+    {
+      "case": "W06",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0305",
+        "inventorySha256": "f6641e71c17d4a50af5adb667798adbdf9c35b3636a238a85d6ec29b6916db6c",
+        "member": "summary.json",
+        "memberSha256": "143bc285d0e9075ee59586a44d71e4ce9c47d97ec032d9a0321f27a8e357b35c"
+      },
+      "durationSeconds": 1.470844125
+    },
+    {
+      "case": "W06",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0306",
+        "inventorySha256": "ac412c35c40d087470a78821ec359aa32e7538a9fffada5497e9f1027bafe324",
+        "member": "summary.json",
+        "memberSha256": "ba320a7c09737351482c86eaae9e3ad2cea6623e586361c541f725a18746ed3a"
+      },
+      "durationSeconds": 1.4643375
+    },
+    {
+      "case": "W06",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0307",
+        "inventorySha256": "39c6c9b183544c18db98034d81c88e5ad681a13de7d46201594b1cf4702955ec",
+        "member": "summary.json",
+        "memberSha256": "492f6aca8ad2cbba095b9efc66098445b426247943342037a2b4458470abebbe"
+      },
+      "durationSeconds": 1.463089583
+    },
+    {
+      "case": "W07",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0308",
+        "inventorySha256": "f0a83f90ab0ecc5d20c0bebae7a66274a65f950dddb22d20949d10d5e17382fa",
+        "member": "summary.json",
+        "memberSha256": "f57437e14fd7f6ce0a8e7116caeb5ab01d58fc54cbd0ebef6657ca4cd4f37a01"
+      },
+      "durationSeconds": 2.026246833
+    },
+    {
+      "case": "W07",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0309",
+        "inventorySha256": "958ed521ce7794a83a321a67bfc8518f7d14e4c92061ff5d2e7d5b3576cf4147",
+        "member": "summary.json",
+        "memberSha256": "75fac01e02202111f1a162af9437cb2071a2b5aa66eba8cfdbfd2c015e68dd4d"
+      },
+      "durationSeconds": 2.1911845409999997
+    },
+    {
+      "case": "W07",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0310",
+        "inventorySha256": "69fa190743b028e3af2a757e8a8a6ff171e72e116b76b11a22e2aa63569d995b",
+        "member": "summary.json",
+        "memberSha256": "c7398adc6ffb2e879b0586d03eef1e1e2ec55020ee3979a52597757e3bf68642"
+      },
+      "durationSeconds": 2.0226800419999997
+    },
+    {
+      "case": "W08",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0311",
+        "inventorySha256": "8d0bcb88fc48f710bdfcb57e657b6697222ca3b10f78e4ebeec8f143a881af7b",
+        "member": "summary.json",
+        "memberSha256": "da140c61cdef3e727a47d40396f6d65fc4f1218647a3b5b8942e554cd7847eac"
+      },
+      "durationSeconds": 1.57723225
+    },
+    {
+      "case": "W08",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0312",
+        "inventorySha256": "a46f9d803772e5497d12e9db2721c2830d19e3eee86bdc1b577eb8ca730e4fd6",
+        "member": "summary.json",
+        "memberSha256": "69fcd4bbfdd78f1840c7fbfe8dffea786bb84cd2301a3d876890928f0f367e82"
+      },
+      "durationSeconds": 1.582913625
+    },
+    {
+      "case": "W08",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0313",
+        "inventorySha256": "2fa217bb5f3069de006bb05f20969e9cfc28100f06e23dc94a1fcc0421d509ba",
+        "member": "summary.json",
+        "memberSha256": "5da144ed6a954477af13afd517922d7a2bc374e5f581ede8eee5166a0ae678e0"
+      },
+      "durationSeconds": 1.60446125
+    },
+    {
+      "case": "W09",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0314",
+        "inventorySha256": "f4cea444f5034849dcbf66ac1c6f5238b7f73f75f62815839ce34b9cef6fa1c8",
+        "member": "summary.json",
+        "memberSha256": "e73239ad778ca342c48221473911983f7150e9b9a80fc8661c240b2f6282e912"
+      },
+      "durationSeconds": 3.926403
+    },
+    {
+      "case": "W09",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0315",
+        "inventorySha256": "ec177e10b705c83225a33e5e90c01681fa9a02f669b1803b8717b0e207bda0dc",
+        "member": "summary.json",
+        "memberSha256": "a021afcc4fbdecb6667653d4748416d26577ea31ec4c98f169258b013e465ba8"
+      },
+      "durationSeconds": 3.9146878750000003
+    },
+    {
+      "case": "W09",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0316",
+        "inventorySha256": "e5df00a36ce6f343ff536d87ffdc0ecb1bccabf9b64159d8b4e335c06bddeff7",
+        "member": "summary.json",
+        "memberSha256": "11c4d1c9c2f5f532cf36ca5e2a0bbf3f19ae66cba8f0f3ca02eb80c98644bdbb"
+      },
+      "durationSeconds": 3.914426
+    },
+    {
+      "case": "C01",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0317",
+        "inventorySha256": "ee1c2797fc720a6916e72c64910de8cb3c8e9b07d4c74aea65e8432bd1a10854",
+        "member": "summary.json",
+        "memberSha256": "b2fb3c5d62d4fd0b8ab0150cb7f15f40fcf4d90c907b10b1264df0078558a636"
+      },
+      "durationSeconds": 336.00515237499997
+    },
+    {
+      "case": "C03",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0318",
+        "inventorySha256": "110b0f247b363068baf2c78a2012fee5de4dab7840688cda8c3e6c054a698abb",
+        "member": "summary.json",
+        "memberSha256": "f60721aa8e6f3efa6cd634e8c0ad7053d800f68c340f1d3d9c4181fe3a1d9e87"
+      },
+      "durationSeconds": 55.863056875000005
+    },
+    {
+      "case": "C04",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0319",
+        "inventorySha256": "bab5626e261549f1535ed3effb9e8a871e3126e772a88673a34fbf1bc6505be1",
+        "member": "summary.json",
+        "memberSha256": "3fc267c8ad8ad68649971e384b1ee958ff2276d3a09425803231a695810765ee"
+      },
+      "durationSeconds": 19.480359707999998
+    },
+    {
+      "case": "C05",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0320",
+        "inventorySha256": "b47cdd9fc1de43754dc35d1223a072591c311a8d1cc4d5f290fc95078ec879c7",
+        "member": "summary.json",
+        "memberSha256": "5b45ee3a21b80b079a38fd20a98db9b799a74163c661c1d950ab6d1922a8a1af"
+      },
+      "durationSeconds": 77.532896292
+    },
+    {
+      "case": "C06",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0321",
+        "inventorySha256": "7332e7267e8229a2bd4b4de3f7acf5b11216d2df352cd3bf531a96a029e9b73c",
+        "member": "summary.json",
+        "memberSha256": "a290c53b2c48303ab6b61570774b9d42e1a78ce194135afafd59069e08337ca6"
+      },
+      "durationSeconds": 224.281742417
+    },
+    {
+      "case": "D01",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0322",
+        "inventorySha256": "0857c655d838636f7a6263692c64798a4f128faf93e0bf9762c21c6994c0ae16",
+        "member": "summary.json",
+        "memberSha256": "5e8ceeebb290b87b85bc3455ccf20eb63a826552bf6b5b29e7ae946578405c94"
+      },
+      "durationSeconds": 62.030219708
+    },
+    {
+      "case": "D02",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0323",
+        "inventorySha256": "3e8642cd38e7e6c084ef64b38fe5d6a03240c7dbee29fc5dd1ca0d24dc19013a",
+        "member": "summary.json",
+        "memberSha256": "7ef09582211801b30207ff1b2dbdd404dd5444bd0be12ffd1e8cbe199efd5251"
+      },
+      "durationSeconds": 6.173281167000001
+    },
+    {
+      "case": "X01",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0324",
+        "inventorySha256": "81a922981e893b3456b6309b7e717c6fd956d21d10a5a906864b5c481a412441",
+        "member": "summary.json",
+        "memberSha256": "13b798e545c843cf4ffc2927d9047239959a56a200ad77fa6829177084161312"
+      },
+      "durationSeconds": 4.107263125
+    },
+    {
+      "case": "X01",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0325",
+        "inventorySha256": "8e4badb1295327a86ca39a9bd3eba4a6f43704b3a82ee66fa1c6642c2650def1",
+        "member": "summary.json",
+        "memberSha256": "1ae921d2d432fb030175f740225c94cfae04a865ec49c25691102026c63a3726"
+      },
+      "durationSeconds": 4.075588333
+    },
+    {
+      "case": "X01",
+      "result": "pass",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0326",
+        "inventorySha256": "ff8c72d46f802a4bf9e219dc73d33c5eb7d60c458d6b75936713bb50d29e4c4a",
+        "member": "summary.json",
+        "memberSha256": "3135c704bc030044fbd8c972289f621123254538174fbd32fb8d86d684e6e99b"
+      },
+      "durationSeconds": 4.112494208
+    },
+    {
+      "case": "X02",
+      "result": "not_applicable",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0327",
+        "inventorySha256": "16f1ee66320be108992603c6841ee3bdc1d1c8c60d600c8c89b0be392188a50b",
+        "member": "summary.json",
+        "memberSha256": "e520d3c73817574338515f8d38645f64255e6e9feabdc5f0a1ca969694df0eb1"
+      },
+      "durationSeconds": 1.425649459,
+      "reason": "Single Rust process with in-process native protocol, A/B unique Rust owners, no sidecar/child model. Native hard crash can affect both; common stop/cleanup remains tested elsewhere."
+    }
+  ],
+  "summary": {
+    "definedCases": 19,
+    "caseRuns": 38,
+    "WIndependentResetRepetitions": 3,
+    "X01Repetitions": 3,
+    "C02": "covered by C01 same current16-session warm30s/measure300s window",
+    "X02": "conditional N/A for sidecar-only branch; same-process native crash is not isolated"
+  },
+  "sameHeadlessBinaryEvidence": {
+    "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0328",
+    "inventorySha256": "152fc3074d36dd32edaa2c323c9d2b5df3a5122b0dd6c753a03ce14f2d40bd01",
+    "member": "component-impact.json",
+    "memberSha256": "3ab2de62969483d739fe157fff64425c8443e077c56fcec36179a8b02996c9aa"
+  },
+  "extraK07": {
+    "result": "pass_DEV",
+    "raw": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0289",
+      "inventorySha256": "876a84c852b8d71dbe9f1515ac3bdebb029ec06f952f5c41db9176bc4b32a515",
+      "member": "summary.json",
+      "memberSha256": "e68243834d93c0b6ae7bddcbb2bda3ca4685b84477d6824a6225005657e8a6d9"
+    }
+  },
+  "verificationRecord": {
+    "checklist": {
+      "path": "plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md",
+      "sha256": "0cdec7014a9e54365c4460f58e224280c9826b42f25f10247752133fa3f0c527"
+    },
+    "raw": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/qa-run-0109",
+      "inventorySha256": "55081e5ddf111da0c78b3ff4e69b2882623571724e83e4f9b6565106a4a25717",
+      "member": "qa-handoff-receipt.json",
+      "memberSha256": "863dde62e7a74985807c43d6ac0b0aaf2f678328286d22b924c1258b6e350844"
+    }
+  }
+}

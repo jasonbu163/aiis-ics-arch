@@ -130,5 +130,39 @@
     "closePreview": "关闭预览",
     "lengthEditHint": "这里修改的是未保存草稿。关闭弹窗后，请使用配置栏的“保存草稿”；关闭不会保存。",
     "lengths": "当前 DB 长度：{current} 字节 · 理论长度：{calculated} 字节"
+  },
+  "naming": {
+    "technicalName": "技术名称",
+    "sourcePath": "原始路径",
+    "select": "选择",
+    "selectPage": "全选本页点位",
+    "selectPoint": "选择点位 {path}",
+    "selected": "已选 {count} 点（同一 PLC，跨页保留）",
+    "preview": "预览所选技术名",
+    "explicitHint": "仅转换明确选中的点；旧名称和人工名的变化列于下表。取消零写，选择保留。待地址确认或冲突时整批不能确认。",
+    "oldName": "旧名称",
+    "newName": "拟新名称",
+    "reason": "生成依据",
+    "addressConfirmed": "地址已确认",
+    "addressPending": "地址未确认",
+    "confirm": "确认所选转换",
+    "editHint": "名称变化需合法 ASCII 技术名；保留原路径。地址确认与待生成名称在本次保存中同时提交，失败保留输入。",
+    "previewing": "正在核对名称预览…",
+    "importSummary": "本次 {count} 个名称变化，{pending} 点待地址确认生成；不启用、不激活。",
+    "modes": {
+      "legacy": "旧名称 / 待显式转换",
+      "pending": "待地址确认生成技术名",
+      "auto_path": "按路径生成",
+      "auto_address": "按确认地址生成",
+      "manual": "人工技术名"
+    },
+    "reasons": {
+      "path": "合法结构路径",
+      "flatten_collision": "路径压平碰撞，地址兜底",
+      "reserved_collision": "保留名称冲突，地址兜底",
+      "address_required": "路径不适合命名，需确认地址",
+      "manual": "明确人工改名",
+      "preserved": "保留原名称"
+    }
   }
 }

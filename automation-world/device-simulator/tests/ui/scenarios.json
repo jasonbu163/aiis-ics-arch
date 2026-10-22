@@ -1,0 +1,12 @@
+{
+  "schema": "ds-r5-native-dom-v1",
+  "identity": "com.aiis.aw.devicesimulator.validation",
+  "profileReuse": "N1 -> N2 -> N3; one owned DS profile and persistent WebKit store UUID",
+  "scenarios": {
+    "N1": {"purpose": "real six-page configuration/import/layout/naming/policy/apply and dirty-save normal close", "closeChoice": "save"},
+    "N2": {"purpose": "selected reopen initialized/stopped; start, real client, typed ordinary/maintenance writes and active-listener close", "closeChoice": "clean"},
+    "N3": {"purpose": "reopen discards runtime values; real single-connection close, dirty cancellation then discard normal close", "closeChoice": "cancel_then_discard"}
+  },
+  "limits": {"driverSeconds": 240, "reportCount": 64, "reportDetailBytes": 1024},
+  "inputMethod": "fixed WebView DOM events and File/DataTransfer; normal ds_* UI IPC; no Vue internals, mock IPC, destroy or process exit"
+}

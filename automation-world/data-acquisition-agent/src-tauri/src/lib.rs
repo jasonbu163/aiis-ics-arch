@@ -103,6 +103,8 @@ pub fn run() {
             commands::local_acquisition::daa_get_yaml_migration,
             commands::local_acquisition::daa_retry_yaml_migration,
             commands::local_acquisition::daa_save_draft,
+            commands::local_acquisition::daa_preview_point_names,
+            commands::local_acquisition::daa_confirm_point_names,
             commands::local_acquisition::daa_import_sources,
             commands::local_acquisition::daa_preview_offsets,
             commands::local_acquisition::daa_confirm_offsets,

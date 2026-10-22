@@ -1,0 +1,29 @@
+// Public handwritten synthetic input; DB numbers are explicit consumer mapping.
+DATA_BLOCK "Names28"
+{ S7_Optimized_Access := 'FALSE' }
+VAR
+  ActTemp_Z1 : INT;
+  Driver_W : STRUCT Unc_1 : STRUCT ActTemp : INT; END_STRUCT; END_STRUCT;
+  "1_Act" : REAL;
+  "中文" : INT;
+  "a.b" : INT;
+  items : ARRAY[-1..0] OF "NameItem";
+  A_B : STRUCT C : INT; END_STRUCT;
+  A : STRUCT B_C : INT; END_STRUCT;
+END_VAR
+BEGIN
+END_DATA_BLOCK
+DATA_BLOCK "Names60"
+{ S7_Optimized_Access := 'FALSE' }
+VAR
+  "卷材编号" : STRING[20];
+END_VAR
+BEGIN
+END_DATA_BLOCK
+DATA_BLOCK "Names47"
+{ S7_Optimized_Access := 'FALSE' }
+VAR
+  "整机复位" : BOOL;
+END_VAR
+BEGIN
+END_DATA_BLOCK

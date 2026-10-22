@@ -1,0 +1,9 @@
+{
+  "overview": "工作台",
+  "configuration": "配置中心",
+  "instances": "实例",
+  "points": "DB 点位",
+  "policies": "模拟与读写策略",
+  "values": "在线值",
+  "logs": "日志与存储"
+}

@@ -1,0 +1,1266 @@
+{
+  "taskId": "ARCH-AW-005",
+  "revision": "r5",
+  "sourceCandidate": "306a09d5317931482a59f45da5eafcb9d3ee739199799f475ade1891fb0b00b4",
+  "specSha256": "67155fe4fca3068ef8e616dcf0ade69a5cdc614e7175a2f1ef4c6bf98f935419",
+  "status": "qa_passed",
+  "qaVerdict": "qa_passed",
+  "ownerFinalAcceptance": null,
+  "verificationState": "human_owner_final_acceptance_pending",
+  "archives": {
+    "dev-run-0001": "0470d4ed5b74a01f2f72b04e81b755b8d15630bef5792b4f03f523daeaa8b5a0",
+    "dev-run-0002": "58b6a070e8ce44f89efd20956bb4760f3ca4fcbd940bb5d09676dd1d8c48518a",
+    "dev-run-0003": "1cd8b9d4a91c270ade46941e6e2705639184bcf1718802397ab88757efa76f4b",
+    "dev-run-0004": "fbc9a8d6801711945c58849b0dfcd54b553e21a9d23ff0fe3d91c457fbb5cbf9",
+    "dev-run-0005": "8bafa770d6684fbf665e614ec9b789e97670b282e85c52b6819574e4b33b0663",
+    "dev-run-0006": "aa8bdfb558312438175ca2ae2a4184812f14315ce44c6e762d11b18ff90b0881",
+    "dev-run-0007": "b21eb7c6837e7601fc7ed3f8750e14a0f3a0d469c7b973932f2cbc42df19c612",
+    "dev-run-0008": "f3ddaefc8975cbbd436e6959ab06ec315629ead74cde19e44cde2744427ef1a5",
+    "dev-run-0009": "31f7557b0b4e0ce349fc62ded3721f703016378b003ca8cf96a2c0b94a7ca611",
+    "dev-run-0010": "7cd0664d8bd748288e7ac77933a446b751babe8fb62b959a50ca4a36b8cddbab",
+    "dev-run-0011": "4be2a94f6a95af0535180c2adbc31fe4f3473cea2c4c232c81d21bca2ec4b4fd",
+    "dev-run-0012": "cff0f4284091d67e40e7ce483d2b2e4bf4db6de2af95e2f2a8dabfb2c65856b6",
+    "dev-run-0013": "ba3ece74685347b14fb4f477d05e21ab170f3bd35e9453e2fec59d23a9944d4a",
+    "dev-run-0014": "18096704f42c6ae34e24bb204eacc8eae34c1b8f17d7fa0ff99dc4512f3b0301",
+    "dev-run-0015": "1d50347c08db4c28364721ddd12726279437898eae9ad2d97a19b49157aa519d",
+    "dev-run-0016": "76f1d02903c1744a4cfae5a16f4ab10c375d4fae9619168d1b8561cc88c03a0e",
+    "dev-run-0017": "58c69eaf891fc563bd261101b2e906969d1b3513556c456fae4018c752e5e037",
+    "dev-run-0018": "b9cd9280d97a43e93938babeb75c2338c1cb517af34c93021729be27f3a4e76b",
+    "dev-run-0019": "d9f6e771a36738a27fbf59795018b5b83cce59a03a14713f045b7247a232d70d",
+    "dev-run-0020": "a5605c0e70d5b5c3f92803b521fdfee0205a13c651116f36610be08105f73d69",
+    "dev-run-0021": "d69a740fc3fd82baa751ebe79cc958dc53dfe323b06580800591f2e534dda3b7",
+    "dev-run-0022": "26b8c2817a50b401c7e6350fc4237f7ff7e0617ac3670cf1d0276826f4468163",
+    "dev-run-0023": "76a0104f68c7d28068b6c3942b302b0ddf4c83e583eaa41bcf71719fa7d2cd2d",
+    "dev-run-0024": "432807f6fa6e087ba68f6f1316a41df501a72084ebbf168e29601528f811a1fb",
+    "dev-run-0025": "06c564289e7d63cecca185209cdd2a3b0675cdd2fb2b2c3117b7d11918f57ca5",
+    "dev-run-0026": "14aeb4e225e665114c394b00546ab50f7b500acf2af35b238a43d41689ad2b1b",
+    "dev-run-0027": "6b46424f3510ef36566ac65d9432318bc6d7beef15a3a84ef568c22a4c2f57ee",
+    "dev-run-0028": "62be1d223374eb70218fb373f103fec0ce6d8ea3f60ffc8ece59cef5f921a58d",
+    "dev-run-0029": "8c955c50fc8749cc2948429f2fe0f18adf2eb378b8a0c539c6c5c8cd5de1a219",
+    "dev-run-0030": "434d9c9bd39028366aeaaf462452165f97ddb560f3433957994aa95ce9fe0902",
+    "dev-run-0031": "ff647d803da74ffd6db26f09ccfd645a707351d359cc30c58a9de5e9a3fca07e",
+    "dev-run-0032": "ec9243ef42d7691e5d4f39f38bf61b0de13ecb9ff429c1f7f1ad2c9729ccd9be",
+    "dev-run-0033": "4acffb43c76598a1858455126b91578d0248aa3a6e8f0d2e32fbda67336115b0",
+    "dev-run-0034": "0fc5cb5d0170a078e320cd17fd36556740a58296a4e2a3005d59bd496927d8d0",
+    "dev-run-0035": "59dff6e1e861fd423c5ed6576a490eb7a673d75df3c7b801e4b0c70636739aba",
+    "dev-run-0036": "0c5d8706769f171c4b68a2a0276467aeea98522d79219b1b4754115077641c22",
+    "dev-run-0037": "c7b59e297dfcd6fea17272149657c15a012b7fe33af31d9399b96474b2ffeb05",
+    "dev-run-0038": "d2e069c3a2d917e76475ba6ab3702f021ff55f904ca3a61d26a15ab61ddbaf74",
+    "dev-run-0039": "1b40bd195d55947001fecc99dcd3797d149efff3e8294e4a39d68a5aaf0284c2",
+    "dev-run-0040": "eb8e7c19ae71b5606c09a97265ceec0a2c6e07a580f8ee0f84dfe59558391144",
+    "dev-run-0041": "7e0898b18088d3aa55c0be2c3fe2de52e55ba8340c7c249ffda1844233735ab3",
+    "dev-run-0042": "82f49effe96101d7303656ae5ca40402f97b02a4cacd2433da9a0993fd2617a6",
+    "dev-run-0043": "879553eacb5e841b0183de8cfca76047fb7b3e02a666e734e73b74737f925dc1",
+    "dev-run-0044": "bbe8962a6e8c421750bd93219082bfcf63fc7570bd2bf3b41d969f79cd3ee6ed",
+    "dev-run-0045": "dd28349f6f6ddf04cd96583f307db37de4e0b2edf94dcfaf4817723d1b50ee6d",
+    "dev-run-0046": "dfe94818c834e07065565512ac928ae2a2b40715e030e5d314bf3c775d1f1fa0",
+    "dev-run-0047": "b5a0aafc0e81a4790fa467fa0e85ccabb0afb0032418a58b88ac62332bbfe1f4",
+    "dev-run-0048": "c14e2a338f20dd81eff770b3c81fee63f2215b9e13916151a424b2dbb7fe2bdf",
+    "dev-run-0049": "b976521107c9b3677a80d54a94e8b034c31c370cbb3868f59d289821aa719555",
+    "dev-run-0050": "55ab6a4fb7eee2980aee5d9cfbb80e66e4a32ff93c27dbdc9fdf4da7f12125ff",
+    "dev-run-0051": "b7a6c2ac3aa202c31f31649c0bf4ae5412239a9bafb0568c46356390e452d17b",
+    "dev-run-0052": "5b40a4eb6cd6d4d793329f17817556989c5a7579f2cdff4b6f4904a2bc3bfacc",
+    "dev-run-0053": "66f6f52f291373c9720f553b4a8d3bfc8fcd6ece31e080f6806022dbc5aaba76",
+    "dev-run-0054": "f4ee8b064bf096ccc90b5ec595dbe5536e26901e4c4dabcba9618bc561b564a5",
+    "dev-run-0055": "0d24209fda67ec61e34d7c577fa7ab091d5a4da8062661e7c9ea8b4cd28d3c96",
+    "dev-run-0056": "b5604a32ae7f151e52884f0bdc8b38e47067085d621d18e05e972270072887e3",
+    "dev-run-0057": "abca41c6c95db5d095099f9ef6c807b941bd3c1d5b5e303b2e04df842096123f",
+    "dev-run-0058": "1af53e5b0216f2db7be9b4d451a67356684d242b33ef6434ae8f4feceb7737b8",
+    "dev-run-0059": "f3bc594a64f2d2cbf2e29c9cf002314152cf8d87e7b2b62df0e56044de36bf5e",
+    "dev-run-0060": "e9b51e9e0918d6b6a601ecd900f77c820b6b135b07597ce09796ea794b191784",
+    "dev-run-0061": "c9081606b780c27378140edf11377e95e854ed7ac406e8a4bfbfbaa49482b34a",
+    "dev-run-0062": "395fd0c3a035847d2dc2a760fddbafe3680d3e9a007059373c4da950bc18db85",
+    "dev-run-0063": "4e392cd134199da3e01c2a7c33b3c7178c47ba42e4d6f7970f8c7d55769cf979",
+    "dev-run-0064": "cc3def03aa79ea014de2946f5bf8d1e15fa82446dcbfd235f1dd6ef76c00426b",
+    "dev-run-0065": "3c0d2ad62eeb2a0daeb1b6f2efa1b6de0a89be6e967ae55eec3997400da006ee",
+    "dev-run-0066": "89edaf046cfb7087e3645d110eda221e5db2e7124da7c7c3a1f795a4978c4c99",
+    "dev-run-0067": "1b3cbede2236758a27e389deb47c77824ced05032846751d999d327c8a937d6e",
+    "dev-run-0068": "c106c9a6e08862bc59c9423e2e7f3c3c8321399c3c6589ddc7fcc37a47e41dfd",
+    "dev-run-0069": "e550bef97e4c2937f0e983273b0038133a072338985a574c4dccac62f59a7311",
+    "dev-run-0070": "a6d73a4eeec6a470d395c6760511530f9cdd1aa9da94307afc8b5c1a07e933de",
+    "dev-run-0071": "edd8e73205bcf726d467f4132404ff57bde4ecd1de79bda28677176edff7f939",
+    "dev-run-0072": "42df748905bb80695a99669a4c80ce05aa4fa181fd0fd3029a3e24b421122850",
+    "dev-run-0073": "0256761578b01ab8132eb18b573aa29179e9985ad68a84da2dc66740f49c4929",
+    "dev-run-0074": "cf4a620d338b846f7791f156f1a6536a667ad3233a33765972892eabf6d523cc",
+    "dev-run-0075": "7cb8b64a5c9b96b1a5d3f7291e38071df05f8d85df84df011b7dd71c7a4b60cb",
+    "dev-run-0076": "b49221a00cd25c55767204a8ba27df91412a36039106536e507deb4997afc122",
+    "dev-run-0077": "5cf3c4efd04213427b1eec6cebe9827a043371b4f07e05f5d745defebf0a0a6e",
+    "dev-run-0078": "e8c4622bc5bacabbaad2e2f950c77143d640324025e8aa29f2382be85703317b",
+    "dev-run-0079": "96540df83bb7ebe05259d52a030138db92b26728f9df5b29997330c4fa2e4b22",
+    "dev-run-0080": "1fdd8be11a6e04fc9e4c5776e07ec33356fe487f3482850c51c8eae0a86236a6",
+    "dev-run-0081": "7234114ec7a4966c868d5c37da35e0ac7d89338e0ec045eab6822b87368e7204",
+    "dev-run-0082": "7dfe5dbc51649b5f4eabb1f4340f3491d248ad29096472c8ab3c432f21d9c134",
+    "dev-run-0083": "a084691fddc6cf094e455709e02393443113e5cc0508b69622ff86ed295079e3",
+    "dev-run-0084": "812b3a90819e36e7c8525d9d5c6973a92793925c1cec884df028320c93851a4f",
+    "dev-run-0085": "54056ec8ae5956089a6ee56944f3b80493a22fba59cd56f0c3261cc38e9cb5f0",
+    "dev-run-0086": "56d3d1c6caac6c9205cc21872c85cd7d38620d38a7780b8a44110382b0ba36d0",
+    "dev-run-0087": "9d84bc3f26e46b1e773e255f6510c3fb212c69900a35cb2a66e88ab27528ee04",
+    "dev-run-0088": "c181a8b98a6772a38bfcbedaa4bd41f9ceb0b9307c366d5d4e9d896409e27b49",
+    "dev-run-0089": "46258d0230e3c75a381abe47df2c81fd2ea0bbdfefc7ce8cf1fc4165d6654e05",
+    "dev-run-0090": "21c0c7efd5b54052e6e00f7077bdbed5743d46b57d8f9f730ef5dca4d4e83b43",
+    "dev-run-0091": "0c882dadb52c5d5f42807df4f7013e863863a2533c823b03b65629ca7a433806",
+    "dev-run-0092": "967f197c5e97c082d1631f45e319ed062d616da80485541db4efe65757d304ba",
+    "dev-run-0093": "d3906c37bd418c39e0d0845c1691fa96ef945065459be060d2f489600b20c27d",
+    "dev-run-0094": "d5e0a198ac12b92387dd77e642459df7b4188812cab13e0a396e0a0940cd44c1",
+    "dev-run-0095": "e6ad141df38fe83183a51c3daeda00bdcd5032101544f57738c9d9e6fbd2a2b0",
+    "dev-run-0096": "7b21e2232e2f070b9144f3466fc19db1635efca4759ac955122339be29dc6008",
+    "dev-run-0097": "62a96e935c63c4c83440284f4244432ec8e389e44616dc26e7ab1e000362a0bc",
+    "dev-run-0098": "5ca1d39f956181fb24dc8d05126b49c12fbe322a0141fd2eefc3aeea2797df5d",
+    "dev-run-0100": "a64b6d1f7b04ee0455ecb79552b499774cd414f9da400aaf6f634bfe4f6176aa",
+    "dev-run-0101": "fd8c958ecaada578f6e3c99918e662de184adcbf397ded53c960a2fa4827743c",
+    "dev-run-0102": "488acbf7d739f297ec6555bbf4cf3a12ead11f98c0c7d2190b65c7beeeaf5d24",
+    "dev-run-0103": "424645e0b4f3d386dba7e8dfc7f2f1d844753142a36ff299d2c2aa73fe0e99ac",
+    "dev-run-0104": "8e78ed2000169e58933a475fe30955613852b9e9a20b898e0e92897e6fdfeedb",
+    "dev-run-0105": "0ac2ef7fbc57878a4393b5f48fa58b93fdd01d6465fc2113542662de7d31e597",
+    "dev-run-0106": "027465bb7dd5c73b6bd8f86e5d8e761ad7c7b5e8bca029b1dcb7d6f6528267cc",
+    "dev-run-0107": "53af60e92adc2d0cedd3b5a822ae2c598fa2fb070ec4a442a3523a3d85db41ce",
+    "dev-run-0108": "8b24526a87a3dcfb90353a60d851ced60361f737b8518d59e3228bec7628505a",
+    "dev-run-0109": "8daddc6ced21af9cf364322a1a19c4d0daf24b9efc0d6d2ff897c94d0c04b2a1",
+    "dev-run-0110": "6b43cdc40321f1d2f79ea03293a803b2b639286d5188977cd2dc6a196993be5f",
+    "dev-run-0111": "2407f86f44e79a2a25d27bb982445239542d7fbe25617c963c9c162510004a5d",
+    "dev-run-0112": "0876f7d2e2608d8359cd5fdc4b9e991d31bd55d0ebc8c4aabddd882544887d83",
+    "dev-run-0113": "972098820e17c4edc000c8dd864f7dc3e834748bd24029a0e280071beb609166",
+    "dev-run-0114": "682408f21adf6bc89d5daf03425982f49bd908498b60092b6ba36ea1a6ffdc41",
+    "dev-run-0115": "4d1e82027974f764baf9e9bc1c33e716d88b1319e02b4ff6638997529e520b86",
+    "dev-run-0116": "65f61dd0f8cd3433bbb4fc733f748967354c8236822d0425007e641d104efb7d",
+    "dev-run-0117": "0b6293973db593a81e07103f3ea870bfc282a5d2ae2270d0504bbefe4ffa14e2",
+    "dev-run-0118": "e711df93f4b10d79905787ab53188f3d150d5794a3b4f4c01e9931527ae912f7",
+    "dev-run-0119": "fc364ee44c06dc74d99aec343f45cc002e19be49e9f4a302513598566c425a03",
+    "dev-run-0120": "63ba8a9f5cc4a11cbbef61ec9c55309ee4dc4301eff594a5324a3eda5c87955e",
+    "dev-run-0121": "e4cc3304cb07bea73a1e9809cce748aacb680fede4639a36e1001fcf518da260",
+    "dev-run-0122": "d65354d6a1d52f5bf3aaee2d642a43fcd2fcff0617256004ab930c56c571f4bc",
+    "dev-run-0123": "ebb209d48c21b4c661cd4c96e886cd445a39ec05dff2368346d22544a36770b5",
+    "dev-run-0124": "a14b4144b3fd2ac4aa6e1c23451eda6fe386566f525d0c8cc41506ae14f01772",
+    "dev-run-0125": "eb0a4930772855d6c07e58e2ea7ef5dfe83a8637346fa306dec46f62e5d942d7",
+    "dev-run-0126": "d56a4deedfec23d2aeb9da1a128bec9781eb3d85f6848e4f496743558fcfec5f",
+    "dev-run-0127": "df15950648d66849887ce8b1b93ef90cf1b1f8c61dce8ffebcf8d16f86b10096",
+    "dev-run-0128": "2d6d3f8d71cf71bbd8a2a06742f8487a504316e0c779cbc668a7f435e489d858",
+    "dev-run-0129": "4e828e8320db990ed54fbba63bb63b5f4f4211c0ee5285fdce4924e908e3035e",
+    "dev-run-0130": "cf982573c4c40451bd6b8c1304e2d331c5b6bdb0bf03b65fefcd821965cfc0a9",
+    "dev-run-0131": "041223ccd4dda9c2ceae5124f84d0f05e17bd58e84e6c1fe6ca7b664194ba9c9",
+    "dev-run-0132": "336715a0143b29537619c088a7f43516852dd2e21d2f26a9af074026fe43d5af",
+    "dev-run-0133": "cb2653c345e400d8c0bc42eeb1b2a28d8359d3bac961937d61e2cd5c06312fec",
+    "dev-run-0134": "d36d6195abaf95ab61c06ad7a687edd0cfb67dcbb7951583ff64cae52825be71",
+    "dev-run-0135": "670aaf860ccca01026fe2c60521d1ccfb5574d92018bf0bf7dd08d49fff7b84e",
+    "dev-run-0136": "bcff2951f7dbc22684c9644b53441256ae71e04f5a2f572591f90615d587bd36",
+    "dev-run-0137": "829bb70aefbc095125f2cc0c8580da5987e623d89821be4c6e296f3b9d187849",
+    "dev-run-0138": "13d5e723e209f02ee21ff6349450bed6e2f35a897f0da6896f434cb8cc63dfd4",
+    "dev-run-0139": "1436c2e7e9e397c8a1702cf5550032aec92a9310f22a92bf582a1a5adc53faf2",
+    "dev-run-0140": "8295cbaa03e579bb8fb139ca5cca6d42e324bd6fe42d1c555da2b7a29300ca13",
+    "dev-run-0141": "c938460db68cba1fa102e25e75a1728f0747b7739485aef0a664a7f37ed6cbf4",
+    "dev-run-0142": "4b4b86fe855a94306cd33fa3b94acfdaff5e6eb8b64b1f919a6bc7cc30176fda",
+    "dev-run-0143": "8e0c247330bb86b837f6b1145900151580a3267d00fd0990c4949d56e868c5a4",
+    "dev-run-0144": "768a2bebaef9931cadd6e4899928358df12864b6096ec9d096a8e3f9cab49cd6",
+    "dev-run-0145": "83c12026978e0ed23776a0a522e137b1231f7ebdf3de71d36e962720d09aad85",
+    "dev-run-0146": "7f49c1de125fc84ccda190260561a0ce4f96ac316e9033916396580385156fe8",
+    "dev-run-0147": "93bcf89658607544a4bbf33f3457da2ed1b2dd0a87ec784fcd0994f97455735d",
+    "dev-run-0148": "645a4d10d6daf1629e24c0bdf6d0f2f066925e2bd08dcf6a6ac8c19cc0afdd56",
+    "dev-run-0149": "9f767a7234d367ba4c5eb96f8daa18a12f6ddc4f5a09355e90d5ab3b679c5f19",
+    "dev-run-0150": "01fd5160f7b70c67c1c400884932d0d61dbc63614c8a0cc91d7254da50b5ae63",
+    "dev-run-0151": "444c617fa5b425f8410d729fca9f4b69968c57ceb399dfe395e4570912b62c03",
+    "dev-run-0152": "7235e706293e28e953489832c7cbe079d5ccf99449984897154c25468862652e",
+    "dev-run-0153": "7c3eb474058474c35fc76d0bbf19d031d33cd0a3516731270150cf4351a72ab0",
+    "dev-run-0154": "46f1f5c6a2427adbe824b3cd6b626a34f6c3c0799ec4c264ebcdb39c49c8cca1",
+    "dev-run-0155": "dd4fcc8033272b403652e17c729ae22a7ddb10beb8ca7c05badca4be83512d79",
+    "dev-run-0156": "890329c6635da81a3c3ecbcaf0a74c4ad4dd9c1e30905bfd64e4706bca731d47",
+    "dev-run-0157": "d2f5d3da9bb6db8ddddabe498551a19453a65fe282ec06c3602f1b2bb0eb4190",
+    "dev-run-0158": "4d2c0e4f5f621f633807d52b50864d9cf756bb5724da90e6a7ea761a96a47f51",
+    "dev-run-0159": "cb5149520bac187e4b1a3de9194e395ec5b0b9edafb00ae32feadbd676dbc6df",
+    "dev-run-0160": "6c96a3d4f496f0d41a3dc5b263e89a32a0f86bf0aefe549a95afdad834a588e1",
+    "dev-run-0161": "b52b65b352d4b557d4a99dae810413014f9fd48c92be231c01d9117b399dc524",
+    "dev-run-0162": "aec600c2fba9eea6f4343b7c96553e44b49b98b70e95c2c4bc0ea5cd48862d69",
+    "dev-run-0163": "3432bca52fc46dc4870ea184d33d6f63a6d8aea654f25bc3ec45a5ce8f3769b7",
+    "dev-run-0164": "05a9228f1f99ce7b0f22136bc3470676dcd5b4a2fd4f7a9d8edd64f1e4b7a18d",
+    "dev-run-0165": "75a1d33a2494921932274c0074cb0513d729af4babe6050a31cbf4b891d05135",
+    "dev-run-0166": "828e125e9c72eb7f548c3f956f4b827ae0c7548f146d900288abb45ff4de1877",
+    "dev-run-0167": "400c9c0f8887d8115f1534d19ede002c6491ca5ab596d1bb89bf1b0f048c804e",
+    "dev-run-0168": "eeb35b09074d7cbdf7182fc54458c87183baacf119d242068fe712538e7cb112",
+    "dev-run-0169": "4cb6eee382acd10e03f62426877bfb4cec8c453145c8acdc42518df8bf888ce8",
+    "dev-run-0170": "807f186688d64a2f444bec8c6934761795a92038441978f38788e80cb247b9b2",
+    "dev-run-0171": "24a41dc4227fb6b13f2e27762b8e5abb3d06f823874bc1f208b5666099d852f0",
+    "dev-run-0172": "84a00a36d3728a3199e92ee2f8506736041828cffd0492e28e754b17169eea20",
+    "dev-run-0173": "d12e13f230d7a46e150310d556d5cfab050c91942e83a6e04ae61d7189993dfe",
+    "dev-run-0174": "3e5690eead811cb9caa5ea29213ee201d980f399bf88eacf5a3077cc2d7654b6",
+    "dev-run-0175": "765f95467ba54e622d297cdcc48d24f0c2ae4431e450fdeab20290903fc9afcd",
+    "dev-run-0176": "d18b8aad1b3a67d50346a58473e37d7abaf0a23d0b60fe6f0b79541d694dfba6",
+    "dev-run-0177": "dfd95d25f0ca187184f60a7cc58f2bd4032cbdab739dd3e2e6ba6fe0ea39085c",
+    "dev-run-0178": "0087c793523f2a0390613efd25b37f002beff86bf8152c616d71d564524077f0",
+    "dev-run-0179": "420c8fa4707c8e544f2038bbb512652f38948561a7e04522b923e1a637a71a1f",
+    "dev-run-0180": "751eef7a075b18aa3df1d2939fafe1ef1e7e6b3306ada226fd3943849b954d44",
+    "dev-run-0181": "e6041767c51cf64d20ac470adc31708db02ab8e1b5157fb98075684b368d60ac",
+    "dev-run-0182": "c49fe26ddbe9dbe79e36ec61c57634c70ad8feb6495b88f6170d3cc459cfc109",
+    "dev-run-0183": "c4e081899170a5bc13b200e8b263ea0359fb6c99812d1abdd9aeaeaa2080efa8",
+    "dev-run-0184": "579163af04e9b1860f86a7bd7bc475b23ef8df1405d41a4441eceab34a30e46a",
+    "dev-run-0185": "8b91ce907a775124e6069e15f238eb8815571d0ce8622c861c2a3360739b2408",
+    "dev-run-0186": "9d21cdc97e55dfe4aedb6b6606f54f838bf6f18cd49f2c53f6261d135270f5ae",
+    "dev-run-0187": "ca1cda13907f5a7ee09c00a0911e3a572ba92cebba9597a7af911f1c3d028121",
+    "dev-run-0188": "1a17e42d5f8f50fc6c9929e7bc4197fed590447dc44d55d6515e3871202a05c4",
+    "dev-run-0189": "7fcfcaac7287aea6dc23cd5079b3c30edafa3c6ae29385edabc3ddc5f5fc67a3",
+    "dev-run-0190": "413fc22357c2e0a3fce2f4310837e08c555ddbf45193d44a56cb02e6431eb7f9",
+    "dev-run-0191": "01aa72fecbe3af1b648d514ff1ae5d14af4840923ffa16d57572548dc35c1d6b",
+    "dev-run-0192": "efa020df3753966d970c7d010ec923ac01145e653ae105afedb1d11e6f48df64",
+    "dev-run-0193": "5a60847d876661e72835deb6a901dd726a68bfaf6b464b5f1ef3f720397c8af0",
+    "dev-run-0194": "b74ed65ee520aa94c047b85fcd137299787d1dbd54443b5d3bf500c6e5485e38",
+    "dev-run-0195": "1bdb4f89585b301a4079b6a09fcd6a7c6cb7cac4f6670f7d1c4fb5b2bb7cd3e4",
+    "dev-run-0196": "f30fd734e56f511a37d8396ae328b645cf54f3058d1f6f6d7fe5194c4c1bbb4b",
+    "dev-run-0197": "122ad0794a7d527f803329d92c121ba649d87f3b0a1591e04a6f867176dbd46d",
+    "dev-run-0198": "78817cd726e99d34d1cd7670c9bccf1dbf0cbc618bf342eef979491360934908",
+    "dev-run-0199": "b83d6d17fae37d2567bc3a97a1e51fa1ed02a02148f87338ec887a6ebbc4d76b",
+    "dev-run-0200": "4b5b41b6a309f0681ac3001ed9ffc00a1c3ae95dd77a7116e03bac737cefd52a",
+    "dev-run-0201": "ccca719326d92c6e8fd7dcc2bee4a20551810f7eb89ac7323663443d9152226f",
+    "dev-run-0202": "7294d93364a38d0d1aa0d38d766c8401c66378c8dd4307ce89f78ef49c4012ff",
+    "dev-run-0203": "45f94a9eb99e930a2cea41348d7ad53142387e593281a4c3af24432f0c310eab",
+    "dev-run-0204": "f0e349d6d7bd28d68000a5a09198fab068247e5b9f30bc1e0068c49d516e3a7f",
+    "dev-run-0205": "e2857226bd5fcc3706ded6095698dbb194ccdb1379c08fd2c7594bf3d5b363e6",
+    "dev-run-0206": "5fa10a9fa2d5f7616a91796697e0f72944d659df1ed21081a019d4f2c085e3a7",
+    "dev-run-0207": "f64c99d7ff4a6b1bbcdf91c9dc59a99726ab57afabb08f17fc8c25737adba1fc",
+    "dev-run-0208": "f1a372975d610556ac47fb8b07501f787d21363e09f35d3d0ccafe500d15d667",
+    "dev-run-0209": "cd4b7f01788d22542e7000b28e77218fa83628539a073a7389b270b5c3259d77",
+    "dev-run-0210": "328d4c1b0c78ca6722c2eba5ef4237925c74fcc0d14ec954aee97c8f2a0dcfd3",
+    "dev-run-0211": "9eddde73f45aa6302fcb75618185c158063748c323d8ead18734487cfe35f775",
+    "dev-run-0212": "1582d285156a458768d738459017826f9683e23385859f4e0bd394b5db01eade",
+    "dev-run-0213": "3e317af94d7e0c1118a32d6543affdab2724901422583814d060e7142ee8ee30",
+    "dev-run-0214": "80f8408cd602faa7b30e2ad4bac595d7d3c5f746b3cc178729298a1f42dad619",
+    "dev-run-0215": "a2fc87ff6f82b3c240de3e97862b162f304df2c96b37bf59c0021a40cd0139f6",
+    "dev-run-0216": "b1600f2672928717c3696627f1e1d5a7bac8f2dc11c064612c43a2762728e4a0",
+    "dev-run-0217": "84c8a31cc4541be1dd8e027a1130bcf39bfed59290fa6534e8b37f4009847dc9",
+    "dev-run-0218": "317352226b56f5e2ab18b9543bb2ce99a28702bc21f8ff6b865c1ff1b28f7357",
+    "dev-run-0219": "a3faf9590e4de2109d29a81c29bcd40d00b67bd7d755a1819d1ebd413dcc396c",
+    "dev-run-0220": "bb48225901bd05311148e50c704871c949ad68c73240cb09945ad6d380dc6545",
+    "dev-run-0221": "7f867f209000f71ea886a8caa28dc1c8fccbae8f684bfd01fd998f477cce6ba8",
+    "dev-run-0222": "6a07692241c5557fb70662835598e3661852239550973b585fd69b7b030d1ef0",
+    "dev-run-0223": "fc553fb6fa2b725b6fe05490de276ea4ef606ff8d97ca16bcfac20a883357ab4",
+    "dev-run-0224": "318c075ae3935c16e563619fd7e94ad28dc36303f5436caa3170215fa35f3f3c",
+    "dev-run-0225": "f909817b9bbfd788a8b131baa45d59f5338d558ae81cb66fbc538785a8d2464d",
+    "dev-run-0226": "2144f6eec97a6ad1d505b97d4887d04d4dd3cddd4bff4c7235e8593711bb75fc",
+    "dev-run-0227": "1a00a0a0719ffc41fef5e44af0a7a5d02ac425c9eaf7076065cb45b7164ed4aa",
+    "dev-run-0228": "388640a22263efd99e81864b0e0f8bb3d35a7b48fd585a292613c9ac538ac205",
+    "dev-run-0229": "90c7813fb6f7a2f9258190eaac330b0e3d8801c4c59449dd23a08eae169fe353",
+    "dev-run-0230": "5ae775f2ef2ba2dbf694c296d4bd28cccd4f422a32aa160eb644da06eef49193",
+    "dev-run-0231": "68c110e33fa872af35298799f7ccc07124f666e0e4bc35717e0d2f50e7b2fc5d",
+    "dev-run-0232": "a81db0bff2fa9b7273da2e2f14cc4c79f242540ffb7595baf3d3b3e798481e14",
+    "dev-run-0233": "e8ac6eb9b79f7f01c73f9fa06472b8820639bdbd928b3cf3aec8cce5534f22a3",
+    "dev-run-0234": "3b668218a017da9f3fb3be2f728ff58aafea31f7e523137880d63f810f23928d",
+    "dev-run-0235": "a0b2a4ed06d8143697c4f648c5af46b30633e7ba97f7c75e03948db98635023d",
+    "dev-run-0236": "2bc12c254b8c0f7a00be318d009e8f61f9b78961a29e716b6f0315c5b9cf7627",
+    "dev-run-0237": "6d2d1ff206d35202c06e060f3d154f1801f2b18a95be4e9c440c2eb5ede0f420",
+    "dev-run-0238": "fdc4112daec8fce38de23913c3b3b0351bc2f86a1e16499e1458221c4f94c8d5",
+    "dev-run-0239": "84712da68d1b925b15689a23c4733baf5dd4cb6182c34813c1395fab2270ab8b",
+    "dev-run-0240": "434b0e1cd73ae04c35f819c15a1d83c4a45d3257541da7781d6e0be4c682fef3",
+    "dev-run-0241": "22fb4fd1d07731c7c18b43b438a498803c512367a595e078acd9fc6277d27933",
+    "dev-run-0242": "e9fd7b1b0bb3d72ee835a4bbf6e8240f08913b662ff3830e22211d1a33d8065f",
+    "dev-run-0243": "5ca4574b5c54ca781ebc00f575c3c6eb06419aaa45dcdf231fef5cde4dfd59dd",
+    "dev-run-0244": "148a734548a93ad02692c4e151f7c1c97c3ec93142d68a8ae75345285d8666c5",
+    "dev-run-0245": "c19366603475ebf7f92a29e51e18b503c7a68bbd54a19348a01deda6f90719e3",
+    "dev-run-0246": "620e312c52f7c364f9d664fa6c4a380a35fb8bf2166ff9da34932638607e202c",
+    "dev-run-0247": "e715a4184b70468caf7c1e060908f6883b2583c88eb1404a2eecaaafcfeb65ca",
+    "dev-run-0248": "fbdfd841a5e25ffc43ef64432daa0524f58b0b25265b2b2032155063a332b453",
+    "dev-run-0249": "9ce8bf743a5376255bfc174e7e37e456ac5914028e7517791acfec3373d1a678",
+    "dev-run-0250": "4ee75ba01856e5359687857544b1557baefa4c5d9fdabbc73212ffc2830c1b28",
+    "dev-run-0251": "9642d0c917b130bb72242261056d8c4c98322758bde58587d5466f9ceb5094fc",
+    "dev-run-0252": "c9aca19b2c0575f0ea94f0ff302d840c2c36ef2486e31f40abac19901209b89c",
+    "dev-run-0253": "445ae72cab5c251e6ab841958004929520c7001bb63b45d1238d1bf84e207d91",
+    "dev-run-0254": "cc63f40566e6d61bca9b801af1a72e12a93d429883885dfa5c8cb56dd4ba77d9",
+    "dev-run-0255": "d981b10a6be8a97bbae297734e499fbd087cee36d8b018a3b95e2e47f2682cc6",
+    "dev-run-0256": "a498aa6a4c2e4f7705a22c07f10ae3998f2baee960c9560bb8bbfbca5dfbaebf",
+    "dev-run-0257": "c8765ab9c276e67f9f87a8105246bbcd8c9caa46a74d861de27dbab51661dee9",
+    "dev-run-0258": "e0d2e83fb69b4bc3b918eb316245cc7149b5680bb431c5294337658bff8ffc00",
+    "dev-run-0259": "a968f1727010dde146c2932b2f72e6684aa98503c3c109d4f096862d9e1ca7d7",
+    "dev-run-0260": "de53b2ec715b28681844ba754821685d222c615f3bb89b4354c521c04d95e28f",
+    "dev-run-0261": "9b908a272478c76a478f0b80cc55fb0021e585b1459efd4d5eb7c9c514cd607f",
+    "dev-run-0263": "10e9a1cbc4fea7dc4de66787d3eee379ca2072477e098ba301c61c9673edd62e",
+    "dev-run-0264": "733b215bb72757abb9675d219dbe14162642c542bb0eeee1ecef83536606d85c",
+    "dev-run-0265": "2eb862a78f3b59df52413d72b3b6379652e7980e5b856c4107a33ad9458bdb90",
+    "dev-run-0266": "0d609fd8a111447d7f2c9eabcfbc56aca8a308703b04e4ba9b8bb904225006f7",
+    "dev-run-0267": "fdac4ad4627b33ec3644815ea8560ee6b635f4d1773741731eb87eb0566dec34",
+    "dev-run-0268": "35f03205f94e17b6dbcdc23ad66d4e57ba1e8f7e8855c436158f9b8234193469",
+    "dev-run-0269": "599070f542b27ce7292d0de3ae68a3113be970197902115ae3a1dfd1d7e2004b",
+    "dev-run-0272": "aa7858eb40200de495f5a0ed73dfde94be1d056d787b47f45099cccbc066004f",
+    "dev-run-0273": "8ec725220c1198853a5a1e9e668600a75009320373ae4bc718eafa4ea57b8952",
+    "dev-run-0274": "89b0993310a48ba6c030167fc8e076d1daa38178c443e78cec486d5995ac9a46",
+    "dev-run-0275": "3717fdad65f829cfd568e316e7806ad2ed881a30f505a3450bda9397ffda8e1d",
+    "dev-run-0276": "44b4f4608dd99a0a79ee05a8458102c4754932e2f8868dbaa9218109761391e9",
+    "dev-run-0277": "e727de83fbdb7d31fbaa07a2131582504335ab49e79b626245904e6565f63b50",
+    "dev-run-0278": "fc460583a6eb9a71c9b857b683803b3ba54abd39022d3ebcff6bbc81c98f52a1",
+    "dev-run-0279": "bf496bdd85bcbedb5000aab18ed5f75f483aa7224286fa1e87d7a71d72c4a1f0",
+    "dev-run-0280": "8379e106c935a8f4748e895a52d126cd03fa326733158f7106499074357c1596",
+    "dev-run-0281": "944acb3cf8afd675cab54333adc5fe58c3e11afaea0fc9cd0d333b56b76c7241",
+    "dev-run-0282": "0d9b10992e1a6b7f8b44b95efdcf515b26702e51874beacbba24208cded9846f",
+    "dev-run-0283": "d8e66bc43488f9a4ea894d232fbb506f478f12d5b9262b1a1ca2ef7f3736b3e2",
+    "dev-run-0284": "f8fcd623f0a334c8aa93a81d4698e727ac8fb9469db8dc0b5e21c3647fc78ebc",
+    "dev-run-0285": "f591616c3cdc560e9edd589d6f9249f3e319d6f2101424902608b5db2692dbe0",
+    "dev-run-0286": "a6988cbda6492b9fd616aeac5c9b009a3362d7e021c4ce4b3522294cf4e2bedb",
+    "dev-run-0287": "8878e4f9d8fd9c0a339f5006848a4b9849a4fccef9b3f084dc555997759c2ca5",
+    "dev-run-0288": "2db39b388e219a2c2b7692aec16bb0741ad3a717a5fc6d59512e63ddd5f6e190",
+    "dev-run-0289": "876a84c852b8d71dbe9f1515ac3bdebb029ec06f952f5c41db9176bc4b32a515",
+    "dev-run-0290": "b4ccfa3acad7cf11332fa212058d8880e5078516d17892e83aa581be54d5228d",
+    "dev-run-0291": "e1ac9b925d443fcbdb9c6f1cb9b079e711ac09a6121a90d514077b09ba330a6f",
+    "dev-run-0292": "e253712dd58ee65a5a8defb47fad41f2af3d999a8e74f67a614b9e9f96a01023",
+    "dev-run-0293": "07286de215dcfe10851f1233b0a82725f0fd534d1548800cd189eb5d9ef77c69",
+    "dev-run-0294": "901cf957e8090901a557ae0c1734ff1fd3e83a7dd3a855926c03483ec448c159",
+    "dev-run-0295": "611ae57a74c476a01a4f1f2f4eabb47cf9ab040ab5a073dbc0b7540efa571a23",
+    "dev-run-0296": "fc86fd929fe67fef2a2836bf1650e445275bf595132ece8e7761811b1fc1e4dc",
+    "dev-run-0297": "d69080ff73c3ea02c19bf184342bd9da806a23d8370dc627ce6b8a7210761441",
+    "dev-run-0298": "900685f525ce551b6cac6a1d289c619b6b5ea4157cf8fad6675c3bef3a93123c",
+    "dev-run-0299": "94657fa47c215ea28b7f6c7c3ebb5fffc9368321de2d2871ef053a8cfa3602a2",
+    "dev-run-0300": "2fe5d58942f295752b7e5fc0592c3de045d1efce5d4505fd855c82096db1eb7d",
+    "dev-run-0301": "e2df670a532d81f87f1bea02c552be3de1fa82f42f1174cf5909be646bff9c88",
+    "dev-run-0302": "e281feebe661e2b3e5df3a00c80eef4ef22c3a9afe507f62569ab239b0673c3f",
+    "dev-run-0303": "a84d86cad82e0f32a13708f24c32a821cb7323f55485361ecb2a24621a31c1b5",
+    "dev-run-0304": "12e6316efb8dafb02e91e5ab0349cf9ef2372e3a6b64876f4ec1f65510bdb510",
+    "dev-run-0305": "f6641e71c17d4a50af5adb667798adbdf9c35b3636a238a85d6ec29b6916db6c",
+    "dev-run-0306": "ac412c35c40d087470a78821ec359aa32e7538a9fffada5497e9f1027bafe324",
+    "dev-run-0307": "39c6c9b183544c18db98034d81c88e5ad681a13de7d46201594b1cf4702955ec",
+    "dev-run-0308": "f0a83f90ab0ecc5d20c0bebae7a66274a65f950dddb22d20949d10d5e17382fa",
+    "dev-run-0309": "958ed521ce7794a83a321a67bfc8518f7d14e4c92061ff5d2e7d5b3576cf4147",
+    "dev-run-0310": "69fa190743b028e3af2a757e8a8a6ff171e72e116b76b11a22e2aa63569d995b",
+    "dev-run-0311": "8d0bcb88fc48f710bdfcb57e657b6697222ca3b10f78e4ebeec8f143a881af7b",
+    "dev-run-0312": "a46f9d803772e5497d12e9db2721c2830d19e3eee86bdc1b577eb8ca730e4fd6",
+    "dev-run-0313": "2fa217bb5f3069de006bb05f20969e9cfc28100f06e23dc94a1fcc0421d509ba",
+    "dev-run-0314": "f4cea444f5034849dcbf66ac1c6f5238b7f73f75f62815839ce34b9cef6fa1c8",
+    "dev-run-0315": "ec177e10b705c83225a33e5e90c01681fa9a02f669b1803b8717b0e207bda0dc",
+    "dev-run-0316": "e5df00a36ce6f343ff536d87ffdc0ecb1bccabf9b64159d8b4e335c06bddeff7",
+    "dev-run-0317": "ee1c2797fc720a6916e72c64910de8cb3c8e9b07d4c74aea65e8432bd1a10854",
+    "dev-run-0318": "110b0f247b363068baf2c78a2012fee5de4dab7840688cda8c3e6c054a698abb",
+    "dev-run-0319": "bab5626e261549f1535ed3effb9e8a871e3126e772a88673a34fbf1bc6505be1",
+    "dev-run-0320": "b47cdd9fc1de43754dc35d1223a072591c311a8d1cc4d5f290fc95078ec879c7",
+    "dev-run-0321": "7332e7267e8229a2bd4b4de3f7acf5b11216d2df352cd3bf531a96a029e9b73c",
+    "dev-run-0322": "0857c655d838636f7a6263692c64798a4f128faf93e0bf9762c21c6994c0ae16",
+    "dev-run-0323": "3e8642cd38e7e6c084ef64b38fe5d6a03240c7dbee29fc5dd1ca0d24dc19013a",
+    "dev-run-0324": "81a922981e893b3456b6309b7e717c6fd956d21d10a5a906864b5c481a412441",
+    "dev-run-0325": "8e4badb1295327a86ca39a9bd3eba4a6f43704b3a82ee66fa1c6642c2650def1",
+    "dev-run-0326": "ff8c72d46f802a4bf9e219dc73d33c5eb7d60c458d6b75936713bb50d29e4c4a",
+    "dev-run-0327": "16f1ee66320be108992603c6841ee3bdc1d1c8c60d600c8c89b0be392188a50b",
+    "dev-run-0328": "152fc3074d36dd32edaa2c323c9d2b5df3a5122b0dd6c753a03ce14f2d40bd01"
+  },
+  "coverage": [
+    {
+      "ac": "AC1",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "No r5 QA/Owner verdict inferred."
+    },
+    {
+      "ac": "AC2",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Normal pnpm tauri dev and no-bundle product/test feature separation"
+    },
+    {
+      "ac": "AC3",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "34 upstream, exact8 controlled diff and bridge ABI/dispatch; same headless binaries."
+    },
+    {
+      "ac": "AC4",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Real item/wire/owner evidence."
+    },
+    {
+      "ac": "AC5",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Full memory/hash/sequence rejection and barriers."
+    },
+    {
+      "ac": "AC6",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Six write sources, CAS and paused owner."
+    },
+    {
+      "ac": "AC7",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Each repetition includes100 BOOL competitions."
+    },
+    {
+      "ac": "AC8",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "All malformed/raw/scalar boundary vectors."
+    },
+    {
+      "ac": "AC9",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "STRING8/254 exact bytes and rejected packages."
+    },
+    {
+      "ac": "AC10",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Ordered partial items/system whitelist."
+    },
+    {
+      "ac": "AC11",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "C01/C02 same original warm30s+measure300s window;9600 requests/345600 application bytes."
+    },
+    {
+      "ac": "AC12",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "H/absolute deadlines/idle and actual send block."
+    },
+    {
+      "ac": "AC13",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Whole PDU admission/budgets beforeitem0."
+    },
+    {
+      "ac": "AC14",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "F1200PDU/4800items,A/B120each/UI60,3stop."
+    },
+    {
+      "ac": "AC15",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Real frozen ManagedS7 five modules/240 reads; no DAA app."
+    },
+    {
+      "ac": "AC16",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Real negative endpoints/identity/owned bind conflict."
+    },
+    {
+      "ac": "AC17",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Commit/unknown/stop and continuous B reads."
+    },
+    {
+      "ac": "AC18",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "160 reconnects/20startstop/3reset/full original resource windows."
+    },
+    {
+      "ac": "AC19",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Single Rust process/native hard crash may affect all instances; no child crash isolation claim."
+    },
+    {
+      "ac": "AC20",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Actual full native tree: POSIX plus exact owned WK store and fixed test-only getter PID union; null unmeasurable cost is retained."
+    },
+    {
+      "ac": "AC21",
+      "devState": "pending_fresh_qa",
+      "evidence": [],
+      "limit": "Independent freshQA/Owner final acceptance pending; DEV results do not grant either."
+    },
+    {
+      "ac": "AC22",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "196 DAA pins and108 frozen references verified; shared/DAA read only."
+    },
+    {
+      "ac": "AC23",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Actual core consumer and distinct visible same-basename source choices"
+    },
+    {
+      "ac": "AC24",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Actual DS core consumer/full oracles/typed golden vectors."
+    },
+    {
+      "ac": "AC25",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Real SQLite/CAS/apply and latest normal UI"
+    },
+    {
+      "ac": "AC26",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Formal clean product build;102 obsolete members retired after durable originals and gate"
+    },
+    {
+      "ac": "AC27",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Finite S7 protocol baseline candidate for fresh QA; not release/deployment or Owner acceptance."
+    },
+    {
+      "ac": "AC28",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0328",
+        "dev-0265"
+      ],
+      "limit": "Five compact P5 summaries and durable A5; current projection/ref checker archived with exact handoff, not QA verdict."
+    },
+    {
+      "ac": "AC29",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "Rust unique owner and real wire/queues/control tested."
+    },
+    {
+      "ac": "AC30",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0282",
+        "dev-0288"
+      ],
+      "limit": "ABI int0/37 Tag20align1 real offsets/100clock/joins/buffers."
+    },
+    {
+      "ac": "AC31",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0282",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0287",
+        "dev-0328"
+      ],
+      "limit": "Automatic real Window.close and full WK resource evidence, no manual gate"
+    },
+    {
+      "ac": "AC32",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0282",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0287",
+        "dev-0328"
+      ],
+      "limit": "102 per-file originals/consumer/retirement audit"
+    },
+    {
+      "ac": "AC33",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0282",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0287",
+        "dev-0328"
+      ],
+      "limit": "Real ownedSQLite/profile lock/unknown cases."
+    },
+    {
+      "ac": "AC34",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0282",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0287",
+        "dev-0328"
+      ],
+      "limit": "Real CAS/concurrency/rollback/ack unknown/immutable data/capacity; no physical ENOSPC claim."
+    },
+    {
+      "ac": "AC35",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0282",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0287",
+        "dev-0328"
+      ],
+      "limit": "Actual DB71 to72 without confirm_points blocks compile/apply; explicit confirmation loads72; structure/length/address/display/unselectedDB and historical-revision rollback assertions in real service test."
+    },
+    {
+      "ac": "AC36",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0282",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0287",
+        "dev-0328"
+      ],
+      "limit": "Manual/layout/names preview/cancel/confirm real IPC"
+    },
+    {
+      "ac": "AC37",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0282",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0287",
+        "dev-0328"
+      ],
+      "limit": "All typed extremes/five rules/seed/policy/initial vectors."
+    },
+    {
+      "ac": "AC38",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0282",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0287",
+        "dev-0328"
+      ],
+      "limit": "Nine retention scenarios/real SQL+owner/generation/failure/reopen."
+    },
+    {
+      "ac": "AC39",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0282",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0287",
+        "dev-0328"
+      ],
+      "limit": "Generic A3DB+B2DB actualS7;8/32/4096/64KiB bounds."
+    },
+    {
+      "ac": "AC40",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0282",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0287",
+        "dev-0328",
+        "dev-0261"
+      ],
+      "limit": "Same unchanged frontend/CU/styles/i18n; current native DOM geometry/IPC covered; A261 original pixels retained, not relabeled."
+    },
+    {
+      "ac": "AC41",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0282",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0287",
+        "dev-0328"
+      ],
+      "limit": "Actual ordinary pnpm tauri dev empty owned profile/native/SQLite/3IPC; watcher cleanup separate from normal Window.close"
+    },
+    {
+      "ac": "AC42",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0282",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0287",
+        "dev-0328"
+      ],
+      "limit": "CurrentDEV-role full33-test core including actual owned-manifest positives/negatives passed. Production Manifest unchanged; actualQA-role execution and current independent native gates remain pending. Original N evidence retains4d0 source."
+    },
+    {
+      "ac": "AC43",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0282",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0287",
+        "dev-0328"
+      ],
+      "limit": "Actual partial/failure/ring/file burst+saturation and full matrix evidence; failed A128 retained."
+    },
+    {
+      "ac": "AC44",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0282",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0287",
+        "dev-0328"
+      ],
+      "limit": "102 originals durable/per-member map/unlinked; clean core/build/native checked"
+    },
+    {
+      "ac": "AC45",
+      "devState": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0282",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0287",
+        "dev-0328"
+      ],
+      "limit": "Current source/binaries and compact P5 handoff; QA3 qa_failed retained; new freshQA and Owner pending."
+    }
+  ],
+  "productGroups": [
+    {
+      "group": "K01",
+      "state": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0282"
+      ],
+      "pending": null
+    },
+    {
+      "group": "K02",
+      "state": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0282"
+      ],
+      "pending": null
+    },
+    {
+      "group": "K03",
+      "state": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0282"
+      ],
+      "pending": null
+    },
+    {
+      "group": "K04",
+      "state": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0282"
+      ],
+      "pending": null
+    },
+    {
+      "group": "K05",
+      "state": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0282"
+      ],
+      "pending": null
+    },
+    {
+      "group": "K06",
+      "state": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0282"
+      ],
+      "pending": null
+    },
+    {
+      "group": "K07",
+      "state": "dev_evidence",
+      "evidence": [
+        "dev-0289"
+      ],
+      "pending": null
+    },
+    {
+      "group": "K08",
+      "state": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0282",
+        "dev-0188",
+        "dev-0261"
+      ],
+      "pending": null
+    },
+    {
+      "group": "K09",
+      "state": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0282"
+      ],
+      "pending": null
+    },
+    {
+      "group": "K10",
+      "state": "dev_evidence",
+      "evidence": [
+        "dev-0280",
+        "dev-0283",
+        "dev-0284",
+        "dev-0286",
+        "dev-0282"
+      ],
+      "pending": null
+    }
+  ],
+  "latestNative": {
+    "publicSummary": {
+      "file": "delivery-source-manifest.json",
+      "pointer": "/nativeStage"
+    },
+    "raw": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0328",
+      "inventorySha256": "152fc3074d36dd32edaa2c323c9d2b5df3a5122b0dd6c753a03ce14f2d40bd01",
+      "member": "native-validation-summary.json",
+      "memberSha256": "55004819d41b99bcf895c2a323834c278a5486627e038cd1946e90e5310be0c7"
+    },
+    "cycleRuns": [
+      "dev-0283",
+      "dev-0284",
+      "dev-0286"
+    ],
+    "normal": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0287",
+      "inventorySha256": "8878e4f9d8fd9c0a339f5006848a4b9849a4fccef9b3f084dc555997759c2ca5",
+      "member": "status.json",
+      "memberSha256": "d830f106a8afd84a19aae05a05defbd8942adad78558be7940eab81d9c9ca94c"
+    },
+    "b0": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0282",
+      "inventorySha256": "0d9b10992e1a6b7f8b44b95efdcf515b26702e51874beacbba24208cded9846f",
+      "member": "build-manifest.json",
+      "memberSha256": "7499a743a4c5477f7900aae59191b956b38c4f39ded91fc12ddef7139cbe1d00"
+    },
+    "browser": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0261",
+      "inventorySha256": "9b908a272478c76a478f0b80cc55fb0021e585b1459efd4d5eb7c9c514cd607f",
+      "member": "browser-observation.json",
+      "memberSha256": "c1e697a49e94389a0d544c9fb424538218a54404dd12d78d86cc13c8525e19bd"
+    }
+  },
+  "previousDeveloperAudit": {
+    "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0271",
+    "inventorySha256": "2f85249543f94d5371ecad897a661bd61764077f51766d03914e64f3876c4fbb",
+    "member": "status.json",
+    "memberSha256": "ca4aaaeede637bac53f4f95bd8dbf3e00f76139c46f24b3feb0aed5cd4d7f1e9"
+  },
+  "rawRoot": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence",
+  "originalFailuresPreserved": true,
+  "owningChecklist": "../../checklist.md",
+  "qaHistory": {
+    "state": "qa_failed",
+    "finding": "F-r5-003",
+    "scope": "QA3 actual same-lineage source/UUID reimport DB71 to72 retained old initial/policy confirmations and applied without confirm_points. Product failure, not a new requirement.",
+    "oldDeveloperReceipt": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0272",
+      "inventorySha256": "aa7858eb40200de495f5a0ed73dfde94be1d056d787b47f45099cccbc066004f",
+      "member": "previous-dev-receipt.json",
+      "memberSha256": "948dd8267e7b2d7c4f54a0899d6f93874b0df4b0fa9819d8c6ff6ad752e51d97"
+    },
+    "oldPublicP5": {
+      "delivery-source-manifest.json": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0272",
+        "inventorySha256": "aa7858eb40200de495f5a0ed73dfde94be1d056d787b47f45099cccbc066004f",
+        "member": "P5-before/delivery-source-manifest.json",
+        "memberSha256": "fc8582b80d333741ceb3e35b2c2d7a677823b67317603ba6ba1233fab6555a25"
+      },
+      "evidence-index.json": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0272",
+        "inventorySha256": "aa7858eb40200de495f5a0ed73dfde94be1d056d787b47f45099cccbc066004f",
+        "member": "P5-before/evidence-index.json",
+        "memberSha256": "41c795f3032d6cef54de42137bd48bbe4b533499586674141c3d62ebd61b14cd"
+      },
+      "input-manifest.json": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0272",
+        "inventorySha256": "aa7858eb40200de495f5a0ed73dfde94be1d056d787b47f45099cccbc066004f",
+        "member": "P5-before/input-manifest.json",
+        "memberSha256": "9cc80e78becda959afb94d41b332c8d572b318c1906f8c04ddabe42719005995"
+      },
+      "protocol-baseline.json": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0272",
+        "inventorySha256": "aa7858eb40200de495f5a0ed73dfde94be1d056d787b47f45099cccbc066004f",
+        "member": "P5-before/protocol-baseline.json",
+        "memberSha256": "9a05300edc14a7fc3b3bbeb3df6f96d1b953b8ce140bda3af96e3c6d26781a7f"
+      },
+      "resource-closeout.json": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0272",
+        "inventorySha256": "aa7858eb40200de495f5a0ed73dfde94be1d056d787b47f45099cccbc066004f",
+        "member": "P5-before/resource-closeout.json",
+        "memberSha256": "00e7585173f7e570d4b43ff01930b24815af1f7f5929ffbc3074656c4092c578"
+      }
+    },
+    "checklist": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/qa-run-0055",
+      "inventorySha256": "dd817167baaf4542a8908052ce5657146b73c9411617c222201247b9cdc60942",
+      "member": "checklist.md",
+      "memberSha256": "b1d6d7c4a1081c7a2f06691c5a007e03b4029e6b0740206dab84d6dd4abcfa0d"
+    },
+    "qaReceipt": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/qa-run-0055",
+      "inventorySha256": "dd817167baaf4542a8908052ce5657146b73c9411617c222201247b9cdc60942",
+      "member": "qa-handoff-receipt.json",
+      "memberSha256": "e3019ab78c360b220c36c3cc4d2c18f5f5249167cafda3382b370c7a9c037124"
+    },
+    "qaMinimalProofInventory": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/qa-run-0054",
+      "inventorySha256": "9519a9bb72fb684a43142b8593a4653c0ec5be7c3ff22e53484a2bc0a144266e"
+    },
+    "findingEvidence": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/qa-run-0054",
+      "inventorySha256": "9519a9bb72fb684a43142b8593a4653c0ec5be7c3ff22e53484a2bc0a144266e",
+      "member": "finding.json",
+      "memberSha256": "b22f0ae83e1f4781da1935d7bdc0da66d6270ed76198952b0acc784ef76ab38e"
+    },
+    "completed": "QA3 ordinary/core33/B0 and rawN/W/K07 executed; final native resource recomputation incomplete. C01/C02 interrupted exit130; no complete productQA pass.",
+    "notRun": [
+      "completedQA_C01_C02",
+      "C03-C06",
+      "D01-D02",
+      "X01-X02",
+      "completeQA_resource_recomputation"
+    ],
+    "closedFindings": [
+      {
+        "finding": "F-r5-001",
+        "by": "QA2 independent material audit"
+      },
+      {
+        "finding": "F-r5-002",
+        "by": "QA3 actual QA-owned core"
+      }
+    ],
+    "previousQA2": {
+      "state": "qa_failed",
+      "finding": "F-r5-002",
+      "scope": "QA2 actual-role core positive test used hard-codedDEV role; product Manifest correctly rejected it. Current change fixes only test construction; no QA verdict inferred.",
+      "oldDeveloperReceipt": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0265",
+        "inventorySha256": "2eb862a78f3b59df52413d72b3b6379652e7980e5b856c4107a33ad9458bdb90",
+        "member": "developer-handoff-receipt.json",
+        "memberSha256": "a911d9997c78d7fe0fe6992fc9283f0d5d6fcedaafcd52a8b52594596052308e"
+      },
+      "oldPublicP5": {
+        "delivery-source-manifest.json": {
+          "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0266",
+          "inventorySha256": "0d609fd8a111447d7f2c9eabcfbc56aca8a308703b04e4ba9b8bb904225006f7",
+          "member": "P5-before/delivery-source-manifest.json",
+          "memberSha256": "9be36713878a46ec355bb0475d95bcaaeb913182fea59c697cc92c740f8dabfd"
+        },
+        "evidence-index.json": {
+          "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0266",
+          "inventorySha256": "0d609fd8a111447d7f2c9eabcfbc56aca8a308703b04e4ba9b8bb904225006f7",
+          "member": "P5-before/evidence-index.json",
+          "memberSha256": "e14ba54fca5793b6a002d7361039f3b6db7ad18cc018709e296476c3bfa3a88f"
+        },
+        "input-manifest.json": {
+          "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0266",
+          "inventorySha256": "0d609fd8a111447d7f2c9eabcfbc56aca8a308703b04e4ba9b8bb904225006f7",
+          "member": "P5-before/input-manifest.json",
+          "memberSha256": "0e2267829a94225dffad2c127a3217ccd77dedb71897addda539e136fa05d981"
+        },
+        "protocol-baseline.json": {
+          "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0266",
+          "inventorySha256": "0d609fd8a111447d7f2c9eabcfbc56aca8a308703b04e4ba9b8bb904225006f7",
+          "member": "P5-before/protocol-baseline.json",
+          "memberSha256": "59f238283057b65a4c8514b750b8492dc830151cb802ac19b0a78e770300f327"
+        },
+        "resource-closeout.json": {
+          "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0266",
+          "inventorySha256": "0d609fd8a111447d7f2c9eabcfbc56aca8a308703b04e4ba9b8bb904225006f7",
+          "member": "P5-before/resource-closeout.json",
+          "memberSha256": "7d6f5ee1a86f1855ce26b3308130818e77b0df970826cfd992d12bb53e0710c7"
+        }
+      },
+      "checklist": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/qa-run-0013",
+        "inventorySha256": "32a208f0a4ed277c0aedb908dabc20ad067c66c9010a7d47596eaaf1516d390b",
+        "member": "checklist.md",
+        "memberSha256": "6d28825b59be65761a056a783dc73b4bcc44278a69ba1a7a82ab6aadfa1b4b5f"
+      },
+      "qaReceipt": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/qa-run-0014",
+        "inventorySha256": "249570b8819ea45fcab5a8c95ff9d36d75798c5a4a7701b68b287863a60b3c26",
+        "member": "qa-handoff-receipt.json",
+        "memberSha256": "3b2eb3f47ea05ef0c22c37b57f0a974ac0d5103998bbb0bd3ad71307f8ecb957"
+      },
+      "qaMinimalProofInventory": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/qa-run-0013",
+        "inventorySha256": "32a208f0a4ed277c0aedb908dabc20ad067c66c9010a7d47596eaaf1516d390b"
+      },
+      "findingEvidence": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/qa-run-0013",
+        "inventorySha256": "32a208f0a4ed277c0aedb908dabc20ad067c66c9010a7d47596eaaf1516d390b",
+        "member": "finding-F-r5-002.json",
+        "memberSha256": "1dcc299354c3f33c41ff17225f3e512b5b31bc1f0520a5d5877f88956d0b465f"
+      },
+      "completed": "QA2 fmt exit0; core cargo test exit101:23 passed/1failed, later tests and cross-process lock not run.",
+      "notRun": [
+        "completeQAcore",
+        "B0",
+        "N1",
+        "N2",
+        "N3",
+        "originalprotocolmatrix"
+      ],
+      "closedFindings": [
+        {
+          "finding": "F-r5-001",
+          "by": "QA2 independent material audit; only this subfinding closed"
+        }
+      ],
+      "previousQA1": {
+        "state": "qa_failed",
+        "finding": "F-r5-001",
+        "scope": "Public P5 raw evidence placement; complete product QA was not finished. Old DEV results do not become QA results.",
+        "oldDeveloperReceipt": {
+          "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0262",
+          "inventorySha256": "109004154857db5e2eadcfd4eaecd01aafcc5105a94287bbb2388a56259d4f67",
+          "member": "developer-handoff-receipt.json",
+          "memberSha256": "97433e0183eb87935140a3ea154bb214055e3ecdb33ee6dc8b82e71f3b22d7e8"
+        },
+        "oldPublicP5": {
+          "delivery-source-manifest.json": {
+            "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0263",
+            "inventorySha256": "10e9a1cbc4fea7dc4de66787d3eee379ca2072477e098ba301c61c9673edd62e",
+            "member": "before-P5/delivery-source-manifest.json",
+            "memberSha256": "0143e22ce17f10a0a9059e08fd50e6fc4fa89668829df6f137fe1c61129c0c9a"
+          },
+          "evidence-index.json": {
+            "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0263",
+            "inventorySha256": "10e9a1cbc4fea7dc4de66787d3eee379ca2072477e098ba301c61c9673edd62e",
+            "member": "before-P5/evidence-index.json",
+            "memberSha256": "1b13dcae81cba2541ab4ff94e55f546894bee043d8fda34d38366a1c19f2a279"
+          },
+          "input-manifest.json": {
+            "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0263",
+            "inventorySha256": "10e9a1cbc4fea7dc4de66787d3eee379ca2072477e098ba301c61c9673edd62e",
+            "member": "before-P5/input-manifest.json",
+            "memberSha256": "a6b273d705038557260d7113dde70518aac8b6d0ea38dc90294dc4a87ec5f140"
+          },
+          "protocol-baseline.json": {
+            "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0263",
+            "inventorySha256": "10e9a1cbc4fea7dc4de66787d3eee379ca2072477e098ba301c61c9673edd62e",
+            "member": "before-P5/protocol-baseline.json",
+            "memberSha256": "79d39428eb060e2aa5487896f2d0fff53a894ab837f986bcf75e2a3644b4d734"
+          },
+          "resource-closeout.json": {
+            "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0263",
+            "inventorySha256": "10e9a1cbc4fea7dc4de66787d3eee379ca2072477e098ba301c61c9673edd62e",
+            "member": "before-P5/resource-closeout.json",
+            "memberSha256": "d04f3052f0c91b40ad8207840ff740a6953336813a473bfed8797808bf8e7a60"
+          }
+        },
+        "checklist": {
+          "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/qa-run-0008",
+          "inventorySha256": "cd4ad14dcc6977c8a2642e4bbb4d4c19690247e005756a9a518b0c11da1d4617",
+          "member": "checklist.md",
+          "memberSha256": "6010a27858b414b8d75d69abd04209dccfc4757e2f71110eec77a38130b1e0eb"
+        },
+        "qaReceipt": {
+          "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/qa-run-0008",
+          "inventorySha256": "cd4ad14dcc6977c8a2642e4bbb4d4c19690247e005756a9a518b0c11da1d4617",
+          "member": "qa-handoff-receipt.json",
+          "memberSha256": "25fea17ad26c5baebb6e249c45605d175f80af1283dab5385d530d956778a674"
+        },
+        "qaMinimalProofInventory": {
+          "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/qa-run-0007",
+          "inventorySha256": "703541c43adf3a0bf1c1ad76fa3e55fe9cf42933bd4b93b1893b56e0553cbaac"
+        },
+        "completed": "QA1 ordinary startup qa5 passed independently; core/all interrupted exit130 without complete core result.",
+        "notRun": [
+          "B0",
+          "N1",
+          "N2",
+          "N3",
+          "original protocol matrix"
+        ],
+        "next": "new fresh-context Verification pending; Owner final acceptance pending"
+      },
+      "next": "new fresh-context Verification pending; Owner final acceptance pending"
+    },
+    "next": "new fresh-context Verification pending; Owner final acceptance pending"
+  },
+  "rework": {
+    "finding": "F-r5-003",
+    "scope": "configuration physical-context confirmation invalidation and one real service regression in existing source_import test file; no UI/native/protocol/Manifest/dependency/schema changes",
+    "run": "dev-0329",
+    "currentCore": {
+      "result": "pass_DEV",
+      "testCount": 34,
+      "fmtExitCode": 0,
+      "cargoTestExitCode": 0,
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0280",
+        "inventorySha256": "8379e106c935a8f4748e895a52d126cd03fa326733158f7106499074357c1596",
+        "member": "status.json",
+        "memberSha256": "81d42ec423559ec00bc9ffea4d72e5dcde346da8ef8156679422bc0266f1a7bd"
+      },
+      "profileLock": {
+        "result": "pass",
+        "firstOwnerExit": 0,
+        "secondRejectedExit": 1,
+        "raw": {
+          "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0280",
+          "inventorySha256": "8379e106c935a8f4748e895a52d126cd03fa326733158f7106499074357c1596",
+          "member": "profile-lock-processes.json",
+          "memberSha256": "9f691887b7b47a32e716837961f75c9f733882b0afafe81796302b0f590dac53"
+        }
+      }
+    },
+    "componentImpact": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0328",
+      "inventorySha256": "152fc3074d36dd32edaa2c323c9d2b5df3a5122b0dd6c753a03ce14f2d40bd01",
+      "member": "component-impact.json",
+      "memberSha256": "3ab2de62969483d739fe157fff64425c8443e077c56fcec36179a8b02996c9aa"
+    },
+    "failedNativeRetryHistory": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0285",
+      "inventorySha256": "f591616c3cdc560e9edd589d6f9249f3e319d6f2101424902608b5db2692dbe0",
+      "member": "status.json",
+      "memberSha256": "6ac5f461de24a63936b836b4df9e50649957245eb7917bc841e3c937e9f8639e"
+    },
+    "nextVerification": "New fresh QA must independently execute the exact current source and full applicable gates."
+  },
+  "verificationRecord": {
+    "checklist": {
+      "path": "plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md",
+      "sha256": "0cdec7014a9e54365c4460f58e224280c9826b42f25f10247752133fa3f0c527"
+    },
+    "raw": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/qa-run-0109",
+      "inventorySha256": "55081e5ddf111da0c78b3ff4e69b2882623571724e83e4f9b6565106a4a25717",
+      "member": "qa-handoff-receipt.json",
+      "memberSha256": "863dde62e7a74985807c43d6ac0b0aaf2f678328286d22b924c1258b6e350844"
+    }
+  }
+}

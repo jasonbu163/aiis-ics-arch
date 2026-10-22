@@ -1,0 +1,17 @@
+[package]
+name="aiis-device-simulator"
+version="0.1.0"
+edition="2021"
+[lib]
+name="aiis_device_simulator_lib"
+crate-type= ["staticlib", "cdylib", "rlib"]
+[features]
+default= []
+native-s7= ["ds-runtime/native-s7"]
+test-automation= ["ds-runtime/test-automation"]
+[dependencies]
+tauri= { version = "=2.11.3", features = [] }
+serde= {version="=1.0.228",features= ["derive"] }
+ds-runtime= {version="=0.1.0",path="../runtime"}
+[build-dependencies]
+tauri-build= { version = "=2.6.3", features = [] }

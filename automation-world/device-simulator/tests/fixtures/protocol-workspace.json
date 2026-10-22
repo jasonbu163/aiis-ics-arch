@@ -1,0 +1,1948 @@
+{
+  "schemaVersion": 1,
+  "instances": [
+    {
+      "id": "cfa7f7f9-e70d-5f78-9801-03974e602699",
+      "name": "A",
+      "host": "127.0.0.1",
+      "port": 30102,
+      "slot": 1,
+      "maxConnections": 16,
+      "maxHandshakes": 4,
+      "dbs": [
+        {
+          "id": "cbe1aa86-1ae5-5399-aa2e-6fd14526b7b0",
+          "name": "ProtocolValues",
+          "number": 41,
+          "length": 1024,
+          "manual": true,
+          "points": [
+            {
+              "id": "ec5c6b04-d289-5149-b71e-7aee5f197136",
+              "name": "AClientBit",
+              "dataType": "BOOL",
+              "byte": 0,
+              "bit": 0,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "3aee92d9-8663-5508-9ef2-cf6f89189130",
+              "name": "AFixedBit",
+              "dataType": "BOOL",
+              "byte": 0,
+              "bit": 1,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "rule",
+                "clientWrite": false,
+                "uiWrite": false,
+                "mode": "fixed",
+                "rule": {
+                  "kind": "fixed",
+                  "fixedValue": true
+                }
+              }
+            },
+            {
+              "id": "2d84e60d-5ade-52d8-bc67-756341390170",
+              "name": "AByteBit0",
+              "dataType": "BOOL",
+              "byte": 1,
+              "bit": 0,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "432bb2d9-7746-5e13-945a-eceec12f9e90",
+              "name": "AByteBit1",
+              "dataType": "BOOL",
+              "byte": 1,
+              "bit": 1,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "7bdbbcef-3523-518b-aa18-49a4114002e7",
+              "name": "AByteBit2",
+              "dataType": "BOOL",
+              "byte": 1,
+              "bit": 2,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "5cf481a5-f62a-52e4-982d-00db8d584dba",
+              "name": "AByteBit3",
+              "dataType": "BOOL",
+              "byte": 1,
+              "bit": 3,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "db1cf02a-56db-5c17-ad44-77b8d42ed47c",
+              "name": "AByteBit4",
+              "dataType": "BOOL",
+              "byte": 1,
+              "bit": 4,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "c42d84cf-85ba-5d46-9426-6246e7476456",
+              "name": "AByteBit5",
+              "dataType": "BOOL",
+              "byte": 1,
+              "bit": 5,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "af641338-25de-577f-9c6d-9f9dc9f1c598",
+              "name": "AByteBit6",
+              "dataType": "BOOL",
+              "byte": 1,
+              "bit": 6,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "77b6e3b4-38a0-5928-a223-506bf6171592",
+              "name": "AByteBit7",
+              "dataType": "BOOL",
+              "byte": 1,
+              "bit": 7,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "8e3dbd8a-8057-599f-a330-de5fccee869b",
+              "name": "ASignedInt",
+              "dataType": "INT",
+              "byte": 2,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "e4ac0631-7fe6-55bc-8868-12b8197ece28",
+              "name": "AFloatReal",
+              "dataType": "REAL",
+              "byte": 4,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "8fdeffb5-79b3-5b03-8f44-58830b7cb681",
+              "name": "AUiDint",
+              "dataType": "DINT",
+              "byte": 48,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "ui",
+                "clientWrite": false,
+                "uiWrite": true
+              }
+            },
+            {
+              "id": "124a2a47-24eb-5271-a8ea-6a7ce8a53af1",
+              "name": "AMaintainDint",
+              "dataType": "DINT",
+              "byte": 56,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "004e7fb6-960c-5323-930e-00e511e1f3b5",
+              "name": "AString8",
+              "dataType": "STRING[8]",
+              "byte": 64,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "5409288d-ee2f-56b9-893e-55bb06c8b403",
+              "name": "AString254",
+              "dataType": "STRING[254]",
+              "byte": 128,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "4b91bc19-e799-59b2-8c07-93387799922c",
+              "name": "ARamp0",
+              "dataType": "DINT",
+              "byte": 400,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "rule",
+                "clientWrite": false,
+                "uiWrite": false,
+                "mode": "ramp",
+                "rule": {
+                  "kind": "ramp",
+                  "min": 0,
+                  "max": 1000000,
+                  "periodMs": 100000000
+                }
+              }
+            },
+            {
+              "id": "c68394a8-19d6-5478-986b-518b776db754",
+              "name": "ARamp1",
+              "dataType": "DINT",
+              "byte": 404,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "rule",
+                "clientWrite": false,
+                "uiWrite": false,
+                "mode": "ramp",
+                "rule": {
+                  "kind": "ramp",
+                  "min": 0,
+                  "max": 1000000,
+                  "periodMs": 100000000
+                }
+              }
+            },
+            {
+              "id": "967cca0a-ac18-58a3-987f-987975e4aaa1",
+              "name": "ARamp2",
+              "dataType": "DINT",
+              "byte": 408,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "rule",
+                "clientWrite": false,
+                "uiWrite": false,
+                "mode": "ramp",
+                "rule": {
+                  "kind": "ramp",
+                  "min": 0,
+                  "max": 1000000,
+                  "periodMs": 100000000
+                }
+              }
+            },
+            {
+              "id": "a8297250-deba-545c-a65d-b2ceade2b315",
+              "name": "ARamp3",
+              "dataType": "DINT",
+              "byte": 412,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "rule",
+                "clientWrite": false,
+                "uiWrite": false,
+                "mode": "ramp",
+                "rule": {
+                  "kind": "ramp",
+                  "min": 0,
+                  "max": 1000000,
+                  "periodMs": 100000000
+                }
+              }
+            },
+            {
+              "id": "b3c1f489-39b0-5a13-89ec-0c0d85aaf47a",
+              "name": "ARamp4",
+              "dataType": "DINT",
+              "byte": 416,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "rule",
+                "clientWrite": false,
+                "uiWrite": false,
+                "mode": "ramp",
+                "rule": {
+                  "kind": "ramp",
+                  "min": 0,
+                  "max": 1000000,
+                  "periodMs": 100000000
+                }
+              }
+            },
+            {
+              "id": "718c3f16-3701-5184-bb7f-4a7050274bc4",
+              "name": "ARamp5",
+              "dataType": "DINT",
+              "byte": 420,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "rule",
+                "clientWrite": false,
+                "uiWrite": false,
+                "mode": "ramp",
+                "rule": {
+                  "kind": "ramp",
+                  "min": 0,
+                  "max": 1000000,
+                  "periodMs": 100000000
+                }
+              }
+            },
+            {
+              "id": "3e23bec6-9ddd-5d09-b916-093f9bc78c9f",
+              "name": "AFixedDint",
+              "dataType": "DINT",
+              "byte": 424,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "rule",
+                "clientWrite": false,
+                "uiWrite": false,
+                "mode": "fixed",
+                "rule": {
+                  "kind": "fixed",
+                  "fixedValue": 7
+                }
+              }
+            },
+            {
+              "id": "71f8f764-86bb-5d7b-8af6-15fd15e4e143",
+              "name": "ASlot0Word0",
+              "dataType": "DINT",
+              "byte": 512,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "23a7fac5-ee5b-55b9-b44d-5b8555c672c3",
+              "name": "ASlot0Word1",
+              "dataType": "DINT",
+              "byte": 516,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "d080ffc1-18dc-5580-ada6-8b6fb0243c57",
+              "name": "ASlot1Word0",
+              "dataType": "DINT",
+              "byte": 520,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "5dabb756-2fbb-56ae-8fe8-9e4375557a31",
+              "name": "ASlot1Word1",
+              "dataType": "DINT",
+              "byte": 524,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "5cabfea6-5e63-5a4b-8b21-03385dc25964",
+              "name": "ASlot2Word0",
+              "dataType": "DINT",
+              "byte": 528,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "adc76302-455e-59c7-9869-f383b8797595",
+              "name": "ASlot2Word1",
+              "dataType": "DINT",
+              "byte": 532,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "4bc4e02d-0a42-5e6d-a6a4-7bb709379980",
+              "name": "ASlot3Word0",
+              "dataType": "DINT",
+              "byte": 536,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "57f3779b-a301-5f02-a3a8-72a5b883bb73",
+              "name": "ASlot3Word1",
+              "dataType": "DINT",
+              "byte": 540,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "38783c4f-0eb1-55a7-a38e-cfbdb08164a2",
+              "name": "ASlot4Word0",
+              "dataType": "DINT",
+              "byte": 544,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "7398425e-1d25-5223-9372-b15e120af1d8",
+              "name": "ASlot4Word1",
+              "dataType": "DINT",
+              "byte": 548,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "0730db3e-1bb2-5212-8023-e8cc298821f2",
+              "name": "ASlot5Word0",
+              "dataType": "DINT",
+              "byte": 552,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "98cf5e84-f949-5558-a74d-a668b3604b2b",
+              "name": "ASlot5Word1",
+              "dataType": "DINT",
+              "byte": 556,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "7e36a5b9-42ad-52ce-8b3c-e78005c68485",
+              "name": "ASlot6Word0",
+              "dataType": "DINT",
+              "byte": 560,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "a199daa3-1099-5ac3-ab3b-48588e0f4fee",
+              "name": "ASlot6Word1",
+              "dataType": "DINT",
+              "byte": 564,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "b31f7035-dbc9-55d1-a5f4-ebcae0d94d45",
+              "name": "ASlot7Word0",
+              "dataType": "DINT",
+              "byte": 568,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "03f57ce7-0d1e-54f8-ac27-879a03574a1f",
+              "name": "ASlot7Word1",
+              "dataType": "DINT",
+              "byte": 572,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "fb05cdf5-14b5-5c9a-a49a-c21b7fd97414",
+              "name": "ASlot8Word0",
+              "dataType": "DINT",
+              "byte": 576,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "bc25576a-5d27-553d-94b5-f842013082cc",
+              "name": "ASlot8Word1",
+              "dataType": "DINT",
+              "byte": 580,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "6797b495-312a-53c6-9c77-140192921865",
+              "name": "ASlot9Word0",
+              "dataType": "DINT",
+              "byte": 584,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "cb30aa36-60dd-5f9f-bda8-bab5420762d5",
+              "name": "ASlot9Word1",
+              "dataType": "DINT",
+              "byte": 588,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "d64ea05d-f012-530b-8add-ed5ffffec8a8",
+              "name": "ASlot10Word0",
+              "dataType": "DINT",
+              "byte": 592,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "8a99d1b0-757f-51cf-9468-33d8c3deba72",
+              "name": "ASlot10Word1",
+              "dataType": "DINT",
+              "byte": 596,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "e8427f5b-f0c0-5f11-a05a-276c97a3c165",
+              "name": "ASlot11Word0",
+              "dataType": "DINT",
+              "byte": 600,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "05849217-7d8f-5493-82e7-114d2c366de7",
+              "name": "ASlot11Word1",
+              "dataType": "DINT",
+              "byte": 604,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "c8c0605f-59ce-54f5-836d-a4c1f6d87687",
+              "name": "ASlot12Word0",
+              "dataType": "DINT",
+              "byte": 608,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "6f341c40-f10f-531e-9be4-dfe258d09547",
+              "name": "ASlot12Word1",
+              "dataType": "DINT",
+              "byte": 612,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "99fd3c3d-3768-507d-9268-98e50747b114",
+              "name": "ASlot13Word0",
+              "dataType": "DINT",
+              "byte": 616,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "8eac52b7-cd83-5d7d-a131-9d57faa8df17",
+              "name": "ASlot13Word1",
+              "dataType": "DINT",
+              "byte": 620,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "e56e215a-09d2-5815-8196-c6409e494dbd",
+              "name": "ASlot14Word0",
+              "dataType": "DINT",
+              "byte": 624,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "7e9db197-8253-5c1e-97fd-115baba35741",
+              "name": "ASlot14Word1",
+              "dataType": "DINT",
+              "byte": 628,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "050a2152-cd25-55fa-96d7-8565f7c9f284",
+              "name": "ASlot15Word0",
+              "dataType": "DINT",
+              "byte": 632,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "c31d6b2b-083d-5361-bced-ab3665fd860c",
+              "name": "ASlot15Word1",
+              "dataType": "DINT",
+              "byte": 636,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            }
+          ]
+        },
+        {
+          "id": "20d8c8d5-3d0a-5f62-a6e9-ecea54a67312",
+          "name": "ProtocolMarker",
+          "number": 57,
+          "length": 64,
+          "manual": true,
+          "points": [
+            {
+              "id": "ff43475b-d605-51f4-a0b6-f28b52d4102b",
+              "name": "AMarker0",
+              "dataType": "BYTE",
+              "byte": 0,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "none",
+                "clientWrite": false,
+                "uiWrite": false,
+                "initial": 68
+              }
+            },
+            {
+              "id": "7f382571-6e5e-5299-abfa-23411cd9f240",
+              "name": "AMarker1",
+              "dataType": "BYTE",
+              "byte": 1,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "none",
+                "clientWrite": false,
+                "uiWrite": false,
+                "initial": 83
+              }
+            },
+            {
+              "id": "8f885068-a02f-5637-af0c-a5254a8e48d4",
+              "name": "AMarker2",
+              "dataType": "BYTE",
+              "byte": 2,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "none",
+                "clientWrite": false,
+                "uiWrite": false,
+                "initial": 71
+              }
+            },
+            {
+              "id": "72ee9bcc-650a-5dfe-963f-85fb60203a40",
+              "name": "AMarker3",
+              "dataType": "BYTE",
+              "byte": 3,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "none",
+                "clientWrite": false,
+                "uiWrite": false,
+                "initial": 48
+              }
+            },
+            {
+              "id": "efdcb70e-8c4c-533c-88d3-a55bcfbaf14a",
+              "name": "AMarker4",
+              "dataType": "BYTE",
+              "byte": 4,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "none",
+                "clientWrite": false,
+                "uiWrite": false,
+                "initial": 65
+              }
+            },
+            {
+              "id": "a0171157-afac-5694-84e4-37ab98254d63",
+              "name": "AMarker5",
+              "dataType": "BYTE",
+              "byte": 5,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "none",
+                "clientWrite": false,
+                "uiWrite": false,
+                "initial": 48
+              }
+            },
+            {
+              "id": "0413900d-d435-5a55-ba56-b9bddf28df3d",
+              "name": "AMarker6",
+              "dataType": "BYTE",
+              "byte": 6,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "none",
+                "clientWrite": false,
+                "uiWrite": false,
+                "initial": 48
+              }
+            },
+            {
+              "id": "8d2fef7d-f48e-5883-ac3e-5d1ddedc3562",
+              "name": "AMarker7",
+              "dataType": "BYTE",
+              "byte": 7,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "none",
+                "clientWrite": false,
+                "uiWrite": false,
+                "initial": 49
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "09559a62-52ac-5ac7-b826-2f6ecb7167b7",
+      "name": "B",
+      "host": "127.0.0.1",
+      "port": 30103,
+      "slot": 2,
+      "maxConnections": 16,
+      "maxHandshakes": 4,
+      "dbs": [
+        {
+          "id": "ed5b1550-c7ef-5cc4-a54f-6a72fc93bc5b",
+          "name": "ProtocolValues",
+          "number": 41,
+          "length": 1024,
+          "manual": true,
+          "points": [
+            {
+              "id": "f7f3a6dc-3af1-5e5f-b713-97d95df5d23a",
+              "name": "BClientBit",
+              "dataType": "BOOL",
+              "byte": 0,
+              "bit": 0,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "1216bed6-fee6-5099-8415-5709933083d2",
+              "name": "BFixedBit",
+              "dataType": "BOOL",
+              "byte": 0,
+              "bit": 1,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "rule",
+                "clientWrite": false,
+                "uiWrite": false,
+                "mode": "fixed",
+                "rule": {
+                  "kind": "fixed",
+                  "fixedValue": true
+                }
+              }
+            },
+            {
+              "id": "f9fe6af6-70e4-5c58-a479-340944e2bd75",
+              "name": "BByteBit0",
+              "dataType": "BOOL",
+              "byte": 1,
+              "bit": 0,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "2bbed4f3-52f2-58b0-965c-b932de71198d",
+              "name": "BByteBit1",
+              "dataType": "BOOL",
+              "byte": 1,
+              "bit": 1,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "df89ecae-2205-5326-ba55-fd36ab76bec3",
+              "name": "BByteBit2",
+              "dataType": "BOOL",
+              "byte": 1,
+              "bit": 2,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "fa578014-c076-5e98-906c-c56322576b72",
+              "name": "BByteBit3",
+              "dataType": "BOOL",
+              "byte": 1,
+              "bit": 3,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "6ad0feee-6c3e-59fd-8181-0cfbc8c8f9e3",
+              "name": "BByteBit4",
+              "dataType": "BOOL",
+              "byte": 1,
+              "bit": 4,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "9904de45-9197-5299-8053-479170a0225b",
+              "name": "BByteBit5",
+              "dataType": "BOOL",
+              "byte": 1,
+              "bit": 5,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "bea43792-be62-590d-8300-27548d9b72d4",
+              "name": "BByteBit6",
+              "dataType": "BOOL",
+              "byte": 1,
+              "bit": 6,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "2637b032-a0b2-5607-9ba5-06e49918a2fe",
+              "name": "BByteBit7",
+              "dataType": "BOOL",
+              "byte": 1,
+              "bit": 7,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "7bbd90ea-9244-56d1-921e-b88185cc12e5",
+              "name": "BSignedInt",
+              "dataType": "INT",
+              "byte": 2,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "3828f7ca-11f4-561d-a3ec-5295567a356d",
+              "name": "BFloatReal",
+              "dataType": "REAL",
+              "byte": 4,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "65558884-7283-5038-9840-a19af50eeb94",
+              "name": "BUiDint",
+              "dataType": "DINT",
+              "byte": 48,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "ui",
+                "clientWrite": false,
+                "uiWrite": true
+              }
+            },
+            {
+              "id": "54f34b19-8cfe-55cd-af8b-f231fef5146d",
+              "name": "BMaintainDint",
+              "dataType": "DINT",
+              "byte": 56,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "18f8bbe0-4221-5128-9125-742dcdfa5f7b",
+              "name": "BString8",
+              "dataType": "STRING[8]",
+              "byte": 64,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "ebc31c6d-3ef7-5868-b6f8-f5a8e5987e94",
+              "name": "BString254",
+              "dataType": "STRING[254]",
+              "byte": 128,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "f8f778d4-bab2-534d-8174-15fab77ee063",
+              "name": "BRamp0",
+              "dataType": "DINT",
+              "byte": 400,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "rule",
+                "clientWrite": false,
+                "uiWrite": false,
+                "mode": "ramp",
+                "rule": {
+                  "kind": "ramp",
+                  "min": 0,
+                  "max": 1000000,
+                  "periodMs": 100000000
+                }
+              }
+            },
+            {
+              "id": "a43e3bc7-1dd9-58ee-99ce-1fa3c56af126",
+              "name": "BRamp1",
+              "dataType": "DINT",
+              "byte": 404,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "rule",
+                "clientWrite": false,
+                "uiWrite": false,
+                "mode": "ramp",
+                "rule": {
+                  "kind": "ramp",
+                  "min": 0,
+                  "max": 1000000,
+                  "periodMs": 100000000
+                }
+              }
+            },
+            {
+              "id": "74bc6656-0b27-555b-8c18-c3e80b290062",
+              "name": "BRamp2",
+              "dataType": "DINT",
+              "byte": 408,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "rule",
+                "clientWrite": false,
+                "uiWrite": false,
+                "mode": "ramp",
+                "rule": {
+                  "kind": "ramp",
+                  "min": 0,
+                  "max": 1000000,
+                  "periodMs": 100000000
+                }
+              }
+            },
+            {
+              "id": "839f5da9-a721-5730-98bb-fc4a897e587c",
+              "name": "BRamp3",
+              "dataType": "DINT",
+              "byte": 412,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "rule",
+                "clientWrite": false,
+                "uiWrite": false,
+                "mode": "ramp",
+                "rule": {
+                  "kind": "ramp",
+                  "min": 0,
+                  "max": 1000000,
+                  "periodMs": 100000000
+                }
+              }
+            },
+            {
+              "id": "e2e2cf9c-0c30-57a5-a76a-f860c8101252",
+              "name": "BRamp4",
+              "dataType": "DINT",
+              "byte": 416,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "rule",
+                "clientWrite": false,
+                "uiWrite": false,
+                "mode": "ramp",
+                "rule": {
+                  "kind": "ramp",
+                  "min": 0,
+                  "max": 1000000,
+                  "periodMs": 100000000
+                }
+              }
+            },
+            {
+              "id": "0919ae02-1abf-527d-80ab-5ac04b88ef8a",
+              "name": "BRamp5",
+              "dataType": "DINT",
+              "byte": 420,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "rule",
+                "clientWrite": false,
+                "uiWrite": false,
+                "mode": "ramp",
+                "rule": {
+                  "kind": "ramp",
+                  "min": 0,
+                  "max": 1000000,
+                  "periodMs": 100000000
+                }
+              }
+            },
+            {
+              "id": "35d28352-83e3-5665-bf8d-8b6e2cea548b",
+              "name": "BFixedDint",
+              "dataType": "DINT",
+              "byte": 424,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "rule",
+                "clientWrite": false,
+                "uiWrite": false,
+                "mode": "fixed",
+                "rule": {
+                  "kind": "fixed",
+                  "fixedValue": 7
+                }
+              }
+            },
+            {
+              "id": "e389b979-a2e0-5c62-8178-ac0ace015e66",
+              "name": "BSlot0Word0",
+              "dataType": "DINT",
+              "byte": 512,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "0729d981-7f09-5a7c-bffb-75b310767d98",
+              "name": "BSlot0Word1",
+              "dataType": "DINT",
+              "byte": 516,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "018e5783-cb01-5c6e-a6af-576c2e3279d8",
+              "name": "BSlot1Word0",
+              "dataType": "DINT",
+              "byte": 520,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "90333935-dd09-5f9b-a708-946c049e55b7",
+              "name": "BSlot1Word1",
+              "dataType": "DINT",
+              "byte": 524,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "27d737ce-e007-59c0-96d4-4bcb9f956d29",
+              "name": "BSlot2Word0",
+              "dataType": "DINT",
+              "byte": 528,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "b1aa50d4-070a-591c-9358-92ad423a9263",
+              "name": "BSlot2Word1",
+              "dataType": "DINT",
+              "byte": 532,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "752552f0-fb66-5422-9e20-e61d68f776de",
+              "name": "BSlot3Word0",
+              "dataType": "DINT",
+              "byte": 536,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "baa890df-0e67-5e6c-b5bc-582cddedf942",
+              "name": "BSlot3Word1",
+              "dataType": "DINT",
+              "byte": 540,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "6178e574-b804-5317-be4b-23ee59c8dac8",
+              "name": "BSlot4Word0",
+              "dataType": "DINT",
+              "byte": 544,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "68cacae3-24c3-5e52-80ba-1c5e20f8fdeb",
+              "name": "BSlot4Word1",
+              "dataType": "DINT",
+              "byte": 548,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "3b7d9a9e-34d1-5e33-a65f-3f8943c0d53c",
+              "name": "BSlot5Word0",
+              "dataType": "DINT",
+              "byte": 552,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "366879c3-c39d-5275-9966-0f0d27f4d464",
+              "name": "BSlot5Word1",
+              "dataType": "DINT",
+              "byte": 556,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "c973f1bc-1d05-54f6-aec2-42e6aa0bfd73",
+              "name": "BSlot6Word0",
+              "dataType": "DINT",
+              "byte": 560,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "70f49b7f-0f09-546a-b5cf-8756ecdce320",
+              "name": "BSlot6Word1",
+              "dataType": "DINT",
+              "byte": 564,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "51cf623d-4a09-5fe9-9bff-46f8d17c593a",
+              "name": "BSlot7Word0",
+              "dataType": "DINT",
+              "byte": 568,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "0b2172d1-9122-5e19-aeca-b36d0172050b",
+              "name": "BSlot7Word1",
+              "dataType": "DINT",
+              "byte": 572,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "a5af61cd-5e43-5cb7-a5bc-97d8b3f9ec32",
+              "name": "BSlot8Word0",
+              "dataType": "DINT",
+              "byte": 576,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "c1854e79-f1bc-5709-a92f-8b1cb242bc18",
+              "name": "BSlot8Word1",
+              "dataType": "DINT",
+              "byte": 580,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "254f28fa-eef0-526a-81e2-ab20b9ddad8a",
+              "name": "BSlot9Word0",
+              "dataType": "DINT",
+              "byte": 584,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "a9268eb7-0dbf-53ae-bcc8-260031284a97",
+              "name": "BSlot9Word1",
+              "dataType": "DINT",
+              "byte": 588,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "74fda8bc-9cb0-5904-b2a7-a7f4dec748e5",
+              "name": "BSlot10Word0",
+              "dataType": "DINT",
+              "byte": 592,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "3778b8f7-2bfe-50dc-a816-962e24669f4b",
+              "name": "BSlot10Word1",
+              "dataType": "DINT",
+              "byte": 596,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "802a418c-f7d7-56a0-8a7f-7700c6621590",
+              "name": "BSlot11Word0",
+              "dataType": "DINT",
+              "byte": 600,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "33aac9fb-8374-5b98-9420-6388c79198c6",
+              "name": "BSlot11Word1",
+              "dataType": "DINT",
+              "byte": 604,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "39f90552-8db2-561d-8cfd-1fc5598d7a91",
+              "name": "BSlot12Word0",
+              "dataType": "DINT",
+              "byte": 608,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "e3c843aa-31e6-5a7a-9980-343819cebc05",
+              "name": "BSlot12Word1",
+              "dataType": "DINT",
+              "byte": 612,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "ec37dcbf-6b35-5835-8287-c92dd5d37fff",
+              "name": "BSlot13Word0",
+              "dataType": "DINT",
+              "byte": 616,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "72af3124-dc26-5277-b39a-0435ea41799d",
+              "name": "BSlot13Word1",
+              "dataType": "DINT",
+              "byte": 620,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "c6f11057-5d1a-53f7-ab82-9fd6e8a4f085",
+              "name": "BSlot14Word0",
+              "dataType": "DINT",
+              "byte": 624,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "bfba3dee-869d-54d0-9241-f510aac565a8",
+              "name": "BSlot14Word1",
+              "dataType": "DINT",
+              "byte": 628,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "abbf1f20-78b0-532e-ba10-a5a391dc5819",
+              "name": "BSlot15Word0",
+              "dataType": "DINT",
+              "byte": 632,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            },
+            {
+              "id": "5d14dab9-0327-5b88-8e61-8efd04a23159",
+              "name": "BSlot15Word1",
+              "dataType": "DINT",
+              "byte": 636,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "client",
+                "clientWrite": true,
+                "uiWrite": false
+              }
+            }
+          ]
+        },
+        {
+          "id": "c698604b-ea65-523c-a27d-8c4f73b24617",
+          "name": "ProtocolMarker",
+          "number": 57,
+          "length": 64,
+          "manual": true,
+          "points": [
+            {
+              "id": "7dec38ae-0b13-51ec-a79b-da701b032a82",
+              "name": "BMarker0",
+              "dataType": "BYTE",
+              "byte": 0,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "none",
+                "clientWrite": false,
+                "uiWrite": false,
+                "initial": 68
+              }
+            },
+            {
+              "id": "c09bbde8-2e0b-5a3b-bde4-316883db37e9",
+              "name": "BMarker1",
+              "dataType": "BYTE",
+              "byte": 1,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "none",
+                "clientWrite": false,
+                "uiWrite": false,
+                "initial": 83
+              }
+            },
+            {
+              "id": "99b2e9cd-d401-56a3-b797-167066dbde87",
+              "name": "BMarker2",
+              "dataType": "BYTE",
+              "byte": 2,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "none",
+                "clientWrite": false,
+                "uiWrite": false,
+                "initial": 71
+              }
+            },
+            {
+              "id": "3d23cc86-0294-50b3-8bf7-72e9b3736819",
+              "name": "BMarker3",
+              "dataType": "BYTE",
+              "byte": 3,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "none",
+                "clientWrite": false,
+                "uiWrite": false,
+                "initial": 48
+              }
+            },
+            {
+              "id": "23d1dbfb-7d0f-5777-8f1e-9d57612bbde6",
+              "name": "BMarker4",
+              "dataType": "BYTE",
+              "byte": 4,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "none",
+                "clientWrite": false,
+                "uiWrite": false,
+                "initial": 66
+              }
+            },
+            {
+              "id": "6b4d0048-8f04-5151-924c-3fdd02c7f447",
+              "name": "BMarker5",
+              "dataType": "BYTE",
+              "byte": 5,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "none",
+                "clientWrite": false,
+                "uiWrite": false,
+                "initial": 48
+              }
+            },
+            {
+              "id": "f427b941-f560-56f7-830e-3907a4aaab58",
+              "name": "BMarker6",
+              "dataType": "BYTE",
+              "byte": 6,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "none",
+                "clientWrite": false,
+                "uiWrite": false,
+                "initial": 48
+              }
+            },
+            {
+              "id": "0ad373a7-3673-51a3-8fd7-757c526e3f1e",
+              "name": "BMarker7",
+              "dataType": "BYTE",
+              "byte": 7,
+              "bit": null,
+              "manual": true,
+              "manualReason": "independent synthetic protocol vector",
+              "policy": {
+                "owner": "none",
+                "clientWrite": false,
+                "uiWrite": false,
+                "initial": 49
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "sourceVersions": []
+}

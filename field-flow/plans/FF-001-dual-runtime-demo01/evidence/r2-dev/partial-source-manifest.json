@@ -1,0 +1,143 @@
+{
+  "task": "FF-001",
+  "revision": "r2",
+  "candidate_status": "partial_implementation_blocked_before_handoff",
+  "workspace": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+  "files": [
+    {
+      "path": "field-flow/field-flow-rust/.gitignore",
+      "sha256": "cbb176cbce6141bd798392b5fce6c8431efea60146239c355abb2ac2adae5195",
+      "bytes": 35
+    },
+    {
+      "path": "field-flow/field-flow-rust/Cargo.lock",
+      "sha256": "13404c36665fa46f50f40291e111bcb11e99b9ee8c13d29130004c9ef3d74fc6",
+      "bytes": 50783
+    },
+    {
+      "path": "field-flow/field-flow-rust/Cargo.toml",
+      "sha256": "d28d9068b6804afe0f2605bdc5d90976a45e2e055881c771e26e7203291e8ea8",
+      "bytes": 788
+    },
+    {
+      "path": "field-flow/field-flow-rust/config/loopback.yaml",
+      "sha256": "291f3516795b164b9ff3a78f237aff860f4405a93654f86d870963d5d968760c",
+      "bytes": 756
+    },
+    {
+      "path": "field-flow/field-flow-rust/locales/en-US.json",
+      "sha256": "198b0a98f6304dc9cab7f2861051bdfec6163182efde98aa997b20bfafc13ec2",
+      "bytes": 456
+    },
+    {
+      "path": "field-flow/field-flow-rust/locales/zh-CN.json",
+      "sha256": "f3dd7f52bb508438a5c3f3778acc60fe86131d7d05783aa386c74bc088f895cf",
+      "bytes": 459
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/app/demo01.rs",
+      "sha256": "4b5a98619040c66a3597f4be3d8451c7ad3f00e10df8fb5552bab3a45edea580",
+      "bytes": 698
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/app/mod.rs",
+      "sha256": "92b38610a8b9e28a23c7f41d6063f81797e5d89ca95bd88bd6086299346662ba",
+      "bytes": 74
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/bin/ff-fixture.rs",
+      "sha256": "8b5e12b776adccbc616d7036c40233bc6aa88aecfef2daee641f9fe6e9284092",
+      "bytes": 1626
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/commands.rs",
+      "sha256": "eb841046186f452ee93c40d39e6ec2abe69fae4302f3cc5eef739996fed3bead",
+      "bytes": 4801
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/config.rs",
+      "sha256": "29caa5d914f55560a8e273bb9849f39ed1d622364542f76faed34a0bb95e8000",
+      "bytes": 5776
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/domain.rs",
+      "sha256": "f21fac9b013204b8925b58685ac45d1c388436db0902be76453fde4f616ba8cc",
+      "bytes": 4861
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/driver_process.rs",
+      "sha256": "25327860b95776df1ca0354b5b76edb00d7adeddcc835c2a1c6c0e8c64845cea",
+      "bytes": 19847
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/fixture.rs",
+      "sha256": "0195a037d7266b6d502776dc7aec019b066be152f292b513ff58500d24806af9",
+      "bytes": 10915
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/infrastructure/audit.rs",
+      "sha256": "7542e3236a8a2c081c0c789d5a5262a3e0048eb02268a4bf717a0aeeb19d8f56",
+      "bytes": 5463
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/infrastructure/http.rs",
+      "sha256": "5a25b826f4175422e25e8149726433c6a166755e594c18c046783202a8e73880",
+      "bytes": 3486
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/infrastructure/mod.rs",
+      "sha256": "d189dc09101578b082b780ef99a9d575cd446bf82c6f7618da4a5dbbe0f117b5",
+      "bytes": 127
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/infrastructure/posix.rs",
+      "sha256": "930d3e3ec9a855ad935eceb362de737bfd68fda0359f9457fa2b158a0207849b",
+      "bytes": 3718
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/infrastructure/state.rs",
+      "sha256": "8064350f2c01580b605fb8362594acbca9902ef21f9e99c74cda4a1eb65062f7",
+      "bytes": 19138
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/lib.rs",
+      "sha256": "d49740fe50ae0816b9dba602e96cdfa371e0a46f46037fc872d264c7497db420",
+      "bytes": 331
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/main.rs",
+      "sha256": "debf6ae0b6073e8fd9779469d2c6b3a27d58f03b4b587e63519ddb96a2940105",
+      "bytes": 238
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/runtime.rs",
+      "sha256": "2cdbcb0c91aa1e2dfaade9520c5b46877bfc262650fa9dc56c0294b7b05cf201",
+      "bytes": 20140
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/services/execution.rs",
+      "sha256": "b3098fa1c5e4ea5177c8e07f30a8c72fd96284c136bc7e958f3521cf4250cdc0",
+      "bytes": 1588
+    },
+    {
+      "path": "field-flow/field-flow-rust/src/services/mod.rs",
+      "sha256": "716a45c51475e03d7c5298e1eccb81b1d45be00dcd0e3f3ca81725debddca4c2",
+      "bytes": 153
+    },
+    {
+      "path": "field-flow/field-flow-rust/tests/local_protocol.rs",
+      "sha256": "691cc9d0cc9302f3f68c4b271ca053cd4148fdcf24e80ccde819ced0782238be",
+      "bytes": 16954
+    },
+    {
+      "path": "field-flow/field-flow-rust/tests/process_lifecycle.rs",
+      "sha256": "75467e71a6b5dc1c75355318745eaaaa1f0a1515217db297c8f064989077a1e0",
+      "bytes": 6052
+    },
+    {
+      "path": "field-flow/field-flow-rust/tests/support/mod.rs",
+      "sha256": "7d6f2d02f7a6e03a12be983b7b4f1be76e52bdb44395cb9fc6d7366c3219627c",
+      "bytes": 3803
+    }
+  ]
+}

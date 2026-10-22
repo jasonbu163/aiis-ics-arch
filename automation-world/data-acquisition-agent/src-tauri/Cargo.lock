@@ -33,6 +33,7 @@ dependencies = [
 name = "aiis-data-acquisition-agent"
 version = "0.1.0"
 dependencies = [
+ "aiis-tia-import-core",
  "chrono",
  "dirs",
  "fs2",
@@ -51,6 +52,10 @@ dependencies = [
  "tracing-subscriber",
  "uuid",
 ]
+
+[[package]]
+name = "aiis-tia-import-core"
+version = "0.1.0"
 
 [[package]]
 name = "aliasable"

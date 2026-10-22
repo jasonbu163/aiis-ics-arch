@@ -1,0 +1,334 @@
+{
+  "schema_version": 1,
+  "task_id": "ARCH-AW-007",
+  "revision": "r2",
+  "closeout_mode": "acceptance_only",
+  "coordinator": "main conversation",
+  "human_owner_acceptance": {
+    "date": "2026-10-21",
+    "timezone": "Asia/Shanghai",
+    "quote": "ARCH-AW-007 r2 文档验收通过，更新相关状态并做资源收尾，保留 r1 历史和验证记录，暂时不改代码。"
+  },
+  "recorded_at_utc": "2026-10-21T07:31:53.819443+00:00",
+  "recorded_at_shanghai": "2026-10-21T15:31:53.819443+08:00",
+  "archive": {
+    "path": "document-verification-history-r1-r2.tar.gz",
+    "sha256": "eaa260ad03a08aa5715bbe2086821bec346312a7131b27ef27759ab6e903f732",
+    "bytes": 1316252,
+    "members": 64,
+    "manifest_sha256": "7ffb88fb3b3e166b8f35ef670a35c525b5a4aeb918959e5b03e9b332cbdb3e0b",
+    "verification": "every archived member matched the original bytes before any source deletion",
+    "r1_source_files": 15,
+    "r2_source_files": 34,
+    "accepted_r2_snapshots": 9,
+    "r1_delivery_snapshots": 5
+  },
+  "accepted_candidate_sha256": {
+    "ROADMAP.md": "b1b89f9b9268c57c833e597fff94b83ca08a086be58fb62db146a1e88edc2fb2",
+    "ROADMAP.zh-CN.md": "847e544f1cc39a918ac04131bbd144e3e9c2af057d0bcb4b3cf14ed66e653947",
+    "docs/AIIS_AW_Whitepaper_Roadmap_v0.4.md": "46e1de05709867c76720aa2b8bbf6bcc0c0665df75e1d5b2581923bcc3ff3d67",
+    "docs/AIIS_AW_Runtime_Design.md": "b75e829233c9d5ed638adc88646d8074bcc6a62fc773e7b34ca63aedea6758b9",
+    "docs/AIIS_SMA_Detailed_Design.md": "502ea342ed86008b657d6e2cdbfe8f00f8028bff0546ceb265ca166a86690d07",
+    "plans/ARCH-AW-006-unified-flow-agent-design/spec.md": "63ac134d8a1b75cf1a78815bf11ad53689106269d3556007d99162db1ec4ff73",
+    "plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md": "39041b334483e15d88b00f1ec1e65be07c8d583c982136f7659baa8e8feb297d",
+    "plans/ARCH-AW-007-general-agent-fleet-roadmap/tasks.md": "4e684dbd7312e154a4f723fee7f36aeebdde395234c1bb79a44d6596fa06ae6d",
+    "plans/ARCH-AW-007-general-agent-fleet-roadmap/checklist.md": "d6923eb82fa2dd9050957bb3f95e0ec2a6a197bd3b8236a6659a493f8246d0a5"
+  },
+  "resources": [
+    {
+      "path": "/private/tmp/aiis-aw007-doc-sync-20261020-gz1hgdga",
+      "ownership": "ARCH-AW-007 r1-baseline",
+      "file_count": 15,
+      "bytes": 1057782,
+      "archive_prefix": "r1-baseline/",
+      "status": "removed_after_verified_archive",
+      "files": [
+        {
+          "relative": "check-docs.py",
+          "bytes": 6608,
+          "sha256": "6b7bddf43f9632abe77a7a85d54be9ee2c09a8dad4d541681fb64bb772f22b61"
+        },
+        {
+          "relative": "development-doc-check.json",
+          "bytes": 11694,
+          "sha256": "4b9d3e172cb4193b2fb00952a0a21d8d54b2ef78b39edc7925b65d1c4236607e"
+        },
+        {
+          "relative": "git-status-before.txt",
+          "bytes": 13630,
+          "sha256": "33adbcfb2401921ae6319af1aa66f813e7bf4155a3eb2d2ea9b5161ec9ba35e8"
+        },
+        {
+          "relative": "governance-after-development.log",
+          "bytes": 48164,
+          "sha256": "c4ef6ede8d6276980000591879e71d3e3cd14cd201891057720c6500e8590bd6"
+        },
+        {
+          "relative": "governance-before.log",
+          "bytes": 49776,
+          "sha256": "1155433017f480b74fb7b174d00d462a94874bfe9f848836c6f5c7c96691a754"
+        },
+        {
+          "relative": "governance-verification-before-checklist.log",
+          "bytes": 48164,
+          "sha256": "c4ef6ede8d6276980000591879e71d3e3cd14cd201891057720c6500e8590bd6"
+        },
+        {
+          "relative": "governance-verification-final.log",
+          "bytes": 48164,
+          "sha256": "c4ef6ede8d6276980000591879e71d3e3cd14cd201891057720c6500e8590bd6"
+        },
+        {
+          "relative": "manifest.json",
+          "bytes": 552188,
+          "sha256": "c70f59de7d401a41fc4c1698deed5310597ae6cedcca90bc5ee872ebcd8cf364"
+        },
+        {
+          "relative": "parallel-document-changes.json",
+          "bytes": 2228,
+          "sha256": "b3c1e4a02f5ac14fcb4dd8b9fd93e1436d55d842d08c653aaebc229563efa22d"
+        },
+        {
+          "relative": "sync-docs.py",
+          "bytes": 37252,
+          "sha256": "b3f8f6e2d2fcb22335b135c9c70276cf98c9d0bd1e60a2e0c2a9274c0cbc3dbf"
+        },
+        {
+          "relative": "verification-audit-run.log",
+          "bytes": 24554,
+          "sha256": "fab630a2975cad1da7868ab41f42db53731aad05c3b32d2e009c58a0a5ab861d"
+        },
+        {
+          "relative": "verification-doc-audit.json",
+          "bytes": 58377,
+          "sha256": "2dde7a921b134367012c79a1ed6fb1137aee8b45ad766afa506aeb152869016a"
+        },
+        {
+          "relative": "verification-doc-audit.py",
+          "bytes": 12218,
+          "sha256": "80ed56d1f0316b95888e7f1aaa07bed4ab2ffb376eaa6e77611f115bbdb30dea"
+        },
+        {
+          "relative": "verification-scope.diff",
+          "bytes": 93870,
+          "sha256": "5de8f5916fd055347c1a7fd911be8d347705ca5895436a1a010beea9f7963fb1"
+        },
+        {
+          "relative": "verification-start-snapshot.json",
+          "bytes": 50895,
+          "sha256": "2c61fda95f906eeb7082aacba3823730393805d0ad26181c321fdbca82158614"
+        }
+      ],
+      "path_exists_after_cleanup": false
+    },
+    {
+      "path": "/private/tmp/aiis-aw007-r2-doc-sync-20261020-xbp7s_1j",
+      "ownership": "ARCH-AW-007 r2-baseline",
+      "file_count": 34,
+      "bytes": 2434820,
+      "archive_prefix": "r2-baseline/",
+      "status": "removed_after_verified_archive",
+      "files": [
+        {
+          "relative": "ARCH-AW-006-r1-spec.md",
+          "bytes": 66699,
+          "sha256": "7a96361040684832c9e78ae9ac9717e6cce90e6ed08a443a44a0dcc79fedff92"
+        },
+        {
+          "relative": "ARCH-AW-007-r1-checklist.md",
+          "bytes": 18183,
+          "sha256": "9d268a7dfc21d0f0ecd06831d2e0989703247901c6f11fa4bbf9de3d61097279"
+        },
+        {
+          "relative": "ARCH-AW-007-r1-spec.md",
+          "bytes": 45321,
+          "sha256": "083d64b9ad274eed1a41380ad62e0d58757457a57a090eaffd880f8be1a0b494"
+        },
+        {
+          "relative": "ARCH-AW-007-r1-tasks.md",
+          "bytes": 12307,
+          "sha256": "e8dfad1584329c1e2a92595854992683ff920b7a34eb9c632ca4b2e361f2d2de"
+        },
+        {
+          "relative": "approved-spec-snapshot.json",
+          "bytes": 278232,
+          "sha256": "22372b70b4078450e8ac952be40d7b36a93c36f7af961e1b105be21a18c62066"
+        },
+        {
+          "relative": "check-docs-r2.py",
+          "bytes": 7903,
+          "sha256": "d4bdccb79097d73b43f1b384dd03dca95624e5fe61cbc3b2329e331a1a2d91ba"
+        },
+        {
+          "relative": "coordinator-closeout-r2.json",
+          "bytes": 1798,
+          "sha256": "a1e8e0cde3e5e913d79951bc964b951f9dbb4ca1b5481031fb68ddf491471a7f"
+        },
+        {
+          "relative": "coordinator-final-r2.json",
+          "bytes": 796,
+          "sha256": "799c484a0d9887c3b91f4d28ab0191519da794b26f048f3eeefdd4d8b1f935bb"
+        },
+        {
+          "relative": "coordinator-governance-final-r2.json",
+          "bytes": 2490,
+          "sha256": "cafb48e7b8ab8244c24b1816744a884db888284f806420e41279b45dd91c9550"
+        },
+        {
+          "relative": "developer-handoff-final-r2.json",
+          "bytes": 2436,
+          "sha256": "ed3b00fe82d6acb852fdd2425c699a7d2134599f54033d8b89f1de8e52a03ca2"
+        },
+        {
+          "relative": "development-checker-comparison-r2.json",
+          "bytes": 1787,
+          "sha256": "6e3063a2031b0ced738f81b86eed6baf63a8e9b37ded9f053af4649ca6046a13"
+        },
+        {
+          "relative": "development-doc-check-r2.json",
+          "bytes": 23788,
+          "sha256": "54e15d63897af2217310112a1289282cbfcabf8f48c3037ffa366757c0520452"
+        },
+        {
+          "relative": "development-path-scan-r2.json",
+          "bytes": 363,
+          "sha256": "f446a7225a449e5e626d5b674e38b800ce96f56df8d196ed6c4e055b85b86a00"
+        },
+        {
+          "relative": "development-scope-r2.diff",
+          "bytes": 142915,
+          "sha256": "ac7af4e67d27ef64d0b69d98de273b3a00cacdc46a380b36d3d6b499fedf1445"
+        },
+        {
+          "relative": "finalize-tasks-r2.py",
+          "bytes": 13678,
+          "sha256": "fed20b425a94d76ff601f58941c5bb74d2521524d7d29ec607121fb10ec093c2"
+        },
+        {
+          "relative": "git-status-before.txt",
+          "bytes": 4387,
+          "sha256": "2efa0213de41c0b8471174aa039e0f38a5cbf5c89f69ee1716582ec51f1d073d"
+        },
+        {
+          "relative": "governance-before.log",
+          "bytes": 49484,
+          "sha256": "de580eb8e9e8b41c12bf0714adb91c00193f17ac58a7a41c4fcc6008853210f2"
+        },
+        {
+          "relative": "governance-coordinator-final-r2.log",
+          "bytes": 48948,
+          "sha256": "b1bf3ae1e8e0c027d015a66472a56fd92fba45949b173638d28c69428c308519"
+        },
+        {
+          "relative": "governance-coordinator-root-final-r2.log",
+          "bytes": 48752,
+          "sha256": "09884b80dede954e55dc1aa3c737a3b05d21212edd80fe6b3dfa72944ad17bc4"
+        },
+        {
+          "relative": "governance-development-r2.log",
+          "bytes": 49628,
+          "sha256": "03634ac24fa6185439949ba686cefd7cad79e9e0d245e874e874b2052ea952a9"
+        },
+        {
+          "relative": "governance-handoff-final-r2.log",
+          "bytes": 48754,
+          "sha256": "d0bcb73bee2df11e6e774ed842b2ec1e5898309572fd975c56ceea5c6c888397"
+        },
+        {
+          "relative": "governance-handoff-r2.log",
+          "bytes": 49346,
+          "sha256": "4f68a3eb376bd84c8b5ce5c66b5b4ccac776a7f715fe2c7cd52cbfda86469fa0"
+        },
+        {
+          "relative": "governance-verification-r2-final.log",
+          "bytes": 48752,
+          "sha256": "09884b80dede954e55dc1aa3c737a3b05d21212edd80fe6b3dfa72944ad17bc4"
+        },
+        {
+          "relative": "governance-verification-r2-in-progress.log",
+          "bytes": 48752,
+          "sha256": "09884b80dede954e55dc1aa3c737a3b05d21212edd80fe6b3dfa72944ad17bc4"
+        },
+        {
+          "relative": "manifest.json",
+          "bytes": 923266,
+          "sha256": "89ff1e2421262de41207a2fa64392180871aa6b9f6d8ccbb30a6f988a69c1571"
+        },
+        {
+          "relative": "sync-docs-r2.py",
+          "bytes": 26462,
+          "sha256": "06b904737ed152cca1e8c8fd739eaacdf54fbf6c1825f1993acdf1490c277d00"
+        },
+        {
+          "relative": "verification-checklist-r2-body.md",
+          "bytes": 20237,
+          "sha256": "2d540853545e549c41bae5d7c4bbe7b9511c763b6e1d9e1c3ff379a8bef31519"
+        },
+        {
+          "relative": "verification-five-document-r2.diff",
+          "bytes": 100851,
+          "sha256": "980c4a5f513488965921b55232a0f9d47b020c15d644a40b5dca708cb819c3b9"
+        },
+        {
+          "relative": "verification-governance-comparison-r2.json",
+          "bytes": 3987,
+          "sha256": "1afb75ca4e08d85ccfe0859c1f82ba1c7c33493d558d19172fdf629e0bf09061"
+        },
+        {
+          "relative": "verification-handoff-final-r2.json",
+          "bytes": 1535,
+          "sha256": "a666117316c81005c7405392aea2e6fa59ddc66b2139fabc0e308ddb5afc1e70"
+        },
+        {
+          "relative": "verification-r2-audit.json",
+          "bytes": 50029,
+          "sha256": "f3c09302bb54f5996fee3382da7e39fcc398399ad5c9f75106d12deb61e3f21a"
+        },
+        {
+          "relative": "verification-r2-audit.py",
+          "bytes": 13903,
+          "sha256": "d1ed83a6be5981ddb1d3d1092be6d6c9fcbc5d9a6a2dd8dc96b5640e3ef5a297"
+        },
+        {
+          "relative": "verification-roadmap-coordination-r2.diff",
+          "bytes": 24131,
+          "sha256": "10f758efaeedc4319c3f5b504f5ceffcf7c20a4e6e2e47dea16740e210c0cd30"
+        },
+        {
+          "relative": "verification-start-r2.json",
+          "bytes": 254920,
+          "sha256": "0a74b244a9959d35a76463dcca7f0dc9b6f201596318991cd4ed88c6a40704cd"
+        }
+      ],
+      "path_exists_after_cleanup": false
+    }
+  ],
+  "dependency_checks": {
+    "outside_bundle_repository_references": "rg exact-path search returned no matches (exit1)",
+    "open_handles": "lsof -nP +D on both exact roots returned exit1 with no output",
+    "created_runtime_resources": [],
+    "symlinks_or_nonregular_files": false
+  },
+  "integrity_scope": "Archive and cleanup integrity only; no new QA, builds, runtime tests, API, DB, PLC, dependency, Git commit/push or code changes",
+  "preserved_records": "r1 full histories and original verdicts remain in spec/tasks/checklist; complete supporting files and both r1/r2 delivery snapshots remain in the verified archive",
+  "cleanup": {
+    "status": "completed",
+    "removed_files": 49,
+    "removed_directories": 2,
+    "verified_archive_retained": true,
+    "completed_at_utc": "2026-10-21T07:32:38.411203+00:00",
+    "removal_method": "Only inventoried regular files under the two exact owned roots; directories removed only when empty; no wildcard or unrelated cleanup",
+    "pre_removal_open_handle_checks": [
+      {
+        "path": "/private/tmp/aiis-aw007-doc-sync-20261020-gz1hgdga",
+        "exit_code": 1,
+        "output": ""
+      },
+      {
+        "path": "/private/tmp/aiis-aw007-r2-doc-sync-20261020-xbp7s_1j",
+        "exit_code": 1,
+        "output": ""
+      }
+    ]
+  }
+}

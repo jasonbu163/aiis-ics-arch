@@ -1,56 +1,55 @@
 # DS 设备模拟器详细设计
 
-内容修订：2026-10-18（Asia/Shanghai）· `ARCH-AW-004 r2`。本文件交付首版目标设计；范围批准见 [spec](../plans/ARCH-AW-004-ds-detailed-design/spec.md)，实施核对与文档自检见 [Development 记录](../plans/ARCH-AW-004-ds-detailed-design/tasks.md)。本文不记录本r2独立QA verdict或Human Owner最终验收。r1原正文367行SHA-256为`77216e4233c0b3c0a06fe624d93fee7f826a1a26e5f0bf497f58498aff4bd94c`，其交付/独立文档qa_passed与终验pending保留在任务角色历史；r2重新核验整版R1–R23/AC1–AC29，不继承r1结论。此次已采纳一次性hold维护写和preserve_compatible_hold推荐，所有连接/负载/时延/资源数值都是已批准设计目标，尚非实测能力。
+内容修订：2026-10-21（Asia/Shanghai）· `ARCH-AW-005 r5`产品MVP设计/实施增补（当前实施中，未授QA或Owner终验）；原`ARCH-AW-004 r2`已验收快照SHA `0eb3c149bf7093bbdce2f0b7a07af71e769fe24cb04a542c7f4dc43e6979eecb`保持历史效力。005范围与实现/验证归[005 spec](../plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md)及[005 tasks](../plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md)，不倒记为004旧QA。本文件交付首版目标设计；范围批准见 [spec](../plans/ARCH-AW-004-ds-detailed-design/spec.md)，实施核对与文档自检见 [Development 记录](../plans/ARCH-AW-004-ds-detailed-design/tasks.md)。本文不记录本r2独立QA verdict或Human Owner最终验收。r1原正文367行SHA-256为`77216e4233c0b3c0a06fe624d93fee7f826a1a26e5f0bf497f58498aff4bd94c`，其交付/独立文档qa_passed与终验pending保留在任务角色历史；r2重新核验整版R1–R23/AC1–AC29，不继承r1结论。此次已采纳一次性hold维护写和preserve_compatible_hold推荐，所有连接/负载/时延/资源数值都是已批准设计目标，尚非实测能力。
 
 <a id="boundary"></a>
 ## 1. 定位、依据与效力
 
-DS（Device Simulator）是 Tauri 管理的本地开发、测试、联调工具，首版只模拟多个独立 S7 设备实例。DAA 可以读取模拟值，测试客户端可以向明确允许的字段写入；这些结果只证明模拟链路，不代表真实 PLC、联锁、生产控制或物理动作。DS 不成为 DAA/SMA/CA 的生产依赖，不引入中央 Backend、账号权限服务、流程 runtime 或低代码画布。
+DS（Device Simulator）定位独立S7 PLC模拟器，AW仅工程归属，运行不依赖DAA/SMA/Backend；可供经有限profile实证的其它兼容S7程序使用。完整产品推荐Tauri管理，r4曾从DAA固定白名单派生最小Tauri/Vue骨架；r5已批准从196份冻结DAA输入复用适用壳、控件与五枚图标，实现六页产品MVP，桌面与非默认测试宿主共用同一Rust runtime。DS是本地开发、测试、联调工具，首版只模拟多个独立 S7 设备实例。DAA 可以读取模拟值，测试客户端可以向明确允许的字段写入；这些结果只证明模拟链路，不代表真实 PLC、联锁、生产控制或物理动作。DS 不成为 DAA/SMA/CA 的生产依赖，不引入中央 Backend、账号权限服务、流程 runtime 或低代码画布。
 
 本设计承接已验收的 [AW 白皮书](AIIS_AW_Whitepaper_Roadmap_v0.4.md)、[AW Runtime DS 章节](AIIS_AW_Runtime_Design.md#ds) 和 [DAA 详细设计](AIIS_DAA_Detailed_Design.md)。这些正文保持原样；本任务不重开 ARCH-AW-002/003。DB 编号、DB 数量、名称、地址与区域均由用户编辑；示例编号只是说明，不构成 DB10/DB11 或固定两个 DB 的拓扑。
 
 | 本文标记 | 含义 |
 | --- | --- |
-| 当前事实 | 2026-10-18 只读检查的工作树源码、角色记录或官方资料；DAA 并发变化，实施前重新固定字节。 |
-| 首版决定 | 本版具体行为合同，供未来独立批准的实施任务引用；尚未实现。 |
+| 当前事实 | 004的2026-10-18历史快照、005 r4的2026-10-20冻结输入和§14 r5的2026-10-21冻结输入分层；新候选实际状态/指纹以005 tasks为准。 |
+| 首版决定 | 本版具体行为合同；r5仅实现其批准的产品MVP子集，实际未测项仍保留gate。 |
 | 推荐机制 | 满足行为合同的最小工程方案；可在实施规格中确定代码组织。 |
 | 原型 gate | 库、协议或原生行为尚无充分证明；必须先出运行证据，不能由本次文档检查替代。 |
 | 后续范围 | Modbus、响应/握手/状态机/延迟响应、持久运行值、后台守护、生产托管；不预建空壳。 |
 
-首版决定包括：配置保存与运行应用分开；每实例只有一个内存提交 owner；所有写来源（含显式一次性维护）在提交前做权限和地址检查；同进程停止保留值，跨进程重开初始化且停机；持续规则与可写字段不得争抢所有权。一次性hold维护默认关闭且不接管持续owner；日志介质故障只降级可观察性，apply用单SQLite选择事务而无持久分阶段journal。服务核心语言留给首个原型gate，但不影响行为确定。
+首版决定包括：配置保存与运行应用分开；每实例只有一个内存提交 owner；所有写来源（含显式一次性维护）在提交前做权限和地址检查；同进程停止保留值，跨进程重开初始化且停机；持续规则与可写字段不得争抢所有权。一次性hold维护默认关闭且不接管持续owner；日志介质故障只降级可观察性，apply用单SQLite选择事务而无持久分阶段journal。004当时把服务核心语言留给首个原型gate；005 r4已固定Rust业务runtime与native Snap7协议适配，具体候选证据见§13，不改变上述行为。
 
 <a id="reuse"></a>
 ## 2. 当前 DAA/CU 证据与复用分工
 
 ### 2.1 检查时状态
 
-本节固定r2读时快照为 **2026-10-18 19:54:59 +08:00**，相关37文件完整副本与指纹归本任务Development记录。后续并发进展不自动改变此快照，实施前需重新核对；r1的17:40:28快照保留为历史。
+本节005 r4固定输入为2026-10-20已Owner接受的DAA-006 r3，清单[accepted-source-manifest](../automation-world/data-acquisition-agent/plans/DAA-006-point-naming-and-import-reuse/evidence/accepted-source-manifest.json) SHA `8d9d62457baa32aac8134df77773ea5cae23a0401e403ef1d4c267cdafc02ee7`，60/61文件按工作树字节校验，CODE_INDEX为允许的DS导航差异，其余技术输入固定；不是仅凭HEAD/tag。DAA-006独立AC01–AC20、另行DIRECT UI与Owner接受分层；旧004读时DAA-002在研/QA失败快照是历史，不作当前共享能力依据。CU既有公共出口仍按其接受范围消费。
 
-[DAA PLAN](../automation-world/data-acquisition-agent/PLAN.zh-CN.md)、[DAA-001 checklist §7](../automation-world/data-acquisition-agent/plans/DAA-001-cu-layout-migration/checklist.md) 与 [CU-008 checklist §7](../automation-world/console-ui/plans/CU-008-grouped-sidebar-navigation/checklist.md) 仍确认DAA-001 Stage A及CU-008分组导航已于2026-10-17 owner_accepted，范围有限，不代表DS服务能力。
-
-[DAA-002 checklist](../automation-world/data-acquisition-agent/plans/DAA-002-local-acquisition-loop/checklist.md) 当前为 **qa_failed**：首轮独立核验F-001/AC14缺少保护清理反例，F-002/AC15维护写未按当前空间/journal准入。[DAA-002 tasks §9](../automation-world/data-acquisition-agent/plans/DAA-002-local-acquisition-loop/tasks.md) 当前为implementation_in_progress，正在同r2返工；先前完整developer_handoff、原生保存/重开、76份fixture原样本与Owner观察保留，但不得把旧handoff/自检当最新已通过。新的handoff、fresh QA与Owner终验待续；本版不重测或修改DAA。其维护实现即使已在工作树变化，也只是未重新验收的私有能力；DS不复用采样清理或双库恢复机制。
+共享`aiis-tia-import-core`0.1.0/std-only/Rust2021/publish=false已成为可直接path消费纯能力：scan_sources、expand_db、layout_standard、plan_names、validate_manual_name、type_suffix；profiles/fixtures v1固定。它不拥有DS稳定ID、来源版本、确认地址、初值/encode/存储/runtime。r4 G0仅因真实DAA domain闭包编译消费core，不是当时的DS产品导入实现。r5已单独批准D1产品消费者：正式source_import/layout/naming服务直接消费六API，以固定v1样例/oracle验证；不fork命名/parser/expected。
 
 ### 2.2 可复查矩阵
 
-表中路径均相对仓根；链接进入实际源码。下文简称 DAA=`automation-world/data-acquisition-agent/`，CU=`automation-world/console-ui/`。只有 CU 公共出口列为可直接消费；“适配”指以后独立任务复制最小模式或先抽取纯能力，不在本任务改 DAA。
+表中路径均相对仓根；链接进入实际源码。下文简称 DAA=`automation-world/data-acquisition-agent/`，CU=`automation-world/console-ui/`。CU公共出口和已验收共享core纯API可直接消费；“适配”指以后独立任务复制最小模式或先抽取纯能力，不在本任务改 DAA。
 
 | 主题与实际路径/符号 | 当前事实、限制 | DS 复用等级与后续 gate |
 | --- | --- | --- |
+| [shared/tia-import-core/src/lib.rs](../automation-world/shared/tia-import-core/src/lib.rs)：`scan_sources/expand_db/layout_standard/plan_names/validate_manual_name/type_suffix` | DAA-006已接受0.1.0、std-only、profiles/fixtures v1；受限完整声明树、无环UDT/一维数组；含STRING整DB拒推，无初值/encode/稳定ID/存储。 | **直接消费**固定path crate与v1样例/oracle；DS在D1另验消费者身份、确认/CAS、完整namespace及重导入，不fork parser/命名/expected。 |
 | [CU src/ui/index.ts](../automation-world/console-ui/src/ui/index.ts)：`AgentLayout`、`AgentSidebar`、`AgentTopbar`、`ConsoleCard`、`ConsoleActionButton`、`StatusCapsule`、`ThemeToggle`、`LanguageSwitch`、`NavigationItem/NavigationChildItem` | 唯一公共源码出口；CU-008 已验收一级分组/二级叶导航；无业务/IPC/偏好启动副作用。 | **直接消费**公共出口及 [styles/index.css](../automation-world/console-ui/src/ui/styles/index.css)，编译期固定 Git ref 或工作树完整 manifest；未来做 DS 构建和主题/语言/导航核验。无需 CU 在线。 |
 | [DAA vite.config.ts](../automation-world/data-acquisition-agent/vite.config.ts)、[App.vue](../automation-world/data-acquisition-agent/src/App.vue)、[ConsoleCard.vue](../automation-world/data-acquisition-agent/src/components/console/ConsoleCard.vue) | `@aw-ui`/`@aw-ui-styles` 指向公共源，Vue/Element Plus 等 dedupe；宿主负责翻译、theme scope、dialog 挂载、状态。DAA-001 只接受其集成。 | **适配**消费模式；DS 用自身依赖/locale/偏好 `ds.theme`、`ds.locale`，不复制 CU 私有 workbench 或开发写入通道。 |
-| [DAA src/app/plc/views/points/index.vue](../automation-world/data-acquisition-agent/src/app/plc/views/points/index.vue)：`confirmImport`、`confirmOffsets`、`editLocalPoint`；[diagnostics/index.vue](../automation-world/data-acquisition-agent/src/app/plc/views/diagnostics/index.vue) | 当前私有页面有导入差异、完整树、人工地址与单点弹窗、PLC 编辑；来源是 DAA-002 QA失败返工中的私有代码。其采集组、诊断读取与只读 DB 结构假设不适合直接照搬 DS。 | **适配**页面流程和确认反馈；DS 独立支持手工增删 DB/点位、策略/内存操作，不能只复用 DAA 页就宣称满足。未来逐页 UI/native gate。 |
+| [DAA src/app/plc/views/points/index.vue](../automation-world/data-acquisition-agent/src/app/plc/views/points/index.vue)：`confirmImport`、`confirmOffsets`、`editLocalPoint`；[diagnostics/index.vue](../automation-world/data-acquisition-agent/src/app/plc/views/diagnostics/index.vue) | 当前私有页面有导入差异、完整树、人工地址与单点弹窗、PLC 编辑；该页面模式原取自004的2026-10-18 DAA-002 QA失败返工快照；005当前共享依据为已接受DAA-006固定清单，页面仍是DAA私有适配参考。其采集组、诊断读取与只读 DB 结构假设不适合直接照搬 DS。 | **适配**页面流程和确认反馈；DS 独立支持手工增删 DB/点位、策略/内存操作，不能只复用 DAA 页就宣称满足。未来逐页 UI/native gate。 |
 | [DAA src/services/localAcquisition.ts](../automation-world/data-acquisition-agent/src/services/localAcquisition.ts)：`localCall`、DTO、`LocalCommandError`；[useLocalAcquisitionConsole.ts](../automation-world/data-acquisition-agent/src/console/composables/useLocalAcquisitionConsole.ts)：`saveCandidate/importSources/infer/activate` | 页面注入 `localConsoleKey`，调用 `localCall` → `invoke(command,{request})`；本地模式 gate、CAS 错误、单 owner 与最多 1Hz 刷新。 | **适配**IPC facade/错误/页面 owner 模式，定义 DS 命令与 DTO；不直接调用 `daa_*`，不依赖 DAA 进程。 |
 | [DAA commands/local_acquisition.rs](../automation-world/data-acquisition-agent/src-tauri/src/commands/local_acquisition.rs)：`dispatch` → [services/local_configuration.rs](../automation-world/data-acquisition-agent/src-tauri/src/services/local_configuration.rs) `LocalEngine::{save,import,offsets,confirm_offsets}` | 薄 command、严格 DTO；服务缓存与 ETag/源摘要绑定的预览再确认，`protect_derived` 阻止普通保存伪造来源树/哈希。 | **适配**服务边界和两步导入；DS 编辑操作产生独立“手工结构”来源，不能放宽 DAA 派生字段保护或冒充 TIA 证明。 |
-| [DAA infrastructure/tia_source.rs](../automation-world/data-acquisition-agent/src-tauri/src/infrastructure/tia_source.rs)：`Parser::{kind,fields,blocks}`、`expand/expand_kind`、`import` | 受限声明树、内联 Struct、无环 UDT、一维常量数组；未知 header/类型定位报错；非完整 TIA 编译器。`fields` 跳过声明 `:=`，`blocks` 跳过 `BEGIN` 至 `END_DATA_BLOCK`，均不产生初值模型。 | **需抽取/适配**纯 parser 和诊断，先冻结来源、定义稳定纯接口及夹具；不是已发布公共 crate。必须保留初值未导入提示，初值解析另做明确能力。 |
-| [DAA infrastructure/plc_layout.rs](../automation-world/data-acquisition-agent/src-tauri/src/infrastructure/plc_layout.rs)：`preview/confirm` | 只接受 `complete && flat` 的完整标准 DB；按树顺序分配标量、BOOL 位、字对齐；不推算 UDT/数组/STRING；人工地址受保护。 | **需抽取/适配**受限辅助预览；不得由选中叶点猜完整布局；DS 自身增加地址/策略 bit coverage 校验。需 TIA 标准布局黄金夹具。 |
+| [DAA infrastructure/tia_source.rs](../automation-world/data-acquisition-agent/src-tauri/src/infrastructure/tia_source.rs)：`Parser::{kind,fields,blocks}`、`expand/expand_kind`、`import` | 受限声明树、内联 Struct、无环 UDT、一维常量数组；未知 header/类型定位报错；非完整 TIA 编译器。`fields` 跳过声明 `:=`，`blocks` 跳过 `BEGIN` 至 `END_DATA_BLOCK`，均不产生初值模型。 | **历史适配参考**；005已接受path core0.1.0（publish=false）是当前直接消费面，不等待再次公共抽取；旧私有parser不作共享出口。必须保留初值未导入提示，初值解析另做明确能力。 |
+| [DAA infrastructure/plc_layout.rs](../automation-world/data-acquisition-agent/src-tauri/src/infrastructure/plc_layout.rs)：`preview/confirm` | 旧DAA私有plc_layout的flat-only快照；005转用已接受共享layout_standard，需完整非优化受限标准树；按树顺序分配标量、BOOL 位、字对齐；共享core现可推受限UDT/一维数组，含STRING整DB仍拒推；人工地址受保护。 | **历史适配参考**；当前直接消费共享layout_standard，不等待抽取；不得由选中叶点猜完整布局；DS 自身增加地址/策略 bit coverage 校验。需 TIA 标准布局黄金夹具。 |
 | [DAA domain/local_configuration.rs](../automation-world/data-acquisition-agent/src-tauri/src/domain/local_configuration.rs)：`Configuration/SourceDocument/FieldNode/Db/Point/Address/width/validate` | 稳定 ID、完整来源、类型宽度/地址检查；其中采集组、限额、PLC 客户端字段是 DAA 专用。 | **适配**值对象/校验模式，重建 DS instance/region/policy/initial 配置；不把 DAA schema 当公共 DS schema。 |
 | [DAA infrastructure/local_decode.rs](../automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_decode.rs)：`decode` | 已有有限 REAL、大端数、BOOL、ASCII CHAR/STRING 解码；没有服务端 encode/准入合同；其失败 null/quality 为采集事实。 | **需抽取/适配**类型宽度/解码，独立实现编码、范围校验和往返黄金字节；DAA decode 不是 DS server encode 或协议写入证明。 |
-| [DAA infrastructure/local_store/README.md](../automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/README.md)、[configuration.rs](../automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/configuration.rs)、[services/local_activation.rs](../automation-world/data-acquisition-agent/src-tauri/src/services/local_activation.rs)：`LocalEngine::activate` | 双库配置revision/ETag、prepare/select/install/finish、停止意图恢复；QA失败返工中，强耦合样本上下文与维护容量。 | **适配模式**，DS用自身单配置库、selection事务与进程内loaded事实，不引入持久apply journal，不复制双库、既定SQLite版本或DAA容量合同；DS 依赖版本与故障恢复需独立审查。 |
+| [DAA infrastructure/local_store/README.md](../automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/README.md)、[configuration.rs](../automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/configuration.rs)、[services/local_activation.rs](../automation-world/data-acquisition-agent/src-tauri/src/services/local_activation.rs)：`LocalEngine::activate` | 双库配置revision/ETag、prepare/select/install/finish、停止意图恢复；004的2026-10-18记录为QA失败返工快照，不能作为2026-10-20当前状态；这些存储模式强耦合样本上下文与维护容量。 | **适配模式**，DS用自身单配置库、selection事务与进程内loaded事实，不引入持久apply journal，不复制双库、既定SQLite版本或DAA容量合同；DS 依赖版本与故障恢复需独立审查。 |
 | [DAA services/local_queries.rs](../automation-world/data-acquisition-agent/src-tauri/src/services/local_queries.rs)：`snapshot/logs`；[infrastructure/local_logging.rs](../automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_logging.rs)：`LocalLog` | 快照缓存 1 秒，有界查询和 JSON Lines 轮转；当前私有审计字段不覆盖 DS 协议写入。 | **适配**快照节流/分页/轮转模式，补 DS instance/epoch/item result；不复制采样历史/outbox。 |
 | [DAA infrastructure/managed_s7.rs](../automation-world/data-acquisition-agent/src-tauri/src/infrastructure/managed_s7.rs)：`Transport`、`ManagedS7::{connect,read,read_bounded}` | 客户端明确设置 `RemotePort`、rack/slot 和超时；源码有 owned loopback 测试，但本任务没有重跑。 | **不作服务端复用**；未来作为 DS 联调客户端，验证非102端口/TSAP/长连接/错误返回。客户端不是 server，也不证明 DS 兼容所有驱动。 |
 | [DAA services/local_scheduler.rs](../automation-world/data-acquisition-agent/src-tauri/src/services/local_scheduler.rs)、[local_storage.rs](../automation-world/data-acquisition-agent/src-tauri/src/services/local_storage.rs)、[local_store/runtime.rs](../automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/runtime.rs) | 采集、DB 包/样本、source sequence、pending/历史为 DAA 领域；Stage C 上传尚未纳入本地闭环。 | **不适用**DS；规则调度、内存、日志独立设计，不增加采样库/补传器/业务 API。 |
 
-公共提取不是首版前置的大重构。实施时先固定 DAA 读时版本与纯 parser/type 夹具，评估双方真实收益；有收益才另批准共享抽取，并给 DAA 回归与负责人。没有公共包时 DS 可以在独立授权范围适配最小纯能力，明确来源和差异，不把 DAA 工作阻塞在共享发布上。
+004在2026-10-18曾将公共提取列为后续独立评估；该历史建议已由005固定的DAA-006共享core接受事实推进，不再作为当前DS消费的前置。当前直接消费已固定的path core，DS只适配消费者身份/存储/确认职责，明确来源和差异，不把 DAA 工作阻塞在共享发布上。
 
 <a id="architecture"></a>
 ## 3. 组件与配置、控制、内存数据流
@@ -225,7 +224,7 @@ apply前逐点列“保留/初始化/删除”及原因、规则时钟影响，�
 1. 选择实例，新增任意数量（上限内）的 DB，编辑唯一 DB 号、名称、长度；也可多选 `.db` TIA 文本与其全部 `.udt`。`.db` 不是 SQLite 数据文件，UI 必须显式区分。
 2. 服务保存源完整内容、来源摘要、导入器版本、声明树、UDT引用及行号诊断；给新增/删除/类型/树/地址/初值确认失效差异。先预览，用户确认后才保存候选；不自动应用或开始监听。
 3. 展示完整树及叶点，用户可新增手工DB/点、改DB号/名称/点显示名、offset/bit、类型和来源说明。导入结构只经重导入或显式“转为手工编辑”修改；后者保留原源但派生结构不再声称源一致。
-4. 地址辅助必须手动触发并针对完整DB；显示原值、建议值、长度与人工保护，再逐项确认。只支持完整平铺标准标量。复杂结构需用户依据TIA标准非优化绝对地址逐叶手工确认，并附依据；确认是人工审核，不是布局引擎证明。
+4. 地址辅助必须手动触发并针对完整DB；显示原值、建议值、长度与人工保护，再逐项确认。只支持完整非优化标准树（含受限STRUCT/UDT/一维数组，STRING整DB拒推）。复杂结构需用户依据TIA标准非优化绝对地址逐叶手工确认，并附依据；确认是人工审核，不是布局引擎证明。
 5. 全部启用点地址确认、边界/重叠、初值与策略校验通过，再保存并在stopped显式apply。运行中结构修改只形成草稿/新revision，旧loaded image保持，不能原地改DB内存大小。
 
 ### 6.2 首版支持矩阵
@@ -233,7 +232,7 @@ apply前逐点列“保留/初始化/删除”及原因、规则时钟影响，�
 | 形态 | 当前DAA证据 | DS首版处理决定 |
 | --- | --- | --- |
 | 标准非优化DB，完整平铺BOOL、BYTE/USINT/CHAR、INT/UINT/WORD、DINT/UDINT/DWORD、REAL | parser/width/受限layout支持；REAL解码有限，CHAR ASCII。 | 接受完整声明与手工编辑；辅助推算需完整树与用户确认，编码黄金夹具待做。SINT/时间类不默认为支持。 |
-| 内联Struct、已提供且无环UDT、单维常量数组（包括展开后的支持叶） | parser保存父节点/引用/边界，缺定义/循环/嵌套数组拒绝；有深度/叶上限。 | 接受受限结构树，**不自动推算地址/步长**；每叶人工确认地址与DB长度后才可应用。不能把UDT名当连续字节编码。 |
+| 内联Struct、已提供且无环UDT、单维常量数组（包括展开后的支持叶） | parser保存父节点/引用/边界，缺定义/循环/嵌套数组拒绝；有深度/叶上限。 | 接受受限结构树，可手动调用共享layout_standard获得理论叶地址/长度预览，显式确认后才应用；STRING叶存在则整个DB拒推。stride只据返回叶展示，不另造规则。不能把UDT名当连续字节编码。 |
 | STRING[n]，1≤n≤254 | DAA width=n+2、ASCII与S7双字节长度头解码；layout不推算。 | 可接受声明，人工确认全包地址/长度；typed初值/规则encode需独立gate。首版拒WSTRING/Unicode扩展，不截断后称成功。 |
 | 缺UDT、循环UDT、未知语法、动态/多维/嵌套数组、FB/实例DB、AT/指针/ANY/VARIANT、LREAL/LINT/ULINT、TIME/DATE/WCHAR/S5TIME等 | 当前受限parser拒绝或无法建立完整布局。 | 诊断到文件/行/路径，拒绝相应DB应用；不能忽略字段后称完整。可另建明确手工测试DB，但不继承导入完整证明。 |
 | 优化DB或优化标记未知 | parser拒绝optimized或unknown标准性；绝对布局无据。 | 拒绝导入为可应用DB；要求提供标准非优化完整资料。不得仅手填几个offset绕过优化DB拒绝。 |
@@ -381,6 +380,8 @@ reserved/padding默认读零、禁止全部写来源，读取权限可收紧；�
 
 ### 10.1 已有证据与不足
 
+本节保留004于2026-10-18的候选比较与原型要求；其中语言待选、wrapper/FFI待核是该时点的状态。当前005 r4的获批路线已固定为Rust唯一业务runtime与受控native Snap7，实际B0/协议/原生结果只归005 tasks与后续checklist，不能从本历史表推定当前仍待选语言或已通过。
+
 2026-10-18只读参考外部工程 `/Users/jason/Desktop/DreamCode/vibe-l2-front-end/tools/plc/s7-virtual-plc/src-python/core/runtime.py`：`refresh_areas`逐tick调用`simulated_value`和`write_value`，可借鉴fixed/random/wave等规则和类型写入，不证明写入保持或服务端写保护。其同目录 `strict_server.py` 的 `StrictServerISOConnection._parse_cotp_cr`检查called TSAP，`StrictTsapServer._handle_client`随后使用继承的`_process_request`；“strict”指连接协商，不是写前权限。外部 `tools/pyproject.toml`声明`python-snap7>=3.0,<4`及Python范围，不是DS精确锁定版本，也不证明本地安装版本/行为。本任务未导入该库或运行工具。 本仓库也有同路径 [runtime.py](../tools/plc/s7-virtual-plc/src-python/core/runtime.py) 与 [strict_server.py](../tools/plc/s7-virtual-plc/src-python/core/strict_server.py)，本次逐字节比较与上述外部两文件相同；这里只作为可定位参考，不把它们的行为写成DS实现。
 
 官方 [python-snap7 3.2.1 Server API](https://python-snap7.readthedocs.io/en/3.2.1/API/server.html#snap7.server.Server.set_rw_area_callback) 将 `set_rw_area_callback`注明为兼容C API的stub；该版本页面证据不足以证明本地任意3.x可拦写。官方 [native Snap7 resourceless servers](https://snap7.sourceforge.net/res_servers.html) 描述自1.4.0的按请求回调及地址/大小/WordLen；它与Python同名API不能等同，回调失败码、真实PDU回执与同步内存边界仍须核冻结实现和原型。上述资料于2026-10-18读取，不能由理论接口名推导保护已有效。
@@ -413,7 +414,7 @@ reserved/padding默认读零、禁止全部写来源，读取权限可收紧；�
 | 同端口或wildcard冲突/重复start | 后启动者明确failed，无抢占/改端口/第二listener，原实例可读；OS listener与操作日志 | Runtime + QA，D2 |
 | 完整DB/无环UDT/一维数组 | 完整树/叶数/来源摘要与黄金夹具相符；复杂地址须逐叶确认 | Parser + QA，D1 |
 | 缺UDT/循环/未知/优化或不支持类型 | 定位诊断、不可apply，不出现partial“完整”标记；失败夹具与服务响应 | Parser + QA，D1 |
-| 完整平铺推算/手工复杂地址 | 完整顺序/对齐向量、手工地址不被覆盖；只选叶不能推完整布局 | Parser + QA，D1 |
+| 完整受限标准树推算/手工复杂地址 | 完整顺序/对齐向量、手工地址不被覆盖；只选叶不能推完整布局 | Parser + QA，D1 |
 | 重导入/类型/DB号/地址改变 | 受影响地址/初值/策略确认失效，旧值仅候选；新点默认、删点引用可见 | 配置/UI + QA，D1/D3 |
 | TIA声明/BEGIN初值 | 页面警示未导入；无DS初值用类型默认，有明确初值优先，绝不误用跳过文本 | Parser/UI + QA，D1/D3 |
 | 自动数值变化/自动区拒写 | 多时刻变化，client write真实失败且image不变；raw协议/字节/hash | Runtime/协议 + QA，G0/D2 |
@@ -463,8 +464,8 @@ L4/L5的预期失败与吞吐下降也要保留逐连接分母、原因、trace/
 
 | 阶段 | 后续独立实施范围与退出gate |
 | --- | --- |
-| G0 技术原型 | 先证明server写前拒绝、单owner内存/item回执与DAA自定义端口；决定服务核心与库版本、进程边界。失败先换候选评审，不开展宣称保护成立的产品实现。 |
-| D1 配置与纯能力 | DS身份/profile、单配置SQLite/CAS/revision/selection事务和兼容清单、DB/UDT纯parser适配、手工编辑/确认与policy编译；用纯夹具与故障注入核对，不扰动DAA。公共提取另议。 |
+| G0 技术原型 | 先证明server写前拒绝、单owner内存/item回执与DAA自定义端口；005 r4已固定Rust业务核心/native Snap7与进程内边界，实际适用性仍由该任务证据核验。失败先换候选评审，不开展宣称保护成立的产品实现。 |
+| D1 配置与纯能力 | DS身份/profile、单配置SQLite/CAS/revision/selection事务和兼容清单、共享core六API的DS消费者适配、手工编辑/确认与policy编译；用纯夹具与故障注入核对，不扰动DAA。不等待新的公共抽取。 |
 | D2 最小运行核心 | 多实例连接生命周期/C/H/TCP计数、有限队列/输出预留/公平/期限/单item屏障、普通与维护CAS、fixed无变化、兼容保留/幂等、日志降级；协议和并发矩阵独立验证。 |
 | D3 管理UI与原生闭环 | CU公共消费、各配置页/连接面板/在线维护/日志降级、保留影响确认与explicit apply、Tauri退出及sidecar如选；中英/主题/原生保存重开，不以浏览器fallback作证明。 |
 | D4 有界联调与交付核验 | 固定DAA/测试客户端版本跑模拟链路、类型/PDU、L1/L2必测与L4/L5；L3仅独立扩展profile批准后探索；记录支持矩阵、限制和退出资源。发布/部署/真实设备验证另批准。 |
@@ -494,4 +495,95 @@ L4/L5的预期失败与吞吐下降也要保留逐连接分母、原因、trace/
 | R19，AC24 | §7 fixed无变化、§8提交结果与§9日志降级/故障分类 |
 | R22，AC27 | §4.4九场景保留/影响清单/确认/typed重编码/失败；§4.3重试与恢复 |
 
-本文是详细设计，不替代`contracts/`公开合同、获批任务spec或真实运行手册。本轮只交文档与只读证据，未创建DS工程/数据库/配置，未改DAA/CU/SMA/CA/Backend，未安装/构建/启动或连接。协议拒写/维护CAS、编码、连接/队列公平/输出预算、L1–L5容量、native/sidecar可用性、退出资源与跨平台行为均保留后续原型/实施gate。设计文档核验也不代表软件通过或最终Owner验收。
+本文是详细设计，不替代`contracts/`公开合同、获批任务spec或真实运行手册。004文档任务在其交付时只交文档与只读证据，004交付时未创建DS工程/数据库/配置，未改DAA/CU/SMA/CA/Backend，未安装/构建/启动或连接。协议拒写/维护CAS、编码、连接/队列公平/输出预算、L1–L5容量、native/sidecar可用性、退出资源与跨平台行为均保留后续原型/实施gate。设计文档核验也不代表软件通过或最终Owner验收。
+
+<a id="005-design-refresh"></a>
+## 13. 005 r4共享消费、身份、编码和实施边界增补
+
+本节及§2/§6刷新依据005 r4独立批准，保持004所有权/维护CAS/配置与值语义，更新已过时flat-only复用限制；产品D1–D4仍另批。004原497行/原接受记录不倒写。
+
+
+本节具体补全§2复用、§6导入、§4配置/保值及§9动作/§10–11实施分层。本次同步同一canonical设计正文：以005 r4标识新依据，保持004已验收行为与历史，不伪称旧004 QA验证了新增部分；docs索引只改DS行，CODE_INDEX只增真实G0结构。无新设计正文副本、无004 bundle修改。
+
+**多文件/多DB和身份流程**：选择目标instance -> 读所选公开或用户授权的.db/.udt原UTF-8字节并建source lineage/version/hash -> scan_sources一次catalog枚举多个DATA_BLOCK/TYPE及诊断 -> 用户逐DB明确UDT DeclarationRef闭包 -> expand_db -> 每DB显式绑定(instance_id, memory_region_id, db_id, db_number, length) -> 地址/命名/初值/策略预览 -> 用户确认后仅保存候选revision -> stopped显式apply，start独立。memory_region为该DB唯一image区域，area=DB；policy_region是该DB内bit子区间，二者身份分开，不把一份DB隐式拆成别的端口/DB。
+
+DeclarationRef(input_id,declaration_index)只在本catalog定位，**不是跨重导稳定ID**。DS持有稳定source_lineage_id、不可变source_version_id、DB lineage/db_id、point_id及结构化Field/Index叶身份，DB号/端口/文件名/文件序号均非主键。一个文件可有多DB，每DB独立目标/编号；同instance DB号唯一，UDT可被多个DB引用但各DB固定其source version闭包。重复原字节在同lineage/映射/闭包下为unchanged预览，不生成第二组ID或重复DB；相同内容但新lineage/同名声明有歧义时须显式选择，不能按序号、同名或hash自动合并。
+
+重导入先preview/CAS（expected saved etag+输入hash/闭包+一次性token），显示新增/删除/类型/结构/地址/DB号和引用影响，confirm前不写。仅注释/显示变化且结构/类型/地址/effective policy一致可保留ID/DS初值和确认依据；结构化路径/类型/DB号/长度/地址改变取消受影响地址/初值/策略确认，旧初值仅候选，不强转/截断。移除项列受影响规则/策略，确认前不删；同名UDT新版本不污染仍绑定旧版的DB。运行中仅产生saved候选，禁止直接改变loaded布局，停止/资源释放后才能apply。
+
+**地址与命名**：将004“flat-only、UDT/数组不推算”刷新为core当前支持的**完整非优化标准树**，可对受限嵌套STRUCT、无环UDT、一维常量数组（负/非零下界）调用layout_standard提供理论预览；优化/未知标准性、不完整/缺失/循环UDT/未知类型/多维或嵌套数组拒绝。STRING叶可解析，含STRING的**整个DB不推算**，全部地址需有明确人工依据，不跳过STRING猜其后地址。只选若干叶不能推整DB。实际LayoutPlan只返回leaves{path,byte,bit}与length；padding由DS完整coverage列为reserved，数组stride只能据已返回叶布局展示，不另造推算规则或声称API返回stride。始终由DS校边界/全bit coverage、保护人工地址并让用户显式确认模型/摘要/依据；ConfirmedAddress由消费者负责，不能把oracle或建议写成已确认/实际PLC地址。
+
+core扫描预算≤128输入、单文件1MiB/批次4MiB、展开深度8/数组1024/4096叶；DS另外聚合检查既有每instance≤32DB/4096叶及最多8instance目标，不能每DB各4096累乘。DB长度1–65536、编号1–65535，BOOL位0–7、标量不得带bit、checked算术及末端边界，BOOL不同bit合法，任何同bit/标量别名重叠拒绝，padding reserved默认读零/禁写。
+
+技术名统一调用plan_names，**每个instance一次完整NameBatch**，包含全部DB、未选/停用/legacy/手工保留名；只对可变选中项应用结果，不能逐DB分批逃过碰撞。用真实结构化segments，不拆sourcePath字符串；type_suffix/validate_manual_name保持core规则及1–100 ASCII bytes，名称冲突按core原字符串比较，不自行casefold。数组/非ASCII/扁平碰撞无法命名可pending，地址经DS确认后再由同core一次地址兜底，不造另一套拼名规则；pending不能作为可应用启用点。DS消费者要在D1用原v1样例/oracle及完整namespace碰撞、重导/身份case独立验收，不改expected来迎合实现。
+
+**初值/编码**：core跳过:=和BEGIN赋值；常驻提示“仅结构，TIA初值未导入”。DS typed初值缺省BOOL=false、整数/REAL=0、CHAR=NUL、STRING空串（max=n/actual=0，其余零）；显式DS输入优先，未经类型/范围/用户确认不能apply。BYTE/USINT 0..255、WORD/UINT 0..65535、DWORD/UDINT 0..4294967295，INT -32768..32767、DINT -2147483648..2147483647；多字节大端，REAL为有限IEEE754 f32、转换溢出拒绝，BOOL只更新对应mask不写邻位。CHAR限ASCII单byte（NUL默认合法），STRING[1..254]全n+2包/max头/actual≤n/ASCII/确定零填充，拒WSTRING、非ASCII、截断/超长、部分包与部分多字节标量。类型黄金字节/roundtrip和错误路径由DS自己验证，DAA decode可作对读，sharedcore不含encode，Python参考不是已完成Rust/C++编解码。
+
+**配置/值及恢复**：沿用004单DS SQLite配置、不可变saved revision、单事务CAS selected、进程内loaded和唯一image owner；保存不运行、不逐tick存运行值，无持久apply journal/样本库/outbox。core接受RETAIN/NON_RETAIN语法不等于DS跨进程保值，不能据TIA保留标记改变本节恢复合同。apply仅stopped且旧callback/连接释放：有界typed旧值快照 -> owner外构建/兼容影响清单 -> 用户确认 -> 控制代次/epoch/seq/CAS复核 -> SQLite选中 -> 安装新epoch -> 独立start。selected已提交但安装失败不能报事务回滚；selected/loaded不一致禁start；commit/ack未知查询事实不自动重试。同版selected+loaded内容一致重复apply为already_loaded，不换epoch/重初始化；reset独立。
+
+| 场景 | 推荐默认及确认边界（承接004，非本G0实施） |
+| --- | --- |
+| 同进程stop→start | 保留所有当前值/规则模拟时间，连接重建；stop不是reset。 |
+| 同布局仅显示/连接限额 | 停机apply；稳定点ID、DB/地址/类型/确认摘要/effective值语义全部兼容者可保留typed值，含规则值/时间；不恢复连接。 |
+| 规则参数/seed/周期 | 兼容hold保留，全部规则点/统一时钟初始化t=0。 |
+| 初值改变 | 受影响点按新初值，其它兼容hold保留，全部规则统一t=0。 |
+| mode/owner/读写/维护权限改变 | 受影响点初始化，其它兼容hold保留，全部规则t=0，取消旧epoch积压。 |
+| DB结构/号/长度/地址/类型/增删点 | 受影响DB整体初始化；其它DB仅严格兼容hold保留，新增初始化、删除丢弃，规则t=0；绝不旧bytes拷新布局。 |
+| 显式reset | stopped确认丢值；当前loaded全部初始化、新epoch/规则t=0。 |
+| 跨进程重开/崩溃恢复 | 按真实selected重新校验并全部初始化、stopped，无值/连接/运行意图持久恢复。 |
+| 回旧revision | 默认全部初始化并确认；不从日志复活历史运行值。 |
+
+混合变更按更严格影响合并，保留需稳定ID/确认布局/owner/类型/初值/权限一致；保留证明或typed编码失败则选中事务前失败，旧版/值保留，用户可明确改选初始化，不能静默丢值。单一配置DB保存失败仍保旧/明示失败；可选日志sink故障只告警+有界环/丢弃计数，不封全部模拟写、不将已提交成功改失败/回放。
+
+**页面到服务的实际责任**：D3工作台显式start/pause/resume/stop/reset与连接单close；配置中心的实例、DB/点位、多源预览/重导、地址确认、全instance命名、typed初值/owner/规则、saved/selected/loaded及保留清单；在线值只显示当前image，普通UI仅ui-owner，client/none hold维护须显式默认关开关+revision/epoch/point seq CAS确认，规则暂停不让权，维护后client可覆盖。页面刷新/筛选/导入预览不bind或写运行值；保存只持久草稿，apply后仍stopped。Tauri commands只解析DTO/意图并调用Rust应用服务；共享core负责纯导入/布局/名，存储/实例控制/策略编译由DS服务负责。协议adapter、规则/UI/init/reset必须进入同一个runtime image owner，不能Rust一份image+C++裸共享区另一份。
+
+005 r4固定业务runtime为Rust。`device-simulator/runtime`唯一持有image、policy/CAS、六写来源、epoch/seq、规则时钟、协议/规则/UI轮转与逐连接item公平、C/H/TCP/bytes准入、取消/stop和资源状态；Tauri两个只读commands及独立Rust G0入口消费同库。native Snap7只承担协议/IO与有限线程生命周期hooks，经版本化int C ABI回调Rust，不保留C++业务owner/第二image。Tag/data只在同步callback内借用，读快照回填stage，写请求在整PDU预算内复制；Rust panic与C++ exception不越FFI。先封准入/取消未入段，当前单item结束后真实pthread_join/Rust join，完成前上下文/名额仍保留。r3六个未采用C++业务源先原字节持久归档后退役，旧编译/ABI不计r4通过。G0仍同进程A/B，native硬崩可同时影响两者；X02条件N/A不能证明进程隔离。
+
+开工顺序：r4批准→r3原件持久归档→设计同步/DAA精简骨架/Rust库→有限native桥B0/统一时钟→骨架build及三次native启动/两个只读IPC/退出→原G0 P1/P2/P3→fresh QA/Owner；core前置已可供D1**另立精确spec**，纯导入/配置设计可并行，产品实现仍需其批准；D2真实server保护路径须等G0 go，D3依赖D1/D2稳定合同，D4 L1/L2/L4/L5另批，L3扩展再另批。若有限原生控制点失败，研究no_go可接受但没有可交接server，必须回PM；不继续产品功能掩盖保护缺口。
+
+
+G0正式源码位于`automation-world/device-simulator/g0/`，仅ds-g0-s7-v1合成DB41/57、Rust单进程A/B与模块级真实ManagedS7；独立服务端无DAA运行依赖。B0/全部适用case/新fresh QA/Owner接受前仍candidate，不把设计、源码或no_go研究说成已有可联调server。G0不关闭DAA整体B；真实DAA应用S7→SQLite另批准、独立核验和接受，C排除。
+
+
+本§13及§13.1为r4范围/顺序的历史记录；r5新增产品与自动化范围以§14及已批准005 r5 spec为准，不沿用“产品另批/只有两只读IPC/需人工三窗”的旧限制。
+
+### 13.1 r4最小骨架与时钟 gate
+
+DAA固定37源白名单派生，只保留Tauri/Vue构建基础、CU公共壳、主题/语言及单一停止态概览；剔除采集/配置库/历史/上传/授权/旧IPC，五个ManagedS7模块仅供独立client。DS身份com.aiis.aw.devicesimulator、ds.theme/ds.locale、独立owned profile，不读取DAA数据。ds_get_bootstrap/ds_get_runtime_snapshot只读；默认stopped/零listener，UI不跑规则。共享core直接path固定0.1.0，六API消费者/配置SQLite/D1–D4另批。
+
+Rust/native统一clock_gettime(CLOCK_MONOTONIC)纳秒，B0做100次Rust→native→Rust夹点；Python只用自身elapsed，以request/phase ID及ping区间校准，不直接比较旧steady_clock/monotonic绝对原点。measurement_begin/end由Rust同源事件划C01窗口；不确定区间跨阈值不得判通过。新Rust请求/FFI节点、copy和队列容量另计实际预算，不套旧C++sizeof。骨架/WebView资源单列，G0独立Rust server全树保留原19case/16会话/公平/释放阈值。所有结果见005 tasks/checklist，设计同步不表示已通过或可联调baseline。
+
+
+<a id="r5-product"></a>
+## 14. r5产品MVP：同一Rust runtime、完整配置闭环与自动化取证
+
+依据为唯一已批准[ARCH-AW-005 r5 spec](../plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md) SHA `67155fe4fca3068ef8e616dcf0ade69a5cdc614e7175a2f1ef4c6bf98f935419`；004与r4历史验收/失败原件不倒写。r5交付目标是从DAA派生的可操作独立S7模拟器，保留Rust业务owner，Snap7只协议/IO/join；原19协议case加K01–K10/N1–N3与fresh Verification共同建立有限baseline。DAA真实应用读取到SQLite联调仍另批，Stage C、现场设备、完整PLC/三平台与L1–L5长负载不纳入本次。
+
+| 层与正式路径 | r5行为与边界 |
+| --- | --- |
+| `device-simulator/src` + CU公共出口 | 保留DAA壳/主题/中EN/overlay及五枚原图标；工作台、实例、DB点位、模拟与策略、在线值、日志六页。一个宿主状态owner、可见≤1Hz快照、隐藏暂停；草稿dirty不被快照覆盖，过期实例/页响应丢弃，失败保留stale值。 |
+| `src-tauri/src/commands` | 16项固定IPC：bootstrap/snapshot/configuration/save、import/layout/names三组preview/confirm、apply preview/confirm、control/write/close/logs；严格camelCase DTO/deny_unknown_fields，operation UUID与相应ETag/loadedRevision/epoch/pointSeq复核，u64字符串。命令只适配服务。 |
+| `runtime/src/domain`、`services/owner.rs` | UUID实例（最多8）/DB稳定身份与DB号分离，用户编辑DB数、号、长度与地址；稀疏bit coverage与逐点seq/source/time，一实例唯一image。完整typed BE编码、BOOL RMW、STRING整包校验，原始byte/bit全触达权限检查；single-item原子、多项顺序部分成功，回执未知不自动重试。 |
+| `services/source_import.rs`、`layout.rs`、`naming.rs` | 固定core0.1.0/std-only六API真实消费者。每批scan一次，显式声明与UDT闭包、来源lineage/version UUID、结构化段保点ID；原bytes/hash不可变，BEGIN/:=初值均提示不导入。标准布局仅完整非优化树，STRING整DB拒推；人工理由不被批量覆盖；完整instance一次NameBatch含未选/停用/legacy保留名，命名/布局/初值/策略由服务生成确认。 |
+| `infrastructure/config_store` | DS单配置SQLite v1、七表、DELETE/EXTRA/FK/普通索引，不复制DAA双库或采样表。profile OS锁保持到DB关闭，未知身份/版本/坏库/WAL/SHM/symlink/引用错误失败且保留原件；source+draft CAS+immutable revision同短事务，1执行+4等待有限worker，查询≤100条/1s预算，owner不等SQL。保存不应用、不启动。 |
+| `services/apply.rs`、`lifecycle.rs` | 完全stopped/transport释放才apply：owner有界typed快照（含generation/epoch/seq/值摘要）→锁外编译与保值清单→控制序列复核→owner外selected CAS→同owner新epoch安装、仍stopped。stop独立封gate不排SQL之后；已提交selected但安装失败承认load_failed，新selected真实存在、旧image仅诊断禁start。 |
+| `native`与`runtime/build.rs` | 正式自动CMake构建有限八文件controlled hooks+二文件C ABI bridge；无C++业务owner/第二image。native-s7由tauri.conf build.features显式传入，Cargo links/DEP metadata给桌面rpath，无必需DS_G0键或手工预构建。端点仅IPv4 loopback，用户可编辑端口；实验只30102/30103与负例30104。 |
+
+配置为`<profile>/device-simulator-v1/config.sqlite`，默认Tauri独立app_local_data_dir，可选绝对DS_PROFILE_DIR，不找父.env/DAA目录。默认真实empty/unconfigured/stopped，无自动绑定。跨进程仅恢复selected配置并初始化运行值/规则时间，绝不恢复运行意图/连接/值。macOS WebKit另按同profile持久UUID选非零data_store_identifier，在创建WebView前指定；测试identifier为独立validation，实际新建路径/归属必须运行观察，不能仅凭DS_PROFILE_DIR宣称WebKit隔离。
+
+保值沿§13九场景而成为产品服务：同进程stop/start保全部值与时间；同布局显示/命名/限额变保兼容值含规则时间；规则参数/初值/权限变化按影响初始化、兼容hold保留、全部规则t=0；结构/号/长度/地址/类型/增删点使受影响DB整体初始化；显式reset与重开/rollback默认初始化。typed重编码或兼容证明失败在selection前拒绝并保旧，用户可显式initialize_all，不能静默丢值。相同selected/loaded重试already_loaded不改epoch，unchanged保存不改ETag/revision；外层committed/receiptState须反映实际分段，不能把load_failed误报零持久副作用。
+
+线程/内存准入由实际通用装配重算，不能继承r4两个实例的53-worker常量。headless固定预留12线程，desktop固定预留40线程；两者是不同组合根的替代基数，包含本进程宿主、SQL、日志、采样和控制，不能相加或再重复计入这些线程。再加实际owner数、每个active listener及其stop reaper的2个名额和TCP worker，合计≤64；C16/H4与global128/32/160及协议字节预算同时满足，额度不足真实拒绝，不外推8×16容量。desktop预留以本轮空壳约28线程、单owner/listener/worker场景峰36线程的实际采样校准：扣除另计线程后留保守余量；这是候选准入预算，不是所有OS负载下的硬实时证明。WebKit/XPC费用单列，未归属服务保持unknown，不能用40常数覆盖或记零。
+
+候选配置、typed快照、preview（≤8/300s且有总字节预算）、SQL排队副本、image/metadata与网络/日志内存联合计入512MiB设计上限，运行资源由独立产品R测试宿主全树实测。完整日志event heap上限256KiB，pending/history/drain各8MiB、file队列16MiB且最多8192条、序列化及解析临时副本4MiB、active worker message256KiB；另为channel槽位/消息头、VecDeque/Vec未用容量和控制结构保守预留2MiB，共46MiB+256KiB，纳入配置/SQL/preview/log的288MiB预留，不截断必要快照。数量与bytes任一满均真实计数降级，owner不等文件IO。无端口回归实际构建C16/H4连接元数据、完整63点/两DB和长ID/seq，检查递归heap上界、真实序列化与两个sink完整一致；另对真实sink突发/持续输入和确定性channel饱和、归还及关闭取证。这些probe不替代真实16会话协议证据。全体关闭先封准入/并发请求stop、共用绝对期限、真实native/Rust join后再SQL/锁/日志释放，正常确认关闭≤5s；dirty取消不能触shutdown。
+
+自动验证不再请Owner反复关窗。非默认test-automation加显式owned manifest才编入固定WebView DOM driver与唯一有界ds_test_report；普通产品无测试CLI/stdio/barrier/eval命令。driver通过真实DOM输入/点击/File导入调用正常16IPC，结束用Window.close走真实CloseRequested→dirty保存/丢弃/取消→join/DB/锁/日志正常关闭。N1保存导入、N2重开初始化/显式启动/值与真实client、N3再重开初值/dirty取消丢弃/单close，分别保留实际资源/退出证据。普通pnpm tauri dev的feature/native/SQLite/Vite入口另外实证，watcher清理不冒充正常关闭；B0先于S7监听，原19项次数/时长/负载分母保持。已执行与未执行事实见[005 tasks](../plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md#9-r5实施起点来源保护与执行计划)，最新独立核验与Owner状态见[owning checklist](../plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md)；设计文本不授QA或Owner验收。
+
+旧G0按逐文件keep/migrate/retire map处理：第一次源码改动前已持久r4原件，必要产品验证通过、引用/证据迁移后才清废弃G0，再重建与复核受影响项；P5恰五类紧凑JSON，raw逐成员SHA保存在A5，保留QA/后续另批联调所需缓存和原件，不删除未知WebView数据或其它任务资源。
+
+
+r5 DEV已在原件逐SHA持久保存与产品门汇总后，按102成员闭集退役废弃G0入口；runtime唯一owner及正式native/tests服务保留，历史§13路径只表当时事实。逐文件map区分68项同字节迁入与34项适配/合并，并列具体consumer/验证；清后构建与受影响检查事实及独立结论仍分别见tasks/checklist。N场景额外报告desktop、已观察POSIX children及当前WebView关联XPC的逐PID资源，不套headless阈值：test-only macOS probe通过Tauri主线程with_webview即时借用当前WKWebView，运行时检查固定只读Private SPI进程ID getter；与精确owned store句柄及children按PID/时段去重。该SPI仅本机取证，不是公开稳定API/产品依赖，普通构建不包含它；不支持、无法归属或缺样本保持unknown，不造零费用，不扫描其它应用或杀系统XPC。正常关闭后的ESRCH只有实际正常close/exit、host code0及精确已关联PID不存在证据才分类终止null样本；运行中异常消失仍报错。跨进程Mach port数未请求task权限时null，采样峰不宣称全寿命/同时峰。
+
+#### r5 六页面布局收口
+
+DS 自有 ConsoleCard 为内容提供统一 token 间距，选择栏采用自适应网格；运行值/连接技术列保持完整字段并在表内横滚。日志筛选同行、事实分组自适应，空态使用紧凑图示；指标卡采用相同密度以对齐数字。弹窗在视口内保留可滚动表体与有间距的可换行按钮区，表单不叠加默认项间距。切换页面后只重置 `.agent-workspace`，同页手动滚动保留。提示色消费 CU 主题 token，兼容深浅色。实际原生 DOM 几何/IPC/正常关闭与浏览器像素分别记录，来源和最终 DEV/独立核验状态见 owning tasks/checklist。

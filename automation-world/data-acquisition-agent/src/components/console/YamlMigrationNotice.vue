@@ -1,28 +1,26 @@
-<!-- 迁入时记录：仅在配置栏既有详情内展示Rust有界历史与权威重试动作。 -->
+<!-- 当前迁入故障小弹窗：仅消费同一owner的权威摘要与原安全重试，不展示迁入历史。 -->
 <template>
-  <section v-if="local?.migration" class="console-stack">
-    <h3>{{ t('common.local.migration.title') }}</h3>
-    <div class="console-action-group"><ConsoleActionButton v-if="local.migration.retryAllowed" label-key="common.local.migration.retry" :disabled="local.busy || local.dirty || local.editing" @click="local.retryMigration()" /></div>
+  <el-dialog v-if="attention && local?.migration" :model-value="modelValue" :title="t('common.local.migration.title')" width="560px" class="standard-form-dialog" append-to-body destroy-on-close @update:model-value="$emit('update:modelValue', $event)">
     <div class="console-stack">
-      <el-alert :title="local.migration.status === 'failed' ? t('common.local.migration.failed') : local.label(local.migration.status)" :description="t('common.local.migration.boundary')" :type="local.migration.status === 'failed' ? 'warning' : 'info'" :closable="false" show-icon />
-      <p>{{ t('common.local.migration.counts', local.migration.counts) }}</p>
+      <el-alert :title="t(unknown ? 'common.local.migration.persistenceUnknown' : 'common.local.migration.failed')" type="warning" :closable="false" show-icon />
       <p v-if="local.migration.errorCode">{{ local.label(local.migration.errorCode) }}</p>
-      <p v-if="local.migration.statusPersistence === 'unknown'">{{ t('common.local.migration.persistenceUnknown') }}</p>
-      <p v-if="local.dirty || local.editing">{{ t('common.local.migration.unsaved') }}</p>
-      <p class="daa-source-note">{{ t('common.local.migration.details') }}</p>
-        <p v-for="source in local.migration.sources" :key="source.kind">{{ local.label(source.kind) }} · {{ source.path }} · {{ local.label(source.origin) }} · {{ source.bytes ?? '—' }} B · {{ source.sha256 ?? local.label(source.hashUnavailable) }}</p>
-        <p v-if="local.migration.sources.some(s => s.origin === 'application_default')">{{ t('common.local.migration.example') }}</p>
-        <p v-for="(issue, index) in local.migration.diagnostics" :key="index">{{ local.label(issue.code) }} · {{ issue.path }}</p>
-        <p>{{ t('common.local.migration.diagnostics', { total: local.migration.diagnosticTotal, omitted: local.migration.diagnosticOmitted }) }}</p>
-        <p>{{ t('common.local.migration.attempt') }}: {{ local.migration.attemptId ?? '—' }}</p>
+      <p v-if="!unknown && (local.dirty || local.editing)">{{ t('common.local.migration.unsaved') }}</p>
     </div>
-  </section>
+    <template #footer>
+      <ConsoleActionButton label-key="common.local.migration.close" @click="$emit('update:modelValue', false)" />
+      <ConsoleActionButton v-if="!unknown && local.migration.retryAllowed" label-key="common.local.migration.retry" :disabled="local.busy || local.dirty || local.editing" @click="local.retryMigration()" />
+    </template>
+  </el-dialog>
 </template>
 <script setup lang="ts">
-import { inject } from 'vue'
+import { computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { localConsoleKey } from '../../console/composables/useLocalAcquisitionConsole'
 import ConsoleActionButton from './ConsoleActionButton.vue'
+defineProps<{ modelValue: boolean }>()
+defineEmits<{ 'update:modelValue': [value: boolean] }>()
 const local = inject(localConsoleKey)
 const { t } = useI18n()
+const unknown = computed(() => local?.migration?.statusPersistence === 'unknown')
+const attention = computed(() => unknown.value || (local?.migration?.status === 'failed' && local.migration.retryAllowed === true))
 </script>

@@ -287,3 +287,6 @@ automation-world/**/*.sqlite3
 # DAA-005 handwritten public source fixtures (exact paths only)
 !/automation-world/data-acquisition-agent/src-tauri/tests/fixtures/source-import-multi-db/multi.db
 !/automation-world/data-acquisition-agent/src-tauri/tests/fixtures/source-import-multi-db/layout.db
+
+# DAA-006 public handwritten source fixture only
+!automation-world/shared/tia-import-core/fixtures/names.db

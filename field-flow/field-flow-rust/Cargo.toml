@@ -1,0 +1,28 @@
+[package]
+name = "field-flow"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.89"
+[features]
+default = []
+test-fixture = []
+[dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "io-util", "process", "signal", "sync", "time"] }
+reqwest = { version = "0.13", default-features = false, features = ["rustls", "json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["json"] }
+rust-snap7 = "=1.142.2"
+rusqlite = { version = "=0.32.1", features = ["bundled"] }
+libc = "0.2"
+sha2 = "0.10"
+chrono = "0.4"
+[[bin]]
+name = "field-flow"
+path = "src/main.rs"
+[[bin]]
+name = "ff-fixture"
+path = "src/bin/ff-fixture.rs"
+required-features = ["test-fixture"]

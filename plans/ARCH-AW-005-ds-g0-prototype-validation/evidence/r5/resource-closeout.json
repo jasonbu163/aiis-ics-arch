@@ -1,0 +1,217 @@
+{
+  "taskId": "ARCH-AW-005",
+  "revision": "r5",
+  "sourceCandidate": "306a09d5317931482a59f45da5eafcb9d3ee739199799f475ade1891fb0b00b4",
+  "specSha256": "67155fe4fca3068ef8e616dcf0ade69a5cdc614e7175a2f1ef4c6bf98f935419",
+  "status": "qa_passed",
+  "qaVerdict": "qa_passed",
+  "ownerFinalAcceptance": null,
+  "verificationState": "human_owner_final_acceptance_pending",
+  "resources": [
+    {
+      "path": "/private/tmp/arch-aw-005-r5-exec",
+      "owner": "DEV role subtrees only",
+      "purpose": "resume builds/cache/profiles/raw and future QA references",
+      "cleanupTrigger": "coordinator ownership/dependency audit after necessary raw durable and no run/QA/integration dependency"
+    },
+    {
+      "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence",
+      "owner": "task evidence",
+      "purpose": "immutable recovery/evidence",
+      "cleanupTrigger": "retain through independent verification and separately approved integration acceptance"
+    },
+    {
+      "path": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/automation-world/device-simulator/node_modules",
+      "owner": "DS frozen dependency links",
+      "purpose": "resume normal/frontend/native builds",
+      "cleanupTrigger": "no build/QA dependency;do not remove shared store"
+    },
+    {
+      "path": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/automation-world/device-simulator/src-tauri/gen",
+      "owner": "DS generated schema",
+      "purpose": "Tauri capability/build checks",
+      "cleanupTrigger": "only after build/QA dependencies end"
+    },
+    {
+      "path": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/automation-world/device-simulator/g0",
+      "state": "retired102originalmembers",
+      "proof": "dev-0217 and final per-file map",
+      "cleanupTrigger": "already exact retired; historical archive retained"
+    },
+    {
+      "path": "/Users/jason/Library/WebKit/aiis-device-simulator/WebsiteDataStore/<owned-profile-UUID>",
+      "owner": "per-run UUID, observed metadata/lsof/test-only fixed WebKit getters",
+      "purpose": "native validation profile preferences and full-tree attribution",
+      "cleanupTrigger": "keep for QA/evidence; no deletion of system/shared/unknown data"
+    },
+    {
+      "path": "/Users/jason/Library/WebKit/com.aiis.aw.devicesimulator/WebsiteData and /Users/jason/Library/Caches/com.aiis.aw.devicesimulator/WebKit",
+      "owner": "historical attribution unknown",
+      "purpose": "old r4 observations only; r5 uses nonzero separate data store IDs",
+      "cleanupTrigger": "not authorized; preserve"
+    },
+    {
+      "path": "/private/tmp/arch-aw-005-r2-p0-_ap0y325/pm/downloads/snap7-full-1.4.2.7z",
+      "owner": "historical frozen package input",
+      "purpose": "QA source provenance audit only, not normal product runtime/build dependency",
+      "cleanupTrigger": "retain until audit consumer migrated or no QA dependency"
+    },
+    {
+      "path": "/private/tmp/arch-aw-005-r3-exec and /private/tmp/arch-aw-005-r4-exec",
+      "owner": "historical role caches/raw",
+      "purpose": "prior failed/successful observations and accepted input evidence",
+      "cleanupTrigger": "coordinator per-member dependency/ownership audit; not removed by r5"
+    }
+  ],
+  "nativeResources": {
+    "publicSummary": {
+      "file": "delivery-source-manifest.json",
+      "pointer": "/nativeStage/cycles"
+    },
+    "cycleCount": 3,
+    "allExpectedComponentsAttributed": true,
+    "resourceErrorCount": 0,
+    "observations": [
+      {
+        "scenario": "N1",
+        "components": [
+          {
+            "component": "Networking",
+            "successfulSampleCount": 32,
+            "unavailableSampleCount": 0
+          },
+          {
+            "component": "GPU",
+            "successfulSampleCount": 31,
+            "unavailableSampleCount": 0
+          },
+          {
+            "component": "WebContent",
+            "successfulSampleCount": 31,
+            "unavailableSampleCount": 0
+          }
+        ],
+        "terminalUnavailableObservationCount": 0,
+        "raw": {
+          "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0283",
+          "inventorySha256": "d8e66bc43488f9a4ea894d232fbb506f478f12d5b9262b1a1ca2ef7f3736b3e2",
+          "member": "status.json",
+          "memberSha256": "ff0a129ad0f4828ea61d306f6851e9e3e7d0527d5cebc7af9acf78b873f6bb72"
+        }
+      },
+      {
+        "scenario": "N2",
+        "components": [
+          {
+            "component": "GPU",
+            "successfulSampleCount": 11,
+            "unavailableSampleCount": 0
+          },
+          {
+            "component": "WebContent",
+            "successfulSampleCount": 11,
+            "unavailableSampleCount": 0
+          },
+          {
+            "component": "Networking",
+            "successfulSampleCount": 11,
+            "unavailableSampleCount": 0
+          }
+        ],
+        "terminalUnavailableObservationCount": 0,
+        "raw": {
+          "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0284",
+          "inventorySha256": "f8fcd623f0a334c8aa93a81d4698e727ac8fb9469db8dc0b5e21c3647fc78ebc",
+          "member": "status.json",
+          "memberSha256": "514d7e3197938e55a3a6ec0ccf986c3701094453b1fc497999e2095ded52d348"
+        }
+      },
+      {
+        "scenario": "N3",
+        "components": [
+          {
+            "component": "GPU",
+            "successfulSampleCount": 6,
+            "unavailableSampleCount": 0
+          },
+          {
+            "component": "WebContent",
+            "successfulSampleCount": 6,
+            "unavailableSampleCount": 0
+          },
+          {
+            "component": "Networking",
+            "successfulSampleCount": 6,
+            "unavailableSampleCount": 0
+          }
+        ],
+        "terminalUnavailableObservationCount": 0,
+        "raw": {
+          "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0286",
+          "inventorySha256": "a6988cbda6492b9fd616aeac5c9b009a3362d7e021c4ce4b3522294cf4e2bedb",
+          "member": "status.json",
+          "memberSha256": "07c67ca9a10cb21a9c33137b1c6f98e47f5a6f8f55febc0a0d0bcf7605563832"
+        }
+      }
+    ]
+  },
+  "lastDevCloseout": {
+    "run": "dev-0328",
+    "ownedProductProcessCount": 0,
+    "fixedPortListenerCount": 0,
+    "raw": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/dev-run-0328",
+      "inventorySha256": "152fc3074d36dd32edaa2c323c9d2b5df3a5122b0dd6c753a03ce14f2d40bd01",
+      "member": "current-port-closeout.json",
+      "memberSha256": "1a63cf5a3fbdc413061add548e2cc60dfa2d74bcded01062adf8639515f9f73e"
+    },
+    "meaning": "After final protocol: every owned run cleaned; current five ports empty. Profiles/cache/WK stores retained; unknown/shared services not deleted."
+  },
+  "latestQAStop": {
+    "raw": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/qa-run-0109",
+      "inventorySha256": "55081e5ddf111da0c78b3ff4e69b2882623571724e83e4f9b6565106a4a25717",
+      "member": "qa-handoff-receipt.json",
+      "memberSha256": "863dde62e7a74985807c43d6ac0b0aaf2f678328286d22b924c1258b6e350844"
+    },
+    "observedAt": "2026-10-21T10:23:44.273591+00:00",
+    "meaning": "QA4 all application/protocol tests ended; own DS/test/launcher matches empty and five fixed ports unbound. QA stopped all writes after receipt sealing. QA3 stop history remains in pre-sync P5 A57 and historical QA receipts."
+  },
+  "resourceMethod": "1Hz actual PID/time union; original ESRCH retained; only verified normal terminal sequence gets null terminal classification; no0 costs. CPU single sample null; peaks observed sampled, not lifetime; own Mach counts measured, crossPID Mach null without task rights. Private WebKit SPI is macOS-specific unstable test-only, ordinary product excludes it.",
+  "slowPeerMethod": "Actual SO_RCVBUF/SO_SNDBUF readback <=16KiB; FIONREAD/history advertisement credit separately retained, not kernel physical16KiB promise.",
+  "coordinatorAwake": {
+    "previousWindow": "Coordinator-owned PID88421 reached authorized60min expiry; exact ps at2026-10-21T07:12:37Z returned exit1/empty. See T5/coordinator/resume-003/awake-expiry-observation.json. No current keep-awake promise; 07:13 CUA availability was one observed point only. DEV neither renewed nor terminated it.",
+    "latestWindow": {
+      "pid": 66750,
+      "authorizedMaximumSeconds": 3600,
+      "revokedAt": "2026-10-21T10:21:13.907229+00:00",
+      "observedAbsent": true,
+      "childExitStatusCaptured": false,
+      "persistentSettingsChanged": false,
+      "origin": "coordinator",
+      "raw": {
+        "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/qa-run-0109",
+        "inventorySha256": "55081e5ddf111da0c78b3ff4e69b2882623571724e83e4f9b6565106a4a25717",
+        "member": "coordinator-origin/awake-002-closeout.json",
+        "memberSha256": "04f3f01314862ececc622c9a4ecac1fbaa4acd134f23799f7bca3fe8d25af567"
+      }
+    }
+  },
+  "g0Retired": true,
+  "cleanup": [
+    "102 exact old source members retired only after archive/gate; A4/A5/P4/plans historical raw preserved",
+    "No foreign/system/user data deletion; caches/node_modules/gen/profile retained for fresh QA and separately approved integration"
+  ],
+  "verificationRecord": {
+    "checklist": {
+      "path": "plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md",
+      "sha256": "0cdec7014a9e54365c4460f58e224280c9826b42f25f10247752133fa3f0c527"
+    },
+    "raw": {
+      "archive": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/qa-run-0109",
+      "inventorySha256": "55081e5ddf111da0c78b3ff4e69b2882623571724e83e4f9b6565106a4a25717",
+      "member": "qa-handoff-receipt.json",
+      "memberSha256": "863dde62e7a74985807c43d6ac0b0aaf2f678328286d22b924c1258b6e350844"
+    }
+  }
+}

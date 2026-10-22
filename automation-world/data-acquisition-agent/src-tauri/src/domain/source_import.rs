@@ -88,6 +88,7 @@ pub(crate) struct ImportPreview {
     pub issues: Vec<Issue>,
     pub readiness: Vec<Issue>,
     pub deltas: Vec<DbDelta>,
+    pub name_changes: Vec<super::point_naming::NameChange>,
     pub can_confirm: bool,
     pub unchanged: bool,
     pub preview_token: Option<String>,

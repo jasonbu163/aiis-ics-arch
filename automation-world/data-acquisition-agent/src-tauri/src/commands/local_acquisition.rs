@@ -94,6 +94,8 @@ pub(crate) fn dispatch(
             engine.invalidate_previews();
             value(engine.configuration()?)
         }
+        "daa_preview_point_names" => value(engine.preview_point_names(parse(request)?)?),
+        "daa_confirm_point_names" => value(engine.confirm_point_names(parse(request)?)?),
         "daa_save_draft" => {
             let r: Save = parse(request)?;
             value(engine.save(r.draft, r.expected_etag)?)
@@ -327,4 +329,19 @@ pub(crate) async fn daa_retry_yaml_migration(
     request: Value,
 ) -> IpcResult {
     invoke(state, "daa_retry_yaml_migration", request).await
+}
+
+#[tauri::command]
+pub(crate) async fn daa_preview_point_names(
+    state: tauri::State<'_, LocalState>,
+    request: Value,
+) -> IpcResult {
+    invoke(state, "daa_preview_point_names", request).await
+}
+#[tauri::command]
+pub(crate) async fn daa_confirm_point_names(
+    state: tauri::State<'_, LocalState>,
+    request: Value,
+) -> IpcResult {
+    invoke(state, "daa_confirm_point_names", request).await
 }

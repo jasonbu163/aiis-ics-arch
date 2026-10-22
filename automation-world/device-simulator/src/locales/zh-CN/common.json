@@ -1,0 +1,25 @@
+{
+  "app": {
+    "title": "AIIS Device Simulator",
+    "subtitle": "独立 S7 模拟器"
+  },
+  "actions": {
+    "refresh": "刷新",
+    "switchLanguage": "切换语言",
+    "switchToDark": "切换到深色模式",
+    "switchToLight": "切换到浅色模式",
+    "switchToChineseShort": "中",
+    "switchToEnglishShort": "EN",
+    "toggleSidebar": "切换侧栏",
+    "switchToEnglish": "切换到英语",
+    "switchToChinese": "切换到中文"
+  },
+  "local": {
+    "mode": "已停止",
+    "running": "运行中",
+    "loading": "正在读取快照",
+    "readOnlyIpc": "桌面只读快照",
+    "bootstrapFailed": "Rust IPC 不可用",
+    "desktopPreview": "浏览器无桌面桥接"
+  }
+}

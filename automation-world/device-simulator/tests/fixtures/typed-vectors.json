@@ -1,0 +1,156 @@
+{
+  "schema": "ds-typed-golden-v1",
+  "provenance": "Handwritten S7 big-endian scalar boundary bytes; no runtime encode used to produce expectations.",
+  "vectors": [
+    {
+      "type": "BYTE",
+      "value": 0,
+      "hex": "00"
+    },
+    {
+      "type": "BYTE",
+      "value": 255,
+      "hex": "ff"
+    },
+    {
+      "type": "USINT",
+      "value": 0,
+      "hex": "00"
+    },
+    {
+      "type": "USINT",
+      "value": 255,
+      "hex": "ff"
+    },
+    {
+      "type": "WORD",
+      "value": 0,
+      "hex": "0000"
+    },
+    {
+      "type": "WORD",
+      "value": 65535,
+      "hex": "ffff"
+    },
+    {
+      "type": "UINT",
+      "value": 0,
+      "hex": "0000"
+    },
+    {
+      "type": "UINT",
+      "value": 65535,
+      "hex": "ffff"
+    },
+    {
+      "type": "DWORD",
+      "value": 0,
+      "hex": "00000000"
+    },
+    {
+      "type": "DWORD",
+      "value": 4294967295,
+      "hex": "ffffffff"
+    },
+    {
+      "type": "UDINT",
+      "value": 0,
+      "hex": "00000000"
+    },
+    {
+      "type": "UDINT",
+      "value": 4294967295,
+      "hex": "ffffffff"
+    },
+    {
+      "type": "INT",
+      "value": -32768,
+      "hex": "8000"
+    },
+    {
+      "type": "INT",
+      "value": 0,
+      "hex": "0000"
+    },
+    {
+      "type": "INT",
+      "value": 32767,
+      "hex": "7fff"
+    },
+    {
+      "type": "DINT",
+      "value": -2147483648,
+      "hex": "80000000"
+    },
+    {
+      "type": "DINT",
+      "value": 0,
+      "hex": "00000000"
+    },
+    {
+      "type": "DINT",
+      "value": 2147483647,
+      "hex": "7fffffff"
+    },
+    {
+      "type": "REAL",
+      "value": -3.4028234663852886e+38,
+      "hex": "ff7fffff"
+    },
+    {
+      "type": "REAL",
+      "value": 0.0,
+      "hex": "00000000"
+    },
+    {
+      "type": "REAL",
+      "value": -0.0,
+      "hex": "80000000"
+    },
+    {
+      "type": "REAL",
+      "value": 3.4028234663852886e+38,
+      "hex": "7f7fffff"
+    },
+    {
+      "type": "BOOL",
+      "value": false,
+      "hex": "00"
+    },
+    {
+      "type": "BOOL",
+      "value": true,
+      "hex": "01"
+    },
+    {
+      "type": "CHAR",
+      "value": "\u0000",
+      "hex": "00"
+    },
+    {
+      "type": "CHAR",
+      "value": "",
+      "hex": "7f"
+    },
+    {
+      "type": "STRING[1]",
+      "value": "",
+      "hex": "010000"
+    },
+    {
+      "type": "STRING[1]",
+      "value": "A",
+      "hex": "010141"
+    },
+    {
+      "type": "STRING[254]",
+      "value": "",
+      "hex": "fe000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "type": "STRING[254]",
+      "value": "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ",
+      "hex": "fefe5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a"
+    }
+  ]
+}

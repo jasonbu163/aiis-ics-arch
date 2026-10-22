@@ -1,0 +1,47 @@
+{
+  "schema": "ds-product-negative-v1",
+  "bounds": {
+    "instances": [
+      8,
+      9
+    ],
+    "dbs": [
+      32,
+      33
+    ],
+    "leaves": [
+      4096,
+      4097
+    ],
+    "dbLength": [
+      65536,
+      65537
+    ],
+    "arrayLeaves": [
+      1024,
+      1025
+    ],
+    "sourceBytes": [
+      1048576,
+      1048577
+    ],
+    "batchBytes": [
+      4194304,
+      4194305
+    ]
+  },
+  "sourceCases": [
+    "missing_udt",
+    "cyclic_udt",
+    "unknown_type",
+    "optimized_db",
+    "multidimensional_array",
+    "depth9"
+  ],
+  "identityCases": [
+    "same_name_udt_explicit_source",
+    "ambiguous_lineage",
+    "unselected_old_closure_preserved"
+  ],
+  "scope": "Synthetic inputs and exact limits; each case is executed by formal Rust consumer tests, not inferred from this manifest."
+}

@@ -1,0 +1,68 @@
+/** DS宿主仅保留DAA基础reset和内容布局；公共壳/按钮/主题外观由CU提供。 */
+* { box-sizing: border-box; }
+html,body,#app { margin:0; min-width:0; min-height:100vh; }
+body { font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+button,input,textarea,select { font:inherit; }
+h1,h2,h3,p { margin-top:0; }
+.console-section,.console-column-stack,.console-stack { display:grid; align-content:start; gap:16px; min-width:0; }
+
+/* DS内容布局沿DAA工作台/表单/分页范式，颜色与控件仍归CU/Element Plus主题。 */
+.ds-form-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px; }
+.ds-inline,.ds-actions,.aw-form-actions { display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+.ds-inline>.el-select { width:min(280px,100%); }
+.ds-actions { padding:4px 0; }
+.ds-wrap { overflow-wrap:anywhere; }
+.ds-facts { display:grid;grid-template-columns:minmax(100px,180px) minmax(0,1fr);gap:8px; }
+.ds-facts dd { margin:0; }
+.ds-issues { margin:0;padding-left:20px;font-size:12px;color:var(--el-color-warning); }
+.console-table-shell { min-width:0; }
+.console-table-shell__scroll { overflow:auto; }
+.console-table-shell__footer { display:flex;justify-content:space-between;gap:12px;padding-top:16px;flex-wrap:wrap; }
+.metric-grid { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px; }
+.daa-metric { display:grid;gap:8px; }
+.daa-metric strong { font-size:28px; }
+.daa-metric small { color:var(--el-text-color-secondary); }
+.console-info-grid { min-width:0; }
+.el-table { width:100%; }
+.el-dialog .el-input-number { max-width:100%; }
+@media(max-width:900px){.metric-grid,.ds-form-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.ds-inline { align-items:stretch; }}
+@media(max-width:640px){.ds-form-grid,.metric-grid { grid-template-columns:1fr; }.ds-facts { grid-template-columns:1fr; }}
+
+/* DS内容层只收口布局与主题token；不改变CU公共外观/按钮尺寸。 */
+.ds-card-stack { display:grid; grid-template-columns:minmax(0,1fr); min-width:0; gap:var(--agent-action-gap); }
+.ds-card-stack > * { min-width:0; }
+.ds-card-stack > p, .console-stack > p { margin:0; }
+.ds-card-stack > .el-empty { padding:12px 0; }
+.ds-selection-toolbar { display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;align-items:center;gap:var(--agent-action-gap);min-width:0; }
+.ds-policy-selector { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--agent-action-gap);align-items:center; }
+.ds-selection-toolbar > .el-select,.ds-policy-selector > .el-select { width:100%;min-width:0; }
+.ds-form-grid > .el-form-item, .ds-inline > .el-form-item { margin-bottom:0;min-width:0; }
+.ds-form-grid > .el-alert { grid-column:1/-1; }
+.ds-form-grid .el-input-number,.ds-form-grid .el-select { width:100%; }
+.ds-form-grid .el-form-item__label { height:auto;line-height:1.5; }
+.ds-technical-table .el-table__header .cell { white-space:nowrap; }
+.ds-technical-table .el-table__body .cell { overflow-wrap:anywhere; }
+.ds-log-filter { display:grid;grid-template-columns:minmax(0,420px) auto;justify-content:start;align-items:center;gap:var(--agent-action-gap); }
+.ds-log-facts { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--agent-action-gap);margin:0; }
+.ds-log-fact { display:grid;gap:6px;align-content:start;min-width:0; }
+.ds-log-fact dt { color:var(--agent-text-muted);font-size:12px;line-height:1.5; }
+.ds-log-fact dd { margin:0;overflow-wrap:anywhere; }
+.ds-log-fact--path { grid-column:1/-1; }
+.el-dialog { max-width:calc(100vw - 32px);max-height:calc(100dvh - 32px);margin:16px auto;display:flex;flex-direction:column; }
+.el-dialog__body { min-height:0;overflow:auto; }
+.el-dialog__header,.el-dialog__footer { flex-shrink:0; }
+.el-dialog__footer { display:flex;justify-content:flex-end;align-items:center;gap:var(--agent-action-gap);flex-wrap:wrap; }
+.el-dialog__footer > .aw-form-actions { width:100%; }
+.aw-ui .el-alert { background:var(--agent-surface-muted);color:var(--agent-text);border:1px solid var(--agent-border); }
+.aw-ui .el-alert__title { color:var(--agent-text); }
+.aw-ui .el-alert__description { color:var(--agent-text-muted); }
+.aw-ui .el-alert--error .el-alert__icon { color:var(--agent-danger); }
+.aw-ui .el-alert--warning .el-alert__icon { color:var(--agent-warning); }
+@media(min-width:1440px){.ds-policy-selector { grid-template-columns:repeat(4,minmax(0,1fr)); }}
+@media(max-width:1000px){.ds-selection-toolbar { grid-template-columns:repeat(2,minmax(0,1fr)); }.ds-selection-toolbar > .console-action-button { grid-column:1/-1;justify-self:start; }.ds-log-facts { grid-template-columns:repeat(2,minmax(0,1fr)); }}
+@media(max-width:640px){.ds-selection-toolbar,.ds-policy-selector,.ds-log-facts { grid-template-columns:1fr; }.ds-log-filter { grid-template-columns:minmax(0,1fr) auto; }}
+
+.aw-ui .el-alert--error { border-color:var(--agent-danger); }
+.aw-ui .el-alert--error .el-alert__title { color:var(--agent-danger); }
+.aw-ui .el-alert--warning { border-color:var(--agent-warning); }
+.aw-ui .el-alert--warning .el-alert__title { color:var(--agent-warning); }

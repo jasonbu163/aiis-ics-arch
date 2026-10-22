@@ -1,0 +1,1 @@
+{"identifier":"default","description":"DS local main window events and normal close only","windows":["main"],"permissions":["core:default","core:window:allow-close"]}

@@ -1,5 +1,5 @@
 //! TIA源导入入口：安全分界解析与显式所选delta；不重解析/替换未选来源。
-mod parser;
+pub(crate) mod parser;
 mod reconcile;
 #[cfg(test)]
 mod tests;

@@ -401,6 +401,7 @@ pub(crate) fn plan(c: &Configuration, r: &ImportRequest) -> LocalResult<ImportPr
         return Err("source_limits".into());
     }
     let mut next = c.clone();
+    let mut renamed = BTreeSet::new();
     let mut issues = vec![];
     let mut deltas = vec![];
     let mut changes = vec![];
@@ -595,6 +596,21 @@ pub(crate) fn plan(c: &Configuration, r: &ImportRequest) -> LocalResult<ImportPr
                     if prior_source_comment != Some(comment.as_str()) {
                         delta.comments_changed = true;
                     }
+                    if p.name_mode.is_some()
+                        && !matches!(
+                            p.name_mode,
+                            Some(crate::domain::point_naming::NameMode::Manual)
+                        )
+                        && (p.data_type != typ
+                            || (layout_changed
+                                && matches!(
+                                    p.name_mode,
+                                    Some(crate::domain::point_naming::NameMode::AutoAddress)
+                                        | Some(crate::domain::point_naming::NameMode::Pending)
+                                )))
+                    {
+                        renamed.insert(p.id.clone());
+                    }
                     p.data_type = typ;
                     if prior_source_comment == Some(p.comment.as_str()) {
                         p.comment = comment;
@@ -609,12 +625,15 @@ pub(crate) fn plan(c: &Configuration, r: &ImportRequest) -> LocalResult<ImportPr
                     }
                 } else {
                     delta.added_paths.push(path.clone());
+                    let point_id = id();
+                    renamed.insert(point_id.clone());
                     next.points.push(Point {
-                        id: id(),
+                        name_mode: Some(crate::domain::point_naming::NameMode::Pending),
+                        id: point_id,
                         plc_id: b.source.plc_id.clone(),
                         db_id: db_id.clone(),
                         source_path: path.clone(),
-                        name: path,
+                        name: String::new(),
                         data_type: typ,
                         comment,
                         enabled: false,
@@ -682,6 +701,17 @@ pub(crate) fn plan(c: &Configuration, r: &ImportRequest) -> LocalResult<ImportPr
     {
         issues.push(issue("configuration_limits", ""));
     }
+    let proven = next
+        .dbs
+        .iter()
+        .filter(|d| verify_db(&next, d).is_ok())
+        .map(|d| d.id.clone())
+        .collect();
+    if let Err(es) =
+        crate::domain::point_naming::generated(&mut next, &renamed, &proven, None, true)
+    {
+        issues.extend(es)
+    }
     // Existing activation/readiness issues remain advisory. Structural/identity limits are fatal.
     for i in validate(&next) {
         if [
@@ -697,6 +727,25 @@ pub(crate) fn plan(c: &Configuration, r: &ImportRequest) -> LocalResult<ImportPr
             issues.push(i);
         }
     }
+    let name_changes = next
+        .points
+        .iter()
+        .filter(|p| renamed.contains(&p.id))
+        .map(|p| {
+            let mut empty = p.clone();
+            empty.name = String::new();
+            empty.name_mode = None;
+            crate::domain::point_naming::change(
+                c.points.iter().find(|old| old.id == p.id).unwrap_or(&empty),
+                p,
+                if p.name_mode == Some(crate::domain::point_naming::NameMode::Pending) {
+                    "address_required"
+                } else {
+                    "path"
+                },
+            )
+        })
+        .collect();
     let readiness = validate(&next);
     let can_confirm = issues.is_empty();
     if !can_confirm {
@@ -709,6 +758,7 @@ pub(crate) fn plan(c: &Configuration, r: &ImportRequest) -> LocalResult<ImportPr
         issues,
         readiness,
         deltas,
+        name_changes,
         can_confirm,
         unchanged,
         preview_token: None,

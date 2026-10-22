@@ -1,0 +1,309 @@
+{
+  "fixtureVersion": "v1",
+  "nameProfile": "tia-point-name-v1",
+  "layoutProfile": "siemens-step7-v20-standard-word-v1",
+  "mapping": {
+    "Names28": 28,
+    "Names60": 60,
+    "Names47": 47
+  },
+  "cases": [
+    {
+      "key": "BOOL",
+      "db": 28,
+      "segments": [
+        "Value"
+      ],
+      "type": "BOOL",
+      "name": "DB28_Value_Bool",
+      "mode": "auto_path"
+    },
+    {
+      "key": "BYTE",
+      "db": 28,
+      "segments": [
+        "Value"
+      ],
+      "type": "BYTE",
+      "name": "DB28_Value_Byte",
+      "mode": "auto_path"
+    },
+    {
+      "key": "USINT",
+      "db": 28,
+      "segments": [
+        "Value"
+      ],
+      "type": "USINT",
+      "name": "DB28_Value_USInt",
+      "mode": "auto_path"
+    },
+    {
+      "key": "CHAR",
+      "db": 28,
+      "segments": [
+        "Value"
+      ],
+      "type": "CHAR",
+      "name": "DB28_Value_Char",
+      "mode": "auto_path"
+    },
+    {
+      "key": "INT",
+      "db": 28,
+      "segments": [
+        "Value"
+      ],
+      "type": "INT",
+      "name": "DB28_Value_Int",
+      "mode": "auto_path"
+    },
+    {
+      "key": "UINT",
+      "db": 28,
+      "segments": [
+        "Value"
+      ],
+      "type": "UINT",
+      "name": "DB28_Value_UInt",
+      "mode": "auto_path"
+    },
+    {
+      "key": "WORD",
+      "db": 28,
+      "segments": [
+        "Value"
+      ],
+      "type": "WORD",
+      "name": "DB28_Value_Word",
+      "mode": "auto_path"
+    },
+    {
+      "key": "DINT",
+      "db": 28,
+      "segments": [
+        "Value"
+      ],
+      "type": "DINT",
+      "name": "DB28_Value_DInt",
+      "mode": "auto_path"
+    },
+    {
+      "key": "UDINT",
+      "db": 28,
+      "segments": [
+        "Value"
+      ],
+      "type": "UDINT",
+      "name": "DB28_Value_UDInt",
+      "mode": "auto_path"
+    },
+    {
+      "key": "DWORD",
+      "db": 28,
+      "segments": [
+        "Value"
+      ],
+      "type": "DWORD",
+      "name": "DB28_Value_DWord",
+      "mode": "auto_path"
+    },
+    {
+      "key": "REAL",
+      "db": 28,
+      "segments": [
+        "Value"
+      ],
+      "type": "REAL",
+      "name": "DB28_Value_Real",
+      "mode": "auto_path"
+    },
+    {
+      "key": "STRING[20]",
+      "db": 28,
+      "segments": [
+        "Value"
+      ],
+      "type": "STRING[20]",
+      "name": "DB28_Value_String",
+      "mode": "auto_path"
+    },
+    {
+      "key": "nested",
+      "db": 28,
+      "segments": [
+        "Driver_W",
+        "Unc_1",
+        "ActTemp"
+      ],
+      "type": "INT",
+      "name": "DB28_Driver_W_Unc_1_ActTemp_Int",
+      "mode": "auto_path"
+    },
+    {
+      "key": "digit",
+      "db": 28,
+      "segments": [
+        "1_Act"
+      ],
+      "type": "REAL",
+      "name": "DB28_1_Act_Real",
+      "mode": "auto_path"
+    },
+    {
+      "key": "chinese-pending",
+      "db": 60,
+      "segments": [
+        "卷材编号"
+      ],
+      "type": "STRING[20]",
+      "name": "",
+      "mode": "pending"
+    },
+    {
+      "key": "chinese-address",
+      "db": 60,
+      "segments": [
+        "卷材编号"
+      ],
+      "type": "STRING[20]",
+      "address": {
+        "offset": 0,
+        "bit": null
+      },
+      "name": "DB60_B0_String",
+      "mode": "auto_address"
+    },
+    {
+      "key": "bool-address",
+      "db": 47,
+      "segments": [
+        "整机复位"
+      ],
+      "type": "BOOL",
+      "address": {
+        "offset": 12,
+        "bit": 0
+      },
+      "name": "DB47_B12_0_Bool",
+      "mode": "auto_address"
+    },
+    {
+      "key": "space",
+      "db": 28,
+      "segments": [
+        "a b"
+      ],
+      "type": "INT",
+      "address": {
+        "offset": 2,
+        "bit": null
+      },
+      "name": "DB28_B2_Int",
+      "mode": "auto_address"
+    },
+    {
+      "key": "punctuation",
+      "db": 28,
+      "segments": [
+        "a-b"
+      ],
+      "type": "INT",
+      "address": {
+        "offset": 4,
+        "bit": null
+      },
+      "name": "DB28_B4_Int",
+      "mode": "auto_address"
+    },
+    {
+      "key": "quoted-dot",
+      "db": 28,
+      "segments": [
+        "a.b"
+      ],
+      "type": "INT",
+      "address": {
+        "offset": 6,
+        "bit": null
+      },
+      "name": "DB28_B6_Int",
+      "mode": "auto_address"
+    },
+    {
+      "key": "array",
+      "db": 28,
+      "segments": [
+        "items",
+        -1,
+        "Value"
+      ],
+      "type": "INT",
+      "address": {
+        "offset": 8,
+        "bit": null
+      },
+      "name": "DB28_B8_Int",
+      "mode": "auto_address"
+    },
+    {
+      "key": "100-bytes",
+      "db": 1,
+      "segments": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "type": "INT",
+      "name": "DB1_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa_Int",
+      "mode": "auto_path"
+    },
+    {
+      "key": "101-bytes",
+      "db": 1,
+      "segments": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "type": "INT",
+      "address": {
+        "offset": 0,
+        "bit": null
+      },
+      "name": "DB1_B0_Int",
+      "mode": "auto_address"
+    }
+  ],
+  "flattenCollision": {
+    "paths": [
+      [
+        "A_B",
+        "C"
+      ],
+      [
+        "A",
+        "B_C"
+      ]
+    ],
+    "primary": "DB28_A_B_C_Int",
+    "expected": [
+      "DB28_B0_Int",
+      "DB28_B2_Int"
+    ],
+    "unconfirmed": [
+      "",
+      ""
+    ]
+  },
+  "reject": [
+    "unknown_type",
+    "BOOL_missing_bit",
+    "BOOL_bit8",
+    "unconfirmed_address",
+    "final_collision",
+    "manual_invalid",
+    "duplicate_keys",
+    "db_zero"
+  ],
+  "legacyRead": "unchanged_no_write",
+  "selectedPendingCanConfirm": false,
+  "manual": "Roll_Code",
+  "unselectedLegacy": "卷材编号"
+}

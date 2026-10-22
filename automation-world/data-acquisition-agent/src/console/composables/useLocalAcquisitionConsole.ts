@@ -2,7 +2,7 @@
 import { computed, watch, onMounted, onUnmounted, reactive, ref, type InjectionKey } from 'vue';
 import { ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
-import { bootstrap, localCall, LocalCommandError, type Configuration, type ConfigurationView, type Snapshot, type ImportPreview, type Source, type Offset, type Point, type History, type RawSample, type LogRow, type MigrationSummary, type Identification, type BlockMapping } from '../../services/localAcquisition';
+import { bootstrap, localCall, LocalCommandError, type Configuration, type ConfigurationView, type Snapshot, type ImportPreview, type Source, type Offset, type Point, type History, type RawSample, type LogRow, type MigrationSummary, type Identification, type BlockMapping, type NameRequest, type NamePreview, previewPointNames, confirmPointNames } from '../../services/localAcquisition';
 export const localConsoleKey: InjectionKey<LocalConsole> = Symbol('daa-local-owner');
 export type LocalConsole = ReturnType<typeof useLocalAcquisitionConsole>;
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
@@ -18,6 +18,41 @@ export function useLocalAcquisitionConsole() {
     const importRows = computed(() => (identification.value?.blocks ?? []).filter(b => b.blockKey.kind === 'DATA_BLOCK').map(b => ({ block: b, mapping: mappings.value.find(m => m.sourceIndex === b.sourceIndex && m.blockKey.name === b.blockKey.name)! })));
     const pagedImportRows = computed(() => importRows.value.slice((importPage.value - 1) * importPageSize.value, importPage.value * importPageSize.value));
 
+    const selectedNameIds = ref<string[]>([]), namePreview = ref<NamePreview | null>(null), namePreviewOpen = ref(false), namePreviewBusy = ref(false), namePage = ref(1), namePageSize = ref(10), pointPageSize = ref(20);
+    let nameInput: NameRequest | null = null, nameEpoch = 0;
+    let nameTimer: ReturnType<typeof setTimeout> | undefined;
+    const pagedNames = computed(() => namePreview.value?.rows.slice((namePage.value - 1) * namePageSize.value, namePage.value * namePageSize.value) ?? []);
+    function invalidateNames() { nameEpoch++; namePreview.value = null; nameInput = null; namePreviewBusy.value = false; if (nameTimer) clearTimeout(nameTimer); }
+    function closeNames() { namePreviewOpen.value = false; invalidateNames(); }
+    function toggleNamePoint(id: string, selected: boolean) { invalidateNames(); selectedNameIds.value = selected ? [...new Set([...selectedNameIds.value, id])] : selectedNameIds.value.filter(p => p !== id); }
+    async function previewNames() {
+        await perform(async () => {
+            invalidateNames(); if (!view.value || dirty.value || editing.value) throw new Error('unsaved_changes');
+            const input: NameRequest = { expectedEtag: view.value.etag, plcId: selectedPlc.value, pointIds: [...selectedNameIds.value], intent: 'generate', patch: null };
+            const result = await previewPointNames(input); nameInput = input; namePreview.value = result; namePage.value = 1; namePreviewOpen.value = true;
+        });
+    }
+    function stagePointEdit(point: Point | null) {
+        invalidateNames(); if (!point || !view.value || !available) return;
+        const epoch = nameEpoch;
+        const input: NameRequest = { expectedEtag: view.value.etag, plcId: point.plcId, pointIds: [point.id], intent: 'edit', patch: { name: point.name, comment: point.comment, enabled: point.enabled, groupId: point.groupId, address: clone(point.address) } };
+        namePreviewBusy.value = true;
+        nameTimer = setTimeout(async () => {
+            try { const result = await previewPointNames(input); if (epoch === nameEpoch) { nameInput = input; namePreview.value = result; } }
+            catch (e) { if (epoch === nameEpoch) error.value = String(e instanceof Error ? e.message : e); }
+            finally { if (epoch === nameEpoch) namePreviewBusy.value = false; }
+        }, 180);
+    }
+    async function confirmNames() {
+        let saved = false;
+        const input = nameInput, preview = namePreview.value;
+        if (!input || !preview?.canConfirm || namePreviewBusy.value) return false;
+        await perform(async () => {
+            const result = await confirmPointNames(input, preview);
+            invalidateNames(); namePreviewOpen.value = false; accept(result); notice.value = 'saved'; saved = true;
+        });
+        return saved;
+    }
     const editing = ref(false);
     const selectedTargets = ref<string[]>([]);
     const historyFilter = reactive({ plcId: '', groupId: '', from: '', to: '', quality: '' });
@@ -42,7 +77,7 @@ export function useLocalAcquisitionConsole() {
             return true;
         } catch { return false; }
     }
-    const pagedPoints = computed(() => points.value.slice((pointPage.value - 1) * 20, pointPage.value * 20));
+    const pagedPoints = computed(() => points.value.slice((pointPage.value - 1) * pointPageSize.value, pointPage.value * pointPageSize.value));
     async function perform(fn: () => Promise<void>) {
         if (!available) { error.value = 'desktop_preview'; return; }
         if (busy.value)
@@ -64,6 +99,7 @@ export function useLocalAcquisitionConsole() {
         }
     }
     function accept(v: ConfigurationView) {
+        invalidateNames();
         view.value = v;
         draft.value = clone(v.draft);
         if (!plcs.value.some(p => p.id === selectedPlc.value))
@@ -88,7 +124,7 @@ export function useLocalAcquisitionConsole() {
         migration.value = null;
         migration.value = await localCall<MigrationSummary>('daa_get_yaml_migration');
     }
-    async function reload() { await perform(async () => { accept(await localCall<ConfigurationView>('daa_get_configuration')); await refreshMigration(); preview.value = null; offsets.value = []; }); }
+    async function reload() { invalidateNames(); await perform(async () => { accept(await localCall<ConfigurationView>('daa_get_configuration')); await refreshMigration(); preview.value = null; offsets.value = []; }); }
     async function retryMigration() {
         if (!view.value || !migration.value?.attemptId || dirty.value || editing.value) { error.value = 'yaml_unsaved_edits'; return; }
         const expectedEtag = view.value.etag, expectedAttemptId = migration.value.attemptId;
@@ -100,6 +136,7 @@ export function useLocalAcquisitionConsole() {
     }
     // Candidate stays detached until Rust/CAS returns a committed configuration.
     async function saveCandidate(candidate: Configuration) {
+        invalidateNames();
         let saved = false;
         await perform(async () => {
             if (!view.value) return;
@@ -167,7 +204,7 @@ export function useLocalAcquisitionConsole() {
         });
         await refresh();
     }
-    function invalidateImport() { preview.value = null; }
+    function invalidateImport() { preview.value = null; invalidateNames(); }
     function changeImportTarget(mapping: BlockMapping) {
         const db = dbs.value.find(d => d.id === mapping.targetId);
         if (db) mapping.dbNumber = db.number;
@@ -212,6 +249,7 @@ export function useLocalAcquisitionConsole() {
         });
     }
     async function infer(confirm = false) {
+        invalidateNames();
         await perform(async () => {
             if (dirty.value || editing.value) throw new Error('unsaved_changes');
             if (!view.value || !selectedDb.value) return;
@@ -221,6 +259,10 @@ export function useLocalAcquisitionConsole() {
             } else { offsets.value = await localCall<Offset[]>('daa_preview_offsets', { dbId: selectedDb.value, expectedEtag: view.value.etag }); offsetPreviewOpen.value = true; }
         });
     }
+    watch(pointPageSize, () => { pointPage.value = 1; });
+    watch(selectedPlc, () => { selectedNameIds.value = []; invalidateNames(); });
+    watch(() => view.value?.etag, invalidateNames);
+    watch(dirty, () => { if (!editing.value) invalidateNames(); });
     watch([sources, mappings, selectedPlc], invalidateImport, { deep: true });
     watch([dirty, editing, () => view.value?.etag, selectedDb], () => { preview.value = null; offsets.value = []; });
     function address(p: Point) {
@@ -299,6 +341,7 @@ export function useLocalAcquisitionConsole() {
     onUnmounted(() => {
         if (timer)
             clearInterval(timer);
+        if (nameTimer) clearTimeout(nameTimer);
     });
-    return reactive({ sourcePreviewOpen, offsetPreviewOpen, sourceStructureOpen, identification, mappings, importPage, importPageSize, importRows, pagedImportRows, invalidateImport, changeImportTarget, available, migration, retryMigration, editing, dirty, confirmAction, conflictVersion, snapshotError, selectedTargets, bootstrap, view, draft, snapshot, busy, error, notice, selectedPlc, selectedDb, query, pointPage, preview, offsets, sources, history, historyFilter, historyPage, historyPageSize, historyPreviousAvailable, historyNextAvailable, historyPreviousBounded, raw, rawSampleId, logs, label, plcs, dbs, groups, points, pagedPoints, perform, refresh, reload, save, saveCandidate, activate, addPlc, removePlc, addGroup, removeGroup, control, readFiles, importSources, infer, address, manual, bulk, loadHistory, inspect, loadLogs, state, formatBytes });
+    return reactive({ selectedNameIds, namePreview, namePreviewOpen, namePreviewBusy, namePage, namePageSize, pagedNames, pointPageSize, closeNames, invalidateNames, toggleNamePoint, previewNames, stagePointEdit, confirmNames, sourcePreviewOpen, offsetPreviewOpen, sourceStructureOpen, identification, mappings, importPage, importPageSize, importRows, pagedImportRows, invalidateImport, changeImportTarget, available, migration, retryMigration, editing, dirty, confirmAction, conflictVersion, snapshotError, selectedTargets, bootstrap, view, draft, snapshot, busy, error, notice, selectedPlc, selectedDb, query, pointPage, preview, offsets, sources, history, historyFilter, historyPage, historyPageSize, historyPreviousAvailable, historyNextAvailable, historyPreviousBounded, raw, rawSampleId, logs, label, plcs, dbs, groups, points, pagedPoints, perform, refresh, reload, save, saveCandidate, activate, addPlc, removePlc, addGroup, removeGroup, control, readFiles, importSources, infer, address, manual, bulk, loadHistory, inspect, loadLogs, state, formatBytes });
 }

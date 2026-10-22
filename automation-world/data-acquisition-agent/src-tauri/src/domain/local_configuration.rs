@@ -124,6 +124,8 @@ pub(crate) struct Point {
     pub db_id: String,
     pub source_path: String,
     pub name: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub name_mode: Option<super::point_naming::NameMode>,
     pub data_type: String,
     pub comment: String,
     pub enabled: bool,
@@ -383,6 +385,26 @@ pub(crate) fn validate(c: &Configuration) -> Vec<Issue> {
         }
         if p.enabled && p.group_id.is_none() {
             err("group_required", &p.id)
+        }
+        if let Some(mode) = &p.name_mode {
+            use super::point_naming::NameMode;
+            if *mode == NameMode::Pending {
+                if !p.name.is_empty() {
+                    err("point_name_invalid", &p.id)
+                }
+                if p.enabled {
+                    err("point_name_pending", &p.id)
+                }
+            } else if aiis_tia_import_core::validate_manual_name(&p.name).is_err() {
+                err("point_name_invalid", &p.id)
+            }
+            if !p.name.is_empty()
+                && c.points.iter().any(|other| {
+                    other.id != p.id && other.plc_id == p.plc_id && other.name == p.name
+                })
+            {
+                err("point_name_conflict", &p.id)
+            }
         }
         if !p.enabled {
             continue;

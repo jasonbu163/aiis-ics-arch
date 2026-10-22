@@ -1,0 +1,405 @@
+{
+  "profile": "siemens-step7-v20-standard-word-v1",
+  "createdAt": "2026-10-19T05:37:01.305826+00:00",
+  "origin": "Hand-authored before new parser/reconcile/layout implementation; no tested code or preview produced these expectations. Index comprehensions only transcribe the explicit manual address sequence.",
+  "scope": "Complete explicit non-optimized DB; finite one-dimensional arrays; STRUCT and acyclic UDT; no STRING/optimized/TIA compile or field evidence.",
+  "references": [
+    {
+      "url": "https://docs.tia.siemens.cloud/r/en-us/v20/programming-basics/serializing-structures-for-data-exchange/padding-bytes-when-using-structured-data-types",
+      "version": "STEP 7 V20 11/2024",
+      "paragraph": "Padding bytes in non-optimized memory area",
+      "use": "Even structured start/end and explicit BYTE-array example."
+    },
+    {
+      "url": "https://docs.tia.siemens.cloud/r/en-us/v20/data-types/struct-data-structure-anonymous-structures/structure-of-a-struct-tag",
+      "version": "STEP 7 V20 11/2024",
+      "paragraph": "Introduction",
+      "use": "Declaration order, bit/byte/word and nested boundary rules."
+    },
+    {
+      "url": "https://docs.tia.siemens.cloud/r/en-us/v20/data-types/array/structure-of-an-array-tag",
+      "version": "STEP 7 V20 11/2024",
+      "paragraph": "Introduction; one-dimensional array",
+      "use": "Element order and bit packing. English word-start sentence contradicts its even-address clause; padding page is authoritative for that boundary."
+    },
+    {
+      "url": "https://docs.tia.siemens.cloud/r/en-us/v20/data-types/binary-numbers/bool-bit",
+      "version": "STEP 7 V20 11/2024",
+      "paragraph": "Description; length table; optimized note",
+      "use": "Standard BOOL is one bit; optimized 1500 one byte is excluded."
+    }
+  ],
+  "cases": [
+    {
+      "name": "OfficialPadding",
+      "declarations": "a: BYTE; b: BYTE; c: BYTE; bytes: ARRAY[0..6] OF BYTE; tail: BYTE;",
+      "leaves": [
+        {
+          "path": "a",
+          "byte": 0,
+          "bit": null
+        },
+        {
+          "path": "b",
+          "byte": 1,
+          "bit": null
+        },
+        {
+          "path": "c",
+          "byte": 2,
+          "bit": null
+        },
+        {
+          "path": "bytes[0]",
+          "byte": 4,
+          "bit": null
+        },
+        {
+          "path": "bytes[1]",
+          "byte": 5,
+          "bit": null
+        },
+        {
+          "path": "bytes[2]",
+          "byte": 6,
+          "bit": null
+        },
+        {
+          "path": "bytes[3]",
+          "byte": 7,
+          "bit": null
+        },
+        {
+          "path": "bytes[4]",
+          "byte": 8,
+          "bit": null
+        },
+        {
+          "path": "bytes[5]",
+          "byte": 9,
+          "bit": null
+        },
+        {
+          "path": "bytes[6]",
+          "byte": 10,
+          "bit": null
+        },
+        {
+          "path": "tail",
+          "byte": 12,
+          "bit": null
+        }
+      ],
+      "length": 14,
+      "strides": {
+        "bytes": 1
+      },
+      "basis": "Siemens padding explicit three BYTE + seven BYTE array + trailing BYTE example; final DB word boundary."
+    },
+    {
+      "name": "Scalars",
+      "declarations": "b0: BOOL; b1: BOOL; b2: BOOL; b3: BOOL; b4: BOOL; b5: BOOL; b6: BOOL; b7: BOOL; b8: BOOL; octet: BYTE; small: USINT; character: CHAR; signed: INT; unsigned: UINT; bits: WORD; long: DINT; positive: UDINT; mask: DWORD; value: REAL;",
+      "leaves": [
+        {
+          "path": "b0",
+          "byte": 0,
+          "bit": 0
+        },
+        {
+          "path": "b1",
+          "byte": 0,
+          "bit": 1
+        },
+        {
+          "path": "b2",
+          "byte": 0,
+          "bit": 2
+        },
+        {
+          "path": "b3",
+          "byte": 0,
+          "bit": 3
+        },
+        {
+          "path": "b4",
+          "byte": 0,
+          "bit": 4
+        },
+        {
+          "path": "b5",
+          "byte": 0,
+          "bit": 5
+        },
+        {
+          "path": "b6",
+          "byte": 0,
+          "bit": 6
+        },
+        {
+          "path": "b7",
+          "byte": 0,
+          "bit": 7
+        },
+        {
+          "path": "b8",
+          "byte": 1,
+          "bit": 0
+        },
+        {
+          "path": "octet",
+          "byte": 2,
+          "bit": null
+        },
+        {
+          "path": "small",
+          "byte": 3,
+          "bit": null
+        },
+        {
+          "path": "character",
+          "byte": 4,
+          "bit": null
+        },
+        {
+          "path": "signed",
+          "byte": 6,
+          "bit": null
+        },
+        {
+          "path": "unsigned",
+          "byte": 8,
+          "bit": null
+        },
+        {
+          "path": "bits",
+          "byte": 10,
+          "bit": null
+        },
+        {
+          "path": "long",
+          "byte": 12,
+          "bit": null
+        },
+        {
+          "path": "positive",
+          "byte": 16,
+          "bit": null
+        },
+        {
+          "path": "mask",
+          "byte": 20,
+          "bit": null
+        },
+        {
+          "path": "value",
+          "byte": 24,
+          "bit": null
+        }
+      ],
+      "length": 28,
+      "strides": {},
+      "basis": "STRUCT declaration order, BOOL least bit/one bit, BYTE/CHAR byte boundary; other supported widths word-aligned. USINT uses 8-bit width."
+    },
+    {
+      "name": "Nested",
+      "declarations": "lead: BYTE; inner: STRUCT a: BOOL; b: BYTE; child: STRUCT u: WORD; flag: BOOL; END_STRUCT; tail: BYTE; END_STRUCT; next: USINT;",
+      "leaves": [
+        {
+          "path": "lead",
+          "byte": 0,
+          "bit": null
+        },
+        {
+          "path": "inner.a",
+          "byte": 2,
+          "bit": 0
+        },
+        {
+          "path": "inner.b",
+          "byte": 3,
+          "bit": null
+        },
+        {
+          "path": "inner.child.u",
+          "byte": 4,
+          "bit": null
+        },
+        {
+          "path": "inner.child.flag",
+          "byte": 6,
+          "bit": 0
+        },
+        {
+          "path": "inner.tail",
+          "byte": 8,
+          "bit": null
+        },
+        {
+          "path": "next",
+          "byte": 10,
+          "bit": null
+        }
+      ],
+      "length": 12,
+      "strides": {},
+      "basis": "Both STRUCT levels begin and finish on even byte boundaries; leaf sum is insufficient."
+    },
+    {
+      "name": "Arrays",
+      "declarations": "lead: BYTE; flags: ARRAY[-2..6] OF BOOL; bytes: ARRAY[3..5] OF BYTE; words: ARRAY[-1..0] OF WORD; values: ARRAY[5..6] OF REAL; items: ARRAY[1..2] OF STRUCT octet: BYTE; flag: BOOL; END_STRUCT; units: ARRAY[-1..0] OF \"OracleUnit\"; tail: BYTE;",
+      "types": "TYPE \"OracleUnit\" VERSION : 0.1 STRUCT ready: BOOL; code: BYTE; count: WORD; END_STRUCT; END_TYPE",
+      "leaves": [
+        {
+          "path": "lead",
+          "byte": 0,
+          "bit": null
+        },
+        {
+          "path": "flags[-2]",
+          "byte": 2,
+          "bit": 0
+        },
+        {
+          "path": "flags[-1]",
+          "byte": 2,
+          "bit": 1
+        },
+        {
+          "path": "flags[0]",
+          "byte": 2,
+          "bit": 2
+        },
+        {
+          "path": "flags[1]",
+          "byte": 2,
+          "bit": 3
+        },
+        {
+          "path": "flags[2]",
+          "byte": 2,
+          "bit": 4
+        },
+        {
+          "path": "flags[3]",
+          "byte": 2,
+          "bit": 5
+        },
+        {
+          "path": "flags[4]",
+          "byte": 2,
+          "bit": 6
+        },
+        {
+          "path": "flags[5]",
+          "byte": 2,
+          "bit": 7
+        },
+        {
+          "path": "flags[6]",
+          "byte": 3,
+          "bit": 0
+        },
+        {
+          "path": "bytes[3]",
+          "byte": 4,
+          "bit": null
+        },
+        {
+          "path": "bytes[4]",
+          "byte": 5,
+          "bit": null
+        },
+        {
+          "path": "bytes[5]",
+          "byte": 6,
+          "bit": null
+        },
+        {
+          "path": "words[-1]",
+          "byte": 8,
+          "bit": null
+        },
+        {
+          "path": "words[0]",
+          "byte": 10,
+          "bit": null
+        },
+        {
+          "path": "values[5]",
+          "byte": 12,
+          "bit": null
+        },
+        {
+          "path": "values[6]",
+          "byte": 16,
+          "bit": null
+        },
+        {
+          "path": "items[1].octet",
+          "byte": 20,
+          "bit": null
+        },
+        {
+          "path": "items[1].flag",
+          "byte": 21,
+          "bit": 0
+        },
+        {
+          "path": "items[2].octet",
+          "byte": 22,
+          "bit": null
+        },
+        {
+          "path": "items[2].flag",
+          "byte": 23,
+          "bit": 0
+        },
+        {
+          "path": "units[-1].ready",
+          "byte": 24,
+          "bit": 0
+        },
+        {
+          "path": "units[-1].code",
+          "byte": 25,
+          "bit": null
+        },
+        {
+          "path": "units[-1].count",
+          "byte": 26,
+          "bit": null
+        },
+        {
+          "path": "units[0].ready",
+          "byte": 28,
+          "bit": 0
+        },
+        {
+          "path": "units[0].code",
+          "byte": 29,
+          "bit": null
+        },
+        {
+          "path": "units[0].count",
+          "byte": 30,
+          "bit": null
+        },
+        {
+          "path": "tail",
+          "byte": 32,
+          "bit": null
+        }
+      ],
+      "length": 34,
+      "strides": {
+        "flags": "1 bit",
+        "bytes": 1,
+        "words": 2,
+        "values": 4,
+        "items": 2,
+        "units": 4
+      },
+      "basis": "ARRAY word start/end from authoritative padding page; elements in declaration/index order from ARRAY page; BOOL 1 bit from BOOL page; each STRUCT/UDT element occupies a complete word-padded structure."
+    }
+  ]
+}

@@ -1,0 +1,477 @@
+{
+  "recorded_process_checks": [
+    {
+      "pid": 6438,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-2.log"
+      ]
+    },
+    {
+      "pid": 6440,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-2.log"
+      ]
+    },
+    {
+      "pid": 6455,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-2.log"
+      ]
+    },
+    {
+      "pid": 6459,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-2.log"
+      ]
+    },
+    {
+      "pid": 7281,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-3.log"
+      ]
+    },
+    {
+      "pid": 7296,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-3.log"
+      ]
+    },
+    {
+      "pid": 7297,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-3.log"
+      ]
+    },
+    {
+      "pid": 7312,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-3.log"
+      ]
+    },
+    {
+      "pid": 7634,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-4.log"
+      ]
+    },
+    {
+      "pid": 7635,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-4.log"
+      ]
+    },
+    {
+      "pid": 7636,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-4.log"
+      ]
+    },
+    {
+      "pid": 7637,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-4.log"
+      ]
+    },
+    {
+      "pid": 7652,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-4.log"
+      ]
+    },
+    {
+      "pid": 8175,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-6.log"
+      ]
+    },
+    {
+      "pid": 8176,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-6.log"
+      ]
+    },
+    {
+      "pid": 8191,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-6.log"
+      ]
+    },
+    {
+      "pid": 8192,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-6.log"
+      ]
+    },
+    {
+      "pid": 8193,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-6.log"
+      ]
+    },
+    {
+      "pid": 8468,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-7.log"
+      ]
+    },
+    {
+      "pid": 8483,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-7.log"
+      ]
+    },
+    {
+      "pid": 8487,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-7.log"
+      ]
+    },
+    {
+      "pid": 8488,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-7.log"
+      ]
+    },
+    {
+      "pid": 8489,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-7.log"
+      ]
+    },
+    {
+      "pid": 8490,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-7.log"
+      ]
+    },
+    {
+      "pid": 8895,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-8.log"
+      ]
+    },
+    {
+      "pid": 8896,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-8.log"
+      ]
+    },
+    {
+      "pid": 8897,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-8.log"
+      ]
+    },
+    {
+      "pid": 8898,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-8.log"
+      ]
+    },
+    {
+      "pid": 8899,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-8.log"
+      ]
+    },
+    {
+      "pid": 8914,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-8.log"
+      ]
+    },
+    {
+      "pid": 9969,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-9.log"
+      ]
+    },
+    {
+      "pid": 9970,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-9.log"
+      ]
+    },
+    {
+      "pid": 9971,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-9.log"
+      ]
+    },
+    {
+      "pid": 9972,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-9.log"
+      ]
+    },
+    {
+      "pid": 9973,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-9.log"
+      ]
+    },
+    {
+      "pid": 10034,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-9.log"
+      ]
+    },
+    {
+      "pid": 10049,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-9.log"
+      ]
+    },
+    {
+      "pid": 10080,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-9.log"
+      ]
+    },
+    {
+      "pid": 10501,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-10.log"
+      ]
+    },
+    {
+      "pid": 10516,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-10.log"
+      ]
+    },
+    {
+      "pid": 10517,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-10.log"
+      ]
+    },
+    {
+      "pid": 10518,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-10.log"
+      ]
+    },
+    {
+      "pid": 10519,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-10.log"
+      ]
+    },
+    {
+      "pid": 10583,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-10.log"
+      ]
+    },
+    {
+      "pid": 10584,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-10.log"
+      ]
+    },
+    {
+      "pid": 10620,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-10.log"
+      ]
+    },
+    {
+      "pid": 10636,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-10.log"
+      ]
+    },
+    {
+      "pid": 10666,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-10.log"
+      ]
+    },
+    {
+      "pid": 10702,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-matrix-10.log"
+      ]
+    },
+    {
+      "pid": 11963,
+      "status": "pid_absent",
+      "recorded_sources": [
+        "rust-stale-reference-probe.log"
+      ]
+    }
+  ],
+  "temporary_roots": [
+    {
+      "path": "/private/tmp/ff-001-r1-20261021-r2dev",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-concurrent-1792585606204-8455-15",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-concurrent-1792585653171-8880-15",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-concurrent-1792585779348-9953-15",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-concurrent-1792585833602-10499-15",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-dry-1792585787805-9953-160",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-dry-1792585842064-10499-160",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-int-1792585373287-6436-0",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-int-1792585476041-7273-0",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-int-1792585511186-7608-0",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-int-1792585569326-8174-0",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-int-1792585604890-8455-0",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-int-1792585651774-8880-0",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-int-1792585778074-9953-0",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-int-1792585832201-10499-0",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-lost-ack-1792585787977-9953-165",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-lost-ack-1792585842242-10499-165",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-reject-1792585605934-8455-11",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-reject-1792585652899-8880-11",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-reject-1792585779081-9953-11",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-reject-1792585833332-10499-11",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-slow-1792585851936-10499-178",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-slow-http-1792585606472-8455-79",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-slow-http-1792585653438-8880-79",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-slow-http-1792585779609-9953-79",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-slow-http-1792585833874-10499-79",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-split-1792585792820-9953-170",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-split-1792585847254-10499-173",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-stale-1792585856623-10499-183",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r2-rust-stale-reference-probe-1792586007636-11961-0",
+      "purpose": "r2 synthetic state/logs or compilation/evidence; retain for PM/Verification reproduction, coordinator cleans after evidence dependencies end"
+    }
+  ],
+  "limits": "Only exact task-owned PIDs found in recorded output were queried with signal 0; no process-name scan or termination performed. Port rebind proof belongs finite probe; lsof postcheck has no listener output."
+}

@@ -1,0 +1,430 @@
+{
+  "schemaVersion": 1,
+  "taskNamespace": "aiis-ics-arch",
+  "taskId": "DAA-006",
+  "revision": "r3",
+  "status": "owner_accepted",
+  "acceptanceDate": "2026-10-20",
+  "ownerAcceptanceText": "可以，这两处调整没问题，验收 DAA-006 r3。完成验收状态和临时资源收尾，再给我一段发到 DS 会话的接续说明，我接着推动 DS。",
+  "acceptanceSource": "direct Human Owner message in this DAA conversation",
+  "sourceBasis": {
+    "repository": "aiis-ics-arch",
+    "branch": "main",
+    "head": "0af5b91177f3bca63f9f3c2bef9f14004ea49944",
+    "delivery": "working-tree files pinned below; HEAD alone is not the accepted delivery; no Git ref or release created"
+  },
+  "independentQa": {
+    "candidateChecklistSha256": "5bfc28dee9e3a1c7e071ed1ad3a446f76a7230f7b2b771245af4e4c278aac43c",
+    "verdict": "qa_passed",
+    "criteria": "AC01–AC20 within documented limits",
+    "implementationManifestSha256": "1fd10056107669e3c14b57eda54883e54940f029fe7f5edd07de9696a03ed712"
+  },
+  "directUiOverlay": {
+    "mode": "DIRECT",
+    "ownerConfirmed": true,
+    "description": "16px offset-note/action spacing; visible-page select-all, indeterminate state and cross-page retention",
+    "sourcePaths": [
+      "automation-world/data-acquisition-agent/src/app/plc/views/points/index.vue",
+      "automation-world/data-acquisition-agent/src/app/plc/locales/zh-CN.json",
+      "automation-world/data-acquisition-agent/src/app/plc/locales/en-US.json"
+    ],
+    "checks": "frontend build, locale parity/placeholders, actual SFC/local-owner UI interactions, light/English-dark narrow layout; self-check, not a new independent QA",
+    "frontendBuildExit": 0,
+    "summarySha256": "7aedc44dc9dfffc45ddb6a63c5f92220f58b6ed1cdb7253835c8be8c83696696"
+  },
+  "sharedCore": {
+    "package": "aiis-tia-import-core",
+    "version": "0.1.0",
+    "edition": "2021",
+    "profiles": {
+      "import": "tia-subset-v1",
+      "layout": "siemens-step7-v20-standard-word-v1",
+      "name": "tia-point-name-v1",
+      "fixture": "v1"
+    },
+    "publicAPI": [
+      "scan_sources",
+      "expand_db",
+      "layout_standard",
+      "plan_names",
+      "validate_manual_name",
+      "type_suffix"
+    ],
+    "path": "automation-world/shared/tia-import-core",
+    "coreDeliveryManifestSha256": "205f00ecf946246dfc7c2268eb60912733fb7fb1e52405e9174a5ea5996b1812"
+  },
+  "acceptedFiles": [
+    {
+      "path": "automation-world/shared/README.md",
+      "acceptedSha256": "a78c8867953f2ffe01eb59c965f6e99630df82ed702a331385ed6ca3c1cd2099",
+      "independentQaCandidateSha256": "a78c8867953f2ffe01eb59c965f6e99630df82ed702a331385ed6ca3c1cd2099",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/README.zh-CN.md",
+      "acceptedSha256": "eb93d6a62df11aabdbd83d857f651a07c2efc83708dffb11fcb2d16c863b60c7",
+      "independentQaCandidateSha256": "eb93d6a62df11aabdbd83d857f651a07c2efc83708dffb11fcb2d16c863b60c7",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/tia-import-core/Cargo.toml",
+      "acceptedSha256": "a82f221d1d6baab2aa9bfb0c5cf084847768d0d5d34d747c912420d549bd5cb1",
+      "independentQaCandidateSha256": "a82f221d1d6baab2aa9bfb0c5cf084847768d0d5d34d747c912420d549bd5cb1",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/tia-import-core/Cargo.lock",
+      "acceptedSha256": "4ac1935bee10dde4638df61833f07d95008ae5853f8e630afc2019ee76769502",
+      "independentQaCandidateSha256": "4ac1935bee10dde4638df61833f07d95008ae5853f8e630afc2019ee76769502",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/tia-import-core/src/lib.rs",
+      "acceptedSha256": "d69e0cabfec5c1cb98334fd3a3038d21c318a30687d155d8ade8f1d0e6fc5d5f",
+      "independentQaCandidateSha256": "d69e0cabfec5c1cb98334fd3a3038d21c318a30687d155d8ade8f1d0e6fc5d5f",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/tia-import-core/src/model.rs",
+      "acceptedSha256": "1347c9a2cb6ba102861229432f602ff7bebb4e83fc1e75cee387c901f24bca31",
+      "independentQaCandidateSha256": "1347c9a2cb6ba102861229432f602ff7bebb4e83fc1e75cee387c901f24bca31",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/tia-import-core/src/parser.rs",
+      "acceptedSha256": "1513cef43324868f73a191c5b15cc4398ac0fc6fab400de516f95f7e0fa5a6e9",
+      "independentQaCandidateSha256": "1513cef43324868f73a191c5b15cc4398ac0fc6fab400de516f95f7e0fa5a6e9",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/tia-import-core/src/layout.rs",
+      "acceptedSha256": "316ce3ae0c3511e12291dd460702cedfe403ec7e2120b4314dce0b6fe8bf793e",
+      "independentQaCandidateSha256": "316ce3ae0c3511e12291dd460702cedfe403ec7e2120b4314dce0b6fe8bf793e",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/tia-import-core/src/naming.rs",
+      "acceptedSha256": "122ceb9b88fad2bb10ae495985fee3b6b4d5cc5ce3460b207d9c2ab26e968fe2",
+      "independentQaCandidateSha256": "122ceb9b88fad2bb10ae495985fee3b6b4d5cc5ce3460b207d9c2ab26e968fe2",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/tia-import-core/tests/contract.rs",
+      "acceptedSha256": "8ba71ef71f644c71d857e88483fef72ac418b809be54b05957daa0789fa3ed72",
+      "independentQaCandidateSha256": "8ba71ef71f644c71d857e88483fef72ac418b809be54b05957daa0789fa3ed72",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/tia-import-core/fixtures/names.db",
+      "acceptedSha256": "769ebebc825bfa321de71a0a931012f5d6d0f1fe135da4b028cc6e9b78cf2586",
+      "independentQaCandidateSha256": "769ebebc825bfa321de71a0a931012f5d6d0f1fe135da4b028cc6e9b78cf2586",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/tia-import-core/fixtures/names.udt",
+      "acceptedSha256": "8a5e470b2668f85aff8b7ba01c22c06b341ef044fbd4d31d1ec8e0f48ec02250",
+      "independentQaCandidateSha256": "8a5e470b2668f85aff8b7ba01c22c06b341ef044fbd4d31d1ec8e0f48ec02250",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/tia-import-core/fixtures/expected-v1.json",
+      "acceptedSha256": "397fb68d8053f2adef41aa5a63cd8e53673e90174532a0def6db985aca913977",
+      "independentQaCandidateSha256": "397fb68d8053f2adef41aa5a63cd8e53673e90174532a0def6db985aca913977",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/tia-import-core/fixtures/daa005-layout-oracle.json",
+      "acceptedSha256": "2f2f6fe79eea60b48357b72f8a4f352016da4c8d95220ba2e06005133c24e633",
+      "independentQaCandidateSha256": "2f2f6fe79eea60b48357b72f8a4f352016da4c8d95220ba2e06005133c24e633",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/tia-import-core/fixtures/README.md",
+      "acceptedSha256": "4c9bc5c8b2c10711ebe585e19d43d4ccf6633a77c44f5820398cdc6b432b7c6a",
+      "independentQaCandidateSha256": "4c9bc5c8b2c10711ebe585e19d43d4ccf6633a77c44f5820398cdc6b432b7c6a",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/tia-import-core/fixtures/README.zh-CN.md",
+      "acceptedSha256": "b09f33569f6873af52befbe6d07402cd856076e753b38801b446cd505410ea6d",
+      "independentQaCandidateSha256": "b09f33569f6873af52befbe6d07402cd856076e753b38801b446cd505410ea6d",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/tia-import-core/README.md",
+      "acceptedSha256": "76789a2987f6a8517f6bd2afc606ce333058d295069e41479c5d5ad207fa769c",
+      "independentQaCandidateSha256": "76789a2987f6a8517f6bd2afc606ce333058d295069e41479c5d5ad207fa769c",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/shared/tia-import-core/README.zh-CN.md",
+      "acceptedSha256": "f561bd78dd444ce1173a7cd21a9afddb890ab8a2b35e3a9cab9f66e56dbae7da",
+      "independentQaCandidateSha256": "f561bd78dd444ce1173a7cd21a9afddb890ab8a2b35e3a9cab9f66e56dbae7da",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/Cargo.toml",
+      "acceptedSha256": "6ca767c287b9118449027671684b3fd4dea5d4503d266d09a5d8cc22bd92c88e",
+      "independentQaCandidateSha256": "6ca767c287b9118449027671684b3fd4dea5d4503d266d09a5d8cc22bd92c88e",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/Cargo.lock",
+      "acceptedSha256": "0fd260eb50278b28e6b3a2e016dcc18ed6a4030b0c95a2a828db8ddcbfc05a61",
+      "independentQaCandidateSha256": "0fd260eb50278b28e6b3a2e016dcc18ed6a4030b0c95a2a828db8ddcbfc05a61",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/config/mod.rs",
+      "acceptedSha256": "5e4ed91fe6b7ffb4f66a6f814cab4c0466112eff6f6c0620a1e034bf4fa5fd4f",
+      "independentQaCandidateSha256": "5e4ed91fe6b7ffb4f66a6f814cab4c0466112eff6f6c0620a1e034bf4fa5fd4f",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/domain/local_configuration.rs",
+      "acceptedSha256": "af64ca7f52d336b096a4744dcf3f0398776204a0e86939eba1bbd8693e07d22d",
+      "independentQaCandidateSha256": "af64ca7f52d336b096a4744dcf3f0398776204a0e86939eba1bbd8693e07d22d",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/domain/mod.rs",
+      "acceptedSha256": "a8d7f588e4703fe4a181d9cf594b0a5717964209ca99e8f5a9f25aa1115635d5",
+      "independentQaCandidateSha256": "a8d7f588e4703fe4a181d9cf594b0a5717964209ca99e8f5a9f25aa1115635d5",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/domain/point_naming.rs",
+      "acceptedSha256": "d60cab560b2f2047cc299b7ea62ba8b1978c754930af9d965aa444467332276b",
+      "independentQaCandidateSha256": "d60cab560b2f2047cc299b7ea62ba8b1978c754930af9d965aa444467332276b",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/domain/source_import.rs",
+      "acceptedSha256": "35f32c26eb3eb13e89c211354c6fdbfb9ecf94db379a8aef87138000f5b73654",
+      "independentQaCandidateSha256": "35f32c26eb3eb13e89c211354c6fdbfb9ecf94db379a8aef87138000f5b73654",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/infrastructure/tia_source.rs",
+      "acceptedSha256": "97477cf7bf6fc7d60413e1bbd0da223a9a17e19b4f9c6ee04000faf5703347c1",
+      "independentQaCandidateSha256": "97477cf7bf6fc7d60413e1bbd0da223a9a17e19b4f9c6ee04000faf5703347c1",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/infrastructure/tia_source/parser.rs",
+      "acceptedSha256": "ec4e851858d246f9df88b770088877b09ef3b5b71272ebd24917fbbf20503129",
+      "independentQaCandidateSha256": "ec4e851858d246f9df88b770088877b09ef3b5b71272ebd24917fbbf20503129",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/infrastructure/tia_source/reconcile.rs",
+      "acceptedSha256": "c474e92d035fcdd79623f13041747726e7f2e89f9b9f6521e4dcb95d07ebbec2",
+      "independentQaCandidateSha256": "c474e92d035fcdd79623f13041747726e7f2e89f9b9f6521e4dcb95d07ebbec2",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/infrastructure/tia_source/tests.rs",
+      "acceptedSha256": "01a22f2fc7c464997335bee66ca8f94790c301bc3fb112cfbcfa26da1b898a0b",
+      "independentQaCandidateSha256": "01a22f2fc7c464997335bee66ca8f94790c301bc3fb112cfbcfa26da1b898a0b",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/infrastructure/plc_layout.rs",
+      "acceptedSha256": "6f962a52029e9fdcd7416e3491c67794554ac59cddb7a4f299a683efc69827a9",
+      "independentQaCandidateSha256": "6f962a52029e9fdcd7416e3491c67794554ac59cddb7a4f299a683efc69827a9",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/infrastructure/plc_layout/tests.rs",
+      "acceptedSha256": "8bf372df5b0b044ad978b5e0279114fc550c2569632a8445ded0c239c94039d2",
+      "independentQaCandidateSha256": "8bf372df5b0b044ad978b5e0279114fc550c2569632a8445ded0c239c94039d2",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/mod.rs",
+      "acceptedSha256": "6d34cf32aa96ee78daa64c08cbcd99b098b15c60d2b9fef5d1e898de8a637ed5",
+      "independentQaCandidateSha256": "6d34cf32aa96ee78daa64c08cbcd99b098b15c60d2b9fef5d1e898de8a637ed5",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/point_naming_tests.rs",
+      "acceptedSha256": "45449b04e539271652069ea7d7d662a3cd7f5749db33a5991c8ce4cd67513ea3",
+      "independentQaCandidateSha256": "45449b04e539271652069ea7d7d662a3cd7f5749db33a5991c8ce4cd67513ea3",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/source_import_tests.rs",
+      "acceptedSha256": "6290cff52064116e28d8dae4d4c2514bc958bf1e79153ecb18dd9f76189d3036",
+      "independentQaCandidateSha256": "6290cff52064116e28d8dae4d4c2514bc958bf1e79153ecb18dd9f76189d3036",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/infrastructure/yaml_migration.rs",
+      "acceptedSha256": "a532834557e067fabf4d44ba6a780286c383f36308d0fd992f5b464f0d66b7ea",
+      "independentQaCandidateSha256": "a532834557e067fabf4d44ba6a780286c383f36308d0fd992f5b464f0d66b7ea",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/services/mod.rs",
+      "acceptedSha256": "1dd5259d9c0723baa359274618935007243f66c147973e913bcadbbab45eb883",
+      "independentQaCandidateSha256": "1dd5259d9c0723baa359274618935007243f66c147973e913bcadbbab45eb883",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/services/local_point_naming.rs",
+      "acceptedSha256": "72e786bfea56ce2cd0dd6adce06b14dfb8304839be799b7f3f958665cb091433",
+      "independentQaCandidateSha256": "72e786bfea56ce2cd0dd6adce06b14dfb8304839be799b7f3f958665cb091433",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/services/local_configuration.rs",
+      "acceptedSha256": "bad335d806a81862d3648dbe8d79537a0edb1366b93833b88f1301e4784d8c38",
+      "independentQaCandidateSha256": "bad335d806a81862d3648dbe8d79537a0edb1366b93833b88f1301e4784d8c38",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/services/local_supervisor.rs",
+      "acceptedSha256": "3436a2dda9a2daab7f788c865b3cdee74440cf1763fd3b45726f04e2b2344f6e",
+      "independentQaCandidateSha256": "3436a2dda9a2daab7f788c865b3cdee74440cf1763fd3b45726f04e2b2344f6e",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/commands/local_acquisition.rs",
+      "acceptedSha256": "846eb8699335aa9d81f9c8b52ff6b353e30b75e5aa1197166541e27324aaf418",
+      "independentQaCandidateSha256": "846eb8699335aa9d81f9c8b52ff6b353e30b75e5aa1197166541e27324aaf418",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/lib.rs",
+      "acceptedSha256": "42685d3265a3e8439990a1907f041d8ce5f820ee54ef4a0a69ff3fd32f4906b7",
+      "independentQaCandidateSha256": "42685d3265a3e8439990a1907f041d8ce5f820ee54ef4a0a69ff3fd32f4906b7",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src/services/localAcquisition.ts",
+      "acceptedSha256": "231c78ec8c2099895f1c1d23ee50806797110f3bad598287e9d1e1450a06ab85",
+      "independentQaCandidateSha256": "231c78ec8c2099895f1c1d23ee50806797110f3bad598287e9d1e1450a06ab85",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src/console/composables/useLocalAcquisitionConsole.ts",
+      "acceptedSha256": "6c772d80f8c0bb36a942de42277e31f77db943b057546869acd38fc6b5b6c40e",
+      "independentQaCandidateSha256": "6c772d80f8c0bb36a942de42277e31f77db943b057546869acd38fc6b5b6c40e",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src/components/console/ConfigRevisionBar.vue",
+      "acceptedSha256": "843aa0a23e222b5981199b32d044163f354c76647b0ccbe264502cccd4254c56",
+      "independentQaCandidateSha256": "843aa0a23e222b5981199b32d044163f354c76647b0ccbe264502cccd4254c56",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src/components/console/YamlMigrationNotice.vue",
+      "acceptedSha256": "b899529004abad6fd39a76019a88d15c80bcf2b1707959162fcf119d0070113d",
+      "independentQaCandidateSha256": "b899529004abad6fd39a76019a88d15c80bcf2b1707959162fcf119d0070113d",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src/app/plc/views/points/index.vue",
+      "acceptedSha256": "333927927e556f7a1557ec02ff8010e0c6e43fe229e6b2f736d3308eee8d824d",
+      "independentQaCandidateSha256": "26da5e0177e08f85d0187c3a7cb0155000b9843fd84d71644b72edcb068a74de",
+      "directUiOverlay": true
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src/app/plc/components/SourceImportPanel.vue",
+      "acceptedSha256": "7d9509c203d47443442490a34d8f30be5a11e59e046c2e385c93ce60a9a0678a",
+      "independentQaCandidateSha256": "7d9509c203d47443442490a34d8f30be5a11e59e046c2e385c93ce60a9a0678a",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src/app/plc/components/PointNamePreviewDialog.vue",
+      "acceptedSha256": "f94dd11e3cc39a2d3b771ef7c2e2a6087e4879d078f52a45d850b6449b3cc154",
+      "independentQaCandidateSha256": "f94dd11e3cc39a2d3b771ef7c2e2a6087e4879d078f52a45d850b6449b3cc154",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src/styles/app.css",
+      "acceptedSha256": "9e40bd8265c486b2c3ace07776b2bdbeb53a0e567e39066fb183efe402000a62",
+      "independentQaCandidateSha256": "9e40bd8265c486b2c3ace07776b2bdbeb53a0e567e39066fb183efe402000a62",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src/locales/zh-CN/common.json",
+      "acceptedSha256": "828b8f39e48ec74c0d14578f9abda2fc1f2d39fbc9e80392eb5115c8ef2a1249",
+      "independentQaCandidateSha256": "828b8f39e48ec74c0d14578f9abda2fc1f2d39fbc9e80392eb5115c8ef2a1249",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src/locales/en-US/common.json",
+      "acceptedSha256": "3a93a3540629e938fa5127a02d7bcae25c6ea9ec499ee4940fe93797e1d52ff1",
+      "independentQaCandidateSha256": "3a93a3540629e938fa5127a02d7bcae25c6ea9ec499ee4940fe93797e1d52ff1",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src/app/plc/locales/zh-CN.json",
+      "acceptedSha256": "f580a3fea35c82a33b6ed6097973f1b9024695a13198e7505ccba6c0da4d303d",
+      "independentQaCandidateSha256": "c3f5b80bb2f7c8b2a5648105ff4374b961d2fcb98c1c74c53005402df5ff8bf0",
+      "directUiOverlay": true
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src/app/plc/locales/en-US.json",
+      "acceptedSha256": "5333c7f2e541f3830b0223ec1bdb4854ff565b1b173dbb11b3bc952642570917",
+      "independentQaCandidateSha256": "6a2e6c2306ab5334db83552320b42ee4e42dd77a847ca23dc14c2967250e27a5",
+      "directUiOverlay": true
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/README.md",
+      "acceptedSha256": "9d710ad056cd1036385a288a97ee9d2be1ccc8c78d8d71dccca8aa8d4ad9e893",
+      "independentQaCandidateSha256": "9d710ad056cd1036385a288a97ee9d2be1ccc8c78d8d71dccca8aa8d4ad9e893",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/README.zh-CN.md",
+      "acceptedSha256": "2c908622d34f5358c0603f1dae0d43150118afcdcd675a132e935bc9ae6b97cf",
+      "independentQaCandidateSha256": "2c908622d34f5358c0603f1dae0d43150118afcdcd675a132e935bc9ae6b97cf",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src/app/README.md",
+      "acceptedSha256": "0d67c52f3867df25051079a039f03cd346e275a5f5609a4d1e8b28062beacefd",
+      "independentQaCandidateSha256": "0d67c52f3867df25051079a039f03cd346e275a5f5609a4d1e8b28062beacefd",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src/app/README.zh-CN.md",
+      "acceptedSha256": "90c7d654f879fcc86cfb844805f0740b4f6a7e6a6dfd2f0ec256fafbec279b3f",
+      "independentQaCandidateSha256": "90c7d654f879fcc86cfb844805f0740b4f6a7e6a6dfd2f0ec256fafbec279b3f",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/README.md",
+      "acceptedSha256": "770651b85ba752cc4d9799510326eb767870c98bd87e5ad155ec629d3f39bf0b",
+      "independentQaCandidateSha256": "770651b85ba752cc4d9799510326eb767870c98bd87e5ad155ec629d3f39bf0b",
+      "directUiOverlay": false
+    },
+    {
+      "path": "automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/README.zh-CN.md",
+      "acceptedSha256": "3c2a39b63a4424c6c85deec3b72461b5f9218cb43141982a0d4bd7ed2c8e740d",
+      "independentQaCandidateSha256": "3c2a39b63a4424c6c85deec3b72461b5f9218cb43141982a0d4bd7ed2c8e740d",
+      "directUiOverlay": false
+    },
+    {
+      "path": ".gitignore",
+      "acceptedSha256": "d4eebf28aaa37f43278fbc5ee22fb5d5dd6cc038db520e7c2fe181c095b1194e",
+      "independentQaCandidateSha256": "d4eebf28aaa37f43278fbc5ee22fb5d5dd6cc038db520e7c2fe181c095b1194e",
+      "directUiOverlay": false
+    },
+    {
+      "path": "CODE_INDEX.md",
+      "acceptedSha256": "971235e01214e1dc135d11b9ee575ed6a35764149881344d3dea35d538073837",
+      "independentQaCandidateSha256": "971235e01214e1dc135d11b9ee575ed6a35764149881344d3dea35d538073837",
+      "directUiOverlay": false
+    }
+  ],
+  "handoffBoundaries": [
+    "DS consumes fixed shared-core files with its own instance/region identities; no DAA profile/receipt/history reuse.",
+    "Parser skips source initial values; DS owns explicit initial values, encoding, memory, policies and lifecycle.",
+    "Stage B remains open pending an accepted DS baseline and separately approved DAA–DS real-S7-to-SQLite joint validation.",
+    "No DS G0 execution, Stage C, backend/SMA, real PLC, production API/database, field cutover or Git publication is authorized by this acceptance."
+  ]
+}

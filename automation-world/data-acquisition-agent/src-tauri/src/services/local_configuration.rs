@@ -37,7 +37,7 @@ impl LocalEngine {
         protect_derived(&previous.draft, &draft)?;
         self.save_candidate(draft, etag)
     }
-    fn save_candidate(
+    pub(super) fn save_candidate(
         &self,
         mut draft: Configuration,
         etag: String,
@@ -87,6 +87,7 @@ impl LocalEngine {
     pub fn invalidate_previews(&self) {
         *self.import_preview.lock().unwrap() = None;
         *self.offset_preview.lock().unwrap() = None;
+        *self.name_preview.lock().unwrap() = None;
     }
     pub fn identify_sources(&self, r: &ImportRequest) -> LocalResult<Identification> {
         self.invalidate_previews();
@@ -115,6 +116,7 @@ impl LocalEngine {
         })
     }
     pub fn import_selected(&self, r: ImportRequest) -> LocalResult<ImportPreview> {
+        *self.name_preview.lock().unwrap() = None;
         let outcome = (|| -> LocalResult<ImportPreview> {
             if r.stage.is_none()
                 && (!r.mappings.is_empty()
@@ -214,6 +216,7 @@ impl LocalEngine {
         db: String,
         etag: Option<String>,
     ) -> LocalResult<Vec<plc_layout::OffsetChange>> {
+        *self.name_preview.lock().unwrap() = None;
         *self.offset_preview.lock().unwrap() = None;
         let c = self.configuration()?;
         if etag.as_ref().map(|e| e != &c.etag).unwrap_or(false) {
@@ -258,7 +261,8 @@ impl LocalEngine {
                 return Err("offset_preview_conflict".into());
             }
             plc_layout::confirm(&mut c.draft, &db, &points)?;
-            self.save(c.draft, etag)
+            self.invalidate_previews();
+            self.save_candidate(c.draft, etag)
         })();
         self.event(
             if result.is_ok() {
@@ -314,6 +318,18 @@ fn protect_derived(old: &Configuration, new: &Configuration) -> LocalResult<()> 
             .iter()
             .find(|p| p.id == point.id)
             .ok_or("source_import_required")?;
+        if point.name_mode != original.name_mode || point.name != original.name {
+            return Err("name_preview_required".into());
+        }
+        if point.address != original.address
+            && matches!(
+                point.name_mode,
+                Some(crate::domain::point_naming::NameMode::Pending)
+                    | Some(crate::domain::point_naming::NameMode::AutoAddress)
+            )
+        {
+            return Err("name_preview_required".into());
+        }
         if point.plc_id != original.plc_id
             || point.db_id != original.db_id
             || point.source_path != original.source_path

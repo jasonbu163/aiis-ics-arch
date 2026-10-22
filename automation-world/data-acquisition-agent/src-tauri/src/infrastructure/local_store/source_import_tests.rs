@@ -13,7 +13,7 @@ use serde_json::{json, Value};
 use std::collections::BTreeMap;
 const MULTI: &str = include_str!("../../../tests/fixtures/source-import-multi-db/multi.db");
 const TYPES: &str = include_str!("../../../tests/fixtures/source-import-multi-db/types.udt");
-fn profile(label: &str) -> PathBuf {
+pub(super) fn profile(label: &str) -> PathBuf {
     let p = std::env::temp_dir()
         .canonicalize()
         .unwrap()
@@ -36,7 +36,7 @@ fn plc(n: u8) -> Plc {
         deadline_ms: 5000,
     }
 }
-fn engine(p: &Path) -> Arc<LocalEngine> {
+pub(super) fn engine(p: &Path) -> Arc<LocalEngine> {
     LocalEngine::open(Bootstrap {
         mode: "local_sqlite".into(),
         profile: p.into(),
@@ -48,7 +48,7 @@ fn engine(p: &Path) -> Arc<LocalEngine> {
     })
     .unwrap()
 }
-fn req(c: &Configuration, etag: &str, docs: &[(&str, &str)]) -> ImportRequest {
+pub(super) fn req(c: &Configuration, etag: &str, docs: &[(&str, &str)]) -> ImportRequest {
     let sources: Vec<_> = docs
         .iter()
         .map(|(name, body)| SourceDocument {
@@ -94,7 +94,7 @@ fn req(c: &Configuration, etag: &str, docs: &[(&str, &str)]) -> ImportRequest {
         .collect();
     r
 }
-fn confirm(e: &LocalEngine, mut r: ImportRequest) -> ImportPreview {
+pub(super) fn confirm(e: &LocalEngine, mut r: ImportRequest) -> ImportPreview {
     let p = e.import_selected(r.clone()).unwrap();
     assert!(p.can_confirm, "{:?}", p.issues);
     r.confirm = true;
@@ -104,7 +104,7 @@ fn confirm(e: &LocalEngine, mut r: ImportRequest) -> ImportPreview {
     assert_eq!(result.configuration, p.configuration);
     result
 }
-fn dump(conn: &Connection, tables: &[&str]) -> Value {
+pub(super) fn dump(conn: &Connection, tables: &[&str]) -> Value {
     let mut result = serde_json::Map::new();
     for table in tables {
         let mut stmt = conn
@@ -131,7 +131,7 @@ fn dump(conn: &Connection, tables: &[&str]) -> Value {
     }
     Value::Object(result)
 }
-fn protected(s: &Stores) -> Value {
+pub(super) fn protected(s: &Stores) -> Value {
     json!({"config":dump(&s.config,&["schema_migrations","instance_metadata","configuration_revisions","active_selection","activation_intents"]),"runtime":dump(&s.runtime,&["schema_migrations","runtime_metadata","plc_sources","configuration_contexts","activation_journal","collection_cycles","samples","sample_delivery","sample_references"]),"receipt":s.config.query_row("SELECT content FROM source_documents WHERE substr(name,1,25)='__daa_yaml_migration_v1__'",[],|r|r.get::<_,String>(0)).optional().unwrap()})
 }
 #[test]
@@ -314,7 +314,7 @@ fn store_rollback_and_same_bytes_two_plcs_distinct_names() {
     assert_eq!(archive, dump(&s.config, &["source_documents"]));
     s.clean_exit().unwrap();
 }
-fn old_seed(s: &mut Stores, p: &Path) -> Configuration {
+pub(super) fn old_seed(s: &mut Stores, p: &Path) -> Configuration {
     let points = p.join("empty-points.yaml");
     let policy = p.join("empty-policy.yaml");
     std::fs::write(&points, "# owned empty\n").unwrap();
@@ -354,6 +354,7 @@ fn old_seed(s: &mut Stores, p: &Path) -> Configuration {
     c.points[0].enabled = true;
     c.points[0].group_id = Some(c.groups[0].id.clone());
     c.points[0].name = "User value".into();
+    c.points[0].name_mode = None;
     c.points[0].address.as_mut().unwrap().origin = "manual".into();
     c.points[0].address.as_mut().unwrap().reason = "Seed manual review".into();
     let v = s.configuration().unwrap();

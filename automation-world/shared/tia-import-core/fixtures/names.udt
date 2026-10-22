@@ -1,0 +1,5 @@
+TYPE "NameItem"
+STRUCT
+  Value : INT;
+END_STRUCT;
+END_TYPE

@@ -5,3 +5,5 @@ pub(crate) mod local_sample;
 pub(crate) mod yaml_migration;
 
 pub(crate) mod source_import;
+
+pub(crate) mod point_naming;

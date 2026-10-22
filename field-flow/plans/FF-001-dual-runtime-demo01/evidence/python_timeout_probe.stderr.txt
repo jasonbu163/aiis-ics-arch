@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/plans/FF-001-dual-runtime-demo01/evidence/python_timeout_probe.py", line 69, in <module>
+    assert observations["connect_elapsed_ms"] <= 3500, "FF-001 R04 connect budget violated"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: FF-001 R04 connect budget violated

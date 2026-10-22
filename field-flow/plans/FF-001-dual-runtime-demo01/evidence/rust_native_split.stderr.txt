@@ -1,0 +1,4 @@
+
+thread 'main' panicked at src/main.rs:150:5:
+R04 native total driver budget violated
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

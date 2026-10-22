@@ -3,6 +3,8 @@
 **内容修订：2026-10-17 · ARCH-AW-003 r2**  
 **效力：目标设计、推荐机制与接口语义草案；不表示已实现或正式协议冻结。**
 
+> **方向更新（ARCH-AW-007 r2）：** 新路线保留 DAA、SMA、CA 三应用：DAA 负责大量持续采集，SMA 沿已过滤 TSS 基线精简表格化批量 HTTP 映射与工作台，CA 承担通用节点编排及内部多协议连接器。AWB/AWC 未来统一管理三类实例，先登记/心跳与只读健康，再配置/远程操作。全项目 [中文 ROADMAP](../ROADMAP.zh-CN.md)、[English ROADMAP](../ROADMAP.md) 与 [007 r2](../plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design)、[006 r2](../plans/ARCH-AW-006-unified-flow-agent-design/spec.md#r2-design) 提供当前方向；精确批准、交付、独立 QA 与最终验收状态归所属 bundle，原设计正文/来源及 r1 验证历史保留。DAA 当前 SQLite 本地采集且新上传未接入；SMA 当前 Backend-held TSS/Facts→POST 与逐项 await 调度，子集/逐行常驻、任意 HTTP 源、本地 SQLite/可靠 outbox 和容量优化分期，不强制近期迁库；CA 自身版本化存储仍为目标。本文旧表单/共享 Core/角色节点限制等按当时范围解释，不构成三 App 统一迁移或 CA 能力总界限；CAF/旧 CA 保持冻结。CA 首版 HTTP GET/POST、明确受支持 S7 与无登录前提依 006 r2；原可靠投递、PW Service/API owner、版本固定及 unknown 核实原则仍为适用参考，后续实施 spec 明确采用/替代条款。本提示不宣称软件、QA、设备或部署许可。
+
 本文与 [DAA 详细设计](AIIS_DAA_Detailed_Design.md)配套，承接 [AW 运行原理设计](AIIS_AW_Runtime_Design.md)和 [AW 白皮书](AIIS_AW_Whitepaper_Roadmap_v0.4.md)，范围由 [ARCH-AW-003 r2 spec](../plans/ARCH-AW-003-daa-detailed-design/spec.md)管理。DAA 正文解释现场事实、自描述载荷、来源顺序与 Backend 事实窗口；本文解释 SMA 如何绑定、转换、持久处理及向业务 API 投递。首版推荐表单/规则式工作流，通用画布与共享 Flow Core 是后续方向。
 
 ## 阅读导航

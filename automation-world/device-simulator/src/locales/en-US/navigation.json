@@ -1,0 +1,9 @@
+{
+  "overview": "Workbench",
+  "configuration": "Configuration",
+  "instances": "Instances",
+  "points": "DB points",
+  "policies": "Simulation and access",
+  "values": "Runtime values",
+  "logs": "Logs and storage"
+}

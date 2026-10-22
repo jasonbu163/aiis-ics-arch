@@ -24,6 +24,8 @@
     <section v-if="local.preview" class="daa-local-edit-section">
       
       <p>{{ t(local.preview.canConfirm ? 'plc.sourceImport.ready' : 'plc.sourceImport.blocked') }}</p>
+      <p class="daa-capability-note">{{ t('plc.naming.importSummary', { count: local.preview.nameChanges.length, pending: local.preview.nameChanges.filter(p => p.proposedMode === 'pending').length }) }}</p>
+      <details class="daa-details"><summary>{{ t('plc.naming.newName') }}</summary><p v-for="row in local.preview.nameChanges" :key="row.pointId" class="daa-name-diff">{{ row.sourcePath }} · {{ row.oldName || '—' }} → {{ row.proposedName || t('plc.naming.modes.pending') }} · {{ t('plc.naming.modes.' + (row.proposedMode ?? 'legacy')) }}</p></details>
       <p v-for="(issue, i) in local.preview.issues" :key="i">{{ local.label(issue.code) }} · {{ issue.file }}:{{ issue.line }} {{ issue.path }}</p>
       <details v-for="delta in local.preview.deltas" :key="delta.dbId" class="daa-details"><summary>{{ delta.blockName }} · DB{{ delta.number }} · {{ local.label(delta.status) }}</summary>
         <p>{{ t('plc.sourceImport.preservation', { points: delta.preservedPoints, manual: delta.preservedManual, invalidated: delta.invalidatedConfirmations }) }}</p>

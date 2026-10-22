@@ -130,5 +130,39 @@
     "closePreview": "Close preview",
     "lengthEditHint": "Length edits remain unsaved in the draft. After closing, use Save draft in the configuration bar. Closing does not save.",
     "lengths": "Configured DB length: {current} bytes · Calculated length: {calculated} bytes"
+  },
+  "naming": {
+    "technicalName": "Technical name",
+    "sourcePath": "Original path",
+    "select": "Select",
+    "selectPage": "Select all points on this page",
+    "selectPoint": "Select point {path}",
+    "selected": "{count} selected (one PLC, retained across pages)",
+    "preview": "Preview selected names",
+    "explicitHint": "Only explicitly selected points are converted. Legacy and manual changes appear below. Cancel writes nothing and retains selection. Any pending address or conflict blocks the whole confirmation.",
+    "oldName": "Old name",
+    "newName": "Proposed name",
+    "reason": "Naming basis",
+    "addressConfirmed": "Address confirmed",
+    "addressPending": "Address unconfirmed",
+    "confirm": "Confirm selected conversion",
+    "editHint": "Name changes require a valid ASCII technical name; the original path stays. Address confirmation and pending name generation commit in this save. Failures retain input.",
+    "previewing": "Checking name preview…",
+    "importSummary": "{count} name changes; {pending} await confirmed addresses. Nothing is enabled or activated.",
+    "modes": {
+      "legacy": "Legacy name / explicit conversion pending",
+      "pending": "Awaiting address to generate technical name",
+      "auto_path": "Generated from path",
+      "auto_address": "Generated from confirmed address",
+      "manual": "Manual technical name"
+    },
+    "reasons": {
+      "path": "Valid structured path",
+      "flatten_collision": "Flatten collision; address fallback",
+      "reserved_collision": "Reserved-name collision; address fallback",
+      "address_required": "Path needs confirmed-address fallback",
+      "manual": "Explicit manual rename",
+      "preserved": "Original name retained"
+    }
   }
 }

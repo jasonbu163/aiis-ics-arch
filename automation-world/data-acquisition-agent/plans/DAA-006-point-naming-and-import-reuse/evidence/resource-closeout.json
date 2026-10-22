@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "taskNamespace": "aiis-ics-arch",
+  "taskId": "DAA-006",
+  "revision": "r3",
+  "status": "resource_closeout_completed",
+  "completedUtc": "2026-10-20T06:26:34.121552+00:00",
+  "authorization": "Human Owner final acceptance and explicit temporary-resource cleanup request on 2026-10-20",
+  "coordinator": "/root",
+  "cleanedRoots": [
+    {
+      "path": "/private/tmp/daa-006-r1-spec-dzsd375h",
+      "fileCount": 13,
+      "bytes": 403117,
+      "ownership": "DAA-006 coordinator-state and handoff",
+      "uid": 501
+    },
+    {
+      "path": "/private/tmp/daa-006-r2-spec-wxtwzx9l",
+      "fileCount": 6,
+      "bytes": 355132,
+      "ownership": "DAA-006 coordinator-state and handoff",
+      "uid": 501
+    },
+    {
+      "path": "/private/tmp/daa-006-r3-spec-83zdc53u",
+      "fileCount": 4,
+      "bytes": 365355,
+      "ownership": "DAA-006 coordinator-state and handoff",
+      "uid": 501
+    },
+    {
+      "path": "/private/tmp/daa-006-r3-execution-8knyrx3c",
+      "fileCount": 1085,
+      "bytes": 100992618,
+      "ownership": "DAA-006 coordinator-state and handoff",
+      "uid": 501
+    }
+  ],
+  "cleanedRootCount": 4,
+  "removedFileCount": 1108,
+  "removedBytes": 102116222,
+  "archive": {
+    "path": "/Users/jason/.codex/visualizations/2026/10/16/01a143e5-5616-76c0-9df7-13b487bc9c26/daa006-r3-accepted-evidence.tar.gz",
+    "sha256": "530a8057fd5583f5c08628fc6be0c1e1138ad71b692e9422c7c0a5a2b0e4fcb4",
+    "bytes": 1203052,
+    "fileCount": 212,
+    "verification": "All members re-read from archive and compared by SHA-256 before cleanup",
+    "inventoryPath": "/Users/jason/.codex/visualizations/2026/10/16/01a143e5-5616-76c0-9df7-13b487bc9c26/daa006-r3-accepted-evidence-inventory.json",
+    "inventorySha256": "78f8ec5f1a045a67107d75f2d8c5e868b7af9792ad1d606cd3f9a72bfd086ff2",
+    "retentionReason": "Preserve original Development and independent QA logs, blocked history and owned synthetic native data without retaining temporary build trees",
+    "reviewTrigger": "Reassess archive retention after separately accepted DAA-DS Stage B joint validation; no automatic deletion"
+  },
+  "regenerableExcluded": {
+    "pathPrefixes": [
+      "dev/core-target/",
+      "dev/dist/",
+      "qa1/core-target/",
+      "qa1/dist/",
+      "qa1/tmp/",
+      "dev/visual/.vite/"
+    ],
+    "exactFiles": [
+      "qa1/public-core-probe"
+    ],
+    "fileCount": 901,
+    "bytes": 97975415
+  },
+  "openHandleChecks": [
+    {
+      "root": "/private/tmp/daa-006-r1-spec-dzsd375h",
+      "argv": [
+        "lsof",
+        "-nP",
+        "+D",
+        "/private/tmp/daa-006-r1-spec-dzsd375h"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "root": "/private/tmp/daa-006-r2-spec-wxtwzx9l",
+      "argv": [
+        "lsof",
+        "-nP",
+        "+D",
+        "/private/tmp/daa-006-r2-spec-wxtwzx9l"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "root": "/private/tmp/daa-006-r3-spec-83zdc53u",
+      "argv": [
+        "lsof",
+        "-nP",
+        "+D",
+        "/private/tmp/daa-006-r3-spec-83zdc53u"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "root": "/private/tmp/daa-006-r3-execution-8knyrx3c",
+      "argv": [
+        "lsof",
+        "-nP",
+        "+D",
+        "/private/tmp/daa-006-r3-execution-8knyrx3c"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "postRemovalCheck": "All four exact roots absent",
+  "retainedRepositoryResources": [
+    "Authoritative DAA and shared tia-import-core source",
+    "Public synthetic fixtures and golden data",
+    "Existing SQLite configuration and history were not opened or modified",
+    "Protected spec.md and tasks.md",
+    "Accepted source manifest"
+  ],
+  "otherRetainedResources": [
+    "Session archive, archive inventory and DIRECT UI observations/screenshots",
+    "Shared repository src-tauri/target and node_modules left untouched"
+  ],
+  "directOverlayCleanup": "Previously completed: /private/tmp/daa006-direct-ui-kf9u76b_ removed, owned port15308 server stopped and owned browser tabs closed",
+  "gitCleanup": "No task-created Git branch/worktree to remove; no Git mutation",
+  "boundaries": "No tests, builds, native restart, DS message or real PLC/API/database operation during acceptance closeout"
+}
+

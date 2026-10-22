@@ -1,0 +1,18 @@
+# DS协议回归真实DAA模块编译闭包；不启动完整应用。
+[package]
+name="ds-s7-daa-client"
+version="0.1.0"
+edition="2021"
+publish=false
+[features]
+default=[]
+rust-snap7-driver=["dep:rust-snap7"]
+local-validation=[]
+[dependencies]
+rust-snap7={version="=1.142.2",optional=true}
+serde={version="=1.0.228",features=["derive"]}
+serde_json="=1.0.150"
+uuid={version="=1.23.3",features=["v4"]}
+sha2="=0.10.9"
+chrono={version="=0.4.45",default-features=false,features=["clock"]}
+aiis-tia-import-core={version="=0.1.0",path="../../../../shared/tia-import-core"}

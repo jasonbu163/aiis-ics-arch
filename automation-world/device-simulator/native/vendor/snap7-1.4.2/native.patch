@@ -1,0 +1,660 @@
+--- a/src/core/s7_server.h
++++ b/src/core/s7_server.h
+@@ -25,6 +25,7 @@
+ |=============================================================================*/
+ #ifndef s7_server_h
+ #define s7_server_h
++// DS G0 uses inherited per-connection hooks; no registered image memory.
+ //---------------------------------------------------------------------------
+ #include "snap_tcpsrvr.h"
+ #include "s7_types.h"
+--- a/src/core/s7_isotcp.cpp
++++ b/src/core/s7_isotcp.cpp
+@@ -159,6 +159,7 @@
+ //---------------------------------------------------------------------------
+ int TIsoTcpSocket::IsoConfirmConnection(u_char PDUType)
+ {
++    if (DsHooks && PDUType==pdu_type_CC && !DsHooks->cotp(DsHooks->user,DsId,(unsigned char*)&PDU,PDUSize(&PDU))) { ForceClose(); return LastTcpError=WSAECONNRESET; }
+     PIsoControlPDU CPDU = PIsoControlPDU(&PDU);
+ 	u_short TempRef;
+ 
+@@ -392,6 +393,7 @@
+         }
+ 
+ 		DataLength = PDUSize(&PDU) - DataHeaderSize;
++        if (DsHooks && (PDUSize(&PDU)>512 || DataLength<0 || DataLength>480)) return SetIsoError(errIsoPduOverflow);
+ 		if (CheckPDU(&PDU, PDUType)!=0)
+ 			return LastIsoError;
+ 		// Checks for data presence
+@@ -452,10 +454,13 @@
+ 	Offset =0;
+ 	Complete =false;
+     ClrIsoError();
++    if (DsHooks) DsRecvDeadline=0;
+ 	pData = pbyte(&PDU.Payload);
+ 	do {
+ 		pData=pData+Offset;
+-		max =IsoPayload_Size-Offset; // Maximum packet allowed
++        if (DsHooks) pData=pbyte(&PDU.Payload)+Offset;
++		max =IsoPayload_Size-Offset;
++        if (DsHooks && max>480-Offset) max=480-Offset; // Maximum packet allowed
+ 		if (max>0)
+ 		{
+ 			Result =isoRecvFragment(pData, max, Received, Complete);
+@@ -484,7 +489,7 @@
+             memcpy(Data, &PDU, Size);
+ 	}
+ 	else
+-        if (LastTcpError!=WSAECONNRESET)
++        if (!DsHooks && LastTcpError!=WSAECONNRESET)
+             Purge();
+ 	return Result;
+ }
+--- a/src/core/s7_isotcp.h
++++ b/src/core/s7_isotcp.h
+@@ -25,6 +25,7 @@
+ |=============================================================================*/
+ #ifndef s7_isotcp_h
+ #define s7_isotcp_h
++// DS G0 limits and absolute IO context inherited from TMsgSocket.
+ //---------------------------------------------------------------------------
+ #include "snap_msgsock.h"
+ //---------------------------------------------------------------------------
+--- a/src/core/s7_server.cpp
++++ b/src/core/s7_server.cpp
+@@ -43,12 +43,14 @@
+ //---------------------------------------------------------------------------
+ bool TIsoTcpWorker::ExecuteRecv()
+ {
++    if (DsHooks && !DsHooks->active(DsHooks->user,DsId)) return false;
+     TPDUKind PduKind;
+     int PayloadSize;
+ 
+     if (CanRead(WorkInterval)) // should be Small to avoid time wait during the close
+     {
+-        isoRecvPDU(&PDU);
++        int ds_iso_result=isoRecvPDU(&PDU);
++        if (DsHooks && ds_iso_result) return false;
+         if (LastTcpError==0)
+         {
+             IsoPeek(&PDU,PduKind);
+@@ -56,13 +58,14 @@
+             if (PduKind==pkValidData)
+             {
+                 PayloadSize=PDUSize(&PDU)-DataHeaderSize;
+-                return IsoPerformCommand(PayloadSize);
++                bool result=IsoPerformCommand(PayloadSize);
++                return result && (!DsHooks || LastTcpError==0);
+             };
+             // Connection request incoming
+             if (PduKind==pkConnectionRequest)
+             {
+                 IsoConfirmConnection(pdu_type_CC); // <- Connection confirm
+-                return LastTcpError!=WSAECONNRESET;
++                return DsHooks ? LastTcpError==0 : LastTcpError!=WSAECONNRESET;
+             };
+             // Disconnect request incoming (only for isotcp full complient equipment, not S7)
+             if (PduKind==pkDisconnectRequest)
+@@ -82,11 +85,12 @@
+                 return LastTcpError!=WSAECONNRESET;
+             };
+             // Here we have an Invalid PDU
++            if (DsHooks) return false;
+             Purge();
+             return true;
+         }
+         else
+-            return LastTcpError!=WSAECONNRESET;
++            return DsHooks ? false : LastTcpError!=WSAECONNRESET;
+     }
+     else
+         return true;
+@@ -168,6 +172,8 @@
+ //------------------------------------------------------------------------------
+ bool TS7Worker::IsoPerformCommand(int &Size)
+ {
++    if (DsHooks && (Size<10 || Size>480 || PDUH_in->PDUType!=PduType_request)) return false;
++
+     // Checks for Ack fragment
+     if (Size==0)
+         return PerformPDUAck(Size);
+@@ -200,6 +206,20 @@
+     // We have to store PDUfun since it will be overwritten
+     P = pbyte(PDUH_in)+ReqHeaderSize;
+     PDUFun=*P;
++    struct DsScope {
++        TMsgSocket *w; bool armed;
++        ~DsScope() { if (armed) w->DsHooks->end_pdu(w->DsHooks->user,w->DsId); }
++    } ds_scope{this,false};
++    if (DsHooks) {
++        if (PDUFun==pduNegotiate) {
++            if (Size!=18 || SwapWord(PDUH_in->ParLen)!=8 || SwapWord(PDUH_in->DataLen)!=0 || ((unsigned char*)PDUH_in)[11]!=0 || (((unsigned char*)PDUH_in)[12]==0 && ((unsigned char*)PDUH_in)[13]==0) || (((unsigned char*)PDUH_in)[14]==0 && ((unsigned char*)PDUH_in)[15]==0) || (((unsigned char*)PDUH_in)[16]*256+((unsigned char*)PDUH_in)[17]<480) || DsEstablished || !DsHooks->setup(DsHooks->user,DsId)) return false;
++            DsEstablished=true;
++        } else {
++            if (!DsEstablished || (PDUFun!=pduFuncRead && PDUFun!=pduFuncWrite)) return false;
++            if (!DsHooks->begin_pdu(DsHooks->user,DsId,(unsigned char*)PDUH_in,Size)) return false;
++            ds_scope.armed=true;
++        }
++    }
+     // Watches the function
+     switch (PDUFun)
+     {
+@@ -524,6 +544,7 @@
+     for (c = 0; c < ItemsCount; c++)
+ 	{
+ 		ResData[c]=PResFunReadItem(pbyte(ResParams)+Offset);
++        if (DsHooks) DsHooks->item(DsHooks->user,DsId,c);
+ 		ItemSize=ReadArea(ResData[c],&ReqParams->Items[c],PDURemainder, EV);
+ 
+         // S7 doesn't xfer odd byte amount
+@@ -753,6 +774,7 @@
+ 	// Stage 2 : Write data
+ 	for (c = 0; c < ItemsCount; c++)
+ 	{
++      if (DsHooks) DsHooks->item(DsHooks->user,DsId,c);
+ 	  ResData->Data[c]=WriteArea(ReqData[c],&ReqParams->Items[c], EV);
+       // For multiple items we have to create multiple events
+       if (ItemsCount>1)
+@@ -801,8 +823,8 @@
+ 	ResParams->FunNegotiate=pduNegotiate;
+ 	ResParams->Unknown=0x0;
+ 	// We offer the same
+-	ResParams->ParallelJobs_1=ReqParams->ParallelJobs_1;
+-	ResParams->ParallelJobs_2=ReqParams->ParallelJobs_2;
++	ResParams->ParallelJobs_1=DsHooks ? SwapWord(1) : ReqParams->ParallelJobs_1;
++	ResParams->ParallelJobs_2=DsHooks ? SwapWord(1) : ReqParams->ParallelJobs_2;
+ 
+ 	if (FServer->ForcePDU == 0)
+ 	{
+@@ -818,6 +840,7 @@
+ 	else
+ 		ResParams->PDULength = SwapWord(FServer->ForcePDU);
+ 
++	if (DsHooks) ResParams->PDULength=SwapWord(480);
+ 	FPDULength=SwapWord(ResParams->PDULength); // Stores the value
+ 	// Sends the answer
+ 	Size=sizeof(TS7ResHeader23) + sizeof(TResFunNegotiateParams);
+@@ -2110,7 +2133,7 @@
+ 	bool Result = false;
+ 	if (!Destroying && (OnRWArea != NULL))
+ 	{
+-		CSRWHook->Enter();
++		if (!DsHooks) CSRWHook->Enter();
+ 		try
+ 		{ 
+ 			Tag.Area = Area;
+@@ -2125,7 +2148,7 @@
+ 		{
+ 			Result = false;
+ 		};
+-		CSRWHook->Leave();
++		if (!DsHooks) CSRWHook->Leave();
+ 	}
+ 	return Result;
+ }
+@@ -2136,7 +2159,7 @@
+ 	bool Result = false;
+ 	if (!Destroying && (OnRWArea != NULL))
+ 	{
+-		CSRWHook->Enter();
++		if (!DsHooks) CSRWHook->Enter();
+ 		try
+ 		{ 
+ 			Tag.Area = Area;
+@@ -2151,7 +2174,7 @@
+ 		{
+ 			Result = false;
+ 		};
+-		CSRWHook->Leave();
++		if (!DsHooks) CSRWHook->Leave();
+ 	}
+ 	return Result;
+ }
+--- a/src/sys/snap_tcpsrvr.cpp
++++ b/src/sys/snap_tcpsrvr.cpp
+@@ -25,6 +25,13 @@
+ |=============================================================================*/
+ 
+ #include "snap_tcpsrvr.h"
++#include <thread>
++#include <chrono>
++#include <fcntl.h>
++extern void* ThreadProc(void*);
++
++int TMsgWorkerThread::DsStart() { pthread_t created; int rc=pthread_create(&created,nullptr,ThreadProc,this); if(!rc) Started=true; return rc; }
++int TMsgListenerThread::DsStart() { pthread_t created; int rc=pthread_create(&created,nullptr,ThreadProc,this); if(!rc) Started=true; return rc; }
+ //---------------------------------------------------------------------------
+ // EVENTS QUEUE
+ //---------------------------------------------------------------------------
+@@ -99,17 +106,18 @@
+ //---------------------------------------------------------------------------
+ TMsgWorkerThread::TMsgWorkerThread(TMsgSocket *Socket, TCustomMsgServer *Server) 
+ {
+-    FreeOnTerminate = true;
++    FreeOnTerminate = Server->DsHooks == nullptr;
+     WorkerSocket = Socket;
+     FServer = Server;
+ }
+ //---------------------------------------------------------------------------
+ void TMsgWorkerThread::Execute() 
+ {
++    DsThread = pthread_self(); DsReady.store(true);
+     bool Exception = false;
+     bool SelfClose = false;
+     // Working loop
+-    while (!Terminated && !SelfClose && !Exception && !FServer->Destroying)
++    while ((FServer->DsHooks ? !DsStop.load() : (!Terminated && !FServer->Destroying)) && !SelfClose && !Exception)
+     {
+         try
+         {
+@@ -136,6 +144,11 @@
+         else
+             FServer->DoEvent(WorkerSocket->ClientHandle, evcClientTerminated, 0, 0, 0, 0, 0);
+     }
++    if (FServer->DsHooks) {
++        FServer->DsHooks->closing(FServer->DsHooks->user, WorkerSocket->DsId);
++        DsDone.store(true);
++        return; // socket/context/list retained until real pthread_join
++    }
+     delete WorkerSocket;
+     // Delete reference from list
+     FServer->Delete(Index);
+@@ -154,26 +167,33 @@
+ 
+ void TMsgListenerThread::Execute() 
+ {
++    DsThread = pthread_self(); DsReady.store(true);
+     socket_t Sock;
+     bool Valid;
+ 
+-    while (!Terminated)
++    while (FServer->DsHooks ? !DsStop.load() : !Terminated)
+     {
+         if (FListener->CanRead(FListener->WorkInterval))
+         {
++            if (FServer->DsHooks && !FServer->DsHooks->reserve_accept(FServer->DsHooks->user)) { SysSleep(5); continue; }
+             Sock = FListener->SckAccept(); // in any case we must accept
+             Valid = Sock != INVALID_SOCKET;
++            if (!Valid && FServer->DsHooks) FServer->DsHooks->cancel_accept(FServer->DsHooks->user);
+             // check if we are not destroying
+-            if ((!Terminated) && (!FServer->Destroying))
++            if (FServer->DsHooks ? !DsStop.load() : ((!Terminated) && (!FServer->Destroying)))
+             {
+                 if (Valid)
+                     FServer->Incoming(Sock);
+             }
+             else
+                 if (Valid)
++                {
+                     Msg_CloseSocket(Sock);
++                    if (FServer->DsHooks) FServer->DsHooks->cancel_accept(FServer->DsHooks->user);
++                }
+         };
+     }
++    DsDone.store(true);
+ }
+ //---------------------------------------------------------------------------
+ // TCP SERVER
+@@ -191,6 +211,7 @@
+     EventMask = 0xFFFFFFFF;
+     LogMask = 0xFFFFFFFF;
+     Destroying = false;
++    SockListener=nullptr; ServerThread=nullptr;
+     FLastError = 0;
+     ClientsCount = 0;
+     LocalBind = 0;
+@@ -234,7 +255,8 @@
+ {
+     int Result;
+     // Creates the listener
+-    SockListener = new TMsgSocket();
++    try { SockListener = new TMsgSocket(); } catch (...) { SockListener=nullptr; return ENOMEM; }
++    if (DsHooks) SockListener->DsHooks=DsHooks;
+     strncpy(SockListener->LocalAddress, FLocalAddress, 16);
+     SockListener->LocalPort = LocalPort;
+     // Binds
+@@ -246,15 +268,27 @@
+         Result = SockListener->SckListen();
+         if (Result == 0)
+         {
++            // G0 accept must not block after readiness is consumed by a reset peer.
++            if (DsHooks) {
++                int flags=fcntl(SockListener->DsFd(),F_GETFL,0);
++                if (flags<0 || fcntl(SockListener->DsFd(),F_SETFL,flags|O_NONBLOCK)<0) { int error=errno; delete SockListener; SockListener=nullptr; return error; }
++            }
+             // Creates the Listener thread
+-            ServerThread = new TMsgListenerThread(SockListener, this);
+-            ServerThread->Start();
+-        }
+-        else
+-            delete SockListener;
+-    }
+-    else
+-        delete SockListener;
++            try { ServerThread = new TMsgListenerThread(SockListener, this); } catch (...) { delete SockListener; SockListener=nullptr; ServerThread=nullptr; return ENOMEM; }
++            if (DsHooks) {
++                int rc=ServerThread->DsStart();
++                if (rc) { delete ServerThread; ServerThread=nullptr; delete SockListener; SockListener=nullptr; return rc; }
++                double start=DsMonotonicSeconds();
++                while (!ServerThread->DsReady.load()) {
++                    if (DsMonotonicSeconds()-start>1) { ServerThread->DsStop.store(true); return ETIMEDOUT; }
++                    SysSleep(1);
++                }
++            } else ServerThread->Start();
++            if (DsHooks) { DsReaping.store(true); try { DsReaper = new std::thread([this] { while (DsReaping.load()) { DsReap(); SysSleep(2); } DsReap(); }); } catch (...) { DsReaping.store(false); ServerThread->DsStop.store(true); return EAGAIN; } }
++        }
++        else { delete SockListener; SockListener=nullptr; }
++    }
++    else { delete SockListener; SockListener=nullptr; }
+ 
+     return Result;
+ }
+@@ -311,6 +345,7 @@
+ //---------------------------------------------------------------------------
+ bool TCustomMsgServer::CanAccept(socket_t Socket) 
+ {
++    if (DsHooks) return true; // admission already reserved before accept
+     return ((MaxClients == 0) || (ClientsCount < MaxClients));
+ }
+ //---------------------------------------------------------------------------
+@@ -379,18 +414,41 @@
+         if (idx >= 0)
+         {
+             // Creates the Worker and assigns it the connected socket
+-            WorkerSocket = CreateWorkerSocket(Sock);
++            try { WorkerSocket = CreateWorkerSocket(Sock); }
++            catch (...) { Msg_CloseSocket(Sock); UnlockList(); if (DsHooks) DsHooks->cancel_accept(DsHooks->user); return; }
++            if (DsHooks) {
++                WorkerSocket->DsHooks = DsHooks;
++                try { WorkerSocket->DsId = DsHooks->accepted(DsHooks->user, int(Sock)); }
++                catch (...) { delete WorkerSocket; UnlockList(); DsHooks->cancel_accept(DsHooks->user); return; }
++                WorkerSocket->DsAcceptedAt = DsMonotonicSeconds();
++                WorkerSocket->WorkInterval = 5;
++            }
+             // Creates the Worker thread
+-            Workers[idx] = new TMsgWorkerThread(WorkerSocket, this);
++            try { Workers[idx] = new TMsgWorkerThread(WorkerSocket, this); }
++            catch (...) { uint64_t id=WorkerSocket->DsId; delete WorkerSocket; UnlockList(); if (DsHooks) DsHooks->joined(DsHooks->user,id,-ENOMEM); return; }
+             PMsgWorkerThread(Workers[idx])->Index = idx;
+             // Update the number
+             ClientsCount++;
+             // And Starts the worker
+-            PMsgWorkerThread(Workers[idx])->Start();
++            if (DsHooks) {
++                auto w=PMsgWorkerThread(Workers[idx]);
++                int rc=w->DsStart();
++                if (rc) {
++                    uint64_t id=WorkerSocket->DsId; Workers[idx]=nullptr; --ClientsCount;
++                    delete WorkerSocket; delete w; UnlockList();
++                    DsHooks->joined(DsHooks->user,id,-rc); return; // creation failed: no pthread existed
++                }
++                double start=DsMonotonicSeconds();
++                while (!w->DsReady.load()) {
++                    if (DsMonotonicSeconds()-start>1) { w->DsStop.store(true); DsHooks->closing(DsHooks->user,WorkerSocket->DsId); UnlockList(); return; }
++                    SysSleep(1);
++                }
++            } else PMsgWorkerThread(Workers[idx])->Start();
+             DoEvent(WorkerSocket->ClientHandle, evcClientAdded, 0, 0, 0, 0, 0);
+         }
+         else
+         {
++            if (DsHooks) DsHooks->cancel_accept(DsHooks->user);
+             DoEvent(ClientHandle, evcClientNoRoom, 0, 0, 0, 0, 0);
+             Msg_CloseSocket(Sock);
+         }
+@@ -433,9 +491,35 @@
+ //---------------------------------------------------------------------------
+ void TCustomMsgServer::Stop() 
+ {
+-    if (Status == SrvRunning)
++    if (Status == SrvRunning || (DsHooks && Status==SrvError))
+     {
+         // Kills the listener thread
++        if (DsHooks) {
++            if (ServerThread) ServerThread->DsStop.store(true);
++            double begin = DsMonotonicSeconds();
++            while (ServerThread && !ServerThread->DsDone.load()) {
++                if (DsMonotonicSeconds()-begin > 5) { Status=SrvError; return; }
++                SysSleep(1);
++            }
++            int rc=ServerThread ? pthread_join(ServerThread->DsThread,nullptr) : 0;
++            if (rc) { Status=SrvError; return; }
++            delete ServerThread; ServerThread=nullptr;
++            delete SockListener; SockListener=nullptr;
++            LockList();
++            for (int i=0;i<MaxWorkers;++i) if (Workers[i]) {
++                auto w=PMsgWorkerThread(Workers[i]); w->DsStop.store(true);
++                shutdown(w->WorkerSocket->DsFd(),SHUT_RDWR);
++            }
++            UnlockList();
++            for (;;) {
++                if (!DsReaper) DsReap();
++                LockList(); bool remaining=ClientsCount>0; UnlockList(); if (!remaining) break;
++                if (DsMonotonicSeconds()-begin > 5) { Status=SrvError; return; }
++                SysSleep(1);
++            }
++            DsReaping.store(false); if (DsReaper) { static_cast<std::thread*>(DsReaper)->join(); delete static_cast<std::thread*>(DsReaper); DsReaper=nullptr; }
++            Status=SrvStopped; LocalBind=0; return;
++        }
+         ServerThread->Terminate();
+         if (ServerThread->WaitFor(ThTimeout) != WAIT_OBJECT_0)
+             ServerThread->Kill();
+@@ -485,3 +569,27 @@
+ //---------------------------------------------------------------------------
+ 
+ 
++
++// DS G0: reaper never holds CSList while joining or invoking owner callbacks.
++void TCustomMsgServer::DsReap() {
++ for (int i=0;i<MaxWorkers;++i) {
++  LockList(); auto w=PMsgWorkerThread(Workers[i]);
++  bool take=w && w->DsDone.load() && !w->DsJoining.exchange(true); UnlockList();
++  if (!take) continue;
++  uint64_t id=w->WorkerSocket->DsId;
++  int rc=pthread_join(w->DsThread,nullptr);
++  if (rc) { w->DsJoining.store(false); continue; }
++  LockList(); Workers[i]=nullptr; UnlockList();
++  delete w->WorkerSocket; delete w;
++  DsHooks->joined(DsHooks->user,id,rc);
++  LockList(); --ClientsCount; UnlockList();
++ }
++}
++void TCustomMsgServer::DsClose(uint64_t id) {
++ LockList();
++ for (int i=0;i<MaxWorkers;++i) if (Workers[i]) {
++  auto w=PMsgWorkerThread(Workers[i]);
++  if (w->WorkerSocket->DsId==id) { w->DsStop.store(true); shutdown(w->WorkerSocket->DsFd(),SHUT_RDWR); }
++ }
++ UnlockList();
++}
+--- a/src/sys/snap_msgsock.cpp
++++ b/src/sys/snap_msgsock.cpp
+@@ -25,6 +25,9 @@
+ |=============================================================================*/
+ 
+ #include "snap_msgsock.h"
++#include <chrono>
++#include <poll.h>
++#include <errno.h>
+ 
+ //---------------------------------------------------------------------------
+ 
+@@ -499,7 +502,7 @@
+ int TMsgSocket::SckListen()
+ {
+     LastTcpError=0;
+-    SockCheck(listen(FSocket ,SOMAXCONN));
++    SockCheck(listen(FSocket ,DsHooks ? 4 : SOMAXCONN));
+     return LastTcpError;
+ }
+ //---------------------------------------------------------------------------
+@@ -528,6 +531,33 @@
+ //---------------------------------------------------------------------------
+ int TMsgSocket::SendPacket(void *Data, int Size)
+ {
++    if (DsHooks) {
++        LastTcpError=0;
++        if (Size<0 || Size>512) return LastTcpError=WSAETIMEDOUT;
++        const double started=DsMonotonicSeconds();
++        DsSendStarted=started;
++        int done=0; bool blocked=false;
++        while (done<Size) {
++            double now=DsMonotonicSeconds();
++            double deadline=started+2.0;
++            if (!DsEstablished && deadline>DsAcceptedAt+5.0) deadline=DsAcceptedAt+5.0;
++            if (!DsHooks->active(DsHooks->user,DsId) || now>=deadline) {
++                DsHooks->io(DsHooks->user,DsId,4,nullptr,done,started);
++                return LastTcpError=WSAETIMEDOUT;
++            }
++            int n=send(FSocket,(char*)Data+done,Size-done,MSG_DONTWAIT|MSG_NOSIGNAL);
++            if (n>0) {
++                
++                DsHooks->io(DsHooks->user,DsId,1,(char*)Data+done,n,started);
++                done+=n; continue;
++            }
++            if (n==0 || (errno!=EAGAIN && errno!=EWOULDBLOCK && errno!=EINTR)) return LastTcpError=WSAECONNRESET;
++            if ((errno==EAGAIN || errno==EWOULDBLOCK) && !blocked) { blocked=true; DsHooks->io(DsHooks->user,DsId,3,nullptr,done,started); }
++            struct pollfd pfd{FSocket,short(POLLOUT),0}; poll(&pfd,1,5);
++        }
++        DsHooks->io(DsHooks->user,DsId,2,nullptr,Size,started); return 0;
++    }
++
+     int Result;
+     
+     LastTcpError=0;
+@@ -579,6 +609,33 @@
+ //---------------------------------------------------------------------------
+ int TMsgSocket::RecvPacket(void *Data, int Size)
+ {
++    if (DsHooks) {
++        LastTcpError=0;
++        if (Size<0 || Size>512) return LastTcpError=WSAETIMEDOUT;
++        const double started=DsMonotonicSeconds();
++        
++        int done=0; bool blocked=false;
++        while (done<Size) {
++            double now=DsMonotonicSeconds();
++            double deadline=(DsRecvDeadline ? DsRecvDeadline : started+2.0);
++            if (!DsEstablished && deadline>DsAcceptedAt+5.0) deadline=DsAcceptedAt+5.0;
++            if (!DsHooks->active(DsHooks->user,DsId) || now>=deadline) {
++                DsHooks->io(DsHooks->user,DsId,5,nullptr,done,started);
++                return LastTcpError=WSAETIMEDOUT;
++            }
++            int n=recv(FSocket,(char*)Data+done,Size-done,MSG_DONTWAIT|MSG_NOSIGNAL);
++            if (n>0) {
++                if (!DsRecvDeadline) DsRecvDeadline=now+2.0;
++                DsHooks->io(DsHooks->user,DsId,0,(char*)Data+done,n,started);
++                done+=n; continue;
++            }
++            if (n==0 || (errno!=EAGAIN && errno!=EWOULDBLOCK && errno!=EINTR)) return LastTcpError=WSAECONNRESET;
++            
++            struct pollfd pfd{FSocket,short(POLLIN),0}; poll(&pfd,1,5);
++        }
++        return 0;
++    }
++
+     int BytesRead;
+     WaitForData(Size, RecvTimeout);
+     if (LastTcpError==0)
+@@ -921,3 +978,6 @@
+ }
+ 
+ 
++
++// Explicit server clock shared with Rust CLOCK_MONOTONIC.
++double DsMonotonicSeconds(){timespec t{};clock_gettime(_CLOCK_MONOTONIC,&t);return double(t.tv_sec)+double(t.tv_nsec)/1e9;}
+--- a/src/sys/snap_msgsock.h
++++ b/src/sys/snap_msgsock.h
+@@ -232,6 +232,26 @@
+ 		TSnapBase();
+ };
+ //---------------------------------------------------------------------------
++
++// DS G0: bounded server-only hooks; upstream/default client path unchanged.
++#include <stdint.h>
++double DsMonotonicSeconds();
++struct DsS7Hooks {
++ void *user;
++ bool (*reserve_accept)(void*);
++ void (*cancel_accept)(void*);
++ uint64_t (*accepted)(void*, int);
++ bool (*active)(void*, uint64_t);
++ bool (*cotp)(void*, uint64_t, const unsigned char*, int);
++ bool (*setup)(void*, uint64_t);
++ bool (*begin_pdu)(void*, uint64_t, const unsigned char*, int);
++ void (*end_pdu)(void*, uint64_t);
++ void (*item)(void*, uint64_t, int);
++ void (*closing)(void*, uint64_t);
++ void (*joined)(void*, uint64_t, int);
++ void (*io)(void*, uint64_t, int, const void*, int, double);
++};
++
+ class TMsgSocket : public TSnapBase
+ {
+ private:
+@@ -261,6 +281,11 @@
+         // Clear socket input buffer
+         void Purge();
+ public:
++        DsS7Hooks *DsHooks = nullptr;
++        uint64_t DsId = 0;
++        double DsAcceptedAt = 0, DsRecvDeadline = 0, DsSendStarted = 0;
++        bool DsEstablished = false;
++        int DsFd() const { return FSocket; }
+         longword ClientHandle;
+         longword LocalBind;
+         // Coordinates Address:Port
+--- a/src/sys/snap_tcpsrvr.h
++++ b/src/sys/snap_tcpsrvr.h
+@@ -28,6 +28,14 @@
+ //---------------------------------------------------------------------------
+ #include "snap_msgsock.h"
+ #include "snap_threads.h"
++// Byte-sized atomics avoid exposing new std namespace types to frozen headers.
++struct DsAtomicBool {
++ bool value;
++ DsAtomicBool(bool v=false):value(v) {}
++ bool load() const { return __atomic_load_n(&value,__ATOMIC_SEQ_CST); }
++ void store(bool v) { __atomic_store_n(&value,v,__ATOMIC_SEQ_CST); }
++ bool exchange(bool v) { return __atomic_exchange_n(&value,v,__ATOMIC_SEQ_CST); }
++};
+ //---------------------------------------------------------------------------
+ 
+ #define MaxWorkers 1024
+@@ -117,9 +125,13 @@
+ protected:
+         TMsgSocket *WorkerSocket;
+ public:
++        DsAtomicBool DsReady{false}, DsDone{false}, DsStop{false};
++        DsAtomicBool DsJoining{false};
++        pthread_t DsThread{};
+         int Index;
+         friend class TCustomMsgServer;
+         TMsgWorkerThread(TMsgSocket *Socket, TCustomMsgServer *Server);
++        int DsStart();
+         void Execute();
+ };
+ typedef TMsgWorkerThread *PMsgWorkerThread;
+@@ -134,7 +146,10 @@
+         TMsgSocket *FListener;
+         TCustomMsgServer *FServer;
+ public:
++        DsAtomicBool DsReady{false}, DsDone{false}, DsStop{false};
++        pthread_t DsThread{};
+         TMsgListenerThread(TMsgSocket *Listener, TCustomMsgServer *Server);
++        int DsStart();
+         void Execute();
+ };
+ typedef TMsgListenerThread *PMsgListenerThread;
+@@ -190,6 +205,11 @@
+ public:
+         friend class TMsgWorkerThread;
+         friend class TMsgListenerThread;
++        DsS7Hooks *DsHooks = nullptr;
++        void *DsReaper = nullptr;
++        DsAtomicBool DsReaping{false};
++        void DsReap();
++        void DsClose(uint64_t id);
+         word LocalPort;
+         longword LocalBind;
+         longword LogMask;

@@ -11,6 +11,7 @@ AIIS ICS Architecture is the public source baseline for reusable industrial info
 ├── backend/       # FastAPI, SQLAlchemy, Alembic and Core modules
 ├── frontend-js/   # Vue 3 + Vite JavaScript Core frontend
 ├── automation-world/ # CA compatibility baseline and independent DAA/SMA projects
+├── field-flow/    # Independent field runtimes under development
 ├── tools/         # Independent project-level tools
 ├── contracts/     # Root Core cross-runtime contract hub
 ├── docs/          # Durable cross-repository and process documents
@@ -80,3 +81,5 @@ Read [AGENTS.md](AGENTS.md) before making changes. Current architecture status i
 See [initialization and deployment](INITIALIZATION.md#single-host-deployment) for environment files, preparation, explicit migrations, account setup, restart behavior and troubleshooting. Configuration validation does not establish successful runtime deployment.
 
 See [Automation World](automation-world/README.md) for CA freezing, independent DAA/SMA startup and later-stage boundaries.
+
+See [Field Flow](field-flow/README.md) for independent Rust/Python field runtimes. The partial Rust candidate is blocked by S7 acknowledgement correlation; complete runtime validation and Python implementation remain pending.

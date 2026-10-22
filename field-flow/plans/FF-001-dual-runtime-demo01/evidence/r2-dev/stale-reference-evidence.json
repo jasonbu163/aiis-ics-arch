@@ -1,0 +1,179 @@
+{
+  "actual_writevar_count": 1,
+  "applied_positive_ack_count": 1,
+  "case": "unmatched-S7-PDU-reference",
+  "child_pid": 11963,
+  "child_pid_gone": true,
+  "fixture_natural_close": {
+    "Ok": null
+  },
+  "native_memory_readback_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+  "neighbor_bytes_preserved": true,
+  "parent_store": {
+    "counts": {
+      "confirmed": 1
+    },
+    "meta": {
+      "implementation": "rust",
+      "instance_id": "ff-rust-demo01",
+      "mode": "execute",
+      "schema_version": 1,
+      "store_uuid": "1792586007646-11961-1"
+    }
+  },
+  "protocol_trace": [
+    {
+      "at_ms": 1792586007965,
+      "operation": 0,
+      "positive": false,
+      "request_ref": [
+        192,
+        1
+      ],
+      "response_ref": [
+        192,
+        1
+      ]
+    },
+    {
+      "at_ms": 1792586007965,
+      "operation": 240,
+      "positive": false,
+      "request_ref": [
+        0,
+        0
+      ],
+      "response_ref": [
+        0,
+        0
+      ]
+    },
+    {
+      "at_ms": 1792586007987,
+      "operation": 4,
+      "positive": false,
+      "request_ref": [
+        1,
+        0
+      ],
+      "response_ref": [
+        1,
+        0
+      ]
+    },
+    {
+      "changed_absolute_tpkt_index": 12,
+      "event": "unmatched_response_sent",
+      "operation": 4,
+      "original_response_hex": "0300001b02f0803203000001000002000600000401ff040010a5a5",
+      "original_response_pdu_ref": [
+        1,
+        0
+      ],
+      "request_hex": "0300001f02f080320100000100000e00000401120a10020002000184000000",
+      "request_pdu_ref": [
+        1,
+        0
+      ],
+      "sent_response_hex": "0300001b02f0803203000001010002000600000401ff040010a5a5",
+      "sent_response_pdu_ref": [
+        1,
+        1
+      ]
+    },
+    {
+      "at_ms": 1792586008005,
+      "operation": 5,
+      "positive": true,
+      "request_ref": [
+        2,
+        0
+      ],
+      "response_ref": [
+        2,
+        0
+      ]
+    },
+    {
+      "changed_absolute_tpkt_index": 12,
+      "event": "unmatched_response_sent",
+      "operation": 5,
+      "original_response_hex": "0300001602f0803203000002000002000100000501ff",
+      "original_response_pdu_ref": [
+        2,
+        0
+      ],
+      "request_hex": "0300002502f080320100000200000e00060501120a1002000200018400000000040010002a",
+      "request_pdu_ref": [
+        2,
+        0
+      ],
+      "sent_response_hex": "0300001602f0803203000002010002000100000501ff",
+      "sent_response_pdu_ref": [
+        2,
+        1
+      ]
+    },
+    {
+      "at_ms": 1792586008088,
+      "operation": 0,
+      "positive": false,
+      "request_ref": [
+        192,
+        1
+      ],
+      "response_ref": [
+        192,
+        1
+      ]
+    },
+    {
+      "at_ms": 1792586008089,
+      "operation": 240,
+      "positive": false,
+      "request_ref": [
+        0,
+        0
+      ],
+      "response_ref": [
+        0,
+        0
+      ]
+    },
+    {
+      "at_ms": 1792586008090,
+      "operation": 4,
+      "positive": false,
+      "request_ref": [
+        1,
+        0
+      ],
+      "response_ref": [
+        1,
+        0
+      ]
+    }
+  ],
+  "read_result": {
+    "Ok": {
+      "flow_id": "stale-reader",
+      "generation": 1,
+      "pid": 11963,
+      "quality": "good",
+      "request_id": "1792586007977-11961-4",
+      "sampled_at_ms": 1792586007988,
+      "value": -23131
+    }
+  },
+  "released_ports": [
+    31102,
+    31103,
+    31880
+  ],
+  "revision": "r2",
+  "store_dir": "/private/tmp/ff-001-r1-r2-rust-stale-reference-probe-1792586007636-11961-0/state",
+  "task": "FF-001",
+  "write_iteration_result": {
+    "Ok": null
+  }
+}

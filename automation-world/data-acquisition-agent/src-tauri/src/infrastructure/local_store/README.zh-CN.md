@@ -51,3 +51,5 @@ DAA-003 不新增DDL/索引/版本。profile锁owner在双库普通恢复后、�
 源导入继续使用原DDL和双库身份。可选`SourceDocument.lineageId`、`Db.importBinding`（块key、lineage、UDT来源版本闭包）仅位于配置JSON；字段缺失解码为None且缺省省略，配置/revision/历史读取不保存或重编码旧payload。旧deny_unknown_fields binary可能拒绝新增元数据，降级兼容另立gate。
 
 Configuration的source ID是按PLC的逻辑版本，`source_documents.sha256`则是全库唯一物理正文归档。不同逻辑ID/名称/PLC的完全相同字节复用原归档行，不改其id/name/diagnostics/content；同ID异正文或hash/content不符使整事务拒绝。只准备所选目标delta，新source、草稿和新ETag在原表同一短事务提交，CAS/失败均回滚；无变化草稿保留原ETag。全部保留版本计入来源/JSON/写预算，未选来源及私有迁入receipt受保护。active/revision/runtime context/sample/manifest/generation/seq/pending/delivery/reference不属导入变更面。
+
+Point.name为ASCII技术名，sourcePath原路径与稳定ID分开；唯一可选JSON nameMode为缺失legacy或pending/auto_path/auto_address/manual。legacy读取零写回，转换需明确勾选及预览。pending为空且停用，既有地址确认原子成名。唯一owner持有选择/预览/token，私有分页PointNamePreviewDialog及原编辑/offset弹窗展示差异；无第二owner/DDL/key。普通save不能去除/伪造mode或绕过改名预览。历史JSON/receipt原bytes保持，旧binary降级另核。

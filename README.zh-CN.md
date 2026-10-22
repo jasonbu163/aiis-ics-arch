@@ -11,6 +11,7 @@ AIIS ICS Architecture 是可复用工业信息系统架构的公开源码基线�
 ├── backend/       # FastAPI、SQLAlchemy、Alembic 与 Core 模块
 ├── frontend-js/   # Vue 3 + Vite JavaScript Core 前端
 ├── automation-world/ # CA冻结兼容基线与独立DAA/SMA工程
+├── field-flow/    # 开发中的独立现场运行程序
 ├── tools/         # 独立的项目级工具
 ├── contracts/     # 根目录 Core 跨运行时合同中心
 ├── docs/          # 跨仓库与流程类长期文档
@@ -79,3 +80,5 @@ cargo test --manifest-path src-tauri/Cargo.toml --locked
 环境文件、准备步骤、显式迁移、账号初始化、重启和排障见[初始化与部署说明](INITIALIZATION.zh-CN.md#单机部署)。配置校验通过不代表已完成运行部署。
 
 AW 的归属、CA冻结、DAA/SMA独立启动与后续边界见 [Automation World](automation-world/README.zh-CN.md)。
+
+独立 Rust/Python 现场运行程序见 [Field Flow](field-flow/README.zh-CN.md)。Rust 局部候选因 S7 确认关联问题阻塞，完整运行时验证及 Python 实现尚待完成。
