@@ -1,0 +1,101 @@
+{"timestamp":"2026-10-22T01:50:48.894367+00:00","event":"process_start","implementation":"python","run_id":"84008af9f0a848d1bf3743f8249d88a5","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"ok","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:50:48.923674+00:00","event":"driver_spawn","implementation":"python","run_id":"84008af9f0a848d1bf3743f8249d88a5","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":77633,"generation":1}
+{"timestamp":"2026-10-22T01:50:48.958067+00:00","event":"driver_child_event","implementation":"python","run_id":"84008af9f0a848d1bf3743f8249d88a5","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"connecting","error_key":"","duration_ms":0,"pid":77633,"remaining_threads":null}
+{"timestamp":"2026-10-22T01:50:48.958894+00:00","event":"driver_ready","implementation":"python","run_id":"84008af9f0a848d1bf3743f8249d88a5","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":77633,"generation":1}
+{"timestamp":"2026-10-22T01:50:48.966246+00:00","event":"intent","implementation":"python","run_id":"84008af9f0a848d1bf3743f8249d88a5","instance_id":"ff-python-demo01","flow_id":"demo01","target_id":"","command_id":"queued-one","request_id":"","state":"pending","old":"","new":"pending","result":"durable","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:50:48.966715+00:00","event":"intent","implementation":"python","run_id":"84008af9f0a848d1bf3743f8249d88a5","instance_id":"ff-python-demo01","flow_id":"second-flow","target_id":"","command_id":"queued-two","request_id":"","state":"pending","old":"","new":"pending","result":"durable","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:50:48.967123+00:00","event":"in_flight","implementation":"python","run_id":"84008af9f0a848d1bf3743f8249d88a5","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"queued-one","request_id":"d63f160dfcb148358d604d67f6206263","state":"in_flight","old":"pending","new":"in_flight","result":"dispatch_permit","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:50:48.967447+00:00","event":"in_flight","implementation":"python","run_id":"84008af9f0a848d1bf3743f8249d88a5","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"queued-two","request_id":"12602b9a0df144a18e4fffaab7a29a6a","state":"in_flight","old":"pending","new":"in_flight","result":"dispatch_permit","error_key":"","duration_ms":0}
+Error handling client ('127.0.0.1', 60143): Expected COTP DT, got 0x80
+{"evidence": "/private/tmp/ff-001-r1-r4-python-audit-order-awhdk9q_/report.json"}
+F
+=================================== FAILURES ===================================
+__________________ test_audit_queued_prepermit_and_postcommit __________________
+
+    def test_audit_queued_prepermit_and_postcommit():
+        async def scenario():
+            h = Harness("audit-order")
+            try:
+                run = await h.open("queued", io_config(h.c)); owner = run.owners["plc_demo"]
+                h.fixture.fault = "split"; busy = asyncio.create_task(owner.read("busy-read"))
+                await eventually(lambda: owner.dispatching == 1)
+                h.fixture.command("queued-one"); one = h.intent(run)
+                two = replace(one, command_id="queued-two", flow_id="second-flow", target=replace(one.target, offset=2))
+                first = asyncio.create_task(h.apply(run, one)); second = asyncio.create_task(h.apply(run, two))
+                await eventually(lambda: owner.queue.qsize() == 2)
+                await eventually(lambda: state.inspect(run.state.directory)["counts"].get("in_flight", 0) == 2)
+                before = h.fixture.writes
+                with pytest.raises(Failure): await run.state.test_fault("audit")
+                await asyncio.gather(busy, first, second, return_exceptions=True)
+                h.fixture.fault = ""; await asyncio.wait_for(owner.ready.wait(), 4)
+                assert (await owner.read("independent-after-sink")).quality == "good"
+                assert h.fixture.writes == before and state.inspect(run.state.directory)["counts"] == {"canceled": 2}
+                await h.close_run(run, False)
+                run = await h.open("t1-audit"); h.fixture.command("t1-before-audit"); before = h.fixture.writes
+                await run.state.call(lambda: setattr(run.state.audit, "failed", True))
+                with pytest.raises(Failure): await h.iteration(run)
+                assert h.fixture.writes == before and state.inspect(run.state.directory)["counts"] == {"pending": 1}
+                await h.close_run(run, False)
+                run = await h.open("t2-audit"); h.fixture.command("t2-before-permit"); intent = h.intent(run)
+                await run.state.admit(intent)
+                await run.state.call(lambda: setattr(run.state.audit, "failed", True))
+                with pytest.raises(Failure): await h.apply(run, intent)
+                assert h.fixture.writes == before
+                assert state.inspect(run.state.directory)["counts"] == {"canceled": 1}
+                await h.close_run(run, False)
+                run = await h.open("ack-audit"); h.fixture.command("ack-commit-then-sink")
+                await run.state.call(lambda: setattr(run.state.audit, "_test_fail_event", "ack"))
+                with pytest.raises(Failure): await h.iteration(run)
+                assert state.inspect(run.state.directory)["counts"] == {"confirmed": 1} and h.fixture.writes-before == 1
+                await h.close_run(run, False)
+                run = await h.open("ack-audit", new=False)
+                for _ in range(10): await h.iteration(run)
+                await h.close_run(run, True); assert h.fixture.writes-before == 1
+            finally: await h.close()
+>       asyncio.run(scenario())
+
+tests/test_local_protocol.py:310: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/jason/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/runners.py:190: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+/Users/jason/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/jason/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/base_events.py:654: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def scenario():
+        h = Harness("audit-order")
+        try:
+            run = await h.open("queued", io_config(h.c)); owner = run.owners["plc_demo"]
+            h.fixture.fault = "split"; busy = asyncio.create_task(owner.read("busy-read"))
+            await eventually(lambda: owner.dispatching == 1)
+            h.fixture.command("queued-one"); one = h.intent(run)
+            two = replace(one, command_id="queued-two", flow_id="second-flow", target=replace(one.target, offset=2))
+            first = asyncio.create_task(h.apply(run, one)); second = asyncio.create_task(h.apply(run, two))
+            await eventually(lambda: owner.queue.qsize() == 2)
+            await eventually(lambda: state.inspect(run.state.directory)["counts"].get("in_flight", 0) == 2)
+            before = h.fixture.writes
+            with pytest.raises(Failure): await run.state.test_fault("audit")
+            await asyncio.gather(busy, first, second, return_exceptions=True)
+            h.fixture.fault = ""; await asyncio.wait_for(owner.ready.wait(), 4)
+            assert (await owner.read("independent-after-sink")).quality == "good"
+>           assert h.fixture.writes == before and state.inspect(run.state.directory)["counts"] == {"canceled": 2}
+E           AssertionError: assert (0 == 0 and {'expired': 2} == {'canceled': 2}
+E            +  where 0 = <tests.fixtures.runtime.Fixture object at 0x101e8aad0>.writes
+E            +    where <tests.fixtures.runtime.Fixture object at 0x101e8aad0> = <tests.fixtures.support.Harness object at 0x101e8a290>.fixture
+E             
+E             Left contains 1 more item:
+E             {'expired': 2}
+E             Right contains 1 more item:
+E             {'canceled': 2}
+E             Use -v to get more diff)
+
+tests/test_local_protocol.py:287: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_local_protocol.py::test_audit_queued_prepermit_and_postcommit
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 10 deselected in 1.47s

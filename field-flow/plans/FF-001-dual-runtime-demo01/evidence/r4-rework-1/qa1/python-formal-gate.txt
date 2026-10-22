@@ -1,0 +1,43 @@
+F
+=================================== FAILURES ===================================
+____________________________ test_matched_ack_gate _____________________________
+
+    def test_matched_ack_gate():
+        root = Path(tempfile.mkdtemp(prefix="ff-001-r1-r4-python-gate-", dir="/private/tmp"))
+>       start = time.monotonic(); asyncio.run(gate(root))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_matched_ack_gate.py:98: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/jason/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/runners.py:190: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+/Users/jason/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/jason/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/base_events.py:654: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+tests/test_matched_ack_gate.py:51: in gate
+    fixture = Fixture(); reports = []; c = config()
+              ^^^^^^^^^
+tests/fixtures/runtime.py:56: in __init__
+    self._start()
+tests/fixtures/runtime.py:81: in _start
+    self.listener = bind(32102)
+                    ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+port = 32102
+
+    def bind(port):
+        peer = socket.socket()
+        peer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+>           peer.bind((HOST, port))
+E           PermissionError: [Errno 1] Operation not permitted
+
+tests/fixtures/public_api.py:84: PermissionError
+=========================== short test summary info ============================
+FAILED tests/test_matched_ack_gate.py::test_matched_ack_gate - PermissionErro...
+1 failed in 0.09s

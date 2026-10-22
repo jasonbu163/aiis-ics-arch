@@ -1,0 +1,42 @@
+[
+  {
+    "name": "unit-1",
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-q",
+      "tests/unit/test_s7_int_pdu.py",
+      "-s"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "timeout_seconds": 120,
+    "exit_code": 0,
+    "duration_seconds": 0.186533417,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/unit-1.txt"
+  },
+  {
+    "name": "gate-1",
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-q",
+      "tests/test_matched_ack_gate.py",
+      "-s"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "timeout_seconds": 120,
+    "exit_code": 0,
+    "duration_seconds": 1.4741780839999998,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/gate-1.txt"
+  }
+]

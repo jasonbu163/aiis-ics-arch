@@ -4,3 +4,4 @@ pub mod posix;
 pub mod state;
 
 pub mod http;
+pub mod s7_int_pdu;

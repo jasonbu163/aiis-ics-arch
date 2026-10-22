@@ -1,0 +1,75 @@
+import ast,hashlib,json,os,re,shutil,subprocess,time
+from pathlib import Path
+repo=Path('/Users/jason/Desktop/DreamCode/aiis-ics-arch');ff=repo/'field-flow';r=Path('/private/tmp/ff-001-r1-r4dev-pc36ki7o');ev=ff/'plans/FF-001-dual-runtime-demo01/evidence/r4-dev';h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();base=json.loads(Path('/private/tmp/ff-001-r4-coordinator-1y0z0h4z/baseline.json').read_text())
+for name,target in [('field-flow-python','python-copy'),('field-flow-rust','rust-retained-copy')]:
+ for p in (ff/name).rglob('*'):
+  rel=p.relative_to(ff/name)
+  if any(x in ('.venv','__pycache__','.pytest_cache','dist','target','.git') for x in rel.parts) or not p.is_file():continue
+  q=r/target/rel
+  if not q.exists() or h(p)!=h(q):q.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,q)
+initial=json.loads((r/'copy-initial-manifest.json').read_text());man={'task':'FF-001','revision':'r4','status':'developer_handoff','head':subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip(),'workspace':str(repo),'approved_spec_sha256':h(ff/'plans/FF-001-dual-runtime-demo01/spec.md'),'projects':{}}
+for name,target in [('field-flow-python','python-copy'),('field-flow-rust','rust-retained-copy')]:
+ files={str(p.relative_to(ff/name)):h(p) for p in (ff/name).rglob('*') if p.is_file() and not any(x in ('.venv','__pycache__','.pytest_cache','dist','target','.git') for x in p.relative_to(ff/name).parts)}
+ assert all(h(r/target/k)==v for k,v in files.items())
+ man['projects'][name]={'files_sha256':dict(sorted(files.items())),'file_count':len(files),'copy':str(r/target),'copy_equal':True}
+assert man['approved_spec_sha256']=='e30641845b63f295b408568009c25514f314101d0a2e2b72d331d4255a73045d'
+rustchanges=[k for k,v in base['rust_initial_sha256'].items() if man['projects']['field-flow-rust']['files_sha256'][k]!=v]
+assert sorted(rustchanges)==sorted(['README.md','README.zh-CN.md','PLAN.md','PLAN.zh-CN.md','plans/README.md','plans/README.zh-CN.md'])
+man['rust_changes_from_approved_r4_initial']=rustchanges;man['rust_runtime_lock_tests_unchanged_from_r3']=True
+checks={}
+for key in ('protected_sha256','historical_evidence_sha256'):
+ bad=[k for k,v in base[key].items() if h(repo/k)!=v];assert not bad;checks[key]={'checked':len(base[key]),'changed':bad}
+assert h(ev/'r3-tasks-original.txt')==base['r3_tasks_sha256'];checks['r3_tasks_original_sha256']=h(ev/'r3-tasks-original.txt')
+checks['approved_spec_sha256']=man['approved_spec_sha256'];checks['rust_documentation_only_changes']=rustchanges
+links=[];errors=[]
+for name in ('field-flow-python','field-flow-rust'):
+ for p in (ff/name).rglob('*.md'):
+  if any(x in ('.venv','dist','target') for x in p.relative_to(ff/name).parts):continue
+  for link in re.findall(r'\]\(([^)]+)\)',p.read_text()):
+   if link.startswith(('http:','https:','#','mailto:')):continue
+   rel=link.split('#')[0]
+   if not rel:continue
+   exists=(p.parent/rel).exists();links.append({'file':str(p.relative_to(repo)),'target':link,'exists':exists})
+   if not exists:errors.append(links[-1])
+assert not errors
+checks['local_links']={'count':len(links),'missing':errors}
+for name in ('field-flow-python','field-flow-rust'):
+ a=json.loads((ff/name/'locales/en-US.json').read_text());b=json.loads((ff/name/'locales/zh-CN.json').read_text());assert a.keys()==b.keys()
+ checks[name+'_locale_keys']=len(a)
+for name,project in man['projects'].items():
+ for rel in project['files_sha256']:
+  p=ff/name/rel
+  if p.suffix not in ('.py','.rs','.md','.toml','.json','.yaml'):continue
+  for number,line in enumerate(p.read_text().splitlines(),1):
+   if line.rstrip()!=line:raise RuntimeError(f'whitespace:{p}:{number}')
+result=subprocess.run(['git','diff','--check','--','field-flow/field-flow-python','field-flow/field-flow-rust','field-flow/plans/FF-001-dual-runtime-demo01/tasks.md'],cwd=repo,capture_output=True,text=True);assert result.returncode==0;checks['git_diff_check']={'command':result.args,'exit_code':result.returncode,'stdout':result.stdout,'stderr':result.stderr}
+pids=set()
+def walk(v,key=''):
+ if isinstance(v,dict):
+  for k,x in v.items():walk(x,k)
+ elif isinstance(v,list):
+  for x in v:walk(x,key)
+ elif isinstance(v,int) and not isinstance(v,bool) and (key=='pid' or key.endswith('_pid')) and v>1:pids.add(v)
+for p in ev.glob('*'):
+ if p.suffix=='.json':
+  try:walk(json.loads(p.read_text()))
+  except ValueError:pass
+ elif p.suffix=='.txt':
+  for line in p.read_text().splitlines():
+   try:walk(json.loads(line))
+   except ValueError:pass
+live=[]
+for pid in sorted(pids):
+ try:os.kill(pid,0);live.append(pid)
+ except ProcessLookupError:pass
+ except PermissionError:live.append(pid)
+assert not live,live
+ports=[]
+for port in (31102,31103,31880,32102,32103,32880):
+ result=subprocess.run(['lsof','-nP',f'-iTCP:{port}'],capture_output=True,text=True)
+ ports.append({'port':port,'exit_code':result.returncode,'stdout':result.stdout,'stderr':result.stderr});assert result.returncode==1 and not result.stdout
+roots=sorted(str(p) for p in Path('/private/tmp').glob('ff-001-r1-r4-python-*') if p.is_dir());roots.insert(0,str(r))
+resource={'recorded_at_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'own_recorded_pids':sorted(pids),'pid_count':len(pids),'live_pids':live,'fixed_port_inventory':ports,'retained_roots':roots,'retention':'Own r4 environments, independent copies, synthetic state/audit and protocol traces remain for fresh Verification reproduction and failure review. Delete after QA/Owner accepts or no evidence dependency, preserving durable bundle reports first. Old r1-r3/other coordinator roots are not touched. No retained listener/driver/task/thread; individual natural/forced joins are in reports.'}
+(ev/'candidate-manifest-final.json').write_text(json.dumps(man,indent=2)+'\n');(ev/'integrity-final.json').write_text(json.dumps(checks,indent=2)+'\n');(ev/'resources-final.json').write_text(json.dumps(resource,indent=2)+'\n')
+for n in ('formal-provenance.json','copy-provenance.json'):shutil.copy2(r/n,ev/n)
+print(json.dumps({'files':{k:v['file_count'] for k,v in man['projects'].items()},'pids':len(pids),'live':live,'links':len(links),'retained_roots':len(roots),'candidate_sha256':h(ev/'candidate-manifest-final.json')},indent=2))

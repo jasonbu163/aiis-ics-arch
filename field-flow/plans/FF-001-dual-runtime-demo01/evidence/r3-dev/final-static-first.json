@@ -1,0 +1,79 @@
+{
+  "candidate_hashes": {
+    "rust": 43,
+    "python": 16,
+    "all_equal": true
+  },
+  "standalone_copy": {
+    "files": 43,
+    "all_equal": true
+  },
+  "local_markdown_links": {
+    "documents": 17,
+    "links": 91,
+    "missing": [
+      {
+        "source": "field-flow/plans/FF-001-dual-runtime-demo01/tasks.md",
+        "target": "evidence/r3-dev/manifest.sha256",
+        "exists": false
+      },
+      {
+        "source": "field-flow/plans/FF-001-dual-runtime-demo01/tasks.md",
+        "target": "evidence/r3-dev/final-static-checks.json",
+        "exists": false
+      },
+      {
+        "source": "field-flow/plans/FF-001-dual-runtime-demo01/tasks.md",
+        "target": "plans/...md",
+        "exists": false
+      }
+    ]
+  },
+  "candidate_trailing_whitespace": [],
+  "locale_keys_equal": true,
+  "git_diff_check": {
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "--",
+      "field-flow/field-flow-rust",
+      "field-flow/field-flow-python",
+      "field-flow/plans/FF-001-dual-runtime-demo01/tasks.md",
+      "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r3-dev"
+    ],
+    "exit_code": 0,
+    "output": ""
+  },
+  "evidence_git_ignore": {
+    "checked": 62,
+    "exit_code": 1,
+    "ignored_paths": []
+  },
+  "r2_tasks_reconstructed_sha256": "ce9dfe615dbfc69c2e0dccf00178d7bcb8856ea51458e4e2d405c3a55389d0e9",
+  "tasks_sha256": "ab3895105a5fc7efcd3390a8227ccfa648b3fd04742c9e27f27be48fa4abcce2",
+  "exit_code": 1,
+  "failures": [
+    {
+      "link": {
+        "source": "field-flow/plans/FF-001-dual-runtime-demo01/tasks.md",
+        "target": "evidence/r3-dev/manifest.sha256",
+        "exists": false
+      }
+    },
+    {
+      "link": {
+        "source": "field-flow/plans/FF-001-dual-runtime-demo01/tasks.md",
+        "target": "evidence/r3-dev/final-static-checks.json",
+        "exists": false
+      }
+    },
+    {
+      "link": {
+        "source": "field-flow/plans/FF-001-dual-runtime-demo01/tasks.md",
+        "target": "plans/...md",
+        "exists": false
+      }
+    }
+  ]
+}

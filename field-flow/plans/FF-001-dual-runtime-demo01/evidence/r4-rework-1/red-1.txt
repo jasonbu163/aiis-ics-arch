@@ -1,0 +1,9 @@
+error: no test target named `runtime_regressions` in default-run packages
+help: available test targets:
+    ack_rejection_matrix
+    cli_contract
+    confirmed_audit
+    local_protocol
+    process_lifecycle
+    remaining_matrix
+    s7_int_pdu

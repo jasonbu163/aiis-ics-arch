@@ -1,0 +1,9 @@
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running `/private/tmp/ff-001-r1-r4-rework1-32onn0fh/target/debug/field-flow`
+Field Flow (synthetic local runtime)
+Usage:
+  field-flow [--lang en-US|zh-CN] --help
+  field-flow state init --synthetic --mode dry_run|execute --state-dir NEW_DIR --instance-id ID
+  field-flow state inspect --state-dir DIR
+  field-flow run --config FILE --state-dir DIR [--execute]
+Run requires an explicitly initialized state directory. Stop with SIGINT or SIGTERM.

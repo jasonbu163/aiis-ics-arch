@@ -1,0 +1,10 @@
+import json,os,subprocess,time,sys
+from pathlib import Path
+r=Path('/private/tmp/ff-001-r1-r4-rework1-32onn0fh');label=sys.argv[1];cwd=sys.argv[2];env=os.environ.copy();env['CARGO_TARGET_DIR']=str(r/('target' if label=='formal' else 'copy-target'));steps=[('fmt',['cargo','fmt','--check'],60),('check',['cargo','check','--locked','--offline','--all-targets','--features','test-fixture'],120),('build',['cargo','build','--locked','--offline','--bins','--features','test-fixture'],120),('codec',['cargo','test','--locked','--offline','--test','s7_int_pdu','--','--test-threads=1','--nocapture'],60),('gate',['cargo','test','--locked','--offline','--features','test-fixture','--test','local_protocol','matched_ack_preflight','--','--test-threads=1','--nocapture'],120),('all',['cargo','test','--locked','--offline','--features','test-fixture','--','--test-threads=1','--nocapture'],180),('bare',['cargo','run','--locked','--offline','--bin','field-flow','--'],30)];rows=[]
+for name,cmd,timeout in steps:
+ p=r/(label+'-'+name+'.txt');start=time.monotonic()
+ with p.open('wb')as f:
+  try:code=subprocess.run(cmd,cwd=cwd,env=env,stdout=f,stderr=subprocess.STDOUT,timeout=timeout).returncode
+  except subprocess.TimeoutExpired:code='timeout'+str(timeout)
+ rows.append({'label':name,'command':cmd,'cwd':cwd,'target':env['CARGO_TARGET_DIR'],'timeout_seconds':timeout,'exit_code':code,'duration_seconds':time.monotonic()-start,'output':str(p)});(r/(label+'-commands.json')).write_text(json.dumps(rows,indent=2)+'\n');print(label,name,code,flush=True)
+ if code!=0:raise SystemExit(1)

@@ -1,0 +1,243 @@
+{
+  "normal": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792628630133-11821-2",
+        "created_at": "2026-10-22T00:23:50.133Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "gate-normal-1",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "9b3ab9a846946b1fbb5964c9bb377711444d2fd0ca2bffdda351dec1ad32b63c",
+        "value_i16": 42,
+        "issued_at_ms": 1792628630534,
+        "expires_at_ms": 1792628690534,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792628630134-11821-3",
+        "request_id": "1792628630546-11821-5",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T00:23:50.541Z",
+        "updated_at": "2026-10-22T00:23:50.556Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "gate-normal-1",
+        "run_id": "1792628630134-11821-3",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "9b3ab9a846946b1fbb5964c9bb377711444d2fd0ca2bffdda351dec1ad32b63c",
+        "created_at": "2026-10-22T00:23:50.542Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "gate-normal-1",
+        "run_id": "1792628630134-11821-3",
+        "request_id": "1792628630546-11821-5",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T00:23:50.546Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "gate-normal-1",
+        "run_id": "1792628630134-11821-3",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T00:23:50.556Z"
+      }
+    ]
+  },
+  "bad-ref-read": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792628630658-11821-8",
+        "created_at": "2026-10-22T00:23:50.658Z"
+      }
+    ],
+    "commands": [],
+    "command_events": []
+  },
+  "bad-ref-write": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792628630792-11821-13",
+        "created_at": "2026-10-22T00:23:50.792Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "gate-bad-ref-write",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "a071c88ee753700ea767043b16bb49ca15e34962f5bddf3646cae0324cdab6d4",
+        "value_i16": 42,
+        "issued_at_ms": 1792628630827,
+        "expires_at_ms": 1792628690827,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792628630792-11821-14",
+        "request_id": "1792628630834-11821-16",
+        "last_error_key": "s7_reference_mismatch",
+        "ack_kind": null,
+        "created_at": "2026-10-22T00:23:50.829Z",
+        "updated_at": "2026-10-22T00:23:50.921Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "gate-bad-ref-write",
+        "run_id": "1792628630792-11821-14",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "a071c88ee753700ea767043b16bb49ca15e34962f5bddf3646cae0324cdab6d4",
+        "created_at": "2026-10-22T00:23:50.830Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "gate-bad-ref-write",
+        "run_id": "1792628630792-11821-14",
+        "request_id": "1792628630834-11821-16",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T00:23:50.834Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "gate-bad-ref-write",
+        "run_id": "1792628630792-11821-14",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "s7_reference_mismatch",
+        "summary": "{}",
+        "created_at": "2026-10-22T00:23:50.921Z"
+      }
+    ]
+  },
+  "short-read": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792628631151-11821-20",
+        "created_at": "2026-10-22T00:23:51.152Z"
+      }
+    ],
+    "commands": [],
+    "command_events": []
+  },
+  "short-write": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792628631288-11821-25",
+        "created_at": "2026-10-22T00:23:51.288Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "gate-short-write",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "5dda8c52727fb21a52d422ce186d393540bf7f62bc4f015df2a6a3262b652c93",
+        "value_i16": 42,
+        "issued_at_ms": 1792628631315,
+        "expires_at_ms": 1792628691315,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792628631288-11821-26",
+        "request_id": "1792628631323-11821-28",
+        "last_error_key": "s7_invalid_response",
+        "ack_kind": null,
+        "created_at": "2026-10-22T00:23:51.319Z",
+        "updated_at": "2026-10-22T00:23:51.406Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "gate-short-write",
+        "run_id": "1792628631288-11821-26",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "5dda8c52727fb21a52d422ce186d393540bf7f62bc4f015df2a6a3262b652c93",
+        "created_at": "2026-10-22T00:23:51.319Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "gate-short-write",
+        "run_id": "1792628631288-11821-26",
+        "request_id": "1792628631323-11821-28",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T00:23:51.323Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "gate-short-write",
+        "run_id": "1792628631288-11821-26",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "s7_invalid_response",
+        "summary": "{}",
+        "created_at": "2026-10-22T00:23:51.406Z"
+      }
+    ]
+  }
+}

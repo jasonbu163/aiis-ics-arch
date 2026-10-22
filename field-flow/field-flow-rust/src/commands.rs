@@ -82,7 +82,12 @@ pub async fn execute(mut args: Vec<String>) -> i32 {
     let mut runtime=crate::runtime::Runtime::start(&c,&dir,&std::env::current_exe().map_err(|_|"runtime_executable")?,state.clone())?;runtime.launch_flows(&c)?;
     let mut terminate=tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate()).map_err(|_|"signal_setup")?;let mut tick=tokio::time::interval(std::time::Duration::from_secs(5));
     loop{tokio::select!{_=tokio::signal::ctrl_c()=>break,_=terminate.recv()=>break,_=tick.tick()=>{let _=runtime.health().await;}}}
-    let outcome=runtime.shutdown(c.shutdown_timeout_ms).await;if outcome.is_ok(){state.finalize().await?;}drop(state);let joined=tokio::time::timeout(std::time::Duration::from_millis(c.shutdown_timeout_ms),state_task.join()).await.map_err(|_|"state_join_incomplete")?;joined?;outcome
+    let end=tokio::time::Instant::now()+std::time::Duration::from_millis(c.shutdown_timeout_ms);
+    let mut outcome=runtime.shutdown(c.shutdown_timeout_ms).await;
+    if outcome.is_ok(){match tokio::time::timeout_at(end,state.finalize()).await{Ok(Ok(()))=>{},Ok(Err(e))=>outcome=Err(format!("runtime_finalize:{e}")),Err(_)=>outcome=Err("shutdown_incomplete".into())}}
+    drop(state);
+    match tokio::time::timeout_at(end,state_task.join()).await{Ok(Ok(()))=>{},Ok(Err(e))=>outcome=Err(format!("runtime_state_join:{e}")),Err(_)=>outcome=Err("shutdown_incomplete".into())}
+    outcome
    },_=>Err("cli_arguments".into())
   }
  }.await;

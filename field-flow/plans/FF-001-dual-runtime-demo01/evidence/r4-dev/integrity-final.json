@@ -1,0 +1,40 @@
+{
+  "protected_sha256": {
+    "checked": 4,
+    "changed": []
+  },
+  "historical_evidence_sha256": {
+    "checked": 112,
+    "changed": []
+  },
+  "r3_tasks_original_sha256": "48a52ef056ccced510bc4c24c685b4ef7d03fd03868487dff1616a1ba829dd76",
+  "approved_spec_sha256": "e30641845b63f295b408568009c25514f314101d0a2e2b72d331d4255a73045d",
+  "rust_documentation_only_changes": [
+    "README.md",
+    "PLAN.zh-CN.md",
+    "README.zh-CN.md",
+    "PLAN.md",
+    "plans/README.md",
+    "plans/README.zh-CN.md"
+  ],
+  "local_links": {
+    "count": 98,
+    "missing": []
+  },
+  "field-flow-python_locale_keys": 3,
+  "field-flow-rust_locale_keys": 3,
+  "git_diff_check": {
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "--",
+      "field-flow/field-flow-python",
+      "field-flow/field-flow-rust",
+      "field-flow/plans/FF-001-dual-runtime-demo01/tasks.md"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+}

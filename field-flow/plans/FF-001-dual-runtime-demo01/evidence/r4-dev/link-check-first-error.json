@@ -1,0 +1,4 @@
+{
+  "exit_code": 1,
+  "cause": "Evidence seal helper regex treated a literal checker pattern inside inline backticks as a Markdown link (plans/...md). Corrected helper strips inline code before checking actual links; no project/task content changed. Runtime/candidate checks had already passed."
+}

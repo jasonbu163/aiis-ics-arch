@@ -2,9 +2,9 @@
 
 English version: [README.md](README.md)
 
-Field Flow（FF）归属可独立维护的手写现场流程运行程序；在 AW 持续发展期间，任一实现都可能长期配合 Backend 承担现场职责。本目录管理 FF 的计划与后续源码，与离线 tools 工具集合分开。
+Field Flow（FF）用于独立维护、手写的现场流程运行程序；AW 发展期间，某个实现可能长期配合 Backend 工作。本目录管理 FF 计划及源码，与离线工具集合分开。
 
-Rust 局部候选已编译并获得本地协议证据，但 r2 Development 已阻塞：高层 S7 驱动把未匹配的确认响应当成成功。[Development 记录及失败证据](plans/FF-001-dual-runtime-demo01/tasks.md)完整保留。[r3 提案](plans/FF-001-dual-runtime-demo01/spec.md)保留原库，经公开 raw ISO 交换接口增加受限 INT 请求/响应适配，等待 Human Owner 精确批准。Python 尚未开始，完整运行时验收及 QA 仍待完成。
+精确 [FF-001 r4](plans/FF-001-dual-runtime-demo01/spec.md)的[双版本 Development 交接](plans/FF-001-dual-runtime-demo01/tasks.md)已通过 fresh-context [QA2](plans/FF-001-dual-runtime-demo01/checklist.md)，覆盖两工程本地 AC01–AC15。Rust 排队 IO 期限、调用前时钟保护及真实 started 统计修复后均独立复验关闭，正式/隔离全18项通过。Python48 保持，原 QA1 全量独立证据已核准，并完成新环境构建/单元/gate/CLI 复验。全部旧失败/候选保留；Human Owner 最终验收、现场验证及长期运行验收待定。
 
 ## 两个独立实现
 
@@ -15,13 +15,13 @@ Rust 局部候选已编译并获得本地协议证据，但 r2 Development 已�
 
 每个实现应能独立复制、构建和启动，不依赖另一个版本的源码、可执行文件、测试服务进程、虚拟环境或可写状态，也不依赖父目录运行清单。两版保持流程行为与验收场景一致，文件和函数组织可以遵循各自语言习惯。
 
-Rust 目录保留局部、阻塞中的实现；Python 目录仍为规划。完整构建/启动说明将在实现及验证完成后补充。
+[Rust 工程说明](field-flow-rust/README.zh-CN.md)和 [Python 工程说明](field-flow-python/README.zh-CN.md)分别提供独立构建、启动及验证命令。两版已实现 demo01 本地 HTTP GET → PLC INT 闭环，并通过独立本地 QA；现场验证和长期运行验收归后续阶段。
 
 ## 手写流程
 
 每个应用流程模块代表一条逻辑流，通过稳定 flow ID 和业务名标识触发方式、步骤、有类型输入输出、跨轮状态与失败行为。runtime 负责调度和生命周期，infrastructure 负责 PLC/HTTP 通信。
 
-首批场景为 HTTP GET -> 条件 -> S7 DB 写入，以及 S7 DB 读取 -> 条件/上升沿 -> HTTP POST。这些是拟实现的场景，不表示连接器已经实现或现场测试已经通过。
+demo01 为 HTTP GET -> 条件判断 -> S7 DB INT 写入，Rust 和 Python 候选均有本地 DEV 证据。demo02“PLC 上升沿 -> HTTP POST”属于下一增量。
 
 ## Backend 与长期运行
 
@@ -42,5 +42,5 @@ FF 保持可独立维护，其流程说明和已验证场景可作为后续 CA �
 - [PLAN.zh-CN.md](PLAN.zh-CN.md)索引 FF 当前任务及下一 gate。
 - [任务目录](plans/README.zh-CN.md)只链接真实存在的角色文档。
 - [讨论基线](plans/ARCH-TOOL-001-field-flow-runner/spec.md)管理详细范围、决策、分阶段验收和可还原的 r1 历史。
-- [首轮实施范围](plans/FF-001-dual-runtime-demo01/spec.md)定义独立运行时与 demo01 本地闭环；r3 为待批准草案，完整已批准 r2/r1 历史保留。
+- [首轮实施范围](plans/FF-001-dual-runtime-demo01/spec.md)定义独立运行时与 demo01 本地闭环；精确 r4 已批准，完整已批准 r3/r2/r1 历史保留。
 - 继续遵循[仓库契约](../AGENTS.md)和[开发流程](../.codex/workflows/development-lifecycle-workflow.md)。

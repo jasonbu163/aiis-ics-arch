@@ -1,0 +1,732 @@
+{
+  "results": [
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-recovery-8sf1czgr/t1",
+      "normal": true,
+      "summary": {
+        "commands": {
+          "pending": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "df3e1f45ebec40b18377940dfa6c2c6a",
+          "created_at": "2026-10-22T02:33:28.889Z"
+        },
+        "counts": {
+          "pending": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "df3e1f45ebec40b18377940dfa6c2c6a",
+              "created_at": "2026-10-22T02:33:28.889Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "t1",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "39502479ec9b8fd3e59699282c04920238b897daae7d9281028907f5c93cb77a",
+              "value_i16": 42,
+              "issued_at_ms": 1792636409078,
+              "expires_at_ms": 1792636439078,
+              "state": "pending",
+              "dispatch_count": 0,
+              "run_id": "6b1bfafaed3e4646b96bc9e57f2c0e48",
+              "request_id": null,
+              "last_error_key": null,
+              "ack_kind": null,
+              "created_at": "2026-10-22T02:33:29.079Z",
+              "updated_at": "2026-10-22T02:33:29.079Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "t1",
+              "run_id": "6b1bfafaed3e4646b96bc9e57f2c0e48",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "39502479ec9b8fd3e59699282c04920238b897daae7d9281028907f5c93cb77a",
+              "created_at": "2026-10-22T02:33:29.079Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-recovery-8sf1czgr/t1",
+      "normal": true,
+      "summary": {
+        "commands": {
+          "confirmed": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "df3e1f45ebec40b18377940dfa6c2c6a",
+          "created_at": "2026-10-22T02:33:28.889Z"
+        },
+        "counts": {
+          "confirmed": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "df3e1f45ebec40b18377940dfa6c2c6a",
+              "created_at": "2026-10-22T02:33:28.889Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "t1",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "39502479ec9b8fd3e59699282c04920238b897daae7d9281028907f5c93cb77a",
+              "value_i16": 42,
+              "issued_at_ms": 1792636409078,
+              "expires_at_ms": 1792636439078,
+              "state": "confirmed",
+              "dispatch_count": 1,
+              "run_id": "6b1bfafaed3e4646b96bc9e57f2c0e48",
+              "request_id": "7da0e46a986e444780ece396e0b7545b",
+              "last_error_key": null,
+              "ack_kind": "s7_protocol",
+              "created_at": "2026-10-22T02:33:29.079Z",
+              "updated_at": "2026-10-22T02:33:29.320Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "t1",
+              "run_id": "6b1bfafaed3e4646b96bc9e57f2c0e48",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "39502479ec9b8fd3e59699282c04920238b897daae7d9281028907f5c93cb77a",
+              "created_at": "2026-10-22T02:33:29.079Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "t1",
+              "run_id": "bfdd2f50b39a4df4a54d7cd3c8da2895",
+              "request_id": "7da0e46a986e444780ece396e0b7545b",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:29.319Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "t1",
+              "run_id": "bfdd2f50b39a4df4a54d7cd3c8da2895",
+              "request_id": "7da0e46a986e444780ece396e0b7545b",
+              "from_state": "in_flight",
+              "to_state": "confirmed",
+              "reason_key": "s7_protocol",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:29.320Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-recovery-8sf1czgr/t2",
+      "normal": false,
+      "summary": {
+        "commands": {
+          "in_flight": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "a68f6c7ecd2840a7b510ca9a9326b72d",
+          "created_at": "2026-10-22T02:33:29.361Z"
+        },
+        "counts": {
+          "in_flight": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "a68f6c7ecd2840a7b510ca9a9326b72d",
+              "created_at": "2026-10-22T02:33:29.361Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "t2",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "fe43d722b4fd690d0879dd1fb322763da50ef521d72d2b20e1dae673bb9af753",
+              "value_i16": 42,
+              "issued_at_ms": 1792636409570,
+              "expires_at_ms": 1792636439570,
+              "state": "in_flight",
+              "dispatch_count": 1,
+              "run_id": "594247469e5a4c0ba2dc0c9b8d60e973",
+              "request_id": "durable-permit",
+              "last_error_key": null,
+              "ack_kind": null,
+              "created_at": "2026-10-22T02:33:29.571Z",
+              "updated_at": "2026-10-22T02:33:29.571Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "t2",
+              "run_id": "594247469e5a4c0ba2dc0c9b8d60e973",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "fe43d722b4fd690d0879dd1fb322763da50ef521d72d2b20e1dae673bb9af753",
+              "created_at": "2026-10-22T02:33:29.571Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "t2",
+              "run_id": "594247469e5a4c0ba2dc0c9b8d60e973",
+              "request_id": "durable-permit",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:29.571Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-recovery-8sf1czgr/t2",
+      "normal": false,
+      "summary": {
+        "commands": {
+          "unknown": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "a68f6c7ecd2840a7b510ca9a9326b72d",
+          "created_at": "2026-10-22T02:33:29.361Z"
+        },
+        "counts": {
+          "unknown": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "a68f6c7ecd2840a7b510ca9a9326b72d",
+              "created_at": "2026-10-22T02:33:29.361Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "t2",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "fe43d722b4fd690d0879dd1fb322763da50ef521d72d2b20e1dae673bb9af753",
+              "value_i16": 42,
+              "issued_at_ms": 1792636409570,
+              "expires_at_ms": 1792636439570,
+              "state": "unknown",
+              "dispatch_count": 1,
+              "run_id": "594247469e5a4c0ba2dc0c9b8d60e973",
+              "request_id": "durable-permit",
+              "last_error_key": "recovered_in_flight",
+              "ack_kind": null,
+              "created_at": "2026-10-22T02:33:29.571Z",
+              "updated_at": "2026-10-22T02:33:29.608Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "t2",
+              "run_id": "594247469e5a4c0ba2dc0c9b8d60e973",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "fe43d722b4fd690d0879dd1fb322763da50ef521d72d2b20e1dae673bb9af753",
+              "created_at": "2026-10-22T02:33:29.571Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "t2",
+              "run_id": "594247469e5a4c0ba2dc0c9b8d60e973",
+              "request_id": "durable-permit",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:29.571Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "t2",
+              "run_id": "c36fca0dda934154b9f31f6407ebe575",
+              "request_id": "durable-permit",
+              "from_state": "in_flight",
+              "to_state": "unknown",
+              "reason_key": "recovered_in_flight",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:29.608Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-recovery-8sf1czgr/held",
+      "normal": false,
+      "summary": {
+        "commands": {
+          "unknown": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "e8db7a61f29841569928bdeab72fa3b3",
+          "created_at": "2026-10-22T02:33:29.845Z"
+        },
+        "counts": {
+          "unknown": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "e8db7a61f29841569928bdeab72fa3b3",
+              "created_at": "2026-10-22T02:33:29.845Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "held",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "c565b5899d427ffc5f147961f918a21be25224bc73a85425be9d4d184c7fde7b",
+              "value_i16": 42,
+              "issued_at_ms": 1792636410038,
+              "expires_at_ms": 1792636440038,
+              "state": "unknown",
+              "dispatch_count": 1,
+              "run_id": "0c8ef61817ae43c182cc5b62b14ee1ed",
+              "request_id": "0973cffeb90447a58726a77eab13f2cd",
+              "last_error_key": "forced_driver_stop",
+              "ack_kind": null,
+              "created_at": "2026-10-22T02:33:30.040Z",
+              "updated_at": "2026-10-22T02:33:30.851Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "held",
+              "run_id": "0c8ef61817ae43c182cc5b62b14ee1ed",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "c565b5899d427ffc5f147961f918a21be25224bc73a85425be9d4d184c7fde7b",
+              "created_at": "2026-10-22T02:33:30.040Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "held",
+              "run_id": "0c8ef61817ae43c182cc5b62b14ee1ed",
+              "request_id": "0973cffeb90447a58726a77eab13f2cd",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:30.041Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "held",
+              "run_id": "0c8ef61817ae43c182cc5b62b14ee1ed",
+              "request_id": "0973cffeb90447a58726a77eab13f2cd",
+              "from_state": "in_flight",
+              "to_state": "unknown",
+              "reason_key": "forced_driver_stop",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:30.852Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-recovery-8sf1czgr/held",
+      "normal": false,
+      "summary": {
+        "commands": {
+          "unknown": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "e8db7a61f29841569928bdeab72fa3b3",
+          "created_at": "2026-10-22T02:33:29.845Z"
+        },
+        "counts": {
+          "unknown": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "e8db7a61f29841569928bdeab72fa3b3",
+              "created_at": "2026-10-22T02:33:29.845Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "held",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "c565b5899d427ffc5f147961f918a21be25224bc73a85425be9d4d184c7fde7b",
+              "value_i16": 42,
+              "issued_at_ms": 1792636410038,
+              "expires_at_ms": 1792636440038,
+              "state": "unknown",
+              "dispatch_count": 1,
+              "run_id": "0c8ef61817ae43c182cc5b62b14ee1ed",
+              "request_id": "0973cffeb90447a58726a77eab13f2cd",
+              "last_error_key": "forced_driver_stop",
+              "ack_kind": null,
+              "created_at": "2026-10-22T02:33:30.040Z",
+              "updated_at": "2026-10-22T02:33:30.851Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "held",
+              "run_id": "0c8ef61817ae43c182cc5b62b14ee1ed",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "c565b5899d427ffc5f147961f918a21be25224bc73a85425be9d4d184c7fde7b",
+              "created_at": "2026-10-22T02:33:30.040Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "held",
+              "run_id": "0c8ef61817ae43c182cc5b62b14ee1ed",
+              "request_id": "0973cffeb90447a58726a77eab13f2cd",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:30.041Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "held",
+              "run_id": "0c8ef61817ae43c182cc5b62b14ee1ed",
+              "request_id": "0973cffeb90447a58726a77eab13f2cd",
+              "from_state": "in_flight",
+              "to_state": "unknown",
+              "reason_key": "forced_driver_stop",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:30.852Z"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "fixture": {
+    "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+    "writes": 2,
+    "reads": 2,
+    "gets": 11,
+    "sessions": 7,
+    "closed_sessions": 7,
+    "trace": [
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "",
+        "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400000000040010002a",
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "hold_ack",
+        "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400000000040010002a",
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      }
+    ],
+    "server_pid": 14064,
+    "server_exit": 0,
+    "server_close": {
+      "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "remaining_threads": [],
+      "pid": 14064,
+      "exit_code": 0
+    },
+    "server_epochs": [
+      {
+        "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+        "remaining_threads": [],
+        "pid": 14064,
+        "exit_code": 0
+      }
+    ],
+    "proxy_threads_joined": 7,
+    "ports_rebound": [
+      32102,
+      32103,
+      32880
+    ]
+  }
+}

@@ -6,7 +6,7 @@ English version: [PLAN.md](PLAN.md)
 
 - 源码基线版本：`1.0.0`（annotated `v1.0.0` tag 与 `release/1.x.x` 维护分支已复核；不代表已创建托管
   Release 或完成部署）。
-- 当前工作树表面：`backend/`、`frontend-js/`、`automation-world/`、`field-flow/`、`tools/`、`contracts/`；CA 已迁入 AW 并冻结，DAA/SMA 初始化状态见下方任务。Field Flow 已有局部 Rust 候选，因 S7 确认关联问题阻塞；Python 未开始。
+- 当前工作树表面：`backend/`、`frontend-js/`、`automation-world/`、`field-flow/`、`tools/`、`contracts/`；CA 已迁入 AW 并冻结，DAA/SMA 初始化状态见下方任务。Field Flow r4 双版本已通过独立本地 QA2，Human Owner 最终验收待定。
 - 项目业务模块和项目输入归使用方项目仓库。
 
 ## 架构工作流
@@ -16,7 +16,7 @@ DAA 阶段 B 整体仍未关闭，已有受控本地证据和已验收增量继�
 | 工作流 | 状态 | 记录 | 边界 |
 | --- | --- | --- | --- |
 | 最新三界总图与状态快照 | `qa_passed` | [ARCH-MULTI-002 r1 spec](plans/ARCH-MULTI-002-three-worlds-diagram-sync/spec.md) | 独立 AC01–AC10 文档 QA 结论已写入 checklist；结论保存后的 Agent 最终回报遇到模型容量错误。Mermaid 未渲染，待 Human Owner 最终验收；仅文档改动。 |
-| Field Flow 独立现场运行程序 | `draft`（FF-001 r3）；r2 `dev_blocked` | [FF 计划](field-flow/PLAN.zh-CN.md)；[FF-001 r3 spec](field-flow/plans/FF-001-dual-runtime-demo01/spec.md) | r2 已有可编译 Rust 候选及局部本机证据，但未匹配 S7 写 ACK 被提交 confirmed。PM 提议经原库公开 raw ISO API 增加受限 INT 适配，精确 r3 待批准。全部源码/历史/证据保留；Python、完整交接及 QA 待完成，ARCH-TOOL-001 r2 不变。 |
+| Field Flow 独立现场运行程序 | `qa_passed`（FF-001 r4） | [FF 计划](field-flow/PLAN.zh-CN.md)；[FF-001 r4 spec](field-flow/plans/FF-001-dual-runtime-demo01/spec.md) | Fresh [QA2](field-flow/plans/FF-001-dual-runtime-demo01/checklist.md)已通过双版本本地 AC01–AC15，关闭全部三项 Rust QA1 缺陷。Rust 正式/隔离全18项通过；未变的 Python48 原 QA1 全量证据已核准，并完成新环境构建/单元/gate/CLI 复验。失败历史保留，Human Owner 最终验收、现场及长期运行验证待定。 |
 | DAA/SMA/CA 三应用发展路线 | `owner_accepted` | [ARCH-AW-007 r2 spec](plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md) | Human Owner 于 2026-10-21 最终验收精确 r2 文档，原 fresh-context AC01–AC14 QA 保留。DAA 专用采集、TSS 派生 SMA 表格/工作台、CA 通用编排/内部连接器及未来全类型健康明确，首版无登录。完整 r1 历史/QA 保留，证据已归档，两处自有临时目录共 49 文件已清理；未改代码、未追加测试，软件另立范围。 |
 | DAA/SMA/CA 与 CA 通用流程设计 | `owner_approved` | [ARCH-AW-006 r2 spec](plans/ARCH-AW-006-unified-flow-agent-design/spec.md) | Human Owner 已批准 r2 设计：DAA 大量采集、TSS 派生 SMA 映射表/工作台、CA 节点/版本/上下文及扩展；首版无登录认证。产线/实验室案例及完整 r1 保留，文档实施统一归 007 r2，软件实施另立范围。 |
 | DS 产品实施与 G0 退役 | `qa_passed` | [ARCH-AW-005 r5 spec](plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md)；[r5 开发交接](plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md)；[Verification 记录](plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md) | 源码 306a09d5 独立核验通过：34 项核心测试、普通启动、N1–N3 和原协议适用矩阵，含 16 客户端通信及第 17 条连接拒绝。F-r5-003 已关闭，废弃 G0 已退役，失败历史保留。Owner 最终验收待完成；DAA–DS SQLite 联调另批，阶段 C 排除。 |

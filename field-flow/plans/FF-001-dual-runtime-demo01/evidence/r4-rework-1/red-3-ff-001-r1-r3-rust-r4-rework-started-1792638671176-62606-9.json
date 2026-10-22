@@ -1,0 +1,117 @@
+{
+  "fixture_joined": true,
+  "native_exit": 0,
+  "native_pid": 62626,
+  "ports_rebound": [
+    31102,
+    31103,
+    31880
+  ],
+  "protocol": {
+    "applied": 1,
+    "gets": 0,
+    "native_pid": 62626,
+    "reads": 0,
+    "sessions": 1,
+    "trace": [
+      {
+        "at_ms": 1792638671221,
+        "operation": 0,
+        "original_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+        "positive": false,
+        "request_hex": "0300001611e00000000100c0010ac1020100c2020101",
+        "request_ref": [
+          192,
+          1
+        ],
+        "response_ref": [
+          192,
+          1
+        ],
+        "sent_response_hex": "0300001611d00001000100c0010ac1020100c2020101"
+      },
+      {
+        "at_ms": 1792638671222,
+        "operation": 240,
+        "original_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+        "positive": false,
+        "request_hex": "0300001902f08032010000000000080000f0000001000101e0",
+        "request_ref": [
+          0,
+          0
+        ],
+        "response_ref": [
+          0,
+          0
+        ],
+        "sent_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0"
+      },
+      {
+        "at_ms": 1792638671357,
+        "operation": 5,
+        "original_response_hex": "0300001602f0803203000000010002000100000501ff",
+        "positive": true,
+        "request_hex": "0300002502f080320100000001000e00060501120a1002000200018400000000040010002a",
+        "request_ref": [
+          0,
+          1
+        ],
+        "response_ref": [
+          0,
+          1
+        ],
+        "sent_response_hex": "0300001602f0803203000000010002000100000501ff"
+      }
+    ],
+    "writes": 1
+  },
+  "result": {
+    "after": {
+      "generation": 1,
+      "in_flight": 0,
+      "pid": 62627,
+      "queue_depth": 0,
+      "state": "ready"
+    },
+    "before": {
+      "generation": 1,
+      "in_flight": 1,
+      "pid": 62627,
+      "queue_depth": 0,
+      "state": "ready"
+    },
+    "before_events": 0,
+    "before_writevar": 0,
+    "during": {
+      "generation": 1,
+      "in_flight": 1,
+      "pid": 62627,
+      "queue_depth": 0,
+      "state": "ready"
+    },
+    "during_events": 0,
+    "result": {
+      "Ok": null
+    },
+    "store": {
+      "driver_gone": true,
+      "driver_pid": 62627,
+      "shutdown": {
+        "Ok": null
+      },
+      "state": {
+        "counts": {
+          "confirmed": 1
+        },
+        "meta": {
+          "implementation": "rust",
+          "instance_id": "ff-rust-demo01",
+          "mode": "execute",
+          "schema_version": 1,
+          "store_uuid": "1792638671192-62606-11"
+        }
+      },
+      "state_dir": "/private/tmp/ff-001-r1-r3-rust-r4-rework-started-state-1792638671186-62606-10/state"
+    }
+  }
+}

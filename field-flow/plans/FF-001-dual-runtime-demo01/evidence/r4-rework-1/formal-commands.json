@@ -1,0 +1,133 @@
+[
+  {
+    "label": "fmt",
+    "command": [
+      "cargo",
+      "fmt",
+      "--check"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "target": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/target",
+    "timeout_seconds": 60,
+    "exit_code": 0,
+    "duration_seconds": 0.205373959,
+    "output": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/formal-fmt.txt"
+  },
+  {
+    "label": "check",
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--all-targets",
+      "--features",
+      "test-fixture"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "target": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/target",
+    "timeout_seconds": 120,
+    "exit_code": 0,
+    "duration_seconds": 6.715018333,
+    "output": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/formal-check.txt"
+  },
+  {
+    "label": "build",
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--offline",
+      "--bins",
+      "--features",
+      "test-fixture"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "target": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/target",
+    "timeout_seconds": 120,
+    "exit_code": 0,
+    "duration_seconds": 7.670535459,
+    "output": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/formal-build.txt"
+  },
+  {
+    "label": "codec",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--test",
+      "s7_int_pdu",
+      "--",
+      "--test-threads=1",
+      "--nocapture"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "target": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/target",
+    "timeout_seconds": 60,
+    "exit_code": 0,
+    "duration_seconds": 2.038522542000001,
+    "output": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/formal-codec.txt"
+  },
+  {
+    "label": "gate",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--features",
+      "test-fixture",
+      "--test",
+      "local_protocol",
+      "matched_ack_preflight",
+      "--",
+      "--test-threads=1",
+      "--nocapture"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "target": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/target",
+    "timeout_seconds": 120,
+    "exit_code": 0,
+    "duration_seconds": 2.993693833000002,
+    "output": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/formal-gate.txt"
+  },
+  {
+    "label": "all",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--features",
+      "test-fixture",
+      "--",
+      "--test-threads=1",
+      "--nocapture"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "target": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/target",
+    "timeout_seconds": 180,
+    "exit_code": 0,
+    "duration_seconds": 68.753139292,
+    "output": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/formal-all.txt"
+  },
+  {
+    "label": "bare",
+    "command": [
+      "cargo",
+      "run",
+      "--locked",
+      "--offline",
+      "--bin",
+      "field-flow",
+      "--"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "target": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/target",
+    "timeout_seconds": 30,
+    "exit_code": 0,
+    "duration_seconds": 0.4169979589999997,
+    "output": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/formal-bare.txt"
+  }
+]

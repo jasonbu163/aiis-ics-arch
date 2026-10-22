@@ -1,0 +1,365 @@
+Task ID: FF-001
+Revision: r3
+Status: dev_blocked
+Owner Role: Development
+Allowed Writers: Development
+Handoff: r3 blocked by real Python public DB write accepting wrong-operation ACK; Rust formal/copy test results preserved with exact coverage limits; coordinator/PM prepares next Revision; no completed developer_handoff or QA
+Workflow Mode: STD
+Execution Mode: agent_team_same_session
+
+# FF-001 r3 Development
+
+批准：Human Owner于2026-10-22明确“批准 FF-001 r3，按这个方案继续推进。”；消费owner_approved spec SHA256=`cf2ff0ff8e8d7bf1bc2302127f5f5bc7a32d767be470ddf9875cf3ced59efbb1`。当前HEAD=`dbed9107dce5701fa138a66b3c13aba637a27b86`，不是本会话commit；正式树`/Users/jason/Desktop/DreamCode/aiis-ics-arch`，保留其他dirty，无commit/push/refs。
+
+## 实施计划与边界
+
+1. 原Rust driver内有限2-byte DB INT raw ISO adapter；先编码/截断/拒绝单元矩阵，再执行120秒有界真实matched_ack_preflight，真实自然/故障回收与unknown证据。
+2. gate通过后完整Rust AC01–AC15，补原未验项、文档与独立复制；随后独立Python同例，自身3.11/uv锁/fixture。
+3. 保持r1/r2失败及原库只读；完整矩阵成功后记录逐AC真实命令/退出码、candidate manifest、资源和developer_handoff，协调器另启fresh Verification。不得写spec/checklist或代验收。
+
+r3私有根`/private/tmp/ff-001-r1-r3dev-k989azay`保存新synthetic状态/日志/报告；可复用原r2 target缓存`/private/tmp/ff-001-r1-20261021-r2dev/rust-target`，只作编译缓存。重要证据持久化本bundle，新库不覆盖r2错误confirmed库。通知由协调器管理。
+
+初始检查点当时r3 gate与全AC均not_run；最新结果见后续批次，不用r2结果替代。本实现继续使用已加载aiis/rust-runtime/plc-point-mapping/backend-arch(local state only)/i18n-workflow/code-document-indexer；工程README/PLAN/catalog由project-governance约束，不运行初始化工具或修改skills。
+
+## R14 gate 批次1
+
+- `cargo test --locked --offline --manifest-path field-flow/field-flow-rust/Cargo.toml --test s7_int_pdu` exit0，固定请求/INT、全部逐长度截断和响应字段拒绝、typed结果3个测试通过。缓存沿用r2 target，无新依赖/锁变动。
+- 从Rust工程执行 `cargo test --locked --offline --features test-fixture --test local_protocol matched_ack_preflight -- --test-threads=1 --nocapture`，外层本任务自有subprocess harness实际120秒timeout；实际总12.60秒（含编译）、exit0，测试本体1.97秒。内层110秒deadline也未触发。
+- 真实正常GET/单item raw WriteVar/ReadVar及停止后匹配codec读回成立；bad-ref Read拒绝，已应用WriteVar的bad-ref/短响应均unknown=1、confirmed=0、actualWriteVar=1；各新私有库重复10轮/原库重启不重发。旧child真实退出后才返回失败，不在旧会话派发新job；fixture自然退出及31102/31103/31880实际rebind成功。
+- [gate-1.txt](evidence/r3-dev/gate-1.txt)、[gate-1.json](evidence/r3-dev/gate-1.json)、[三表只读导出](evidence/r3-dev/gate-1-stores.json)已持久化。r2错误confirmed库未触达。此为Development gate，自主继续完整Rust矩阵，不是QA/Owner验收或完整handoff。
+
+## Rust完整矩阵批次2（Python之前）
+
+正式交付树依序`cargo fmt --check`、`cargo check --locked --offline --all-targets --features test-fixture`、`cargo build --locked --offline --bins --features test-fixture`、`cargo test --locked --offline --lib`、`cargo test --locked --offline --features test-fixture -- --test-threads=1 --nocapture`，逐条exit0，最后全套62.16秒。[命令/退出码](evidence/r3-dev/rust-delivery-commands.json)，原样输出rust-delivery-0.txt至4.txt。lib本身0-case，功能证据归14个integration tests。
+
+| AC | Rust实际DEV证据 |
+| --- | --- |
+| AC01 | locked构建/正式全套通过；42文件hash相同的单目录复制build/help/全矩阵正在执行。 |
+| AC02 | CLI/config3 tests：无参/中英help空目录零IO、错误参数，非法schema/mode/缺库/不覆盖，字段/重复ID/endpoint/overlap/typed数值/budget拒绝。 |
+| AC03 | 五个INT逐值GET/Write，停止后分别独立匹配raw ReadVar、A5保持，越界/float/bool/string/实际块越界拒绝。 |
+| AC04 | idle/status/body/JSON/source/time拒绝、clock倒拨锁定invalid；queued TTL以父原子phase证明未派发，expired且零写。 |
+| AC05 | 同ID十轮/原库重启不重发，payload/time/target冲突保原记录，ref维护后身份仍不重建。 |
+| AC06 | 三读流各20独立sample/request，单PID/generation/session串行归回。 |
+| AC07 | 1200ms GET与100ms读8秒并发，>=20样本、max_gap<=500ms，同流不重叠。 |
+| AC08 | 静默COTP/分段/慢字节/stale/初始server缺席/断连恢复，总deadline含实际reap，无关HTTP flow恢复。 |
+| AC09 | T1/T2恢复、丢ACK unknown十轮/重启不重发、物理别名/overlap阻断，不相关read继续。 |
+| AC10 | 已应用写分别终止child/parent，unknown原库恢复/actualWriteVar1；父死亡child<=500ms结束、锁保留、PID消失；T3失败不重发。 |
+| AC11 | 真实GET/read、write0/仅simulated、mode交叉拒绝。 |
+| AC12 | 10/100容量/2048byte轮转，保confirmed10；audit失败闭child开始gate，排队两个write都canceled/零写、独立read继续。 |
+| AC13 | child调用前屏障+父队列stop零写/全join；故障fault_cleanup/exit1、无正常shutdown_complete；冲突保占用者；runtime/SQLite/audit共享一个global end不追加15秒。 |
+| AC14 | 自身双语README/PLAN/catalog、locale/索引/组件声明已补，tasks/证据分批记录；Verification/Owner gate未发生。 |
+| AC15 | 29个真实ref/header/function/count/global/item/长度/短空附加/4096或4097/transport/bitlen/坏ref紧跟正确ACK拒绝例；无good/confirmed，写unknown/actualWriteVar1、旧会话退役；近65535维护不复用ref。 |
+
+本批真实失败：rust-remaining-1.txt exit101，测试INT数组缺i16类型；修正后remaining-2/3与正式全套exit0。证据整理脚本两次遇非dict JSON/非字符串evidence字段的AttributeError/TypeError，均exit1，补类型判断后完成；不是软件矩阵失败。
+
+runtime/driver文件500–800行，职责复核仍是owner监督/私有IPC封装，未扩大平台或任务外重构。根*.log规则不改；必要输出使用.txt原字节副本，旧r2输出以新增来源/hash映射复本保留，原44证据/manifest不覆盖；SQLite/target不纳入源码。Python尚未实现，Rust复制验证后再以独立Python环境/自身夹具核实公开API候选。
+
+## 当前r3停止事实与交PM的 blocker handoff
+
+Human Owner批准r3及其SHA256仍是本轮消费的精确输入；PM正在另行准备下一Revision，本Development不写spec/checklist。协调器确认Python真实候选失败后，要求停止后续Python实现/新协议执行、保留Rust成果，只做文档、hash与资源复核。本次为`dev_blocked`，不是完整`developer_handoff`，未启动QA或授予Owner验收。
+
+### Rust正式树与独立复制
+
+[Rust正式命令](evidence/r3-dev/rust-delivery-commands.json)的fmt/check/build/lib/all-tests逐条exit0；[独立副本命令](evidence/r3-dev/rust-copy-commands.json)的locked build、无参startup及同一全矩阵全部exit0（全tests57.52秒），正式树全tests62.16秒。42文件独立副本没有父/兄弟源码、清单、fixture、环境或可写状态依赖；只使用正常公共依赖缓存与本任务Cargo target缓存。复制品和正式树runtime源码/配置/锁hash相同；测试后仅PLAN双语状态同步为Python阻塞，并同步复制品，当前42文件仍逐字节相等。正式树实际build入口随后再次构建exit0，非仅临时副本交付。
+
+Rust公开原依赖/锁未换，finite raw codec及全部有效变更留在正式树。新增自身README/PLAN/catalog、locale索引、MIT本工程LICENSE和第三方原许可差异声明。框架/现场/长期运行与原生内存安全资格仍排除；有限本机证据不授权这些外部gate。
+
+### Python有限公开API真实失败
+
+本工程独立Python3.11.12、uv0.7.8；`uv lock --python 3.11 --no-python-downloads`、`uv sync --locked --python 3.11 --no-python-downloads`均exit0，自身uv.lock/.venv，未下载解释器/全局升级。锁定python-snap7=3.0.0、httpx=0.28.1、PyYAML=6.0.3、pytest=8.4.2；SQLite环境版本3.47.1来自运行中sqlite3模块，不代表已建本工程执行库。Rust bundled SQLite源宏3.46.0来自已锁libsqlite3-sys0.30.1源头，未额外执行runtime版本SQL。
+
+从Python工程执行：
+
+```bash
+UV_CACHE_DIR=/private/tmp/ff-001-r1-r3dev-k989azay/uv-cache uv run --locked --python 3.11 --no-python-downloads python -m tests.python_api_preflight --evidence-dir /private/tmp/ff-001-r1-r3dev-k989azay/python-api-preflight-3
+```
+
+实际exit1。真实WriteVar请求ref=`0002`/function05；自身Python S7 Server原正ACK ref=`0002`/function05；代理仅改TPKT绝对byte19为04，ref/error/count/status不变。Client.db_write返回0、get_last_error=0、调用0.147ms，actualWriteVar1，Server注册内存`002a`+14个`a5`，相邻字节保持。候选把ReadVar功能码的ACK当写成功，违反r3 AC15；与ref匹配无关，也不能靠IPC/deadline补校验。
+
+[完整三份hex/ref/function、版本、原API返回和释放事实](evidence/r3-dev/python-api-preflight.json)、[原样输出](evidence/r3-dev/python-api-preflight-3.txt)、[只读分析](evidence/r3-dev/python-public-api-review.md)、[原源码位置/签名/hash](evidence/r3-dev/python-source-review.json)均已持久化。该probe只验证公开候选，不是完成的Python runtime；没有Python SQLite执行schema、父T3或confirmed记录，不能伪称已提交confirmed。
+
+自身client PID32027、Server PID32026自然exit0、parent真实join；Server剩余线程[]、proxy真join，32102/32103实际rebind。最终合同断言在自然清理与JSON落盘后才exit1，整轮约121.278ms，不是超时。原两轮夹具误将正常COTP DR无数据ACK的EOF当异常，均exit1，输出原样保留；修正仅自身夹具EOF后得到上述合同失败，未修改第三方。中间辅助路径修正一次FileNotFoundError/exit1、源码hash辅助脚本对server.py误假设而失败，修正只读路径后完成，未造成协议实现变化。
+
+公开`Client.iso_exchange_buffer(self,data:bytearray)->bytearray`在client.py:1396存在，返回原S7 payload，长度用len；原连接处理TPKT/COTP。Client.connect(:152)内部已完成TCP/COTP和S7 Setup(:1868)，无须消费方调用私有握手。raw入口单send/单receive，无S7 ref/op/status过滤/自动重发；单TPKT16-bit长度/减4/strip3决定payload最多65528字节，没有4096 cap或native FFI指针。原DB写只返回0，无法拿到该次原response；check_write_response(:1484)不比较function。这里只读核查，不调用raw、不新增Python codec/私有transport/monkeypatch/换库；是否承担该责任交PM下一精确Revision。
+
+### 逐AC最终DEV范围及已知限制
+
+| AC | Rust | Python |
+| --- | --- | --- |
+| AC01 | 正式树及独立42文件副本locked build/help/启动/测试均exit0；hash一致。 | 仅独立锁/sync/包环境/有限候选probe；完整runtime构建/启动/复制未做。 |
+| AC02 | CLI/config3 tests通过，详见批次2。 | 产品CLI/config/schema未实现。 |
+| AC03 | 五值逐次真实写/停止后匹配读回/A5保持、类型/块范围拒绝。 | 此probe只写42并查看自身Server内存；完整矩阵未做。 |
+| AC04 | 输入拒绝/clock/queued expiry测试通过。 | 未实现/未做。 |
+| AC05 | 十轮/原库重启/冲突/ref换代身份保留测试通过。 | 未实现/未做。 |
+| AC06 | 三读流各20独立sample、单PID/session测试通过。 | 未实现/未做。 |
+| AC07 | 慢GET与100ms读8秒调度测试通过。 | 未实现/未做。 |
+| AC08 | 静默COTP/分段/慢字节/stale、缺席/断连恢复、实际回收测试通过。 | 仅正常公开connect/write自然关闭，非完整预算/恢复矩阵。 |
+| AC09 | T1/T2/丢ACK/unknown身份和物理范围阻断测试通过。 | 未实现/未做。 |
+| AC10 | 父/子死亡、T3 precommit失败、confirmed重启去重测试通过。**confirmed后sink失败组合未独立注入**；不能用其他用例标签替代该组合证据。 | runtime/T3未实现，不能给confirmed结论。 |
+| AC11 | dry GET/read/write0/simulated/mode隔离测试通过。 | 未实现/未做。 |
+| AC12 | 轮转/容量/audit queued零写与独立read测试通过。 | 未实现/未做。 |
+| AC13 | 正常/forced分列、队列/child屏障、parentdeath/实例锁/实际PID和端口释放测试通过。 | 仅自身finite probe自然join/PID/端口释放，非完整应用生命周期。 |
+| AC14 | 自身双语文档/索引、tasks/命令/资源有真实记录。fresh QA/Owner gate未发生。 | partial工程文档准确标明缺少完整runtime；QA未发生。 |
+| AC15 | R14 gate、字段/长度真实拒绝矩阵通过。**fixture中oldref/otherref标签实际均是ref第二byte+1，只证明额外不匹配ref；未分别构造历史实际ref/另一操作历史ref**。下一Revision须补精确语义向量，不在停止令后改已验证源码或继续协议。 | **失败**：匹配ref但function错误仍公开写成功；其余完整矩阵未做。 |
+
+Rust全套exit0是已运行目标的事实，不等于无缺口的独立QA/全AC验收。上述两个精确覆盖限制已报协调器和PM，完整任务仍阻塞；不以not_run改成deferred complete，不创建完整developer_handoff。
+
+### 最终候选、资源和保护
+
+- [candidate-manifest.json](evidence/r3-dev/candidate-manifest.json)：当前正式Rust42文件/Python16文件SHA256、HEAD、工作树与Rust copy逐字节一致性；状态明确`dev_blocked_cross_language_not_completed_handoff`。Rust实现已验证成果保留，Python只是partial候选。无commit/push/refs/worktree；不回滚外部修改。
+- [resources-checkpoint.json](evidence/r3-dev/resources-checkpoint.json)：对本轮输出中253个确切自有PID逐个signal0，只读均pid_absent；未按名称扫描/终止进程。6固定端口lsof exit1零输出，正常用例另有实际rebind，不杀占用者/换端口。
+- r3私有状态/日志/报告目录216个，完整路径及用途在资源JSON；总根`/private/tmp/ff-001-r1-r3dev-k989azay`含独立Rust源码复制品、UV cache、3轮Pythonprobe目录与原输出。另复用r2 Cargo target cache；Python .venv在自身工程且已忽略。辅助入口读取/根指针文件也列明。都保留供PM新Revision与后续复现/Verification，由协调器在无依赖时核对回收，不作为唯一持久证据。
+- 新必要输出都以.txt/JSON在bundle持久化，原被忽略.log原样保留并有.txt复本；原44历史证据/manifest与r2 tasks可还原归档不得改。运行库/JSONL/target不纳入源码。root导航与spec由协调器/PM改，本Development未修改。
+
+**交接协调器/PM：精确FF-001 r3、当前正式树/上述manifest/真实证据，Status=`dev_blocked`。** Python原公开DB路径接受错误操作ACK，需PM界定下一精确Revision的受限校验责任及风险并取得Owner批准；保留Rust成果与已知覆盖限制。此次为blocker handoff，非完成交付、QA verdict或Human Owner验收。
+
+## r2 tasks完整历史
+
+以下每个原物理行仅增加`r2tasks|`前缀；移除前缀可逐字节还原原r2 tasks（含其原r1归档），SHA256=`ce9dfe615dbfc69c2e0dccf00178d7bcb8856ea51458e4e2d405c3a55389d0e9`。
+
+`````text
+r2tasks|Task ID: FF-001
+r2tasks|Revision: r2
+r2tasks|Status: dev_blocked
+r2tasks|Owner Role: Development
+r2tasks|Allowed Writers: Development
+r2tasks|Handoff: r2 DEV blocked by real unmatched S7 WriteVar ACK being committed confirmed; exact evidence handed to coordinator/PM for next Revision; no completed developer_handoff or QA
+r2tasks|Workflow Mode: STD
+r2tasks|Execution Mode: agent_team_same_session
+r2tasks|
+r2tasks|# FF-001 r2 Development
+r2tasks|
+r2tasks|Human Owner 于2026-10-21明确“批准 ff001 r2”。消费owner_approved spec SHA256=`1bd11a1dd3ef1dd69ac67943c2a74d0c446f525d4a2378c8cbbb2f05a846a522`。当前交付树`/Users/jason/Desktop/DreamCode/aiis-ics-arch`，不提交、不改任务外dirty。原r1 tasks完整原字节下方前缀归档，原24份evidence和manifest不改。
+r2tasks|
+r2tasks|## r2实施计划
+r2tasks|
+r2tasks|1. Rust独立工程：typed配置/输入、独立并发flow、父队列与每PLC持久driver子进程；匿名有界IPC、总deadline内回收、parentdeath与本实例锁、跨进程start/stop闸门。
+r2tasks|2. 父SQLite单owner、T1/T2/T3与checked持久审计、unknown物理范围阻断、容量/日志和健康；demo01单轮编排，CLI无参无IO与双语。
+r2tasks|3. 自身Rust协议fixture及AC01–AC14真实DEV矩阵，独立复制/源码一致性；Rust证据完成后Python3.11.12同例。
+r2tasks|4. 文档/索引/逐AC命令退出码/限制/资源、固定candidate manifest，交精确r2 developer_handoff；fresh Verification由协调器另启动。
+r2tasks|
+r2tasks|辅助依赖理由（锁前记录）：`libc 0.2`仅POSIX实例锁/继承FD/非阻塞审计/磁盘容量及信号回收；`sha2 0.10`仅稳定typed意图SHA256；`chrono 0.4`仅UTC JSONL时间（亦为原driver传递依赖）。不引入新S7栈、service manager或通用平台。Tokio/reqwest/serde/serde_yaml/tracing/rusqlite保持批准family与精确S7版本。
+r2tasks|
+r2tasks|## r2事实进度
+r2tasks|
+r2tasks|- 已完整读取批准r2合同、r1归档/原tasks和驱动证据、根/FF规则、development角色与canonical workflow。r1结果不充当r2进程隔离验证。
+r2tasks|- 初始r2检查点当时所有AC均not_run；恢复后的实际局部结果与当前阻塞见后续批次，不将旧检查点当作实时状态。
+r2tasks|- r2私有临时根：`/private/tmp/ff-001-r1-20261021-r2dev/`；与r1资源分离，仍符合批准路径前缀。源码在正式交付树，测试库/日志/target与复制品仅本临时根。保留用途/释放情况随事实更新。
+r2tasks|- 主协调器r2资源`/private/tmp/ff-001-r2-coordinator-nt6pixvu`供批准/保护hash复核，由协调器管理。
+r2tasks|
+r2tasks|## r2 平台中断检查点
+r2tasks|
+r2tasks|记录时间：2026-10-21T12:13:21Z（Asia/Shanghai 2026-10-21 20:13:21）。这是本次只读盘点时间；平台失败的独立精确时间戳未返回。主协调器报告实际`development`角色上一turn失败，转述的平台错误原文为：
+r2tasks|
+r2tasks|> This content was flagged for possible cybersecurity risk... This agent's turn failed.
+r2tasks|
+r2tasks|本次依主协调器指示仅恢复Development事实记录，不继续源码或运行测试。它是平台工具中断，不是本任务QA结论，也不撤销Human Owner对精确r2的批准；不因此改spec、改scope或请求重复范围批准。
+r2tasks|
+r2tasks|### 已落盘的实现面
+r2tasks|
+r2tasks|正式交付树`field-flow/field-flow-rust/`已新增以下未验证候选，全部保留，不撤销或清理：
+r2tasks|
+r2tasks|- `Cargo.toml`、`.gitignore`。
+r2tasks|- `src/main.rs`、`src/lib.rs`、`src/commands.rs`、`src/config.rs`、`src/domain.rs`、`src/runtime.rs`、`src/driver_process.rs`。
+r2tasks|- `src/infrastructure/mod.rs`、`audit.rs`、`state.rs`、`posix.rs`。
+r2tasks|- `src/services/mod.rs`、`src/app/mod.rs`、`src/app/demo01.rs`。
+r2tasks|- `src/bin/ff-fixture.rs`（当前仅占位帮助，不是已实现fixture）。
+r2tasks|- `config/loopback.yaml`、`locales/en-US.json`、`locales/zh-CN.json`。
+r2tasks|
+r2tasks|正式`Cargo.lock`尚未生成；Rust README/PLAN/catalog/CODE_INDEX和测试尚未完成。`field-flow-python/`尚未创建。上述源码没有编译成功或运行证明，不能作为可交付候选或声称满足AC。
+r2tasks|
+r2tasks|### 最近实际命令与结果
+r2tasks|
+r2tasks|在上述文件写入后，实际尝试：
+r2tasks|
+r2tasks|```bash
+r2tasks|CARGO_TARGET_DIR=/private/tmp/ff-001-r1-20261021-r2dev/rust-target cargo generate-lockfile --offline --manifest-path field-flow/field-flow-rust/Cargo.toml
+r2tasks|CARGO_TARGET_DIR=/private/tmp/ff-001-r1-20261021-r2dev/rust-target cargo check --locked --offline --all-targets --features test-fixture --manifest-path field-flow/field-flow-rust/Cargo.toml
+r2tasks|```
+r2tasks|
+r2tasks|两条都在依赖解析阶段非零失败；该次转录只保留了工具`output`，未单独保存数值`exit_code`，不补造。输出报告：`chacha20 = "^0.10.0"`的本地可见`0.10.1`被yank，依赖链为`rand 0.10.2 -> quinn-proto 0.11.17 -> quinn 0.11.11 -> reqwest 0.13.4`。尚未在线解析或安装新的依赖，没有运行到源码编译，更没有项目构建成功、启动、schema、协议fixture或AC测试结果。该普通离线解析问题尚未排除，不把它直接升级成合同不可实现。
+r2tasks|
+r2tasks|本次恢复只读命令`date -u`、tasks/文件列表读取、manifest hash及`du -sh`整体exit0；没有运行协议、构建或测试。原24份证据manifest SHA256仍为`d046e373c875c236ef1ad9678e1ba6dd9141d5667c92be2bd66ed70acbbd8770`。
+r2tasks|
+r2tasks|### 当前资源、未验项与下一步
+r2tasks|
+r2tasks|- r2自建临时根`/private/tmp/ff-001-r1-20261021-r2dev/`只读盘点为0B；没有本r2启动的runtime/driver/fixture、listener、状态库或日志，无本r2进程清理动作。r1私有资源按原历史保留；协调器临时资源归协调器管理。
+r2tasks|- r1前缀归档、原24份证据及manifest原样保留；没有创建checklist或修改spec/其他模块/真实配置，也未连接真实设备或第三方业务接口。
+r2tasks|- r2 AC01–AC14全部尚无完成证据，Python全未执行。平台失败不属于DEV自检完成、独立QA或Human Owner最终验收。
+r2tasks|- 协调器已只读指出候选`force()`必须区分真正wait/reap和wait错误、spawn中途失败也须实际回收；子进程日志须用独立有界通道归父。这些建议尚未实施或验证，不能写成已修复。
+r2tasks|- 下一步由主协调器处理平台工具中断，再恢复原Development或明确续接者；继续已批准r2时先解决依赖解析及上述未验证实现问题，再完成全部Rust矩阵、Python同例和正式developer_handoff。当前状态`dev_blocked`只表示本次执行中断，并非r2技术方案已被证伪或另一个Revision已获批准。
+r2tasks|
+r2tasks|## r2恢复批次1（2026-10-21）
+r2tasks|
+r2tasks|精确spec SHA256再次消费为 `1bd11a1dd3ef1dd69ac67943c2a74d0c446f525d4a2378c8cbbb2f05a846a522`。当前是获批范围内的普通本机合成应用开发，原平台中断记录保留，不升级为软件故障或完成。
+r2tasks|
+r2tasks|- 正常在线 `cargo generate-lockfile --manifest-path field-flow/field-flow-rust/Cargo.toml` exit0，208个依赖；原离线解析问题来自缓存，正常下载已消除。固定 `rust-snap7=1.142.2`、`rusqlite=0.32.1`；未修改第三方源码。
+r2tasks|- `CARGO_TARGET_DIR=/private/tmp/ff-001-r1-20261021-r2dev/rust-target cargo check --locked --offline --all-targets --features test-fixture --manifest-path field-flow/field-flow-rust/Cargo.toml` 最初exit101（候选类型推断/tracing错误）；实际修正后exit0。`cargo build --locked --offline --bins --features test-fixture` exit0。全部构建/依赖在本工程，无兄弟工程导入。
+r2tasks|- `cargo fmt --manifest-path field-flow/field-flow-rust/Cargo.toml` exit0；修正原候选真实reap判定、spawn前完成可失败的IPC构造、独立有界child日志通道、service执行状态、unknown阻断、审计健康闸门、Stop通知竞态、JoinError/异常退出收尾。仍在真实矩阵迭代，不能以源码检查替代运行证明。
+r2tasks|- 真实矩阵命令为 `CARGO_TARGET_DIR=/private/tmp/ff-001-r1-20261021-r2dev/rust-target cargo test --locked --offline --features test-fixture --test local_protocol --manifest-path field-flow/field-flow-rust/Cargo.toml -- --test-threads=1`。第1轮exit101：受限执行不能bind本机端口，后续 `lsof` exit1且零占用输出；未杀占用者或换端口。第2–4、6轮exit101：自有夹具在macOS接受socket继承nonblocking导致握手提前断开；已显式改blocking。第5轮exit101：新增健康gate字段编译错误。第7轮exit101：测试错误要求慢流瞬时in_flight==1（实际0合法），已改<=1。第8轮exit101：测试持有额外Owner/State句柄导致actor join等待，已在join前释放。第9轮exit101：故障收尾把完成后返回错误的JoinHandle再次poll，已改分辨timeout与已完成错误。所有真实失败日志保存于 [r2-dev](evidence/r2-dev/)，未覆盖历史。
+r2tasks|- 已在这些真实运行获得局部事实：INT五个值实际各1次写，重复10轮与原库重启不重发；输入越界/float/bool/string/时间/body/schema拒绝；三个独立读流各20个request/sample，单PID/generation、一个S7 session；1200ms GET并发100ms读在8秒约77个sample，HTTP等待不占PLC队列。完整AC仍在继续，不宣称已通过整矩阵或完成handoff。
+r2tasks|- 新增本机资源均为 `/private/tmp/ff-001-r1-r2-rust-<case>-<unique>/` 私有状态/日志，与既有r2 target根分开；fixture固定31102/31103/31880，只连接同项目合成服务。正常退出/故障回收与port释放由矩阵继续观测。现阶段Python尚未开始，fresh Verification/checklist尚无。
+r2tasks|
+r2tasks|## r2 当前停止事实与 blocker handoff（2026-10-21）
+r2tasks|
+r2tasks|主协调器已要求停止实现和新的协议执行，等待PM处理新Revision。当前不是平台中断，而是新得到的实际协议语义失败；原平台中断、r1驱动预算失败及r2所有测试失败均保留。未启动Python、未新增协议guard/运行代理、未换库/改第三方、未写spec或checklist。
+r2tasks|
+r2tasks|### 有限真实复核
+r2tasks|
+r2tasks|```bash
+r2tasks|CARGO_TARGET_DIR=/private/tmp/ff-001-r1-20261021-r2dev/rust-target cargo test --locked --offline --features test-fixture --test local_protocol --manifest-path field-flow/field-flow-rust/Cargo.toml stale_reference_probe -- --test-threads=1 --nocapture
+r2tasks|```
+r2tasks|
+r2tasks|实际exit101。真实ReadVar请求reference `0100`、服务端原响应 `0100`、代理实际发送 `0101`，driver仍返回good/-23131。真实WriteVar请求 `0200`、原正ACK `0200`、实发 `0201`，父业务iteration返回Ok，T3持久化 `confirmed=1`。只改TPKT绝对byte12（S7 PDU reference第二字节），没有改功能码、长度、error、item-status或INT；完整三份报文hex均在 [stale-reference-evidence.json](evidence/r2-dev/stale-reference-evidence.json)。实际WriteVar1/已应用正ACK1，停止runtime后独立协议读回 `002a`，邻接A5不变。这不是重复写或未写成功问题，而是未匹配ACK也被当成确认。
+r2tasks|
+r2tasks|[源码/API复核](evidence/r2-dev/stale-reference-review.md)只读确认锁定候选 `db_write` 返回路径检查ISO/global/item-success，没有提供原始ACK/ref；公开 `iso_exchange_buffer` 存在，但未使用，也没有为通过测试手写新的PDU适配器。IPC request_id/generation匹配不能替代r2 R08/T3要求的S7匹配正ACK。因此当前adapter未满足批准r2，需PM处理具体实现边界/风险，不由Development放宽合同。
+r2tasks|
+r2tasks|probe先完成自然收尾再执行合同断言：driver PID11963自然结束、父wait/reap且PID消失；fixture native server自然exit0、父wait、代理/HTTP真实join；31102/31103/31880实际rebind均成功。父JSONL保留正常资源收尾事实，它只表示该次程序自然退出，并不改变ACK业务断言失败。完整日志、state三表只读JSON导出及固定报文在本bundle，不依赖临时库作为唯一证据。
+r2tasks|
+r2tasks|### 批次2命令/结果
+r2tasks|
+r2tasks|- 第10轮同 `cargo test ... --test local_protocol -- --test-threads=1` 实际exit101：`approved_loopback_matrix`真实通过；`fault_and_stop_matrix`的split/slow用例通过后，stale返回成功导致合同断言失败。split和slow分别4617ms，父整体deadline触发实际TERM/wait/reap、原PID消失，属于fault_cleanup，不能写成正常shutdown。不能以这两项局部隔离实证抵消匹配ACK失败。日志为 [rust-matrix-10.log](evidence/r2-dev/rust-matrix-10.log)。
+r2tasks|- `cargo fmt --manifest-path field-flow/field-flow-rust/Cargo.toml --check` exit0。
+r2tasks|- `CARGO_TARGET_DIR=/private/tmp/ff-001-r1-20261021-r2dev/rust-target cargo check --locked --offline --all-targets --features test-fixture --manifest-path field-flow/field-flow-rust/Cargo.toml` exit0；[输出](evidence/r2-dev/final-partial-check.log)仅有共享测试support在另一测试binary中未用的dead_code warning，不是runtime错误。
+r2tasks|- 源码结构还未完成文档/索引，也没有独立复制测试。`tests/process_lifecycle.rs`已写入并通过上述编译，但其真实进程矩阵未执行；不能把写入测试代码当作通过。
+r2tasks|
+r2tasks|### 逐AC当前DEV范围（均非独立QA）
+r2tasks|
+r2tasks|| AC | Rust实际范围与缺口 | Python |
+r2tasks|| --- | --- | --- |
+r2tasks|| AC01 | 自身Cargo.lock解析/编译/bins构建成功；库API显式synthetic初始化及运行已执行。独立复制、产品CLI无参/启动完整矩阵未执行。 | not_run，目录未创建 |
+r2tasks|| AC02 | typed实现与分层编译成立；未完成非法配置/版本/CLI双语全矩阵，不能标完整通过。 | not_run |
+r2tasks|| AC03 | 五个INT值实际各写1次；首段测试最后32767及有限probe42有停止后独立读回/A5邻接证据。未完成每个边界值分别独立读回/块越界矩阵。 | not_run |
+r2tasks|| AC04 | 越界/float/bool/string、来源时间、非200、body超限/坏JSON/source/idle、domain时钟倒拨局部断言执行；入队时效/全部schema变体未完成。 | not_run |
+r2tasks|| AC05 | 同命令10轮、原execute库重启不重发，payload冲突且原记录不变已执行；child恢复及time/target组合未完成。 | not_run |
+r2tasks|| AC06 | 三个独立读流各20个request/sample，同child PID/generation及1个S7 session的真实断言通过。完整任务仍阻塞。 | not_run |
+r2tasks|| AC07 | 1200ms GET和100ms读的8秒并发真实执行，约77样本、最大相邻成功间隔<=500ms断言通过；同流结构保持单轮，瞬时in_flight<=1。 | not_run |
+r2tasks|| AC08 | 真实split/slow由父约4617ms内回收child/PID消失；stale读响应被错误接受，继而有限写ACK复核失败。静默COTP/断连恢复完整后续矩阵未执行完成。 | not_run |
+r2tasks|| AC09 | 首段真实已写丢ACK、unknown10轮/重启/新ID阻断及不相关read断言在第10轮first test通过。T1/T2/别名/overlap后续用例写入但未执行到。 | not_run |
+r2tasks|| AC10 | **未满足**：有限真实未匹配WriteVar ACK被父T3提交confirmed=1。父/子崩溃专项、ACK后T3失败未执行到。 | not_run |
+r2tasks|| AC11 | 实际GET/read、simulated=1、write增量0及mode交叉拒绝在first test通过；不视作完整任务完成。 | not_run |
+r2tasks|| AC12 | 有界日志/健康/容量与故障hook已编译；真实轮转/容量/排队审计故障矩阵未执行。 | not_run |
+r2tasks|| AC13 | 有限probe普通driver/fixture自然关闭、真实wait/join/端口/PID释放；split/slow是fault_cleanup真实reap。排队/child调用前屏障正常stop及parentdeath专项未执行到。 | not_run |
+r2tasks|| AC14 | 本tasks及证据已更新；Rust工程README/PLAN/catalog/CODE_INDEX尚未完成，Python未开始，无fresh Verification或Owner最终验收。 | not_run |
+r2tasks|
+r2tasks|### 当前候选、资源与保护复核
+r2tasks|
+r2tasks|- 正式源码在 `/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust/`；未commit、未push、无Git refs操作。当前局部candidate文件/hash/字节清单为 [partial-source-manifest.json](evidence/r2-dev/partial-source-manifest.json)，状态明确 `partial_implementation_blocked_before_handoff`；不得把它当可交付完成候选。
+r2tasks|- 原20个候选文件均保留并做必要实现修正；新增Cargo.lock、独立fixture/HTTP infrastructure、execution service、真实协议/进程测试support，完整清单见manifest。不撤销任务外dirty。`field-flow-python`不存在。
+r2tasks|- [resources-checkpoint.json](evidence/r2-dev/resources-checkpoint.json)列出30个本r2私有临时根：`/private/tmp/ff-001-r1-20261021-r2dev`保存target/原运行日志，其他均 `/private/tmp/ff-001-r1-r2-rust-<case>-<unique>`保存合成状态/日志。暂保留给PM复核及后续获批候选复现，由协调器在证据/验证依赖结束后核对回收；无临时源码复制品或新worktree。
+r2tasks|- 对记录中50个本任务确切PID逐个 `kill(pid,0)` 只读探测：全部pid_absent；未按进程名扫描或终止任何进程。固定端口 `lsof -nP -iTCP:31102 -iTCP:31103 -iTCP:31880 -sTCP:LISTEN` exit1且零输出；probe另有真实rebind证据。没有当前自有运行任务、driver/fixture或listener需继续清理；未清理其他任务资源。
+r2tasks|- spec SHA256仍 `1bd11a1dd3ef1dd69ac67943c2a74d0c446f525d4a2378c8cbbb2f05a846a522`；原24份r1 evidence/manifest保持。checkpoint日志和源码保留，未把失败改成pass或deferred complete。
+r2tasks|
+r2tasks|最终仅文档/hash复核exit0：27个Rust候选文件与partial manifest逐字节一致；spec、r1 tasks前缀归档及24份原evidence/manifest均保持批准/历史SHA256；本Development新增Markdown链接/空白检查通过，Python/checklist仍不存在。当前r2临时target/运行根约1.0GiB，新持久evidence约328KiB；保留供PM复核，资源不代表运行服务或交付产物。`git diff --check -- <本实现/tasks/evidence范围>` exit0，但该范围多为未跟踪新文件，不能替代前述逐文件/hash检查或声称全仓治理通过。
+r2tasks|
+r2tasks|**交给协调器/PM：FF-001 r2、当前正式工作树、上述partial manifest与全部证据，Status=`dev_blocked`。** blocker为候选高层S7 driver把未匹配WriteVar ACK接受为成功，现父T3无法满足r2匹配ACK合同。请PM决定下一精确Revision的受限适配方案、验证与风险，再取得Human Owner批准。此次为blocker handoff，明确不是`developer_handoff`完成，不启动完整实现QA，也不提供QA verdict或Owner验收。
+r2tasks|
+r2tasks|## r1 tasks完整历史
+r2tasks|
+r2tasks|下方每行唯一`r1tasks|`前缀；去前缀可逐字节还原r1最终tasks，SHA256=`d68e3e01be185ce124dff1387bed5784bf65ecbc9a0510022f066f9a203fbcc3`。历史状态/待批准描述仅指当时，不覆盖当前r2授权。
+r2tasks|
+r2tasks|````text
+r2tasks|r1tasks|Task ID: FF-001
+r2tasks|r1tasks|Revision: r1
+r2tasks|r1tasks|Status: dev_blocked
+r2tasks|r1tasks|Owner Role: Development
+r2tasks|r1tasks|Allowed Writers: Development
+r2tasks|r1tasks|Handoff: r1 dependency prechecks blocked; PM r2 draft awaits exact Owner approval; no developer_handoff completion/QA
+r2tasks|r1tasks|Workflow Mode: STD
+r2tasks|r1tasks|Execution Mode: agent_team_same_session
+r2tasks|r1tasks|
+r2tasks|r1tasks|# Development 事实与计划
+r2tasks|r1tasks|
+r2tasks|r1tasks|精确批准：Human Owner 于 2026-10-21 回复“批准 ff001 r1”。本次消费的 owner_approved spec SHA256：`13ed64444c5c4df5916adbf8c5f6ae0b668c7c32ef1747b95e560eb1b99bbc70`。关联 ARCH-TOOL-001 r2 全文件 SHA256：`049574ad8fb9e43fcf7073aa217410b28cc21da7100500a28f9887510aac64ae`。
+r2tasks|r1tasks|
+r2tasks|r1tasks|Development 由主协调器实际选定 development 角色；contract_only。写入仅限本 tasks、真实 evidence 与两个获批独立工程。导航由协调器机械同步。本仓库存在大量任务外 dirty，保持不动；不提交/推送，不执行 Docker、真实数据库/PLC、第三方 HTTP。
+r2tasks|r1tasks|
+r2tasks|r1tasks|## 执行计划
+r2tasks|r1tasks|
+r2tasks|r1tasks|1. 建立工具链/依赖与驱动预检证据，实际验证候选同步 timeout、ACK、server 正常退出；不满足时报告 blocker，不改第三方或降标。
+r2tasks|r1tasks|2. Rust 独立工程：typed 配置/domain、专属 PLC owner、持久状态与审计、单轮 demo01、调度与正常停止；逐 AC01–AC14 自检，再做独立复制一致性核对。
+r2tasks|r1tasks|3. Rust DEV 证据完成后，Python 以同矩阵实现并自检；显式 Python 3.11 / uv --no-python-downloads。
+r2tasks|r1tasks|4. 固定源码 manifest、记录实际文件/命令/退出码/资源/限制，developer_handoff 至协调器后启动 fresh-context Verification。
+r2tasks|r1tasks|
+r2tasks|r1tasks|## 当前检查记录
+r2tasks|r1tasks|
+r2tasks|r1tasks|- 已读取根 AGENTS、README/PLAN 双语、canonical workflow、development.toml、FF README/PLAN/catalog 双语与完整批准 spec。FF 内无更近 AGENTS。
+r2tasks|r1tasks|- memory registry 对 FF-001/field-flow 检索无结果，未依赖历史结论。
+r2tasks|r1tasks|- `rustc --version` / `cargo --version`：均 1.89.0；`uv --version`：0.7.8。
+r2tasks|r1tasks|- 首次 `uv python find 3.11 --no-python-downloads`：因默认 uv cache `.git` sandbox 访问限制失败，尚未证明解释器缺失；后续使用任务私有 cache 重试。
+r2tasks|r1tasks|- 两版实现、AC01–AC14、协议/退出测试：not_run，尚无 developer_handoff 或 QA verdict。
+r2tasks|r1tasks|
+r2tasks|r1tasks|## 临时资源
+r2tasks|r1tasks|
+r2tasks|r1tasks|本任务临时根将使用唯一 `/private/tmp/ff-001-r1-20261021-dev/`，各资源用途和实际创建情况随执行更新。重要结果持久化本 bundle evidence；自然退出/端口释放实际检查后记录，不以停止标志代替 join。后续 QA 需要的资源保留至协调器按 workflow 审计回收。
+r2tasks|r1tasks|
+r2tasks|r1tasks|## Development 阶段停止事实（2026-10-21）
+r2tasks|r1tasks|
+r2tasks|r1tasks|候选 `python-snap7==3.0.0` 的公开 Client 路径不能满足批准 R04 同步 connect/IO 硬预算。已向主协调器报告并完成其要求的公开配置入口、真实读写与重试核查。完整调用链、准确版本/源码hash、命令和原样结果见 [driver_api_review.md](evidence/driver_api_review.md)。
+r2tasks|r1tasks|
+r2tasks|r1tasks|- connect：5003 ms，超3000+500ms；实际断言exit1。
+r2tasks|r1tasks|- 真实WriteVar已应用、正ACK分段送达：6019 ms，超5000+500ms；exit1。
+r2tasks|r1tasks|- 真实ReadVar分段送达：6018 ms，超5000+500ms；exit1。
+r2tasks|r1tasks|- 3次旧真响应后匹配ACK：有限receive重试，actual write=1，174ms；exit0，仅证明此路径不重发。
+r2tasks|r1tasks|- 每次Python协议测试proxy已join、server子进程自然exit0且无剩余线程、32102/32103释放。Rust独立静默COTP预检实际500ms错误、thread join/31102释放，exit0。
+r2tasks|r1tasks|
+r2tasks|r1tasks|公开 Client 无timeout/transport注入参数；低层连接虽有timeout，但Client每次重建对象且无参连接。直接使用私有初始化/改第三方/替换候选不在本Development可自行决定范围。正式实现暂停，等待PM/协调器的新Revision决定；未安装其他候选、未创建两版正式源码目录。此处不是开发完成handoff，不能据此启动完整实现QA或宣称任务已完成。
+r2tasks|r1tasks|
+r2tasks|r1tasks|### 逐AC当前状态
+r2tasks|r1tasks|
+r2tasks|r1tasks|| AC | Rust | Python |
+r2tasks|r1tasks|| --- | --- | --- |
+r2tasks|r1tasks|| AC01 | not_run：只有独立probe锁/构建，不是runtime或复制验证 | not_run：只有独立probe环境，不是runtime锁/构建 |
+r2tasks|r1tasks|| AC02 | not_run | not_run |
+r2tasks|r1tasks|| AC03 | not_run | 仅驱动预检INT42/相邻字节成立；完整demo01矩阵not_run |
+r2tasks|r1tasks|| AC04 | not_run | not_run |
+r2tasks|r1tasks|| AC05 | not_run | not_run |
+r2tasks|r1tasks|| AC06 | not_run | not_run |
+r2tasks|r1tasks|| AC07 | not_run | not_run |
+r2tasks|r1tasks|| AC08 | 仅静默COTP500ms局部预检；完整AC not_run | 候选驱动预算实测失败；完整runtime矩阵not_run |
+r2tasks|r1tasks|| AC09 | not_run | not_run |
+r2tasks|r1tasks|| AC10 | not_run | not_run |
+r2tasks|r1tasks|| AC11 | not_run | not_run |
+r2tasks|r1tasks|| AC12 | not_run | not_run |
+r2tasks|r1tasks|| AC13 | 仅probe thread/31102释放；runtime/native server not_run | 仅probe proxy/server子进程/32102/32103释放；runtime not_run |
+r2tasks|r1tasks|| AC14 | not_run：正式runtime文档/Verification尚无 | not_run：正式runtime文档/Verification尚无 |
+r2tasks|r1tasks|
+r2tasks|r1tasks|### 实际资源与限制
+r2tasks|r1tasks|
+r2tasks|r1tasks|- `/private/tmp/ff-001-r1-20261021-dev/python-preflight-venv/`：唯一3.11 probe环境；无数据库。
+r2tasks|r1tasks|- `/private/tmp/ff-001-r1-20261021-dev/uv-cache/`：本次依赖下载缓存。
+r2tasks|r1tasks|- `/private/tmp/ff-001-r1-20261021-dev/rust-driver-preflight/`：独立候选crate probe源码/锁/target；不是交付runtime。清单/锁/源码已持久保存evidence。
+r2tasks|r1tasks|- 当前无本任务常驻进程、listener、状态库。没有Docker/真实PLC/第三方业务HTTP、其他任务写入或Git refs操作。
+r2tasks|r1tasks|- 临时资源暂保留给PM复核及协调器决定后续复现/回收；重要证据已在bundle，不依赖临时目录作为唯一记录。
+r2tasks|r1tasks|
+r2tasks|r1tasks|### 交给协调器/PM的 blocker handoff
+r2tasks|r1tasks|
+r2tasks|r1tasks|精确 FF-001 r1；工作树 `/Users/jason/Desktop/DreamCode/aiis-ics-arch`，未commit。Development新增仅本tasks与evidence，不改spec/checklist/任务外文件。请由PM决定符合既定预算的获批候选/适配范围及新Revision；未获批准前不进行替代实现。成功预算不能用异步waiter超时代替同步driver终止。尚无developer_handoff完成、fresh Verification verdict或Human Owner最终验收。
+r2tasks|r1tasks|
+r2tasks|r1tasks|### 追加有限 Rust native 预检（同日，协调器明确要求）
+r2tasks|r1tasks|
+r2tasks|r1tasks|因为Python已实证分段接收突破总deadline，协调器要求在原r1批准的31102/31103核查Rust/native同类风险，未展开正式实现。
+r2tasks|r1tasks|
+r2tasks|r1tasks|- `ff001-driver-preflight native_standard`：实际原生server+透明proxy，connect3ms/write1ms/read1ms，actualWriteVar1、匹配正ACK、INT42及邻接字节成立；exit0。
+r2tasks|r1tasks|- `ff001-driver-preflight native_split`：实际SendTimeout/RecvTimeout=5000ms，原始ACK7字节header延迟3s、body再延迟3s；write6020ms仍成功、实际写1；读回及原生server注册内存正确。超5500ms断言exit101，原失败保留。
+r2tasks|r1tasks|- 两次proxy真join，原生server子进程自然exit0、父进程wait、31102/31103实际重bind；不是native stop返回即宣称线程已join。buffer直到server drop后仍活着。
+r2tasks|r1tasks|- `cargo fmt`、`cargo build --locked --offline`、后续`cargo fmt --check`均exit0，仅临时候选probe。源码/锁与真实输出持久于evidence；完整调用链与限制见driver_api_review。
+r2tasks|r1tasks|- 这项失败说明底层RecvTimeout不等于整次driver deadline；并未排除native所有可能保守预算适配。不能仅换Python候选就宣称问题解决。PM需在下一精确范围中决定可验证办法，不能降低原预算。
+r2tasks|r1tasks|- Rust AC03仅新增单值驱动R/W局部证据，AC08新增现参数映射的总预算失败；其余完整runtime AC状态仍如上表not_run。
+r2tasks|r1tasks|- 最终临时Rust probe占用97M，Python环境964K、UV缓存480K；保存用于失败复核及后续gate。无listener/常驻进程/状态库；正式Rust/Python源码目录依然未创建。
+r2tasks|r1tasks|
+r2tasks|r1tasks|### Development 记录检查
+r2tasks|r1tasks|
+r2tasks|r1tasks|`git diff --check -- field-flow/plans/FF-001-dual-runtime-demo01` exit0；因bundle未跟踪，该命令不构成新文件内容检查，另执行证据JSONL解析/源脚本编译/空白与链接断言。两份受保护spec的SHA256复核均保持原值。无替代依赖安装、spec/checklist写入、QA verdict或最终验收。当前gate为PM处理依赖/预算合同并取得Human Owner对新Revision的批准。
+r2tasks|r1tasks|
+r2tasks|r1tasks|### 公开native参数分配核查及最终阻塞结论
+r2tasks|r1tasks|
+r2tasks|r1tasks|协调器再次要求仅用当前Rust候选公开参数判断保守阶段分配能力。已只读界定COTP2次接收、S7协商、INT单slice、每次PDU最多64片/128次RecvPacket；不能机械除2。发现native `Purge()`在raw recv恰为512字节时持续循环，无deadline/次数上限，且通过接收超时、协议错误、disconnect/析构可达；成功POSIX连接路径恢复blocking，socket未设置系统接收/发送超时。公开Ping/Send/Recv参数不能约束此路径，完整说明及源码hash见evidence/driver_api_review.md。
+r2tasks|r1tasks|
+r2tasks|r1tasks|最小 `native_split_budgeted` probe仅把公开Send/Recv参数改为10ms，同样真实分段ACK下write10ms错误、read10ms错误；server已写42，actualWriteVar1。proxy/server自然join/exit0、两端口释放。probe exit0只证明这一条路径能及时失败，不证明完整R04。原6020ms失败保留。未实际执行永不返回Purge/强杀用例，未修改第三方、未安装2.1.0，未扩成正式runtime。
+r2tasks|r1tasks|
+r2tasks|r1tasks|最终blocker handoff：当前r1两个候选的既有公开入口尚不能证明整次同步IO/退出预算，Rust有具体未受控Purge循环；需PM在新Revision中明确可验证适配方案并获Human Owner批准。继续保持`blocked_dependency`；无developer_handoff完成、QA verdict或Owner验收。
+r2tasks|r1tasks|
+r2tasks|r1tasks|元数据规范化：仅将当前状态名规范为`dev_blocked`并补充真实Handoff，Revision仍为r1；原`blocked_dependency`依赖合同阻塞事实和全部失败历史未消除，PM r2仍为待精确批准的draft，不表示r2已实施或已进入QA。
+r2tasks|````
+`````

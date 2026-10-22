@@ -1,0 +1,7 @@
+{
+  "exit_code": 1,
+  "error": "AssertionError from asserting no ignored report paths",
+  "diagnostic_command": "git check-ignore -v field-flow/plans/FF-001-dual-runtime-demo01/evidence/r3-dev/manifest.sha256",
+  "diagnostic_result": ".gitignore:218:*.sha256",
+  "resolution": "Removed only own empty placeholder, use evidence-manifest.txt; root .gitignore unchanged; source/protocol tests unaffected"
+}

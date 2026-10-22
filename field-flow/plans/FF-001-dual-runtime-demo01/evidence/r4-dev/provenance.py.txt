@@ -1,0 +1,10 @@
+import json,sys,platform,sqlite3,importlib.metadata
+import field_flow
+import tests.fixtures.runtime as fixture
+from pathlib import Path
+root=Path.cwd().resolve()
+v={'cwd':str(root),'sys_executable':sys.executable,'python':sys.version,'platform':platform.platform(),'field_flow_file':field_flow.__file__,'fixture_file':fixture.__file__,'versions':{k:importlib.metadata.version(k) for k in ('field-flow','python-snap7','httpx','PyYAML','pytest')},'sqlite_version':sqlite3.sqlite_version}
+assert Path(sys.executable).parent.parent == root/'.venv'
+assert Path(field_flow.__file__).is_relative_to(root/'src')
+assert Path(fixture.__file__).is_relative_to(root/'tests')
+print(json.dumps(v,indent=2))

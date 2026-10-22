@@ -150,6 +150,7 @@ async fn child_and_parent_death_are_real() {
                 .iter()
                 .any(|e| e["event"] == "shutdown_complete"));
         }
+        let old_child_end_ms = start.elapsed().as_millis();
         fixture.fault("");
         let mut restart = Process::start(dir.clone(), false);
         restart.pid().await;
@@ -166,7 +167,7 @@ async fn child_and_parent_death_are_real() {
             .any(|e| e["event"] == "shutdown_complete"));
         println!(
             "{}",
-            json!({"ac":"AC10/AC13","kill_parent":kill_parent,"old_child_pid":child_pid,"child_gone":true,"duration_to_observation_ms":start.elapsed().as_millis(),"applied":1,"unknown":1,"store":dir})
+            json!({"ac":"AC10/AC13","kill_parent":kill_parent,"old_child_pid":child_pid,"child_gone":true,"duration_to_observation_ms":start.elapsed().as_millis(),"old_child_end_ms":old_child_end_ms,"applied":1,"unknown":1,"store":dir})
         );
     }
     fixture.close().unwrap();

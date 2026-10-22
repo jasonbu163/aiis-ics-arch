@@ -10,6 +10,8 @@ pnpm tauri dev
 pnpm tauri build --no-bundle
 ```
 
+For store mismatch/modules-rebuild messages, see the [guide’s pnpm store notes](USER_GUIDE.md#12-understand-pnpm-store-messages). Historical validation stores under `/private/tmp` are not normal startup prerequisites. Keep the declared pnpm version/lock; review that a reinstall concerns only this project’s dependencies. The [manual-DB/import guide](USER_GUIDE.md) also records the current nonzero initial/fixed-value input issue.
+
 Tauri's `build.features` explicitly enables `native-s7`, including when the CLI passes `--no-default-features`. The runtime build script automatically invokes CMake in Cargo `OUT_DIR`; the desktop consumes Cargo `DEP_DS_S7_NATIVE_*` metadata and links the native library with the required rpath. No G0 environment variables or prebuilt library in `/private/tmp` are product prerequisites. Frontend-only `pnpm dev` uses strict `127.0.0.1:15194`; it reports unavailable desktop operations rather than mock success. Preview uses strict port 14194.
 
 To isolate a local product session, set optional `DS_PROFILE_DIR` to a new absolute owned directory before launch. It contains DS configuration, logs and the persistent WebView store ID; macOS stores actual WebKit data separately under that ID. Do not delete unknown existing profiles or system WebKit directories. A profile in use is rejected rather than replaced. The new profile starts empty and never opens S7 listeners until a configured, applied instance is explicitly started. Product configuration accepts IPv4 loopback endpoints; insufficient permissions or occupied ports produce a real start failure.

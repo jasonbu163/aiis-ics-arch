@@ -1,0 +1,2265 @@
+{
+  "checked_at_utc": "2026-10-22T03:00:10Z",
+  "recorded_pids": [
+    {
+      "pid": 7063,
+      "state": "absent"
+    },
+    {
+      "pid": 7064,
+      "state": "absent"
+    },
+    {
+      "pid": 7065,
+      "state": "absent"
+    },
+    {
+      "pid": 7086,
+      "state": "absent"
+    },
+    {
+      "pid": 7089,
+      "state": "absent"
+    },
+    {
+      "pid": 7115,
+      "state": "absent"
+    },
+    {
+      "pid": 7194,
+      "state": "absent"
+    },
+    {
+      "pid": 7231,
+      "state": "absent"
+    },
+    {
+      "pid": 8705,
+      "state": "absent"
+    },
+    {
+      "pid": 10028,
+      "state": "absent"
+    },
+    {
+      "pid": 10035,
+      "state": "absent"
+    },
+    {
+      "pid": 10038,
+      "state": "absent"
+    },
+    {
+      "pid": 10062,
+      "state": "absent"
+    },
+    {
+      "pid": 10067,
+      "state": "absent"
+    },
+    {
+      "pid": 10113,
+      "state": "absent"
+    },
+    {
+      "pid": 10116,
+      "state": "absent"
+    },
+    {
+      "pid": 10117,
+      "state": "absent"
+    },
+    {
+      "pid": 10122,
+      "state": "absent"
+    },
+    {
+      "pid": 10125,
+      "state": "absent"
+    },
+    {
+      "pid": 10126,
+      "state": "absent"
+    },
+    {
+      "pid": 10128,
+      "state": "absent"
+    },
+    {
+      "pid": 10143,
+      "state": "absent"
+    },
+    {
+      "pid": 10144,
+      "state": "absent"
+    },
+    {
+      "pid": 10145,
+      "state": "absent"
+    },
+    {
+      "pid": 10146,
+      "state": "absent"
+    },
+    {
+      "pid": 10149,
+      "state": "absent"
+    },
+    {
+      "pid": 10155,
+      "state": "absent"
+    },
+    {
+      "pid": 10160,
+      "state": "absent"
+    },
+    {
+      "pid": 10175,
+      "state": "absent"
+    },
+    {
+      "pid": 10176,
+      "state": "absent"
+    },
+    {
+      "pid": 10177,
+      "state": "absent"
+    },
+    {
+      "pid": 10178,
+      "state": "absent"
+    },
+    {
+      "pid": 10179,
+      "state": "absent"
+    },
+    {
+      "pid": 10180,
+      "state": "absent"
+    },
+    {
+      "pid": 10181,
+      "state": "absent"
+    },
+    {
+      "pid": 10182,
+      "state": "absent"
+    },
+    {
+      "pid": 10198,
+      "state": "absent"
+    },
+    {
+      "pid": 10199,
+      "state": "absent"
+    },
+    {
+      "pid": 10200,
+      "state": "absent"
+    },
+    {
+      "pid": 10201,
+      "state": "absent"
+    },
+    {
+      "pid": 10202,
+      "state": "absent"
+    },
+    {
+      "pid": 10204,
+      "state": "absent"
+    },
+    {
+      "pid": 10205,
+      "state": "absent"
+    },
+    {
+      "pid": 10281,
+      "state": "absent"
+    },
+    {
+      "pid": 10283,
+      "state": "absent"
+    },
+    {
+      "pid": 10284,
+      "state": "absent"
+    },
+    {
+      "pid": 10285,
+      "state": "absent"
+    },
+    {
+      "pid": 10289,
+      "state": "absent"
+    },
+    {
+      "pid": 10306,
+      "state": "absent"
+    },
+    {
+      "pid": 10307,
+      "state": "absent"
+    },
+    {
+      "pid": 10308,
+      "state": "absent"
+    },
+    {
+      "pid": 10309,
+      "state": "absent"
+    },
+    {
+      "pid": 10310,
+      "state": "absent"
+    },
+    {
+      "pid": 10311,
+      "state": "absent"
+    },
+    {
+      "pid": 10312,
+      "state": "absent"
+    },
+    {
+      "pid": 10313,
+      "state": "absent"
+    },
+    {
+      "pid": 10314,
+      "state": "absent"
+    },
+    {
+      "pid": 10315,
+      "state": "absent"
+    },
+    {
+      "pid": 10330,
+      "state": "absent"
+    },
+    {
+      "pid": 10331,
+      "state": "absent"
+    },
+    {
+      "pid": 10332,
+      "state": "absent"
+    },
+    {
+      "pid": 10333,
+      "state": "absent"
+    },
+    {
+      "pid": 10334,
+      "state": "absent"
+    },
+    {
+      "pid": 10335,
+      "state": "absent"
+    },
+    {
+      "pid": 10336,
+      "state": "absent"
+    },
+    {
+      "pid": 10338,
+      "state": "absent"
+    },
+    {
+      "pid": 10339,
+      "state": "absent"
+    },
+    {
+      "pid": 10354,
+      "state": "absent"
+    },
+    {
+      "pid": 10355,
+      "state": "absent"
+    },
+    {
+      "pid": 10356,
+      "state": "absent"
+    },
+    {
+      "pid": 10357,
+      "state": "absent"
+    },
+    {
+      "pid": 10358,
+      "state": "absent"
+    },
+    {
+      "pid": 10359,
+      "state": "absent"
+    },
+    {
+      "pid": 10360,
+      "state": "absent"
+    },
+    {
+      "pid": 10361,
+      "state": "absent"
+    },
+    {
+      "pid": 10362,
+      "state": "absent"
+    },
+    {
+      "pid": 10377,
+      "state": "absent"
+    },
+    {
+      "pid": 10378,
+      "state": "absent"
+    },
+    {
+      "pid": 10379,
+      "state": "absent"
+    },
+    {
+      "pid": 10380,
+      "state": "absent"
+    },
+    {
+      "pid": 10389,
+      "state": "absent"
+    },
+    {
+      "pid": 10392,
+      "state": "absent"
+    },
+    {
+      "pid": 10393,
+      "state": "absent"
+    },
+    {
+      "pid": 10394,
+      "state": "absent"
+    },
+    {
+      "pid": 10395,
+      "state": "absent"
+    },
+    {
+      "pid": 10410,
+      "state": "absent"
+    },
+    {
+      "pid": 10443,
+      "state": "absent"
+    },
+    {
+      "pid": 10447,
+      "state": "absent"
+    },
+    {
+      "pid": 10448,
+      "state": "absent"
+    },
+    {
+      "pid": 10463,
+      "state": "absent"
+    },
+    {
+      "pid": 10464,
+      "state": "absent"
+    },
+    {
+      "pid": 10465,
+      "state": "absent"
+    },
+    {
+      "pid": 10480,
+      "state": "absent"
+    },
+    {
+      "pid": 10481,
+      "state": "absent"
+    },
+    {
+      "pid": 10482,
+      "state": "absent"
+    },
+    {
+      "pid": 10497,
+      "state": "absent"
+    },
+    {
+      "pid": 10498,
+      "state": "absent"
+    },
+    {
+      "pid": 10499,
+      "state": "absent"
+    },
+    {
+      "pid": 10504,
+      "state": "absent"
+    },
+    {
+      "pid": 10505,
+      "state": "absent"
+    },
+    {
+      "pid": 10522,
+      "state": "absent"
+    },
+    {
+      "pid": 10523,
+      "state": "absent"
+    },
+    {
+      "pid": 10526,
+      "state": "absent"
+    },
+    {
+      "pid": 10527,
+      "state": "absent"
+    },
+    {
+      "pid": 10542,
+      "state": "absent"
+    },
+    {
+      "pid": 10543,
+      "state": "absent"
+    },
+    {
+      "pid": 10544,
+      "state": "absent"
+    },
+    {
+      "pid": 10545,
+      "state": "absent"
+    },
+    {
+      "pid": 10552,
+      "state": "absent"
+    },
+    {
+      "pid": 10567,
+      "state": "absent"
+    },
+    {
+      "pid": 10568,
+      "state": "absent"
+    },
+    {
+      "pid": 10569,
+      "state": "absent"
+    },
+    {
+      "pid": 10570,
+      "state": "absent"
+    },
+    {
+      "pid": 10571,
+      "state": "absent"
+    },
+    {
+      "pid": 10572,
+      "state": "absent"
+    },
+    {
+      "pid": 10573,
+      "state": "absent"
+    },
+    {
+      "pid": 10574,
+      "state": "absent"
+    },
+    {
+      "pid": 10589,
+      "state": "absent"
+    },
+    {
+      "pid": 10593,
+      "state": "absent"
+    },
+    {
+      "pid": 10595,
+      "state": "absent"
+    },
+    {
+      "pid": 10610,
+      "state": "absent"
+    },
+    {
+      "pid": 10611,
+      "state": "absent"
+    },
+    {
+      "pid": 10612,
+      "state": "absent"
+    },
+    {
+      "pid": 10614,
+      "state": "absent"
+    },
+    {
+      "pid": 10615,
+      "state": "absent"
+    },
+    {
+      "pid": 10619,
+      "state": "absent"
+    },
+    {
+      "pid": 10620,
+      "state": "absent"
+    },
+    {
+      "pid": 10621,
+      "state": "absent"
+    },
+    {
+      "pid": 10636,
+      "state": "absent"
+    },
+    {
+      "pid": 10637,
+      "state": "absent"
+    },
+    {
+      "pid": 10638,
+      "state": "absent"
+    },
+    {
+      "pid": 10639,
+      "state": "absent"
+    },
+    {
+      "pid": 10640,
+      "state": "absent"
+    },
+    {
+      "pid": 10641,
+      "state": "absent"
+    },
+    {
+      "pid": 10642,
+      "state": "absent"
+    },
+    {
+      "pid": 10643,
+      "state": "absent"
+    },
+    {
+      "pid": 10658,
+      "state": "absent"
+    },
+    {
+      "pid": 10659,
+      "state": "absent"
+    },
+    {
+      "pid": 10660,
+      "state": "absent"
+    },
+    {
+      "pid": 10661,
+      "state": "absent"
+    },
+    {
+      "pid": 10662,
+      "state": "absent"
+    },
+    {
+      "pid": 10663,
+      "state": "absent"
+    },
+    {
+      "pid": 10678,
+      "state": "absent"
+    },
+    {
+      "pid": 10679,
+      "state": "absent"
+    },
+    {
+      "pid": 10680,
+      "state": "absent"
+    },
+    {
+      "pid": 10695,
+      "state": "absent"
+    },
+    {
+      "pid": 10696,
+      "state": "absent"
+    },
+    {
+      "pid": 10700,
+      "state": "absent"
+    },
+    {
+      "pid": 10702,
+      "state": "absent"
+    },
+    {
+      "pid": 10704,
+      "state": "absent"
+    },
+    {
+      "pid": 10720,
+      "state": "absent"
+    },
+    {
+      "pid": 10725,
+      "state": "absent"
+    },
+    {
+      "pid": 10731,
+      "state": "absent"
+    },
+    {
+      "pid": 10941,
+      "state": "absent"
+    },
+    {
+      "pid": 10942,
+      "state": "absent"
+    },
+    {
+      "pid": 10945,
+      "state": "absent"
+    },
+    {
+      "pid": 10953,
+      "state": "absent"
+    },
+    {
+      "pid": 10955,
+      "state": "absent"
+    },
+    {
+      "pid": 10993,
+      "state": "absent"
+    },
+    {
+      "pid": 10995,
+      "state": "absent"
+    },
+    {
+      "pid": 11351,
+      "state": "absent"
+    },
+    {
+      "pid": 11433,
+      "state": "absent"
+    },
+    {
+      "pid": 11519,
+      "state": "absent"
+    },
+    {
+      "pid": 11671,
+      "state": "absent"
+    },
+    {
+      "pid": 11703,
+      "state": "absent"
+    },
+    {
+      "pid": 11778,
+      "state": "absent"
+    },
+    {
+      "pid": 11883,
+      "state": "absent"
+    },
+    {
+      "pid": 11960,
+      "state": "absent"
+    },
+    {
+      "pid": 12004,
+      "state": "absent"
+    },
+    {
+      "pid": 12081,
+      "state": "absent"
+    },
+    {
+      "pid": 12168,
+      "state": "absent"
+    },
+    {
+      "pid": 12407,
+      "state": "absent"
+    },
+    {
+      "pid": 12431,
+      "state": "absent"
+    },
+    {
+      "pid": 12434,
+      "state": "absent"
+    },
+    {
+      "pid": 12452,
+      "state": "absent"
+    },
+    {
+      "pid": 12453,
+      "state": "absent"
+    },
+    {
+      "pid": 12457,
+      "state": "absent"
+    },
+    {
+      "pid": 12458,
+      "state": "absent"
+    },
+    {
+      "pid": 12463,
+      "state": "absent"
+    },
+    {
+      "pid": 12466,
+      "state": "absent"
+    },
+    {
+      "pid": 12469,
+      "state": "absent"
+    },
+    {
+      "pid": 12484,
+      "state": "absent"
+    },
+    {
+      "pid": 12497,
+      "state": "absent"
+    },
+    {
+      "pid": 12498,
+      "state": "absent"
+    },
+    {
+      "pid": 12533,
+      "state": "absent"
+    },
+    {
+      "pid": 12553,
+      "state": "absent"
+    },
+    {
+      "pid": 12579,
+      "state": "absent"
+    },
+    {
+      "pid": 12593,
+      "state": "absent"
+    },
+    {
+      "pid": 12616,
+      "state": "absent"
+    },
+    {
+      "pid": 13809,
+      "state": "absent"
+    },
+    {
+      "pid": 13810,
+      "state": "absent"
+    },
+    {
+      "pid": 13813,
+      "state": "absent"
+    },
+    {
+      "pid": 13816,
+      "state": "absent"
+    },
+    {
+      "pid": 13833,
+      "state": "absent"
+    },
+    {
+      "pid": 13836,
+      "state": "absent"
+    },
+    {
+      "pid": 13838,
+      "state": "absent"
+    },
+    {
+      "pid": 13840,
+      "state": "absent"
+    },
+    {
+      "pid": 13841,
+      "state": "absent"
+    },
+    {
+      "pid": 13842,
+      "state": "absent"
+    },
+    {
+      "pid": 13843,
+      "state": "absent"
+    },
+    {
+      "pid": 13846,
+      "state": "absent"
+    },
+    {
+      "pid": 13851,
+      "state": "absent"
+    },
+    {
+      "pid": 13867,
+      "state": "absent"
+    },
+    {
+      "pid": 13868,
+      "state": "absent"
+    },
+    {
+      "pid": 13869,
+      "state": "absent"
+    },
+    {
+      "pid": 13870,
+      "state": "absent"
+    },
+    {
+      "pid": 13871,
+      "state": "absent"
+    },
+    {
+      "pid": 13872,
+      "state": "absent"
+    },
+    {
+      "pid": 13873,
+      "state": "absent"
+    },
+    {
+      "pid": 13874,
+      "state": "absent"
+    },
+    {
+      "pid": 13876,
+      "state": "absent"
+    },
+    {
+      "pid": 13877,
+      "state": "absent"
+    },
+    {
+      "pid": 13892,
+      "state": "absent"
+    },
+    {
+      "pid": 13896,
+      "state": "absent"
+    },
+    {
+      "pid": 13897,
+      "state": "absent"
+    },
+    {
+      "pid": 13898,
+      "state": "absent"
+    },
+    {
+      "pid": 13899,
+      "state": "absent"
+    },
+    {
+      "pid": 13900,
+      "state": "absent"
+    },
+    {
+      "pid": 13901,
+      "state": "absent"
+    },
+    {
+      "pid": 13902,
+      "state": "absent"
+    },
+    {
+      "pid": 13903,
+      "state": "absent"
+    },
+    {
+      "pid": 13918,
+      "state": "absent"
+    },
+    {
+      "pid": 13919,
+      "state": "absent"
+    },
+    {
+      "pid": 13920,
+      "state": "absent"
+    },
+    {
+      "pid": 13921,
+      "state": "absent"
+    },
+    {
+      "pid": 13922,
+      "state": "absent"
+    },
+    {
+      "pid": 13923,
+      "state": "absent"
+    },
+    {
+      "pid": 13924,
+      "state": "absent"
+    },
+    {
+      "pid": 13925,
+      "state": "absent"
+    },
+    {
+      "pid": 13926,
+      "state": "absent"
+    },
+    {
+      "pid": 13941,
+      "state": "absent"
+    },
+    {
+      "pid": 13942,
+      "state": "absent"
+    },
+    {
+      "pid": 13943,
+      "state": "absent"
+    },
+    {
+      "pid": 13973,
+      "state": "absent"
+    },
+    {
+      "pid": 13979,
+      "state": "absent"
+    },
+    {
+      "pid": 13994,
+      "state": "absent"
+    },
+    {
+      "pid": 13995,
+      "state": "absent"
+    },
+    {
+      "pid": 13996,
+      "state": "absent"
+    },
+    {
+      "pid": 14011,
+      "state": "absent"
+    },
+    {
+      "pid": 14012,
+      "state": "absent"
+    },
+    {
+      "pid": 14013,
+      "state": "absent"
+    },
+    {
+      "pid": 14014,
+      "state": "absent"
+    },
+    {
+      "pid": 14029,
+      "state": "absent"
+    },
+    {
+      "pid": 14030,
+      "state": "absent"
+    },
+    {
+      "pid": 14031,
+      "state": "absent"
+    },
+    {
+      "pid": 14032,
+      "state": "absent"
+    },
+    {
+      "pid": 14047,
+      "state": "absent"
+    },
+    {
+      "pid": 14048,
+      "state": "absent"
+    },
+    {
+      "pid": 14049,
+      "state": "absent"
+    },
+    {
+      "pid": 14064,
+      "state": "absent"
+    },
+    {
+      "pid": 14065,
+      "state": "absent"
+    },
+    {
+      "pid": 14066,
+      "state": "absent"
+    },
+    {
+      "pid": 14069,
+      "state": "absent"
+    },
+    {
+      "pid": 14070,
+      "state": "absent"
+    },
+    {
+      "pid": 14071,
+      "state": "absent"
+    },
+    {
+      "pid": 14090,
+      "state": "absent"
+    },
+    {
+      "pid": 14091,
+      "state": "absent"
+    },
+    {
+      "pid": 14092,
+      "state": "absent"
+    },
+    {
+      "pid": 14093,
+      "state": "absent"
+    },
+    {
+      "pid": 14094,
+      "state": "absent"
+    },
+    {
+      "pid": 14095,
+      "state": "absent"
+    },
+    {
+      "pid": 14096,
+      "state": "absent"
+    },
+    {
+      "pid": 14111,
+      "state": "absent"
+    },
+    {
+      "pid": 14112,
+      "state": "absent"
+    },
+    {
+      "pid": 14113,
+      "state": "absent"
+    },
+    {
+      "pid": 14129,
+      "state": "absent"
+    },
+    {
+      "pid": 14130,
+      "state": "absent"
+    },
+    {
+      "pid": 14132,
+      "state": "absent"
+    },
+    {
+      "pid": 14133,
+      "state": "absent"
+    },
+    {
+      "pid": 14136,
+      "state": "absent"
+    },
+    {
+      "pid": 14162,
+      "state": "absent"
+    },
+    {
+      "pid": 14163,
+      "state": "absent"
+    },
+    {
+      "pid": 14164,
+      "state": "absent"
+    },
+    {
+      "pid": 14165,
+      "state": "absent"
+    },
+    {
+      "pid": 14166,
+      "state": "absent"
+    },
+    {
+      "pid": 14168,
+      "state": "absent"
+    },
+    {
+      "pid": 14169,
+      "state": "absent"
+    },
+    {
+      "pid": 14184,
+      "state": "absent"
+    },
+    {
+      "pid": 14186,
+      "state": "absent"
+    },
+    {
+      "pid": 14187,
+      "state": "absent"
+    },
+    {
+      "pid": 14188,
+      "state": "absent"
+    },
+    {
+      "pid": 14190,
+      "state": "absent"
+    },
+    {
+      "pid": 14192,
+      "state": "absent"
+    },
+    {
+      "pid": 14196,
+      "state": "absent"
+    },
+    {
+      "pid": 14211,
+      "state": "absent"
+    },
+    {
+      "pid": 14212,
+      "state": "absent"
+    },
+    {
+      "pid": 14213,
+      "state": "absent"
+    },
+    {
+      "pid": 14218,
+      "state": "absent"
+    },
+    {
+      "pid": 14222,
+      "state": "absent"
+    },
+    {
+      "pid": 14225,
+      "state": "absent"
+    },
+    {
+      "pid": 14247,
+      "state": "absent"
+    },
+    {
+      "pid": 14248,
+      "state": "absent"
+    },
+    {
+      "pid": 14264,
+      "state": "absent"
+    },
+    {
+      "pid": 14265,
+      "state": "absent"
+    },
+    {
+      "pid": 14270,
+      "state": "absent"
+    },
+    {
+      "pid": 14272,
+      "state": "absent"
+    },
+    {
+      "pid": 14274,
+      "state": "absent"
+    },
+    {
+      "pid": 14290,
+      "state": "absent"
+    },
+    {
+      "pid": 14294,
+      "state": "absent"
+    },
+    {
+      "pid": 14297,
+      "state": "absent"
+    },
+    {
+      "pid": 14459,
+      "state": "absent"
+    },
+    {
+      "pid": 14479,
+      "state": "absent"
+    },
+    {
+      "pid": 14505,
+      "state": "absent"
+    },
+    {
+      "pid": 14552,
+      "state": "absent"
+    },
+    {
+      "pid": 14667,
+      "state": "absent"
+    },
+    {
+      "pid": 14685,
+      "state": "absent"
+    },
+    {
+      "pid": 14686,
+      "state": "absent"
+    },
+    {
+      "pid": 14687,
+      "state": "absent"
+    },
+    {
+      "pid": 14690,
+      "state": "absent"
+    },
+    {
+      "pid": 14814,
+      "state": "absent"
+    },
+    {
+      "pid": 14845,
+      "state": "absent"
+    },
+    {
+      "pid": 14894,
+      "state": "absent"
+    },
+    {
+      "pid": 14930,
+      "state": "absent"
+    },
+    {
+      "pid": 14949,
+      "state": "absent"
+    },
+    {
+      "pid": 15001,
+      "state": "absent"
+    },
+    {
+      "pid": 15095,
+      "state": "absent"
+    },
+    {
+      "pid": 15194,
+      "state": "absent"
+    },
+    {
+      "pid": 18436,
+      "state": "absent"
+    },
+    {
+      "pid": 18445,
+      "state": "absent"
+    },
+    {
+      "pid": 18586,
+      "state": "absent"
+    },
+    {
+      "pid": 18608,
+      "state": "absent"
+    },
+    {
+      "pid": 18635,
+      "state": "absent"
+    },
+    {
+      "pid": 18682,
+      "state": "absent"
+    },
+    {
+      "pid": 18796,
+      "state": "absent"
+    },
+    {
+      "pid": 18800,
+      "state": "absent"
+    },
+    {
+      "pid": 18801,
+      "state": "absent"
+    },
+    {
+      "pid": 18802,
+      "state": "absent"
+    },
+    {
+      "pid": 18822,
+      "state": "absent"
+    },
+    {
+      "pid": 18931,
+      "state": "absent"
+    },
+    {
+      "pid": 18965,
+      "state": "absent"
+    },
+    {
+      "pid": 18998,
+      "state": "absent"
+    },
+    {
+      "pid": 19045,
+      "state": "absent"
+    },
+    {
+      "pid": 19050,
+      "state": "absent"
+    },
+    {
+      "pid": 19100,
+      "state": "absent"
+    },
+    {
+      "pid": 19145,
+      "state": "absent"
+    },
+    {
+      "pid": 19235,
+      "state": "absent"
+    },
+    {
+      "pid": 19779,
+      "state": "absent"
+    },
+    {
+      "pid": 19780,
+      "state": "absent"
+    },
+    {
+      "pid": 19785,
+      "state": "absent"
+    },
+    {
+      "pid": 19791,
+      "state": "absent"
+    },
+    {
+      "pid": 19828,
+      "state": "absent"
+    },
+    {
+      "pid": 19831,
+      "state": "absent"
+    },
+    {
+      "pid": 19834,
+      "state": "absent"
+    },
+    {
+      "pid": 20206,
+      "state": "absent"
+    },
+    {
+      "pid": 20296,
+      "state": "absent"
+    },
+    {
+      "pid": 20440,
+      "state": "absent"
+    },
+    {
+      "pid": 20546,
+      "state": "absent"
+    },
+    {
+      "pid": 20584,
+      "state": "absent"
+    },
+    {
+      "pid": 20718,
+      "state": "absent"
+    },
+    {
+      "pid": 20853,
+      "state": "absent"
+    },
+    {
+      "pid": 20968,
+      "state": "absent"
+    },
+    {
+      "pid": 21043,
+      "state": "absent"
+    },
+    {
+      "pid": 21189,
+      "state": "absent"
+    },
+    {
+      "pid": 21263,
+      "state": "absent"
+    },
+    {
+      "pid": 21281,
+      "state": "absent"
+    },
+    {
+      "pid": 21292,
+      "state": "absent"
+    },
+    {
+      "pid": 21295,
+      "state": "absent"
+    },
+    {
+      "pid": 21310,
+      "state": "absent"
+    },
+    {
+      "pid": 21311,
+      "state": "absent"
+    },
+    {
+      "pid": 21312,
+      "state": "absent"
+    },
+    {
+      "pid": 21317,
+      "state": "absent"
+    },
+    {
+      "pid": 21320,
+      "state": "absent"
+    },
+    {
+      "pid": 21321,
+      "state": "absent"
+    },
+    {
+      "pid": 21333,
+      "state": "absent"
+    },
+    {
+      "pid": 21334,
+      "state": "absent"
+    },
+    {
+      "pid": 21335,
+      "state": "absent"
+    },
+    {
+      "pid": 21380,
+      "state": "absent"
+    },
+    {
+      "pid": 21399,
+      "state": "absent"
+    },
+    {
+      "pid": 21409,
+      "state": "absent"
+    },
+    {
+      "pid": 21438,
+      "state": "absent"
+    },
+    {
+      "pid": 21455,
+      "state": "absent"
+    },
+    {
+      "pid": 21473,
+      "state": "absent"
+    },
+    {
+      "pid": 22665,
+      "state": "absent"
+    },
+    {
+      "pid": 22666,
+      "state": "absent"
+    },
+    {
+      "pid": 22667,
+      "state": "absent"
+    },
+    {
+      "pid": 22670,
+      "state": "absent"
+    },
+    {
+      "pid": 22689,
+      "state": "absent"
+    },
+    {
+      "pid": 22690,
+      "state": "absent"
+    },
+    {
+      "pid": 22694,
+      "state": "absent"
+    },
+    {
+      "pid": 22695,
+      "state": "absent"
+    },
+    {
+      "pid": 22696,
+      "state": "absent"
+    },
+    {
+      "pid": 22697,
+      "state": "absent"
+    },
+    {
+      "pid": 22698,
+      "state": "absent"
+    },
+    {
+      "pid": 22699,
+      "state": "absent"
+    },
+    {
+      "pid": 22704,
+      "state": "absent"
+    },
+    {
+      "pid": 22725,
+      "state": "absent"
+    },
+    {
+      "pid": 22726,
+      "state": "absent"
+    },
+    {
+      "pid": 22728,
+      "state": "absent"
+    },
+    {
+      "pid": 22729,
+      "state": "absent"
+    },
+    {
+      "pid": 22730,
+      "state": "absent"
+    },
+    {
+      "pid": 22731,
+      "state": "absent"
+    },
+    {
+      "pid": 22732,
+      "state": "absent"
+    },
+    {
+      "pid": 22733,
+      "state": "absent"
+    },
+    {
+      "pid": 22734,
+      "state": "absent"
+    },
+    {
+      "pid": 22749,
+      "state": "absent"
+    },
+    {
+      "pid": 22750,
+      "state": "absent"
+    },
+    {
+      "pid": 22751,
+      "state": "absent"
+    },
+    {
+      "pid": 22752,
+      "state": "absent"
+    },
+    {
+      "pid": 22753,
+      "state": "absent"
+    },
+    {
+      "pid": 22754,
+      "state": "absent"
+    },
+    {
+      "pid": 22755,
+      "state": "absent"
+    },
+    {
+      "pid": 22756,
+      "state": "absent"
+    },
+    {
+      "pid": 22757,
+      "state": "absent"
+    },
+    {
+      "pid": 22772,
+      "state": "absent"
+    },
+    {
+      "pid": 22773,
+      "state": "absent"
+    },
+    {
+      "pid": 22774,
+      "state": "absent"
+    },
+    {
+      "pid": 22775,
+      "state": "absent"
+    },
+    {
+      "pid": 22776,
+      "state": "absent"
+    },
+    {
+      "pid": 22777,
+      "state": "absent"
+    },
+    {
+      "pid": 22778,
+      "state": "absent"
+    },
+    {
+      "pid": 22779,
+      "state": "absent"
+    },
+    {
+      "pid": 22780,
+      "state": "absent"
+    },
+    {
+      "pid": 22795,
+      "state": "absent"
+    },
+    {
+      "pid": 22796,
+      "state": "absent"
+    },
+    {
+      "pid": 22797,
+      "state": "absent"
+    },
+    {
+      "pid": 22798,
+      "state": "absent"
+    },
+    {
+      "pid": 22831,
+      "state": "absent"
+    },
+    {
+      "pid": 22849,
+      "state": "absent"
+    },
+    {
+      "pid": 22850,
+      "state": "absent"
+    },
+    {
+      "pid": 22851,
+      "state": "absent"
+    },
+    {
+      "pid": 22866,
+      "state": "absent"
+    },
+    {
+      "pid": 22867,
+      "state": "absent"
+    },
+    {
+      "pid": 22868,
+      "state": "absent"
+    },
+    {
+      "pid": 22869,
+      "state": "absent"
+    },
+    {
+      "pid": 22870,
+      "state": "absent"
+    },
+    {
+      "pid": 22885,
+      "state": "absent"
+    },
+    {
+      "pid": 22886,
+      "state": "absent"
+    },
+    {
+      "pid": 22887,
+      "state": "absent"
+    },
+    {
+      "pid": 22902,
+      "state": "absent"
+    },
+    {
+      "pid": 22903,
+      "state": "absent"
+    },
+    {
+      "pid": 22904,
+      "state": "absent"
+    },
+    {
+      "pid": 22905,
+      "state": "absent"
+    },
+    {
+      "pid": 22924,
+      "state": "absent"
+    },
+    {
+      "pid": 22925,
+      "state": "absent"
+    },
+    {
+      "pid": 22926,
+      "state": "absent"
+    },
+    {
+      "pid": 22927,
+      "state": "absent"
+    },
+    {
+      "pid": 22928,
+      "state": "absent"
+    },
+    {
+      "pid": 22929,
+      "state": "absent"
+    },
+    {
+      "pid": 22944,
+      "state": "absent"
+    },
+    {
+      "pid": 22945,
+      "state": "absent"
+    },
+    {
+      "pid": 22946,
+      "state": "absent"
+    },
+    {
+      "pid": 22947,
+      "state": "absent"
+    },
+    {
+      "pid": 22948,
+      "state": "absent"
+    },
+    {
+      "pid": 22963,
+      "state": "absent"
+    },
+    {
+      "pid": 22964,
+      "state": "absent"
+    },
+    {
+      "pid": 22965,
+      "state": "absent"
+    },
+    {
+      "pid": 22966,
+      "state": "absent"
+    },
+    {
+      "pid": 22967,
+      "state": "absent"
+    },
+    {
+      "pid": 22983,
+      "state": "absent"
+    },
+    {
+      "pid": 22984,
+      "state": "absent"
+    },
+    {
+      "pid": 22985,
+      "state": "absent"
+    },
+    {
+      "pid": 22986,
+      "state": "absent"
+    },
+    {
+      "pid": 22987,
+      "state": "absent"
+    },
+    {
+      "pid": 22988,
+      "state": "absent"
+    },
+    {
+      "pid": 23003,
+      "state": "absent"
+    },
+    {
+      "pid": 23004,
+      "state": "absent"
+    },
+    {
+      "pid": 23005,
+      "state": "absent"
+    },
+    {
+      "pid": 23006,
+      "state": "absent"
+    },
+    {
+      "pid": 23007,
+      "state": "absent"
+    },
+    {
+      "pid": 23008,
+      "state": "absent"
+    },
+    {
+      "pid": 23012,
+      "state": "absent"
+    },
+    {
+      "pid": 23013,
+      "state": "absent"
+    },
+    {
+      "pid": 23028,
+      "state": "absent"
+    },
+    {
+      "pid": 23030,
+      "state": "absent"
+    },
+    {
+      "pid": 23031,
+      "state": "absent"
+    },
+    {
+      "pid": 23032,
+      "state": "absent"
+    },
+    {
+      "pid": 23033,
+      "state": "absent"
+    },
+    {
+      "pid": 23034,
+      "state": "absent"
+    },
+    {
+      "pid": 23049,
+      "state": "absent"
+    },
+    {
+      "pid": 23050,
+      "state": "absent"
+    },
+    {
+      "pid": 23051,
+      "state": "absent"
+    },
+    {
+      "pid": 23052,
+      "state": "absent"
+    },
+    {
+      "pid": 23053,
+      "state": "absent"
+    },
+    {
+      "pid": 23057,
+      "state": "absent"
+    },
+    {
+      "pid": 23076,
+      "state": "absent"
+    },
+    {
+      "pid": 23077,
+      "state": "absent"
+    },
+    {
+      "pid": 23078,
+      "state": "absent"
+    },
+    {
+      "pid": 23094,
+      "state": "absent"
+    },
+    {
+      "pid": 23096,
+      "state": "absent"
+    },
+    {
+      "pid": 23098,
+      "state": "absent"
+    },
+    {
+      "pid": 23100,
+      "state": "absent"
+    },
+    {
+      "pid": 23104,
+      "state": "absent"
+    },
+    {
+      "pid": 23121,
+      "state": "absent"
+    },
+    {
+      "pid": 23272,
+      "state": "absent"
+    },
+    {
+      "pid": 23553,
+      "state": "absent"
+    },
+    {
+      "pid": 23562,
+      "state": "absent"
+    },
+    {
+      "pid": 23563,
+      "state": "absent"
+    },
+    {
+      "pid": 23579,
+      "state": "absent"
+    },
+    {
+      "pid": 23734,
+      "state": "absent"
+    },
+    {
+      "pid": 23738,
+      "state": "absent"
+    },
+    {
+      "pid": 23762,
+      "state": "absent"
+    },
+    {
+      "pid": 23813,
+      "state": "absent"
+    },
+    {
+      "pid": 23938,
+      "state": "absent"
+    },
+    {
+      "pid": 23956,
+      "state": "absent"
+    },
+    {
+      "pid": 23957,
+      "state": "absent"
+    },
+    {
+      "pid": 23958,
+      "state": "absent"
+    },
+    {
+      "pid": 23961,
+      "state": "absent"
+    },
+    {
+      "pid": 24070,
+      "state": "absent"
+    },
+    {
+      "pid": 24103,
+      "state": "absent"
+    },
+    {
+      "pid": 24146,
+      "state": "absent"
+    },
+    {
+      "pid": 24182,
+      "state": "absent"
+    },
+    {
+      "pid": 24202,
+      "state": "absent"
+    },
+    {
+      "pid": 24252,
+      "state": "absent"
+    },
+    {
+      "pid": 24301,
+      "state": "absent"
+    },
+    {
+      "pid": 24392,
+      "state": "absent"
+    },
+    {
+      "pid": 25096,
+      "state": "absent"
+    },
+    {
+      "pid": 25119,
+      "state": "absent"
+    },
+    {
+      "pid": 25120,
+      "state": "absent"
+    },
+    {
+      "pid": 35871,
+      "state": "absent"
+    },
+    {
+      "pid": 35872,
+      "state": "absent"
+    },
+    {
+      "pid": 35873,
+      "state": "absent"
+    },
+    {
+      "pid": 35874,
+      "state": "absent"
+    }
+  ],
+  "ports": [
+    {
+      "port": 31102,
+      "argv": [
+        "lsof",
+        "-nP",
+        "-iTCP:31102",
+        "-sTCP:LISTEN"
+      ],
+      "lsof_exit": 1,
+      "output": "",
+      "rebound": true
+    },
+    {
+      "port": 31103,
+      "argv": [
+        "lsof",
+        "-nP",
+        "-iTCP:31103",
+        "-sTCP:LISTEN"
+      ],
+      "lsof_exit": 1,
+      "output": "",
+      "rebound": true
+    },
+    {
+      "port": 31880,
+      "argv": [
+        "lsof",
+        "-nP",
+        "-iTCP:31880",
+        "-sTCP:LISTEN"
+      ],
+      "lsof_exit": 1,
+      "output": "",
+      "rebound": true
+    },
+    {
+      "port": 32102,
+      "argv": [
+        "lsof",
+        "-nP",
+        "-iTCP:32102",
+        "-sTCP:LISTEN"
+      ],
+      "lsof_exit": 1,
+      "output": "",
+      "rebound": true
+    },
+    {
+      "port": 32103,
+      "argv": [
+        "lsof",
+        "-nP",
+        "-iTCP:32103",
+        "-sTCP:LISTEN"
+      ],
+      "lsof_exit": 1,
+      "output": "",
+      "rebound": true
+    },
+    {
+      "port": 32880,
+      "argv": [
+        "lsof",
+        "-nP",
+        "-iTCP:32880",
+        "-sTCP:LISTEN"
+      ],
+      "lsof_exit": 1,
+      "output": "",
+      "rebound": true
+    }
+  ],
+  "retained_roots": [
+    "/private/tmp/ff-001-r1-20261021-r2dev",
+    "/private/tmp/ff-001-r1-r3-rust-ack-rejections-1792636455628-14552-0",
+    "/private/tmp/ff-001-r1-r3-rust-ack-rejections-1792636809180-18682-0",
+    "/private/tmp/ff-001-r1-r3-rust-ack-rejections-1792637092938-23813-0",
+    "/private/tmp/ff-001-r1-r3-rust-child-death-1792636494781-14946-0",
+    "/private/tmp/ff-001-r1-r3-rust-child-death-1792636848100-19047-0",
+    "/private/tmp/ff-001-r1-r3-rust-child-death-1792637132155-24199-0",
+    "/private/tmp/ff-001-r1-r3-rust-confirmed-then-sink-1792636466060-14667-0",
+    "/private/tmp/ff-001-r1-r3-rust-confirmed-then-sink-1792636819282-18796-0",
+    "/private/tmp/ff-001-r1-r3-rust-confirmed-then-sink-1792637103092-23938-0",
+    "/private/tmp/ff-001-r1-r3-rust-lost-ack-1792636475910-14685-165",
+    "/private/tmp/ff-001-r1-r3-rust-lost-ack-1792636829172-18800-165",
+    "/private/tmp/ff-001-r1-r3-rust-lost-ack-1792637113158-23956-165",
+    "/private/tmp/ff-001-r1-r3-rust-matched-ack-preflight-1792636450629-14479-0",
+    "/private/tmp/ff-001-r1-r3-rust-matched-ack-preflight-1792636492464-14685-220",
+    "/private/tmp/ff-001-r1-r3-rust-matched-ack-preflight-1792636804714-18608-0",
+    "/private/tmp/ff-001-r1-r3-rust-matched-ack-preflight-1792636845753-18800-220",
+    "/private/tmp/ff-001-r1-r3-rust-matched-ack-preflight-1792637088292-23738-0",
+    "/private/tmp/ff-001-r1-r3-rust-matched-ack-preflight-1792637129775-23956-220",
+    "/private/tmp/ff-001-r1-r3-rust-parent-death-1792636500494-14946-2",
+    "/private/tmp/ff-001-r1-r3-rust-parent-death-1792636853805-19047-2",
+    "/private/tmp/ff-001-r1-r3-rust-parent-death-1792637137903-24199-2",
+    "/private/tmp/ff-001-r1-r3-rust-queued-stop-1792636492092-14685-214",
+    "/private/tmp/ff-001-r1-r3-rust-queued-stop-1792636845380-18800-214",
+    "/private/tmp/ff-001-r1-r3-rust-queued-stop-1792637129400-23956-214",
+    "/private/tmp/ff-001-r1-r3-rust-stale-reference-probe-1792636493802-14685-251",
+    "/private/tmp/ff-001-r1-r3-rust-stale-reference-probe-1792636847133-18800-251",
+    "/private/tmp/ff-001-r1-r3-rust-stale-reference-probe-1792637131196-23956-251",
+    "/private/tmp/ff-001-r1-r3dev-k989azay",
+    "/private/tmp/ff-001-r1-r4-python-absence-alias-3adinjb1",
+    "/private/tmp/ff-001-r1-r4-python-absence-alias-njfcpkj0",
+    "/private/tmp/ff-001-r1-r4-python-absence-alias-svy6oav7",
+    "/private/tmp/ff-001-r1-r4-python-ack-matrix-1pjefpq3",
+    "/private/tmp/ff-001-r1-r4-python-ack-matrix-4b08rd0j",
+    "/private/tmp/ff-001-r1-r4-python-ack-matrix-lv86alnt",
+    "/private/tmp/ff-001-r1-r4-python-audit-order-42cxgsou",
+    "/private/tmp/ff-001-r1-r4-python-audit-order-jfo0znbk",
+    "/private/tmp/ff-001-r1-r4-python-audit-order-sjaorq4h",
+    "/private/tmp/ff-001-r1-r4-python-audit-stop-bnxce5ah",
+    "/private/tmp/ff-001-r1-r4-python-audit-stop-swwo99ox",
+    "/private/tmp/ff-001-r1-r4-python-audit-stop-xlc51h_1",
+    "/private/tmp/ff-001-r1-r4-python-cli-smoke-09r4k1xn",
+    "/private/tmp/ff-001-r1-r4-python-cli-smoke-2evkl2_3",
+    "/private/tmp/ff-001-r1-r4-python-cli-smoke-_fiduros",
+    "/private/tmp/ff-001-r1-r4-python-clock-conflict-dq45e7x2",
+    "/private/tmp/ff-001-r1-r4-python-clock-conflict-efrhx15e",
+    "/private/tmp/ff-001-r1-r4-python-clock-conflict-ret4osjq",
+    "/private/tmp/ff-001-r1-r4-python-concurrency-oabo0zem",
+    "/private/tmp/ff-001-r1-r4-python-concurrency-tvkd5kza",
+    "/private/tmp/ff-001-r1-r4-python-concurrency-y_thgz0o",
+    "/private/tmp/ff-001-r1-r4-python-connect-queue-85u_rmp_",
+    "/private/tmp/ff-001-r1-r4-python-connect-queue-bn14z_2c",
+    "/private/tmp/ff-001-r1-r4-python-connect-queue-qdsoczvd",
+    "/private/tmp/ff-001-r1-r4-python-deadline-max_short-3wb6gydq",
+    "/private/tmp/ff-001-r1-r4-python-deadline-max_short-cbx38yd2",
+    "/private/tmp/ff-001-r1-r4-python-deadline-max_short-nno25ezc",
+    "/private/tmp/ff-001-r1-r4-python-deadline-slow-5nu4rovn",
+    "/private/tmp/ff-001-r1-r4-python-deadline-slow-9lvayqb1",
+    "/private/tmp/ff-001-r1-r4-python-deadline-slow-w79m35cj",
+    "/private/tmp/ff-001-r1-r4-python-deadline-split-a9mov9mf",
+    "/private/tmp/ff-001-r1-r4-python-deadline-split-pdcs2nx2",
+    "/private/tmp/ff-001-r1-r4-python-deadline-split-saawerit",
+    "/private/tmp/ff-001-r1-r4-python-deadline-stale-c3yqgm_h",
+    "/private/tmp/ff-001-r1-r4-python-deadline-stale-l7p_rauy",
+    "/private/tmp/ff-001-r1-r4-python-deadline-stale-mtjn20w9",
+    "/private/tmp/ff-001-r1-r4-python-gate-ah_p5sf7",
+    "/private/tmp/ff-001-r1-r4-python-gate-du4ize04",
+    "/private/tmp/ff-001-r1-r4-python-gate-ty7_o_lz",
+    "/private/tmp/ff-001-r1-r4-python-process-death-1ipdoucf",
+    "/private/tmp/ff-001-r1-r4-python-process-death-cvkh885r",
+    "/private/tmp/ff-001-r1-r4-python-process-death-k8q26hm8",
+    "/private/tmp/ff-001-r1-r4-python-recovery-3glnpisz",
+    "/private/tmp/ff-001-r1-r4-python-recovery-8sf1czgr",
+    "/private/tmp/ff-001-r1-r4-python-recovery-lw931nm_",
+    "/private/tmp/ff-001-r1-r4-python-ref-maintenance-10rf78x7",
+    "/private/tmp/ff-001-r1-r4-python-ref-maintenance-kv2hs851",
+    "/private/tmp/ff-001-r1-r4-python-ref-maintenance-oyy17e0l",
+    "/private/tmp/ff-001-r1-r4-python-values-ibkcbs_s",
+    "/private/tmp/ff-001-r1-r4-python-values-lu81v4vn",
+    "/private/tmp/ff-001-r1-r4-python-values-y7819zow",
+    "/private/tmp/ff-001-r4-qa-wY5eCh"
+  ],
+  "json_reports_sha256": {
+    "/private/tmp/ff-001-r1-r4-python-values-lu81v4vn/report.json": "533e4ea2b6b49276433f1d580c0a94559e44fd6d0cd5d1e53b2663d8774f1f3e",
+    "/private/tmp/ff-001-r1-r4-python-concurrency-y_thgz0o/report.json": "fbe278372f4234e94807c18ce71b999b0b78a06c0bccda08e50a50d9e8637955",
+    "/private/tmp/ff-001-r1-r4-python-ack-matrix-4b08rd0j/report.json": "1f80777e746088ea27dbc25a4c45a4da540ead9749f83ca0a6e35f94caa832a9",
+    "/private/tmp/ff-001-r1-r4-python-deadline-split-a9mov9mf/report.json": "ac74cf4db23fcc91752e0d975bf295b86d58950cb84d67a07467a06cffd600f0",
+    "/private/tmp/ff-001-r1-r4-python-deadline-slow-5nu4rovn/report.json": "89ac3e463239370a8b6a475948cad5cb8e928c85f62c5f13c83c447b39db57be",
+    "/private/tmp/ff-001-r1-r4-python-deadline-stale-l7p_rauy/report.json": "78fa0d5bd5e5e919877ba3f3cf1b93199f5c8eaf89cf755b03bdfcda5a47dd38",
+    "/private/tmp/ff-001-r1-r4-python-deadline-max_short-3wb6gydq/report.json": "9208c017e3c21fada281498a5956288bd3bc89f5fe0124fb1949177323dcaddb",
+    "/private/tmp/ff-001-r1-r4-python-connect-queue-85u_rmp_/report.json": "7bf35ab4afae30f39b4ca8e96652abae449a81e391ddcb7c53cae1e0e29a6777",
+    "/private/tmp/ff-001-r1-r4-python-recovery-lw931nm_/report.json": "f60f2c8f2dc0840a8f93767a47b48627115b34a0351a081e908349b93b059964",
+    "/private/tmp/ff-001-r1-r4-python-audit-stop-swwo99ox/report.json": "2a9727e6c4121b42313800cd5816c2ec661a663b07208a981acc928d40f23c6a",
+    "/private/tmp/ff-001-r1-r4-python-audit-order-jfo0znbk/report.json": "bb4dd8989ef97c7c60ab277ce2a9b6a410e3baa64aafdb1f2ccda69317ef0132",
+    "/private/tmp/ff-001-r1-r4-python-ref-maintenance-10rf78x7/report.json": "f62d4c878f143effb554e0b1d16dbebeffa0d3ff9a2cde7ccc064191a3f5c595",
+    "/private/tmp/ff-001-r1-r4-python-process-death-k8q26hm8/report.json": "08e1cccce8c6ad55d2c451bcd1b90714141f613a9f98957e915ffbe58d915533",
+    "/private/tmp/ff-001-r1-r4-python-absence-alias-njfcpkj0/report.json": "9f60e1f51eb9105a0c6d7c0345a39f16feffa71f33a07e8fcbeaedc55b0769ee",
+    "/private/tmp/ff-001-r1-r4-python-clock-conflict-ret4osjq/report.json": "5024b575aef92503c1252f4a02a83cd64dd3399d745593a26e34eef00566d1af",
+    "/private/tmp/ff-001-r1-r4-python-cli-smoke-_fiduros/report.json": "780e785e9cff83b88bad20a4998a0b53d94b584f474cf5c636c260f79a50d90c",
+    "/private/tmp/ff-001-r1-r4-python-cli-smoke-2evkl2_3/report.json": "008c53ea49fdc26abbd75531a923083385654cb300c163ad15f8b8e68bb3cf0f",
+    "/private/tmp/ff-001-r1-r4-python-gate-du4ize04/gate.json": "e9f63547a155f4d2ec460d0d4adbbefbd2712953eff0dbd95ee84dd1e43a086d",
+    "/private/tmp/ff-001-r1-r4-python-values-y7819zow/report.json": "2b982494b3fe627046b02b4d4cfe171c235318c3d6fd9b537754bafbedc86d74",
+    "/private/tmp/ff-001-r1-r4-python-concurrency-tvkd5kza/report.json": "0f075ae69726c79b362585b20f2c3cc735576ece200246dfc67aaf3ee3f07d9e",
+    "/private/tmp/ff-001-r1-r4-python-ack-matrix-lv86alnt/report.json": "ab957c75c6e71e7ee8f9a76ceca25febc9d1ac666ca8c0df0c30f1937351c814",
+    "/private/tmp/ff-001-r1-r4-python-deadline-split-pdcs2nx2/report.json": "4d7d4ce97097d2e61736989dd8c0bc749701319d9dd2b80dccaa0bb43c8560fe",
+    "/private/tmp/ff-001-r1-r4-python-deadline-slow-w79m35cj/report.json": "c2053902c1c3556cf58e7d38ff7b684826fa237213dcbde39033cac9ee368264",
+    "/private/tmp/ff-001-r1-r4-python-deadline-stale-mtjn20w9/report.json": "f809b6a05d44cdcc21be16b38d133d500b022f277eee4e584f5b28ede9c1fbf4",
+    "/private/tmp/ff-001-r1-r4-python-deadline-max_short-cbx38yd2/report.json": "87aeaf3942003024cceb60d003229522f598ef73033b1a6efe412c5ebbedd134",
+    "/private/tmp/ff-001-r1-r4-python-connect-queue-bn14z_2c/report.json": "eadecc1344328d13054fb98c2e77919d8d7d55df24952f55241340db02794223",
+    "/private/tmp/ff-001-r1-r4-python-recovery-8sf1czgr/report.json": "96ef592a284ec9e5de73c2086f7f49ca7d966c1fd2a9b4b1b578a5cd8879a87b",
+    "/private/tmp/ff-001-r1-r4-python-audit-stop-bnxce5ah/report.json": "70653e64c812018f3c1f3e2267c44f03361b0f6e78514168bf3caf45297da580",
+    "/private/tmp/ff-001-r1-r4-python-audit-order-sjaorq4h/report.json": "8e04c7e4895ec2f868172fe908c93734fc45ad583a96e4187eeebe354b4f59fc",
+    "/private/tmp/ff-001-r1-r4-python-ref-maintenance-oyy17e0l/report.json": "0adece1c5839c558cfc21211355829ed082ef4c7d9e7b65da982f28a525eb8dc",
+    "/private/tmp/ff-001-r1-r4-python-process-death-1ipdoucf/report.json": "fca5578b98ebc3ca651c7349c6878a85f09a5c9d4b08630861f46a1e387f7f65",
+    "/private/tmp/ff-001-r1-r4-python-absence-alias-3adinjb1/report.json": "0c1cef9770c54f74a03e1f8f715ba73dcab262bbc87d6512d8a967e164369370",
+    "/private/tmp/ff-001-r1-r4-python-clock-conflict-efrhx15e/report.json": "487a4d85f80d30082f349bcbdb94d043a49523172a378f19e554cc2bc6ff640f",
+    "/private/tmp/ff-001-r1-r4-python-values-ibkcbs_s/report.json": "597eb32231c21a0d64e6250df0198407ab3ef977a670216df3a25932980efdcf",
+    "/private/tmp/ff-001-r1-r4-python-concurrency-oabo0zem/report.json": "3d377d191c15128f8158ba92b9cd450904786143eefa178b7a7ed1e549132c0d",
+    "/private/tmp/ff-001-r1-r4-python-ack-matrix-1pjefpq3/report.json": "dceeb5da5167caeaab809a595e3557def8eddca0100e60a670d0e544afad4592",
+    "/private/tmp/ff-001-r1-r4-python-deadline-split-saawerit/report.json": "33e0811202247845360fb10ed76c0948f661c2142479aa3f600bccff656ad16c",
+    "/private/tmp/ff-001-r1-r4-python-deadline-slow-9lvayqb1/report.json": "3ee57e64f2db6eda1c4dafe8c5bc6d15ed82cfed2c56c0530b54b226852bd3b5",
+    "/private/tmp/ff-001-r1-r4-python-deadline-stale-c3yqgm_h/report.json": "b4e9b88e4f845137e2549ce9495120bf863dd4a3838dc56af8c99e3e9563118f",
+    "/private/tmp/ff-001-r1-r4-python-deadline-max_short-nno25ezc/report.json": "767dd5deeb05e92d34d09b0829a4e00fff04797f9e7384a5ef43fccf9586cbc3",
+    "/private/tmp/ff-001-r1-r4-python-connect-queue-qdsoczvd/report.json": "77192601cd3d85eb138205f0e9a186fe63a3160601e2290241501c4af5dd165d",
+    "/private/tmp/ff-001-r1-r4-python-recovery-3glnpisz/report.json": "568ee295d77f7b91013e40bded22f24af52d28221aaba8210dc3bf23a53f88cf",
+    "/private/tmp/ff-001-r1-r4-python-audit-stop-xlc51h_1/report.json": "6dfec77379ed535427588ea9b2e9c5316dd08055b60ad9b77eeeb397034421d8",
+    "/private/tmp/ff-001-r1-r4-python-audit-order-42cxgsou/report.json": "d237ddbad607342f5bfb675dc59c527583d6aee50ceea00404c669a6276e6483",
+    "/private/tmp/ff-001-r1-r4-python-ref-maintenance-kv2hs851/report.json": "3abef84052ec9099f824f8b23bb4a3655f4feb2cc6f254f57736ece05b91e013",
+    "/private/tmp/ff-001-r1-r4-python-process-death-cvkh885r/report.json": "c8333a451ac429db5145ce69e4bb306f9a2cc3440acc26f7d3206adbc7327e29",
+    "/private/tmp/ff-001-r1-r4-python-absence-alias-svy6oav7/report.json": "a4ce1c09b437350d6fac42045db001274f0061d167d272897647ce1a4ba4a017",
+    "/private/tmp/ff-001-r1-r4-python-clock-conflict-dq45e7x2/report.json": "78147cc53fa2cff0051ead9db17c43900ad9c3c3ceed4e14f0560222b939e7d6",
+    "/private/tmp/ff-001-r1-r4-python-cli-smoke-09r4k1xn/report.json": "101f6c3a36a4db6e93dfac3182e7fb8af81b9172fe9a128b7f8414def43c2c7e",
+    "/private/tmp/ff-001-r1-r4-python-gate-ah_p5sf7/gate.json": "31420b350fc3d20adc43a0dd0acb02a9d65830c0246b6d32c9be05d6ee39a3ff",
+    "/private/tmp/ff-001-r1-r4-python-gate-ty7_o_lz/gate.json": "ed2e57a91f6bc93b08912f83f02cd11a13ad53843944985443fd504948fbdbd5"
+  },
+  "retention": "QA owned sources/envs/state/logs/reports retained for Development rework and Owner; no directory cleanup performed",
+  "scope": "PID inventory uses only own command outputs and their report references; no process-name termination or unknown-owner cleanup"
+}

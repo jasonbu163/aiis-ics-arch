@@ -1,0 +1,143 @@
+1: Task ID: FF-001
+2: Revision: r3
+3: Status: dev_blocked
+4: Owner Role: Development
+5: Allowed Writers: Development
+6: Handoff: r3 blocked by real Python public DB write accepting wrong-operation ACK; Rust formal/copy DEV checks and approved historical-ref/confirmed-sink gap closures preserved; coordinator/PM prepares next Revision; no completed developer_handoff or QA
+7: Workflow Mode: STD
+8: Execution Mode: agent_team_same_session
+9: 
+10: # FF-001 r3 Development
+11: 
+12: 批准：Human Owner于2026-10-22明确“批准 FF-001 r3，按这个方案继续推进。”；消费owner_approved spec SHA256=`cf2ff0ff8e8d7bf1bc2302127f5f5bc7a32d767be470ddf9875cf3ced59efbb1`。当前HEAD=`dbed9107dce5701fa138a66b3c13aba637a27b86`，不是本会话commit；正式树`/Users/jason/Desktop/DreamCode/aiis-ics-arch`，保留其他dirty，无commit/push/refs。
+13: 
+14: ## 实施计划与边界
+15: 
+16: 1. 原Rust driver内有限2-byte DB INT raw ISO adapter；先编码/截断/拒绝单元矩阵，再执行120秒有界真实matched_ack_preflight，真实自然/故障回收与unknown证据。
+17: 2. gate通过后完整Rust AC01–AC15，补原未验项、文档与独立复制；随后独立Python同例，自身3.11/uv锁/fixture。
+18: 3. 保持r1/r2失败及原库只读；完整矩阵成功后记录逐AC真实命令/退出码、candidate manifest、资源和developer_handoff，协调器另启fresh Verification。不得写spec/checklist或代验收。
+19: 
+20: r3私有根`/private/tmp/ff-001-r1-r3dev-k989azay`保存新synthetic状态/日志/报告；可复用原r2 target缓存`/private/tmp/ff-001-r1-20261021-r2dev/rust-target`，只作编译缓存。重要证据持久化本bundle，新库不覆盖r2错误confirmed库。通知由协调器管理。
+21: 
+22: 初始检查点当时r3 gate与全AC均not_run；最新结果见后续批次，不用r2结果替代。本实现继续使用已加载aiis/rust-runtime/plc-point-mapping/backend-arch(local state only)/i18n-workflow/code-document-indexer；工程README/PLAN/catalog由project-governance约束，不运行初始化工具或修改skills。
+23: 
+24: ## R14 gate 批次1
+25: 
+26: - `cargo test --locked --offline --manifest-path field-flow/field-flow-rust/Cargo.toml --test s7_int_pdu` exit0，固定请求/INT、全部逐长度截断和响应字段拒绝、typed结果3个测试通过。缓存沿用r2 target，无新依赖/锁变动。
+27: - 从Rust工程执行 `cargo test --locked --offline --features test-fixture --test local_protocol matched_ack_preflight -- --test-threads=1 --nocapture`，外层本任务自有subprocess harness实际120秒timeout；实际总12.60秒（含编译）、exit0，测试本体1.97秒。内层110秒deadline也未触发。
+28: - 真实正常GET/单item raw WriteVar/ReadVar及停止后匹配codec读回成立；bad-ref Read拒绝，已应用WriteVar的bad-ref/短响应均unknown=1、confirmed=0、actualWriteVar=1；各新私有库重复10轮/原库重启不重发。旧child真实退出后才返回失败，不在旧会话派发新job；fixture自然退出及31102/31103/31880实际rebind成功。
+29: - [gate-1.txt](evidence/r3-dev/gate-1.txt)、[gate-1.json](evidence/r3-dev/gate-1.json)、[三表只读导出](evidence/r3-dev/gate-1-stores.json)已持久化。r2错误confirmed库未触达。此为Development gate，自主继续完整Rust矩阵，不是QA/Owner验收或完整handoff。
+30: 
+31: ## Rust完整矩阵批次2（Python之前）
+32: 
+33: 正式交付树依序`cargo fmt --check`、`cargo check --locked --offline --all-targets --features test-fixture`、`cargo build --locked --offline --bins --features test-fixture`、`cargo test --locked --offline --lib`、`cargo test --locked --offline --features test-fixture -- --test-threads=1 --nocapture`，逐条exit0，最后全套62.16秒。[命令/退出码](evidence/r3-dev/rust-delivery-commands.json)，原样输出rust-delivery-0.txt至4.txt。lib本身0-case，功能证据归14个integration tests。
+34: 
+35: | AC | Rust实际DEV证据 |
+36: | --- | --- |
+37: | AC01 | locked构建/正式全套通过；42文件hash相同的单目录复制build/help/全矩阵正在执行。 |
+38: | AC02 | CLI/config3 tests：无参/中英help空目录零IO、错误参数，非法schema/mode/缺库/不覆盖，字段/重复ID/endpoint/overlap/typed数值/budget拒绝。 |
+39: | AC03 | 五个INT逐值GET/Write，停止后分别独立匹配raw ReadVar、A5保持，越界/float/bool/string/实际块越界拒绝。 |
+40: | AC04 | idle/status/body/JSON/source/time拒绝、clock倒拨锁定invalid；queued TTL以父原子phase证明未派发，expired且零写。 |
+41: | AC05 | 同ID十轮/原库重启不重发，payload/time/target冲突保原记录，ref维护后身份仍不重建。 |
+42: | AC06 | 三读流各20独立sample/request，单PID/generation/session串行归回。 |
+43: | AC07 | 1200ms GET与100ms读8秒并发，>=20样本、max_gap<=500ms，同流不重叠。 |
+44: | AC08 | 静默COTP/分段/慢字节/stale/初始server缺席/断连恢复，总deadline含实际reap，无关HTTP flow恢复。 |
+45: | AC09 | T1/T2恢复、丢ACK unknown十轮/重启不重发、物理别名/overlap阻断，不相关read继续。 |
+46: | AC10 | 已应用写分别终止child/parent，unknown原库恢复/actualWriteVar1；父死亡child<=500ms结束、锁保留、PID消失；T3失败不重发。 |
+47: | AC11 | 真实GET/read、write0/仅simulated、mode交叉拒绝。 |
+48: | AC12 | 10/100容量/2048byte轮转，保confirmed10；audit失败闭child开始gate，排队两个write都canceled/零写、独立read继续。 |
+49: | AC13 | child调用前屏障+父队列stop零写/全join；故障fault_cleanup/exit1、无正常shutdown_complete；冲突保占用者；runtime/SQLite/audit共享一个global end不追加15秒。 |
+50: | AC14 | 自身双语README/PLAN/catalog、locale/索引/组件声明已补，tasks/证据分批记录；Verification/Owner gate未发生。 |
+51: | AC15 | 29个真实ref/header/function/count/global/item/长度/短空附加/4096或4097/transport/bitlen/坏ref紧跟正确ACK拒绝例；无good/confirmed，写unknown/actualWriteVar1、旧会话退役；近65535维护不复用ref。 |
+52: 
+53: 本批真实失败：rust-remaining-1.txt exit101，测试INT数组缺i16类型；修正后remaining-2/3与正式全套exit0。证据整理脚本两次遇非dict JSON/非字符串evidence字段的AttributeError/TypeError，均exit1，补类型判断后完成；不是软件矩阵失败。
+54: 
+55: runtime/driver文件500–800行，职责复核仍是owner监督/私有IPC封装，未扩大平台或任务外重构。根*.log规则不改；必要输出使用.txt原字节副本，旧r2输出以新增来源/hash映射复本保留，原44证据/manifest不覆盖；SQLite/target不纳入源码。Python尚未实现，Rust复制验证后再以独立Python环境/自身夹具核实公开API候选。
+56: 
+57: ## 当前r3停止事实与交PM的 blocker handoff
+58: 
+59: Human Owner批准r3及其SHA256仍是本轮消费的精确输入；PM正在另行准备下一Revision，本Development不写spec/checklist。协调器确认Python真实候选失败后，要求停止后续Python实现/新协议执行、保留Rust成果，先做文档、hash与资源复核；随后协调器明确允许补完原r3的两项Rust测试缺口（实际历史ref/另一操作历史ref、confirmed后sink失败），仅最少测试/fixture接线，无runtime重构。两项均已执行并见下方批次3。本次为`dev_blocked`，不是完整`developer_handoff`，未启动QA或授予Owner验收。
+60: 
+61: ### Rust正式树与独立复制
+62: 
+63: [Rust正式命令](evidence/r3-dev/rust-delivery-commands.json)的fmt/check/build/lib/all-tests逐条exit0；[独立副本命令](evidence/r3-dev/rust-copy-commands.json)的locked build、无参startup及同一全矩阵全部exit0（全tests57.52秒），正式树全tests62.16秒。42文件独立副本没有父/兄弟源码、清单、fixture、环境或可写状态依赖；只使用正常公共依赖缓存与本任务Cargo target缓存。复制品和正式树runtime源码/配置/锁hash相同；测试后仅PLAN双语状态同步为Python阻塞，并同步复制品，当前42文件仍逐字节相等。正式树实际build入口随后再次构建exit0，非仅临时副本交付。
+64: 
+65: Rust公开原依赖/锁未换，finite raw codec及全部有效变更留在正式树。新增自身README/PLAN/catalog、locale索引、MIT本工程LICENSE和第三方原许可差异声明。框架/现场/长期运行与原生内存安全资格仍排除；有限本机证据不授权这些外部gate。
+66: 
+67: ### Python有限公开API真实失败
+68: 
+69: 本工程独立Python3.11.12、uv0.7.8；`uv lock --python 3.11 --no-python-downloads`、`uv sync --locked --python 3.11 --no-python-downloads`均exit0，自身uv.lock/.venv，未下载解释器/全局升级。锁定python-snap7=3.0.0、httpx=0.28.1、PyYAML=6.0.3、pytest=8.4.2；SQLite环境版本3.47.1来自运行中sqlite3模块，不代表已建本工程执行库。Rust bundled SQLite源宏3.46.0来自已锁libsqlite3-sys0.30.1源头，未额外执行runtime版本SQL。
+70: 
+71: 从Python工程执行：
+72: 
+73: ```bash
+74: UV_CACHE_DIR=/private/tmp/ff-001-r1-r3dev-k989azay/uv-cache uv run --locked --python 3.11 --no-python-downloads python -m tests.python_api_preflight --evidence-dir /private/tmp/ff-001-r1-r3dev-k989azay/python-api-preflight-3
+75: ```
+76: 
+77: 实际exit1。真实WriteVar请求ref=`0002`/function05；自身Python S7 Server原正ACK ref=`0002`/function05；代理仅改TPKT绝对byte19为04，ref/error/count/status不变。Client.db_write返回0、get_last_error=0、调用0.147ms，actualWriteVar1，Server注册内存`002a`+14个`a5`，相邻字节保持。候选把ReadVar功能码的ACK当写成功，违反r3 AC15；与ref匹配无关，也不能靠IPC/deadline补校验。
+78: 
+79: [完整三份hex/ref/function、版本、原API返回和释放事实](evidence/r3-dev/python-api-preflight.json)、[原样输出](evidence/r3-dev/python-api-preflight-3.txt)、[只读分析](evidence/r3-dev/python-public-api-review.md)、[原源码位置/签名/hash](evidence/r3-dev/python-source-review.json)均已持久化。该probe只验证公开候选，不是完成的Python runtime；没有Python SQLite执行schema、父T3或confirmed记录，不能伪称已提交confirmed。
+80: 
+81: 自身client PID32027、Server PID32026自然exit0、parent真实join；Server剩余线程[]、proxy真join，32102/32103实际rebind。最终合同断言在自然清理与JSON落盘后才exit1，整轮约121.278ms，不是超时。原两轮夹具误将正常COTP DR无数据ACK的EOF当异常，均exit1，输出原样保留；修正仅自身夹具EOF后得到上述合同失败，未修改第三方。中间辅助路径修正一次FileNotFoundError/exit1、源码hash辅助脚本对server.py误假设而失败，修正只读路径后完成，未造成协议实现变化。
+82: 
+83: 公开`Client.iso_exchange_buffer(self,data:bytearray)->bytearray`在client.py:1396存在，返回原S7 payload，长度用len；原连接处理TPKT/COTP。Client.connect(:152)内部已完成TCP/COTP和S7 Setup(:1868)，无须消费方调用私有握手。raw入口单send/单receive，无S7 ref/op/status过滤/自动重发；单TPKT16-bit长度/减4/strip3决定payload最多65528字节，没有4096 cap或native FFI指针。原DB写只返回0，无法拿到该次原response；check_write_response(:1484)不比较function。这里只读核查，不调用raw、不新增Python codec/私有transport/monkeypatch/换库；是否承担该责任交PM下一精确Revision。
+84: 
+85: ### 逐AC最终DEV范围及已知限制（含批次3补测）
+86: 
+87: | AC | Rust | Python |
+88: | --- | --- | --- |
+89: | AC01 | 正式树及原42文件独立副本全套exit0；批次3最终43文件hash相同，受影响回归/正式入口检查exit0。 | 仅独立锁/sync/包环境/有限候选probe；完整runtime构建/启动/复制未做。 |
+90: | AC02 | CLI/config3 tests通过，详见批次2。 | 产品CLI/config/schema未实现。 |
+91: | AC03 | 五值逐次真实写/停止后匹配读回/A5保持、类型/块范围拒绝。 | 此probe只写42并查看自身Server内存；完整矩阵未做。 |
+92: | AC04 | 输入拒绝/clock/queued expiry测试通过。 | 未实现/未做。 |
+93: | AC05 | 十轮/原库重启/冲突/ref换代身份保留测试通过。 | 未实现/未做。 |
+94: | AC06 | 三读流各20独立sample、单PID/session测试通过。 | 未实现/未做。 |
+95: | AC07 | 慢GET与100ms读8秒调度测试通过。 | 未实现/未做。 |
+96: | AC08 | 静默COTP/分段/慢字节/stale、缺席/断连恢复、实际回收测试通过。 | 仅正常公开connect/write自然关闭，非完整预算/恢复矩阵。 |
+97: | AC09 | T1/T2/丢ACK/unknown身份和物理范围阻断测试通过。 | 未实现/未做。 |
+98: | AC10 | 父/子死亡、T3 precommit失败、confirmed重启去重通过；批次3新增confirmed后sink真实失败，保持confirmed1、原库重启十轮actualWriteVar仍1，独立读回42。 | runtime/T3未实现，不能给confirmed结论。 |
+99: | AC11 | dry GET/read/write0/simulated/mode隔离测试通过。 | 未实现/未做。 |
+100: | AC12 | 轮转/容量/audit queued零写与独立read测试通过。 | 未实现/未做。 |
+101: | AC13 | 正常/forced分列、队列/child屏障、parentdeath/实例锁/实际PID和端口释放测试通过。 | 仅自身finite probe自然join/PID/端口释放，非完整应用生命周期。 |
+102: | AC14 | 自身双语文档/索引、tasks/命令/资源有真实记录。fresh QA/Owner gate未发生。 | partial工程文档准确标明缺少完整runtime；QA未发生。 |
+103: | AC15 | R14 gate、字段/长度拒绝矩阵通过；批次3纠正早期oldref/otherref仅ref+1标签，实际先完成ReadVar0001，再分别对ReadVar0002/WriteVar0002注入该历史0001，均拒绝/旧child回收，后者unknown/confirmed0/actualWriteVar1。 | **失败**：匹配ref但function错误仍公开写成功；其余完整矩阵未做。 |
+104: 
+105: Rust全套及受影响补测exit0是Development已运行范围的事实，不是独立QA/Owner验收。两个原r3覆盖缺口已在协调器明确许可后补完，早期标签错误和原报告仍保留；完整双语言任务因Python公开API失败而阻塞，不创建完整developer_handoff。
+106: 
+107: ### 最终候选、资源和保护
+108: 
+109: - [candidate-manifest-final.json](evidence/r3-dev/candidate-manifest-final.json)：最终正式Rust43文件/Python16文件SHA256、HEAD、工作树与Rust copy逐字节一致性。原42文件快照[candidate-manifest.json](evidence/r3-dev/candidate-manifest.json)原样保留。状态仍`dev_blocked_cross_language_not_completed_handoff`，Python只是partial候选。无commit/push/refs/worktree；不回滚外部修改。
+110: - [resources-final.json](evidence/r3-dev/resources-final.json)：对本轮输出累计397个确切记录PID逐个signal0，均pid_absent；6固定端口lsof exit1零输出，正常用例另有实际rebind。无按名称扫描/终止/杀占用者/换端口。原253PID检查点原样保留。
+111: - 最终Development自有临时目录300个（299个synthetic测试根+本r3dev总根），完整路径/用途在资源JSON。早期前缀目录盘点误把独立coordinator根列入，最终已剔除；该根仅列示/只读，从未修改或回收。总根`/private/tmp/ff-001-r1-r3dev-k989azay`含独立Rust源码复制品、UV cache、3轮Pythonprobe目录与原输出。另复用r2 Cargo target cache；Python .venv在自身工程且已忽略。辅助入口读取/根指针文件也列明。都保留供PM新Revision与后续复现/Verification，由协调器在无依赖时核对回收，不作为唯一持久证据。
+112: - 新必要输出都以.txt/JSON在bundle持久化，原被忽略.log原样保留并有.txt复本；原44历史证据/manifest与r2 tasks可还原归档不得改。运行库/JSONL/target不纳入源码。root导航与spec由协调器/PM改，本Development未修改。
+113: 
+114: **交接协调器/PM：精确FF-001 r3、当前正式树/上述manifest/真实证据，Status=`dev_blocked`。** Python原公开DB路径接受错误操作ACK，需PM界定下一精确Revision的受限校验责任及风险并取得Owner批准；保留Rust成果、原标签错误及已补测的精确范围。此次为blocker handoff，非完成交付、QA verdict或Human Owner验收。
+115: 
+116: ## Rust原r3覆盖缺口补测批次3（最终补充，不扩Python）
+117: 
+118: 停Python之后的记录审计发现两项真实覆盖缺口，已原样报协调器/PM：早期`oldref`/`otherref`均只是当前ref第二byte+1；confirmed后sink失败虽有其他分别测试，组合未执行。协调器明确继续这两项原批准r3测试。原阶段tasks全文另存[tasks-pre-gap-finalization.txt](evidence/r3-dev/tasks-pre-gap-finalization.txt)，原报告不覆盖，不把标签当证据。
+119: 
+120: 仅改`src/fixture.rs`、`tests/ack_rejection_matrix.rs`，新增`tests/confirmed_audit.rs`并登记本工程CODE_INDEX。fixture按会话保存上一个Read/Write ref（两个Option，容量恒定），用例先实际完成ReadVar0001，再当前ReadVar0002收到旧同操作0001，或当前WriteVar0002收到另一操作已完成ReadVar0001。三份完整报文、prior请求/正响应、校验错误/unknown/confirmed0/旧PID实际回收见[rust-gap-summary.json](evidence/r3-dev/rust-gap-summary.json)及两份完整ACK报告；不是人工+1标签。已有runtime实现未重构。
+121: 
+122: 正式树命令`CARGO_TARGET_DIR=/private/tmp/ff-001-r1-20261021-r2dev/rust-target cargo test --locked --offline --features test-fixture --test ack_rejection_matrix --test confirmed_audit --manifest-path field-flow/field-flow-rust/Cargo.toml -- --test-threads=1 --nocapture` exit0；29行ACK矩阵与confirmed-sink两测试通过，[原样输出](evidence/r3-dev/rust-gap-closure-1.txt)。随后仅把fixture存储改为恒定容量last-ref Option、移除新产生的unused import，同步独立副本43文件。
+123: 
+124: 独立副本最终相同源码执行`cargo test --locked --offline --features test-fixture --test local_protocol --test ack_rejection_matrix --test confirmed_audit -- --test-threads=1 --nocapture` exit0，共6个integration tests/49.845秒，包含共享fixture受影响的四个local_protocol回归。[原样输出](evidence/r3-dev/rust-gap-copy.txt)、[逐命令/退出码/用时](evidence/r3-dev/rust-gap-final-commands.json)。随后正式树`cargo fmt --check`、`cargo check --locked --offline --all-targets --features test-fixture`、`cargo build --locked --offline --bins --features test-fixture`均exit0，恢复正式树实际入口。无理由重复的其他已通过全套未再重跑；原正式14integration及副本完整矩阵证据继续有效，新增组合为第15个integration test。
+125: 
+126: confirmed-sink在真实GET→WriteVar→正ACK→T3 confirmed1之后，用已批准test-fixture审计故障入口让实际sink持久失败（返回audit_persist），健康闸门拒绝新iteration；停止后原进度仍confirmed1，原库重启十轮不重发，actualWriteVar1，停止后独立原协议读回42。两轮三表只读导出与结果见[confirmed-sink-stores.json](evidence/r3-dev/confirmed-sink-stores.json)。故障退出与重启正常退出分开，fixture真join和三端口rebind均实际完成。
+127: 
+128: 原24+18条旧证据manifest逐条hash复核、两个manifest本身及r2tasks还原ce9d哈希均保持；含manifest共44个旧文件完整保留，见[history-protection-final.json](evidence/r3-dev/history-protection-final.json)。最终候选、397PID/6端口与300自有目录清单见上述final JSON；被忽略.log保留且必要原样.txt复本可追踪，新增证据最终SHA256清单见[evidence-manifest.txt](evidence/r3-dev/evidence-manifest.txt)。本轮最终diff/链接/hash检查另记[final-static-checks.json](evidence/r3-dev/final-static-checks.json)。
+129: 
+130: 协调器在PM冻结r4 draft（SHA256=`eb3dbc318c89b4772ff9f54f7a1e4ea5ede1520e309f51f310ceb2d5234ebdd1`）后报告：13导航同步r4draft/r3dev_blocked，31活动文档481路径/空白检查exit0，根7导航去FF行与baseline一致，4保护文件与44旧证据保持，git diff --check exit0。这是协调器文档/保护自检，不是独立QA。本Development只原样持久其[checker输出](evidence/r3-dev/coordinator-governance-r4-draft.txt)与[实际命令/分类JSON](evidence/r3-dev/coordinator-final-governance-check.json)：治理checker实际exit1/330行，其中318条任务外旧诊断完全相同，8条为当前r4 draft spec/r3 dev_blocked tasks元数据兼容诊断（2项重复4次），4条为子工程PLAN指向`../plans/`唯一bundle的识别限制；脚本只认字面`](plans/...md)`。没有为消诊断伪造子任务、改checker或把r3tasks改为未批准r4。
+131: 
+132: 最终静态记录器首次提前检查时，尚待生成的manifest/自报告被判缺失，另将说明中的反引号字面checker模式误认成链接，实际exit1已保留[final-static-first.json](evidence/r3-dev/final-static-first.json)。先生成报告清单，再让链接检查跳过inline code后复核；没有代码/协议失败或任务外修改。
+133: 
+134: 静态记录器第二次在git-ignore检查发现根`*.sha256`也忽略新清单，实际AssertionError/exit1；诊断见[final-static-second.json](evidence/r3-dev/final-static-second.json)。未生成内容的本任务清单占位文件移除，最终用未忽略的evidence-manifest.txt，不改根.gitignore。协调器后续范围复核报告121个当前修改/未跟踪文件都在field-flow或13允许导航内，HEAD仍dbed9107，未建checklist；不是QA结论。
+135: 
+136: 最终状态仍FF-001 r3 `dev_blocked`：Rust已完成上述DEV范围及精确缺口补测；Python仅独立公开API有限预检真实失败，完整runtime/T3/矩阵未实现或执行，等待PM下一精确Revision。无完整developer_handoff、QA verdict或Owner验收；不以Rust成果代替双语言合同完成。
+137: 
+138: ## r2 tasks完整历史
+139: 
+140: 以下每个原物理行仅增加`r2tasks|`前缀；移除前缀可逐字节还原原r2 tasks（含其原r1归档），SHA256=`ce9dfe615dbfc69c2e0dccf00178d7bcb8856ea51458e4e2d405c3a55389d0e9`。
+141: 
+142: `````text
+387: `````

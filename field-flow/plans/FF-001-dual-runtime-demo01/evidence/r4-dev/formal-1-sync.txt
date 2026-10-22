@@ -1,0 +1,7 @@
+Resolved 16 packages in 0.95ms
+   Building field-flow @ file:///Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python
+      Built field-flow @ file:///Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python
+Prepared 1 package in 203ms
+Uninstalled 1 package in 0.94ms
+Installed 1 package in 1ms
+ ~ field-flow==0.1.0 (from file:///Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python)

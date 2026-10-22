@@ -1,0 +1,8 @@
+import json,os,subprocess,time
+from pathlib import Path
+r=Path('/private/tmp/ff-001-r1-r4dev-pc36ki7o');env=os.environ.copy();env['UV_CACHE_DIR']=str(r/'uv-cache');rows=[]
+for label,cwd in [('formal','/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python'),('copy',str(r/'python-copy'))]:
+ cmd=['uv','build','--python','3.11','--no-python-downloads'];start=time.monotonic();p=r/(label+'-final-build.txt')
+ with p.open('wb') as f:code=subprocess.run(cmd,cwd=cwd,env=env,stdout=f,stderr=subprocess.STDOUT,timeout=60).returncode
+ rows.append({'command':cmd,'cwd':cwd,'exit_code':code,'duration_seconds':time.monotonic()-start,'output':str(p)});assert code==0
+(r/'final-build-commands.json').write_text(json.dumps(rows,indent=2)+'\n');print(rows)

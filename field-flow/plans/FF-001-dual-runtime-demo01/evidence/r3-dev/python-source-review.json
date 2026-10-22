@@ -1,0 +1,42 @@
+{
+  "package": "python-snap7",
+  "version": "3.0.0",
+  "read_only_no_raw_execution": true,
+  "files": [
+    {
+      "path": "field-flow/field-flow-python/.venv/lib/python3.11/site-packages/snap7/client.py",
+      "sha256": "0d4ca7c3f178fe3484b8282b61635c14d2edf1ef925b1761e2f5b2865251c2ff"
+    },
+    {
+      "path": "field-flow/field-flow-python/.venv/lib/python3.11/site-packages/snap7/s7protocol.py",
+      "sha256": "fef41a421ad01213621422c0599631061640dc7f558e1e700b87bf6975ef74ad"
+    },
+    {
+      "path": "field-flow/field-flow-python/.venv/lib/python3.11/site-packages/snap7/connection.py",
+      "sha256": "fd0f1dde0786bb66709bdec4f46d5f63bb1562b47893feb97056a824a5e62b8b"
+    }
+  ],
+  "routes": [
+    {
+      "path": "client.py:152",
+      "signature": "Client.connect(self,address:str,rack:int,slot:int,tcp_port:int=102)->Client",
+      "boundary": "Existing TCP/COTP plus _setup_communication at client.py:1868 negotiates S7; no separate literal S7Connect method"
+    },
+    {
+      "path": "client.py:1396",
+      "signature": "Client.iso_exchange_buffer(self,data:bytearray)->bytearray",
+      "boundary": "Existing connected raw S7 payload; TPKT/COTP wrapped/stripped internally; no S7 ref/op/status validation; not called here"
+    },
+    {
+      "path": "connection.py:161,347",
+      "signature": "ISOTCPConnection.receive_data(self)->bytes",
+      "boundary": "16-bit TPKT total length minus4 then fixed3-byte COTP removed; maximum single-frame S7 payload65528, no4096 cap; no native FFI pointer or in-place Size"
+    },
+    {
+      "path": "s7protocol.py:1484",
+      "signature": "S7Protocol.check_write_response(self,response:Dict[str,Any])->None",
+      "boundary": "Checks error_code and data.return_code, not operation; high-level db_write returns0 without raw response"
+    }
+  ],
+  "constraints": "connect retains original per-stage waits; parent overall deadline remains necessary. No new Python codec, private transport setup or monkeypatch implemented."
+}

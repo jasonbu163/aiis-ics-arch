@@ -1,0 +1,192 @@
+{
+  "correction": "Original oldref/otherref labels only incremented the current ref; retained outputs do not prove historical-ref semantics. Final fixture stores one previous read and write ref per session; targeted tests complete a real prior read before injecting that exact prior ref.",
+  "runs": [
+    {
+      "source": "rust-gap-closure-1-ack-rejections.json",
+      "historical_vectors": [
+        {
+          "prior_completed_read": {
+            "at_ms": 1792630121422,
+            "operation": 4,
+            "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5",
+            "positive": false,
+            "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000",
+            "request_ref": [
+              0,
+              1
+            ],
+            "response_ref": [
+              0,
+              1
+            ],
+            "sent_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5"
+          },
+          "corrupted_current_response": {
+            "event": "corrupt_response_sent",
+            "fault": "oldref",
+            "operation": 4,
+            "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+            "previous_other_ref": null,
+            "previous_same_ref": [
+              0,
+              1
+            ],
+            "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+            "sent_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5"
+          },
+          "result": {
+            "counts": {},
+            "duration_ms": 89,
+            "error": "s7_reference_mismatch",
+            "field": "oldref",
+            "old_pid": 36672,
+            "old_pid_gone": true,
+            "store": "/private/tmp/ff-001-r1-r3-rust-reject-oldref-1792630121377-36572-91/state",
+            "write": false
+          }
+        },
+        {
+          "prior_completed_read": {
+            "at_ms": 1792630121570,
+            "operation": 4,
+            "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5",
+            "positive": false,
+            "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000",
+            "request_ref": [
+              0,
+              1
+            ],
+            "response_ref": [
+              0,
+              1
+            ],
+            "sent_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5"
+          },
+          "corrupted_current_response": {
+            "event": "corrupt_response_sent",
+            "fault": "otherref",
+            "operation": 5,
+            "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+            "previous_other_ref": [
+              0,
+              1
+            ],
+            "previous_same_ref": null,
+            "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400000000040010002a",
+            "sent_response_hex": "0300001602f0803203000000010002000100000501ff"
+          },
+          "result": {
+            "counts": {
+              "unknown": 1
+            },
+            "duration_ms": 100,
+            "error": "s7_reference_mismatch",
+            "field": "otherref",
+            "old_pid": 36673,
+            "old_pid_gone": true,
+            "store": "/private/tmp/ff-001-r1-r3-rust-reject-otherref-1792630121530-36572-97/state",
+            "write": true
+          }
+        }
+      ],
+      "rows": 29
+    },
+    {
+      "source": "rust-gap-copy-ack-rejections.json",
+      "historical_vectors": [
+        {
+          "prior_completed_read": {
+            "at_ms": 1792630349777,
+            "operation": 4,
+            "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5",
+            "positive": false,
+            "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000",
+            "request_ref": [
+              0,
+              1
+            ],
+            "response_ref": [
+              0,
+              1
+            ],
+            "sent_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5"
+          },
+          "corrupted_current_response": {
+            "event": "corrupt_response_sent",
+            "fault": "oldref",
+            "operation": 4,
+            "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+            "previous_other_ref": null,
+            "previous_same_ref": [
+              0,
+              1
+            ],
+            "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+            "sent_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5"
+          },
+          "result": {
+            "counts": {},
+            "duration_ms": 87,
+            "error": "s7_reference_mismatch",
+            "field": "oldref",
+            "old_pid": 39768,
+            "old_pid_gone": true,
+            "store": "/private/tmp/ff-001-r1-r3-rust-reject-oldref-1792630349746-39688-91/state",
+            "write": false
+          }
+        },
+        {
+          "prior_completed_read": {
+            "at_ms": 1792630349914,
+            "operation": 4,
+            "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5",
+            "positive": false,
+            "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000",
+            "request_ref": [
+              0,
+              1
+            ],
+            "response_ref": [
+              0,
+              1
+            ],
+            "sent_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5"
+          },
+          "corrupted_current_response": {
+            "event": "corrupt_response_sent",
+            "fault": "otherref",
+            "operation": 5,
+            "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+            "previous_other_ref": [
+              0,
+              1
+            ],
+            "previous_same_ref": null,
+            "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400000000040010002a",
+            "sent_response_hex": "0300001602f0803203000000010002000100000501ff"
+          },
+          "result": {
+            "counts": {
+              "unknown": 1
+            },
+            "duration_ms": 92,
+            "error": "s7_reference_mismatch",
+            "field": "otherref",
+            "old_pid": 39769,
+            "old_pid_gone": true,
+            "store": "/private/tmp/ff-001-r1-r3-rust-reject-otherref-1792630349880-39688-97/state",
+            "write": true
+          }
+        }
+      ],
+      "rows": 29
+    }
+  ],
+  "confirmed_sink_evidence": "confirmed-sink-stores.json",
+  "targeted_formal_command": {
+    "command": "CARGO_TARGET_DIR=/private/tmp/ff-001-r1-20261021-r2dev/rust-target cargo test --locked --offline --features test-fixture --test ack_rejection_matrix --test confirmed_audit --manifest-path field-flow/field-flow-rust/Cargo.toml -- --test-threads=1 --nocapture",
+    "exit_code": 0,
+    "output": "rust-gap-closure-1.txt",
+    "qualification": "Before only storage changed from retaining all refs to bounded last-ref Options; exact final fixture source independently revalidated in rust-gap-copy.txt"
+  }
+}

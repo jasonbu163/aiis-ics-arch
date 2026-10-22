@@ -12,7 +12,7 @@ pub fn config() -> Config {
     Config::load(std::path::Path::new("config/loopback.yaml")).unwrap()
 }
 pub fn root(label: &str) -> PathBuf {
-    let p = PathBuf::from(format!("/private/tmp/ff-001-r1-r2-rust-{}-{}", label, id()));
+    let p = PathBuf::from(format!("/private/tmp/ff-001-r1-r3-rust-{}-{}", label, id()));
     std::fs::create_dir(&p).unwrap();
     p
 }
@@ -113,13 +113,26 @@ pub fn intent(c: &Config, command: &str, value: i16) -> field_flow::domain::Inte
     .unwrap()
     .unwrap()
 }
-pub fn readback(offset: i32) -> [u8; 16] {
+pub fn readback(_offset: i32) -> [u8; 16] {
     use rust_snap7::{InternalParam as P, InternalParamValue as V, S7Client};
     let c = S7Client::create();
     c.set_param(P::RemotePort, V::U16(31102)).unwrap();
     c.connect_to("127.0.0.1", 0, 1).unwrap();
     let mut b = [0; 16];
-    c.db_read(1, offset, 16, &mut b).unwrap();
+    let mut session = field_flow::infrastructure::s7_int_pdu::Session::default();
+    for offset in (0..16).step_by(2) {
+        let value = session
+            .exchange(
+                &c,
+                1,
+                offset as u32,
+                field_flow::infrastructure::s7_int_pdu::Operation::Read,
+            )
+            .unwrap();
+        if let field_flow::infrastructure::s7_int_pdu::Validated::Read(value) = value {
+            b[offset..offset + 2].copy_from_slice(&value.value().to_be_bytes());
+        }
+    }
     c.disconnect().unwrap();
     drop(c);
     b

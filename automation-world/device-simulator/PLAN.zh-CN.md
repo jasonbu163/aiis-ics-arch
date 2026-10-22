@@ -2,4 +2,4 @@
 
 | Task | Status | Scope and next gate |
 | --- | --- | --- |
-| [ARCH-AW-005 r5](../../plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md) | [DEV事实](../../plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md) / [Verification与Owner状态](../../plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md) | DAA派生产品MVP、通用Rust runtime/配置SQLite/core导入、自动原生与原协议验证、精确G0退役及受影响复核；各gate分别记录在所属bundle。 |
+| [ARCH-AW-005 r5](../../plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md) | [DEV事实](../../plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md) / [Verification与Owner状态](../../plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md) | 产品MVP/原技术QA及G0退役历史保留。附录B[使用手册](USER_GUIDE.zh-CN.md)增量：先手工DB31再Alpha/Beta导入、7张原生图，导入/重开配图待Owner手动反馈，文档核验待定。自定义初值/持续固定值键入问题未关闭，Owner终验待定。 |

@@ -1,0 +1,1 @@
+SyntaxError: Non-UTF-8 code starting with '\xe7' in file /private/tmp/ff-001-r1-r4-rework1-32onn0fh/fix-runtime.py on line 4, but no encoding declared; see http://python.org/dev/peps/pep-0263/ for details

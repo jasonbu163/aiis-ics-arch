@@ -1,0 +1,221 @@
+{
+  "results": [
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-ref-maintenance-dssj0fpk/actual-boundary",
+      "normal": false,
+      "summary": {
+        "commands": {
+          "unknown": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "545f6696deca4bf78a533f2913eda5f2",
+          "created_at": "2026-10-22T01:58:40.582Z"
+        },
+        "counts": {
+          "unknown": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "545f6696deca4bf78a533f2913eda5f2",
+              "created_at": "2026-10-22T01:58:40.582Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "actual-range-error",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":15,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "9d5e4438c5915fe245029f49ebd6ce5cf67f55b27799886fd58919dc5a3ec1d5",
+              "payload_hash": "9c02590c261d05f9fb9b6328509af442be8e532f1ca6c00b874406d8f606c144",
+              "value_i16": 42,
+              "issued_at_ms": 1792634320627,
+              "expires_at_ms": 1792634350627,
+              "state": "unknown",
+              "dispatch_count": 1,
+              "run_id": "18a3eb495b9845719027fcbca30f8636",
+              "request_id": "dacc44aaf59448d4b04e5938bb145cd8",
+              "last_error_key": "s7_invalid_response",
+              "ack_kind": null,
+              "created_at": "2026-10-22T01:58:40.630Z",
+              "updated_at": "2026-10-22T01:58:40.639Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "actual-range-error",
+              "run_id": "18a3eb495b9845719027fcbca30f8636",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "9c02590c261d05f9fb9b6328509af442be8e532f1ca6c00b874406d8f606c144",
+              "created_at": "2026-10-22T01:58:40.630Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "actual-range-error",
+              "run_id": "18a3eb495b9845719027fcbca30f8636",
+              "request_id": "dacc44aaf59448d4b04e5938bb145cd8",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:58:40.631Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "actual-range-error",
+              "run_id": "18a3eb495b9845719027fcbca30f8636",
+              "request_id": "dacc44aaf59448d4b04e5938bb145cd8",
+              "from_state": "in_flight",
+              "to_state": "unknown",
+              "reason_key": "s7_invalid_response",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:58:40.639Z"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "fixture": {
+    "memory_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+    "writes": 1,
+    "reads": 3,
+    "gets": 1,
+    "sessions": 3,
+    "closed_sessions": 3,
+    "trace": [
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f08032010000fffe000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f08032030000fffe0002000600000401ff040010a5a5",
+        "sent_response_hex": "0300001b02f08032030000fffe0002000600000401ff040010a5a5",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f08032010000ffff000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f08032030000ffff0002000600000401ff040010a5a5",
+        "sent_response_hex": "0300001b02f08032030000ffff0002000600000401ff040010a5a5",
+        "previous_same_ref": "fffe",
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "",
+        "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400007800040010002a",
+        "original_response_hex": "0300001302f080320200000002000000008404",
+        "sent_response_hex": "0300001302f080320200000002000000008404",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      }
+    ],
+    "server_pid": 81434,
+    "server_exit": 0,
+    "server_close": {
+      "memory_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "remaining_threads": [],
+      "pid": 81434,
+      "exit_code": 0
+    },
+    "server_epochs": [
+      {
+        "memory_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+        "remaining_threads": [],
+        "pid": 81434,
+        "exit_code": 0
+      }
+    ],
+    "proxy_threads_joined": 3,
+    "ports_rebound": [
+      32102,
+      32103,
+      32880
+    ]
+  }
+}

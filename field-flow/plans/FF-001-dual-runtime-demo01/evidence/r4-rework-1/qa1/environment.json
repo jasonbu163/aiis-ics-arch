@@ -1,0 +1,49 @@
+[
+  {
+    "argv": [
+      "sw_vers"
+    ],
+    "exit_code": 0,
+    "output": "ProductName:\t\tmacOS\nProductVersion:\t\t15.7.7\nBuildVersion:\t\t24G720\n"
+  },
+  {
+    "argv": [
+      "uname",
+      "-m"
+    ],
+    "exit_code": 0,
+    "output": "arm64\n"
+  },
+  {
+    "argv": [
+      "rustc",
+      "--version"
+    ],
+    "exit_code": 0,
+    "output": "rustc 1.89.0 (29483883e 2025-08-04)\n"
+  },
+  {
+    "argv": [
+      "cargo",
+      "--version"
+    ],
+    "exit_code": 0,
+    "output": "cargo 1.89.0 (c24e10642 2025-06-23)\n"
+  },
+  {
+    "argv": [
+      "uv",
+      "--version"
+    ],
+    "exit_code": 0,
+    "output": "uv 0.7.8 (Homebrew 2025-05-23)\n"
+  },
+  {
+    "argv": [
+      "clang",
+      "--version"
+    ],
+    "exit_code": 0,
+    "output": "Apple clang version 17.0.0 (clang-1700.4.4.1)\nTarget: arm64-apple-darwin24.6.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n"
+  }
+]

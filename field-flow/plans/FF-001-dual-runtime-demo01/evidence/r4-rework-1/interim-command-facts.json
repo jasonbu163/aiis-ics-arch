@@ -1,0 +1,37 @@
+{
+  "red-1": {
+    "exit_code": 101,
+    "cause": "Shell write used repository-relative path while cwd already Rust project; no new test file was written, cargo reported missing target. Original stdout preserved."
+  },
+  "red-2": {
+    "exit_code": 101,
+    "cause": "All test fixture starts returned fixture_port_conflict in sandbox; no protocol evidence. Same command under authorized escalation in red-3 reached all three actual failures."
+  },
+  "red-3": {
+    "exit_code": 101,
+    "duration_test_seconds": 4.86,
+    "cause": "Three real old-runtime contract failures; every case report saved after actual native/driver/fixture cleanup."
+  },
+  "edit-helper": {
+    "exit_code": 1,
+    "error": "SyntaxError: Non-UTF-8 code starting with byte in temporary helper; file bytes decoded valid UTF-8; added explicit coding header and retry succeeded. No product edit occurred on failed helper invocation."
+  },
+  "green-1": {
+    "exit_code": 0,
+    "tests": 3
+  },
+  "green-2": {
+    "exit_code": 0,
+    "tests": 3
+  },
+  "green-3": {
+    "exit_code": 0,
+    "tests": 3,
+    "includes": "Original queue2000 and minimum IO500 boundary; work reserve400 is applied once."
+  },
+  "dispatch-outlives-queue": {
+    "exit_code": 0,
+    "tests": 3,
+    "includes": "Same response600, queue1000 and IO1200; total wait+IO exceeds queue but each dispatched work fits IO minus reserve."
+  }
+}

@@ -1,0 +1,94 @@
+    Checking field-flow v0.1.0 (/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust)
+warning: variable does not need to be mutable
+   --> tests/runtime_regressions.rs:110:9
+    |
+110 |     let mut f = Fixture::start(Path::new(env!("CARGO_BIN_EXE_ff-fixture"))).unwrap();
+    |         ----^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` on by default
+
+warning: struct `Run` is never constructed
+  --> tests/support/mod.rs:19:12
+   |
+19 | pub struct Run {
+   |            ^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: associated items `new`, `open`, `ready`, `close`, and `iteration` are never used
+  --> tests/support/mod.rs:26:12
+   |
+25 | impl Run {
+   | -------- associated items in this implementation
+26 |     pub fn new(label: &str, mode: &str, c: &Config) -> Self {
+   |            ^^^
+...
+32 |     pub fn open(dir: PathBuf, mode: &str, c: &Config) -> Self {
+   |            ^^^^
+...
+48 |     pub async fn ready(&self) {
+   |                  ^^^^^
+...
+59 |     pub async fn close(self, normal: bool) -> PathBuf {
+   |                  ^^^^^
+...
+80 |     pub async fn iteration(&self, c: &Config) -> Result<()> {
+   |                  ^^^^^^^^^
+
+warning: function `intent` is never used
+   --> tests/support/mod.rs:101:8
+    |
+101 | pub fn intent(c: &Config, command: &str, value: i16) -> field_flow::domain::Intent {
+    |        ^^^^^^
+
+warning: function `readback` is never used
+   --> tests/support/mod.rs:116:8
+    |
+116 | pub fn readback(_offset: i32) -> [u8; 16] {
+    |        ^^^^^^^^
+
+warning: function `eventually` is never used
+  --> tests/support/mod.rs:94:14
+   |
+94 | pub async fn eventually(mut f: impl FnMut() -> bool) {
+   |              ^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: variable does not need to be mutable
+  --> tests/runtime_regressions.rs:48:9
+   |
+48 |     let mut f = Fixture::start(Path::new(env!("CARGO_BIN_EXE_ff-fixture"))).unwrap();
+   |         ----^
+   |         |
+   |         help: remove this `mut`
+
+warning: `field-flow` (test "ack_rejection_matrix") generated 3 warnings (2 duplicates)
+warning: `field-flow` (test "process_lifecycle") generated 4 warnings
+warning: variable does not need to be mutable
+   --> tests/runtime_regressions.rs:185:9
+    |
+185 |     let mut f = Fixture::start(Path::new(env!("CARGO_BIN_EXE_ff-fixture"))).unwrap();
+    |         ----^
+    |         |
+    |         help: remove this `mut`
+
+warning: `field-flow` (test "confirmed_audit") generated 2 warnings (2 duplicates)
+warning: methods `close` and `iteration` are never used
+  --> tests/support/mod.rs:59:18
+   |
+25 | impl Run {
+   | -------- methods in this implementation
+...
+59 |     pub async fn close(self, normal: bool) -> PathBuf {
+   |                  ^^^^^
+...
+80 |     pub async fn iteration(&self, c: &Config) -> Result<()> {
+   |                  ^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: `field-flow` (test "runtime_regressions") generated 5 warnings (1 duplicate) (run `cargo fix --test "runtime_regressions"` to apply 3 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.82s

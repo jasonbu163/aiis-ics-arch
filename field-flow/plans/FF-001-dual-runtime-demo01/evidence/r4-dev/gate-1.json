@@ -1,0 +1,812 @@
+{
+  "reports": [
+    {
+      "fault": "",
+      "actual_writes": 1,
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "ba8bcab6fe024b7a858ceb6932a05f7f",
+          "created_at": "2026-10-22T01:29:43.882Z"
+        },
+        "counts": {
+          "confirmed": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "ba8bcab6fe024b7a858ceb6932a05f7f",
+              "created_at": "2026-10-22T01:29:43.882Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "gate-normal",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "cc539d8e73dd4fb877a143ca8fc2f0ed7e85ca50c000f043b2dd25282fe383a1",
+              "value_i16": 42,
+              "issued_at_ms": 1792632583924,
+              "expires_at_ms": 1792632613924,
+              "state": "confirmed",
+              "dispatch_count": 1,
+              "run_id": "a77f13c5b4aa4582ba5252c33faa1cb3",
+              "request_id": "5f4fc9d71c5d466187578f44107791d2",
+              "last_error_key": null,
+              "ack_kind": "s7_protocol",
+              "created_at": "2026-10-22T01:29:43.925Z",
+              "updated_at": "2026-10-22T01:29:43.927Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "gate-normal",
+              "run_id": "a77f13c5b4aa4582ba5252c33faa1cb3",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "cc539d8e73dd4fb877a143ca8fc2f0ed7e85ca50c000f043b2dd25282fe383a1",
+              "created_at": "2026-10-22T01:29:43.925Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "gate-normal",
+              "run_id": "a77f13c5b4aa4582ba5252c33faa1cb3",
+              "request_id": "5f4fc9d71c5d466187578f44107791d2",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:29:43.926Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "gate-normal",
+              "run_id": "a77f13c5b4aa4582ba5252c33faa1cb3",
+              "request_id": null,
+              "from_state": "in_flight",
+              "to_state": "confirmed",
+              "reason_key": "s7_protocol",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:29:43.927Z"
+            }
+          ]
+        }
+      },
+      "directory": "/private/tmp/ff-001-r1-r4-python-gate-3nm9ghei/normal"
+    },
+    {
+      "fault": "function",
+      "actual_writes": 1,
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "e954d02e5b48491f8e77add5e791bf0a",
+          "created_at": "2026-10-22T01:29:44.174Z"
+        },
+        "counts": {
+          "unknown": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "e954d02e5b48491f8e77add5e791bf0a",
+              "created_at": "2026-10-22T01:29:44.174Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "gate-function",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "ba626dd4054fb77693292d710159b573f3bd9aae886ecb0ad4cdeeded00a490b",
+              "value_i16": 42,
+              "issued_at_ms": 1792632584216,
+              "expires_at_ms": 1792632614216,
+              "state": "unknown",
+              "dispatch_count": 1,
+              "run_id": "404b33e901de4da398a9c0eb11fd7f57",
+              "request_id": "45514cdd3aca45069bf0853146b4870b",
+              "last_error_key": "s7_invalid_response",
+              "ack_kind": null,
+              "created_at": "2026-10-22T01:29:44.217Z",
+              "updated_at": "2026-10-22T01:29:44.229Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "gate-function",
+              "run_id": "404b33e901de4da398a9c0eb11fd7f57",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "ba626dd4054fb77693292d710159b573f3bd9aae886ecb0ad4cdeeded00a490b",
+              "created_at": "2026-10-22T01:29:44.217Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "gate-function",
+              "run_id": "404b33e901de4da398a9c0eb11fd7f57",
+              "request_id": "45514cdd3aca45069bf0853146b4870b",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:29:44.218Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "gate-function",
+              "run_id": "404b33e901de4da398a9c0eb11fd7f57",
+              "request_id": null,
+              "from_state": "in_flight",
+              "to_state": "unknown",
+              "reason_key": "s7_invalid_response",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:29:44.229Z"
+            }
+          ]
+        }
+      },
+      "directory": "/private/tmp/ff-001-r1-r4-python-gate-3nm9ghei/function"
+    },
+    {
+      "fault": "ref1",
+      "actual_writes": 1,
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "65ed933b43c34a0a8079f5cf93b77333",
+          "created_at": "2026-10-22T01:29:44.382Z"
+        },
+        "counts": {
+          "unknown": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "65ed933b43c34a0a8079f5cf93b77333",
+              "created_at": "2026-10-22T01:29:44.382Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "gate-ref1",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "12a7f2e6605c5663b27c808898e060491d750f76102047e766876a763b8929ee",
+              "value_i16": 42,
+              "issued_at_ms": 1792632584424,
+              "expires_at_ms": 1792632614424,
+              "state": "unknown",
+              "dispatch_count": 1,
+              "run_id": "6e3bc5a83a2d4ea8890c20fde3b3e760",
+              "request_id": "5538f134731a4c65b887a13a0199352e",
+              "last_error_key": "s7_reference_mismatch",
+              "ack_kind": null,
+              "created_at": "2026-10-22T01:29:44.424Z",
+              "updated_at": "2026-10-22T01:29:44.435Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "gate-ref1",
+              "run_id": "6e3bc5a83a2d4ea8890c20fde3b3e760",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "12a7f2e6605c5663b27c808898e060491d750f76102047e766876a763b8929ee",
+              "created_at": "2026-10-22T01:29:44.424Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "gate-ref1",
+              "run_id": "6e3bc5a83a2d4ea8890c20fde3b3e760",
+              "request_id": "5538f134731a4c65b887a13a0199352e",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:29:44.424Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "gate-ref1",
+              "run_id": "6e3bc5a83a2d4ea8890c20fde3b3e760",
+              "request_id": null,
+              "from_state": "in_flight",
+              "to_state": "unknown",
+              "reason_key": "s7_reference_mismatch",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:29:44.435Z"
+            }
+          ]
+        }
+      },
+      "directory": "/private/tmp/ff-001-r1-r4-python-gate-3nm9ghei/ref1"
+    },
+    {
+      "fault": "short_data",
+      "actual_writes": 1,
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "a1d697e39f4d4b96ae22d5e2fdea9fc6",
+          "created_at": "2026-10-22T01:29:44.592Z"
+        },
+        "counts": {
+          "unknown": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "a1d697e39f4d4b96ae22d5e2fdea9fc6",
+              "created_at": "2026-10-22T01:29:44.592Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "gate-short_data",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "e2a08da503aeb7abe92a6aee3e164bd337470df114619c7c79be22d020ed40a9",
+              "value_i16": 42,
+              "issued_at_ms": 1792632584633,
+              "expires_at_ms": 1792632614633,
+              "state": "unknown",
+              "dispatch_count": 1,
+              "run_id": "976745dc3d9448f4bec3c39fa431be44",
+              "request_id": "10641204de7347cd962825449a2dfabb",
+              "last_error_key": "s7_invalid_response",
+              "ack_kind": null,
+              "created_at": "2026-10-22T01:29:44.633Z",
+              "updated_at": "2026-10-22T01:29:44.645Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "gate-short_data",
+              "run_id": "976745dc3d9448f4bec3c39fa431be44",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "e2a08da503aeb7abe92a6aee3e164bd337470df114619c7c79be22d020ed40a9",
+              "created_at": "2026-10-22T01:29:44.633Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "gate-short_data",
+              "run_id": "976745dc3d9448f4bec3c39fa431be44",
+              "request_id": "10641204de7347cd962825449a2dfabb",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:29:44.634Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "gate-short_data",
+              "run_id": "976745dc3d9448f4bec3c39fa431be44",
+              "request_id": null,
+              "from_state": "in_flight",
+              "to_state": "unknown",
+              "reason_key": "s7_invalid_response",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:29:44.645Z"
+            }
+          ]
+        }
+      },
+      "directory": "/private/tmp/ff-001-r1-r4-python-gate-3nm9ghei/short_data"
+    }
+  ],
+  "protocol_and_close": {
+    "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+    "writes": 4,
+    "reads": 10,
+    "gets": 0,
+    "sessions": 17,
+    "trace": [
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "",
+        "request_hex": "0300002502f080320100000003000e00060501120a1002000200018400000000040010002a",
+        "original_response_hex": "0300001602f0803203000000030002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000030002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": "0002"
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "ref0",
+        "request_hex": "0300001f02f080320100000003000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000030002000600000401ff040010002a",
+        "sent_response_hex": "0300001b02f0803203000001030002000600000401ff040010002a",
+        "previous_same_ref": "0002",
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "ref0",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "ref0",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "function",
+        "request_hex": "0300002502f080320100000003000e00060501120a1002000200018400000000040010002a",
+        "original_response_hex": "0300001602f0803203000000030002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000030002000100000401ff",
+        "previous_same_ref": null,
+        "previous_other_ref": "0002"
+      },
+      {
+        "operation": 0,
+        "fault": "function",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "function",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "ref1",
+        "request_hex": "0300002502f080320100000003000e00060501120a1002000200018400000000040010002a",
+        "original_response_hex": "0300001602f0803203000000030002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": "0002"
+      },
+      {
+        "operation": 0,
+        "fault": "ref1",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "ref1",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "short_data",
+        "request_hex": "0300002502f080320100000003000e00060501120a1002000200018400000000040010002a",
+        "original_response_hex": "0300001602f0803203000000030002000100000501ff",
+        "sent_response_hex": "0300001502f0803203000000030002000100000501",
+        "previous_same_ref": null,
+        "previous_other_ref": "0002"
+      },
+      {
+        "operation": 0,
+        "fault": "short_data",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "short_data",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      }
+    ],
+    "server_pid": 67270,
+    "server_exit": 0,
+    "server_close": {
+      "remaining_threads": []
+    },
+    "proxy_threads_joined": 17,
+    "ports_rebound": [
+      32102,
+      32103,
+      32880
+    ]
+  }
+}

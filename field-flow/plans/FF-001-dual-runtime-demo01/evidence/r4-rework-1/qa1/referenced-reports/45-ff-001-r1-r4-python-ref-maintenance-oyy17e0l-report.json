@@ -1,0 +1,424 @@
+{
+  "results": [
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-ref-maintenance-oyy17e0l/actual-boundary",
+      "normal": false,
+      "summary": {
+        "commands": {
+          "unknown": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "65f470c52b064da0b135b6fc1d0d04a7",
+          "created_at": "2026-10-22T02:33:37.501Z"
+        },
+        "counts": {
+          "unknown": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "65f470c52b064da0b135b6fc1d0d04a7",
+              "created_at": "2026-10-22T02:33:37.501Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "actual-range-error",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":15,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "9d5e4438c5915fe245029f49ebd6ce5cf67f55b27799886fd58919dc5a3ec1d5",
+              "payload_hash": "a73bc63d6f6981073025b9ba4b2a4d19175088c262d9202f9ac377ad0e8984b8",
+              "value_i16": 42,
+              "issued_at_ms": 1792636417706,
+              "expires_at_ms": 1792636447706,
+              "state": "unknown",
+              "dispatch_count": 1,
+              "run_id": "994d08964bc04ce5b21d03512d7e22dd",
+              "request_id": "5130b639ea2448be8e8e877fabc9c98a",
+              "last_error_key": "s7_invalid_response",
+              "ack_kind": null,
+              "created_at": "2026-10-22T02:33:37.710Z",
+              "updated_at": "2026-10-22T02:33:37.721Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "actual-range-error",
+              "run_id": "994d08964bc04ce5b21d03512d7e22dd",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "a73bc63d6f6981073025b9ba4b2a4d19175088c262d9202f9ac377ad0e8984b8",
+              "created_at": "2026-10-22T02:33:37.710Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "actual-range-error",
+              "run_id": "994d08964bc04ce5b21d03512d7e22dd",
+              "request_id": "5130b639ea2448be8e8e877fabc9c98a",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:37.710Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "actual-range-error",
+              "run_id": "994d08964bc04ce5b21d03512d7e22dd",
+              "request_id": "5130b639ea2448be8e8e877fabc9c98a",
+              "from_state": "in_flight",
+              "to_state": "unknown",
+              "reason_key": "s7_invalid_response",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:37.721Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-ref-maintenance-oyy17e0l/actual-boundary",
+      "normal": false,
+      "summary": {
+        "commands": {
+          "unknown": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "65f470c52b064da0b135b6fc1d0d04a7",
+          "created_at": "2026-10-22T02:33:37.501Z"
+        },
+        "counts": {
+          "unknown": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "65f470c52b064da0b135b6fc1d0d04a7",
+              "created_at": "2026-10-22T02:33:37.501Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "actual-range-error",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":15,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "9d5e4438c5915fe245029f49ebd6ce5cf67f55b27799886fd58919dc5a3ec1d5",
+              "payload_hash": "a73bc63d6f6981073025b9ba4b2a4d19175088c262d9202f9ac377ad0e8984b8",
+              "value_i16": 42,
+              "issued_at_ms": 1792636417706,
+              "expires_at_ms": 1792636447706,
+              "state": "unknown",
+              "dispatch_count": 1,
+              "run_id": "994d08964bc04ce5b21d03512d7e22dd",
+              "request_id": "5130b639ea2448be8e8e877fabc9c98a",
+              "last_error_key": "s7_invalid_response",
+              "ack_kind": null,
+              "created_at": "2026-10-22T02:33:37.710Z",
+              "updated_at": "2026-10-22T02:33:37.721Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "actual-range-error",
+              "run_id": "994d08964bc04ce5b21d03512d7e22dd",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "a73bc63d6f6981073025b9ba4b2a4d19175088c262d9202f9ac377ad0e8984b8",
+              "created_at": "2026-10-22T02:33:37.710Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "actual-range-error",
+              "run_id": "994d08964bc04ce5b21d03512d7e22dd",
+              "request_id": "5130b639ea2448be8e8e877fabc9c98a",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:37.710Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "actual-range-error",
+              "run_id": "994d08964bc04ce5b21d03512d7e22dd",
+              "request_id": "5130b639ea2448be8e8e877fabc9c98a",
+              "from_state": "in_flight",
+              "to_state": "unknown",
+              "reason_key": "s7_invalid_response",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:37.721Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "synthetic-complete-INT-memory-boundary",
+      "memory_before": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "memory_after": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "actual_WriteVar": 1,
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "65f470c52b064da0b135b6fc1d0d04a7",
+          "created_at": "2026-10-22T02:33:37.501Z"
+        },
+        "counts": {
+          "unknown": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "65f470c52b064da0b135b6fc1d0d04a7",
+              "created_at": "2026-10-22T02:33:37.501Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "actual-range-error",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":15,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "9d5e4438c5915fe245029f49ebd6ce5cf67f55b27799886fd58919dc5a3ec1d5",
+              "payload_hash": "a73bc63d6f6981073025b9ba4b2a4d19175088c262d9202f9ac377ad0e8984b8",
+              "value_i16": 42,
+              "issued_at_ms": 1792636417706,
+              "expires_at_ms": 1792636447706,
+              "state": "unknown",
+              "dispatch_count": 1,
+              "run_id": "994d08964bc04ce5b21d03512d7e22dd",
+              "request_id": "5130b639ea2448be8e8e877fabc9c98a",
+              "last_error_key": "s7_invalid_response",
+              "ack_kind": null,
+              "created_at": "2026-10-22T02:33:37.710Z",
+              "updated_at": "2026-10-22T02:33:37.721Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "actual-range-error",
+              "run_id": "994d08964bc04ce5b21d03512d7e22dd",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "a73bc63d6f6981073025b9ba4b2a4d19175088c262d9202f9ac377ad0e8984b8",
+              "created_at": "2026-10-22T02:33:37.710Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "actual-range-error",
+              "run_id": "994d08964bc04ce5b21d03512d7e22dd",
+              "request_id": "5130b639ea2448be8e8e877fabc9c98a",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:37.710Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "actual-range-error",
+              "run_id": "994d08964bc04ce5b21d03512d7e22dd",
+              "request_id": "5130b639ea2448be8e8e877fabc9c98a",
+              "from_state": "in_flight",
+              "to_state": "unknown",
+              "reason_key": "s7_invalid_response",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:37.721Z"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "fixture": {
+    "memory_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+    "writes": 1,
+    "reads": 3,
+    "gets": 11,
+    "sessions": 4,
+    "closed_sessions": 4,
+    "trace": [
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f08032010000fffe000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f08032030000fffe0002000600000401ff040010a5a5",
+        "sent_response_hex": "0300001b02f08032030000fffe0002000600000401ff040010a5a5",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f08032010000ffff000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f08032030000ffff0002000600000401ff040010a5a5",
+        "sent_response_hex": "0300001b02f08032030000ffff0002000600000401ff040010a5a5",
+        "previous_same_ref": "fffe",
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "",
+        "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400007800040010002a",
+        "original_response_hex": "0300001302f080320200000002000000008404",
+        "sent_response_hex": "0300001302f080320200000002000000008404",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      }
+    ],
+    "server_pid": 14136,
+    "server_exit": 0,
+    "server_close": {
+      "memory_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "remaining_threads": [],
+      "pid": 14136,
+      "exit_code": 0
+    },
+    "server_epochs": [
+      {
+        "memory_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+        "remaining_threads": [],
+        "pid": 14136,
+        "exit_code": 0
+      }
+    ],
+    "proxy_threads_joined": 4,
+    "ports_rebound": [
+      32102,
+      32103,
+      32880
+    ]
+  }
+}

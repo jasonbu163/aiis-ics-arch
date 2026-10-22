@@ -2,10 +2,13 @@
 
 An independent S7 PLC simulator derived from the applicable DAA desktop assembly. The six-page Tauri/Vue application and the test host use the same Rust runtime. Rust owns configuration, the DB images, all writes, rules and control; the limited Snap7 adapter owns protocol, socket IO and native worker lifecycle. DAA, SMA and Backend do not have to run.
 
-[Build and run](BUILD.md) · [Plan](PLAN.md) · [Runtime](runtime/README.md) · [Native adapter](native/README.md) · [Tests](tests/README.md) · [Detailed design](../../docs/AIIS_DS_Detailed_Design.md)
+[User guide](USER_GUIDE.md) · [Build and run](BUILD.md) · [Plan](PLAN.md) · [Runtime](runtime/README.md) · [Native adapter](native/README.md) · [Tests](tests/README.md) · [Detailed design](../../docs/AIIS_DS_Detailed_Design.md)
 
 The product starts with an empty configuration and stopped instances. Configure UUID instances and DBs, import explicitly selected DB/UDT declarations or create manual points, confirm addresses/names/initial values/policies, save an immutable revision, then apply it while stopped. Start is a separate action. Online values, connections and bounded logs show actual runtime facts; a browser preview cannot perform desktop operations.
 
 Each profile has an independent `device-simulator-v1/config.sqlite`, an OS profile lock and a persistent WebKit data-store UUID. The default is Tauri's DS application local-data directory; optional `DS_PROFILE_DIR` accepts an explicit absolute path. Unknown, corrupt, incompatible or read-only databases are rejected and retained. Runtime values, connections and running intent are not stored: reopening loads the selected revision, initializes its values and remains stopped. Save, selected and loaded versions are separate.
+
+
+Follow the [step-by-step guide](USER_GUIDE.md): manual DB31 first, then explicitly selected Alpha/Beta DB/UDT import. It documents the current nonzero initial/fixed-value input limitation, uses explicit0/false for the executable example, and demonstrates an ordinary runtime write of12. This open product issue and document verification remain distinct from the earlier technical QA record.
 
 The implementation is governed by [ARCH-AW-005 r5](../../plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md). [Tasks](../../plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md) record DEV execution and limitations; the [owning checklist](../../plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md) carries the latest independent Verification and Human Owner status. The obsolete G0 entry points were retired after persistent original-byte archival and product validation; the owning tasks record the exact migration and subsequent checks. Historical evidence remains preserved. DAA application S7-to-SQLite integration, Stage C, real devices, full PLC CPU behavior and cross-platform packaging are outside this task.

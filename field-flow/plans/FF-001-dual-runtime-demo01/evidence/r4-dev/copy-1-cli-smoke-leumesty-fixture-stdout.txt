@@ -1,0 +1,4 @@
+{"event": "fixture_ready", "implementation": "python"}
+Error handling client ('127.0.0.1', 63731): Expected COTP DT, got 0x80
+Error handling client ('127.0.0.1', 63734): Expected COTP DT, got 0x80
+Error handling client ('127.0.0.1', 63736): Expected COTP DT, got 0x80

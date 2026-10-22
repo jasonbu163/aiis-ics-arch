@@ -1,0 +1,11 @@
+   Compiling field-flow v0.1.0 (/private/tmp/ff-001-r4-qa-wY5eCh/isolated/rust/project)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.90s
+     Running tests/s7_int_pdu.rs (/private/tmp/ff-001-r4-qa-wY5eCh/rust-isolated-copy-target/debug/deps/s7_int_pdu-6e8310fbacb1ef39)
+
+running 3 tests
+test all_lengths_and_fields ... ok
+test fixed_requests_and_ints ... ok
+test typed_values ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

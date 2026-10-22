@@ -1,0 +1,1 @@
+{"evidence": "/private/tmp/ff-001-r1-r4-python-cli-smoke-_fiduros/report.json"}

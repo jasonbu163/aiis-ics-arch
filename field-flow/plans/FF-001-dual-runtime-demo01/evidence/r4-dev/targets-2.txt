@@ -1,0 +1,138 @@
+{"timestamp":"2026-10-22T01:55:12.458332+00:00","event":"process_start","implementation":"python","run_id":"3c9c2aa0894447b689ba63d80756f44e","instance_id":"test","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"ok","error_key":"","duration_ms":0}
+.{"timestamp":"2026-10-22T01:55:12.525344+00:00","event":"process_start","implementation":"python","run_id":"dfdff973286e4edb804321cf1c00aea9","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"ok","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:55:12.550565+00:00","event":"driver_spawn","implementation":"python","run_id":"dfdff973286e4edb804321cf1c00aea9","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79812,"generation":1}
+{"timestamp":"2026-10-22T01:55:12.583914+00:00","event":"driver_child_event","implementation":"python","run_id":"dfdff973286e4edb804321cf1c00aea9","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"connecting","error_key":"","duration_ms":0,"pid":79812,"remaining_threads":null}
+{"timestamp":"2026-10-22T01:55:12.584655+00:00","event":"driver_ready","implementation":"python","run_id":"dfdff973286e4edb804321cf1c00aea9","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79812,"generation":1}
+{"timestamp":"2026-10-22T01:55:12.591866+00:00","event":"intent","implementation":"python","run_id":"dfdff973286e4edb804321cf1c00aea9","instance_id":"ff-python-demo01","flow_id":"demo01","target_id":"","command_id":"queued-one","request_id":"","state":"pending","old":"","new":"pending","result":"durable","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:55:12.592264+00:00","event":"intent","implementation":"python","run_id":"dfdff973286e4edb804321cf1c00aea9","instance_id":"ff-python-demo01","flow_id":"second-flow","target_id":"","command_id":"queued-two","request_id":"","state":"pending","old":"","new":"pending","result":"durable","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:55:12.592627+00:00","event":"in_flight","implementation":"python","run_id":"dfdff973286e4edb804321cf1c00aea9","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"queued-one","request_id":"68773935a2454da6a05d491381e391f5","state":"in_flight","old":"pending","new":"in_flight","result":"dispatch_permit","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:55:12.592970+00:00","event":"in_flight","implementation":"python","run_id":"dfdff973286e4edb804321cf1c00aea9","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"queued-two","request_id":"1d7b3867f8ac4a6497ca25cb5c7ef466","state":"in_flight","old":"pending","new":"in_flight","result":"dispatch_permit","error_key":"","duration_ms":0}
+Error handling client ('127.0.0.1', 60514): Expected COTP DT, got 0x80
+{"timestamp":"2026-10-22T01:55:13.756064+00:00","event":"process_start","implementation":"python","run_id":"f333776df7f04dc5a4e90f1019ed68d4","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"ok","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:55:13.768476+00:00","event":"driver_spawn","implementation":"python","run_id":"f333776df7f04dc5a4e90f1019ed68d4","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79830,"generation":1}
+{"timestamp":"2026-10-22T01:55:13.803419+00:00","event":"driver_child_event","implementation":"python","run_id":"f333776df7f04dc5a4e90f1019ed68d4","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"connecting","error_key":"","duration_ms":0,"pid":79830,"remaining_threads":null}
+{"timestamp":"2026-10-22T01:55:13.804072+00:00","event":"driver_ready","implementation":"python","run_id":"f333776df7f04dc5a4e90f1019ed68d4","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79830,"generation":1}
+Error handling client ('127.0.0.1', 60516): Expected COTP DT, got 0x80
+{"timestamp":"2026-10-22T01:55:13.843933+00:00","event":"process_start","implementation":"python","run_id":"cec480c5eec24277aaee61d3e5859e33","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"ok","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:55:13.854894+00:00","event":"driver_spawn","implementation":"python","run_id":"cec480c5eec24277aaee61d3e5859e33","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79831,"generation":1}
+{"timestamp":"2026-10-22T01:55:13.887383+00:00","event":"driver_child_event","implementation":"python","run_id":"cec480c5eec24277aaee61d3e5859e33","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"connecting","error_key":"","duration_ms":0,"pid":79831,"remaining_threads":null}
+{"timestamp":"2026-10-22T01:55:13.888192+00:00","event":"driver_ready","implementation":"python","run_id":"cec480c5eec24277aaee61d3e5859e33","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79831,"generation":1}
+{"timestamp":"2026-10-22T01:55:13.888965+00:00","event":"intent","implementation":"python","run_id":"cec480c5eec24277aaee61d3e5859e33","instance_id":"ff-python-demo01","flow_id":"demo01","target_id":"","command_id":"t2-before-permit","request_id":"","state":"pending","old":"","new":"pending","result":"durable","error_key":"","duration_ms":0}
+Error handling client ('127.0.0.1', 60519): Expected COTP DT, got 0x80
+{"timestamp":"2026-10-22T01:55:13.929669+00:00","event":"process_start","implementation":"python","run_id":"8fc69c9c62f2422587916261500c00a4","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"ok","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:55:13.940488+00:00","event":"driver_spawn","implementation":"python","run_id":"8fc69c9c62f2422587916261500c00a4","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79832,"generation":1}
+{"timestamp":"2026-10-22T01:55:13.973425+00:00","event":"driver_child_event","implementation":"python","run_id":"8fc69c9c62f2422587916261500c00a4","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"connecting","error_key":"","duration_ms":0,"pid":79832,"remaining_threads":null}
+{"timestamp":"2026-10-22T01:55:13.974231+00:00","event":"driver_ready","implementation":"python","run_id":"8fc69c9c62f2422587916261500c00a4","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79832,"generation":1}
+{"timestamp":"2026-10-22T01:55:13.976674+00:00","event":"intent","implementation":"python","run_id":"8fc69c9c62f2422587916261500c00a4","instance_id":"ff-python-demo01","flow_id":"demo01","target_id":"","command_id":"ack-commit-then-sink","request_id":"","state":"pending","old":"","new":"pending","result":"durable","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:55:13.977206+00:00","event":"in_flight","implementation":"python","run_id":"8fc69c9c62f2422587916261500c00a4","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"ack-commit-then-sink","request_id":"fa4b3b77c4d64dac922fd8bf0e08b694","state":"in_flight","old":"pending","new":"in_flight","result":"dispatch_permit","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:55:13.977438+00:00","event":"driver_call_started","implementation":"python","run_id":"8fc69c9c62f2422587916261500c00a4","instance_id":"ff-python-demo01","flow_id":"demo01","target_id":"","command_id":"","request_id":"fa4b3b77c4d64dac922fd8bf0e08b694","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79832,"generation":1}
+Error handling client ('127.0.0.1', 60521): Expected COTP DT, got 0x80
+{"timestamp":"2026-10-22T01:55:14.015349+00:00","event":"process_start","implementation":"python","run_id":"35b82c72e85b402fbdc933e922c1ff1b","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"ok","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:55:14.027415+00:00","event":"driver_spawn","implementation":"python","run_id":"35b82c72e85b402fbdc933e922c1ff1b","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79833,"generation":1}
+{"timestamp":"2026-10-22T01:55:14.059732+00:00","event":"driver_child_event","implementation":"python","run_id":"35b82c72e85b402fbdc933e922c1ff1b","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"connecting","error_key":"","duration_ms":0,"pid":79833,"remaining_threads":null}
+{"timestamp":"2026-10-22T01:55:14.060426+00:00","event":"driver_ready","implementation":"python","run_id":"35b82c72e85b402fbdc933e922c1ff1b","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79833,"generation":1}
+Error handling client ('127.0.0.1', 60524): Expected COTP DT, got 0x80
+{"timestamp":"2026-10-22T01:55:14.082892+00:00","event":"driver_child_event","implementation":"python","run_id":"35b82c72e85b402fbdc933e922c1ff1b","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"client_closed","error_key":"","duration_ms":0,"pid":79833,"remaining_threads":null}
+{"timestamp":"2026-10-22T01:55:14.083097+00:00","event":"driver_child_event","implementation":"python","run_id":"35b82c72e85b402fbdc933e922c1ff1b","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"threads_joined","error_key":"","duration_ms":0,"pid":79833,"remaining_threads":[]}
+{"timestamp":"2026-10-22T01:55:14.089816+00:00","event":"driver_process_reaped","implementation":"python","run_id":"35b82c72e85b402fbdc933e922c1ff1b","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"normal","error_key":"","duration_ms":0,"pid":79833,"exit_code":0}
+{"timestamp":"2026-10-22T01:55:14.090309+00:00","event":"stop_joined","implementation":"python","run_id":"35b82c72e85b402fbdc933e922c1ff1b","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"normal","error_key":"","duration_ms":0,"had_forced_driver_stop":false}
+{"evidence": "/private/tmp/ff-001-r1-r4-python-audit-order-82jknnvq/report.json"}
+.{"timestamp":"2026-10-22T01:55:14.238469+00:00","event":"process_start","implementation":"python","run_id":"6a358e0801d8481986213acbc4891093","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"ok","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:55:14.240346+00:00","event":"driver_spawn","implementation":"python","run_id":"6a358e0801d8481986213acbc4891093","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79835,"generation":1}
+{"timestamp":"2026-10-22T01:55:14.273481+00:00","event":"driver_child_event","implementation":"python","run_id":"6a358e0801d8481986213acbc4891093","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"connecting","error_key":"","duration_ms":0,"pid":79835,"remaining_threads":null}
+{"timestamp":"2026-10-22T01:55:14.274340+00:00","event":"driver_ready","implementation":"python","run_id":"6a358e0801d8481986213acbc4891093","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79835,"generation":1}
+Error handling client ('127.0.0.1', 60536): Expected COTP DT, got 0x80
+{"timestamp":"2026-10-22T01:55:14.275523+00:00","event":"driver_child_event","implementation":"python","run_id":"6a358e0801d8481986213acbc4891093","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"client_closed","error_key":"","duration_ms":0,"pid":79835,"remaining_threads":null}
+{"timestamp":"2026-10-22T01:55:14.275687+00:00","event":"driver_child_event","implementation":"python","run_id":"6a358e0801d8481986213acbc4891093","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"threads_joined","error_key":"","duration_ms":0,"pid":79835,"remaining_threads":[]}
+{"timestamp":"2026-10-22T01:55:14.282295+00:00","event":"driver_process_reaped","implementation":"python","run_id":"6a358e0801d8481986213acbc4891093","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"normal","error_key":"","duration_ms":0,"pid":79835,"exit_code":0}
+{"timestamp":"2026-10-22T01:55:14.284118+00:00","event":"driver_spawn","implementation":"python","run_id":"6a358e0801d8481986213acbc4891093","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79836,"generation":2}
+{"timestamp":"2026-10-22T01:55:14.317482+00:00","event":"driver_child_event","implementation":"python","run_id":"6a358e0801d8481986213acbc4891093","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"connecting","error_key":"","duration_ms":0,"pid":79836,"remaining_threads":null}
+{"timestamp":"2026-10-22T01:55:14.318258+00:00","event":"driver_ready","implementation":"python","run_id":"6a358e0801d8481986213acbc4891093","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79836,"generation":2}
+{"timestamp":"2026-10-22T01:55:14.341232+00:00","event":"driver_child_event","implementation":"python","run_id":"6a358e0801d8481986213acbc4891093","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"client_closed","error_key":"","duration_ms":0,"pid":79836,"remaining_threads":null}
+Error handling client ('127.0.0.1', 60538): Expected COTP DT, got 0x80
+{"timestamp":"2026-10-22T01:55:14.341359+00:00","event":"driver_child_event","implementation":"python","run_id":"6a358e0801d8481986213acbc4891093","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"threads_joined","error_key":"","duration_ms":0,"pid":79836,"remaining_threads":[]}
+{"timestamp":"2026-10-22T01:55:14.348208+00:00","event":"driver_process_reaped","implementation":"python","run_id":"6a358e0801d8481986213acbc4891093","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"normal","error_key":"","duration_ms":0,"pid":79836,"exit_code":0}
+{"timestamp":"2026-10-22T01:55:14.357381+00:00","event":"process_start","implementation":"python","run_id":"9ead5903e54541e0919943b0e837a76d","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"ok","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:55:14.368462+00:00","event":"driver_spawn","implementation":"python","run_id":"9ead5903e54541e0919943b0e837a76d","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79837,"generation":1}
+{"timestamp":"2026-10-22T01:55:14.401438+00:00","event":"driver_child_event","implementation":"python","run_id":"9ead5903e54541e0919943b0e837a76d","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"connecting","error_key":"","duration_ms":0,"pid":79837,"remaining_threads":null}
+{"timestamp":"2026-10-22T01:55:14.402283+00:00","event":"driver_ready","implementation":"python","run_id":"9ead5903e54541e0919943b0e837a76d","instance_id":"ff-python-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79837,"generation":1}
+{"timestamp":"2026-10-22T01:55:14.405391+00:00","event":"intent","implementation":"python","run_id":"9ead5903e54541e0919943b0e837a76d","instance_id":"ff-python-demo01","flow_id":"demo01","target_id":"","command_id":"actual-range-error","request_id":"","state":"pending","old":"","new":"pending","result":"durable","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:55:14.405940+00:00","event":"in_flight","implementation":"python","run_id":"9ead5903e54541e0919943b0e837a76d","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"actual-range-error","request_id":"6f40111c7d9b47608011d08419060e39","state":"in_flight","old":"pending","new":"in_flight","result":"dispatch_permit","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:55:14.406177+00:00","event":"driver_call_started","implementation":"python","run_id":"9ead5903e54541e0919943b0e837a76d","instance_id":"ff-python-demo01","flow_id":"demo01","target_id":"","command_id":"","request_id":"6f40111c7d9b47608011d08419060e39","state":"","old":"","new":"","result":"","error_key":"","duration_ms":0,"pid":79837,"generation":1}
+Only wrote 1 of 2 bytes due to area bounds
+{"timestamp":"2026-10-22T01:55:14.406450+00:00","event":"driver_child_event","implementation":"python","run_id":"9ead5903e54541e0919943b0e837a76d","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"client_closed","error_key":"","duration_ms":0,"pid":79837,"remaining_threads":null}
+Error handling client ('127.0.0.1', 60540): Expected COTP DT, got 0x80
+{"timestamp":"2026-10-22T01:55:14.406564+00:00","event":"driver_child_event","implementation":"python","run_id":"9ead5903e54541e0919943b0e837a76d","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"threads_joined","error_key":"","duration_ms":0,"pid":79837,"remaining_threads":[]}
+{"timestamp":"2026-10-22T01:55:14.413608+00:00","event":"driver_process_reaped","implementation":"python","run_id":"9ead5903e54541e0919943b0e837a76d","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"fault_cleanup","error_key":"","duration_ms":0,"pid":79837,"exit_code":0}
+{"timestamp":"2026-10-22T01:55:14.414239+00:00","event":"unknown","implementation":"python","run_id":"9ead5903e54541e0919943b0e837a76d","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"actual-range-error","request_id":"6f40111c7d9b47608011d08419060e39","state":"unknown","old":"in_flight","new":"unknown","result":"s7_invalid_response","error_key":"","duration_ms":0}
+{"timestamp":"2026-10-22T01:55:14.415208+00:00","event":"stop_joined","implementation":"python","run_id":"9ead5903e54541e0919943b0e837a76d","instance_id":"ff-python-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"fault_cleanup","error_key":"","duration_ms":0,"had_forced_driver_stop":false}
+{"evidence": "/private/tmp/ff-001-r1-r4-python-ref-maintenance-a1w1nz0c/report.json"}
+F
+=================================== FAILURES ===================================
+_____________ test_reference_maintenance_and_actual_block_boundary _____________
+
+    def test_reference_maintenance_and_actual_block_boundary():
+        async def scenario():
+            h = Harness("ref-maintenance")
+            try:
+                from field_flow.owner import Owner
+                directory = h.root/"near-limit"; state.init(directory, "execute", h.c.instance_id)
+                s = await state.State.open(directory, "execute", h.c.instance_id)
+                owner = Owner(h.c.plcs[0], s, seed=65534); await asyncio.wait_for(owner.ready.wait(), 4)
+                pid = owner.driver.process.pid
+                assert (await owner.read("near1")).reference == 65534
+                assert (await owner.read("near2")).reference == 65535
+                sample = await owner.read("after-maintenance")
+                assert sample.reference == 2 and owner.driver.process.pid != pid
+                with pytest.raises(ProcessLookupError): os.kill(pid, 0)
+                end = time.monotonic()+15; assert await owner.close(end); await s.close(end)
+                c = replace(h.c, flows=(replace(h.c.flows[0], target=replace(h.c.flows[0].target, db_size_bytes=32, byte_offset=15)),))
+                run = await h.open("actual-boundary", c); h.fixture.command("actual-range-error"); before = h.fixture.writes
+                with pytest.raises(Failure): await h.iteration(run)
+                assert h.fixture.writes-before == 1
+                assert state.inspect(run.state.directory)["counts"] == {"unknown": 1}
+                assert bytes.fromhex(h.fixture.snapshot()["memory_hex"])[-1] == 0xa5
+                await h.close_run(run, False)
+            finally: await h.close()
+>       asyncio.run(scenario())
+
+tests/test_local_protocol.py:336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/jason/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/runners.py:190: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+/Users/jason/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/jason/.local/share/uv/python/cpython-3.11.12-macos-aarch64-none/lib/python3.11/asyncio/base_events.py:654: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    async def scenario():
+        h = Harness("ref-maintenance")
+        try:
+            from field_flow.owner import Owner
+            directory = h.root/"near-limit"; state.init(directory, "execute", h.c.instance_id)
+            s = await state.State.open(directory, "execute", h.c.instance_id)
+            owner = Owner(h.c.plcs[0], s, seed=65534); await asyncio.wait_for(owner.ready.wait(), 4)
+            pid = owner.driver.process.pid
+            assert (await owner.read("near1")).reference == 65534
+            assert (await owner.read("near2")).reference == 65535
+            sample = await owner.read("after-maintenance")
+            assert sample.reference == 2 and owner.driver.process.pid != pid
+            with pytest.raises(ProcessLookupError): os.kill(pid, 0)
+            end = time.monotonic()+15; assert await owner.close(end); await s.close(end)
+            c = replace(h.c, flows=(replace(h.c.flows[0], target=replace(h.c.flows[0].target, db_size_bytes=32, byte_offset=15)),))
+            run = await h.open("actual-boundary", c); h.fixture.command("actual-range-error"); before = h.fixture.writes
+            with pytest.raises(Failure): await h.iteration(run)
+            assert h.fixture.writes-before == 1
+            assert state.inspect(run.state.directory)["counts"] == {"unknown": 1}
+>           assert bytes.fromhex(h.fixture.snapshot()["memory_hex"])[-1] == 0xa5
+E           assert 0 == 165
+
+tests/test_local_protocol.py:333: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_local_protocol.py::test_reference_maintenance_and_actual_block_boundary
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 2 passed, 15 deselected in 2.17s

@@ -1,0 +1,43 @@
+ M CODE_INDEX.md
+ M PLAN.md
+ M PLAN.zh-CN.md
+ M README.md
+ M README.zh-CN.md
+ M field-flow/PLAN.md
+ M field-flow/PLAN.zh-CN.md
+ M field-flow/README.md
+ M field-flow/README.zh-CN.md
+ M field-flow/field-flow-rust/src/commands.rs
+ M field-flow/field-flow-rust/src/domain.rs
+ M field-flow/field-flow-rust/src/driver_process.rs
+ M field-flow/field-flow-rust/src/fixture.rs
+ M field-flow/field-flow-rust/src/infrastructure/mod.rs
+ M field-flow/field-flow-rust/src/runtime.rs
+ M field-flow/field-flow-rust/src/services/execution.rs
+ M field-flow/field-flow-rust/tests/local_protocol.rs
+ M field-flow/field-flow-rust/tests/process_lifecycle.rs
+ M field-flow/field-flow-rust/tests/support/mod.rs
+ M field-flow/plans/FF-001-dual-runtime-demo01/spec.md
+ M field-flow/plans/FF-001-dual-runtime-demo01/tasks.md
+ M field-flow/plans/README.md
+ M field-flow/plans/README.zh-CN.md
+ M plans/README.md
+ M plans/README.zh-CN.md
+?? field-flow/field-flow-python/
+?? field-flow/field-flow-rust/CODE_INDEX.md
+?? field-flow/field-flow-rust/LICENSE
+?? field-flow/field-flow-rust/PLAN.md
+?? field-flow/field-flow-rust/PLAN.zh-CN.md
+?? field-flow/field-flow-rust/README.md
+?? field-flow/field-flow-rust/README.zh-CN.md
+?? field-flow/field-flow-rust/THIRD_PARTY_NOTICES.md
+?? field-flow/field-flow-rust/THIRD_PARTY_NOTICES.zh-CN.md
+?? field-flow/field-flow-rust/plans/
+?? field-flow/field-flow-rust/src/infrastructure/s7_int_pdu.rs
+?? field-flow/field-flow-rust/tests/ack_rejection_matrix.rs
+?? field-flow/field-flow-rust/tests/cli_contract.rs
+?? field-flow/field-flow-rust/tests/confirmed_audit.rs
+?? field-flow/field-flow-rust/tests/remaining_matrix.rs
+?? field-flow/field-flow-rust/tests/s7_int_pdu.rs
+?? field-flow/plans/FF-001-dual-runtime-demo01/evidence/r3-dev/
+?? field-flow/plans/FF-001-dual-runtime-demo01/evidence/r4-dev/

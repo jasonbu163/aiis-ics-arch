@@ -1,0 +1,96 @@
+{
+  "baseline_file_count": 2307,
+  "changes_before_checklist": [],
+  "head": "dbed9107dce5701fa138a66b3c13aba637a27b86",
+  "copies": {
+    "python": {
+      "files": 48,
+      "formal_hash_mismatches": [],
+      "copy_hash_mismatches": [],
+      "copy": "/private/tmp/ff-001-r4-qa-wY5eCh/isolated/python/project",
+      "parent_entries": [
+        "project"
+      ]
+    },
+    "rust": {
+      "files": 43,
+      "formal_hash_mismatches": [],
+      "copy_hash_mismatches": [],
+      "copy": "/private/tmp/ff-001-r4-qa-wY5eCh/isolated/rust/project",
+      "parent_entries": [
+        "project"
+      ]
+    }
+  },
+  "python_locales": {
+    "en-US": [
+      "error",
+      "fixture_help",
+      "help"
+    ],
+    "zh-CN": [
+      "error",
+      "fixture_help",
+      "help"
+    ]
+  },
+  "python_source_hashes": {
+    "field-flow/field-flow-python/src/field_flow/__init__.py": "3cb90fb7a207dfcabfa28c246293d6db796c889bf05b408f0b338ebd67c94394",
+    "field-flow/field-flow-python/src/field_flow/__main__.py": "f5d49725974521cbf8c0e1dd8ab5deef4c3ef04ce3958a0ca1325b49fadd1c8e",
+    "field-flow/field-flow-python/src/field_flow/app/__init__.py": "a46d9b27628e913cb33588ff4c3a7a3c2ce82e54371a5a4deb299eae1bf66988",
+    "field-flow/field-flow-python/src/field_flow/app/demo01.py": "981a875257c417b27027cbac9e619995d7079973a469dd234ecc4b353f34e9a4",
+    "field-flow/field-flow-python/src/field_flow/cli.py": "ca6612eb1b1ca140e250a7992e21d2e877f24598b8378e3be493d3293680aed1",
+    "field-flow/field-flow-python/src/field_flow/config.py": "0f9be9ec74fc14b9eb2e8d5e21fbba3e4229b03d3e7f7dfb2d1c39098ffd05cc",
+    "field-flow/field-flow-python/src/field_flow/domain.py": "2b934aab846ec47a043262f408cda92dc71eb354541f90e34f455f72710a6de6",
+    "field-flow/field-flow-python/src/field_flow/driver_process.py": "ed29b320690dba3dcc7799faecec9167b78d6b18762120edcb621b585853091e",
+    "field-flow/field-flow-python/src/field_flow/infrastructure/__init__.py": "5165e7675d414864d7221362093b699edaa70d73a0f0a3517f98d82a390fa32a",
+    "field-flow/field-flow-python/src/field_flow/infrastructure/audit.py": "e3c77ce707e5a0b45d9f68c4bc722aced637ab4a2eb60817c39f7a871a3198a1",
+    "field-flow/field-flow-python/src/field_flow/infrastructure/http.py": "aadf4399a72d099889c1657c683ff88c4420a0729dbcda6849f9c741805abed3",
+    "field-flow/field-flow-python/src/field_flow/infrastructure/s7_int_pdu.py": "b729a8e2d485df613ad636a6bf22152a288d5d98f06e28ef1338490a88826d48",
+    "field-flow/field-flow-python/src/field_flow/infrastructure/state.py": "ebb02e07be53cacd58e77dfc67d6980c10c85896b06008d3d2b42e5c0e01f6f5",
+    "field-flow/field-flow-python/src/field_flow/owner.py": "898c1d90911907425a4238a56d1d9c04065f43170cdc1391603c96b327ed1763",
+    "field-flow/field-flow-python/src/field_flow/runtime.py": "fe31973c11c0be69f157cc42610252e0c114a608aa6bb7c107e8bc40b1862f2e",
+    "field-flow/field-flow-python/src/field_flow/services/__init__.py": "0a0285cb01479b214027a7e69920ba6f395da8bb4215c386cfeac9cc1c3690c0",
+    "field-flow/field-flow-python/src/field_flow/services/execution.py": "725c0e8b773ad9cf70372731bfd7d89d70003f1626d4a291cadf3c483ef4e059"
+  },
+  "rust_locales": {
+    "en-US": [
+      "error",
+      "help",
+      "initialized"
+    ],
+    "zh-CN": [
+      "error",
+      "help",
+      "initialized"
+    ]
+  },
+  "rust_source_hashes": {
+    "field-flow/field-flow-rust/src/app/demo01.rs": "4b5a98619040c66a3597f4be3d8451c7ad3f00e10df8fb5552bab3a45edea580",
+    "field-flow/field-flow-rust/src/app/mod.rs": "92b38610a8b9e28a23c7f41d6063f81797e5d89ca95bd88bd6086299346662ba",
+    "field-flow/field-flow-rust/src/bin/ff-fixture.rs": "8b5e12b776adccbc616d7036c40233bc6aa88aecfef2daee641f9fe6e9284092",
+    "field-flow/field-flow-rust/src/commands.rs": "dd07978f3c352a387493ebf1e1d4879652cbf1201180df54fb8c247f09c34c9c",
+    "field-flow/field-flow-rust/src/config.rs": "29caa5d914f55560a8e273bb9849f39ed1d622364542f76faed34a0bb95e8000",
+    "field-flow/field-flow-rust/src/domain.rs": "9bb342326805a6a9fc0a95d5fb7d6f8de15209b38b34c28e23400b2642af24bf",
+    "field-flow/field-flow-rust/src/driver_process.rs": "650f61202eb987ce8e4e5e807d1e0d51bd8ae031d3fb2e922a718973fd1bb202",
+    "field-flow/field-flow-rust/src/fixture.rs": "9c87e39467fd99af9293e12944287b4134adbd28c3bed600069a2229518e4102",
+    "field-flow/field-flow-rust/src/infrastructure/audit.rs": "7542e3236a8a2c081c0c789d5a5262a3e0048eb02268a4bf717a0aeeb19d8f56",
+    "field-flow/field-flow-rust/src/infrastructure/http.rs": "5a25b826f4175422e25e8149726433c6a166755e594c18c046783202a8e73880",
+    "field-flow/field-flow-rust/src/infrastructure/mod.rs": "487330df587f3a67ded81539350f85befde2afb59f44fbbb73cb476483443613",
+    "field-flow/field-flow-rust/src/infrastructure/posix.rs": "930d3e3ec9a855ad935eceb362de737bfd68fda0359f9457fa2b158a0207849b",
+    "field-flow/field-flow-rust/src/infrastructure/s7_int_pdu.rs": "84e83767ad93080df52002cf731dd719b6535b3584fc8963387213bac97f2784",
+    "field-flow/field-flow-rust/src/infrastructure/state.rs": "8064350f2c01580b605fb8362594acbca9902ef21f9e99c74cda4a1eb65062f7",
+    "field-flow/field-flow-rust/src/lib.rs": "d49740fe50ae0816b9dba602e96cdfa371e0a46f46037fc872d264c7497db420",
+    "field-flow/field-flow-rust/src/main.rs": "debf6ae0b6073e8fd9779469d2c6b3a27d58f03b4b587e63519ddb96a2940105",
+    "field-flow/field-flow-rust/src/runtime.rs": "ee6348a38cc7ce1e394fdee0b7155e30d2d81f4353062b3f0ab118c30c2ae72c",
+    "field-flow/field-flow-rust/src/services/execution.rs": "73b0d16bc328ce079620d240d77823cf2426c99b9954aac0d199b681cddbe719",
+    "field-flow/field-flow-rust/src/services/mod.rs": "716a45c51475e03d7c5298e1eccb81b1d45be00dcd0e3f3ca81725debddca4c2"
+  },
+  "python_original_package": {
+    "client.py": "0d4ca7c3f178fe3484b8282b61635c14d2edf1ef925b1761e2f5b2865251c2ff",
+    "connection.py": "fd0f1dde0786bb66709bdec4f46d5f63bb1562b47893feb97056a824a5e62b8b",
+    "s7protocol.py": "fef41a421ad01213621422c0599631061640dc7f558e1e700b87bf6975ef74ad",
+    "server/__init__.py": "2340809a899725cad73a3ec663c3066b8b632fab9d04aeb279df830e42eac201"
+  },
+  "role_config_sha256": "ac3f369876fb1a2b54e8f78e7c3054b01a8d3b70be66cb0456507ac4a010f67e"
+}

@@ -28,12 +28,38 @@ impl Execution<'_> {
             };
         }
         clock.check(now_ms())?;
-        match self.owner.write(intent.clone(), deadline).await {
-            Ok(_) => self.state.finish(intent, "confirmed", "s7_protocol").await,
+        match self.owner.write(intent.clone(), deadline, clock).await {
+            Ok(sample) if sample.write_ack.is_some() => {
+                self.state.finish(intent, "confirmed", "s7_protocol").await
+            }
+            Ok(_) => {
+                self.state
+                    .finish(intent, "unknown", "missing_ack_proof")
+                    .await?;
+                Err("missing_ack_proof".into())
+            }
             Err(error) => {
+                if error == "clock_invalid" {
+                    clock.invalidate();
+                }
                 let persisted = self.state.command_status(intent.clone()).await?;
-                if matches!(error.as_str(), "expired" | "canceled") {
-                    self.state.finish(intent, &error, &error).await?;
+                if persisted == "pending" && intent.validate_time(now_ms()).is_err() {
+                    self.state
+                        .finish(intent, "expired", "input_expired")
+                        .await?;
+                    return Err("expired".into());
+                }
+                if matches!(
+                    error.as_str(),
+                    "expired" | "canceled" | "clock_invalid" | "queue_timeout"
+                ) {
+                    let final_state = if matches!(error.as_str(), "clock_invalid" | "queue_timeout")
+                    {
+                        "canceled"
+                    } else {
+                        &error
+                    };
+                    self.state.finish(intent, final_state, &error).await?;
                 } else if persisted == "in_flight" {
                     self.state.finish(intent, "unknown", &error).await?;
                 }

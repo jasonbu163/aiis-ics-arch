@@ -1,0 +1,96 @@
+[
+  {
+    "label": "fmt",
+    "argv": [
+      "cargo",
+      "fmt",
+      "--check"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-rust",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-target"
+    },
+    "pid": 10955,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.20142170899999998,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-fmt.txt",
+    "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "check",
+    "argv": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--all-targets",
+      "--features",
+      "test-fixture"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-rust",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-target"
+    },
+    "pid": 10995,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 13.134605167,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-check.txt",
+    "output_sha256": "8f86585022f44149b6ef688c47e802c0607a0e17b1043701b1cac000ed213fa8"
+  },
+  {
+    "label": "build",
+    "argv": [
+      "cargo",
+      "build",
+      "--locked",
+      "--offline",
+      "--bins",
+      "--features",
+      "test-fixture"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-rust",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-target"
+    },
+    "pid": 12497,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 13.958983708000002,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-build.txt",
+    "output_sha256": "18d3565209b01ba6c0e98a6129ac3508b77bd9827884300ae5a50f436648b650"
+  },
+  {
+    "label": "unit",
+    "argv": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--test",
+      "s7_int_pdu",
+      "--",
+      "--test-threads=1",
+      "--nocapture"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-rust",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-target"
+    },
+    "pid": 13833,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 2.302074625000003,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-unit.txt",
+    "output_sha256": "f9061ca207da01e8b4276bca785306361ac322d93c6755df4eeae5c5acd94bf7"
+  }
+]

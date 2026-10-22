@@ -1,0 +1,399 @@
+{
+  "results": [
+    {
+      "case": "child",
+      "parent_pid": 14168,
+      "driver_pid": 14169,
+      "parent_exit": 1,
+      "command": [
+        "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-venv/bin/python",
+        "-m",
+        "field_flow",
+        "run",
+        "--config",
+        "/private/tmp/ff-001-r1-r4-python-process-death-1ipdoucf/config.yaml",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-process-death-1ipdoucf/child",
+        "--execute"
+      ],
+      "stdout": "/private/tmp/ff-001-r1-r4-python-process-death-1ipdoucf/child-stdout.txt"
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-process-death-1ipdoucf/child",
+      "normal": false,
+      "summary": {
+        "commands": {
+          "unknown": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "8065d1bba97c4f26b8aa466dcdd8d10b",
+          "created_at": "2026-10-22T02:33:38.390Z"
+        },
+        "counts": {
+          "unknown": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "8065d1bba97c4f26b8aa466dcdd8d10b",
+              "created_at": "2026-10-22T02:33:38.390Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "applied-before-child",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "4313f6288ed6f10be78c0c14e118ead482e2d57754153bf3ff56eff0bdba76af",
+              "payload_hash": "4f7cf1f14ea64993d827d71023936dd757b2a06ddaf65ede41793613c2780ab8",
+              "value_i16": 42,
+              "issued_at_ms": 1792636418390,
+              "expires_at_ms": 1792636448390,
+              "state": "unknown",
+              "dispatch_count": 1,
+              "run_id": "8f85f88703f94963a1bf7d2e6b8468e7",
+              "request_id": "8524006b9f6c4f0fa4cc3e32d27c219d",
+              "last_error_key": "ipc_closed",
+              "ack_kind": null,
+              "created_at": "2026-10-22T02:33:38.693Z",
+              "updated_at": "2026-10-22T02:33:38.845Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "applied-before-child",
+              "run_id": "8f85f88703f94963a1bf7d2e6b8468e7",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "4f7cf1f14ea64993d827d71023936dd757b2a06ddaf65ede41793613c2780ab8",
+              "created_at": "2026-10-22T02:33:38.693Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "applied-before-child",
+              "run_id": "8f85f88703f94963a1bf7d2e6b8468e7",
+              "request_id": "8524006b9f6c4f0fa4cc3e32d27c219d",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:38.841Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "applied-before-child",
+              "run_id": "8f85f88703f94963a1bf7d2e6b8468e7",
+              "request_id": "8524006b9f6c4f0fa4cc3e32d27c219d",
+              "from_state": "in_flight",
+              "to_state": "unknown",
+              "reason_key": "ipc_closed",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:38.845Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "parent_lost",
+      "parent_pid": 14186,
+      "driver_pid": 14187,
+      "parent_exit": -9,
+      "driver_ended_ms": 57.57545796222985,
+      "lock_blocked_until_child_end": true,
+      "command": [
+        "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-venv/bin/python",
+        "-m",
+        "field_flow",
+        "run",
+        "--config",
+        "/private/tmp/ff-001-r1-r4-python-process-death-1ipdoucf/config.yaml",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-process-death-1ipdoucf/parent",
+        "--execute"
+      ],
+      "stdout": "/private/tmp/ff-001-r1-r4-python-process-death-1ipdoucf/parent-stdout.txt"
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-process-death-1ipdoucf/parent",
+      "normal": false,
+      "summary": {
+        "commands": {
+          "unknown": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "f1da91d09eae41deb887b0fed3724fca",
+          "created_at": "2026-10-22T02:33:39.124Z"
+        },
+        "counts": {
+          "unknown": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "f1da91d09eae41deb887b0fed3724fca",
+              "created_at": "2026-10-22T02:33:39.124Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "applied-before-parent",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "4313f6288ed6f10be78c0c14e118ead482e2d57754153bf3ff56eff0bdba76af",
+              "payload_hash": "1efebfd705d22c73fc13fcc617d65938c8bceaf4f3ee28eda93f602bd73b588a",
+              "value_i16": 42,
+              "issued_at_ms": 1792636419124,
+              "expires_at_ms": 1792636449124,
+              "state": "unknown",
+              "dispatch_count": 1,
+              "run_id": "8a6482d4ba07464c860275e29a5c552c",
+              "request_id": "54ee561b51b9404081e15722a9a4c2b7",
+              "last_error_key": "recovered_in_flight",
+              "ack_kind": null,
+              "created_at": "2026-10-22T02:33:39.419Z",
+              "updated_at": "2026-10-22T02:33:39.631Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "applied-before-parent",
+              "run_id": "8a6482d4ba07464c860275e29a5c552c",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "1efebfd705d22c73fc13fcc617d65938c8bceaf4f3ee28eda93f602bd73b588a",
+              "created_at": "2026-10-22T02:33:39.419Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "applied-before-parent",
+              "run_id": "8a6482d4ba07464c860275e29a5c552c",
+              "request_id": "54ee561b51b9404081e15722a9a4c2b7",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:39.569Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "applied-before-parent",
+              "run_id": "338b5cc63be94341afe1f36e42a80982",
+              "request_id": "54ee561b51b9404081e15722a9a4c2b7",
+              "from_state": "in_flight",
+              "to_state": "unknown",
+              "reason_key": "recovered_in_flight",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:33:39.631Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "normal-composition-stop",
+      "parent_pid": 14190,
+      "driver_pid": 14192,
+      "parent_exit": 0,
+      "command": [
+        "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-venv/bin/python",
+        "-m",
+        "field_flow",
+        "run",
+        "--config",
+        "/private/tmp/ff-001-r1-r4-python-process-death-1ipdoucf/config.yaml",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-process-death-1ipdoucf/normal",
+        "--execute"
+      ],
+      "stdout": "/private/tmp/ff-001-r1-r4-python-process-death-1ipdoucf/normal-stdout.txt"
+    }
+  ],
+  "fixture": {
+    "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+    "writes": 3,
+    "reads": 0,
+    "gets": 23,
+    "sessions": 5,
+    "closed_sessions": 5,
+    "trace": [
+      {
+        "operation": 0,
+        "fault": "hold_ack",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "hold_ack",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "hold_ack",
+        "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400000000040010002a",
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "hold_ack",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "hold_ack",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "hold_ack",
+        "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400000000040010002a",
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "",
+        "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400000000040010002a",
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      }
+    ],
+    "server_pid": 14166,
+    "server_exit": 0,
+    "server_close": {
+      "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "remaining_threads": [],
+      "pid": 14166,
+      "exit_code": 0
+    },
+    "server_epochs": [
+      {
+        "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+        "remaining_threads": [],
+        "pid": 14166,
+        "exit_code": 0
+      }
+    ],
+    "proxy_threads_joined": 5,
+    "ports_rebound": [
+      32102,
+      32103,
+      32880
+    ]
+  }
+}

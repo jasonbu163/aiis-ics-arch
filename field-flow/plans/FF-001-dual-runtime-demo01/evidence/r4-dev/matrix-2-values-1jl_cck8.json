@@ -1,0 +1,1485 @@
+{
+  "results": [
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-values-1jl_cck8/value0",
+      "normal": true,
+      "summary": {
+        "commands": {
+          "confirmed": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "6c096829c7b747cb8d1f783102447b3f",
+          "created_at": "2026-10-22T01:42:03.107Z"
+        },
+        "counts": {
+          "confirmed": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "6c096829c7b747cb8d1f783102447b3f",
+              "created_at": "2026-10-22T01:42:03.107Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "value0",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "49ab1d8109dee53af80d4444a722ca9cbcf5597f9c9d251b78fa5796c9ec8b51",
+              "value_i16": -32768,
+              "issued_at_ms": 1792633323201,
+              "expires_at_ms": 1792633353201,
+              "state": "confirmed",
+              "dispatch_count": 1,
+              "run_id": "ad83f395eadc46abbbc2f4e33ef16efd",
+              "request_id": "86cb889587c544dd8a7640225826adc8",
+              "last_error_key": null,
+              "ack_kind": "s7_protocol",
+              "created_at": "2026-10-22T01:42:03.203Z",
+              "updated_at": "2026-10-22T01:42:03.205Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "value0",
+              "run_id": "ad83f395eadc46abbbc2f4e33ef16efd",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "49ab1d8109dee53af80d4444a722ca9cbcf5597f9c9d251b78fa5796c9ec8b51",
+              "created_at": "2026-10-22T01:42:03.203Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "value0",
+              "run_id": "ad83f395eadc46abbbc2f4e33ef16efd",
+              "request_id": "86cb889587c544dd8a7640225826adc8",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.204Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "value0",
+              "run_id": "ad83f395eadc46abbbc2f4e33ef16efd",
+              "request_id": null,
+              "from_state": "in_flight",
+              "to_state": "confirmed",
+              "reason_key": "s7_protocol",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.205Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-values-1jl_cck8/value0",
+      "normal": true,
+      "summary": {
+        "commands": {
+          "confirmed": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "6c096829c7b747cb8d1f783102447b3f",
+          "created_at": "2026-10-22T01:42:03.107Z"
+        },
+        "counts": {
+          "confirmed": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "6c096829c7b747cb8d1f783102447b3f",
+              "created_at": "2026-10-22T01:42:03.107Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "value0",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "49ab1d8109dee53af80d4444a722ca9cbcf5597f9c9d251b78fa5796c9ec8b51",
+              "value_i16": -32768,
+              "issued_at_ms": 1792633323201,
+              "expires_at_ms": 1792633353201,
+              "state": "confirmed",
+              "dispatch_count": 1,
+              "run_id": "ad83f395eadc46abbbc2f4e33ef16efd",
+              "request_id": "86cb889587c544dd8a7640225826adc8",
+              "last_error_key": null,
+              "ack_kind": "s7_protocol",
+              "created_at": "2026-10-22T01:42:03.203Z",
+              "updated_at": "2026-10-22T01:42:03.205Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "value0",
+              "run_id": "ad83f395eadc46abbbc2f4e33ef16efd",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "49ab1d8109dee53af80d4444a722ca9cbcf5597f9c9d251b78fa5796c9ec8b51",
+              "created_at": "2026-10-22T01:42:03.203Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "value0",
+              "run_id": "ad83f395eadc46abbbc2f4e33ef16efd",
+              "request_id": "86cb889587c544dd8a7640225826adc8",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.204Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "value0",
+              "run_id": "ad83f395eadc46abbbc2f4e33ef16efd",
+              "request_id": null,
+              "from_state": "in_flight",
+              "to_state": "confirmed",
+              "reason_key": "s7_protocol",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.205Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-values-1jl_cck8/value1",
+      "normal": true,
+      "summary": {
+        "commands": {
+          "confirmed": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "680e2a8e5d134c20a4659f2d90ec8411",
+          "created_at": "2026-10-22T01:42:03.333Z"
+        },
+        "counts": {
+          "confirmed": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "680e2a8e5d134c20a4659f2d90ec8411",
+              "created_at": "2026-10-22T01:42:03.333Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "value1",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "81733e38a078a075dd53062f9e4ef19a1302b9203191ecb32ee92f05c74b7bc4",
+              "value_i16": -1,
+              "issued_at_ms": 1792633323384,
+              "expires_at_ms": 1792633353384,
+              "state": "confirmed",
+              "dispatch_count": 1,
+              "run_id": "6f932e0ae5654212b48c2e8dfb6fefdd",
+              "request_id": "b65d6af6156f468da42645138a653647",
+              "last_error_key": null,
+              "ack_kind": "s7_protocol",
+              "created_at": "2026-10-22T01:42:03.386Z",
+              "updated_at": "2026-10-22T01:42:03.388Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "value1",
+              "run_id": "6f932e0ae5654212b48c2e8dfb6fefdd",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "81733e38a078a075dd53062f9e4ef19a1302b9203191ecb32ee92f05c74b7bc4",
+              "created_at": "2026-10-22T01:42:03.386Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "value1",
+              "run_id": "6f932e0ae5654212b48c2e8dfb6fefdd",
+              "request_id": "b65d6af6156f468da42645138a653647",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.387Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "value1",
+              "run_id": "6f932e0ae5654212b48c2e8dfb6fefdd",
+              "request_id": null,
+              "from_state": "in_flight",
+              "to_state": "confirmed",
+              "reason_key": "s7_protocol",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.388Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-values-1jl_cck8/value1",
+      "normal": true,
+      "summary": {
+        "commands": {
+          "confirmed": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "680e2a8e5d134c20a4659f2d90ec8411",
+          "created_at": "2026-10-22T01:42:03.333Z"
+        },
+        "counts": {
+          "confirmed": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "680e2a8e5d134c20a4659f2d90ec8411",
+              "created_at": "2026-10-22T01:42:03.333Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "value1",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "81733e38a078a075dd53062f9e4ef19a1302b9203191ecb32ee92f05c74b7bc4",
+              "value_i16": -1,
+              "issued_at_ms": 1792633323384,
+              "expires_at_ms": 1792633353384,
+              "state": "confirmed",
+              "dispatch_count": 1,
+              "run_id": "6f932e0ae5654212b48c2e8dfb6fefdd",
+              "request_id": "b65d6af6156f468da42645138a653647",
+              "last_error_key": null,
+              "ack_kind": "s7_protocol",
+              "created_at": "2026-10-22T01:42:03.386Z",
+              "updated_at": "2026-10-22T01:42:03.388Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "value1",
+              "run_id": "6f932e0ae5654212b48c2e8dfb6fefdd",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "81733e38a078a075dd53062f9e4ef19a1302b9203191ecb32ee92f05c74b7bc4",
+              "created_at": "2026-10-22T01:42:03.386Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "value1",
+              "run_id": "6f932e0ae5654212b48c2e8dfb6fefdd",
+              "request_id": "b65d6af6156f468da42645138a653647",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.387Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "value1",
+              "run_id": "6f932e0ae5654212b48c2e8dfb6fefdd",
+              "request_id": null,
+              "from_state": "in_flight",
+              "to_state": "confirmed",
+              "reason_key": "s7_protocol",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.388Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-values-1jl_cck8/value2",
+      "normal": true,
+      "summary": {
+        "commands": {
+          "confirmed": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "d582e7eb97ad4df28bf67411976c4e03",
+          "created_at": "2026-10-22T01:42:03.510Z"
+        },
+        "counts": {
+          "confirmed": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "d582e7eb97ad4df28bf67411976c4e03",
+              "created_at": "2026-10-22T01:42:03.510Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "value2",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "2311929555b188b2b3b7266464e5ef8c86aff71cab5bddea7a306ebb438bd3ac",
+              "value_i16": 0,
+              "issued_at_ms": 1792633323558,
+              "expires_at_ms": 1792633353558,
+              "state": "confirmed",
+              "dispatch_count": 1,
+              "run_id": "1110522c9cc5460ca79a8c0fbe2655de",
+              "request_id": "163e4ade71c44cc9a58c02a15baaf808",
+              "last_error_key": null,
+              "ack_kind": "s7_protocol",
+              "created_at": "2026-10-22T01:42:03.560Z",
+              "updated_at": "2026-10-22T01:42:03.561Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "value2",
+              "run_id": "1110522c9cc5460ca79a8c0fbe2655de",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "2311929555b188b2b3b7266464e5ef8c86aff71cab5bddea7a306ebb438bd3ac",
+              "created_at": "2026-10-22T01:42:03.560Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "value2",
+              "run_id": "1110522c9cc5460ca79a8c0fbe2655de",
+              "request_id": "163e4ade71c44cc9a58c02a15baaf808",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.561Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "value2",
+              "run_id": "1110522c9cc5460ca79a8c0fbe2655de",
+              "request_id": null,
+              "from_state": "in_flight",
+              "to_state": "confirmed",
+              "reason_key": "s7_protocol",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.561Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-values-1jl_cck8/value2",
+      "normal": true,
+      "summary": {
+        "commands": {
+          "confirmed": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "d582e7eb97ad4df28bf67411976c4e03",
+          "created_at": "2026-10-22T01:42:03.510Z"
+        },
+        "counts": {
+          "confirmed": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "d582e7eb97ad4df28bf67411976c4e03",
+              "created_at": "2026-10-22T01:42:03.510Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "value2",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "2311929555b188b2b3b7266464e5ef8c86aff71cab5bddea7a306ebb438bd3ac",
+              "value_i16": 0,
+              "issued_at_ms": 1792633323558,
+              "expires_at_ms": 1792633353558,
+              "state": "confirmed",
+              "dispatch_count": 1,
+              "run_id": "1110522c9cc5460ca79a8c0fbe2655de",
+              "request_id": "163e4ade71c44cc9a58c02a15baaf808",
+              "last_error_key": null,
+              "ack_kind": "s7_protocol",
+              "created_at": "2026-10-22T01:42:03.560Z",
+              "updated_at": "2026-10-22T01:42:03.561Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "value2",
+              "run_id": "1110522c9cc5460ca79a8c0fbe2655de",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "2311929555b188b2b3b7266464e5ef8c86aff71cab5bddea7a306ebb438bd3ac",
+              "created_at": "2026-10-22T01:42:03.560Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "value2",
+              "run_id": "1110522c9cc5460ca79a8c0fbe2655de",
+              "request_id": "163e4ade71c44cc9a58c02a15baaf808",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.561Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "value2",
+              "run_id": "1110522c9cc5460ca79a8c0fbe2655de",
+              "request_id": null,
+              "from_state": "in_flight",
+              "to_state": "confirmed",
+              "reason_key": "s7_protocol",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.561Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-values-1jl_cck8/value3",
+      "normal": true,
+      "summary": {
+        "commands": {
+          "confirmed": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "fe7114047d70461fa02bd2caf8c621ba",
+          "created_at": "2026-10-22T01:42:03.686Z"
+        },
+        "counts": {
+          "confirmed": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "fe7114047d70461fa02bd2caf8c621ba",
+              "created_at": "2026-10-22T01:42:03.686Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "value3",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "4e9bcd9c9dcb041c94bf58a6158ae90659b3a7b1dd602ead65e7af0d42f9532f",
+              "value_i16": 42,
+              "issued_at_ms": 1792633323734,
+              "expires_at_ms": 1792633353734,
+              "state": "confirmed",
+              "dispatch_count": 1,
+              "run_id": "620c208872a046c7b94fb4fb3a532f2a",
+              "request_id": "77afb1a0e5664635a9004f2f98e4e998",
+              "last_error_key": null,
+              "ack_kind": "s7_protocol",
+              "created_at": "2026-10-22T01:42:03.736Z",
+              "updated_at": "2026-10-22T01:42:03.738Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "value3",
+              "run_id": "620c208872a046c7b94fb4fb3a532f2a",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "4e9bcd9c9dcb041c94bf58a6158ae90659b3a7b1dd602ead65e7af0d42f9532f",
+              "created_at": "2026-10-22T01:42:03.736Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "value3",
+              "run_id": "620c208872a046c7b94fb4fb3a532f2a",
+              "request_id": "77afb1a0e5664635a9004f2f98e4e998",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.737Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "value3",
+              "run_id": "620c208872a046c7b94fb4fb3a532f2a",
+              "request_id": null,
+              "from_state": "in_flight",
+              "to_state": "confirmed",
+              "reason_key": "s7_protocol",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.738Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-values-1jl_cck8/value3",
+      "normal": true,
+      "summary": {
+        "commands": {
+          "confirmed": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "fe7114047d70461fa02bd2caf8c621ba",
+          "created_at": "2026-10-22T01:42:03.686Z"
+        },
+        "counts": {
+          "confirmed": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "fe7114047d70461fa02bd2caf8c621ba",
+              "created_at": "2026-10-22T01:42:03.686Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "value3",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "4e9bcd9c9dcb041c94bf58a6158ae90659b3a7b1dd602ead65e7af0d42f9532f",
+              "value_i16": 42,
+              "issued_at_ms": 1792633323734,
+              "expires_at_ms": 1792633353734,
+              "state": "confirmed",
+              "dispatch_count": 1,
+              "run_id": "620c208872a046c7b94fb4fb3a532f2a",
+              "request_id": "77afb1a0e5664635a9004f2f98e4e998",
+              "last_error_key": null,
+              "ack_kind": "s7_protocol",
+              "created_at": "2026-10-22T01:42:03.736Z",
+              "updated_at": "2026-10-22T01:42:03.738Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "value3",
+              "run_id": "620c208872a046c7b94fb4fb3a532f2a",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "4e9bcd9c9dcb041c94bf58a6158ae90659b3a7b1dd602ead65e7af0d42f9532f",
+              "created_at": "2026-10-22T01:42:03.736Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "value3",
+              "run_id": "620c208872a046c7b94fb4fb3a532f2a",
+              "request_id": "77afb1a0e5664635a9004f2f98e4e998",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.737Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "value3",
+              "run_id": "620c208872a046c7b94fb4fb3a532f2a",
+              "request_id": null,
+              "from_state": "in_flight",
+              "to_state": "confirmed",
+              "reason_key": "s7_protocol",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.738Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-values-1jl_cck8/value4",
+      "normal": true,
+      "summary": {
+        "commands": {
+          "confirmed": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "3b5c9ed03f594698a96f83ac36e73d1d",
+          "created_at": "2026-10-22T01:42:03.863Z"
+        },
+        "counts": {
+          "confirmed": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "3b5c9ed03f594698a96f83ac36e73d1d",
+              "created_at": "2026-10-22T01:42:03.863Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "value4",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "daa4a094ca934ad09b95ed341a09740b4fb4af5ce14c9e2fdff6c3d5a95dd481",
+              "value_i16": 32767,
+              "issued_at_ms": 1792633323912,
+              "expires_at_ms": 1792633353912,
+              "state": "confirmed",
+              "dispatch_count": 1,
+              "run_id": "ec2373d8e36241b09e3fd01f54dd2842",
+              "request_id": "6182d297fb094b7a914acd34893c3460",
+              "last_error_key": null,
+              "ack_kind": "s7_protocol",
+              "created_at": "2026-10-22T01:42:03.914Z",
+              "updated_at": "2026-10-22T01:42:03.915Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "value4",
+              "run_id": "ec2373d8e36241b09e3fd01f54dd2842",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "daa4a094ca934ad09b95ed341a09740b4fb4af5ce14c9e2fdff6c3d5a95dd481",
+              "created_at": "2026-10-22T01:42:03.914Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "value4",
+              "run_id": "ec2373d8e36241b09e3fd01f54dd2842",
+              "request_id": "6182d297fb094b7a914acd34893c3460",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.915Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "value4",
+              "run_id": "ec2373d8e36241b09e3fd01f54dd2842",
+              "request_id": null,
+              "from_state": "in_flight",
+              "to_state": "confirmed",
+              "reason_key": "s7_protocol",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.916Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-values-1jl_cck8/value4",
+      "normal": true,
+      "summary": {
+        "commands": {
+          "confirmed": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "3b5c9ed03f594698a96f83ac36e73d1d",
+          "created_at": "2026-10-22T01:42:03.863Z"
+        },
+        "counts": {
+          "confirmed": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "3b5c9ed03f594698a96f83ac36e73d1d",
+              "created_at": "2026-10-22T01:42:03.863Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "value4",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "daa4a094ca934ad09b95ed341a09740b4fb4af5ce14c9e2fdff6c3d5a95dd481",
+              "value_i16": 32767,
+              "issued_at_ms": 1792633323912,
+              "expires_at_ms": 1792633353912,
+              "state": "confirmed",
+              "dispatch_count": 1,
+              "run_id": "ec2373d8e36241b09e3fd01f54dd2842",
+              "request_id": "6182d297fb094b7a914acd34893c3460",
+              "last_error_key": null,
+              "ack_kind": "s7_protocol",
+              "created_at": "2026-10-22T01:42:03.914Z",
+              "updated_at": "2026-10-22T01:42:03.915Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "value4",
+              "run_id": "ec2373d8e36241b09e3fd01f54dd2842",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "daa4a094ca934ad09b95ed341a09740b4fb4af5ce14c9e2fdff6c3d5a95dd481",
+              "created_at": "2026-10-22T01:42:03.914Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "value4",
+              "run_id": "ec2373d8e36241b09e3fd01f54dd2842",
+              "request_id": "6182d297fb094b7a914acd34893c3460",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.915Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "value4",
+              "run_id": "ec2373d8e36241b09e3fd01f54dd2842",
+              "request_id": null,
+              "from_state": "in_flight",
+              "to_state": "confirmed",
+              "reason_key": "s7_protocol",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:42:03.916Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-values-1jl_cck8/bad-input",
+      "normal": true,
+      "summary": {
+        "commands": {},
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "3d6009f25284448c8c341e117743c9ec",
+          "created_at": "2026-10-22T01:42:04.041Z"
+        },
+        "counts": {},
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "3d6009f25284448c8c341e117743c9ec",
+              "created_at": "2026-10-22T01:42:04.041Z"
+            }
+          ],
+          "commands": [],
+          "command_events": []
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-values-1jl_cck8/dry",
+      "normal": true,
+      "summary": {
+        "commands": {
+          "simulated": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "dry_run",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "65b1fa6a09424a39910a053c7d478e10",
+          "created_at": "2026-10-22T01:42:04.127Z"
+        },
+        "counts": {
+          "simulated": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "dry_run",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "65b1fa6a09424a39910a053c7d478e10",
+              "created_at": "2026-10-22T01:42:04.127Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "dry",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "d89c0af043924304ffb09d999a0484f47742cc402ff016346fe228d5ce2a9bf8",
+              "value_i16": 42,
+              "issued_at_ms": 1792633324176,
+              "expires_at_ms": 1792633354176,
+              "state": "simulated",
+              "dispatch_count": 0,
+              "run_id": "da2c99b18f1e4cfcb01d5268ed4f75d6",
+              "request_id": null,
+              "last_error_key": null,
+              "ack_kind": null,
+              "created_at": "2026-10-22T01:42:04.177Z",
+              "updated_at": "2026-10-22T01:42:04.177Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "dry",
+              "run_id": "da2c99b18f1e4cfcb01d5268ed4f75d6",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "simulated",
+              "reason_key": "intent",
+              "summary": "d89c0af043924304ffb09d999a0484f47742cc402ff016346fe228d5ce2a9bf8",
+              "created_at": "2026-10-22T01:42:04.178Z"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "fixture": {
+    "memory_hex": "7fffa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+    "writes": 5,
+    "reads": 6,
+    "gets": 127,
+    "sessions": 17,
+    "closed_sessions": 17,
+    "trace": [
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "",
+        "request_hex": "0300002502f080320100000002000e00060501120a10020002000184000000000400108000",
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff0400108000",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff0400108000",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "",
+        "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400000000040010ffff",
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010ffff",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010ffff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "",
+        "request_hex": "0300002502f080320100000002000e00060501120a10020002000184000000000400100000",
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff0400100000",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff0400100000",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "",
+        "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400000000040010002a",
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "",
+        "request_hex": "0300002502f080320100000002000e00060501120a10020002000184000000000400107fff",
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff0400107fff",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff0400107fff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff0400107fff",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff0400107fff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      }
+    ],
+    "server_pid": 73454,
+    "server_exit": 0,
+    "server_close": {
+      "remaining_threads": []
+    },
+    "proxy_threads_joined": 17,
+    "ports_rebound": [
+      32102,
+      32103,
+      32880
+    ]
+  }
+}

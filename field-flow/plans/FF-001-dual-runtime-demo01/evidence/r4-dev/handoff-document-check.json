@@ -1,0 +1,8 @@
+{
+  "active_tasks_links": 29,
+  "r3_prefix_original_hash": "48a52ef056ccced510bc4c24c685b4ef7d03fd03868487dff1616a1ba829dd76",
+  "tasks_sha256": "b75074662ca2e763553c2ba8081908ad0f694de4cc6fd6acecfec7a88243e219",
+  "candidate_sha256": "4221b6ded6ea871bb01cf7ac12059e0794d83550ea9d8fe755979a702ab5067f",
+  "git_diff_check_exit": 0,
+  "ignored_new_evidence": []
+}

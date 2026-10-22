@@ -1,0 +1,167 @@
+[
+  {
+    "label": "lock",
+    "command": [
+      "uv",
+      "lock",
+      "--check",
+      "--python",
+      "3.11",
+      "--no-python-downloads"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "timeout_seconds": 60,
+    "exit_code": 0,
+    "duration_seconds": 0.077764875,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/formal-1-lock.txt"
+  },
+  {
+    "label": "sync",
+    "command": [
+      "uv",
+      "sync",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "timeout_seconds": 120,
+    "exit_code": 0,
+    "duration_seconds": 0.242058708,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/formal-1-sync.txt"
+  },
+  {
+    "label": "build",
+    "command": [
+      "uv",
+      "build",
+      "--python",
+      "3.11",
+      "--no-python-downloads"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "timeout_seconds": 120,
+    "exit_code": 0,
+    "duration_seconds": 0.346543833,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/formal-1-build.txt"
+  },
+  {
+    "label": "compile",
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "python",
+      "-m",
+      "compileall",
+      "-q",
+      "src",
+      "tests"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "timeout_seconds": 60,
+    "exit_code": 0,
+    "duration_seconds": 0.07659070800000001,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/formal-1-compile.txt"
+  },
+  {
+    "label": "unit",
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-q",
+      "tests/unit",
+      "-s"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "timeout_seconds": 60,
+    "exit_code": 0,
+    "duration_seconds": 0.5059289579999999,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/formal-1-unit.txt"
+  },
+  {
+    "label": "gate",
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-q",
+      "tests/test_matched_ack_gate.py",
+      "-s"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "timeout_seconds": 120,
+    "exit_code": 0,
+    "duration_seconds": 1.155008083,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/formal-1-gate.txt"
+  },
+  {
+    "label": "local",
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-q",
+      "tests/test_local_protocol.py",
+      "-s"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "timeout_seconds": 180,
+    "exit_code": 0,
+    "duration_seconds": 32.977699459,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/formal-1-local.txt"
+  },
+  {
+    "label": "help",
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "field-flow"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "timeout_seconds": 30,
+    "exit_code": 0,
+    "duration_seconds": 0.6061409579999975,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/formal-1-help.txt"
+  },
+  {
+    "label": "cli-smoke",
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "python",
+      "-m",
+      "tests.fixtures.cli_smoke"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "timeout_seconds": 45,
+    "exit_code": 0,
+    "duration_seconds": 0.7814202500000036,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/formal-1-cli-smoke.txt"
+  }
+]

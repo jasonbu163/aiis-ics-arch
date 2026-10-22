@@ -1,0 +1,22 @@
+{
+  "formal": {
+    "wheel": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python/dist/field_flow-0.1.0-py3-none-any.whl",
+    "wheel_sha256": "5b64ee1e5b36cccc2417330a0d1c65e277ca90efa13b9b09bff5511fa2815b25",
+    "wheel_file_count": 24,
+    "sdist": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python/dist/field_flow-0.1.0.tar.gz",
+    "sdist_sha256": "6ba7f52fc4ba63791bf364607392b5608a58ee6f1b8e74859cd533555cb65483",
+    "sdist_file_count": 49,
+    "packaged_locales": true,
+    "excluded_environment_state_artifacts": true
+  },
+  "copy": {
+    "wheel": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy/dist/field_flow-0.1.0-py3-none-any.whl",
+    "wheel_sha256": "5b64ee1e5b36cccc2417330a0d1c65e277ca90efa13b9b09bff5511fa2815b25",
+    "wheel_file_count": 24,
+    "sdist": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy/dist/field_flow-0.1.0.tar.gz",
+    "sdist_sha256": "6ba7f52fc4ba63791bf364607392b5608a58ee6f1b8e74859cd533555cb65483",
+    "sdist_file_count": 49,
+    "packaged_locales": true,
+    "excluded_environment_state_artifacts": true
+  }
+}

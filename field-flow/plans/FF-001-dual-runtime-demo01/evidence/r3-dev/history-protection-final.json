@@ -1,0 +1,16 @@
+{
+  "manifests": [
+    {
+      "manifest": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/manifest.sha256",
+      "sha256": "d046e373c875c236ef1ad9678e1ba6dd9141d5667c92be2bd66ed70acbbd8770",
+      "verified_entries": 24
+    },
+    {
+      "manifest": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r2-dev/manifest.sha256",
+      "sha256": "33b29e08d24539e24fa59c8b9c41652347c32d298fd7e7f98f2b97cefd80acf7",
+      "verified_entries": 18
+    }
+  ],
+  "r2_tasks_reconstructed_sha256": "ce9dfe615dbfc69c2e0dccf00178d7bcb8856ea51458e4e2d405c3a55389d0e9",
+  "old_evidence_file_count": 44
+}

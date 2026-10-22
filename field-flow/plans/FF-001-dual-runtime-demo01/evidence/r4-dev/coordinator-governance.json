@@ -1,0 +1,27 @@
+{
+  "command": "bash /Users/jason/Desktop/DreamCode/AI/AIIS/skills/project-governance/scripts/check-governance-bundle.sh /Users/jason/Desktop/DreamCode/aiis-ics-arch field-flow field-flow/field-flow-rust field-flow/field-flow-python",
+  "exit_code": 1,
+  "line_count": 322,
+  "existing_outside_diagnostics": 318,
+  "outside_multiset_equal_prior": true,
+  "ff_diagnostics": [
+    "missing plans task link: field-flow/field-flow-rust/PLAN.md",
+    "missing plans task link: field-flow/field-flow-rust/PLAN.zh-CN.md",
+    "missing plans task link: field-flow/field-flow-python/PLAN.md",
+    "missing plans task link: field-flow/field-flow-python/PLAN.zh-CN.md"
+  ],
+  "compatibility": "checker accepts ](plans/ but independent projects truthfully link ../plans/ to the one parent-owned FF-001 bundle; no duplicate tasks or checker changes",
+  "navigation_command": "python3 /private/tmp/ff-001-r4-coordinator-1y0z0h4z/validate-navigation.py",
+  "navigation_exit_code": 0,
+  "navigation_result": {
+    "nav_files": 13,
+    "additional_active_documents": 21,
+    "local_link_paths": 516,
+    "issues": [],
+    "root_non_ff_differences": [],
+    "protected_files": 4,
+    "historical_evidence_files": 112
+  },
+  "qa": false,
+  "timing": "coordinator interim, before final handoff/catalog/checklist"
+}

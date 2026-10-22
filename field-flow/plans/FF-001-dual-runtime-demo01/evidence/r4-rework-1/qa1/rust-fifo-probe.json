@@ -1,0 +1,59 @@
+{
+  "duration_ms": 876,
+  "native_exit": 0,
+  "native_pid": 18445,
+  "ports_rebound": [
+    31102,
+    31103
+  ],
+  "protocol": [
+    {
+      "forwarded_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+      "operation": 0,
+      "original_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+      "request_hex": "0300001611e00000000100c0010ac1020100c2020101"
+    },
+    {
+      "forwarded_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+      "operation": 240,
+      "original_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+      "request_hex": "0300001902f08032010000000000080000f0000001000101e0"
+    },
+    {
+      "forwarded_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5",
+      "operation": 4,
+      "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5",
+      "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000"
+    }
+  ],
+  "proxy_joined": true,
+  "summary": {
+    "actual_readvar": 1,
+    "case": "queued-IO-budget",
+    "expected": "both fresh S7 reads succeed: queue wait under2000ms, each dispatched IO600ms under800ms work budget",
+    "first": {
+      "Ok": -23131
+    },
+    "io_timeout_ms": 1200,
+    "per_response_delay_ms": 600,
+    "queue_wait_ms": 2000,
+    "second": {
+      "Err": "canceled"
+    },
+    "second_elapsed_ms": 600,
+    "shutdown": {
+      "Ok": null
+    },
+    "state": {
+      "counts": {},
+      "meta": {
+        "implementation": "rust",
+        "instance_id": "ff-rust-demo01",
+        "mode": "execute",
+        "schema_version": 1,
+        "store_uuid": "1792636788612-18436-0"
+      }
+    },
+    "total_ms": 715
+  }
+}

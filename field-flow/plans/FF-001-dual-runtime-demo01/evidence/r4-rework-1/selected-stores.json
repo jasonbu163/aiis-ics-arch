@@ -1,0 +1,3893 @@
+{
+  "/private/tmp/ff-001-r1-r3-rust-child-death-1792639082485-69733-0/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639082490-69733-1",
+        "created_at": "2026-10-22T03:18:02.491Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "child-lost",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "9b36c27e218d08f3297733b9fb1b459ca1e6bf6704a939a4905a485b5f7ef416",
+        "value_i16": 42,
+        "issued_at_ms": 1792639082491,
+        "expires_at_ms": 1792639142491,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792639082499-69735-0",
+        "request_id": "1792639082524-69735-2",
+        "last_error_key": "forced_driver_stop:ipc_closed",
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:18:02.518Z",
+        "updated_at": "2026-10-22T03:18:02.556Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "child-lost",
+        "run_id": "1792639082499-69735-0",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "9b36c27e218d08f3297733b9fb1b459ca1e6bf6704a939a4905a485b5f7ef416",
+        "created_at": "2026-10-22T03:18:02.519Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "child-lost",
+        "run_id": "1792639082499-69735-0",
+        "request_id": "1792639082524-69735-2",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:02.531Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "child-lost",
+        "run_id": "1792639082499-69735-0",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "forced_driver_stop:ipc_closed",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:02.556Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-child-death-1792639297704-75402-0/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639297709-75402-1",
+        "created_at": "2026-10-22T03:21:37.709Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "child-lost",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "16c515e1d390fd4233d46000979f89b5875384aec7926bffe20b6da2b9c154de",
+        "value_i16": 42,
+        "issued_at_ms": 1792639297710,
+        "expires_at_ms": 1792639357710,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792639297718-75404-0",
+        "request_id": "1792639297743-75404-2",
+        "last_error_key": "forced_driver_stop:ipc_closed",
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:21:37.737Z",
+        "updated_at": "2026-10-22T03:21:37.781Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "child-lost",
+        "run_id": "1792639297718-75404-0",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "16c515e1d390fd4233d46000979f89b5875384aec7926bffe20b6da2b9c154de",
+        "created_at": "2026-10-22T03:21:37.738Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "child-lost",
+        "run_id": "1792639297718-75404-0",
+        "request_id": "1792639297743-75404-2",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:21:37.751Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "child-lost",
+        "run_id": "1792639297718-75404-0",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "forced_driver_stop:ipc_closed",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:21:37.781Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-confirmed-then-sink-1792639053392-69467-0/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639053395-69467-1",
+        "created_at": "2026-10-22T03:17:33.395Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "confirmed-before-sink",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "cb84c217c89877ecca84c0cc96ed2730b1f60f8b72233c6ac9dae79bfaba3306",
+        "value_i16": 42,
+        "issued_at_ms": 1792639053425,
+        "expires_at_ms": 1792639113425,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792639053396-69467-2",
+        "request_id": "1792639053435-69467-4",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:17:33.430Z",
+        "updated_at": "2026-10-22T03:17:33.444Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "confirmed-before-sink",
+        "run_id": "1792639053396-69467-2",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "cb84c217c89877ecca84c0cc96ed2730b1f60f8b72233c6ac9dae79bfaba3306",
+        "created_at": "2026-10-22T03:17:33.431Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "confirmed-before-sink",
+        "run_id": "1792639053396-69467-2",
+        "request_id": "1792639053435-69467-4",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:17:33.435Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "confirmed-before-sink",
+        "run_id": "1792639053396-69467-2",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:17:33.444Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-confirmed-then-sink-1792639268627-75152-0/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639268630-75152-1",
+        "created_at": "2026-10-22T03:21:08.631Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "confirmed-before-sink",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "d8f8caf7881e0561313688d2775cec67de8f63c0ad7a15eb669fe93a3759f567",
+        "value_i16": 42,
+        "issued_at_ms": 1792639268660,
+        "expires_at_ms": 1792639328660,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792639268631-75152-2",
+        "request_id": "1792639268673-75152-4",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:21:08.669Z",
+        "updated_at": "2026-10-22T03:21:08.682Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "confirmed-before-sink",
+        "run_id": "1792639268631-75152-2",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "d8f8caf7881e0561313688d2775cec67de8f63c0ad7a15eb669fe93a3759f567",
+        "created_at": "2026-10-22T03:21:08.669Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "confirmed-before-sink",
+        "run_id": "1792639268631-75152-2",
+        "request_id": "1792639268673-75152-4",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:21:08.673Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "confirmed-before-sink",
+        "run_id": "1792639268631-75152-2",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:21:08.682Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-lost-ack-1792639063447-69485-165/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639063453-69485-166",
+        "created_at": "2026-10-22T03:17:43.454Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "lost-1",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "6c1ef04486bccd203c1d4e302cb6220094e09c31a910b117e6bfc05e59b5a92d",
+        "value_i16": 42,
+        "issued_at_ms": 1792639063483,
+        "expires_at_ms": 1792639123483,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792639063454-69485-167",
+        "request_id": "1792639063497-69485-169",
+        "last_error_key": "forced_driver_stop:driver_deadline",
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:17:43.492Z",
+        "updated_at": "2026-10-22T03:17:48.125Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "lost-1",
+        "run_id": "1792639063454-69485-167",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "6c1ef04486bccd203c1d4e302cb6220094e09c31a910b117e6bfc05e59b5a92d",
+        "created_at": "2026-10-22T03:17:43.493Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "lost-1",
+        "run_id": "1792639063454-69485-167",
+        "request_id": "1792639063497-69485-169",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:17:43.498Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "lost-1",
+        "run_id": "1792639063454-69485-167",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "forced_driver_stop:driver_deadline",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:17:48.126Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-lost-ack-1792639278659-75156-165/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639278665-75156-166",
+        "created_at": "2026-10-22T03:21:18.665Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "lost-1",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "63d00f839a9d0a867d3cb1a57c5adc90adaec2ab8a03b4f8d4e6ab428d8fe5f8",
+        "value_i16": 42,
+        "issued_at_ms": 1792639278695,
+        "expires_at_ms": 1792639338695,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792639278666-75156-167",
+        "request_id": "1792639278712-75156-169",
+        "last_error_key": "forced_driver_stop:driver_deadline",
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:21:18.706Z",
+        "updated_at": "2026-10-22T03:21:23.340Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "lost-1",
+        "run_id": "1792639278666-75156-167",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "63d00f839a9d0a867d3cb1a57c5adc90adaec2ab8a03b4f8d4e6ab428d8fe5f8",
+        "created_at": "2026-10-22T03:21:18.706Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "lost-1",
+        "run_id": "1792639278666-75156-167",
+        "request_id": "1792639278712-75156-169",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:21:18.712Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "lost-1",
+        "run_id": "1792639278666-75156-167",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "forced_driver_stop:driver_deadline",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:21:23.341Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-parent-death-1792639088217-69733-2/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639088220-69733-3",
+        "created_at": "2026-10-22T03:18:08.220Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "parent-lost",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "6f5ad2d379874183f5baea06ea9e2b9dac52282f0f4e104f117b3c043c9dd3f4",
+        "value_i16": 42,
+        "issued_at_ms": 1792639088221,
+        "expires_at_ms": 1792639148221,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792639088227-69786-0",
+        "request_id": "1792639088254-69786-2",
+        "last_error_key": "recovered_in_flight",
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:18:08.244Z",
+        "updated_at": "2026-10-22T03:18:08.410Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "parent-lost",
+        "run_id": "1792639088227-69786-0",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "6f5ad2d379874183f5baea06ea9e2b9dac52282f0f4e104f117b3c043c9dd3f4",
+        "created_at": "2026-10-22T03:18:08.246Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "parent-lost",
+        "run_id": "1792639088227-69786-0",
+        "request_id": "1792639088254-69786-2",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:08.262Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "parent-lost",
+        "run_id": "1792639088408-69788-0",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "recovered_in_flight",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:08.410Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-parent-death-1792639303456-75402-2/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639303462-75402-3",
+        "created_at": "2026-10-22T03:21:43.463Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "parent-lost",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "014ddca07d6f587cfb306fca25ad23b680b7b04595131c9178e3d57e5135d06b",
+        "value_i16": 42,
+        "issued_at_ms": 1792639303463,
+        "expires_at_ms": 1792639363463,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792639303476-75453-0",
+        "request_id": "1792639303505-75453-2",
+        "last_error_key": "recovered_in_flight",
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:21:43.490Z",
+        "updated_at": "2026-10-22T03:21:43.647Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "parent-lost",
+        "run_id": "1792639303476-75453-0",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "014ddca07d6f587cfb306fca25ad23b680b7b04595131c9178e3d57e5135d06b",
+        "created_at": "2026-10-22T03:21:43.490Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "parent-lost",
+        "run_id": "1792639303476-75453-0",
+        "request_id": "1792639303505-75453-2",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:21:43.513Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "parent-lost",
+        "run_id": "1792639303645-75455-0",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "recovered_in_flight",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:21:43.647Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-queued-stop-1792639079704-69485-214/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639079711-69485-215",
+        "created_at": "2026-10-22T03:17:59.711Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "queued-0",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "af629961eeb2be134c1c87a4d2038818ae6be0fca18cfff16ffd984b7bce06ec",
+        "value_i16": 42,
+        "issued_at_ms": 1792639079753,
+        "expires_at_ms": 1792639139753,
+        "state": "in_flight",
+        "dispatch_count": 1,
+        "run_id": "1792639079712-69485-216",
+        "request_id": "1792639079759-69485-218",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:17:59.753Z",
+        "updated_at": "2026-10-22T03:17:59.759Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "queued-1",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "3dba5711ac2966c8a96e0fde8d24790e210db49e069c40d234da57286c00b662",
+        "value_i16": 42,
+        "issued_at_ms": 1792639079812,
+        "expires_at_ms": 1792639139812,
+        "state": "in_flight",
+        "dispatch_count": 1,
+        "run_id": "1792639079712-69485-216",
+        "request_id": "1792639079820-69485-219",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:17:59.814Z",
+        "updated_at": "2026-10-22T03:17:59.820Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "queued-0",
+        "run_id": "1792639079712-69485-216",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "af629961eeb2be134c1c87a4d2038818ae6be0fca18cfff16ffd984b7bce06ec",
+        "created_at": "2026-10-22T03:17:59.754Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "queued-0",
+        "run_id": "1792639079712-69485-216",
+        "request_id": "1792639079759-69485-218",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:17:59.760Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "queued-1",
+        "run_id": "1792639079712-69485-216",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "3dba5711ac2966c8a96e0fde8d24790e210db49e069c40d234da57286c00b662",
+        "created_at": "2026-10-22T03:17:59.814Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "queued-1",
+        "run_id": "1792639079712-69485-216",
+        "request_id": "1792639079820-69485-219",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:17:59.821Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-queued-stop-1792639294912-75156-214/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639294921-75156-215",
+        "created_at": "2026-10-22T03:21:34.921Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "queued-0",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "6c51b1abf9ddd0e026857c5599b04d777fb4f25fb0a2e689c5c56ddbc91e5a58",
+        "value_i16": 42,
+        "issued_at_ms": 1792639294963,
+        "expires_at_ms": 1792639354963,
+        "state": "in_flight",
+        "dispatch_count": 1,
+        "run_id": "1792639294922-75156-216",
+        "request_id": "1792639294969-75156-218",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:21:34.964Z",
+        "updated_at": "2026-10-22T03:21:34.970Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "queued-1",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "b00a511e87345a04120fe5bd362dd2348e284951ff9cc7a94840713dfb0426b8",
+        "value_i16": 42,
+        "issued_at_ms": 1792639295022,
+        "expires_at_ms": 1792639355022,
+        "state": "in_flight",
+        "dispatch_count": 1,
+        "run_id": "1792639294922-75156-216",
+        "request_id": "1792639295029-75156-219",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:21:35.023Z",
+        "updated_at": "2026-10-22T03:21:35.030Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "queued-0",
+        "run_id": "1792639294922-75156-216",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "6c51b1abf9ddd0e026857c5599b04d777fb4f25fb0a2e689c5c56ddbc91e5a58",
+        "created_at": "2026-10-22T03:21:34.964Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "queued-0",
+        "run_id": "1792639294922-75156-216",
+        "request_id": "1792639294969-75156-218",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:21:34.970Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "queued-1",
+        "run_id": "1792639294922-75156-216",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "b00a511e87345a04120fe5bd362dd2348e284951ff9cc7a94840713dfb0426b8",
+        "created_at": "2026-10-22T03:21:35.024Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "queued-1",
+        "run_id": "1792639294922-75156-216",
+        "request_id": "1792639295029-75156-219",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:21:35.030Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-clock-state-1792638672175-62606-16/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638672183-62606-17",
+        "created_at": "2026-10-22T03:11:12.183Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "a92c9e65b093fa3ddfa983c0fbe4be2149240acaac693587f8ecfdb2d5392140",
+        "value_i16": 42,
+        "issued_at_ms": 1792638667228,
+        "expires_at_ms": 1792638727228,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792638672184-62606-18",
+        "request_id": "1792638672233-62606-21",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:11:12.228Z",
+        "updated_at": "2026-10-22T03:11:13.444Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638672184-62606-18",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "a92c9e65b093fa3ddfa983c0fbe4be2149240acaac693587f8ecfdb2d5392140",
+        "created_at": "2026-10-22T03:11:12.228Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638672184-62606-18",
+        "request_id": "1792638672233-62606-21",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:11:12.234Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638672184-62606-18",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:11:13.445Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-clock-state-1792638673686-62606-24/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638673691-62606-25",
+        "created_at": "2026-10-22T03:11:13.691Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "9a0eec5196fd04030ac62382430dd46b92a2668de6e12b951824d29d9a6b7309",
+        "value_i16": 42,
+        "issued_at_ms": 1792638668728,
+        "expires_at_ms": 1792638728728,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792638673692-62606-26",
+        "request_id": "1792638673738-62606-28",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:11:13.733Z",
+        "updated_at": "2026-10-22T03:11:13.784Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638673692-62606-26",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "9a0eec5196fd04030ac62382430dd46b92a2668de6e12b951824d29d9a6b7309",
+        "created_at": "2026-10-22T03:11:13.733Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638673692-62606-26",
+        "request_id": "1792638673738-62606-28",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:11:13.738Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638673692-62606-26",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:11:13.785Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-clock-state-1792638827699-65151-16/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638827706-65151-17",
+        "created_at": "2026-10-22T03:13:47.706Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "87bdd4f392f45edd418458d7465452104c35bb321914b6f96b0f3fc41bc0a284",
+        "value_i16": 42,
+        "issued_at_ms": 1792638822752,
+        "expires_at_ms": 1792638882752,
+        "state": "canceled",
+        "dispatch_count": 1,
+        "run_id": "1792638827706-65151-18",
+        "request_id": "1792638827757-65151-21",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:13:47.752Z",
+        "updated_at": "2026-10-22T03:13:48.350Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638827706-65151-18",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "87bdd4f392f45edd418458d7465452104c35bb321914b6f96b0f3fc41bc0a284",
+        "created_at": "2026-10-22T03:13:47.752Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638827706-65151-18",
+        "request_id": "1792638827757-65151-21",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:13:47.757Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638827706-65151-18",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:13:48.350Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-clock-state-1792638828595-65151-24/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638828603-65151-25",
+        "created_at": "2026-10-22T03:13:48.603Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "e20930c3d5fb870e93b28f8105a3ef583ea29ca25dbc7ed1e620bf6a405df84d",
+        "value_i16": 42,
+        "issued_at_ms": 1792638823632,
+        "expires_at_ms": 1792638883632,
+        "state": "canceled",
+        "dispatch_count": 1,
+        "run_id": "1792638828603-65151-26",
+        "request_id": "1792638828640-65151-28",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:13:48.635Z",
+        "updated_at": "2026-10-22T03:13:48.681Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638828603-65151-26",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "e20930c3d5fb870e93b28f8105a3ef583ea29ca25dbc7ed1e620bf6a405df84d",
+        "created_at": "2026-10-22T03:13:48.636Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638828603-65151-26",
+        "request_id": "1792638828640-65151-28",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:13:48.640Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638828603-65151-26",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:13:48.681Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-clock-state-1792638916770-65902-17/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638916771-65902-18",
+        "created_at": "2026-10-22T03:15:16.771Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "c4d14dc6c35a9ab4607394da2e330cc515256996d8a06cc4bcf4422dc3135576",
+        "value_i16": 42,
+        "issued_at_ms": 1792638911811,
+        "expires_at_ms": 1792638971811,
+        "state": "canceled",
+        "dispatch_count": 1,
+        "run_id": "1792638916772-65902-19",
+        "request_id": "1792638916816-65902-22",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:15:16.811Z",
+        "updated_at": "2026-10-22T03:15:17.414Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "9da6433d7ef1d6ce1f726e2f44da527761fc49df10fce4a75393f9f920ff6f6b",
+        "value_i16": 42,
+        "issued_at_ms": 1792638917425,
+        "expires_at_ms": 1792638977425,
+        "state": "canceled",
+        "dispatch_count": 0,
+        "run_id": "1792638916772-65902-19",
+        "request_id": null,
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:15:17.426Z",
+        "updated_at": "2026-10-22T03:15:17.433Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638916772-65902-19",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "c4d14dc6c35a9ab4607394da2e330cc515256996d8a06cc4bcf4422dc3135576",
+        "created_at": "2026-10-22T03:15:16.811Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638916772-65902-19",
+        "request_id": "1792638916816-65902-22",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:15:16.817Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638916772-65902-19",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:15:17.415Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792638916772-65902-19",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "9da6433d7ef1d6ce1f726e2f44da527761fc49df10fce4a75393f9f920ff6f6b",
+        "created_at": "2026-10-22T03:15:17.427Z"
+      },
+      {
+        "seq": 5,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792638916772-65902-19",
+        "request_id": null,
+        "from_state": "pending",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:15:17.433Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-clock-state-1792638917647-65902-25/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638917654-65902-26",
+        "created_at": "2026-10-22T03:15:17.654Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "53d771ec286fa43c22cb1b61300b082c13b601492a7fb5bc9308e32d083198a0",
+        "value_i16": 42,
+        "issued_at_ms": 1792638912687,
+        "expires_at_ms": 1792638972687,
+        "state": "canceled",
+        "dispatch_count": 1,
+        "run_id": "1792638917655-65902-27",
+        "request_id": "1792638917695-65902-29",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:15:17.690Z",
+        "updated_at": "2026-10-22T03:15:17.741Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "f8253a1fc4f5d9e1deb848a9f19331f19bdbfd9a5140c73cb04e62648d1274a2",
+        "value_i16": 42,
+        "issued_at_ms": 1792638917750,
+        "expires_at_ms": 1792638977750,
+        "state": "canceled",
+        "dispatch_count": 0,
+        "run_id": "1792638917655-65902-27",
+        "request_id": null,
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:15:17.751Z",
+        "updated_at": "2026-10-22T03:15:17.761Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638917655-65902-27",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "53d771ec286fa43c22cb1b61300b082c13b601492a7fb5bc9308e32d083198a0",
+        "created_at": "2026-10-22T03:15:17.691Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638917655-65902-27",
+        "request_id": "1792638917695-65902-29",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:15:17.696Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638917655-65902-27",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:15:17.742Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792638917655-65902-27",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "f8253a1fc4f5d9e1deb848a9f19331f19bdbfd9a5140c73cb04e62648d1274a2",
+        "created_at": "2026-10-22T03:15:17.751Z"
+      },
+      {
+        "seq": 5,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792638917655-65902-27",
+        "request_id": null,
+        "from_state": "pending",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:15:17.761Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-clock-state-1792638967638-66328-23/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638967644-66328-24",
+        "created_at": "2026-10-22T03:16:07.644Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "ee01428dd639ae9ec66b4a2acf795ea50dcb76a1fa572d20f8357776be646ecd",
+        "value_i16": 42,
+        "issued_at_ms": 1792638962686,
+        "expires_at_ms": 1792639022686,
+        "state": "canceled",
+        "dispatch_count": 1,
+        "run_id": "1792638967645-66328-25",
+        "request_id": "1792638967692-66328-28",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:16:07.686Z",
+        "updated_at": "2026-10-22T03:16:08.277Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "264f594cfb9bab639ed0522aef617c47b8bf36cdf9f35bc14119814ef5b2d004",
+        "value_i16": 42,
+        "issued_at_ms": 1792638968284,
+        "expires_at_ms": 1792639028284,
+        "state": "canceled",
+        "dispatch_count": 0,
+        "run_id": "1792638967645-66328-25",
+        "request_id": null,
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:16:08.284Z",
+        "updated_at": "2026-10-22T03:16:08.289Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638967645-66328-25",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "ee01428dd639ae9ec66b4a2acf795ea50dcb76a1fa572d20f8357776be646ecd",
+        "created_at": "2026-10-22T03:16:07.686Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638967645-66328-25",
+        "request_id": "1792638967692-66328-28",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:16:07.692Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638967645-66328-25",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:16:08.277Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792638967645-66328-25",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "264f594cfb9bab639ed0522aef617c47b8bf36cdf9f35bc14119814ef5b2d004",
+        "created_at": "2026-10-22T03:16:08.284Z"
+      },
+      {
+        "seq": 5,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792638967645-66328-25",
+        "request_id": null,
+        "from_state": "pending",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:16:08.290Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-clock-state-1792638968516-66328-31/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638968518-66328-32",
+        "created_at": "2026-10-22T03:16:08.518Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "7df7b7ae7eb7cfffbc60c37ef7640813f1828bd29ce12be05ba4af83c0dd2f52",
+        "value_i16": 42,
+        "issued_at_ms": 1792638963548,
+        "expires_at_ms": 1792639023548,
+        "state": "canceled",
+        "dispatch_count": 1,
+        "run_id": "1792638968519-66328-33",
+        "request_id": "1792638968556-66328-35",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:16:08.551Z",
+        "updated_at": "2026-10-22T03:16:08.596Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "35895028386ad5f16fb27455640c8966e3a2943f2cec6020568325d2ba95a5a1",
+        "value_i16": 42,
+        "issued_at_ms": 1792638968604,
+        "expires_at_ms": 1792639028604,
+        "state": "canceled",
+        "dispatch_count": 0,
+        "run_id": "1792638968519-66328-33",
+        "request_id": null,
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:16:08.604Z",
+        "updated_at": "2026-10-22T03:16:08.609Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638968519-66328-33",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "7df7b7ae7eb7cfffbc60c37ef7640813f1828bd29ce12be05ba4af83c0dd2f52",
+        "created_at": "2026-10-22T03:16:08.551Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638968519-66328-33",
+        "request_id": "1792638968556-66328-35",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:16:08.557Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792638968519-66328-33",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:16:08.596Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792638968519-66328-33",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "35895028386ad5f16fb27455640c8966e3a2943f2cec6020568325d2ba95a5a1",
+        "created_at": "2026-10-22T03:16:08.604Z"
+      },
+      {
+        "seq": 5,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792638968519-66328-33",
+        "request_id": null,
+        "from_state": "pending",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:16:08.610Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-clock-state-1792639107796-69916-23/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639107802-69916-24",
+        "created_at": "2026-10-22T03:18:27.802Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "a4d0fbbc75569f07d6e564bb9e0c684f216107c4b038caa270f4379e3bfdb951",
+        "value_i16": 42,
+        "issued_at_ms": 1792639102845,
+        "expires_at_ms": 1792639162845,
+        "state": "canceled",
+        "dispatch_count": 1,
+        "run_id": "1792639107802-69916-25",
+        "request_id": "1792639107851-69916-28",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:18:27.846Z",
+        "updated_at": "2026-10-22T03:18:28.444Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "9fa8c4bf12773f17b21c85d0791d5df486c7752d26e02692d39abcad7508f9fc",
+        "value_i16": 42,
+        "issued_at_ms": 1792639108455,
+        "expires_at_ms": 1792639168455,
+        "state": "canceled",
+        "dispatch_count": 0,
+        "run_id": "1792639107802-69916-25",
+        "request_id": null,
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:18:28.456Z",
+        "updated_at": "2026-10-22T03:18:28.464Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639107802-69916-25",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "a4d0fbbc75569f07d6e564bb9e0c684f216107c4b038caa270f4379e3bfdb951",
+        "created_at": "2026-10-22T03:18:27.846Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639107802-69916-25",
+        "request_id": "1792639107851-69916-28",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:27.852Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639107802-69916-25",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:28.444Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792639107802-69916-25",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "9fa8c4bf12773f17b21c85d0791d5df486c7752d26e02692d39abcad7508f9fc",
+        "created_at": "2026-10-22T03:18:28.457Z"
+      },
+      {
+        "seq": 5,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792639107802-69916-25",
+        "request_id": null,
+        "from_state": "pending",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:28.464Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-clock-state-1792639108682-69916-31/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639108687-69916-32",
+        "created_at": "2026-10-22T03:18:28.687Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "103f49cad555d58e924b7f9c8d9f950881358c00e338375eb912caa13dec1d0c",
+        "value_i16": 42,
+        "issued_at_ms": 1792639103715,
+        "expires_at_ms": 1792639163715,
+        "state": "canceled",
+        "dispatch_count": 1,
+        "run_id": "1792639108688-69916-33",
+        "request_id": "1792639108726-69916-35",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:18:28.721Z",
+        "updated_at": "2026-10-22T03:18:28.773Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "674550f5580728dd7e341dbd39399e6a61ea6d278ece4d1aca5706879b1ef898",
+        "value_i16": 42,
+        "issued_at_ms": 1792639108781,
+        "expires_at_ms": 1792639168781,
+        "state": "canceled",
+        "dispatch_count": 0,
+        "run_id": "1792639108688-69916-33",
+        "request_id": null,
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:18:28.781Z",
+        "updated_at": "2026-10-22T03:18:28.786Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639108688-69916-33",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "103f49cad555d58e924b7f9c8d9f950881358c00e338375eb912caa13dec1d0c",
+        "created_at": "2026-10-22T03:18:28.722Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639108688-69916-33",
+        "request_id": "1792639108726-69916-35",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:28.727Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639108688-69916-33",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:28.773Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792639108688-69916-33",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "674550f5580728dd7e341dbd39399e6a61ea6d278ece4d1aca5706879b1ef898",
+        "created_at": "2026-10-22T03:18:28.781Z"
+      },
+      {
+        "seq": 5,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792639108688-69916-33",
+        "request_id": null,
+        "from_state": "pending",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:28.787Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-clock-state-1792639191911-71724-23/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639191917-71724-24",
+        "created_at": "2026-10-22T03:19:51.917Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "a47ab1fe8e5059a2f4618989a8d70be7135308cdf6d006724c91d88377ddb0ce",
+        "value_i16": 42,
+        "issued_at_ms": 1792639186960,
+        "expires_at_ms": 1792639246960,
+        "state": "canceled",
+        "dispatch_count": 1,
+        "run_id": "1792639191918-71724-25",
+        "request_id": "1792639191965-71724-28",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:19:51.960Z",
+        "updated_at": "2026-10-22T03:19:52.556Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "381438f5fb2c8a6b38b5f678656e39d08dd6b7d8dbf2be1300ef2f0bd0648a55",
+        "value_i16": 42,
+        "issued_at_ms": 1792639192565,
+        "expires_at_ms": 1792639252565,
+        "state": "canceled",
+        "dispatch_count": 0,
+        "run_id": "1792639191918-71724-25",
+        "request_id": null,
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:19:52.566Z",
+        "updated_at": "2026-10-22T03:19:52.573Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639191918-71724-25",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "a47ab1fe8e5059a2f4618989a8d70be7135308cdf6d006724c91d88377ddb0ce",
+        "created_at": "2026-10-22T03:19:51.961Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639191918-71724-25",
+        "request_id": "1792639191965-71724-28",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:19:51.966Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639191918-71724-25",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:19:52.557Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792639191918-71724-25",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "381438f5fb2c8a6b38b5f678656e39d08dd6b7d8dbf2be1300ef2f0bd0648a55",
+        "created_at": "2026-10-22T03:19:52.566Z"
+      },
+      {
+        "seq": 5,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792639191918-71724-25",
+        "request_id": null,
+        "from_state": "pending",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:19:52.573Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-clock-state-1792639192786-71724-31/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639192792-71724-32",
+        "created_at": "2026-10-22T03:19:52.792Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "bdfe62315085076815426380b250326018427f8995e16090799523b8a854fe1f",
+        "value_i16": 42,
+        "issued_at_ms": 1792639187819,
+        "expires_at_ms": 1792639247819,
+        "state": "canceled",
+        "dispatch_count": 1,
+        "run_id": "1792639192792-71724-33",
+        "request_id": "1792639192832-71724-35",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:19:52.827Z",
+        "updated_at": "2026-10-22T03:19:52.881Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "8f1e4c140fee39afb689d3585a31a6be93bf8ad8f551a004fa4988eaefb849b2",
+        "value_i16": 42,
+        "issued_at_ms": 1792639192888,
+        "expires_at_ms": 1792639252888,
+        "state": "canceled",
+        "dispatch_count": 0,
+        "run_id": "1792639192792-71724-33",
+        "request_id": null,
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:19:52.888Z",
+        "updated_at": "2026-10-22T03:19:52.893Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639192792-71724-33",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "bdfe62315085076815426380b250326018427f8995e16090799523b8a854fe1f",
+        "created_at": "2026-10-22T03:19:52.827Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639192792-71724-33",
+        "request_id": "1792639192832-71724-35",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:19:52.832Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639192792-71724-33",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:19:52.882Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792639192792-71724-33",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "8f1e4c140fee39afb689d3585a31a6be93bf8ad8f551a004fa4988eaefb849b2",
+        "created_at": "2026-10-22T03:19:52.889Z"
+      },
+      {
+        "seq": 5,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792639192792-71724-33",
+        "request_id": null,
+        "from_state": "pending",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:19:52.893Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-clock-state-1792639323137-75592-23/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639323143-75592-24",
+        "created_at": "2026-10-22T03:22:03.143Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "d07acf4eeee4289e3402d951592a9f2c57f8f94845f23e041ebbb8e485d29395",
+        "value_i16": 42,
+        "issued_at_ms": 1792639318185,
+        "expires_at_ms": 1792639378185,
+        "state": "canceled",
+        "dispatch_count": 1,
+        "run_id": "1792639323144-75592-25",
+        "request_id": "1792639323191-75592-28",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:22:03.186Z",
+        "updated_at": "2026-10-22T03:22:03.785Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "993ef55d284323f41ffe37e45ee2403a5ed9085bbc5f77fb01bc7b3850bdb0bc",
+        "value_i16": 42,
+        "issued_at_ms": 1792639323795,
+        "expires_at_ms": 1792639383795,
+        "state": "canceled",
+        "dispatch_count": 0,
+        "run_id": "1792639323144-75592-25",
+        "request_id": null,
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:22:03.796Z",
+        "updated_at": "2026-10-22T03:22:03.803Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639323144-75592-25",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "d07acf4eeee4289e3402d951592a9f2c57f8f94845f23e041ebbb8e485d29395",
+        "created_at": "2026-10-22T03:22:03.186Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639323144-75592-25",
+        "request_id": "1792639323191-75592-28",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:22:03.192Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639323144-75592-25",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:22:03.785Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792639323144-75592-25",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "993ef55d284323f41ffe37e45ee2403a5ed9085bbc5f77fb01bc7b3850bdb0bc",
+        "created_at": "2026-10-22T03:22:03.797Z"
+      },
+      {
+        "seq": 5,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792639323144-75592-25",
+        "request_id": null,
+        "from_state": "pending",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:22:03.804Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-clock-state-1792639324032-75592-31/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639324038-75592-32",
+        "created_at": "2026-10-22T03:22:04.038Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "3dd2d29a2fbf160da9fee0dc8c68b7d3404dd2a8137b9eba7e2e0c7a4f950c84",
+        "value_i16": 42,
+        "issued_at_ms": 1792639319079,
+        "expires_at_ms": 1792639379079,
+        "state": "canceled",
+        "dispatch_count": 1,
+        "run_id": "1792639324039-75592-33",
+        "request_id": "1792639324084-75592-35",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:22:04.079Z",
+        "updated_at": "2026-10-22T03:22:04.130Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "d2a8f69f002baf75306f195c4cf1be042026ebb6f5192fc73139a4ee7de10e35",
+        "value_i16": 42,
+        "issued_at_ms": 1792639324138,
+        "expires_at_ms": 1792639384138,
+        "state": "canceled",
+        "dispatch_count": 0,
+        "run_id": "1792639324039-75592-33",
+        "request_id": null,
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:22:04.138Z",
+        "updated_at": "2026-10-22T03:22:04.142Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639324039-75592-33",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "3dd2d29a2fbf160da9fee0dc8c68b7d3404dd2a8137b9eba7e2e0c7a4f950c84",
+        "created_at": "2026-10-22T03:22:04.080Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639324039-75592-33",
+        "request_id": "1792639324084-75592-35",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:22:04.085Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "clock-aged",
+        "run_id": "1792639324039-75592-33",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:22:04.130Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792639324039-75592-33",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "d2a8f69f002baf75306f195c4cf1be042026ebb6f5192fc73139a4ee7de10e35",
+        "created_at": "2026-10-22T03:22:04.138Z"
+      },
+      {
+        "seq": 5,
+        "source_id": "demo01-feed",
+        "command_id": "fresh-after-clock-invalid",
+        "run_id": "1792639324039-75592-33",
+        "request_id": null,
+        "from_state": "pending",
+        "to_state": "canceled",
+        "reason_key": "clock_invalid",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:22:04.143Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-fifo-state-1792638669383-62606-1/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638669390-62606-2",
+        "created_at": "2026-10-22T03:11:09.390Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "19d74418ed81209d1cfe10c10150ba9a3e8974f8ae7c8452a98155f4fc3f037b",
+        "value_i16": 42,
+        "issued_at_ms": 1792638670342,
+        "expires_at_ms": 1792638730342,
+        "state": "canceled",
+        "dispatch_count": 1,
+        "run_id": "1792638669390-62606-3",
+        "request_id": "1792638670351-62606-8",
+        "last_error_key": null,
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:11:10.343Z",
+        "updated_at": "2026-10-22T03:11:10.936Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792638669390-62606-3",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "19d74418ed81209d1cfe10c10150ba9a3e8974f8ae7c8452a98155f4fc3f037b",
+        "created_at": "2026-10-22T03:11:10.344Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792638669390-62606-3",
+        "request_id": "1792638670351-62606-8",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:11:10.352Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792638669390-62606-3",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "canceled",
+        "reason_key": "canceled",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:11:10.937Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-fifo-state-1792638823656-65151-1/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638823664-65151-2",
+        "created_at": "2026-10-22T03:13:43.664Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "4a9b3ebea9701704e820f7e590a3f233eef81d7e6d8369a18e242a809c85da3f",
+        "value_i16": 42,
+        "issued_at_ms": 1792638825252,
+        "expires_at_ms": 1792638885252,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792638823665-65151-3",
+        "request_id": "1792638825262-65151-8",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:13:45.253Z",
+        "updated_at": "2026-10-22T03:13:46.450Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792638823665-65151-3",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "4a9b3ebea9701704e820f7e590a3f233eef81d7e6d8369a18e242a809c85da3f",
+        "created_at": "2026-10-22T03:13:45.254Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792638823665-65151-3",
+        "request_id": "1792638825262-65151-8",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:13:45.264Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792638823665-65151-3",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:13:46.451Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-fifo-state-1792638912065-65902-1/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638912075-65902-2",
+        "created_at": "2026-10-22T03:15:12.075Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "35a04cc41ea5bce332d0fc8732d2fa72cba590cc0af9bd0483d1eeaa0c951a5b",
+        "value_i16": 42,
+        "issued_at_ms": 1792638913592,
+        "expires_at_ms": 1792638973592,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792638912076-65902-3",
+        "request_id": "1792638913599-65902-8",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:15:13.593Z",
+        "updated_at": "2026-10-22T03:15:14.789Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792638912076-65902-3",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "35a04cc41ea5bce332d0fc8732d2fa72cba590cc0af9bd0483d1eeaa0c951a5b",
+        "created_at": "2026-10-22T03:15:13.593Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792638912076-65902-3",
+        "request_id": "1792638913599-65902-8",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:15:13.599Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792638912076-65902-3",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:15:14.789Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-fifo-state-1792638962764-66328-1/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638962768-66328-2",
+        "created_at": "2026-10-22T03:16:02.768Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "8a1b60c4bdcce941d55c753a96ec23e4b5682d271b565c52d05e73b848762a27",
+        "value_i16": 42,
+        "issued_at_ms": 1792638964285,
+        "expires_at_ms": 1792639024285,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792638962768-66328-3",
+        "request_id": "1792638964294-66328-8",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:16:04.286Z",
+        "updated_at": "2026-10-22T03:16:05.479Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792638962768-66328-3",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "8a1b60c4bdcce941d55c753a96ec23e4b5682d271b565c52d05e73b848762a27",
+        "created_at": "2026-10-22T03:16:04.286Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792638962768-66328-3",
+        "request_id": "1792638964294-66328-8",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:16:04.295Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792638962768-66328-3",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:16:05.480Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-fifo-state-1792639103156-69916-1/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639103161-69916-2",
+        "created_at": "2026-10-22T03:18:23.161Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "33b9492cb008374f63d59ef292a8f6c89824d1a6e51be265c00bdc3b9c419998",
+        "value_i16": 42,
+        "issued_at_ms": 1792639104426,
+        "expires_at_ms": 1792639164426,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792639103162-69916-3",
+        "request_id": "1792639104435-69916-8",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:18:24.427Z",
+        "updated_at": "2026-10-22T03:18:25.623Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792639103162-69916-3",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "33b9492cb008374f63d59ef292a8f6c89824d1a6e51be265c00bdc3b9c419998",
+        "created_at": "2026-10-22T03:18:24.428Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792639103162-69916-3",
+        "request_id": "1792639104435-69916-8",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:24.436Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792639103162-69916-3",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:25.624Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-fifo-state-1792639186943-71724-1/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639186952-71724-2",
+        "created_at": "2026-10-22T03:19:46.952Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "9f1667d9cc2bffd97f2aa42299bd7d9091732e952d258e0f905a7e858c27e696",
+        "value_i16": 42,
+        "issued_at_ms": 1792639188564,
+        "expires_at_ms": 1792639248564,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792639186952-71724-3",
+        "request_id": "1792639188571-71724-8",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:19:48.565Z",
+        "updated_at": "2026-10-22T03:19:49.764Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792639186952-71724-3",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "9f1667d9cc2bffd97f2aa42299bd7d9091732e952d258e0f905a7e858c27e696",
+        "created_at": "2026-10-22T03:19:48.565Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792639186952-71724-3",
+        "request_id": "1792639188571-71724-8",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:19:48.572Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792639186952-71724-3",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:19:49.765Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-fifo-state-1792639318512-75592-1/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639318517-75592-2",
+        "created_at": "2026-10-22T03:21:58.517Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "10f02fc1fc09e564d1e41874b6e37a9b6a75cc70a32a52cc1e797dc9b75dd999",
+        "value_i16": 42,
+        "issued_at_ms": 1792639319776,
+        "expires_at_ms": 1792639379776,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792639318517-75592-3",
+        "request_id": "1792639319784-75592-8",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:21:59.778Z",
+        "updated_at": "2026-10-22T03:22:00.976Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792639318517-75592-3",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "10f02fc1fc09e564d1e41874b6e37a9b6a75cc70a32a52cc1e797dc9b75dd999",
+        "created_at": "2026-10-22T03:21:59.778Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792639318517-75592-3",
+        "request_id": "1792639319784-75592-8",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:21:59.785Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "fifo-write",
+        "run_id": "1792639318517-75592-3",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:22:00.976Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-minimum-io-1792638965587-66328-9/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638965594-66328-10",
+        "created_at": "2026-10-22T03:16:05.594Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "minimum-write",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "530e3ed0bed14bd382514765670a840d7a3b388ac40a448c79846a7a4a7252f9",
+        "value_i16": 42,
+        "issued_at_ms": 1792638965630,
+        "expires_at_ms": 1792639025630,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792638965594-66328-11",
+        "request_id": "1792638965638-66328-14",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:16:05.633Z",
+        "updated_at": "2026-10-22T03:16:05.648Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "minimum-write",
+        "run_id": "1792638965594-66328-11",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "530e3ed0bed14bd382514765670a840d7a3b388ac40a448c79846a7a4a7252f9",
+        "created_at": "2026-10-22T03:16:05.633Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "minimum-write",
+        "run_id": "1792638965594-66328-11",
+        "request_id": "1792638965638-66328-14",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:16:05.638Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "minimum-write",
+        "run_id": "1792638965594-66328-11",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:16:05.649Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-minimum-io-1792639105736-69916-9/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639105744-69916-10",
+        "created_at": "2026-10-22T03:18:25.744Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "minimum-write",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "fe88e5629e9848cc8966c5856e393f96295dad8803923069ffbc0f4b9980a8c0",
+        "value_i16": 42,
+        "issued_at_ms": 1792639105790,
+        "expires_at_ms": 1792639165790,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792639105745-69916-11",
+        "request_id": "1792639105796-69916-14",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:18:25.791Z",
+        "updated_at": "2026-10-22T03:18:25.808Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "minimum-write",
+        "run_id": "1792639105745-69916-11",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "fe88e5629e9848cc8966c5856e393f96295dad8803923069ffbc0f4b9980a8c0",
+        "created_at": "2026-10-22T03:18:25.791Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "minimum-write",
+        "run_id": "1792639105745-69916-11",
+        "request_id": "1792639105796-69916-14",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:25.797Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "minimum-write",
+        "run_id": "1792639105745-69916-11",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:25.808Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-minimum-io-1792639189865-71724-9/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639189872-71724-10",
+        "created_at": "2026-10-22T03:19:49.872Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "minimum-write",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "37a0f38ba18824061b00ec6ba08c05fa08e9ab19f85342303b9bca64f13c9b59",
+        "value_i16": 42,
+        "issued_at_ms": 1792639189912,
+        "expires_at_ms": 1792639249912,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792639189872-71724-11",
+        "request_id": "1792639189919-71724-14",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:19:49.913Z",
+        "updated_at": "2026-10-22T03:19:49.931Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "minimum-write",
+        "run_id": "1792639189872-71724-11",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "37a0f38ba18824061b00ec6ba08c05fa08e9ab19f85342303b9bca64f13c9b59",
+        "created_at": "2026-10-22T03:19:49.914Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "minimum-write",
+        "run_id": "1792639189872-71724-11",
+        "request_id": "1792639189919-71724-14",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:19:49.920Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "minimum-write",
+        "run_id": "1792639189872-71724-11",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:19:49.932Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-minimum-io-1792639321094-75592-9/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639321101-75592-10",
+        "created_at": "2026-10-22T03:22:01.101Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "minimum-write",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "5c6e48df9647ccf68af7e71671d8b6de4b2e317ae7e98bd13f90b9a4b74f0773",
+        "value_i16": 42,
+        "issued_at_ms": 1792639321145,
+        "expires_at_ms": 1792639381145,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792639321102-75592-11",
+        "request_id": "1792639321151-75592-14",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:22:01.146Z",
+        "updated_at": "2026-10-22T03:22:01.162Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "minimum-write",
+        "run_id": "1792639321102-75592-11",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "5c6e48df9647ccf68af7e71671d8b6de4b2e317ae7e98bd13f90b9a4b74f0773",
+        "created_at": "2026-10-22T03:22:01.146Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "minimum-write",
+        "run_id": "1792639321102-75592-11",
+        "request_id": "1792639321151-75592-14",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:22:01.152Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "minimum-write",
+        "run_id": "1792639321102-75592-11",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:22:01.162Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-started-state-1792638671186-62606-10/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638671192-62606-11",
+        "created_at": "2026-10-22T03:11:11.192Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "986ba5b3b610864cd91de94733b12239b743122c47509d3fcf3b6860cd6c2568",
+        "value_i16": 42,
+        "issued_at_ms": 1792638671235,
+        "expires_at_ms": 1792638731235,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792638671193-62606-12",
+        "request_id": "1792638671240-62606-14",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:11:11.235Z",
+        "updated_at": "2026-10-22T03:11:11.966Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792638671193-62606-12",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "986ba5b3b610864cd91de94733b12239b743122c47509d3fcf3b6860cd6c2568",
+        "created_at": "2026-10-22T03:11:11.236Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792638671193-62606-12",
+        "request_id": "1792638671240-62606-14",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:11:11.241Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792638671193-62606-12",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:11:11.967Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-started-state-1792638826698-65151-10/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638826704-65151-11",
+        "created_at": "2026-10-22T03:13:46.704Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "39d4cca556b96f2ef612918645ecd6a310d25a44ce58745168dbab57a57a7508",
+        "value_i16": 42,
+        "issued_at_ms": 1792638826745,
+        "expires_at_ms": 1792638886745,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792638826705-65151-12",
+        "request_id": "1792638826750-65151-14",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:13:46.745Z",
+        "updated_at": "2026-10-22T03:13:47.467Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792638826705-65151-12",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "39d4cca556b96f2ef612918645ecd6a310d25a44ce58745168dbab57a57a7508",
+        "created_at": "2026-10-22T03:13:46.746Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792638826705-65151-12",
+        "request_id": "1792638826750-65151-14",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:13:46.751Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792638826705-65151-12",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:13:47.468Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-started-state-1792638915031-65902-10/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638915036-65902-11",
+        "created_at": "2026-10-22T03:15:15.036Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "1cb461b081ce4cc5d84d7e7f27a37a3f3545e4e929073b86f879df1503d53f8f",
+        "value_i16": 42,
+        "issued_at_ms": 1792638915068,
+        "expires_at_ms": 1792638975068,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792638915037-65902-12",
+        "request_id": "1792638915080-65902-14",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:15:15.074Z",
+        "updated_at": "2026-10-22T03:15:15.789Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "5aba2959d85001e1ba35d185a958ee79e52dc94873d6aef1551a1782118bb9e4",
+        "value_i16": 42,
+        "issued_at_ms": 1792638915795,
+        "expires_at_ms": 1792638975795,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792638915037-65902-12",
+        "request_id": "1792638915801-65902-15",
+        "last_error_key": "forced_driver_stop:driver_deadline",
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:15:15.796Z",
+        "updated_at": "2026-10-22T03:15:16.623Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792638915037-65902-12",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "1cb461b081ce4cc5d84d7e7f27a37a3f3545e4e929073b86f879df1503d53f8f",
+        "created_at": "2026-10-22T03:15:15.074Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792638915037-65902-12",
+        "request_id": "1792638915080-65902-14",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:15:15.080Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792638915037-65902-12",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:15:15.790Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "run_id": "1792638915037-65902-12",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "5aba2959d85001e1ba35d185a958ee79e52dc94873d6aef1551a1782118bb9e4",
+        "created_at": "2026-10-22T03:15:15.796Z"
+      },
+      {
+        "seq": 5,
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "run_id": "1792638915037-65902-12",
+        "request_id": "1792638915801-65902-15",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:15:15.802Z"
+      },
+      {
+        "seq": 6,
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "run_id": "1792638915037-65902-12",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "forced_driver_stop:driver_deadline",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:15:16.623Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-started-state-1792638965871-66328-16/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792638965877-66328-17",
+        "created_at": "2026-10-22T03:16:05.877Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "ab3f564b7e8623fb0627a69057b628d1c53d031dfaedc851fddad31f68ec8450",
+        "value_i16": 42,
+        "issued_at_ms": 1792638965908,
+        "expires_at_ms": 1792639025908,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792638965877-66328-18",
+        "request_id": "1792638965920-66328-20",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:16:05.915Z",
+        "updated_at": "2026-10-22T03:16:06.644Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "853225eca757d89e95142ade4b680b2ee7c715ca9222a298234ebf5231fd1973",
+        "value_i16": 42,
+        "issued_at_ms": 1792638966652,
+        "expires_at_ms": 1792639026652,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792638965877-66328-18",
+        "request_id": "1792638966659-66328-21",
+        "last_error_key": "forced_driver_stop:driver_deadline",
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:16:06.653Z",
+        "updated_at": "2026-10-22T03:16:07.483Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792638965877-66328-18",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "ab3f564b7e8623fb0627a69057b628d1c53d031dfaedc851fddad31f68ec8450",
+        "created_at": "2026-10-22T03:16:05.915Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792638965877-66328-18",
+        "request_id": "1792638965920-66328-20",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:16:05.920Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792638965877-66328-18",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:16:06.645Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "run_id": "1792638965877-66328-18",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "853225eca757d89e95142ade4b680b2ee7c715ca9222a298234ebf5231fd1973",
+        "created_at": "2026-10-22T03:16:06.654Z"
+      },
+      {
+        "seq": 5,
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "run_id": "1792638965877-66328-18",
+        "request_id": "1792638966659-66328-21",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:16:06.660Z"
+      },
+      {
+        "seq": 6,
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "run_id": "1792638965877-66328-18",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "forced_driver_stop:driver_deadline",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:16:07.484Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-started-state-1792639106030-69916-16/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639106036-69916-17",
+        "created_at": "2026-10-22T03:18:26.036Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "633273725f34a88493bf7a0291020e274c5845bfebfa6d74d108ffe494d6c427",
+        "value_i16": 42,
+        "issued_at_ms": 1792639106078,
+        "expires_at_ms": 1792639166078,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792639106037-69916-18",
+        "request_id": "1792639106084-69916-20",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:18:26.079Z",
+        "updated_at": "2026-10-22T03:18:26.801Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "07f706307aa2878c7db8e8f02158d690e4cd41f14c831c9c0951ade0ccbd7aef",
+        "value_i16": 42,
+        "issued_at_ms": 1792639106809,
+        "expires_at_ms": 1792639166809,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792639106037-69916-18",
+        "request_id": "1792639106814-69916-21",
+        "last_error_key": "forced_driver_stop:driver_deadline",
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:18:26.810Z",
+        "updated_at": "2026-10-22T03:18:27.641Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792639106037-69916-18",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "633273725f34a88493bf7a0291020e274c5845bfebfa6d74d108ffe494d6c427",
+        "created_at": "2026-10-22T03:18:26.079Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792639106037-69916-18",
+        "request_id": "1792639106084-69916-20",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:26.084Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792639106037-69916-18",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:26.802Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "run_id": "1792639106037-69916-18",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "07f706307aa2878c7db8e8f02158d690e4cd41f14c831c9c0951ade0ccbd7aef",
+        "created_at": "2026-10-22T03:18:26.810Z"
+      },
+      {
+        "seq": 5,
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "run_id": "1792639106037-69916-18",
+        "request_id": "1792639106814-69916-21",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:26.815Z"
+      },
+      {
+        "seq": 6,
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "run_id": "1792639106037-69916-18",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "forced_driver_stop:driver_deadline",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:27.642Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-started-state-1792639190135-71724-16/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639190141-71724-17",
+        "created_at": "2026-10-22T03:19:50.142Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "77497dc47834bbe253824824f5e1f522329ff56a2cd61d974192c4cfaf014d98",
+        "value_i16": 42,
+        "issued_at_ms": 1792639190174,
+        "expires_at_ms": 1792639250174,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792639190142-71724-18",
+        "request_id": "1792639190187-71724-20",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:19:50.181Z",
+        "updated_at": "2026-10-22T03:19:50.912Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "d36c78ba7e4869fd01bf46c4ac525dbf3deeb7a74298e15523fb0f2620b8d434",
+        "value_i16": 42,
+        "issued_at_ms": 1792639190919,
+        "expires_at_ms": 1792639250919,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792639190142-71724-18",
+        "request_id": "1792639190926-71724-21",
+        "last_error_key": "forced_driver_stop:driver_deadline",
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:19:50.920Z",
+        "updated_at": "2026-10-22T03:19:51.755Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792639190142-71724-18",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "77497dc47834bbe253824824f5e1f522329ff56a2cd61d974192c4cfaf014d98",
+        "created_at": "2026-10-22T03:19:50.182Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792639190142-71724-18",
+        "request_id": "1792639190187-71724-20",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:19:50.187Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792639190142-71724-18",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:19:50.912Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "run_id": "1792639190142-71724-18",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "d36c78ba7e4869fd01bf46c4ac525dbf3deeb7a74298e15523fb0f2620b8d434",
+        "created_at": "2026-10-22T03:19:50.921Z"
+      },
+      {
+        "seq": 5,
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "run_id": "1792639190142-71724-18",
+        "request_id": "1792639190926-71724-21",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:19:50.927Z"
+      },
+      {
+        "seq": 6,
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "run_id": "1792639190142-71724-18",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "forced_driver_stop:driver_deadline",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:19:51.755Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-r4-rework-started-state-1792639321372-75592-16/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639321379-75592-17",
+        "created_at": "2026-10-22T03:22:01.379Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "c526f858356926ac71e3b4bb0eb3ce1e9f944c4dcd6d135e2702e4271bb03386",
+        "value_i16": 42,
+        "issued_at_ms": 1792639321411,
+        "expires_at_ms": 1792639381411,
+        "state": "confirmed",
+        "dispatch_count": 1,
+        "run_id": "1792639321380-75592-18",
+        "request_id": "1792639321421-75592-20",
+        "last_error_key": null,
+        "ack_kind": "s7_protocol",
+        "created_at": "2026-10-22T03:22:01.416Z",
+        "updated_at": "2026-10-22T03:22:02.135Z"
+      },
+      {
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "f71957b92d9f0e7a8b0d95845b50d524c85f4043a58b664ac198f9ead9e40497",
+        "value_i16": 42,
+        "issued_at_ms": 1792639322143,
+        "expires_at_ms": 1792639382143,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792639321380-75592-18",
+        "request_id": "1792639322151-75592-21",
+        "last_error_key": "forced_driver_stop:driver_deadline",
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:22:02.144Z",
+        "updated_at": "2026-10-22T03:22:02.978Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792639321380-75592-18",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "c526f858356926ac71e3b4bb0eb3ce1e9f944c4dcd6d135e2702e4271bb03386",
+        "created_at": "2026-10-22T03:22:01.417Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792639321380-75592-18",
+        "request_id": "1792639321421-75592-20",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:22:01.421Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "health-started",
+        "run_id": "1792639321380-75592-18",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "confirmed",
+        "reason_key": "s7_protocol",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:22:02.136Z"
+      },
+      {
+        "seq": 4,
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "run_id": "1792639321380-75592-18",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "f71957b92d9f0e7a8b0d95845b50d524c85f4043a58b664ac198f9ead9e40497",
+        "created_at": "2026-10-22T03:22:02.145Z"
+      },
+      {
+        "seq": 5,
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "run_id": "1792639321380-75592-18",
+        "request_id": "1792639322151-75592-21",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:22:02.152Z"
+      },
+      {
+        "seq": 6,
+        "source_id": "demo01-feed",
+        "command_id": "health-timeout",
+        "run_id": "1792639321380-75592-18",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "forced_driver_stop:driver_deadline",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:22:02.978Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-stale-reference-probe-1792639081472-69485-251/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639081479-69485-252",
+        "created_at": "2026-10-22T03:18:01.479Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "stale-write-001",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "b1def1ee1cc7c773f3dd5c01448e83f62152cb87691294b2326075d18cb6de77",
+        "value_i16": 42,
+        "issued_at_ms": 1792639081609,
+        "expires_at_ms": 1792639141609,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792639081479-69485-253",
+        "request_id": "1792639081888-69485-256",
+        "last_error_key": "s7_reference_mismatch",
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:18:01.615Z",
+        "updated_at": "2026-10-22T03:18:01.991Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "stale-write-001",
+        "run_id": "1792639081479-69485-253",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "b1def1ee1cc7c773f3dd5c01448e83f62152cb87691294b2326075d18cb6de77",
+        "created_at": "2026-10-22T03:18:01.616Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "stale-write-001",
+        "run_id": "1792639081479-69485-253",
+        "request_id": "1792639081888-69485-256",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:01.897Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "stale-write-001",
+        "run_id": "1792639081479-69485-253",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "s7_reference_mismatch",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:18:01.991Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-stale-reference-probe-1792639296674-75156-251/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792639296681-75156-252",
+        "created_at": "2026-10-22T03:21:36.681Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "stale-write-001",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "b602f384acc28f96cbf683e8028bf521f4245f1fc6f8ed9eea1db6af5e0f2560",
+        "value_i16": 42,
+        "issued_at_ms": 1792639296812,
+        "expires_at_ms": 1792639356812,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792639296681-75156-253",
+        "request_id": "1792639297094-75156-256",
+        "last_error_key": "s7_reference_mismatch",
+        "ack_kind": null,
+        "created_at": "2026-10-22T03:21:36.818Z",
+        "updated_at": "2026-10-22T03:21:37.196Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "stale-write-001",
+        "run_id": "1792639296681-75156-253",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "b602f384acc28f96cbf683e8028bf521f4245f1fc6f8ed9eea1db6af5e0f2560",
+        "created_at": "2026-10-22T03:21:36.819Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "stale-write-001",
+        "run_id": "1792639296681-75156-253",
+        "request_id": "1792639297094-75156-256",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:21:37.103Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "stale-write-001",
+        "run_id": "1792639296681-75156-253",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "s7_reference_mismatch",
+        "summary": "{}",
+        "created_at": "2026-10-22T03:21:37.196Z"
+      }
+    ]
+  }
+}

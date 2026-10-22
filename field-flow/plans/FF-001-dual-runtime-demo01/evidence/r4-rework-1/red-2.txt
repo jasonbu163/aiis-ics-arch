@@ -1,0 +1,217 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling libc v0.2.191
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.15
+   Compiling pkg-config v0.3.34
+   Compiling stable_deref_trait v1.2.1
+   Compiling once_cell v1.21.4
+   Compiling version_check v0.9.5
+   Compiling fs_extra v1.3.0
+   Compiling dunce v1.0.5
+   Compiling bytes v1.12.1
+   Compiling itoa v1.0.18
+   Compiling pin-project-lite v0.2.17
+   Compiling smallvec v1.16.3
+   Compiling futures-core v0.3.34
+   Compiling litemap v0.8.3
+   Compiling writeable v0.6.4
+   Compiling aws-lc-rs v1.18.2
+   Compiling serde_core v1.0.229
+   Compiling zeroize v1.9.1
+   Compiling core-foundation-sys v0.8.7
+   Compiling icu_properties_data v2.3.0
+   Compiling icu_normalizer_data v2.3.0
+   Compiling utf8_iter v1.0.4
+   Compiling tracing-core v0.1.36
+   Compiling cfg-if v1.0.5
+   Compiling http v1.5.0
+   Compiling memchr v2.8.3
+   Compiling rustls-pki-types v1.15.1
+   Compiling generic-array v0.14.7
+   Compiling zerocopy v0.8.63
+   Compiling slab v0.4.12
+   Compiling untrusted v0.9.0
+   Compiling http-body v1.1.0
+   Compiling percent-encoding v2.3.2
+   Compiling httparse v1.10.1
+   Compiling futures-task v0.3.34
+   Compiling rustls v0.23.46
+   Compiling serde v1.0.229
+   Compiling futures-util v0.3.34
+   Compiling syn v3.0.9
+   Compiling jobserver v0.1.35
+   Compiling errno v0.3.14
+   Compiling signal-hook-registry v1.4.8
+   Compiling cc v1.9.0
+   Compiling mio v1.2.4
+   Compiling socket2 v0.6.5
+   Compiling syn v2.0.119
+   Compiling ahash v0.8.12
+   Compiling try-lock v0.2.5
+   Compiling zmij v1.0.23
+   Compiling subtle v2.6.1
+   Compiling cmake v0.1.58
+   Compiling typenum v1.20.1
+   Compiling bitflags v2.13.2
+   Compiling autocfg v1.5.1
+   Compiling tower-service v0.3.3
+   Compiling num-traits v0.2.19
+   Compiling want v0.3.2
+   Compiling aws-lc-sys v0.46.0
+   Compiling serde_json v1.0.154
+   Compiling atomic-waker v1.1.2
+   Compiling vcpkg v0.2.15
+   Compiling log v0.4.34
+   Compiling synstructure v0.14.0
+   Compiling libsqlite3-sys v0.30.1
+   Compiling security-framework-sys v2.17.0
+   Compiling core-foundation v0.10.1
+   Compiling form_urlencoded v1.2.2
+   Compiling aho-corasick v1.1.5
+   Compiling futures-channel v0.3.34
+   Compiling sync_wrapper v1.0.2
+   Compiling tower-layer v0.3.3
+   Compiling regex-syntax v0.8.11
+   Compiling base64 v0.23.1
+   Compiling anyhow v1.0.104
+   Compiling ipnet v2.12.2
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling zerovec-derive v0.11.6
+   Compiling displaydoc v0.2.7
+   Compiling tokio-macros v2.7.2
+   Compiling serde_derive v1.0.229
+   Compiling tracing-attributes v0.1.31
+   Compiling tokio v1.54.0
+   Compiling zerofrom v0.1.8
+   Compiling hashbrown v0.14.5
+   Compiling regex-automata v0.4.18
+   Compiling yoke v0.8.3
+   Compiling security-framework v3.7.0
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling tracing v0.1.44
+   Compiling zerovec v0.11.8
+   Compiling zerotrie v0.2.5
+   Compiling rust-snap7 v1.142.2
+   Compiling iana-time-zone v0.1.65
+   Compiling equivalent v1.0.3
+   Compiling lazy_static v1.5.1
+   Compiling hashbrown v0.17.1
+   Compiling indexmap v2.14.2
+   Compiling sharded-slab v0.1.7
+   Compiling regex v1.13.1
+   Compiling chrono v0.4.45
+   Compiling digest v0.10.7
+   Compiling tinystr v0.8.4
+   Compiling potential_utf v0.1.6
+   Compiling icu_locale_core v2.3.0
+   Compiling icu_collections v2.3.0
+   Compiling hashlink v0.9.1
+   Compiling tracing-log v0.2.0
+   Compiling cpufeatures v0.2.17
+   Compiling http-body-util v0.1.5
+   Compiling tracing-serde v0.2.0
+   Compiling icu_provider v2.3.1
+   Compiling thread_local v1.1.10
+   Compiling unsafe-libyaml v0.2.11
+   Compiling icu_properties v2.3.0
+   Compiling icu_normalizer v2.3.0
+   Compiling hyper v1.12.0
+   Compiling tower v0.5.3
+   Compiling fallible-streaming-iterator v0.1.9
+   Compiling nu-ansi-term v0.50.3
+   Compiling ryu v1.0.23
+   Compiling fallible-iterator v0.3.0
+   Compiling hyper-util v0.1.21
+   Compiling serde_yaml v0.9.34+deprecated
+   Compiling idna_adapter v1.2.2
+   Compiling tracing-subscriber v0.3.23
+   Compiling idna v1.1.0
+   Compiling sha2 v0.10.9
+   Compiling url v2.5.8
+   Compiling rusqlite v0.32.1
+   Compiling tower-http v0.6.11
+   Compiling rustls-webpki v0.103.16
+   Compiling tokio-rustls v0.26.6
+   Compiling rustls-platform-verifier v0.7.1
+   Compiling hyper-rustls v0.27.10
+   Compiling reqwest v0.13.5
+   Compiling field-flow v0.1.0 (/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust)
+warning: variable does not need to be mutable
+  --> tests/runtime_regressions.rs:37:9
+   |
+37 |     let mut f=Fixture::start(Path::new(env!("CARGO_BIN_EXE_ff-fixture"))).unwrap();let c=config();let run=Run::new("r4-rework-clock-state...
+   |         ----^
+   |         |
+   |         help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` on by default
+
+warning: variable does not need to be mutable
+  --> tests/runtime_regressions.rs:25:41
+   |
+25 |     let root=root("r4-rework-fifo");let mut f=Fixture::start(Path::new(env!("CARGO_BIN_EXE_ff-fixture"))).unwrap();let mut c=config();c.p...
+   |                                         ----^
+   |                                         |
+   |                                         help: remove this `mut`
+
+warning: variable does not need to be mutable
+  --> tests/runtime_regressions.rs:49:134
+   |
+49 | ...::set_var("FF_TEST_CHILD_RELEASE_FILE",&release);let mut f=Fixture::start(Path::new(env!("CARGO_BIN_EXE_ff-fixture"))).unwrap();let c=...
+   |                                                         ----^
+   |                                                         |
+   |                                                         help: remove this `mut`
+
+warning: methods `close` and `iteration` are never used
+  --> tests/support/mod.rs:59:18
+   |
+25 | impl Run {
+   | -------- methods in this implementation
+...
+59 |     pub async fn close(self, normal: bool) -> PathBuf {
+   |                  ^^^^^
+...
+80 |     pub async fn iteration(&self, c: &Config) -> Result<()> {
+   |                  ^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: function `readback` is never used
+   --> tests/support/mod.rs:116:8
+    |
+116 | pub fn readback(_offset: i32) -> [u8; 16] {
+    |        ^^^^^^^^
+
+warning: `field-flow` (test "runtime_regressions") generated 5 warnings (run `cargo fix --test "runtime_regressions"` to apply 3 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 16.57s
+     Running tests/runtime_regressions.rs (/private/tmp/ff-001-r1-r4-rework1-32onn0fh/target/debug/deps/runtime_regressions-522f44036f7a101f)
+
+running 3 tests
+test fifo_dispatch_io_budget_read_and_write ... 
+thread 'fifo_dispatch_io_budget_read_and_write' panicked at tests/runtime_regressions.rs:25:107:
+called `Result::unwrap()` on an `Err` value: "fixture_port_conflict"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+test health_follows_actual_started_and_completion ... 
+thread 'health_follows_actual_started_and_completion' panicked at tests/runtime_regressions.rs:49:200:
+called `Result::unwrap()` on an `Err` value: "fixture_port_conflict"
+FAILED
+test queued_and_precall_clock_invalid_zero_write ... 
+thread 'queued_and_precall_clock_invalid_zero_write' panicked at tests/runtime_regressions.rs:37:75:
+called `Result::unwrap()` on an `Err` value: "fixture_port_conflict"
+FAILED
+
+failures:
+
+failures:
+    fifo_dispatch_io_budget_read_and_write
+    health_follows_actual_started_and_completion
+    queued_and_precall_clock_invalid_zero_write
+
+test result: FAILED. 0 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test runtime_regressions`

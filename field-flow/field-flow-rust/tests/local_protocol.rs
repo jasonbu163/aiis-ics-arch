@@ -364,7 +364,11 @@ async fn fault_and_stop_matrix() {
         let owner = run.rt.owners["plc_demo"].clone();
         jobs.push(tokio::spawn(async move {
             owner
-                .write(i, Instant::now() + Duration::from_secs(5))
+                .write(
+                    i,
+                    Instant::now() + Duration::from_secs(5),
+                    &field_flow::domain::Clock::default(),
+                )
                 .await
         }));
         sleep(Duration::from_millis(50)).await;
@@ -397,13 +401,13 @@ async fn stale_reference_probe() {
     let read = run.rt.owners["plc_demo"].read("stale-reader", 1, 0).await;
     fixture.command("stale-write-001", json!(42));
     let write = run.iteration(&c).await;
-    let dir = run.close(true).await;
+    let dir = run.close(false).await;
     fixture.fault("");
     let memory = readback(0);
     let store = state::inspect(&dir).unwrap();
     let snapshot = fixture.snapshot();
     let close = fixture.close();
-    let evidence = json!({"task":"FF-001","revision":"r2","case":"unmatched-S7-PDU-reference","read_result":read,"write_iteration_result":write,"actual_writevar_count":snapshot["writes"],"applied_positive_ack_count":snapshot["applied"],"native_memory_readback_hex":memory.iter().map(|b|format!("{b:02x}")).collect::<String>(),"neighbor_bytes_preserved":memory[2..].iter().all(|b|*b==0xa5),"parent_store":store,"store_dir":dir,"child_pid":child,"child_pid_gone":unsafe{libc::kill(child as i32,0)}==-1,"fixture_natural_close":close,"released_ports":[31102,31103,31880],"protocol_trace":snapshot["trace"]});
+    let evidence = json!({"task":"FF-001","revision":"r3","case":"unmatched-S7-PDU-reference","read_result":read,"write_iteration_result":write,"actual_writevar_count":snapshot["writes"],"applied_positive_ack_count":snapshot["applied"],"native_memory_readback_hex":memory.iter().map(|b|format!("{b:02x}")).collect::<String>(),"neighbor_bytes_preserved":memory[2..].iter().all(|b|*b==0xa5),"parent_store":store,"store_dir":dir,"child_pid":child,"child_pid_gone":unsafe{libc::kill(child as i32,0)}==-1,"fixture_natural_close":close,"released_ports":[31102,31103,31880],"protocol_trace":snapshot["trace"]});
     std::fs::write(
         dir.parent().unwrap().join("stale-reference-evidence.json"),
         serde_json::to_vec_pretty(&evidence).unwrap(),
@@ -418,4 +422,20 @@ async fn stale_reference_probe() {
                 == 0,
         "T3 contract: unmatched WriteVar ACK must not confirm"
     );
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn matched_ack_preflight() {
+    tokio::time::timeout(Duration::from_secs(110),async{
+ let evidence=root("matched-ack-preflight");let mut fixture=Fixture::start(std::path::Path::new(env!("CARGO_BIN_EXE_ff-fixture"))).unwrap();let c=config();let mut cases=Vec::new();
+ let run=Run::new("gate-normal","execute",&c);run.ready().await;fixture.command("gate-normal-1",json!(42));run.iteration(&c).await.unwrap();run.rt.owners["plc_demo"].read("normal-read",1,0).await.unwrap();let dir=run.close(true).await;let bytes=readback(0);assert_eq!(&bytes[..2],&[0,42]);assert_eq!(state::inspect(&dir).unwrap()["counts"]["confirmed"],1);cases.push(json!({"case":"normal","store":dir,"readback":bytes}));
+ for (name,is_write,fault)in [("bad-ref-read",false,"stale_once"),("bad-ref-write",true,"stale_once"),("short-read",false,"short_ack"),("short-write",true,"short_ack")]{
+  fixture.fault("");let run=Run::new(name,"execute",&c);run.ready().await;let pid=run.rt.owners["plc_demo"].health().pid.unwrap();fixture.fault(fault);fixture.command(&format!("gate-{name}"),json!(42));let before=total(&fixture,"writes");let start=Instant::now();let error=if is_write{run.iteration(&c).await.unwrap_err()}else{run.rt.owners["plc_demo"].read("gate-read",1,0).await.unwrap_err()};let elapsed=start.elapsed().as_millis();assert_eq!(error,if fault=="stale_once"{"s7_reference_mismatch"}else{"s7_invalid_response"});assert!(elapsed<=5500);assert_eq!(unsafe{libc::kill(pid as i32,0)},-1);
+  fixture.fault("");if is_write{for _ in 0..10{assert_eq!(run.iteration(&c).await.unwrap_err(),"target_unknown");}}
+  let dir=run.close(false).await;let snapshot=state::inspect(&dir).unwrap();assert_eq!(snapshot["counts"]["confirmed"].as_u64().unwrap_or(0),0);assert_eq!(total(&fixture,"writes")-before,if is_write{1}else{0});
+  if is_write{assert_eq!(snapshot["counts"]["unknown"],1);let restart=Run::open(dir.clone(),"execute",&c);restart.ready().await;assert_eq!(restart.iteration(&c).await.unwrap_err(),"target_unknown");restart.close(true).await;assert_eq!(total(&fixture,"writes")-before,1);}
+  let db=rusqlite::Connection::open_with_flags(dir.join("state.sqlite"),rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY).unwrap();let mut st=db.prepare("SELECT from_state,to_state,reason_key FROM command_events ORDER BY seq").unwrap();let events=st.query_map([],|r|Ok(json!({"from":r.get::<_,Option<String>>(0)?,"to":r.get::<_,String>(1)?,"reason":r.get::<_,String>(2)?}))).unwrap().collect::<std::result::Result<Vec<_>,_>>().unwrap();cases.push(json!({"case":name,"error":error,"elapsed_ms":elapsed,"old_pid":pid,"old_pid_gone":true,"store":dir,"state":snapshot,"events":events}));
+ }
+ let trace=fixture.snapshot();fixture.close().unwrap();let report=json!({"task":"FF-001","revision":"r3","gate":"matched_ack_preflight","result":"dev_gate_passed","cases":cases,"protocol":trace,"fixture_natural_exit":true,"ports_rebound":[31102,31103,31880]});std::fs::write(evidence.join("gate.json"),serde_json::to_vec_pretty(&report).unwrap()).unwrap();println!("{}",json!({"gate_evidence":evidence,"result":"dev_gate_passed"}));
+ }).await.expect("R14 gate exceeded inner 110-second deadline; outer harness must clean and record failure");
 }

@@ -1,0 +1,96 @@
+[
+  {
+    "label": "fmt",
+    "argv": [
+      "cargo",
+      "fmt",
+      "--check"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-target"
+    },
+    "pid": 7194,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.333663,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-fmt.txt",
+    "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "check",
+    "argv": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--all-targets",
+      "--features",
+      "test-fixture"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-target"
+    },
+    "pid": 7231,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 13.939862042000001,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-check.txt",
+    "output_sha256": "1379f01fe2d4e46032e6104c5e2f404f4c2396e51e23e3aa46883e53fc6428f3"
+  },
+  {
+    "label": "build",
+    "argv": [
+      "cargo",
+      "build",
+      "--locked",
+      "--offline",
+      "--bins",
+      "--features",
+      "test-fixture"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-target"
+    },
+    "pid": 8705,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 13.566966542000001,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-build.txt",
+    "output_sha256": "ba33363faf53dd0d838803d75aeead39629fbbff84a347b2fae9dd228ef5b655"
+  },
+  {
+    "label": "unit",
+    "argv": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--test",
+      "s7_int_pdu",
+      "--",
+      "--test-threads=1",
+      "--nocapture"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-target"
+    },
+    "pid": 10125,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 2.114869542000001,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-unit.txt",
+    "output_sha256": "fb36f6add1b06f0ec874aca93c24c46b4b32c07ecfaa51406f20fcb1e347c392"
+  }
+]

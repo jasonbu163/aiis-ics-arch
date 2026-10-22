@@ -1,0 +1,34 @@
+   Compiling field-flow v0.1.0 (/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust)
+error[E0252]: the name `Mutex` is defined multiple times
+  --> src/infrastructure/state.rs:22:34
+   |
+17 |         Arc, Mutex,
+   |              ----- previous import of the type `Mutex` here
+...
+22 | use tokio::sync::{mpsc, oneshot, Mutex};
+   |                                  ^^^^^ `Mutex` reimported here
+   |
+   = note: `Mutex` must be defined only once in the type namespace of this module
+help: you can use `as` to change the binding name of the import
+   |
+22 | use tokio::sync::{mpsc, oneshot, Mutex as OtherMutex};
+   |                                        +++++++++++++
+
+warning: unused import: `Mutex`
+  --> src/infrastructure/state.rs:22:34
+   |
+22 | use tokio::sync::{mpsc, oneshot, Mutex};
+   |                                  ^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+error[E0063]: missing field `gates` in initializer of `state::State`
+   --> src/infrastructure/state.rs:198:13
+    |
+198 |         Ok((Self { tx, healthy, lock }, StateTask { join }))
+    |             ^^^^ missing `gates`
+
+Some errors have detailed explanations: E0063, E0252.
+For more information about an error, try `rustc --explain E0063`.
+warning: `field-flow` (lib) generated 1 warning
+error: could not compile `field-flow` (lib) due to 2 previous errors; 1 warning emitted

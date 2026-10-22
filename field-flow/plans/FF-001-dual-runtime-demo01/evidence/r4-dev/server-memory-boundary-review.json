@@ -1,0 +1,32 @@
+{
+  "package": "python-snap7==3.0.0",
+  "path": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python/.venv/lib/python3.11/site-packages/snap7/server/__init__.py",
+  "sha256": "2340809a899725cad73a3ec663c3066b8b632fab9d04aeb279df830e42eac201",
+  "read_only_unmodified": true,
+  "public_register_area": {
+    "line": 188,
+    "retains_bytearray_subtype_lines": [
+      215,
+      216,
+      217,
+      218
+    ]
+  },
+  "partial_write_source": {
+    "lines": [
+      1087,
+      1101
+    ],
+    "extract": "\n                # Calculate write range\n                end = min(start + len(write_data), len(area_data))\n                actual_write_len = end - start\n\n                # Write the data\n                area_data[start:end] = write_data[:actual_write_len]\n\n                logger.debug(f\"Wrote {actual_write_len} bytes to {area}#{db_number} at offset {start}\")\n\n                # If we didn't write all data due to bounds, return error\n                if actual_write_len < len(write_data):\n                    logger.warning(f\"Only wrote {actual_write_len} of {len(write_data)} bytes due to area bounds\")\n                    return False\n"
+  },
+  "historical_real_failure": {
+    "command_result": "targets-2 exit1",
+    "report": "targets-2-ref-maintenance-a1w1nz0c.json",
+    "actual_WriteVar": 1,
+    "parent_state": "unknown",
+    "confirmed": 0,
+    "memory_after": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a500",
+    "statement": "Original plain bytearray Server performed partial write before returning a negative response. Not a production adapter success or atomic rejection."
+  },
+  "fixture_correction": "Only own tests/fixtures/runtime.py IntMemory bytearray subclass supplied to public register_area; rejects any non-complete 2-byte slice before mutating its own synthetic data; no third-party/private transport modification. r3 public_api.py unchanged. Parent explicitly confirmed this is within approved R07/R13."
+}

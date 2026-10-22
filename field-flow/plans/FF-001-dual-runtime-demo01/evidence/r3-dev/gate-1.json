@@ -1,0 +1,602 @@
+{
+  "cases": [
+    {
+      "case": "normal",
+      "readback": [
+        0,
+        42,
+        165,
+        165,
+        165,
+        165,
+        165,
+        165,
+        165,
+        165,
+        165,
+        165,
+        165,
+        165,
+        165,
+        165
+      ],
+      "store": "/private/tmp/ff-001-r1-r3-rust-gate-normal-1792628630130-11821-1/state"
+    },
+    {
+      "case": "bad-ref-read",
+      "elapsed_ms": 90,
+      "error": "s7_reference_mismatch",
+      "events": [],
+      "old_pid": 13119,
+      "old_pid_gone": true,
+      "state": {
+        "counts": {},
+        "meta": {
+          "implementation": "rust",
+          "instance_id": "ff-rust-demo01",
+          "mode": "execute",
+          "schema_version": 1,
+          "store_uuid": "1792628630658-11821-8"
+        }
+      },
+      "store": "/private/tmp/ff-001-r1-r3-rust-bad-ref-read-1792628630656-11821-7/state"
+    },
+    {
+      "case": "bad-ref-write",
+      "elapsed_ms": 97,
+      "error": "s7_reference_mismatch",
+      "events": [
+        {
+          "from": null,
+          "reason": "intent",
+          "to": "pending"
+        },
+        {
+          "from": "pending",
+          "reason": "dispatch_permit",
+          "to": "in_flight"
+        },
+        {
+          "from": "in_flight",
+          "reason": "s7_reference_mismatch",
+          "to": "unknown"
+        }
+      ],
+      "old_pid": 13272,
+      "old_pid_gone": true,
+      "state": {
+        "counts": {
+          "unknown": 1
+        },
+        "meta": {
+          "implementation": "rust",
+          "instance_id": "ff-rust-demo01",
+          "mode": "execute",
+          "schema_version": 1,
+          "store_uuid": "1792628630792-11821-13"
+        }
+      },
+      "store": "/private/tmp/ff-001-r1-r3-rust-bad-ref-write-1792628630790-11821-12/state"
+    },
+    {
+      "case": "short-read",
+      "elapsed_ms": 94,
+      "error": "s7_invalid_response",
+      "events": [],
+      "old_pid": 13647,
+      "old_pid_gone": true,
+      "state": {
+        "counts": {},
+        "meta": {
+          "implementation": "rust",
+          "instance_id": "ff-rust-demo01",
+          "mode": "execute",
+          "schema_version": 1,
+          "store_uuid": "1792628631151-11821-20"
+        }
+      },
+      "store": "/private/tmp/ff-001-r1-r3-rust-short-read-1792628631150-11821-19/state"
+    },
+    {
+      "case": "short-write",
+      "elapsed_ms": 96,
+      "error": "s7_invalid_response",
+      "events": [
+        {
+          "from": null,
+          "reason": "intent",
+          "to": "pending"
+        },
+        {
+          "from": "pending",
+          "reason": "dispatch_permit",
+          "to": "in_flight"
+        },
+        {
+          "from": "in_flight",
+          "reason": "s7_invalid_response",
+          "to": "unknown"
+        }
+      ],
+      "old_pid": 13800,
+      "old_pid_gone": true,
+      "state": {
+        "counts": {
+          "unknown": 1
+        },
+        "meta": {
+          "implementation": "rust",
+          "instance_id": "ff-rust-demo01",
+          "mode": "execute",
+          "schema_version": 1,
+          "store_uuid": "1792628631288-11821-25"
+        }
+      },
+      "store": "/private/tmp/ff-001-r1-r3-rust-short-write-1792628631286-11821-24/state"
+    }
+  ],
+  "fixture_natural_exit": true,
+  "gate": "matched_ack_preflight",
+  "ports_rebound": [
+    31102,
+    31103,
+    31880
+  ],
+  "protocol": {
+    "applied": 3,
+    "gets": 25,
+    "native_pid": 12136,
+    "reads": 11,
+    "sessions": 8,
+    "trace": [
+      {
+        "at_ms": 1792628630519,
+        "operation": 0,
+        "positive": false,
+        "request_ref": [
+          192,
+          1
+        ],
+        "response_ref": [
+          192,
+          1
+        ]
+      },
+      {
+        "at_ms": 1792628630521,
+        "operation": 240,
+        "positive": false,
+        "request_ref": [
+          0,
+          0
+        ],
+        "response_ref": [
+          0,
+          0
+        ]
+      },
+      {
+        "at_ms": 1792628630550,
+        "operation": 5,
+        "positive": true,
+        "request_ref": [
+          0,
+          1
+        ],
+        "response_ref": [
+          0,
+          1
+        ]
+      },
+      {
+        "at_ms": 1792628630560,
+        "operation": 4,
+        "positive": false,
+        "request_ref": [
+          0,
+          2
+        ],
+        "response_ref": [
+          0,
+          2
+        ]
+      },
+      {
+        "at_ms": 1792628630642,
+        "operation": 0,
+        "positive": false,
+        "request_ref": [
+          192,
+          1
+        ],
+        "response_ref": [
+          192,
+          1
+        ]
+      },
+      {
+        "at_ms": 1792628630642,
+        "operation": 240,
+        "positive": false,
+        "request_ref": [
+          0,
+          0
+        ],
+        "response_ref": [
+          0,
+          0
+        ]
+      },
+      {
+        "at_ms": 1792628630644,
+        "operation": 4,
+        "positive": false,
+        "request_ref": [
+          0,
+          1
+        ],
+        "response_ref": [
+          0,
+          1
+        ]
+      },
+      {
+        "at_ms": 1792628630646,
+        "operation": 4,
+        "positive": false,
+        "request_ref": [
+          0,
+          2
+        ],
+        "response_ref": [
+          0,
+          2
+        ]
+      },
+      {
+        "at_ms": 1792628630647,
+        "operation": 4,
+        "positive": false,
+        "request_ref": [
+          0,
+          3
+        ],
+        "response_ref": [
+          0,
+          3
+        ]
+      },
+      {
+        "at_ms": 1792628630649,
+        "operation": 4,
+        "positive": false,
+        "request_ref": [
+          0,
+          4
+        ],
+        "response_ref": [
+          0,
+          4
+        ]
+      },
+      {
+        "at_ms": 1792628630650,
+        "operation": 4,
+        "positive": false,
+        "request_ref": [
+          0,
+          5
+        ],
+        "response_ref": [
+          0,
+          5
+        ]
+      },
+      {
+        "at_ms": 1792628630652,
+        "operation": 4,
+        "positive": false,
+        "request_ref": [
+          0,
+          6
+        ],
+        "response_ref": [
+          0,
+          6
+        ]
+      },
+      {
+        "at_ms": 1792628630653,
+        "operation": 4,
+        "positive": false,
+        "request_ref": [
+          0,
+          7
+        ],
+        "response_ref": [
+          0,
+          7
+        ]
+      },
+      {
+        "at_ms": 1792628630655,
+        "operation": 4,
+        "positive": false,
+        "request_ref": [
+          0,
+          8
+        ],
+        "response_ref": [
+          0,
+          8
+        ]
+      },
+      {
+        "at_ms": 1792628630673,
+        "operation": 0,
+        "positive": false,
+        "request_ref": [
+          192,
+          1
+        ],
+        "response_ref": [
+          192,
+          1
+        ]
+      },
+      {
+        "at_ms": 1792628630674,
+        "operation": 240,
+        "positive": false,
+        "request_ref": [
+          0,
+          0
+        ],
+        "response_ref": [
+          0,
+          0
+        ]
+      },
+      {
+        "at_ms": 1792628630687,
+        "operation": 4,
+        "positive": false,
+        "request_ref": [
+          0,
+          1
+        ],
+        "response_ref": [
+          0,
+          1
+        ]
+      },
+      {
+        "changed_absolute_tpkt_index": 12,
+        "event": "unmatched_response_sent",
+        "operation": 4,
+        "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010002a",
+        "original_response_pdu_ref": [
+          0,
+          1
+        ],
+        "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000",
+        "request_pdu_ref": [
+          0,
+          1
+        ],
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "sent_response_pdu_ref": [
+          0,
+          2
+        ]
+      },
+      {
+        "at_ms": 1792628630815,
+        "operation": 0,
+        "positive": false,
+        "request_ref": [
+          192,
+          1
+        ],
+        "response_ref": [
+          192,
+          1
+        ]
+      },
+      {
+        "at_ms": 1792628630816,
+        "operation": 240,
+        "positive": false,
+        "request_ref": [
+          0,
+          0
+        ],
+        "response_ref": [
+          0,
+          0
+        ]
+      },
+      {
+        "at_ms": 1792628630838,
+        "operation": 5,
+        "positive": true,
+        "request_ref": [
+          0,
+          1
+        ],
+        "response_ref": [
+          0,
+          1
+        ]
+      },
+      {
+        "changed_absolute_tpkt_index": 12,
+        "event": "unmatched_response_sent",
+        "operation": 5,
+        "original_response_hex": "0300001602f0803203000000010002000100000501ff",
+        "original_response_pdu_ref": [
+          0,
+          1
+        ],
+        "request_hex": "0300002502f080320100000001000e00060501120a1002000200018400000000040010002a",
+        "request_pdu_ref": [
+          0,
+          1
+        ],
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_pdu_ref": [
+          0,
+          2
+        ]
+      },
+      {
+        "at_ms": 1792628631027,
+        "operation": 0,
+        "positive": false,
+        "request_ref": [
+          192,
+          1
+        ],
+        "response_ref": [
+          192,
+          1
+        ]
+      },
+      {
+        "at_ms": 1792628631029,
+        "operation": 240,
+        "positive": false,
+        "request_ref": [
+          0,
+          0
+        ],
+        "response_ref": [
+          0,
+          0
+        ]
+      },
+      {
+        "at_ms": 1792628631168,
+        "operation": 0,
+        "positive": false,
+        "request_ref": [
+          192,
+          1
+        ],
+        "response_ref": [
+          192,
+          1
+        ]
+      },
+      {
+        "at_ms": 1792628631169,
+        "operation": 240,
+        "positive": false,
+        "request_ref": [
+          0,
+          0
+        ],
+        "response_ref": [
+          0,
+          0
+        ]
+      },
+      {
+        "at_ms": 1792628631179,
+        "operation": 4,
+        "positive": false,
+        "request_ref": [
+          0,
+          1
+        ],
+        "response_ref": [
+          0,
+          1
+        ]
+      },
+      {
+        "event": "short_response_sent",
+        "operation": 4,
+        "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010002a",
+        "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000",
+        "sent_response_hex": "0300001102f08032030000000100020006"
+      },
+      {
+        "at_ms": 1792628631305,
+        "operation": 0,
+        "positive": false,
+        "request_ref": [
+          192,
+          1
+        ],
+        "response_ref": [
+          192,
+          1
+        ]
+      },
+      {
+        "at_ms": 1792628631307,
+        "operation": 240,
+        "positive": false,
+        "request_ref": [
+          0,
+          0
+        ],
+        "response_ref": [
+          0,
+          0
+        ]
+      },
+      {
+        "at_ms": 1792628631328,
+        "operation": 5,
+        "positive": true,
+        "request_ref": [
+          0,
+          1
+        ],
+        "response_ref": [
+          0,
+          1
+        ]
+      },
+      {
+        "event": "short_response_sent",
+        "operation": 5,
+        "original_response_hex": "0300001602f0803203000000010002000100000501ff",
+        "request_hex": "0300002502f080320100000001000e00060501120a1002000200018400000000040010002a",
+        "sent_response_hex": "0300001102f08032030000000100020001"
+      },
+      {
+        "at_ms": 1792628631509,
+        "operation": 0,
+        "positive": false,
+        "request_ref": [
+          192,
+          1
+        ],
+        "response_ref": [
+          192,
+          1
+        ]
+      },
+      {
+        "at_ms": 1792628631510,
+        "operation": 240,
+        "positive": false,
+        "request_ref": [
+          0,
+          0
+        ],
+        "response_ref": [
+          0,
+          0
+        ]
+      }
+    ],
+    "writes": 3
+  },
+  "result": "dev_gate_passed",
+  "revision": "r3",
+  "task": "FF-001"
+}

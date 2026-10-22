@@ -1,7 +1,7 @@
 //! 文件：src/runtime.rs；独立flow调度、每PLC FIFO监督owner、停止与真实join。
 use crate::{
     config::{Config, Plc},
-    domain::{id, now_ms, Intent},
+    domain::{id, now_ms, Clock, ClockAnchor, Intent},
     driver_process::{Driver, Wire},
     infrastructure::{posix::Gate, state::State},
     Result,
@@ -12,7 +12,7 @@ use std::{
     fs::File,
     path::{Path, PathBuf},
     sync::{
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicU8, Ordering},
         Arc, Mutex,
     },
     time::Duration,
@@ -70,6 +70,7 @@ pub struct OwnerHealth {
     pub pid: Option<u32>,
     pub queue_depth: usize,
     pub in_flight: u8,
+    pub clock_invalid: bool,
 }
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct Sample {
@@ -80,6 +81,7 @@ pub struct Sample {
     pub value: i16,
     pub quality: String,
     pub sampled_at_ms: i64,
+    pub write_ack: Option<crate::infrastructure::s7_int_pdu::ValidatedWriteAck>,
 }
 struct Request {
     flow: String,
@@ -87,8 +89,11 @@ struct Request {
     db: u16,
     offset: u32,
     intent: Option<Intent>,
-    deadline: Instant,
+    queue_deadline: Instant,
+    source_deadline: Option<Instant>,
+    clock: Option<ClockAnchor>,
     reply: oneshot::Sender<Result<Sample>>,
+    phase: Arc<AtomicU8>,
 }
 #[derive(Clone)]
 pub struct Owner {
@@ -97,6 +102,7 @@ pub struct Owner {
     plc: Plc,
     stop: Stop,
     state: State,
+    clock_invalid: Arc<AtomicBool>,
 }
 pub struct OwnerTask {
     join: JoinHandle<Result<()>>,
@@ -123,22 +129,35 @@ impl Owner {
             pid: None,
             queue_depth: 0,
             in_flight: 0,
+            clock_invalid: false,
         });
+        let clock_invalid = Arc::new(AtomicBool::new(false));
         let handle = Self {
             tx,
             health: h,
             plc: plc.clone(),
             stop: stop.clone(),
             state: state.clone(),
+            clock_invalid: clock_invalid.clone(),
         };
         let join = tokio::spawn(owner_loop(
-            plc, executable, gate, lock, state, stop, forced, rx, health,
+            plc,
+            executable,
+            gate,
+            lock,
+            state,
+            stop,
+            forced,
+            rx,
+            health,
+            clock_invalid,
         ));
         (handle, OwnerTask { join })
     }
     pub fn health(&self) -> OwnerHealth {
         let mut h = self.health.borrow().clone();
         h.queue_depth = self.tx.max_capacity() - self.tx.capacity();
+        h.clock_invalid = self.clock_invalid.load(Ordering::Acquire);
         h
     }
     async fn ready(&self, deadline: Instant) -> Result<()> {
@@ -164,51 +183,85 @@ impl Owner {
         db: u16,
         offset: u32,
         intent: Option<Intent>,
-        deadline: Instant,
+        source_deadline: Option<Instant>,
+        clock: Option<ClockAnchor>,
     ) -> Result<Sample> {
-        self.ready(deadline).await?;
-        let end = (Instant::now() + Duration::from_millis(self.plc.queue_wait_ms)).min(deadline);
-        let permit = timeout_at(end, self.tx.reserve())
+        let source_end = source_deadline.unwrap_or_else(|| {
+            Instant::now()
+                + Duration::from_millis(
+                    self.plc.ready_wait_ms + self.plc.queue_wait_ms + self.plc.io_timeout_ms + 500,
+                )
+        });
+        if intent.is_some() && self.clock_invalid.load(Ordering::Acquire) {
+            return Err("clock_invalid".into());
+        }
+        self.ready(source_end).await?;
+        let queue_end =
+            (Instant::now() + Duration::from_millis(self.plc.queue_wait_ms)).min(source_end);
+        let permit = timeout_at(queue_end, self.tx.reserve())
             .await
             .map_err(|_| "queue_timeout")?
             .map_err(|_| "owner_closed")?;
         if self.stop.stopped.load(Ordering::Acquire) {
             return Err("canceled".into());
         }
-        if deadline <= Instant::now() + Duration::from_millis(400) {
+        if source_end <= Instant::now() + Duration::from_millis(400) {
             return Err("expired".into());
         }
         let request_id = id();
         if let Some(i) = &intent {
+            if let Some(c) = &clock {
+                if c.check(now_ms()).is_err() {
+                    self.clock_invalid.store(true, Ordering::Release);
+                    return Err("clock_invalid".into());
+                }
+            }
             i.validate_time(now_ms())?;
             self.state.dispatch(i.clone(), request_id.clone()).await?;
         }
-        let (reply, rx) = oneshot::channel();
+        let (reply, mut rx) = oneshot::channel();
+        let phase = Arc::new(AtomicU8::new(0));
         permit.send(Request {
             flow: flow.into(),
             id: request_id,
             db,
             offset,
             intent,
-            deadline,
+            queue_deadline: queue_end,
+            source_deadline,
+            clock,
             reply,
+            phase: phase.clone(),
         });
-        timeout_at(deadline + Duration::from_millis(500), rx)
-            .await
-            .map_err(|_| "driver_cleanup_incomplete")?
-            .map_err(|_| "owner_closed")?
+        match timeout_at(queue_end, &mut rx).await {
+            Ok(reply) => reply.map_err(|_| "owner_closed")?,
+            Err(_) => {
+                if phase
+                    .compare_exchange(0, 2, Ordering::AcqRel, Ordering::Acquire)
+                    .is_ok()
+                {
+                    Err(if source_end <= queue_end {
+                        "expired"
+                    } else {
+                        "queue_timeout"
+                    }
+                    .into())
+                } else {
+                    // 已出队的工作只受其dispatch IO总期限约束；不以queue到期放弃实际回收。
+                    let end =
+                        (queue_end + Duration::from_millis(self.plc.io_timeout_ms)).min(source_end);
+                    timeout_at(end + Duration::from_millis(500), rx)
+                        .await
+                        .map_err(|_| "driver_cleanup_incomplete")?
+                        .map_err(|_| "owner_closed")?
+                }
+            }
+        }
     }
     pub async fn read(&self, flow: &str, db: u16, offset: u32) -> Result<Sample> {
-        self.request(
-            flow,
-            db,
-            offset,
-            None,
-            Instant::now() + Duration::from_millis(self.plc.io_timeout_ms),
-        )
-        .await
+        self.request(flow, db, offset, None, None, None).await
     }
-    pub async fn write(&self, i: Intent, deadline: Instant) -> Result<Sample> {
+    pub async fn write(&self, i: Intent, deadline: Instant, clock: &Clock) -> Result<Sample> {
         let f = i.flow_id.clone();
         let db = i.target.db;
         let offset = i.target.offset;
@@ -217,11 +270,13 @@ impl Owner {
             db,
             offset,
             Some(i),
-            deadline.min(Instant::now() + Duration::from_millis(self.plc.io_timeout_ms)),
+            Some(deadline),
+            Some(clock.anchor()),
         )
         .await
     }
 }
+
 async fn owner_loop(
     plc: Plc,
     executable: PathBuf,
@@ -232,6 +287,7 @@ async fn owner_loop(
     forced: Arc<AtomicBool>,
     mut rx: mpsc::Receiver<Request>,
     health: watch::Sender<OwnerHealth>,
+    clock_invalid: Arc<AtomicBool>,
 ) -> Result<()> {
     let mut driver: Option<Driver> = None;
     let mut generation = 0;
@@ -244,6 +300,7 @@ async fn owner_loop(
             pid: driver.as_ref().map(|d| d.pid),
             queue_depth: 0,
             in_flight,
+            clock_invalid: clock_invalid.load(Ordering::Acquire),
         });
     };
     while !stop.stopped.load(Ordering::Acquire) {
@@ -298,7 +355,9 @@ async fn owner_loop(
         let request = tokio::select! {_=stop.wait()=>None,r=rx.recv()=>r};
         let Some(r) = request else { break };
         if stop.stopped.load(Ordering::Acquire)
-            || r.deadline <= Instant::now() + Duration::from_millis(400)
+            || r.queue_deadline <= Instant::now()
+            || r.source_deadline
+                .is_some_and(|end| end <= Instant::now() + Duration::from_millis(400))
         {
             let _ = r.reply.send(Err(if stop.stopped.load(Ordering::Acquire) {
                 "canceled"
@@ -309,6 +368,13 @@ async fn owner_loop(
             continue;
         }
         if let Some(i) = &r.intent {
+            if clock_invalid.load(Ordering::Acquire)
+                || r.clock.as_ref().is_some_and(|c| c.check(now_ms()).is_err())
+            {
+                clock_invalid.store(true, Ordering::Release);
+                let _ = r.reply.send(Err("clock_invalid".into()));
+                continue;
+            }
             if !state.healthy.load(Ordering::Acquire) {
                 let _ = r.reply.send(Err("canceled".into()));
                 continue;
@@ -318,7 +384,18 @@ async fn owner_loop(
                 continue;
             }
         }
-        update("ready", &driver, generation, 1);
+        if r.phase
+            .compare_exchange(0, 1, Ordering::AcqRel, Ordering::Acquire)
+            .is_err()
+        {
+            let _ = r.reply.send(Err("expired".into()));
+            continue;
+        }
+        let deadline = (Instant::now() + Duration::from_millis(plc.io_timeout_ms)).min(
+            r.source_deadline
+                .unwrap_or_else(|| Instant::now() + Duration::from_millis(plc.io_timeout_ms)),
+        );
+        update("ready", &driver, generation, 0);
         let d = driver.as_mut().unwrap();
         let mut wire = Wire::new(
             if r.intent.is_some() { "write" } else { "read" },
@@ -330,11 +407,21 @@ async fn owner_loop(
         wire.offset = r.offset;
         wire.value = r.intent.as_ref().map(|i| i.value);
         wire.intent = r.intent.clone();
-        let result = d.call(wire, &stop.stopped, r.deadline).await;
-        let answer = match result {
-            Ok((reply, started)) => {
-                if started && r.intent.is_some() {
-                    let _=state.log("driver_call_started",json!({"flow_id":r.flow,"request_id":r.id,"generation":generation,"pid":d.pid})).await;
+        wire.clock = r.clock.clone();
+        let pid = d.pid;
+        let result = d.call(wire, &stop.stopped, deadline, || async {
+            health.send_modify(|h| h.in_flight = 1);
+            if r.intent.is_some() {
+                state.log("driver_call_started", json!({"flow_id":r.flow,"request_id":r.id,"generation":generation,"pid":pid})).await?;
+            }
+            Ok(())
+        }).await;
+        let mut maintenance = false;
+        let mut answer = match result {
+            Ok((reply, _started)) => {
+                maintenance = reply.retire;
+                if reply.result == "clock_invalid" {
+                    clock_invalid.store(true, Ordering::Release);
                 }
                 if reply.result == "ok" {
                     failures = 0;
@@ -349,6 +436,7 @@ async fn owner_loop(
                             .unwrap_or(0),
                         quality: "good".into(),
                         sampled_at_ms: now_ms(),
+                        write_ack: reply.write_ack,
                     })
                 } else {
                     Err(reply.result)
@@ -357,34 +445,47 @@ async fn owner_loop(
             Err(e) => {
                 forced.store(true, Ordering::Release);
                 let _=state.log("forced_driver_stop",json!({"target_id":plc.id,"request_id":r.id,"error_key":e,"result":"fault_cleanup","pid":d.pid})).await;
-                let _ = state
-                    .log(
-                        "driver_process_reaped",
-                        json!({"target_id":plc.id,"pid":d.pid,"result":"fault_cleanup"}),
-                    )
-                    .await;
+                if d.reaped {
+                    let _ = state
+                        .log(
+                            "driver_process_reaped",
+                            json!({"target_id":plc.id,"pid":d.pid,"result":"fault_cleanup"}),
+                        )
+                        .await;
+                } else {
+                    let _ = stop.close();
+                }
                 Err(e)
             }
         };
         let reconnect = answer
             .as_ref()
-            .is_err_and(|e| !matches!(e.as_str(), "canceled" | "expired"));
+            .is_err_and(|e| !matches!(e.as_str(), "canceled" | "expired" | "clock_invalid"));
         if reconnect {
             operation_failed = true;
         }
-        let _ = r.reply.send(answer);
-        update("ready", &driver, generation, 0);
-        if reconnect {
-            if let Some(mut d) = driver.take() {
-                if !d.forced {
-                    let end = Instant::now() + Duration::from_millis(plc.io_timeout_ms);
-                    if d.close(end).await.is_err() {
+        if reconnect || maintenance {
+            update("recovering", &driver, generation, 0);
+            if let Some(mut old) = driver.take() {
+                if !old.reaped {
+                    if let Err(error) = old.close(deadline).await {
                         forced.store(true, Ordering::Release);
+                        let _=state.log("forced_driver_stop",json!({"target_id":plc.id,"pid":old.pid,"result":"fault_cleanup","error_key":error})).await;
                     }
                 }
+                if old.reaped {
+                    let _=state.log("driver_process_reaped",json!({"target_id":plc.id,"pid":old.pid,"result":if old.forced{"fault_cleanup"}else{"normal"}})).await;
+                } else {
+                    answer = Err("driver_cleanup_incomplete".into());
+                    let _ = stop.close();
+                }
             }
-            update("recovering", &driver, generation, 0);
             failures += 1;
+        } else {
+            update("ready", &driver, generation, 0);
+        }
+        let _ = r.reply.send(answer);
+        if reconnect {
             tokio::select! {_=stop.wait()=>{},_=tokio::time::sleep(Duration::from_millis(250))=>{}}
         }
     }

@@ -1,0 +1,7 @@
+{
+  "command": "uv run --locked --python 3.11 --no-python-downloads python /private/tmp/ff-001-r1-r4dev-pc36ki7o/provenance.py",
+  "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+  "exit_code": 1,
+  "error": "ModuleNotFoundError: No module named tests",
+  "cause": "Auxiliary script path outside project replaced initial sys.path; product tests were not run by this diagnostic. Corrected python -c exec with cwd sys.path then formal/copy assertions passed exit0; no product source change."
+}

@@ -1,0 +1,39 @@
+{
+  "argv": [
+    "bash",
+    "/Users/jason/Desktop/DreamCode/AI/AIIS/skills/project-governance/scripts/check-governance-bundle.sh",
+    "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+    "field-flow",
+    "field-flow/field-flow-rust",
+    "field-flow/field-flow-python"
+  ],
+  "exit_code": 1,
+  "line_count": 332,
+  "outside_diagnostics": 318,
+  "outside_equal_prior": true,
+  "ff": [
+    "missing task document link: field-flow/plans/README.md -> FF-001-dual-runtime-demo01/checklist.md",
+    "missing task document link: field-flow/plans/README.zh-CN.md -> FF-001-dual-runtime-demo01/checklist.md",
+    "PLAN v2 task link must target spec.md: field-flow/PLAN.md -> plans/FF-001-dual-runtime-demo01/tasks.md",
+    "missing task document link: field-flow/plans/README.md -> FF-001-dual-runtime-demo01/checklist.md",
+    "missing task document link: field-flow/plans/README.zh-CN.md -> FF-001-dual-runtime-demo01/checklist.md",
+    "missing task document link: field-flow/plans/README.md -> FF-001-dual-runtime-demo01/checklist.md",
+    "missing task document link: field-flow/plans/README.zh-CN.md -> FF-001-dual-runtime-demo01/checklist.md",
+    "PLAN v2 task link must target spec.md: field-flow/PLAN.zh-CN.md -> plans/FF-001-dual-runtime-demo01/tasks.md",
+    "missing task document link: field-flow/plans/README.md -> FF-001-dual-runtime-demo01/checklist.md",
+    "missing task document link: field-flow/plans/README.zh-CN.md -> FF-001-dual-runtime-demo01/checklist.md",
+    "missing plans task link: field-flow/field-flow-rust/PLAN.md",
+    "missing plans task link: field-flow/field-flow-rust/PLAN.zh-CN.md",
+    "missing plans task link: field-flow/field-flow-python/PLAN.md",
+    "missing plans task link: field-flow/field-flow-python/PLAN.zh-CN.md"
+  ],
+  "output_sha256": "8fe2aa91aff38f976b6cdeeab3e44c212db6f7c19edb142aeb1fa5bbb0494dd4",
+  "manual_documents": 34,
+  "manual_local_links": 549,
+  "manual_issues": [],
+  "baseline_file_count": 2307,
+  "baseline_changes_excluding_new_checklist": [],
+  "git_diff_check_exit": 0,
+  "git_diff_check_output": "",
+  "checklist_trailing_whitespace": []
+}

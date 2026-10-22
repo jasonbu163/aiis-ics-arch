@@ -8,7 +8,7 @@ source topology or important entrypoints change.
 - `backend/` — FastAPI, SQLAlchemy, Alembic and Core module registry.
 - `frontend-js/` — JavaScript Core web shell, route/locale discovery and system UI.
 - `automation-world/control-agent/` — optional Rust/Tauri field runtime and operations console.
-- `field-flow/` — independent Rust/Python field runtimes; the partial Rust candidate is blocked on S7 acknowledgement correlation, and Python has not started.
+- `field-flow/` — independent Rust/Python field runtimes; exact r4 passed unified fresh-context local QA2, with Human Owner final acceptance pending.
 - `tools/` — offline lineage, PLC mapping and simulator tools.
 - `contracts/` — root Core hub for cross-runtime public contracts; source truth remains in code.
 - `docs/` — root-PLAN-owned durable cross-repository and process documentation, indexed by a bilingual README pair.
@@ -85,10 +85,11 @@ Database engine settings and YAML upload are deferred to `CA-CONFIG-001`.
 
 ## Documentation entrypoints
 
-- [Field Flow README](field-flow/README.md) / [Chinese pair](field-flow/README.zh-CN.md) and [FF plan](field-flow/PLAN.md) / [Chinese pair](field-flow/PLAN.zh-CN.md) — FF-owned documentation and future runtime work.
+- [Field Flow README](field-flow/README.md) / [Chinese pair](field-flow/README.zh-CN.md) and [FF plan](field-flow/PLAN.md) / [Chinese pair](field-flow/PLAN.zh-CN.md) — FF-owned documentation and runtime work.
 - [FF task catalog](field-flow/plans/README.md) / [Chinese pair](field-flow/plans/README.zh-CN.md) — unique owning bundle for the [ARCH-TOOL-001 r2 baseline](field-flow/plans/ARCH-TOOL-001-field-flow-runner/spec.md), including preserved r1 history and the CA prompt.
-- [FF-001 r3 spec](field-flow/plans/FF-001-dual-runtime-demo01/spec.md) and [r2 Development evidence](field-flow/plans/FF-001-dual-runtime-demo01/tasks.md) — restricted INT raw ISO adapter proposal awaits exact approval after a real unmatched-ACK failure; complete r2/r1 history is retained.
-- [Rust manifest](field-flow/field-flow-rust/Cargo.toml) and [PLC driver process](field-flow/field-flow-rust/src/driver_process.rs) — compiling partial candidate retained with a known protocol blocker; complete startup/protocol acceptance and QA remain pending.
+- [FF-001 r4 spec](field-flow/plans/FF-001-dual-runtime-demo01/spec.md), [Development handoff](field-flow/plans/FF-001-dual-runtime-demo01/tasks.md) and [QA records](field-flow/plans/FF-001-dual-runtime-demo01/checklist.md) — current dual candidate passed fresh QA2 AC01–AC15; three Rust QA1 defects closed and failure/history retained; Human Owner final acceptance pending.
+- [Rust project guide](field-flow/field-flow-rust/README.md), [PLC driver process](field-flow/field-flow-rust/src/driver_process.rs) and [INT response adapter](field-flow/field-flow-rust/src/infrastructure/s7_int_pdu.rs) — repaired queue/IO deadlines, pre-call clock guards and actual started statistics independently verified; formal/isolated full18 and additional protocol/process probes passed.
+- [Python project guide](field-flow/field-flow-python/README.md), [runtime](field-flow/field-flow-python/src/field_flow/runtime.py), [demo01](field-flow/field-flow-python/src/field_flow/app/demo01.py) and [INT response adapter](field-flow/field-flow-python/src/field_flow/infrastructure/s7_int_pdu.py) — unchanged independent candidate passed QA2 using verified QA1 formal/isolated evidence and fresh build/unit/gate/CLI checks; [original public API precheck](field-flow/field-flow-python/tests/python_api_preflight.py) failure retained.
 - `docs/README.md` / `docs/README.zh-CN.md` — bilingual index and authority boundary for durable project documents.
 - `docs/multi-project-pm.md` — canonical multi-project development and governance guide.
 

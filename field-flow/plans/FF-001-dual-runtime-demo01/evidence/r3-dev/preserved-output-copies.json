@@ -1,0 +1,62 @@
+[
+  {
+    "source": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r2-dev/final-partial-check.log",
+    "copy": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r3-dev/r2-preserved-final-partial-check.txt",
+    "sha256": "f95b84a5b576f207b2b7773aefccef14950b2a12e30b2f61da6881ec1ece9648"
+  },
+  {
+    "source": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r2-dev/rust-matrix-1.log",
+    "copy": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r3-dev/r2-preserved-rust-matrix-1.txt",
+    "sha256": "ace328c83bee2e5543109861344315f9cccf7e1c00ff56f80b37b17cdf548546"
+  },
+  {
+    "source": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r2-dev/rust-matrix-10.log",
+    "copy": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r3-dev/r2-preserved-rust-matrix-10.txt",
+    "sha256": "317bff4f27ee5aa49e7524c8c15efdbce6c69de753756260f76dab788cda4a9f"
+  },
+  {
+    "source": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r2-dev/rust-matrix-2.log",
+    "copy": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r3-dev/r2-preserved-rust-matrix-2.txt",
+    "sha256": "e736c79c5f4267d0ca4b9168aa2c7355d7712a67aaf185d14a7dababe8f40614"
+  },
+  {
+    "source": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r2-dev/rust-matrix-3.log",
+    "copy": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r3-dev/r2-preserved-rust-matrix-3.txt",
+    "sha256": "dff81e4620da6fd158d355a3d470441e3d8cfc4e53639b8329f62becd34588fc"
+  },
+  {
+    "source": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r2-dev/rust-matrix-4.log",
+    "copy": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r3-dev/r2-preserved-rust-matrix-4.txt",
+    "sha256": "018b92e31db78a47106338b903de2701a4fe46db9fcc471081798bcc65497430"
+  },
+  {
+    "source": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r2-dev/rust-matrix-5.log",
+    "copy": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r3-dev/r2-preserved-rust-matrix-5.txt",
+    "sha256": "c154b2d5303b1af6db7883ea33df33f6226e13a2b4adb5270035d1c26e2ee5f8"
+  },
+  {
+    "source": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r2-dev/rust-matrix-6.log",
+    "copy": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r3-dev/r2-preserved-rust-matrix-6.txt",
+    "sha256": "7f40458f6dc034e87ec94b46d3030be9fa0da70dfa02d0deb23a486241305ac8"
+  },
+  {
+    "source": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r2-dev/rust-matrix-7.log",
+    "copy": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r3-dev/r2-preserved-rust-matrix-7.txt",
+    "sha256": "261e24930d20a59de229c1a7f5dd389a300e159e941f97f10e4289ceb40845a5"
+  },
+  {
+    "source": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r2-dev/rust-matrix-8.log",
+    "copy": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r3-dev/r2-preserved-rust-matrix-8.txt",
+    "sha256": "941c903b42403168df7e581fcfb7c4f833eea10fbc3121fb143ab008d19ab5c4"
+  },
+  {
+    "source": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r2-dev/rust-matrix-9.log",
+    "copy": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r3-dev/r2-preserved-rust-matrix-9.txt",
+    "sha256": "0b18cfd5dd658310da116bcebc0cddd3f983b1b629e18ccfb6c546b4ef4a70b0"
+  },
+  {
+    "source": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r2-dev/rust-stale-reference-probe.log",
+    "copy": "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r3-dev/r2-preserved-rust-stale-reference-probe.txt",
+    "sha256": "55e116d2dd442e90a73c143bd8b65de908b97f7869db17cd9e87e86bfa5aa40d"
+  }
+]

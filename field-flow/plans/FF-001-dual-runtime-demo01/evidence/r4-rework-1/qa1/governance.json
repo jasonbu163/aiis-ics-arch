@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "bash",
+    "/Users/jason/Desktop/DreamCode/AI/AIIS/skills/project-governance/scripts/check-governance-bundle.sh",
+    "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+    "field-flow",
+    "field-flow/field-flow-rust",
+    "field-flow/field-flow-python"
+  ],
+  "exit_code": 1,
+  "line_count": 332,
+  "outside_diagnostics": 318,
+  "outside_equal_prior": true,
+  "ff": [
+    "missing honest pending task stage: field-flow/plans/README.md -> FF-001-dual-runtime-demo01/checklist.md",
+    "missing honest pending task stage: field-flow/plans/README.zh-CN.md -> FF-001-dual-runtime-demo01/checklist.md",
+    "PLAN v2 task link must target spec.md: field-flow/PLAN.md -> plans/FF-001-dual-runtime-demo01/tasks.md",
+    "missing honest pending task stage: field-flow/plans/README.md -> FF-001-dual-runtime-demo01/checklist.md",
+    "missing honest pending task stage: field-flow/plans/README.zh-CN.md -> FF-001-dual-runtime-demo01/checklist.md",
+    "missing honest pending task stage: field-flow/plans/README.md -> FF-001-dual-runtime-demo01/checklist.md",
+    "missing honest pending task stage: field-flow/plans/README.zh-CN.md -> FF-001-dual-runtime-demo01/checklist.md",
+    "PLAN v2 task link must target spec.md: field-flow/PLAN.zh-CN.md -> plans/FF-001-dual-runtime-demo01/tasks.md",
+    "missing honest pending task stage: field-flow/plans/README.md -> FF-001-dual-runtime-demo01/checklist.md",
+    "missing honest pending task stage: field-flow/plans/README.zh-CN.md -> FF-001-dual-runtime-demo01/checklist.md",
+    "missing plans task link: field-flow/field-flow-rust/PLAN.md",
+    "missing plans task link: field-flow/field-flow-rust/PLAN.zh-CN.md",
+    "missing plans task link: field-flow/field-flow-python/PLAN.md",
+    "missing plans task link: field-flow/field-flow-python/PLAN.zh-CN.md"
+  ],
+  "output_sha256": "b9b64dab95454059945d1ad802f59376121b94caaa609bcb899bf03e0e8c84b4"
+}

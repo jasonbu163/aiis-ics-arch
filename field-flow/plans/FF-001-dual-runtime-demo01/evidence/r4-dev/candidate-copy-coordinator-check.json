@@ -1,0 +1,10 @@
+{
+  "candidate_manifest_sha256": "4221b6ded6ea871bb01cf7ac12059e0794d83550ea9d8fe755979a702ab5067f",
+  "counts": {
+    "field-flow-python": 48,
+    "field-flow-rust": 43
+  },
+  "formal_copy_mismatches": [],
+  "approved_spec_sha256": "e30641845b63f295b408568009c25514f314101d0a2e2b72d331d4255a73045d",
+  "qa": false
+}

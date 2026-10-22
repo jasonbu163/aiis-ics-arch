@@ -1,0 +1,17 @@
+[
+  {
+    "kind": "helper_command_cwd",
+    "command": "uv sync --locked --python 3.11 --no-python-downloads",
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+    "exit_code": 2,
+    "output": "error: No `pyproject.toml` found in current directory or any parent directory",
+    "resolution": "Use own Python project cwd; no dependency modification from failed command."
+  },
+  {
+    "kind": "sandbox_network",
+    "command": "UV_CACHE_DIR=/private/tmp/ff-001-r1-r3dev-k989azay/uv-cache uv sync --locked --python 3.11 --no-python-downloads",
+    "exit_code": 1,
+    "error": "Failed to fetch https://mirrors.aliyun.com/pypi/simple/packaging/; dns error after 3 retries",
+    "resolution": "Request normal tool escalation for approved project build dependency resolution; not a version incompatibility."
+  }
+]

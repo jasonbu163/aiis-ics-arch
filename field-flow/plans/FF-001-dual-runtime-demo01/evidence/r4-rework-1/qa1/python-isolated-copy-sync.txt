@@ -1,0 +1,22 @@
+Using CPython 3.11.12
+Creating virtual environment at: /private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-venv
+Resolved 16 packages in 0.61ms
+   Building field-flow @ file:///private/tmp/ff-001-r4-qa-wY5eCh/isolated/python/project
+      Built field-flow @ file:///private/tmp/ff-001-r4-qa-wY5eCh/isolated/python/project
+Prepared 1 package in 376ms
+Installed 15 packages in 13ms
+ + anyio==4.15.1
+ + certifi==2026.10.19
+ + field-flow==0.1.0 (from file:///private/tmp/ff-001-r4-qa-wY5eCh/isolated/python/project)
+ + h11==0.16.0
+ + httpcore==1.0.9
+ + httpx==0.28.1
+ + idna==3.20
+ + iniconfig==2.3.1
+ + packaging==26.3
+ + pluggy==1.7.0
+ + pygments==2.21.0
+ + pytest==8.4.2
+ + python-snap7==3.0.0
+ + pyyaml==6.0.3
+ + typing-extensions==4.16.0

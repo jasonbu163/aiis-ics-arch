@@ -1,0 +1,74 @@
+[
+  {
+    "label": "rust-gap-copy",
+    "cwd": "/private/tmp/ff-001-r1-r3dev-k989azay/rust-copy",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--features",
+      "test-fixture",
+      "--test",
+      "local_protocol",
+      "--test",
+      "ack_rejection_matrix",
+      "--test",
+      "confirmed_audit",
+      "--",
+      "--test-threads=1",
+      "--nocapture"
+    ],
+    "timeout_seconds": 120,
+    "exit_code": 0,
+    "duration_seconds": 49.844961833999996,
+    "output": "/private/tmp/ff-001-r1-r3dev-k989azay/rust-gap-copy.txt"
+  },
+  {
+    "label": "rust-gap-final-fmt",
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "command": [
+      "cargo",
+      "fmt",
+      "--check"
+    ],
+    "timeout_seconds": 60,
+    "exit_code": 0,
+    "duration_seconds": 0.19059562500000027,
+    "output": "/private/tmp/ff-001-r1-r3dev-k989azay/rust-gap-final-fmt.txt"
+  },
+  {
+    "label": "rust-gap-final-check",
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--all-targets",
+      "--features",
+      "test-fixture"
+    ],
+    "timeout_seconds": 60,
+    "exit_code": 0,
+    "duration_seconds": 0.7694677080000005,
+    "output": "/private/tmp/ff-001-r1-r3dev-k989azay/rust-gap-final-check.txt"
+  },
+  {
+    "label": "rust-gap-final-build",
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--offline",
+      "--bins",
+      "--features",
+      "test-fixture"
+    ],
+    "timeout_seconds": 60,
+    "exit_code": 0,
+    "duration_seconds": 0.13299750000000188,
+    "output": "/private/tmp/ff-001-r1-r3dev-k989azay/rust-gap-final-build.txt"
+  }
+]

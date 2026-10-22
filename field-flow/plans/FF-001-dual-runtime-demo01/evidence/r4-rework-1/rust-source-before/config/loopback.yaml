@@ -1,0 +1,25 @@
+# FF-001 synthetic loopback；不是现场目标授权。
+schema_version: 1
+instance_id: ff-rust-demo01
+plcs:
+  - id: plc_demo
+    host: 127.0.0.1
+    port: 31102
+    rack: 0
+    slot: 1
+    connect_timeout_ms: 3000
+    io_timeout_ms: 5000
+    queue_capacity: 16
+    queue_wait_ms: 2000
+    ready_wait_ms: 3000
+flows:
+  - id: demo01
+    kind: demo01
+    business_name: synthetic_command_to_int
+    interval_ms: 500
+    source_id: demo01-feed
+    get_url: http://127.0.0.1:31880/demo01/command
+    target: {plc_id: plc_demo, db_number: 1, db_size_bytes: 16, byte_offset: 0, type: INT}
+    input_max_age_ms: 10000
+http: {connect_timeout_ms: 500, total_timeout_ms: 1500, pool_wait_ms: 500, max_connections: 8, max_body_bytes: 4096}
+shutdown_timeout_ms: 15000

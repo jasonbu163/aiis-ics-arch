@@ -1,0 +1,43 @@
+    Checking field-flow v0.1.0 (/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust)
+warning: struct `Run` is never constructed
+  --> tests/support/mod.rs:19:12
+   |
+19 | pub struct Run {
+   |            ^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: associated items `new`, `open`, `ready`, `close`, and `iteration` are never used
+  --> tests/support/mod.rs:26:12
+   |
+25 | impl Run {
+   | -------- associated items in this implementation
+26 |     pub fn new(label: &str, mode: &str, c: &Config) -> Self {
+   |            ^^^
+...
+32 |     pub fn open(dir: PathBuf, mode: &str, c: &Config) -> Self {
+   |            ^^^^
+...
+48 |     pub async fn ready(&self) {
+   |                  ^^^^^
+...
+59 |     pub async fn close(self, normal: bool) -> PathBuf {
+   |                  ^^^^^
+...
+80 |     pub async fn iteration(&self, c: &Config) -> Result<()> {
+   |                  ^^^^^^^^^
+
+warning: function `intent` is never used
+   --> tests/support/mod.rs:101:8
+    |
+101 | pub fn intent(c: &Config, command: &str, value: i16) -> field_flow::domain::Intent {
+    |        ^^^^^^
+
+warning: function `readback` is never used
+   --> tests/support/mod.rs:116:8
+    |
+116 | pub fn readback(offset: i32) -> [u8; 16] {
+    |        ^^^^^^^^
+
+warning: `field-flow` (test "process_lifecycle") generated 4 warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.60s

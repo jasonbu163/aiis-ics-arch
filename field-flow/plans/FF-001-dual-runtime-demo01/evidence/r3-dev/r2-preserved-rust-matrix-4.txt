@@ -1,0 +1,63 @@
+   Compiling field-flow v0.1.0 (/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust)
+warning: unused import: `sync::atomic::Ordering`
+  --> tests/local_protocol.rs:10:11
+   |
+10 | use std::{sync::atomic::Ordering, time::Duration};
+   |           ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: function `eventually` is never used
+  --> tests/support/mod.rs:94:14
+   |
+94 | pub async fn eventually(mut f: impl FnMut() -> bool) {
+   |              ^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: function `intent` is never used
+   --> tests/support/mod.rs:101:8
+    |
+101 | pub fn intent(c: &Config, command: &str, value: i16) -> field_flow::domain::Intent {
+    |        ^^^^^^
+
+warning: `field-flow` (test "local_protocol") generated 3 warnings (run `cargo fix --test "local_protocol"` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.82s
+     Running tests/local_protocol.rs (/private/tmp/ff-001-r1-20261021-r2dev/rust-target/debug/deps/local_protocol-98679e1cfe98c183)
+
+running 1 test
+test approved_loopback_matrix ... {"timestamp":"2026-10-21T12:25:11.192264Z","level":"INFO","event":"process_start","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"ok","duration_ms":0,"error_key":"","context":"{\"result\":\"ok\"}","target":"field_flow::infrastructure::audit"}
+{"timestamp":"2026-10-21T12:25:11.205664Z","level":"INFO","event":"driver_spawn","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","duration_ms":0,"error_key":"","context":"{\"generation\":1,\"target_id\":\"plc_demo\"}","target":"field_flow::infrastructure::audit"}
+{"timestamp":"2026-10-21T12:25:11.491521Z","level":"INFO","event":"driver_child_event","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"starting","duration_ms":0,"error_key":"","context":"{\"pid\":7635,\"result\":\"starting\"}","target":"field_flow::infrastructure::audit"}
+{"timestamp":"2026-10-21T12:25:11.496911Z","level":"INFO","event":"driver_child_event","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"child_error","duration_ms":0,"error_key":"plc_connect: ISO : An error occurred during recv TCP : Connection reset by peer","context":"{\"error_key\":\"plc_connect: ISO : An error occurred during recv TCP : Connection reset by peer\",\"pid\":7635,\"result\":\"child_error\"}","target":"field_flow::infrastructure::audit"}
+{"timestamp":"2026-10-21T12:25:11.595454Z","level":"INFO","event":"owner_backoff","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","duration_ms":0,"error_key":"forced_driver_stop:ipc_closed","context":"{\"backoff_ms\":250,\"error_key\":\"forced_driver_stop:ipc_closed\",\"target_id\":\"plc_demo\"}","target":"field_flow::infrastructure::audit"}
+{"timestamp":"2026-10-21T12:25:11.853769Z","level":"INFO","event":"driver_spawn","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","duration_ms":0,"error_key":"","context":"{\"generation\":2,\"target_id\":\"plc_demo\"}","target":"field_flow::infrastructure::audit"}
+{"timestamp":"2026-10-21T12:25:11.877732Z","level":"INFO","event":"driver_child_event","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"starting","duration_ms":0,"error_key":"","context":"{\"pid\":7636,\"result\":\"starting\"}","target":"field_flow::infrastructure::audit"}
+{"timestamp":"2026-10-21T12:25:11.882670Z","level":"INFO","event":"driver_child_event","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"child_error","duration_ms":0,"error_key":"plc_connect: ISO : An error occurred during recv TCP : Connection reset by peer","context":"{\"error_key\":\"plc_connect: ISO : An error occurred during recv TCP : Connection reset by peer\",\"pid\":7636,\"result\":\"child_error\"}","target":"field_flow::infrastructure::audit"}
+{"timestamp":"2026-10-21T12:25:11.980144Z","level":"INFO","event":"owner_backoff","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","duration_ms":0,"error_key":"forced_driver_stop:ipc_closed","context":"{\"backoff_ms\":500,\"error_key\":\"forced_driver_stop:ipc_closed\",\"target_id\":\"plc_demo\"}","target":"field_flow::infrastructure::audit"}
+{"timestamp":"2026-10-21T12:25:12.489370Z","level":"INFO","event":"driver_spawn","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","duration_ms":0,"error_key":"","context":"{\"generation\":3,\"target_id\":\"plc_demo\"}","target":"field_flow::infrastructure::audit"}
+{"timestamp":"2026-10-21T12:25:12.514091Z","level":"INFO","event":"driver_child_event","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"starting","duration_ms":0,"error_key":"","context":"{\"pid\":7637,\"result\":\"starting\"}","target":"field_flow::infrastructure::audit"}
+{"timestamp":"2026-10-21T12:25:12.518261Z","level":"INFO","event":"driver_child_event","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"child_error","duration_ms":0,"error_key":"plc_connect: ISO : An error occurred during recv TCP : Connection reset by peer","context":"{\"error_key\":\"plc_connect: ISO : An error occurred during recv TCP : Connection reset by peer\",\"pid\":7637,\"result\":\"child_error\"}","target":"field_flow::infrastructure::audit"}
+{"timestamp":"2026-10-21T12:25:12.616903Z","level":"INFO","event":"owner_backoff","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","duration_ms":0,"error_key":"forced_driver_stop:ipc_closed","context":"{\"backoff_ms\":1000,\"error_key\":\"forced_driver_stop:ipc_closed\",\"target_id\":\"plc_demo\"}","target":"field_flow::infrastructure::audit"}
+{"timestamp":"2026-10-21T12:25:13.623916Z","level":"INFO","event":"driver_spawn","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","duration_ms":0,"error_key":"","context":"{\"generation\":4,\"target_id\":\"plc_demo\"}","target":"field_flow::infrastructure::audit"}
+{"timestamp":"2026-10-21T12:25:13.647914Z","level":"INFO","event":"driver_child_event","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"starting","duration_ms":0,"error_key":"","context":"{\"pid\":7652,\"result\":\"starting\"}","target":"field_flow::infrastructure::audit"}
+{"timestamp":"2026-10-21T12:25:13.652906Z","level":"INFO","event":"driver_child_event","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"child_error","duration_ms":0,"error_key":"plc_connect: ISO : An error occurred during recv TCP : Connection reset by peer","context":"{\"error_key\":\"plc_connect: ISO : An error occurred during recv TCP : Connection reset by peer\",\"pid\":7652,\"result\":\"child_error\"}","target":"field_flow::infrastructure::audit"}
+{"timestamp":"2026-10-21T12:25:13.749864Z","level":"INFO","event":"owner_backoff","implementation":"rust","run_id":"1792585511191-7608-2","instance_id":"ff-rust-demo01","flow_id":"","target_id":"plc_demo","command_id":"","request_id":"","state":"","old":"","new":"","result":"","duration_ms":0,"error_key":"forced_driver_stop:ipc_closed","context":"{\"backoff_ms\":2000,\"error_key\":\"forced_driver_stop:ipc_closed\",\"target_id\":\"plc_demo\"}","target":"field_flow::infrastructure::audit"}
+FAILED
+
+failures:
+
+---- approved_loopback_matrix stdout ----
+
+thread 'approved_loopback_matrix' panicked at tests/support/mod.rs:51:13:
+ready: OwnerHealth { state: "recovering", generation: 4, pid: None, queue_depth: 0, in_flight: 0 }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+{"fixture_final":{"applied":0,"gets":0,"native_pid":7634,"reads":0,"sessions":4,"trace":[{"at_ms":1792585511493,"operation":0,"positive":false,"request_ref":[192,1],"response_ref":[192,1]},{"at_ms":1792585511881,"operation":0,"positive":false,"request_ref":[192,1],"response_ref":[192,1]},{"at_ms":1792585512516,"operation":0,"positive":false,"request_ref":[192,1],"response_ref":[192,1]},{"at_ms":1792585513649,"operation":0,"positive":false,"request_ref":[192,1],"response_ref":[192,1]}],"writes":0}}
+
+
+failures:
+    approved_loopback_matrix
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.41s
+
+error: test failed, to rerun pass `--test local_protocol`

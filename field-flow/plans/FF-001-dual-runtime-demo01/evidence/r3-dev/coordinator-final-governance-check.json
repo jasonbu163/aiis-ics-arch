@@ -1,0 +1,29 @@
+{
+  "exit_code": 1,
+  "diagnostic_lines": 330,
+  "ff_diagnostics": [
+    "inconsistent Revision: field-flow/plans/FF-001-dual-runtime-demo01/tasks.md (r3 != r4)",
+    "tasks.md requires owner_approved spec.md: field-flow/plans/FF-001-dual-runtime-demo01",
+    "inconsistent Revision: field-flow/plans/FF-001-dual-runtime-demo01/tasks.md (r3 != r4)",
+    "tasks.md requires owner_approved spec.md: field-flow/plans/FF-001-dual-runtime-demo01",
+    "inconsistent Revision: field-flow/plans/FF-001-dual-runtime-demo01/tasks.md (r3 != r4)",
+    "tasks.md requires owner_approved spec.md: field-flow/plans/FF-001-dual-runtime-demo01",
+    "inconsistent Revision: field-flow/plans/FF-001-dual-runtime-demo01/tasks.md (r3 != r4)",
+    "tasks.md requires owner_approved spec.md: field-flow/plans/FF-001-dual-runtime-demo01",
+    "missing plans task link: field-flow/field-flow-rust/PLAN.md",
+    "missing plans task link: field-flow/field-flow-rust/PLAN.zh-CN.md",
+    "missing plans task link: field-flow/field-flow-python/PLAN.md",
+    "missing plans task link: field-flow/field-flow-python/PLAN.zh-CN.md"
+  ],
+  "task_outside_diagnostics_unchanged": true,
+  "outside_previous_count": 318,
+  "outside_current_count": 318,
+  "command": [
+    "bash",
+    "/Users/jason/Desktop/DreamCode/AI/AIIS/skills/project-governance/scripts/check-governance-bundle.sh",
+    "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+    "field-flow",
+    "field-flow/field-flow-rust",
+    "field-flow/field-flow-python"
+  ]
+}

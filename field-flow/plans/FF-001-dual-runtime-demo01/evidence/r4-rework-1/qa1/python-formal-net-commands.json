@@ -1,0 +1,284 @@
+[
+  {
+    "label": "lock",
+    "argv": [
+      "uv",
+      "lock",
+      "--check",
+      "--offline",
+      "--python",
+      "3.11",
+      "--no-python-downloads"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-target"
+    },
+    "pid": 10028,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.08988791600000001,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-lock.txt",
+    "output_sha256": "c24f70856eea62e6903465d316f2808776b99a58a7890e0c6a5b8881e703475c"
+  },
+  {
+    "label": "sync",
+    "argv": [
+      "uv",
+      "sync",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-target"
+    },
+    "pid": 10035,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.04411154099999999,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-sync.txt",
+    "output_sha256": "2a208586c0b461bef54124ec9113b9d71d4ea51ffb1aea83b9b9ba5ddd264e41"
+  },
+  {
+    "label": "build",
+    "argv": [
+      "uv",
+      "build",
+      "--offline",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "--out-dir",
+      "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-dist"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-target"
+    },
+    "pid": 10038,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.846133,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-build.txt",
+    "output_sha256": "b1db5c6f81bd5b2963a199de84a8f8ab3e6dcddaa02758c6f3a7df320c66312d"
+  },
+  {
+    "label": "compile",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "python",
+      "-m",
+      "compileall",
+      "-q",
+      "src",
+      "tests"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-target"
+    },
+    "pid": 10062,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.20241600000000004,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-compile.txt",
+    "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "unit",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "tests/unit",
+      "-s"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-target"
+    },
+    "pid": 10067,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 2.372228125,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-unit.txt",
+    "output_sha256": "9fb4c909bbc074802f77aa9d629de6cb757ceac0d4ce5aad48e9a9da9f96fd8b"
+  },
+  {
+    "label": "gate",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "tests/test_matched_ack_gate.py",
+      "-s"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-target"
+    },
+    "pid": 10113,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 3.2482440419999996,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-gate.txt",
+    "output_sha256": "3803fa4375f88ab5544cb6acddbf9b906e2588d9966bdac1b434ffcc836f6fc0"
+  },
+  {
+    "label": "protocol",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "tests/test_local_protocol.py",
+      "-s"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-target"
+    },
+    "pid": 10155,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 51.976200959,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-protocol.txt",
+    "output_sha256": "481f8451e0f1c6e04db109242f9711413eabb4037588b56c1cf0e340908f7dcd"
+  },
+  {
+    "label": "bare",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "field-flow"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-target"
+    },
+    "pid": 10696,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.6426885000000055,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-bare.txt",
+    "output_sha256": "e0da32ec8bb2533a1077076b454dadfaa4fc27bf52c0c7a46549c29cd1382509"
+  },
+  {
+    "label": "cli",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "python",
+      "-m",
+      "tests.fixtures.cli_smoke"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-target"
+    },
+    "pid": 10700,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 2.3652297499999975,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-cli.txt",
+    "output_sha256": "cedd63cd895aef8c7b4a3291ccc6e11998427ef5ea31d11cc1a06e7362c42743"
+  },
+  {
+    "label": "provenance",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "python",
+      "-c",
+      "import sys,field_flow,tests.fixtures,sqlite3,snap7; import importlib.metadata as m,json; print(json.dumps(dict(executable=sys.executable,source=field_flow.__file__,fixture=tests.fixtures.__file__,python=sys.version,sqlite=sqlite3.sqlite_version,snap7=m.version(\"python-snap7\"))))"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-target"
+    },
+    "pid": 10731,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.1496120420000011,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-provenance.txt",
+    "output_sha256": "e724f538c3a0c11a51ca5a14de242e8fc40b447e12c49f23ef16d35460a8b9e4"
+  }
+]

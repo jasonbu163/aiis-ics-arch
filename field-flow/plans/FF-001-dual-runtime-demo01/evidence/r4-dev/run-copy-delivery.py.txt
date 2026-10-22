@@ -1,0 +1,10 @@
+import json,os,subprocess,time
+from pathlib import Path
+r=Path('/private/tmp/ff-001-r1-r4dev-pc36ki7o');env=os.environ.copy();env['UV_CACHE_DIR']=str(r/'uv-cache');cwd=str(r/'python-copy');prefix=['uv','run','--locked','--python','3.11','--no-python-downloads'];steps=[('lock',['uv','lock','--check','--python','3.11','--no-python-downloads'],60),('sync',['uv','sync','--locked','--python','3.11','--no-python-downloads'],120),('build',['uv','build','--python','3.11','--no-python-downloads'],120),('compile',prefix+['python','-m','compileall','-q','src','tests'],60),('unit',prefix+['pytest','-q','tests/unit','-s'],60),('gate',prefix+['pytest','-q','tests/test_matched_ack_gate.py','-s'],120),('local',prefix+['pytest','-q','tests/test_local_protocol.py','-s'],180),('help',prefix+['field-flow'],30),('cli-smoke',prefix+['python','-m','tests.fixtures.cli_smoke'],45)];rows=[]
+for label,cmd,timeout in steps:
+ start=time.monotonic();out=r/('copy-1-'+label+'.txt')
+ with out.open('wb') as f:
+  try:code=subprocess.run(cmd,cwd=cwd,env=env,stdout=f,stderr=subprocess.STDOUT,timeout=timeout).returncode
+  except subprocess.TimeoutExpired:code='timeout'+str(timeout)
+ rows.append({'label':label,'command':cmd,'cwd':cwd,'timeout_seconds':timeout,'exit_code':code,'duration_seconds':time.monotonic()-start,'output':str(out)});(r/'copy-1-commands.json').write_text(json.dumps(rows,indent=2)+'\n');print(label,code,flush=True)
+ if code!=0:raise SystemExit(1)

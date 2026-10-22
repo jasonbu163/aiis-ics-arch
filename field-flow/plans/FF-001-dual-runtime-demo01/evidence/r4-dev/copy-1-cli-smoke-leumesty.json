@@ -1,0 +1,352 @@
+{
+  "commands": [
+    {
+      "command": [
+        "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy/.venv/bin/python3",
+        "-m",
+        "field_flow",
+        "state",
+        "init",
+        "--synthetic",
+        "--mode",
+        "dry_run",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-cli-smoke-leumesty/dry_run",
+        "--instance-id",
+        "ff-python-demo01"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"timestamp\":\"2026-10-22T02:17:22.937781+00:00\",\"event\":\"state_init\",\"implementation\":\"python\",\"run_id\":\"\",\"instance_id\":\"ff-python-demo01\",\"flow_id\":\"\",\"target_id\":\"\",\"command_id\":\"\",\"request_id\":\"\",\"state\":\"\",\"old\":\"\",\"new\":\"\",\"result\":\"ok\",\"error_key\":\"\",\"duration_ms\":0}\n"
+    },
+    {
+      "command": [
+        "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy/.venv/bin/python3",
+        "-m",
+        "field_flow",
+        "run",
+        "--config",
+        "config/loopback.yaml",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-cli-smoke-leumesty/dry_run"
+      ],
+      "parent_pid": 90887,
+      "exit_code": 0,
+      "shutdown_ms": 111.54237505979836,
+      "inspect_command": [
+        "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy/.venv/bin/python3",
+        "-m",
+        "field_flow",
+        "state",
+        "inspect",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-cli-smoke-leumesty/dry_run"
+      ],
+      "inspect_exit": 0,
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "dry_run",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "b69d0f43098d4dbf99e1a5ff4cc361f6",
+          "created_at": "2026-10-22T02:17:22.937Z"
+        },
+        "counts": {
+          "simulated": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "dry_run",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "b69d0f43098d4dbf99e1a5ff4cc361f6",
+              "created_at": "2026-10-22T02:17:22.937Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "fixture-5535cb3f37234e40908ff11dd4181153",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "9c344e4a391fa636d1dfc8f55993d5e8b9725d93551bddef0da4dd9d6a4592ea",
+              "value_i16": 42,
+              "issued_at_ms": 1792635442903,
+              "expires_at_ms": 1792635472903,
+              "state": "simulated",
+              "dispatch_count": 0,
+              "run_id": "9d19ee3905ed47f68c6a8ea82b3e6be0",
+              "request_id": null,
+              "last_error_key": null,
+              "ack_kind": null,
+              "created_at": "2026-10-22T02:17:23.023Z",
+              "updated_at": "2026-10-22T02:17:23.023Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "fixture-5535cb3f37234e40908ff11dd4181153",
+              "run_id": "9d19ee3905ed47f68c6a8ea82b3e6be0",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "simulated",
+              "reason_key": "intent",
+              "summary": "9c344e4a391fa636d1dfc8f55993d5e8b9725d93551bddef0da4dd9d6a4592ea",
+              "created_at": "2026-10-22T02:17:23.023Z"
+            }
+          ]
+        }
+      },
+      "stdout": "/private/tmp/ff-001-r1-r4-python-cli-smoke-leumesty/dry_run-stdout.txt"
+    },
+    {
+      "command": [
+        "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy/.venv/bin/python3",
+        "-m",
+        "field_flow",
+        "state",
+        "init",
+        "--synthetic",
+        "--mode",
+        "execute",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-cli-smoke-leumesty/execute",
+        "--instance-id",
+        "ff-python-demo01"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"timestamp\":\"2026-10-22T02:17:23.172402+00:00\",\"event\":\"state_init\",\"implementation\":\"python\",\"run_id\":\"\",\"instance_id\":\"ff-python-demo01\",\"flow_id\":\"\",\"target_id\":\"\",\"command_id\":\"\",\"request_id\":\"\",\"state\":\"\",\"old\":\"\",\"new\":\"\",\"result\":\"ok\",\"error_key\":\"\",\"duration_ms\":0}\n"
+    },
+    {
+      "command": [
+        "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy/.venv/bin/python3",
+        "-m",
+        "field_flow",
+        "run",
+        "--config",
+        "config/loopback.yaml",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-cli-smoke-leumesty/execute",
+        "--execute"
+      ],
+      "parent_pid": 90891,
+      "exit_code": 0,
+      "shutdown_ms": 110.20845803432167,
+      "inspect_command": [
+        "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy/.venv/bin/python3",
+        "-m",
+        "field_flow",
+        "state",
+        "inspect",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-cli-smoke-leumesty/execute"
+      ],
+      "inspect_exit": 0,
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "95a1d4439981487584ba7df67229fa1e",
+          "created_at": "2026-10-22T02:17:23.172Z"
+        },
+        "counts": {
+          "confirmed": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "95a1d4439981487584ba7df67229fa1e",
+              "created_at": "2026-10-22T02:17:23.172Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "fixture-5535cb3f37234e40908ff11dd4181153",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "9c344e4a391fa636d1dfc8f55993d5e8b9725d93551bddef0da4dd9d6a4592ea",
+              "value_i16": 42,
+              "issued_at_ms": 1792635442903,
+              "expires_at_ms": 1792635472903,
+              "state": "confirmed",
+              "dispatch_count": 1,
+              "run_id": "86c7ffe5eb0d40739c3b7248c99263d1",
+              "request_id": "d7073da3d47e44bab35facb8ed91109c",
+              "last_error_key": null,
+              "ack_kind": "s7_protocol",
+              "created_at": "2026-10-22T02:17:23.257Z",
+              "updated_at": "2026-10-22T02:17:23.285Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "fixture-5535cb3f37234e40908ff11dd4181153",
+              "run_id": "86c7ffe5eb0d40739c3b7248c99263d1",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "9c344e4a391fa636d1dfc8f55993d5e8b9725d93551bddef0da4dd9d6a4592ea",
+              "created_at": "2026-10-22T02:17:23.257Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "fixture-5535cb3f37234e40908ff11dd4181153",
+              "run_id": "86c7ffe5eb0d40739c3b7248c99263d1",
+              "request_id": "d7073da3d47e44bab35facb8ed91109c",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:17:23.284Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "fixture-5535cb3f37234e40908ff11dd4181153",
+              "run_id": "86c7ffe5eb0d40739c3b7248c99263d1",
+              "request_id": "d7073da3d47e44bab35facb8ed91109c",
+              "from_state": "in_flight",
+              "to_state": "confirmed",
+              "reason_key": "s7_protocol",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:17:23.285Z"
+            }
+          ]
+        }
+      },
+      "stdout": "/private/tmp/ff-001-r1-r4-python-cli-smoke-leumesty/execute-stdout.txt"
+    }
+  ],
+  "fixture_command": [
+    "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy/.venv/bin/python3",
+    "-m",
+    "tests.fixtures",
+    "--config",
+    "config/loopback.yaml",
+    "--evidence-dir",
+    "/private/tmp/ff-001-r1-r4-python-cli-smoke-leumesty/fixture"
+  ],
+  "fixture_pid": 90878,
+  "fixture_exit": 0,
+  "fixture": {
+    "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+    "writes": 1,
+    "reads": 1,
+    "gets": 2,
+    "sessions": 3,
+    "closed_sessions": 2,
+    "trace": [
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "",
+        "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400000000040010002a",
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      }
+    ],
+    "server_pid": 90880,
+    "server_exit": 0,
+    "server_close": {
+      "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "remaining_threads": [],
+      "pid": 90880,
+      "exit_code": 0
+    },
+    "server_epochs": [
+      {
+        "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+        "remaining_threads": [],
+        "pid": 90880,
+        "exit_code": 0
+      }
+    ],
+    "proxy_threads_joined": 3,
+    "ports_rebound": [
+      32102,
+      32103,
+      32880
+    ]
+  }
+}

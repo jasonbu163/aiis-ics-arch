@@ -1,0 +1,178 @@
+[
+  {
+    "source_output": "rust-gap-closure-1.txt",
+    "result": {
+      "ac": "AC10/AC12",
+      "actual_writes": 1,
+      "case": "confirmed-then-sink-failure",
+      "confirmed": 1,
+      "ports_rebound": [
+        31102,
+        31103,
+        31880
+      ],
+      "repeat_after_restart": 10,
+      "store": "/private/tmp/ff-001-r1-r3-rust-confirmed-then-sink-1792630123606-36683-0/state"
+    },
+    "read_only_database": "/private/tmp/ff-001-r1-r3-rust-confirmed-then-sink-1792630123606-36683-0/state/state.sqlite",
+    "tables": {
+      "store_meta": [
+        {
+          "schema_version": 1,
+          "implementation": "rust",
+          "mode": "execute",
+          "instance_id": "ff-rust-demo01",
+          "store_uuid": "1792630123611-36683-1",
+          "created_at": "2026-10-22T00:48:43.611Z"
+        }
+      ],
+      "commands": [
+        {
+          "source_id": "demo01-feed",
+          "command_id": "confirmed-before-sink",
+          "flow_id": "demo01",
+          "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+          "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+          "payload_hash": "5bafe1f0317f343297b62974bd2503549d0a30b9fc563ce1da95ebc732c596c5",
+          "value_i16": 42,
+          "issued_at_ms": 1792630123640,
+          "expires_at_ms": 1792630183640,
+          "state": "confirmed",
+          "dispatch_count": 1,
+          "run_id": "1792630123611-36683-2",
+          "request_id": "1792630123654-36683-4",
+          "last_error_key": null,
+          "ack_kind": "s7_protocol",
+          "created_at": "2026-10-22T00:48:43.649Z",
+          "updated_at": "2026-10-22T00:48:43.665Z"
+        }
+      ],
+      "command_events": [
+        {
+          "seq": 1,
+          "source_id": "demo01-feed",
+          "command_id": "confirmed-before-sink",
+          "run_id": "1792630123611-36683-2",
+          "request_id": null,
+          "from_state": null,
+          "to_state": "pending",
+          "reason_key": "intent",
+          "summary": "5bafe1f0317f343297b62974bd2503549d0a30b9fc563ce1da95ebc732c596c5",
+          "created_at": "2026-10-22T00:48:43.649Z"
+        },
+        {
+          "seq": 2,
+          "source_id": "demo01-feed",
+          "command_id": "confirmed-before-sink",
+          "run_id": "1792630123611-36683-2",
+          "request_id": "1792630123654-36683-4",
+          "from_state": "pending",
+          "to_state": "in_flight",
+          "reason_key": "dispatch_permit",
+          "summary": "{}",
+          "created_at": "2026-10-22T00:48:43.654Z"
+        },
+        {
+          "seq": 3,
+          "source_id": "demo01-feed",
+          "command_id": "confirmed-before-sink",
+          "run_id": "1792630123611-36683-2",
+          "request_id": null,
+          "from_state": "in_flight",
+          "to_state": "confirmed",
+          "reason_key": "s7_protocol",
+          "summary": "{}",
+          "created_at": "2026-10-22T00:48:43.665Z"
+        }
+      ]
+    }
+  },
+  {
+    "source_output": "rust-gap-copy.txt",
+    "result": {
+      "ac": "AC10/AC12",
+      "actual_writes": 1,
+      "case": "confirmed-then-sink-failure",
+      "confirmed": 1,
+      "ports_rebound": [
+        31102,
+        31103,
+        31880
+      ],
+      "repeat_after_restart": 10,
+      "store": "/private/tmp/ff-001-r1-r3-rust-confirmed-then-sink-1792630351915-39793-0/state"
+    },
+    "read_only_database": "/private/tmp/ff-001-r1-r3-rust-confirmed-then-sink-1792630351915-39793-0/state/state.sqlite",
+    "tables": {
+      "store_meta": [
+        {
+          "schema_version": 1,
+          "implementation": "rust",
+          "mode": "execute",
+          "instance_id": "ff-rust-demo01",
+          "store_uuid": "1792630351919-39793-1",
+          "created_at": "2026-10-22T00:52:31.919Z"
+        }
+      ],
+      "commands": [
+        {
+          "source_id": "demo01-feed",
+          "command_id": "confirmed-before-sink",
+          "flow_id": "demo01",
+          "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+          "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+          "payload_hash": "a35711fca564d9c79f6b810b97fcd1d23299bda5d7225ba0307acc6371e5e9f4",
+          "value_i16": 42,
+          "issued_at_ms": 1792630351948,
+          "expires_at_ms": 1792630411948,
+          "state": "confirmed",
+          "dispatch_count": 1,
+          "run_id": "1792630351919-39793-2",
+          "request_id": "1792630351955-39793-4",
+          "last_error_key": null,
+          "ack_kind": "s7_protocol",
+          "created_at": "2026-10-22T00:52:31.950Z",
+          "updated_at": "2026-10-22T00:52:31.966Z"
+        }
+      ],
+      "command_events": [
+        {
+          "seq": 1,
+          "source_id": "demo01-feed",
+          "command_id": "confirmed-before-sink",
+          "run_id": "1792630351919-39793-2",
+          "request_id": null,
+          "from_state": null,
+          "to_state": "pending",
+          "reason_key": "intent",
+          "summary": "a35711fca564d9c79f6b810b97fcd1d23299bda5d7225ba0307acc6371e5e9f4",
+          "created_at": "2026-10-22T00:52:31.951Z"
+        },
+        {
+          "seq": 2,
+          "source_id": "demo01-feed",
+          "command_id": "confirmed-before-sink",
+          "run_id": "1792630351919-39793-2",
+          "request_id": "1792630351955-39793-4",
+          "from_state": "pending",
+          "to_state": "in_flight",
+          "reason_key": "dispatch_permit",
+          "summary": "{}",
+          "created_at": "2026-10-22T00:52:31.955Z"
+        },
+        {
+          "seq": 3,
+          "source_id": "demo01-feed",
+          "command_id": "confirmed-before-sink",
+          "run_id": "1792630351919-39793-2",
+          "request_id": null,
+          "from_state": "in_flight",
+          "to_state": "confirmed",
+          "reason_key": "s7_protocol",
+          "summary": "{}",
+          "created_at": "2026-10-22T00:52:31.966Z"
+        }
+      ]
+    }
+  }
+]

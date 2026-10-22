@@ -1,0 +1,5 @@
+{
+  "help": "Field Flow Python\nfield-flow [--lang en-US|zh-CN] --help\nfield-flow state init --synthetic --mode dry_run|execute --state-dir NEW --instance-id ID\nfield-flow state inspect --state-dir PATH\nfield-flow run --config FILE --state-dir PATH [--execute]",
+  "error": "Command failed",
+  "fixture_help": "Python fixture: python -m tests.fixtures --config FILE --evidence-dir NEW; stop with SIGINT/SIGTERM"
+}

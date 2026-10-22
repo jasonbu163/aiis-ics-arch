@@ -1,0 +1,14 @@
+{
+  "exit_code": 1,
+  "line_count": 322,
+  "existing_outside_diagnostics": 318,
+  "outside_multiset_unchanged": true,
+  "ff_diagnostics": [
+    "missing plans task link: field-flow/field-flow-rust/PLAN.md",
+    "missing plans task link: field-flow/field-flow-rust/PLAN.zh-CN.md",
+    "missing plans task link: field-flow/field-flow-python/PLAN.md",
+    "missing plans task link: field-flow/field-flow-python/PLAN.zh-CN.md"
+  ],
+  "qa": false,
+  "meaning": "Actual coordinator check after QA1 checklist/catalog links and auxiliary PLAN link repair; only original4 ../plans/ parser limitations remain in FF"
+}

@@ -2431,3 +2431,42 @@ PM已读根AGENTS/README/PLAN双语、docs/plans索引、canonical workflow、�
 <!-- END R3 EXACT SNAPSHOT -->
 ```````
 <!-- END R4 EXACT SNAPSHOT -->
+
+## 附录B. 2026-10-22 已批准的操作手册与截图文档增量（当前文档gate）
+
+本附录是同一ARCH-AW-005 r5在Owner终验前的明确文档补全授权，不创建新Revision或Task。其前全部原文保持原字节；原批准spec SHA `67155fe4fca3068ef8e616dcf0ade69a5cdc614e7175a2f1ef4c6bf98f935419`不被倒称已覆盖以下新增成员。2026-10-22（Asia/Shanghai），本协调会话Human Owner消息`01a1622f-337a-7741-a830-68321d8da01f`逐字原话：
+
+> 可以，按这个方案补齐 DS 完整操作手册，先手工建点跑通，再演示多 DB/UDT 导入。每一步写清页面、按钮、填写示例和预期结果，关键步骤配截图，同步 README 和 docs 对应的 DS 文档。只改文档，不改代码、不重跑整套协议测试；DAA–DS SQLite 联调另批，阶段 C 暂不开展。
+
+当前产品候选`306a09d5317931482a59f45da5eafcb9d3ee739199799f475ade1891fb0b00b4`已由独立Verification记录qa_passed，Owner最终验收仍待完成。本附录登记授权，不把原产品QA改写成本次文档/截图已验；当前gate为Development完成下述文档增量，再由fresh-context Verification仅核本增量，Owner最终接受链不变。
+
+### B.1 精确文档面与案例
+
+沿用§5的D/T5/A5定义；下列路径均相对于D=`automation-world/device-simulator`，作为本次已获明确授权的新增allowlist，原技术R/AC、原allowlist及完整r4/r3/r2/r1历史不改。
+
+| 精确新增成员 | 用途 |
+| --- | --- |
+| `USER_GUIDE.md`、`USER_GUIDE.zh-CN.md` | 完整双语操作手册，按真实页面/按钮/输入示例/确认动作/预期结果及常见阻断组织。 |
+| `docs/user-guide/images/README.md`、`docs/user-guide/images/README.zh-CN.md` | 原生截图来源、步骤、脱敏/合成输入、原件哈希与事实边界索引。 |
+| `docs/user-guide/images/01-workbench.png`、`docs/user-guide/images/02-instance-editor.png`、`docs/user-guide/images/03-manual-point.png`、`docs/user-guide/images/04-manual-layout.png`、`docs/user-guide/images/05-policy.png` | 工作台、实例、手工点、布局及策略关键步骤的真实原生截图。 |
+| `docs/user-guide/images/06-apply-preview.png`、`docs/user-guide/images/07-online-values.png`、`docs/user-guide/images/08-import-bindings.png`、`docs/user-guide/images/09-import-names.png`、`docs/user-guide/images/10-reopen-stopped.png` | 应用预览、在线值、导入绑定/命名、重开stopped的真实原生截图。 |
+
+既有D的README双语仅补快捷入口/手册链接，BUILD双语仅在必要时澄清启动及pnpm提示；`docs/AIIS_DS_Detailed_Design.md`及`docs/README.md`、`docs/README.zh-CN.md`同步操作说明/入口事实。D的PLAN双语和根PLAN双语、plans/README双语仅同步文档导航/真实状态；主协调机械同步根四索引。Development只更新自身tasks事实，fresh Verification只更新自身checklist，PM仍只写本spec。
+
+手册先写普通`pnpm tauri dev`启动与提示，以及`pnpm dev`的浏览器边界，再依次讲实例/手工DB/点位、地址与名称确认、初值/策略/规则、保存与停机apply/start、在线值和受控维护写、连接关闭、pause/resume/stop/reset、保值与保存重开/错误处理；每步给页面→按钮→填写→确认→预期结果，按当前已实现UI记录，不增加产品动作。
+
+两个顺序案例：先手工DB31，长度8，`BOOL 0.0`、`INT 2`、`REAL 4`；再使用冻结DAA `src-tauri/tests/fixtures/source-import-multi-db/multi.db`与`types.udt`，仅选Alpha/Beta，分别映射DB71/88，显式选择Measure闭包。两文件完整仓库前缀为`automation-world/data-acquisition-agent/`，SHA分别为`456ad00f264f0f5e9b9a0fd8e9960928b9e81b1cf535b273a3a0f996e1ed3b61`与`f594c7c4748b2d9b6c7d1d81f9235b1980e729cf1c4115e29a5084a08b4044fb`。参数只是操作案例，不固定产品拓扑；不改样例、共享core 0.1.0/v1或golden expected，不将TIA初值/RETAIN当作DS初值或跨进程保值。
+
+### B.2 原生取图与辅助资源边界
+
+仅使用已验收同字节productDesktop二进制及其冻结native库，在独立合成`DS_PROFILE_DIR=T5/profile/dev/user-guide-20261022`完成一次文档操作/取图，原始截图及辅助输入放`T5/tmp/dev/user-guide-20261022`。冻结产品源码/二进制/库及只读输入指纹，新文档/图片指纹单列。可按案例运行既有本地DS动作，沿用受限loopback及既有资源规则；不连接真实PLC/DAA应用、不作新协议/吞吐结论、不重跑整套协议矩阵、不让Owner反复关窗，不接触用户真实profile。
+
+现有A5三张浏览器布局预览不能冒充原生操作图。当前CUA无DS条目、旧no-bundle Mach-O按名称/路径/bundle ID绑定失败，是取图可用性事实。为本次明确授权的原生取图，若必要，允许在`T5/tmp/dev/user-guide-20261022/DS-User-Guide-Capture.app`用原字节二进制/库副本（保持所需相对布局）和最薄Info.plist组成一次性识别载体；这是文档辅助资源，不是产品包交付。不得修改/重编译产品源或二进制、重写链接、签名、安装、调用lsregister、修改系统设置/权限或依赖。记录载体成员/Info.plist、原二进制/库SHA和实际绑定结果；若仍不能绑定原生窗口，先报告事实与最小取图办法，不造图或用浏览器预览代替。
+
+截图标明真实日期、页面/动作、合成profile、对应原件SHA与来源，公开图片仅含合成示例。完成后正常关闭并核实本次自有进程/listener释放；TERM不记为正常退出。原件、来源与载体清单按既有A5持久证据规则留档后，只回收无运行/证据依赖的自有载体及临时资源，不清未知资源或用户数据。
+
+### B.3 验证与交接
+
+本次只验步骤与当前UI/源码的一致性、双语对应、链接/图片存在和原件来源、合成案例、原产品及只读输入指纹未变；必要单次操作/取图不替代或改写已完成产品QA。不得安装依赖、修改Node/Cargo/锁、业务源码、schema或真实配置，不新增协议测试/性能结论，不开展DAA–DS SQLite联调或阶段C。若操作遇到真实产品阻断，如实记录并回主协调，不借文档授权修业务代码。
+
+Development交接文档差异、命令/操作事实及截图来源；fresh Verification仅核新增文档/截图/链接及源码未变，保留原协议证据和结论。旧产品指纹、原批准正文与历史不重算为“新文档已验证”；新文档指纹及本增量核验单列，最终仍交Human Owner接受。

@@ -1,0 +1,261 @@
+{
+  "fixture_joined": true,
+  "native_exit": 0,
+  "native_pid": 75607,
+  "ports_rebound": [
+    31102,
+    31103,
+    31880
+  ],
+  "protocol": {
+    "applied": 2,
+    "gets": 0,
+    "native_pid": 75607,
+    "reads": 4,
+    "sessions": 2,
+    "trace": [
+      {
+        "at_ms": 1792639318539,
+        "operation": 0,
+        "original_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+        "positive": false,
+        "request_hex": "0300001611e00000000100c0010ac1020100c2020101",
+        "request_ref": [
+          192,
+          1
+        ],
+        "response_ref": [
+          192,
+          1
+        ],
+        "sent_response_hex": "0300001611d00001000100c0010ac1020100c2020101"
+      },
+      {
+        "at_ms": 1792639318541,
+        "operation": 240,
+        "original_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+        "positive": false,
+        "request_hex": "0300001902f08032010000000000080000f0000001000101e0",
+        "request_ref": [
+          0,
+          0
+        ],
+        "response_ref": [
+          0,
+          0
+        ],
+        "sent_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0"
+      },
+      {
+        "at_ms": 1792639318551,
+        "operation": 4,
+        "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5",
+        "positive": false,
+        "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000",
+        "request_ref": [
+          0,
+          1
+        ],
+        "response_ref": [
+          0,
+          1
+        ],
+        "sent_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5"
+      },
+      {
+        "at_ms": 1792639319157,
+        "operation": 4,
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+        "positive": false,
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "request_ref": [
+          0,
+          2
+        ],
+        "response_ref": [
+          0,
+          2
+        ],
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5"
+      },
+      {
+        "at_ms": 1792639319764,
+        "operation": 4,
+        "original_response_hex": "0300001b02f0803203000000030002000600000401ff040010a5a5",
+        "positive": false,
+        "request_hex": "0300001f02f080320100000003000e00000401120a10020002000184000000",
+        "request_ref": [
+          0,
+          3
+        ],
+        "response_ref": [
+          0,
+          3
+        ],
+        "sent_response_hex": "0300001b02f0803203000000030002000600000401ff040010a5a5"
+      },
+      {
+        "at_ms": 1792639320371,
+        "operation": 5,
+        "original_response_hex": "0300001602f0803203000000040002000100000501ff",
+        "positive": true,
+        "request_hex": "0300002502f080320100000004000e00060501120a1002000200018400000000040010002a",
+        "request_ref": [
+          0,
+          4
+        ],
+        "response_ref": [
+          0,
+          4
+        ],
+        "sent_response_hex": "0300001602f0803203000000040002000100000501ff"
+      },
+      {
+        "at_ms": 1792639321129,
+        "operation": 0,
+        "original_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+        "positive": false,
+        "request_hex": "0300001611e00000000100c0010ac1020100c2020101",
+        "request_ref": [
+          192,
+          1
+        ],
+        "response_ref": [
+          192,
+          1
+        ],
+        "sent_response_hex": "0300001611d00001000100c0010ac1020100c2020101"
+      },
+      {
+        "at_ms": 1792639321130,
+        "operation": 240,
+        "original_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+        "positive": false,
+        "request_hex": "0300001902f08032010000000000080000f0000001000101e0",
+        "request_ref": [
+          0,
+          0
+        ],
+        "response_ref": [
+          0,
+          0
+        ],
+        "sent_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0"
+      },
+      {
+        "at_ms": 1792639321143,
+        "operation": 4,
+        "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010002a",
+        "positive": false,
+        "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000",
+        "request_ref": [
+          0,
+          1
+        ],
+        "response_ref": [
+          0,
+          1
+        ],
+        "sent_response_hex": "0300001b02f0803203000000010002000600000401ff040010002a"
+      },
+      {
+        "at_ms": 1792639321157,
+        "operation": 5,
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "positive": true,
+        "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400000000040010002a",
+        "request_ref": [
+          0,
+          2
+        ],
+        "response_ref": [
+          0,
+          2
+        ],
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff"
+      }
+    ],
+    "writes": 2
+  },
+  "result": {
+    "final": {
+      "clock_invalid": false,
+      "generation": 1,
+      "in_flight": 0,
+      "pid": 75608,
+      "queue_depth": 0,
+      "state": "ready"
+    },
+    "first": {
+      "Ok": -23131
+    },
+    "io_timeout_ms": 1200,
+    "minimum_read": {
+      "Ok": 42
+    },
+    "minimum_store": {
+      "driver_gone": true,
+      "driver_pid": 75626,
+      "shutdown": {
+        "Ok": null
+      },
+      "state": {
+        "counts": {
+          "confirmed": 1
+        },
+        "meta": {
+          "implementation": "rust",
+          "instance_id": "ff-rust-demo01",
+          "mode": "execute",
+          "schema_version": 1,
+          "store_uuid": "1792639321101-75592-10"
+        }
+      },
+      "state_dir": "/private/tmp/ff-001-r1-r3-rust-r4-rework-minimum-io-1792639321094-75592-9/state"
+    },
+    "minimum_write": {
+      "Ok": null
+    },
+    "original": {
+      "clock_invalid": false,
+      "generation": 1,
+      "in_flight": 0,
+      "pid": 75608,
+      "queue_depth": 0,
+      "state": "ready"
+    },
+    "queue_wait_ms": 1000,
+    "response_delay_ms": 600,
+    "second": {
+      "Ok": -23131
+    },
+    "second_ms": 1204,
+    "store": {
+      "driver_gone": true,
+      "driver_pid": 75608,
+      "shutdown": {
+        "Ok": null
+      },
+      "state": {
+        "counts": {
+          "confirmed": 1
+        },
+        "meta": {
+          "implementation": "rust",
+          "instance_id": "ff-rust-demo01",
+          "mode": "execute",
+          "schema_version": 1,
+          "store_uuid": "1792639318517-75592-2"
+        }
+      },
+      "state_dir": "/private/tmp/ff-001-r1-r3-rust-r4-rework-fifo-state-1792639318512-75592-1/state"
+    },
+    "third": {
+      "Ok": -23131
+    },
+    "write": {
+      "Ok": null
+    },
+    "write_ms": 1205
+  }
+}

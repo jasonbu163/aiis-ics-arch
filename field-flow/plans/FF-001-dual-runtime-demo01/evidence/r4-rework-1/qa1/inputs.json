@@ -1,0 +1,31 @@
+{
+  "input_hashes": {
+    "field-flow/plans/FF-001-dual-runtime-demo01/spec.md": "e30641845b63f295b408568009c25514f314101d0a2e2b72d331d4255a73045d",
+    "field-flow/plans/FF-001-dual-runtime-demo01/tasks.md": "b75074662ca2e763553c2ba8081908ad0f694de4cc6fd6acecfec7a88243e219",
+    "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r4-dev/candidate-manifest-final.json": "4221b6ded6ea871bb01cf7ac12059e0794d83550ea9d8fe755979a702ab5067f",
+    "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r4-dev/evidence-manifest.txt": "8046b6af23c492897b526a8791ac953e498ac10d40766b6b8800105c669bc497"
+  },
+  "head": "dbed9107dce5701fa138a66b3c13aba637a27b86",
+  "projects": {
+    "field-flow-python": {
+      "files": 48,
+      "mismatches": [],
+      "source": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+      "copy": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-python"
+    },
+    "field-flow-rust": {
+      "files": 43,
+      "mismatches": [],
+      "source": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+      "copy": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-rust"
+    }
+  },
+  "restored_spec.md": {
+    "bytes": 180301,
+    "sha256": "cf2ff0ff8e8d7bf1bc2302127f5f5bc7a32d767be470ddf9875cf3ced59efbb1"
+  },
+  "restored_tasks.md": {
+    "bytes": 52447,
+    "sha256": "48a52ef056ccced510bc4c24c685b4ef7d03fd03868487dff1616a1ba829dd76"
+  }
+}

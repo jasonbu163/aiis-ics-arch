@@ -1,0 +1,10 @@
+   Compiling field-flow v0.1.0 (/private/tmp/ff-001-r1-r3dev-k989azay/rust-copy)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.39s
+     Running `/private/tmp/ff-001-r1-20261021-r2dev/rust-target/debug/field-flow`
+Field Flow (synthetic local runtime)
+Usage:
+  field-flow [--lang en-US|zh-CN] --help
+  field-flow state init --synthetic --mode dry_run|execute --state-dir NEW_DIR --instance-id ID
+  field-flow state inspect --state-dir DIR
+  field-flow run --config FILE --state-dir DIR [--execute]
+Run requires an explicitly initialized state directory. Stop with SIGINT or SIGTERM.

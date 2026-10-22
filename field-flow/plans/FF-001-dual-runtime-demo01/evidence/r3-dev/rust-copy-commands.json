@@ -1,0 +1,49 @@
+[
+  {
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--offline",
+      "--bins",
+      "--features",
+      "test-fixture"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r3dev-k989azay/rust-copy",
+    "exit_code": 0,
+    "duration_seconds": 0.28704275,
+    "output": "/private/tmp/ff-001-r1-r3dev-k989azay/rust-copy-0.txt"
+  },
+  {
+    "command": [
+      "cargo",
+      "run",
+      "--locked",
+      "--offline",
+      "--bin",
+      "field-flow",
+      "--"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r3dev-k989azay/rust-copy",
+    "exit_code": 0,
+    "duration_seconds": 2.7836635409999997,
+    "output": "/private/tmp/ff-001-r1-r3dev-k989azay/rust-copy-1.txt"
+  },
+  {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--features",
+      "test-fixture",
+      "--",
+      "--test-threads=1",
+      "--nocapture"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r3dev-k989azay/rust-copy",
+    "exit_code": 0,
+    "duration_seconds": 57.523887,
+    "output": "/private/tmp/ff-001-r1-r3dev-k989azay/rust-copy-2.txt"
+  }
+]

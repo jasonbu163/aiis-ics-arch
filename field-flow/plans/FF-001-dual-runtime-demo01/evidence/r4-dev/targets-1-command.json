@@ -1,0 +1,22 @@
+{
+  "command": [
+    "uv",
+    "run",
+    "--locked",
+    "--python",
+    "3.11",
+    "--no-python-downloads",
+    "pytest",
+    "-q",
+    "tests/test_local_protocol.py",
+    "-k",
+    "audit_queued or reference_maintenance or process_deaths",
+    "-x",
+    "-s"
+  ],
+  "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+  "timeout_seconds": 240,
+  "exit_code": 1,
+  "duration_seconds": 1.7454865419999999,
+  "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/targets-1.txt"
+}

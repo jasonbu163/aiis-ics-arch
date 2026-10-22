@@ -1,0 +1,12 @@
+{
+  "protected_evidence_count": 239,
+  "old_4_documents_unchanged": true,
+  "python_48_unchanged": true,
+  "rust_manifest_lock_unchanged": true,
+  "original_tasks_sha256": "b75074662ca2e763553c2ba8081908ad0f694de4cc6fd6acecfec7a88243e219",
+  "qa1_checklist_original_sha256": "5e0048a80396b3b6a985a8f767782fe0d2e9a228add148f1db4810fa35705f3e",
+  "local_project_links_checked": 99,
+  "locale_parity": true,
+  "whitespace_check": true,
+  "git_diff_check_exit": 0
+}

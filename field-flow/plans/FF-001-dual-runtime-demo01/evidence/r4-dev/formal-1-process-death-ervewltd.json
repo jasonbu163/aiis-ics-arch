@@ -1,0 +1,399 @@
+{
+  "results": [
+    {
+      "case": "child",
+      "parent_pid": 90031,
+      "driver_pid": 90032,
+      "parent_exit": 1,
+      "command": [
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python/.venv/bin/python",
+        "-m",
+        "field_flow",
+        "run",
+        "--config",
+        "/private/tmp/ff-001-r1-r4-python-process-death-ervewltd/config.yaml",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-process-death-ervewltd/child",
+        "--execute"
+      ],
+      "stdout": "/private/tmp/ff-001-r1-r4-python-process-death-ervewltd/child-stdout.txt"
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-process-death-ervewltd/child",
+      "normal": false,
+      "summary": {
+        "commands": {
+          "unknown": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "5bf3daa7cc3c46dda1739a113e2953b9",
+          "created_at": "2026-10-22T02:16:13.554Z"
+        },
+        "counts": {
+          "unknown": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "5bf3daa7cc3c46dda1739a113e2953b9",
+              "created_at": "2026-10-22T02:16:13.554Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "applied-before-child",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "4313f6288ed6f10be78c0c14e118ead482e2d57754153bf3ff56eff0bdba76af",
+              "payload_hash": "d1e15ba4a3eee0546fb4b2364738de3b9712d697ea4b19b5bc1e8141df2d9c32",
+              "value_i16": 42,
+              "issued_at_ms": 1792635373555,
+              "expires_at_ms": 1792635403555,
+              "state": "unknown",
+              "dispatch_count": 1,
+              "run_id": "3c8770eed73a4696b41ced9384e3fd95",
+              "request_id": "d1fa123ab4794fc9b9b9e1545cdb8458",
+              "last_error_key": "ipc_closed",
+              "ack_kind": null,
+              "created_at": "2026-10-22T02:16:13.645Z",
+              "updated_at": "2026-10-22T02:16:13.676Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "applied-before-child",
+              "run_id": "3c8770eed73a4696b41ced9384e3fd95",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "d1e15ba4a3eee0546fb4b2364738de3b9712d697ea4b19b5bc1e8141df2d9c32",
+              "created_at": "2026-10-22T02:16:13.645Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "applied-before-child",
+              "run_id": "3c8770eed73a4696b41ced9384e3fd95",
+              "request_id": "d1fa123ab4794fc9b9b9e1545cdb8458",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:16:13.668Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "applied-before-child",
+              "run_id": "3c8770eed73a4696b41ced9384e3fd95",
+              "request_id": "d1fa123ab4794fc9b9b9e1545cdb8458",
+              "from_state": "in_flight",
+              "to_state": "unknown",
+              "reason_key": "ipc_closed",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:16:13.676Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "parent_lost",
+      "parent_pid": 90034,
+      "driver_pid": 90035,
+      "parent_exit": -9,
+      "driver_ended_ms": 58.38862503878772,
+      "lock_blocked_until_child_end": true,
+      "command": [
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python/.venv/bin/python",
+        "-m",
+        "field_flow",
+        "run",
+        "--config",
+        "/private/tmp/ff-001-r1-r4-python-process-death-ervewltd/config.yaml",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-process-death-ervewltd/parent",
+        "--execute"
+      ],
+      "stdout": "/private/tmp/ff-001-r1-r4-python-process-death-ervewltd/parent-stdout.txt"
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-process-death-ervewltd/parent",
+      "normal": false,
+      "summary": {
+        "commands": {
+          "unknown": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "fac56376fe3944c19e4660aacdb9992f",
+          "created_at": "2026-10-22T02:16:13.789Z"
+        },
+        "counts": {
+          "unknown": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "fac56376fe3944c19e4660aacdb9992f",
+              "created_at": "2026-10-22T02:16:13.789Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "applied-before-parent",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "4313f6288ed6f10be78c0c14e118ead482e2d57754153bf3ff56eff0bdba76af",
+              "payload_hash": "ce9d220f9c1f4b98b547fdf87358deaf080a4397a74b838e58abeab22f0fe335",
+              "value_i16": 42,
+              "issued_at_ms": 1792635373789,
+              "expires_at_ms": 1792635403789,
+              "state": "unknown",
+              "dispatch_count": 1,
+              "run_id": "a9929eaf8b594a7d81c6c777c8d19946",
+              "request_id": "16ef37e563804bc58b601e5ed0199f06",
+              "last_error_key": "recovered_in_flight",
+              "ack_kind": null,
+              "created_at": "2026-10-22T02:16:13.863Z",
+              "updated_at": "2026-10-22T02:16:13.951Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "applied-before-parent",
+              "run_id": "a9929eaf8b594a7d81c6c777c8d19946",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "ce9d220f9c1f4b98b547fdf87358deaf080a4397a74b838e58abeab22f0fe335",
+              "created_at": "2026-10-22T02:16:13.863Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "applied-before-parent",
+              "run_id": "a9929eaf8b594a7d81c6c777c8d19946",
+              "request_id": "16ef37e563804bc58b601e5ed0199f06",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:16:13.889Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "applied-before-parent",
+              "run_id": "5f65041a834a4eee8eacff30da47106e",
+              "request_id": "16ef37e563804bc58b601e5ed0199f06",
+              "from_state": "in_flight",
+              "to_state": "unknown",
+              "reason_key": "recovered_in_flight",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:16:13.952Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "normal-composition-stop",
+      "parent_pid": 90037,
+      "driver_pid": 90038,
+      "parent_exit": 0,
+      "command": [
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python/.venv/bin/python",
+        "-m",
+        "field_flow",
+        "run",
+        "--config",
+        "/private/tmp/ff-001-r1-r4-python-process-death-ervewltd/config.yaml",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-process-death-ervewltd/normal",
+        "--execute"
+      ],
+      "stdout": "/private/tmp/ff-001-r1-r4-python-process-death-ervewltd/normal-stdout.txt"
+    }
+  ],
+  "fixture": {
+    "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+    "writes": 3,
+    "reads": 0,
+    "gets": 23,
+    "sessions": 5,
+    "closed_sessions": 5,
+    "trace": [
+      {
+        "operation": 0,
+        "fault": "hold_ack",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "hold_ack",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "hold_ack",
+        "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400000000040010002a",
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "hold_ack",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "hold_ack",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "hold_ack",
+        "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400000000040010002a",
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "",
+        "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400000000040010002a",
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      }
+    ],
+    "server_pid": 90030,
+    "server_exit": 0,
+    "server_close": {
+      "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "remaining_threads": [],
+      "pid": 90030,
+      "exit_code": 0
+    },
+    "server_epochs": [
+      {
+        "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+        "remaining_threads": [],
+        "pid": 90030,
+        "exit_code": 0
+      }
+    ],
+    "proxy_threads_joined": 5,
+    "ports_rebound": [
+      32102,
+      32103,
+      32880
+    ]
+  }
+}

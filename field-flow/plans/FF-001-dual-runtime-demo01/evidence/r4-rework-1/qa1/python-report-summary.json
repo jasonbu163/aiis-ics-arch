@@ -1,0 +1,1462 @@
+{
+  "python-formal-net": [
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-gate-du4ize04/gate.json",
+      "sha256": "e9f63547a155f4d2ec460d0d4adbbefbd2712953eff0dbd95ee84dd1e43a086d",
+      "fixture": {
+        "writes": 4,
+        "reads": 10,
+        "gets": 0,
+        "sessions": 13,
+        "server_pid": 10116,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 13
+      },
+      "facts": [
+        {
+          "fault": "",
+          "actual_writes": 1,
+          "directory": "/private/tmp/ff-001-r1-r4-python-gate-du4ize04/normal"
+        },
+        {
+          "fault": "function",
+          "actual_writes": 1,
+          "directory": "/private/tmp/ff-001-r1-r4-python-gate-du4ize04/function"
+        },
+        {
+          "fault": "ref1",
+          "actual_writes": 1,
+          "directory": "/private/tmp/ff-001-r1-r4-python-gate-du4ize04/ref1"
+        },
+        {
+          "fault": "short_data",
+          "actual_writes": 1,
+          "directory": "/private/tmp/ff-001-r1-r4-python-gate-du4ize04/short_data"
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-values-lu81v4vn/report.json",
+      "sha256": "533e4ea2b6b49276433f1d580c0a94559e44fd6d0cd5d1e53b2663d8774f1f3e",
+      "fixture": {
+        "writes": 5,
+        "reads": 6,
+        "gets": 127,
+        "sessions": 17,
+        "server_pid": 10160,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 17
+      },
+      "facts": []
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-concurrency-y_thgz0o/report.json",
+      "sha256": "fbe278372f4234e94807c18ce71b999b0b78a06c0bccda08e50a50d9e8637955",
+      "fixture": {
+        "writes": 0,
+        "reads": 138,
+        "gets": 9,
+        "sessions": 2,
+        "server_pid": 10202,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 2
+      },
+      "facts": [
+        {
+          "independent_samples": [
+            20,
+            20,
+            20
+          ],
+          "pid": 10204,
+          "normal_sessions": 1,
+          "request_ids": 60
+        },
+        {
+          "samples": 78,
+          "max_gap_ms": 104.78558298200369,
+          "slow_flow_health": {
+            "state": "running",
+            "last_iteration_ms": 1792636288069,
+            "last_success_ms": 1792636288069,
+            "consecutive_errors": 0,
+            "iterations": 8,
+            "in_flight": 1,
+            "max_in_flight": 1,
+            "result": "idle"
+          }
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-ack-matrix-4b08rd0j/report.json",
+      "sha256": "1f80777e746088ea27dbc25a4c45a4da540ead9749f83ca0a6e35f94caa832a9",
+      "fixture": {
+        "writes": 10,
+        "reads": 22,
+        "gets": 210,
+        "sessions": 40,
+        "server_pid": 10281,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 40
+      },
+      "facts": [
+        {
+          "case": "id",
+          "write": false,
+          "old_pid": 10283,
+          "old_pid_gone": true,
+          "duration_ms": 8.700874983333051,
+          "counts": {}
+        },
+        {
+          "case": "rosctr",
+          "write": false,
+          "old_pid": 10284,
+          "old_pid_gone": true,
+          "duration_ms": 8.561042021028697,
+          "counts": {}
+        },
+        {
+          "case": "reserved0",
+          "write": false,
+          "old_pid": 10285,
+          "old_pid_gone": true,
+          "duration_ms": 9.263082989491522,
+          "counts": {}
+        },
+        {
+          "case": "reserved1",
+          "write": false,
+          "old_pid": 10289,
+          "old_pid_gone": true,
+          "duration_ms": 9.896583971567452,
+          "counts": {}
+        },
+        {
+          "case": "function",
+          "write": false,
+          "old_pid": 10306,
+          "old_pid_gone": true,
+          "duration_ms": 8.625290938653052,
+          "counts": {}
+        },
+        {
+          "case": "count",
+          "write": false,
+          "old_pid": 10307,
+          "old_pid_gone": true,
+          "duration_ms": 8.842749986797571,
+          "counts": {}
+        },
+        {
+          "case": "param_length",
+          "write": false,
+          "old_pid": 10308,
+          "old_pid_gone": true,
+          "duration_ms": 8.354458957910538,
+          "counts": {}
+        },
+        {
+          "case": "data_length",
+          "write": false,
+          "old_pid": 10309,
+          "old_pid_gone": true,
+          "duration_ms": 9.030499961227179,
+          "counts": {}
+        },
+        {
+          "case": "transport",
+          "write": false,
+          "old_pid": 10310,
+          "old_pid_gone": true,
+          "duration_ms": 8.501957985572517,
+          "counts": {}
+        },
+        {
+          "case": "bits",
+          "write": false,
+          "old_pid": 10311,
+          "old_pid_gone": true,
+          "duration_ms": 8.727874956093729,
+          "counts": {}
+        },
+        {
+          "case": "short_header",
+          "write": false,
+          "old_pid": 10312,
+          "old_pid_gone": true,
+          "duration_ms": 9.177125059068203,
+          "counts": {}
+        },
+        {
+          "case": "short_data",
+          "write": false,
+          "old_pid": 10313,
+          "old_pid_gone": true,
+          "duration_ms": 8.942833985202014,
+          "counts": {}
+        },
+        {
+          "case": "empty",
+          "write": false,
+          "old_pid": 10314,
+          "old_pid_gone": true,
+          "duration_ms": 8.786207996308804,
+          "counts": {}
+        },
+        {
+          "case": "extra",
+          "write": false,
+          "old_pid": 10315,
+          "old_pid_gone": true,
+          "duration_ms": 10.16941701527685,
+          "counts": {}
+        },
+        {
+          "case": "payload4096",
+          "write": false,
+          "old_pid": 10330,
+          "old_pid_gone": true,
+          "duration_ms": 9.459750028327107,
+          "counts": {}
+        },
+        {
+          "case": "payload4097",
+          "write": false,
+          "old_pid": 10331,
+          "old_pid_gone": true,
+          "duration_ms": 8.660917053930461,
+          "counts": {}
+        },
+        {
+          "case": "payload65528",
+          "write": false,
+          "old_pid": 10332,
+          "old_pid_gone": true,
+          "duration_ms": 8.553542080335319,
+          "counts": {}
+        },
+        {
+          "case": "ref0",
+          "write": false,
+          "old_pid": 10333,
+          "old_pid_gone": true,
+          "duration_ms": 8.618708932772279,
+          "counts": {}
+        },
+        {
+          "case": "ref1",
+          "write": false,
+          "old_pid": 10334,
+          "old_pid_gone": true,
+          "duration_ms": 8.44633299857378,
+          "counts": {}
+        },
+        {
+          "case": "oldref",
+          "write": false,
+          "old_pid": 10335,
+          "old_pid_gone": true,
+          "duration_ms": 8.691375027410686,
+          "counts": {}
+        },
+        {
+          "case": "otherref",
+          "write": true,
+          "old_pid": 10336,
+          "old_pid_gone": true,
+          "duration_ms": 12.43370899464935,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "ref0",
+          "write": true,
+          "old_pid": 10339,
+          "old_pid_gone": true,
+          "duration_ms": 12.374000041745603,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "ref1",
+          "write": true,
+          "old_pid": 10355,
+          "old_pid_gone": true,
+          "duration_ms": 18.09870800934732,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "global0",
+          "write": true,
+          "old_pid": 10357,
+          "old_pid_gone": true,
+          "duration_ms": 12.193459086120129,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "global1",
+          "write": true,
+          "old_pid": 10359,
+          "old_pid_gone": true,
+          "duration_ms": 12.128208996728063,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "item",
+          "write": true,
+          "old_pid": 10361,
+          "old_pid_gone": true,
+          "duration_ms": 11.687667109072208,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "function",
+          "write": true,
+          "old_pid": 10377,
+          "old_pid_gone": true,
+          "duration_ms": 12.460083002224565,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "count",
+          "write": true,
+          "old_pid": 10379,
+          "old_pid_gone": true,
+          "duration_ms": 11.907749925740063,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "extra",
+          "write": true,
+          "old_pid": 10389,
+          "old_pid_gone": true,
+          "duration_ms": 13.545083929784596,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "late_correct",
+          "write": true,
+          "old_pid": 10393,
+          "old_pid_gone": true,
+          "duration_ms": 12.101624975912273,
+          "counts": {
+            "unknown": 1
+          }
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-deadline-split-a9mov9mf/report.json",
+      "sha256": "ac74cf4db23fcc91752e0d975bf295b86d58950cb84d67a07467a06cffd600f0",
+      "fixture": {
+        "writes": 0,
+        "reads": 2,
+        "gets": 0,
+        "sessions": 2,
+        "server_pid": 10395,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 2
+      },
+      "facts": [
+        {
+          "fault": "split",
+          "old_pid": 10410,
+          "old_pid_gone": true,
+          "duration_ms": 4608.870958909392,
+          "had_forced_driver_stop": true
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-deadline-slow-5nu4rovn/report.json",
+      "sha256": "89ac3e463239370a8b6a475948cad5cb8e928c85f62c5f13c83c447b39db57be",
+      "fixture": {
+        "writes": 0,
+        "reads": 2,
+        "gets": 0,
+        "sessions": 2,
+        "server_pid": 10447,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 2
+      },
+      "facts": [
+        {
+          "fault": "slow",
+          "old_pid": 10448,
+          "old_pid_gone": true,
+          "duration_ms": 808.8746670400724,
+          "had_forced_driver_stop": true
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-deadline-stale-l7p_rauy/report.json",
+      "sha256": "78fa0d5bd5e5e919877ba3f3cf1b93199f5c8eaf89cf755b03bdfcda5a47dd38",
+      "fixture": {
+        "writes": 0,
+        "reads": 2,
+        "gets": 0,
+        "sessions": 2,
+        "server_pid": 10464,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 2
+      },
+      "facts": [
+        {
+          "fault": "stale",
+          "old_pid": 10465,
+          "old_pid_gone": true,
+          "duration_ms": 114.78329205419868,
+          "had_forced_driver_stop": false
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-deadline-max_short-3wb6gydq/report.json",
+      "sha256": "9208c017e3c21fada281498a5956288bd3bc89f5fe0124fb1949177323dcaddb",
+      "fixture": {
+        "writes": 0,
+        "reads": 2,
+        "gets": 0,
+        "sessions": 2,
+        "server_pid": 10481,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 2
+      },
+      "facts": [
+        {
+          "fault": "max_short",
+          "old_pid": 10482,
+          "old_pid_gone": true,
+          "duration_ms": 808.5920830490068,
+          "had_forced_driver_stop": true
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-connect-queue-85u_rmp_/report.json",
+      "sha256": "7bf35ab4afae30f39b4ca8e96652abae449a81e391ddcb7c53cae1e0e29a6777",
+      "fixture": {
+        "writes": 0,
+        "reads": 3,
+        "gets": 0,
+        "sessions": 5,
+        "server_pid": 10498,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 5
+      },
+      "facts": []
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-recovery-lw931nm_/report.json",
+      "sha256": "f60f2c8f2dc0840a8f93767a47b48627115b34a0351a081e908349b93b059964",
+      "fixture": {
+        "writes": 2,
+        "reads": 2,
+        "gets": 11,
+        "sessions": 7,
+        "server_pid": 10526,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 7
+      },
+      "facts": []
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-audit-stop-swwo99ox/report.json",
+      "sha256": "2a9727e6c4121b42313800cd5816c2ec661a663b07208a981acc928d40f23c6a",
+      "fixture": {
+        "writes": 12,
+        "reads": 1,
+        "gets": 34,
+        "sessions": 6,
+        "server_pid": 10567,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 6
+      },
+      "facts": [
+        {
+          "case": "pre-call-and-parent-queue-stop",
+          "actual_new_writes": 0
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-audit-order-jfo0znbk/report.json",
+      "sha256": "bb4dd8989ef97c7c60ab277ce2a9b6a410e3baa64aafdb1f2ccda69317ef0132",
+      "fixture": {
+        "writes": 1,
+        "reads": 2,
+        "gets": 12,
+        "sessions": 6,
+        "server_pid": 10574,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 6
+      },
+      "facts": []
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-ref-maintenance-10rf78x7/report.json",
+      "sha256": "f62d4c878f143effb554e0b1d16dbebeffa0d3ff9a2cde7ccc064191a3f5c595",
+      "fixture": {
+        "writes": 1,
+        "reads": 3,
+        "gets": 11,
+        "sessions": 4,
+        "server_pid": 10612,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 4
+      },
+      "facts": [
+        {
+          "case": "synthetic-complete-INT-memory-boundary",
+          "memory_before": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+          "memory_after": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+          "actual_WriteVar": 1
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-process-death-k8q26hm8/report.json",
+      "sha256": "08e1cccce8c6ad55d2c451bcd1b90714141f613a9f98957e915ffbe58d915533",
+      "fixture": {
+        "writes": 3,
+        "reads": 0,
+        "gets": 23,
+        "sessions": 5,
+        "server_pid": 10621,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 5
+      },
+      "facts": [
+        {
+          "case": "child",
+          "parent_pid": 10636,
+          "driver_pid": 10637,
+          "parent_exit": 1,
+          "command": [
+            "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-venv/bin/python",
+            "-m",
+            "field_flow",
+            "run",
+            "--config",
+            "/private/tmp/ff-001-r1-r4-python-process-death-k8q26hm8/config.yaml",
+            "--state-dir",
+            "/private/tmp/ff-001-r1-r4-python-process-death-k8q26hm8/child",
+            "--execute"
+          ]
+        },
+        {
+          "case": "parent_lost",
+          "parent_pid": 10639,
+          "driver_pid": 10640,
+          "parent_exit": -9,
+          "driver_ended_ms": 64.75254194810987,
+          "lock_blocked_until_child_end": true,
+          "command": [
+            "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-venv/bin/python",
+            "-m",
+            "field_flow",
+            "run",
+            "--config",
+            "/private/tmp/ff-001-r1-r4-python-process-death-k8q26hm8/config.yaml",
+            "--state-dir",
+            "/private/tmp/ff-001-r1-r4-python-process-death-k8q26hm8/parent",
+            "--execute"
+          ]
+        },
+        {
+          "case": "normal-composition-stop",
+          "parent_pid": 10642,
+          "driver_pid": 10643,
+          "parent_exit": 0,
+          "command": [
+            "/private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-venv/bin/python",
+            "-m",
+            "field_flow",
+            "run",
+            "--config",
+            "/private/tmp/ff-001-r1-r4-python-process-death-k8q26hm8/config.yaml",
+            "--state-dir",
+            "/private/tmp/ff-001-r1-r4-python-process-death-k8q26hm8/normal",
+            "--execute"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-absence-alias-njfcpkj0/report.json",
+      "sha256": "9f60e1f51eb9105a0c6d7c0345a39f16feffa71f33a07e8fcbeaedc55b0769ee",
+      "fixture": {
+        "writes": 0,
+        "reads": 2,
+        "gets": 7,
+        "sessions": 4,
+        "server_pid": 10661,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 4
+      },
+      "facts": []
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-clock-conflict-ret4osjq/report.json",
+      "sha256": "5024b575aef92503c1252f4a02a83cd64dd3399d745593a26e34eef00566d1af",
+      "fixture": {
+        "writes": 1,
+        "reads": 1,
+        "gets": 2,
+        "sessions": 3,
+        "server_pid": 10678,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 3
+      },
+      "facts": []
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-cli-smoke-09r4k1xn/report.json",
+      "sha256": "101f6c3a36a4db6e93dfac3182e7fb8af81b9172fe9a128b7f8414def43c2c7e",
+      "fixture": {
+        "writes": 1,
+        "reads": 1,
+        "gets": 2,
+        "sessions": 3,
+        "server_pid": 10704,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 3
+      },
+      "facts": []
+    }
+  ],
+  "python-isolated-copy": [
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-gate-ty7_o_lz/gate.json",
+      "sha256": "ed2e57a91f6bc93b08912f83f02cd11a13ad53843944985443fd504948fbdbd5",
+      "fixture": {
+        "writes": 4,
+        "reads": 10,
+        "gets": 0,
+        "sessions": 13,
+        "server_pid": 20296,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 13
+      },
+      "facts": [
+        {
+          "fault": "",
+          "actual_writes": 1,
+          "directory": "/private/tmp/ff-001-r1-r4-python-gate-ty7_o_lz/normal"
+        },
+        {
+          "fault": "function",
+          "actual_writes": 1,
+          "directory": "/private/tmp/ff-001-r1-r4-python-gate-ty7_o_lz/function"
+        },
+        {
+          "fault": "ref1",
+          "actual_writes": 1,
+          "directory": "/private/tmp/ff-001-r1-r4-python-gate-ty7_o_lz/ref1"
+        },
+        {
+          "fault": "short_data",
+          "actual_writes": 1,
+          "directory": "/private/tmp/ff-001-r1-r4-python-gate-ty7_o_lz/short_data"
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-values-ibkcbs_s/report.json",
+      "sha256": "597eb32231c21a0d64e6250df0198407ab3ef977a670216df3a25932980efdcf",
+      "fixture": {
+        "writes": 5,
+        "reads": 6,
+        "gets": 127,
+        "sessions": 17,
+        "server_pid": 21292,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 17
+      },
+      "facts": []
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-concurrency-oabo0zem/report.json",
+      "sha256": "3d377d191c15128f8158ba92b9cd450904786143eefa178b7a7ed1e549132c0d",
+      "fixture": {
+        "writes": 0,
+        "reads": 137,
+        "gets": 11,
+        "sessions": 2,
+        "server_pid": 21438,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 2
+      },
+      "facts": [
+        {
+          "independent_samples": [
+            20,
+            20,
+            20
+          ],
+          "pid": 21455,
+          "normal_sessions": 1,
+          "request_ids": 60
+        },
+        {
+          "samples": 77,
+          "max_gap_ms": 113.95004205405712,
+          "slow_flow_health": {
+            "state": "running",
+            "last_iteration_ms": 1792636965954,
+            "last_success_ms": 1792636965954,
+            "consecutive_errors": 0,
+            "iterations": 10,
+            "in_flight": 1,
+            "max_in_flight": 1,
+            "result": "idle"
+          }
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-ack-matrix-1pjefpq3/report.json",
+      "sha256": "dceeb5da5167caeaab809a595e3557def8eddca0100e60a670d0e544afad4592",
+      "fixture": {
+        "writes": 10,
+        "reads": 22,
+        "gets": 210,
+        "sessions": 40,
+        "server_pid": 22665,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 40
+      },
+      "facts": [
+        {
+          "case": "id",
+          "write": false,
+          "old_pid": 22666,
+          "old_pid_gone": true,
+          "duration_ms": 10.85208309814334,
+          "counts": {}
+        },
+        {
+          "case": "rosctr",
+          "write": false,
+          "old_pid": 22667,
+          "old_pid_gone": true,
+          "duration_ms": 28.106832993216813,
+          "counts": {}
+        },
+        {
+          "case": "reserved0",
+          "write": false,
+          "old_pid": 22670,
+          "old_pid_gone": true,
+          "duration_ms": 17.53816695418209,
+          "counts": {}
+        },
+        {
+          "case": "reserved1",
+          "write": false,
+          "old_pid": 22689,
+          "old_pid_gone": true,
+          "duration_ms": 9.491541888564825,
+          "counts": {}
+        },
+        {
+          "case": "function",
+          "write": false,
+          "old_pid": 22694,
+          "old_pid_gone": true,
+          "duration_ms": 10.310249985195696,
+          "counts": {}
+        },
+        {
+          "case": "count",
+          "write": false,
+          "old_pid": 22695,
+          "old_pid_gone": true,
+          "duration_ms": 10.263083968311548,
+          "counts": {}
+        },
+        {
+          "case": "param_length",
+          "write": false,
+          "old_pid": 22696,
+          "old_pid_gone": true,
+          "duration_ms": 11.439208989031613,
+          "counts": {}
+        },
+        {
+          "case": "data_length",
+          "write": false,
+          "old_pid": 22697,
+          "old_pid_gone": true,
+          "duration_ms": 11.931999935768545,
+          "counts": {}
+        },
+        {
+          "case": "transport",
+          "write": false,
+          "old_pid": 22698,
+          "old_pid_gone": true,
+          "duration_ms": 11.302417027764022,
+          "counts": {}
+        },
+        {
+          "case": "bits",
+          "write": false,
+          "old_pid": 22699,
+          "old_pid_gone": true,
+          "duration_ms": 27.886083000339568,
+          "counts": {}
+        },
+        {
+          "case": "short_header",
+          "write": false,
+          "old_pid": 22704,
+          "old_pid_gone": true,
+          "duration_ms": 10.114416014403105,
+          "counts": {}
+        },
+        {
+          "case": "short_data",
+          "write": false,
+          "old_pid": 22725,
+          "old_pid_gone": true,
+          "duration_ms": 9.696667082607746,
+          "counts": {}
+        },
+        {
+          "case": "empty",
+          "write": false,
+          "old_pid": 22726,
+          "old_pid_gone": true,
+          "duration_ms": 9.807750000618398,
+          "counts": {}
+        },
+        {
+          "case": "extra",
+          "write": false,
+          "old_pid": 22728,
+          "old_pid_gone": true,
+          "duration_ms": 9.593207971192896,
+          "counts": {}
+        },
+        {
+          "case": "payload4096",
+          "write": false,
+          "old_pid": 22729,
+          "old_pid_gone": true,
+          "duration_ms": 9.397791931405663,
+          "counts": {}
+        },
+        {
+          "case": "payload4097",
+          "write": false,
+          "old_pid": 22730,
+          "old_pid_gone": true,
+          "duration_ms": 9.085000026971102,
+          "counts": {}
+        },
+        {
+          "case": "payload65528",
+          "write": false,
+          "old_pid": 22731,
+          "old_pid_gone": true,
+          "duration_ms": 9.45016706828028,
+          "counts": {}
+        },
+        {
+          "case": "ref0",
+          "write": false,
+          "old_pid": 22732,
+          "old_pid_gone": true,
+          "duration_ms": 9.029500070028007,
+          "counts": {}
+        },
+        {
+          "case": "ref1",
+          "write": false,
+          "old_pid": 22733,
+          "old_pid_gone": true,
+          "duration_ms": 9.264541091397405,
+          "counts": {}
+        },
+        {
+          "case": "oldref",
+          "write": false,
+          "old_pid": 22734,
+          "old_pid_gone": true,
+          "duration_ms": 8.742125006392598,
+          "counts": {}
+        },
+        {
+          "case": "otherref",
+          "write": true,
+          "old_pid": 22749,
+          "old_pid_gone": true,
+          "duration_ms": 12.292666011489928,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "ref0",
+          "write": true,
+          "old_pid": 22751,
+          "old_pid_gone": true,
+          "duration_ms": 13.386791106313467,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "ref1",
+          "write": true,
+          "old_pid": 22753,
+          "old_pid_gone": true,
+          "duration_ms": 12.043750029988587,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "global0",
+          "write": true,
+          "old_pid": 22755,
+          "old_pid_gone": true,
+          "duration_ms": 12.512332992628217,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "global1",
+          "write": true,
+          "old_pid": 22757,
+          "old_pid_gone": true,
+          "duration_ms": 12.684207991696894,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "item",
+          "write": true,
+          "old_pid": 22773,
+          "old_pid_gone": true,
+          "duration_ms": 12.732916045933962,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "function",
+          "write": true,
+          "old_pid": 22775,
+          "old_pid_gone": true,
+          "duration_ms": 12.557000038214028,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "count",
+          "write": true,
+          "old_pid": 22777,
+          "old_pid_gone": true,
+          "duration_ms": 12.726749991998076,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "extra",
+          "write": true,
+          "old_pid": 22779,
+          "old_pid_gone": true,
+          "duration_ms": 12.91183300781995,
+          "counts": {
+            "unknown": 1
+          }
+        },
+        {
+          "case": "late_correct",
+          "write": true,
+          "old_pid": 22795,
+          "old_pid_gone": true,
+          "duration_ms": 11.946499929763377,
+          "counts": {
+            "unknown": 1
+          }
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-deadline-split-saawerit/report.json",
+      "sha256": "33e0811202247845360fb10ed76c0948f661c2142479aa3f600bccff656ad16c",
+      "fixture": {
+        "writes": 0,
+        "reads": 2,
+        "gets": 0,
+        "sessions": 2,
+        "server_pid": 22797,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 2
+      },
+      "facts": [
+        {
+          "fault": "split",
+          "old_pid": 22798,
+          "old_pid_gone": true,
+          "duration_ms": 4607.913165935315,
+          "had_forced_driver_stop": true
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-deadline-slow-9lvayqb1/report.json",
+      "sha256": "3ee57e64f2db6eda1c4dafe8c5bc6d15ed82cfed2c56c0530b54b226852bd3b5",
+      "fixture": {
+        "writes": 0,
+        "reads": 2,
+        "gets": 0,
+        "sessions": 2,
+        "server_pid": 22849,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 2
+      },
+      "facts": [
+        {
+          "fault": "slow",
+          "old_pid": 22850,
+          "old_pid_gone": true,
+          "duration_ms": 810.211000032723,
+          "had_forced_driver_stop": true
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-deadline-stale-c3yqgm_h/report.json",
+      "sha256": "b4e9b88e4f845137e2549ce9495120bf863dd4a3838dc56af8c99e3e9563118f",
+      "fixture": {
+        "writes": 0,
+        "reads": 2,
+        "gets": 0,
+        "sessions": 2,
+        "server_pid": 22866,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 2
+      },
+      "facts": [
+        {
+          "fault": "stale",
+          "old_pid": 22867,
+          "old_pid_gone": true,
+          "duration_ms": 124.05566603410989,
+          "had_forced_driver_stop": false
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-deadline-max_short-nno25ezc/report.json",
+      "sha256": "767dd5deeb05e92d34d09b0829a4e00fff04797f9e7384a5ef43fccf9586cbc3",
+      "fixture": {
+        "writes": 0,
+        "reads": 2,
+        "gets": 0,
+        "sessions": 2,
+        "server_pid": 22869,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 2
+      },
+      "facts": [
+        {
+          "fault": "max_short",
+          "old_pid": 22870,
+          "old_pid_gone": true,
+          "duration_ms": 810.1964169181883,
+          "had_forced_driver_stop": true
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-connect-queue-qdsoczvd/report.json",
+      "sha256": "77192601cd3d85eb138205f0e9a186fe63a3160601e2290241501c4af5dd165d",
+      "fixture": {
+        "writes": 0,
+        "reads": 3,
+        "gets": 0,
+        "sessions": 5,
+        "server_pid": 22886,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 5
+      },
+      "facts": []
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-recovery-3glnpisz/report.json",
+      "sha256": "568ee295d77f7b91013e40bded22f24af52d28221aaba8210dc3bf23a53f88cf",
+      "fixture": {
+        "writes": 2,
+        "reads": 2,
+        "gets": 11,
+        "sessions": 7,
+        "server_pid": 22924,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 7
+      },
+      "facts": []
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-audit-stop-xlc51h_1/report.json",
+      "sha256": "6dfec77379ed535427588ea9b2e9c5316dd08055b60ad9b77eeeb397034421d8",
+      "fixture": {
+        "writes": 12,
+        "reads": 1,
+        "gets": 34,
+        "sessions": 6,
+        "server_pid": 22945,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 6
+      },
+      "facts": [
+        {
+          "case": "pre-call-and-parent-queue-stop",
+          "actual_new_writes": 0
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-audit-order-42cxgsou/report.json",
+      "sha256": "d237ddbad607342f5bfb675dc59c527583d6aee50ceea00404c669a6276e6483",
+      "fixture": {
+        "writes": 1,
+        "reads": 2,
+        "gets": 12,
+        "sessions": 6,
+        "server_pid": 22966,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 6
+      },
+      "facts": []
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-ref-maintenance-kv2hs851/report.json",
+      "sha256": "3abef84052ec9099f824f8b23bb4a3655f4feb2cc6f254f57736ece05b91e013",
+      "fixture": {
+        "writes": 1,
+        "reads": 3,
+        "gets": 11,
+        "sessions": 4,
+        "server_pid": 22987,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 4
+      },
+      "facts": [
+        {
+          "case": "synthetic-complete-INT-memory-boundary",
+          "memory_before": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+          "memory_after": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+          "actual_WriteVar": 1
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-process-death-cvkh885r/report.json",
+      "sha256": "c8333a451ac429db5145ce69e4bb306f9a2cc3440acc26f7d3206adbc7327e29",
+      "fixture": {
+        "writes": 3,
+        "reads": 0,
+        "gets": 23,
+        "sessions": 5,
+        "server_pid": 23006,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 5
+      },
+      "facts": [
+        {
+          "case": "child",
+          "parent_pid": 23007,
+          "driver_pid": 23008,
+          "parent_exit": 1,
+          "command": [
+            "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-venv/bin/python",
+            "-m",
+            "field_flow",
+            "run",
+            "--config",
+            "/private/tmp/ff-001-r1-r4-python-process-death-cvkh885r/config.yaml",
+            "--state-dir",
+            "/private/tmp/ff-001-r1-r4-python-process-death-cvkh885r/child",
+            "--execute"
+          ]
+        },
+        {
+          "case": "parent_lost",
+          "parent_pid": 23013,
+          "driver_pid": 23028,
+          "parent_exit": -9,
+          "driver_ended_ms": 64.43966703955084,
+          "lock_blocked_until_child_end": true,
+          "command": [
+            "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-venv/bin/python",
+            "-m",
+            "field_flow",
+            "run",
+            "--config",
+            "/private/tmp/ff-001-r1-r4-python-process-death-cvkh885r/config.yaml",
+            "--state-dir",
+            "/private/tmp/ff-001-r1-r4-python-process-death-cvkh885r/parent",
+            "--execute"
+          ]
+        },
+        {
+          "case": "normal-composition-stop",
+          "parent_pid": 23031,
+          "driver_pid": 23032,
+          "parent_exit": 0,
+          "command": [
+            "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-venv/bin/python",
+            "-m",
+            "field_flow",
+            "run",
+            "--config",
+            "/private/tmp/ff-001-r1-r4-python-process-death-cvkh885r/config.yaml",
+            "--state-dir",
+            "/private/tmp/ff-001-r1-r4-python-process-death-cvkh885r/normal",
+            "--execute"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-absence-alias-svy6oav7/report.json",
+      "sha256": "a4ce1c09b437350d6fac42045db001274f0061d167d272897647ce1a4ba4a017",
+      "fixture": {
+        "writes": 0,
+        "reads": 2,
+        "gets": 7,
+        "sessions": 4,
+        "server_pid": 23050,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 4
+      },
+      "facts": []
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-clock-conflict-dq45e7x2/report.json",
+      "sha256": "78147cc53fa2cff0051ead9db17c43900ad9c3c3ceed4e14f0560222b939e7d6",
+      "fixture": {
+        "writes": 1,
+        "reads": 1,
+        "gets": 2,
+        "sessions": 3,
+        "server_pid": 23053,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 3
+      },
+      "facts": []
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r4-python-cli-smoke-_fiduros/report.json",
+      "sha256": "780e785e9cff83b88bad20a4998a0b53d94b584f474cf5c636c260f79a50d90c",
+      "fixture": {
+        "writes": 1,
+        "reads": 1,
+        "gets": 2,
+        "sessions": 3,
+        "server_pid": 23098,
+        "server_exit": 0,
+        "ports_rebound": [
+          32102,
+          32103,
+          32880
+        ],
+        "proxy_threads_joined": 3
+      },
+      "facts": []
+    }
+  ]
+}

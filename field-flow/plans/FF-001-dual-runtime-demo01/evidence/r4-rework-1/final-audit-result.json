@@ -1,0 +1,24 @@
+{
+  "candidate_sha256": "701272f1ea19c4759d604810c1aaac4cdce3e4ee5930aaba62c147f4dd52c15b",
+  "files": {
+    "field-flow-rust": 44,
+    "field-flow-python": 48
+  },
+  "changed_rust": [
+    "README.md",
+    "PLAN.zh-CN.md",
+    "CODE_INDEX.md",
+    "README.zh-CN.md",
+    "PLAN.md",
+    "tests/local_protocol.rs",
+    "tests/runtime_regressions.rs",
+    "src/runtime.rs",
+    "src/domain.rs",
+    "src/fixture.rs",
+    "src/driver_process.rs",
+    "src/services/execution.rs"
+  ],
+  "recorded_pids": 230,
+  "retained_roots": 79,
+  "links": 99
+}

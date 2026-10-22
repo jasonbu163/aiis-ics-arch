@@ -1,0 +1,16 @@
+{
+  "cwd": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy",
+  "sys_executable": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy/.venv/bin/python3",
+  "python": "3.11.12 (main, May 22 2025, 01:39:08) [Clang 20.1.4 ]",
+  "platform": "macOS-15.7.7-arm64-arm-64bit",
+  "field_flow_file": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy/src/field_flow/__init__.py",
+  "fixture_file": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy/tests/fixtures/runtime.py",
+  "versions": {
+    "field-flow": "0.1.0",
+    "python-snap7": "3.0.0",
+    "httpx": "0.28.1",
+    "PyYAML": "6.0.3",
+    "pytest": "8.4.2"
+  },
+  "sqlite_version": "3.47.1"
+}

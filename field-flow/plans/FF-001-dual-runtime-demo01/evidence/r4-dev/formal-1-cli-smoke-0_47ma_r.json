@@ -1,0 +1,352 @@
+{
+  "commands": [
+    {
+      "command": [
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python/.venv/bin/python3",
+        "-m",
+        "field_flow",
+        "state",
+        "init",
+        "--synthetic",
+        "--mode",
+        "dry_run",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-cli-smoke-0_47ma_r/dry_run",
+        "--instance-id",
+        "ff-python-demo01"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"timestamp\":\"2026-10-22T02:16:18.005825+00:00\",\"event\":\"state_init\",\"implementation\":\"python\",\"run_id\":\"\",\"instance_id\":\"ff-python-demo01\",\"flow_id\":\"\",\"target_id\":\"\",\"command_id\":\"\",\"request_id\":\"\",\"state\":\"\",\"old\":\"\",\"new\":\"\",\"result\":\"ok\",\"error_key\":\"\",\"duration_ms\":0}\n"
+    },
+    {
+      "command": [
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python/.venv/bin/python3",
+        "-m",
+        "field_flow",
+        "run",
+        "--config",
+        "config/loopback.yaml",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-cli-smoke-0_47ma_r/dry_run"
+      ],
+      "parent_pid": 90090,
+      "exit_code": 0,
+      "shutdown_ms": 105.47041695099324,
+      "inspect_command": [
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python/.venv/bin/python3",
+        "-m",
+        "field_flow",
+        "state",
+        "inspect",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-cli-smoke-0_47ma_r/dry_run"
+      ],
+      "inspect_exit": 0,
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "dry_run",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "1380d5a6bf034494a0477ade0108a77b",
+          "created_at": "2026-10-22T02:16:18.005Z"
+        },
+        "counts": {
+          "simulated": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "dry_run",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "1380d5a6bf034494a0477ade0108a77b",
+              "created_at": "2026-10-22T02:16:18.005Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "fixture-c7ac95f3c94c49a6ac55d8a99387688f",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "e433f366104ca9492b7f43b7fe9cd4354088ebc00f81cf889573a0d6e49c46e7",
+              "value_i16": 42,
+              "issued_at_ms": 1792635377969,
+              "expires_at_ms": 1792635407969,
+              "state": "simulated",
+              "dispatch_count": 0,
+              "run_id": "9cd0c167504f4d458e2f85b73c5a8474",
+              "request_id": null,
+              "last_error_key": null,
+              "ack_kind": null,
+              "created_at": "2026-10-22T02:16:18.086Z",
+              "updated_at": "2026-10-22T02:16:18.086Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "fixture-c7ac95f3c94c49a6ac55d8a99387688f",
+              "run_id": "9cd0c167504f4d458e2f85b73c5a8474",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "simulated",
+              "reason_key": "intent",
+              "summary": "e433f366104ca9492b7f43b7fe9cd4354088ebc00f81cf889573a0d6e49c46e7",
+              "created_at": "2026-10-22T02:16:18.086Z"
+            }
+          ]
+        }
+      },
+      "stdout": "/private/tmp/ff-001-r1-r4-python-cli-smoke-0_47ma_r/dry_run-stdout.txt"
+    },
+    {
+      "command": [
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python/.venv/bin/python3",
+        "-m",
+        "field_flow",
+        "state",
+        "init",
+        "--synthetic",
+        "--mode",
+        "execute",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-cli-smoke-0_47ma_r/execute",
+        "--instance-id",
+        "ff-python-demo01"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"timestamp\":\"2026-10-22T02:16:18.226624+00:00\",\"event\":\"state_init\",\"implementation\":\"python\",\"run_id\":\"\",\"instance_id\":\"ff-python-demo01\",\"flow_id\":\"\",\"target_id\":\"\",\"command_id\":\"\",\"request_id\":\"\",\"state\":\"\",\"old\":\"\",\"new\":\"\",\"result\":\"ok\",\"error_key\":\"\",\"duration_ms\":0}\n"
+    },
+    {
+      "command": [
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python/.venv/bin/python3",
+        "-m",
+        "field_flow",
+        "run",
+        "--config",
+        "config/loopback.yaml",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-cli-smoke-0_47ma_r/execute",
+        "--execute"
+      ],
+      "parent_pid": 90094,
+      "exit_code": 0,
+      "shutdown_ms": 109.81679195538163,
+      "inspect_command": [
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python/.venv/bin/python3",
+        "-m",
+        "field_flow",
+        "state",
+        "inspect",
+        "--state-dir",
+        "/private/tmp/ff-001-r1-r4-python-cli-smoke-0_47ma_r/execute"
+      ],
+      "inspect_exit": 0,
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "dafac018a35f42b58c4ca472180d5466",
+          "created_at": "2026-10-22T02:16:18.226Z"
+        },
+        "counts": {
+          "confirmed": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "dafac018a35f42b58c4ca472180d5466",
+              "created_at": "2026-10-22T02:16:18.226Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "fixture-c7ac95f3c94c49a6ac55d8a99387688f",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "e433f366104ca9492b7f43b7fe9cd4354088ebc00f81cf889573a0d6e49c46e7",
+              "value_i16": 42,
+              "issued_at_ms": 1792635377969,
+              "expires_at_ms": 1792635407969,
+              "state": "confirmed",
+              "dispatch_count": 1,
+              "run_id": "ca6286981d614d728d1b74531285e734",
+              "request_id": "3ac0298dacaa49fa9d0a3fda5d730493",
+              "last_error_key": null,
+              "ack_kind": "s7_protocol",
+              "created_at": "2026-10-22T02:16:18.308Z",
+              "updated_at": "2026-10-22T02:16:18.337Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "fixture-c7ac95f3c94c49a6ac55d8a99387688f",
+              "run_id": "ca6286981d614d728d1b74531285e734",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "e433f366104ca9492b7f43b7fe9cd4354088ebc00f81cf889573a0d6e49c46e7",
+              "created_at": "2026-10-22T02:16:18.308Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "fixture-c7ac95f3c94c49a6ac55d8a99387688f",
+              "run_id": "ca6286981d614d728d1b74531285e734",
+              "request_id": "3ac0298dacaa49fa9d0a3fda5d730493",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:16:18.336Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "fixture-c7ac95f3c94c49a6ac55d8a99387688f",
+              "run_id": "ca6286981d614d728d1b74531285e734",
+              "request_id": "3ac0298dacaa49fa9d0a3fda5d730493",
+              "from_state": "in_flight",
+              "to_state": "confirmed",
+              "reason_key": "s7_protocol",
+              "summary": "{}",
+              "created_at": "2026-10-22T02:16:18.337Z"
+            }
+          ]
+        }
+      },
+      "stdout": "/private/tmp/ff-001-r1-r4-python-cli-smoke-0_47ma_r/execute-stdout.txt"
+    }
+  ],
+  "fixture_command": [
+    "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python/.venv/bin/python3",
+    "-m",
+    "tests.fixtures",
+    "--config",
+    "config/loopback.yaml",
+    "--evidence-dir",
+    "/private/tmp/ff-001-r1-r4-python-cli-smoke-0_47ma_r/fixture"
+  ],
+  "fixture_pid": 90086,
+  "fixture_exit": 0,
+  "fixture": {
+    "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+    "writes": 1,
+    "reads": 1,
+    "gets": 2,
+    "sessions": 3,
+    "closed_sessions": 2,
+    "trace": [
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "",
+        "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400000000040010002a",
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010002a",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      }
+    ],
+    "server_pid": 90088,
+    "server_exit": 0,
+    "server_close": {
+      "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "remaining_threads": [],
+      "pid": 90088,
+      "exit_code": 0
+    },
+    "server_epochs": [
+      {
+        "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+        "remaining_threads": [],
+        "pid": 90088,
+        "exit_code": 0
+      }
+    ],
+    "proxy_threads_joined": 3,
+    "ports_rebound": [
+      32102,
+      32103,
+      32880
+    ]
+  }
+}

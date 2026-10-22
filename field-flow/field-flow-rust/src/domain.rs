@@ -81,18 +81,29 @@ impl Resource {
 }
 impl Intent {
     pub fn validate_time(&self, now: i64) -> Result<()> {
-        if self.expires_at_ms <= self.issued_at_ms
-            || self.expires_at_ms - self.issued_at_ms > 60000
-            || self.issued_at_ms > now + 1000
+        if self
+            .expires_at_ms
+            .checked_sub(self.issued_at_ms)
+            .is_none_or(|ttl| ttl <= 0 || ttl > 60000)
+            || self.issued_at_ms > now.saturating_add(1000)
             || now >= self.expires_at_ms
-            || now - self.issued_at_ms > self.input_max_age_ms as i64
+            || now
+                .checked_sub(self.issued_at_ms)
+                .is_none_or(|age| age > self.input_max_age_ms as i64)
         {
             return Err("input_stale".into());
         }
         Ok(())
     }
     pub fn deadline(&self) -> Instant {
-        Instant::now() + Duration::from_millis((self.expires_at_ms - now_ms()).max(0) as u64)
+        Instant::now()
+            + Duration::from_millis(
+                (self.expires_at_ms.min(
+                    self.issued_at_ms
+                        .saturating_add(self.input_max_age_ms as i64),
+                ) - now_ms())
+                .max(0) as u64,
+            )
     }
 }
 impl Input {
@@ -138,29 +149,77 @@ impl Input {
         Ok(Some(intent))
     }
 }
-pub struct Clock {
+/// 同一任务的wall/OS monotonic锚点可随私有IPC传给child，排队不重置。
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ClockAnchor {
     wall: i64,
-    mono: Instant,
+    mono_ms: i64,
+    #[cfg(feature = "test-fixture")]
+    test_wall: Option<std::path::PathBuf>,
+}
+fn monotonic_ms() -> Result<i64> {
+    let mut t = std::mem::MaybeUninit::<libc::timespec>::uninit();
+    if unsafe { libc::clock_gettime(libc::CLOCK_MONOTONIC, t.as_mut_ptr()) } != 0 {
+        return Err("clock_invalid".into());
+    }
+    let t = unsafe { t.assume_init() };
+    Ok(t.tv_sec * 1000 + t.tv_nsec / 1_000_000)
+}
+impl ClockAnchor {
+    pub fn check(&self, wall: i64) -> Result<()> {
+        #[cfg(feature = "test-fixture")]
+        let wall = wall + test_wall_offset(self.test_wall.as_deref());
+        let drift =
+            wall as i128 - self.wall as i128 - (monotonic_ms()? as i128 - self.mono_ms as i128);
+        if drift.abs() > 1000 {
+            Err("clock_invalid".into())
+        } else {
+            Ok(())
+        }
+    }
+}
+pub struct Clock {
+    anchor: ClockAnchor,
     pub invalid: bool,
 }
 impl Default for Clock {
     fn default() -> Self {
+        let mono = monotonic_ms();
         Self {
-            wall: now_ms(),
-            mono: Instant::now(),
-            invalid: false,
+            anchor: ClockAnchor {
+                wall: now_ms(),
+                mono_ms: mono.clone().unwrap_or(0),
+                #[cfg(feature = "test-fixture")]
+                test_wall: std::env::var_os("FF_TEST_CLOCK_FILE").map(Into::into),
+            },
+            invalid: mono.is_err(),
         }
     }
 }
 impl Clock {
+    pub fn anchor(&self) -> ClockAnchor {
+        self.anchor.clone()
+    }
+    pub fn invalidate(&mut self) {
+        self.invalid = true;
+    }
     pub fn check(&mut self, wall: i64) -> Result<()> {
-        if (wall - self.wall - self.mono.elapsed().as_millis() as i64).abs() > 1000 {
-            self.invalid = true;
-        }
+        self.invalid |= self.anchor.check(wall).is_err();
         if self.invalid {
             Err("clock_invalid".into())
         } else {
             Ok(())
         }
     }
+}
+/// 仅合成回归的有界墙钟偏移；不修改宿主系统时钟或产品配置。
+#[cfg(feature = "test-fixture")]
+fn test_wall_offset(path: Option<&std::path::Path>) -> i64 {
+    use std::io::Read;
+    let mut text = String::new();
+    path.and_then(|p| std::fs::File::open(p).ok())
+        .and_then(|f| f.take(32).read_to_string(&mut text).ok())
+        .and_then(|_| text.trim().parse::<i64>().ok())
+        .unwrap_or(0)
 }

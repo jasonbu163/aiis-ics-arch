@@ -1,0 +1,45 @@
+   Compiling field-flow v0.1.0 (/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust)
+warning: unused import: `sync::atomic::Ordering`
+  --> tests/local_protocol.rs:10:11
+   |
+10 | use std::{sync::atomic::Ordering, time::Duration};
+   |           ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: function `eventually` is never used
+  --> tests/support/mod.rs:94:14
+   |
+94 | pub async fn eventually(mut f: impl FnMut() -> bool) {
+   |              ^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: function `intent` is never used
+   --> tests/support/mod.rs:101:8
+    |
+101 | pub fn intent(c: &Config, command: &str, value: i16) -> field_flow::domain::Intent {
+    |        ^^^^^^
+
+warning: `field-flow` (test "local_protocol") generated 3 warnings (run `cargo fix --test "local_protocol"` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.54s
+     Running tests/local_protocol.rs (/private/tmp/ff-001-r1-20261021-r2dev/rust-target/debug/deps/local_protocol-98679e1cfe98c183)
+
+running 1 test
+test approved_loopback_matrix ... FAILED
+
+failures:
+
+---- approved_loopback_matrix stdout ----
+
+thread 'approved_loopback_matrix' panicked at tests/local_protocol.rs:25:80:
+called `Result::unwrap()` on an `Err` value: "fixture_port_conflict"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    approved_loopback_matrix
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test local_protocol`

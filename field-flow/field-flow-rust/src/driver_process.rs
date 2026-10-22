@@ -1,7 +1,7 @@
 //! 文件：src/driver_process.rs；单PLC常驻子进程、私有有界IPC与总deadline内真实回收。
 use crate::{
     config::Plc,
-    domain::{now_ms, Intent},
+    domain::{now_ms, ClockAnchor, Intent},
     infrastructure::posix::{socket_bounds, Gate},
     Result,
 };
@@ -38,11 +38,14 @@ pub struct Wire {
     pub offset: u32,
     pub value: Option<i16>,
     pub intent: Option<Intent>,
+    pub clock: Option<ClockAnchor>,
     pub remaining_ms: u64,
     pub plc: Option<Plc>,
     pub gate: Option<PathBuf>,
     pub result: String,
     pub sample: Option<i16>,
+    pub write_ack: Option<crate::infrastructure::s7_int_pdu::ValidatedWriteAck>,
+    pub retire: bool,
 }
 impl Wire {
     pub fn new(kind: &str, generation: u64, request_id: &str) -> Self {
@@ -55,11 +58,14 @@ impl Wire {
             offset: 0,
             value: None,
             intent: None,
+            clock: None,
             remaining_ms: 5000,
             plc: None,
             gate: None,
             result: String::new(),
             sample: None,
+            write_ack: None,
+            retire: false,
         }
     }
 }
@@ -180,6 +186,11 @@ pub fn child_main() -> i32 {
             .map_err(|e| format!("plc_connect:{e}"))?;
         emit(&mut logs, "connected")?;
         write_sync(&mut control, &Wire::new("ready", generation, "connect"))?;
+        let mut session = crate::infrastructure::s7_int_pdu::Session::default();
+        #[cfg(feature = "test-fixture")]
+        if std::env::var_os("FF_TEST_REF_NEAR_END").is_some() {
+            session = crate::infrastructure::s7_int_pdu::Session::test_near_end();
+        }
         loop {
             let mut request = read_sync(&mut control)?;
             if request.generation != generation {
@@ -209,19 +220,37 @@ pub fn child_main() -> i32 {
                 return Err("ipc_permit".into());
             }
             #[cfg(feature = "test-fixture")]
-            if std::env::var_os("FF_TEST_CHILD_BARRIER").is_some() {
+            if kind == "write" && std::env::var_os("FF_TEST_CHILD_BARRIER").is_some() {
                 while !gate.with(|closed| Ok(closed))? {
                     thread::sleep(Duration::from_millis(5));
+                }
+            }
+            #[cfg(feature = "test-fixture")]
+            if kind == "write" {
+                if let Some(path) = std::env::var_os("FF_TEST_CHILD_RELEASE_FILE") {
+                    while !std::path::Path::new(&path).exists()
+                        && !gate.with(|closed| Ok(closed))?
+                    {
+                        thread::sleep(Duration::from_millis(5));
+                    }
                 }
             }
             let admitted = gate.with(|closed| {
                 if (closed && kind == "write") || permit.result == "stop" {
                     return Ok(false);
                 }
-                if std::time::Instant::now() >= expiry || request.remaining_ms < 400 {
+                if std::time::Instant::now() >= expiry {
                     return Ok(false);
                 }
                 if let Some(i) = &request.intent {
+                    if request
+                        .clock
+                        .as_ref()
+                        .is_none_or(|c| c.check(now_ms()).is_err())
+                    {
+                        request.result = "clock_invalid".into();
+                        return Ok(false);
+                    }
                     if i.validate_time(now_ms()).is_err() {
                         return Ok(false);
                     }
@@ -236,30 +265,31 @@ pub fn child_main() -> i32 {
             request.plc = None;
             request.gate = None;
             if !admitted {
-                request.result = "canceled".into();
+                if request.result != "clock_invalid" {
+                    request.result = "canceled".into();
+                }
                 write_sync(&mut control, &request)?;
                 continue;
             }
+            use crate::infrastructure::s7_int_pdu::{Operation, Validated};
             let operation = if kind == "write" {
-                let mut b = request.value.ok_or("ipc_value")?.to_be_bytes();
-                client
-                    .db_write(request.db as i32, request.offset as i32, 2, &mut b)
-                    .map(|_| None)
+                Operation::Write(request.value.ok_or("ipc_value")?)
             } else {
-                let mut b = [0; 2];
-                client
-                    .db_read(request.db as i32, request.offset as i32, 2, &mut b)
-                    .map(|_| Some(i16::from_be_bytes(b)))
+                Operation::Read
             };
-            match operation {
-                Ok(sample) => {
+            request.write_ack = None;
+            match session.exchange(&client, request.db, request.offset, operation) {
+                Ok(Validated::Read(value)) => {
                     request.result = "ok".into();
-                    request.sample = sample;
+                    request.sample = Some(value.value());
                 }
-                Err(_) => {
-                    request.result = "plc_io".into();
+                Ok(Validated::Write(ack)) => {
+                    request.result = "ok".into();
+                    request.write_ack = Some(ack);
                 }
+                Err(error) => request.result = error,
             }
+            request.retire = session.exhausted();
             if request.result != "ok" {
                 emit(&mut logs, "plc_io_error")?;
             }
@@ -418,12 +448,17 @@ impl Driver {
         }
         Ok(driver)
     }
-    pub async fn call(
+    pub async fn call<F, Fut>(
         &mut self,
         mut request: Wire,
         stop: &AtomicBool,
         deadline: Instant,
-    ) -> Result<(Wire, bool)> {
+        on_started: F,
+    ) -> Result<(Wire, bool)>
+    where
+        F: FnOnce() -> Fut,
+        Fut: std::future::Future<Output = Result<()>>,
+    {
         let work = deadline - Duration::from_millis(400);
         let mut started = false;
         let result: Result<(Wire, bool)> = async {
@@ -455,6 +490,9 @@ impl Driver {
                     return Err("ipc_mismatch".into());
                 }
                 started = true;
+                timeout_at(work, on_started())
+                    .await
+                    .map_err(|_| "driver_deadline")??;
                 r = receive(&mut self.stream, work).await?;
             }
             if r.kind != "result"
@@ -462,6 +500,15 @@ impl Driver {
                 || r.generation != self.generation
             {
                 return Err("ipc_mismatch".into());
+            }
+            if r.result == "clock_invalid" && started {
+                return Err("ipc_mismatch".into());
+            }
+            if r.result == "ok"
+                && request.kind == "write"
+                && r.write_ack.as_ref().is_none_or(|a| a.reference() == 0)
+            {
+                return Err("ipc_ack_proof".into());
             }
             Ok((r, started))
         }

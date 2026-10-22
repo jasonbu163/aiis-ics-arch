@@ -1,0 +1,133 @@
+[
+  {
+    "label": "fmt",
+    "command": [
+      "cargo",
+      "fmt",
+      "--check"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project",
+    "target": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/copy-target",
+    "timeout_seconds": 60,
+    "exit_code": 0,
+    "duration_seconds": 0.14765108400000002,
+    "output": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/copy-fmt.txt"
+  },
+  {
+    "label": "check",
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--all-targets",
+      "--features",
+      "test-fixture"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project",
+    "target": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/copy-target",
+    "timeout_seconds": 120,
+    "exit_code": 0,
+    "duration_seconds": 12.669787915999999,
+    "output": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/copy-check.txt"
+  },
+  {
+    "label": "build",
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--offline",
+      "--bins",
+      "--features",
+      "test-fixture"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project",
+    "target": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/copy-target",
+    "timeout_seconds": 120,
+    "exit_code": 0,
+    "duration_seconds": 13.135876959,
+    "output": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/copy-build.txt"
+  },
+  {
+    "label": "codec",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--test",
+      "s7_int_pdu",
+      "--",
+      "--test-threads=1",
+      "--nocapture"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project",
+    "target": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/copy-target",
+    "timeout_seconds": 60,
+    "exit_code": 0,
+    "duration_seconds": 2.0846020000000003,
+    "output": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/copy-codec.txt"
+  },
+  {
+    "label": "gate",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--features",
+      "test-fixture",
+      "--test",
+      "local_protocol",
+      "matched_ack_preflight",
+      "--",
+      "--test-threads=1",
+      "--nocapture"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project",
+    "target": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/copy-target",
+    "timeout_seconds": 120,
+    "exit_code": 0,
+    "duration_seconds": 3.053378875,
+    "output": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/copy-gate.txt"
+  },
+  {
+    "label": "all",
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--features",
+      "test-fixture",
+      "--",
+      "--test-threads=1",
+      "--nocapture"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project",
+    "target": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/copy-target",
+    "timeout_seconds": 180,
+    "exit_code": 0,
+    "duration_seconds": 68.722798916,
+    "output": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/copy-all.txt"
+  },
+  {
+    "label": "bare",
+    "command": [
+      "cargo",
+      "run",
+      "--locked",
+      "--offline",
+      "--bin",
+      "field-flow",
+      "--"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project",
+    "target": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/copy-target",
+    "timeout_seconds": 30,
+    "exit_code": 0,
+    "duration_seconds": 0.43156374999999514,
+    "output": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/copy-bare.txt"
+  }
+]

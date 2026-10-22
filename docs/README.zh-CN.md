@@ -13,7 +13,7 @@
 | [AW 运行原理与详细设计](AIIS_AW_Runtime_Design.md) | SQLite、S7 点位、API、共享流程 Core 与设备执行/恢复的设计依据；非实现声明。 |
 | [DAA 详细设计](AIIS_DAA_Detailed_Design.md) | 多 PLC、双 SQLite、有界最新优先补传及 Backend 最多三自然月窗口的中文目标设计；补充 CU 消费、工作台/配置页面、运行数据流、DB 包/批次示例与分阶段实施；不授权实现。 |
 | [SMA 详细设计](AIIS_SMA_Detailed_Design.md) | 本地表单绑定、API 材料/手工目标、定义校验/转换、持久进度/outbox 与可靠业务 API 投递的中文目标设计；不授权实现。 |
-| [DS 详细设计](AIIS_DS_Detailed_Design.md) | 004 r2已验收历史及已批005 r5产品MVP设计：DAA派生六页、单Rust runtime、typed导入/配置/apply、DS SQLite与自动验证；DEV实施证据与最新独立QA/Owner状态见所属tasks/checklist；DAA至SQLite联调另批，不倒记旧验收。 |
+| [DS 详细设计](AIIS_DS_Detailed_Design.md) · [使用手册](../automation-world/device-simulator/USER_GUIDE.zh-CN.md) | 004已验收历史及r5产品设计；逐步手工DB31→Alpha/Beta导入、原生图和启动/store说明。明确当前自定义初值/持续固定值键入问题，文档核验/Owner终验与原技术QA分开；DAA至SQLite联调另批。 |
 
 
 ## 权威边界

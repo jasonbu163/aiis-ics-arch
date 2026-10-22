@@ -1,0 +1,46 @@
+{
+  "python-formal-net": [
+    {
+      "name": "field_flow-0.1.0.tar.gz",
+      "sha256": "6ba7f52fc4ba63791bf364607392b5608a58ee6f1b8e74859cd533555cb65483",
+      "bytes": 53716
+    },
+    {
+      "name": "field_flow-0.1.0-py3-none-any.whl",
+      "sha256": "5b64ee1e5b36cccc2417330a0d1c65e277ca90efa13b9b09bff5511fa2815b25",
+      "bytes": 27628,
+      "locale_packaged": [
+        "field_flow/locales/en-US.json",
+        "field_flow/locales/zh-CN.json"
+      ],
+      "unexpected_state_or_env": false
+    },
+    {
+      "name": ".gitignore",
+      "sha256": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+      "bytes": 1
+    }
+  ],
+  "python-isolated-copy": [
+    {
+      "name": "field_flow-0.1.0.tar.gz",
+      "sha256": "6ba7f52fc4ba63791bf364607392b5608a58ee6f1b8e74859cd533555cb65483",
+      "bytes": 53716
+    },
+    {
+      "name": "field_flow-0.1.0-py3-none-any.whl",
+      "sha256": "5b64ee1e5b36cccc2417330a0d1c65e277ca90efa13b9b09bff5511fa2815b25",
+      "bytes": 27628,
+      "locale_packaged": [
+        "field_flow/locales/en-US.json",
+        "field_flow/locales/zh-CN.json"
+      ],
+      "unexpected_state_or_env": false
+    },
+    {
+      "name": ".gitignore",
+      "sha256": "684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1",
+      "bytes": 1
+    }
+  ]
+}

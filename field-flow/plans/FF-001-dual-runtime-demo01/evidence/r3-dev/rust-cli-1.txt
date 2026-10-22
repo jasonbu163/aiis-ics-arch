@@ -1,0 +1,11 @@
+   Compiling field-flow v0.1.0 (/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.24s
+     Running tests/cli_contract.rs (/private/tmp/ff-001-r1-20261021-r2dev/rust-target/debug/deps/cli_contract-80525ad23852f3d9)
+
+running 3 tests
+test strict_values_times_and_clock ... ok
+test strict_config ... ok
+test cli_and_schema ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
+

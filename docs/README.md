@@ -13,7 +13,7 @@
 | [AW Runtime Principles and Design](AIIS_AW_Runtime_Design.md) | SQLite, S7 points, APIs, shared Flow Core and device execution/recovery design; no implementation claim. |
 | [DAA Detailed Design](AIIS_DAA_Detailed_Design.md) | Chinese target design for multi-PLC acquisition, dual SQLite, bounded latest-first replay and a maximum three-calendar-month Backend window; includes CU consumption, workspace/configuration pages, runtime data flows, DB-packet/batch examples and phased implementation; no implementation authorization. |
 | [SMA Detailed Design](AIIS_SMA_Detailed_Design.md) | Chinese target design for local form-based bindings, API materials/manual targets, definition checks, transformations, persistent progress/outbox and reliable business API delivery; no implementation authorization. |
-| [DS Detailed Design](AIIS_DS_Detailed_Design.md) | Accepted ARCH-AW-004 r2 history with approved ARCH-AW-005 r5 product MVP design: DAA-derived six-page UI, one Rust runtime, typed import/configuration/apply, DS SQLite and automated validation; DEV implementation/evidence and current independent QA/Owner status are recorded in the owning tasks/checklist; DAA-to-SQLite integration is separately gated. |
+| [DS Detailed Design](AIIS_DS_Detailed_Design.md) · [User guide](../automation-world/device-simulator/USER_GUIDE.md) | 004 accepted history and r5 product design; step-by-step manual DB31 then Alpha/Beta import, native images and startup/store guidance. Current custom initial/fixed-value typing issue is disclosed; document verification and Owner acceptance are separate from prior technical QA. DAA-to-SQLite integration remains separately gated. |
 
 
 ## Authority Boundaries

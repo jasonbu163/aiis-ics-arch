@@ -82,4 +82,4 @@ See [initialization and deployment](INITIALIZATION.md#single-host-deployment) fo
 
 See [Automation World](automation-world/README.md) for CA freezing, independent DAA/SMA startup and later-stage boundaries.
 
-See [Field Flow](field-flow/README.md) for independent Rust/Python field runtimes. The partial Rust candidate is blocked by S7 acknowledgement correlation; complete runtime validation and Python implementation remain pending.
+See [Field Flow](field-flow/README.md) for independent Rust/Python field runtimes. FF-001 r4 implements demo01's local HTTP GET → PLC INT loop in both projects. Fresh-context [QA2](field-flow/plans/FF-001-dual-runtime-demo01/checklist.md) passed AC01–AC15 for the exact [dual-version handoff](field-flow/plans/FF-001-dual-runtime-demo01/tasks.md), independently closing all three Rust QA1 defects. Earlier failures remain; Human Owner final acceptance, field validation and long-running acceptance are pending.

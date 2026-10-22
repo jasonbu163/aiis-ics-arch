@@ -1,0 +1,81 @@
+[
+  {
+    "label": "gate",
+    "argv": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--features",
+      "test-fixture",
+      "--test",
+      "local_protocol",
+      "matched_ack_preflight",
+      "--",
+      "--test-threads=1",
+      "--nocapture"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-target"
+    },
+    "pid": 14459,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 4.229825,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-gate.txt",
+    "output_sha256": "f2da7d262c66c4558ca12ee43c5b1ef133a4e0337ed69c06ac0783a0b88aa0ce"
+  },
+  {
+    "label": "protocol",
+    "argv": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--features",
+      "test-fixture",
+      "--",
+      "--test-threads=1",
+      "--nocapture"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-target"
+    },
+    "pid": 14505,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 65.760322417,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-protocol.txt",
+    "output_sha256": "33c1e82c81a02b639b1ad1820e96a72e896675858e7f8feb698080fb486d6c51"
+  },
+  {
+    "label": "bare",
+    "argv": [
+      "cargo",
+      "run",
+      "--locked",
+      "--offline",
+      "--bin",
+      "field-flow",
+      "--"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-target"
+    },
+    "pid": 15194,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.5053223339999988,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-bare.txt",
+    "output_sha256": "eade5443aa76aed42f6adefcc3a46e681a190d521b6081c21d72b8d0fc32a55e"
+  }
+]

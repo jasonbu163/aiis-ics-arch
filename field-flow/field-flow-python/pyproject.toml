@@ -1,0 +1,24 @@
+[project]
+name = "field-flow"
+version = "0.1.0"
+requires-python = ">=3.11,<3.14"
+dependencies = ["python-snap7==3.0.0", "httpx>=0.28,<0.29", "PyYAML>=6,<7"]
+
+[project.scripts]
+field-flow = "field_flow.cli:main"
+
+[build-system]
+requires = ["hatchling==1.32.4"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/field_flow"]
+
+[dependency-groups]
+dev = ["pytest>=8,<9"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"locales" = "field_flow/locales"
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "config", "locales", "README*", "PLAN*", "CODE_INDEX.md", "LICENSE", "THIRD_PARTY_NOTICES*", "pyproject.toml", "uv.lock", ".python-version", "plans/README*"]

@@ -1,0 +1,28 @@
+# coding: utf-8
+import json,re,shutil,sqlite3,hashlib
+from pathlib import Path
+r=Path('/private/tmp/ff-001-r1-r4-rework1-32onn0fh');e=Path('/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/plans/FF-001-dual-runtime-demo01/evidence/r4-rework-1');mapping=[];stores=set()
+def walk(v):
+ if isinstance(v,dict):
+  for x in v.values():walk(x)
+ elif isinstance(v,list):
+  for x in v:walk(x)
+ elif isinstance(v,str) and v.startswith('/private/tmp/ff-001-r1-'):
+  p=Path(v)
+  if p.is_dir() and (p/'state.sqlite').is_file():stores.add(p)
+for p in sorted(r.iterdir()):
+ if p.is_file() and p.suffix in ('.txt','.json','.py'):
+  shutil.copy2(p,e/(p.name if p.suffix!='.py' else p.name+'.txt'))
+  if p.suffix=='.txt':
+   for line in p.read_text().splitlines():
+    try:v=json.loads(line[line.index('{'):])
+    except (ValueError,TypeError):continue
+    walk(v)
+    path=v.get('regression_evidence') if isinstance(v,dict) else None
+    if path:
+     src=Path(path);dst=e/(p.stem+'-'+src.parent.name+'.json');shutil.copy2(src,dst);report=json.loads(src.read_text());walk(report);mapping.append({'source':str(src),'copy':dst.name,'sha256':hashlib.sha256(src.read_bytes()).hexdigest()})
+export={}
+for p in sorted(stores):
+ c=sqlite3.connect((p/'state.sqlite').as_uri()+'?mode=ro',uri=True);c.row_factory=sqlite3.Row
+ export[str(p)]={t:[dict(x) for x in c.execute('SELECT * FROM '+t)] for t in ('store_meta','commands','command_events')};c.close()
+(e/'report-map.json').write_text(json.dumps(mapping,indent=2)+'\n');(e/'selected-stores.json').write_text(json.dumps(export,indent=2)+'\n');print('reports',len(mapping),'stores',len(export))

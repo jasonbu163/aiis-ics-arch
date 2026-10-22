@@ -1,0 +1,104 @@
+{
+  "clock_counterexample": {
+    "initial_source_age_ms": 5000,
+    "proper_drift_check": {
+      "Err": "clock_invalid"
+    },
+    "scope": "local arithmetic model plus source control-flow review; host system clock unchanged; not a real wall-clock-jump runtime experiment",
+    "utc_only_validation": {
+      "Ok": null
+    },
+    "wall_jump_ms": -2000
+  },
+  "fixture_joined": true,
+  "native_exit": 0,
+  "native_pid": 25119,
+  "ports_rebound": [
+    31102,
+    31103,
+    31880
+  ],
+  "precall_barrier": {
+    "actual_WriteVar": 0,
+    "after_stop": {
+      "counts": {
+        "canceled": 1
+      },
+      "meta": {
+        "implementation": "rust",
+        "instance_id": "ff-rust-demo01",
+        "mode": "execute",
+        "schema_version": 1,
+        "store_uuid": "1792637239509-25096-0"
+      }
+    },
+    "driver_call_started_events": 0,
+    "durable_before_stop": {
+      "counts": {
+        "in_flight": 1
+      },
+      "meta": {
+        "implementation": "rust",
+        "instance_id": "ff-rust-demo01",
+        "mode": "execute",
+        "schema_version": 1,
+        "store_uuid": "1792637239509-25096-0"
+      }
+    },
+    "health": {
+      "generation": 1,
+      "in_flight": 1,
+      "pid": 25120,
+      "queue_depth": 0,
+      "state": "ready"
+    },
+    "job_result": {
+      "Err": "canceled"
+    },
+    "shutdown": {
+      "Ok": null
+    }
+  },
+  "protocol": {
+    "applied": 0,
+    "gets": 1,
+    "native_pid": 25119,
+    "reads": 0,
+    "sessions": 1,
+    "trace": [
+      {
+        "at_ms": 1792637239833,
+        "operation": 0,
+        "original_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+        "positive": false,
+        "request_hex": "0300001611e00000000100c0010ac1020100c2020101",
+        "request_ref": [
+          192,
+          1
+        ],
+        "response_ref": [
+          192,
+          1
+        ],
+        "sent_response_hex": "0300001611d00001000100c0010ac1020100c2020101"
+      },
+      {
+        "at_ms": 1792637239834,
+        "operation": 240,
+        "original_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+        "positive": false,
+        "request_hex": "0300001902f08032010000000000080000f0000001000101e0",
+        "request_ref": [
+          0,
+          0
+        ],
+        "response_ref": [
+          0,
+          0
+        ],
+        "sent_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0"
+      }
+    ],
+    "writes": 0
+  }
+}

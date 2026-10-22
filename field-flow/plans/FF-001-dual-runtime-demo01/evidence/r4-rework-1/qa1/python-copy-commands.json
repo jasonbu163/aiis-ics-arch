@@ -1,0 +1,284 @@
+[
+  {
+    "label": "lock",
+    "argv": [
+      "uv",
+      "lock",
+      "--check",
+      "--offline",
+      "--python",
+      "3.11",
+      "--no-python-downloads"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-target"
+    },
+    "pid": 10941,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.022615208999999997,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-lock.txt",
+    "output_sha256": "a76581b3e5bba4c93fa2dfd6917fb6168fa530e96fba39ec91011eeacb1b9e43"
+  },
+  {
+    "label": "sync",
+    "argv": [
+      "uv",
+      "sync",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-target"
+    },
+    "pid": 10942,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.38136941700000004,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-sync.txt",
+    "output_sha256": "95900d83a300bcb452a70f5709fd63fc6f585e7a599d839c5262823b89d512db"
+  },
+  {
+    "label": "build",
+    "argv": [
+      "uv",
+      "build",
+      "--offline",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "--out-dir",
+      "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-dist"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-target"
+    },
+    "pid": 10945,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.735981875,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-build.txt",
+    "output_sha256": "8e88ca30f455cc5c5b114c69d784c645ed5fb189341f2ce652420fe5c5339ce2"
+  },
+  {
+    "label": "compile",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "python",
+      "-m",
+      "compileall",
+      "-q",
+      "src",
+      "tests"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-target"
+    },
+    "pid": 10953,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.15002175000000006,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-compile.txt",
+    "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "unit",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "tests/unit",
+      "-s"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-target"
+    },
+    "pid": 10993,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 4.091864083,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-unit.txt",
+    "output_sha256": "207b3b6a534eb8df6663fd140fa9b74585157271cd9861e20ecf062290b53a58"
+  },
+  {
+    "label": "gate",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "tests/test_matched_ack_gate.py",
+      "-s"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-target"
+    },
+    "pid": 11351,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 5.692847124999999,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-gate.txt",
+    "output_sha256": "4aef1f10580a631f10fdc6b8db90bd2f3587baa081d8b61984619b0ac711f736"
+  },
+  {
+    "label": "protocol",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "tests/test_local_protocol.py",
+      "-s"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-target"
+    },
+    "pid": 12407,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 56.637251917,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-protocol.txt",
+    "output_sha256": "62114e5f4311631a86c0bf6066b01e7a9eb2fefec60db683326ad3d36a60b162"
+  },
+  {
+    "label": "bare",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "field-flow"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-target"
+    },
+    "pid": 14265,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.5639111250000042,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-bare.txt",
+    "output_sha256": "e0da32ec8bb2533a1077076b454dadfaa4fc27bf52c0c7a46549c29cd1382509"
+  },
+  {
+    "label": "cli",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "python",
+      "-m",
+      "tests.fixtures.cli_smoke"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-target"
+    },
+    "pid": 14270,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 2.7291649170000056,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-cli.txt",
+    "output_sha256": "41615dfe93128157e3773a6f3a93e5e219ba5f39de3d80b546aadba29f552ef0"
+  },
+  {
+    "label": "provenance",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "python",
+      "-c",
+      "import sys,field_flow,tests.fixtures,sqlite3,snap7; import importlib.metadata as m,json; print(json.dumps(dict(executable=sys.executable,source=field_flow.__file__,fixture=tests.fixtures.__file__,python=sys.version,sqlite=sqlite3.sqlite_version,snap7=m.version(\"python-snap7\"))))"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-python",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-target"
+    },
+    "pid": 14297,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.18823575000000403,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-provenance.txt",
+    "output_sha256": "7f060e0e66ed3c1bc5cd8c7d0f6b3cbcf9c53b09ea7d0f144e9ef24d64f653aa"
+  }
+]

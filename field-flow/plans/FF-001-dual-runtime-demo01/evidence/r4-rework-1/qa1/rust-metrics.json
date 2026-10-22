@@ -1,0 +1,1054 @@
+{
+  "rust-formal": [
+    {
+      "ac": "AC10/AC12",
+      "actual_writes": 1,
+      "case": "confirmed-then-sink-failure",
+      "confirmed": 1,
+      "ports_rebound": [
+        31102,
+        31103,
+        31880
+      ],
+      "repeat_after_restart": 10,
+      "store": "/private/tmp/ff-001-r1-r3-rust-confirmed-then-sink-1792636466060-14667-0/state"
+    },
+    {
+      "ac": "AC03/AC05",
+      "case": "INT-and-ten-repeats-restart",
+      "evidence": {
+        "generation": 1,
+        "initial_pid": 14687,
+        "readback": [
+          127,
+          255,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165
+        ],
+        "writes": 5
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC04",
+      "case": "invalid-idle-body-clock",
+      "evidence": {
+        "new_writes": 0,
+        "rejected": 9
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC06",
+      "case": "three-independent-readers",
+      "evidence": {
+        "pid": 14690,
+        "samples_per_flow": 20,
+        "sessions": 1
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC07",
+      "case": "slow-GET-independent-read",
+      "evidence": {
+        "max_gap_ms": 110,
+        "samples": 77
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC11",
+      "case": "separate-dry-store",
+      "evidence": {
+        "new_writes": 0,
+        "simulated": 1
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC08/AC09",
+      "case": "applied-ACK-lost-reap-unknown",
+      "evidence": {
+        "elapsed_ms": 4633,
+        "error": "forced_driver_stop:driver_deadline",
+        "store": "/private/tmp/ff-001-r1-r3-rust-lost-ack-1792636475910-14685-165/state",
+        "writes": 1
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC08",
+      "case": "split",
+      "evidence": {
+        "driver_pid": 14814,
+        "duration_ms": 4620,
+        "pid_gone": true,
+        "result": {
+          "Err": "forced_driver_stop:driver_deadline"
+        }
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC08",
+      "case": "slow",
+      "evidence": {
+        "driver_pid": 14845,
+        "duration_ms": 4622,
+        "pid_gone": true,
+        "result": {
+          "Err": "forced_driver_stop:driver_deadline"
+        }
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC08",
+      "case": "stale",
+      "evidence": {
+        "driver_pid": 14894,
+        "duration_ms": 100,
+        "pid_gone": true,
+        "result": {
+          "Err": "s7_reference_mismatch"
+        }
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC08",
+      "case": "silent-COTP",
+      "evidence": {
+        "connect_budget_ms": 500,
+        "result": "no_io_before_ready"
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC09",
+      "case": "T1-T2-recovery-and-physical-overlap",
+      "evidence": {
+        "alias_rejections": 4,
+        "confirmed": 1,
+        "unknown": 1
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC10",
+      "case": "ACK-then-T3-failure",
+      "evidence": {
+        "actual_writes": 1,
+        "recovery": "unknown"
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC13",
+      "case": "child-precall-and-parent-queue-stop",
+      "evidence": {
+        "actual_writes": 0,
+        "duration_ms": 98,
+        "store": "/private/tmp/ff-001-r1-r3-rust-queued-stop-1792636492092-14685-214/state"
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "actual_writevar_count": 1,
+      "applied_positive_ack_count": 1,
+      "case": "unmatched-S7-PDU-reference",
+      "child_pid": 14930,
+      "child_pid_gone": true,
+      "fixture_natural_close": {
+        "Ok": null
+      },
+      "native_memory_readback_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "neighbor_bytes_preserved": true,
+      "parent_store": {
+        "counts": {
+          "unknown": 1
+        },
+        "meta": {
+          "implementation": "rust",
+          "instance_id": "ff-rust-demo01",
+          "mode": "execute",
+          "schema_version": 1,
+          "store_uuid": "1792636493808-14685-252"
+        }
+      },
+      "protocol_trace": [
+        {
+          "at_ms": 1792636493831,
+          "operation": 0,
+          "original_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+          "positive": false,
+          "request_hex": "0300001611e00000000100c0010ac1020100c2020101",
+          "request_ref": [
+            192,
+            1
+          ],
+          "response_ref": [
+            192,
+            1
+          ],
+          "sent_response_hex": "0300001611d00001000100c0010ac1020100c2020101"
+        },
+        {
+          "at_ms": 1792636493832,
+          "operation": 240,
+          "original_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+          "positive": false,
+          "request_hex": "0300001902f08032010000000000080000f0000001000101e0",
+          "request_ref": [
+            0,
+            0
+          ],
+          "response_ref": [
+            0,
+            0
+          ],
+          "sent_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0"
+        },
+        {
+          "at_ms": 1792636493843,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000",
+          "request_ref": [
+            0,
+            1
+          ],
+          "response_ref": [
+            0,
+            1
+          ],
+          "sent_response_hex": null
+        },
+        {
+          "changed_absolute_tpkt_index": 12,
+          "event": "unmatched_response_sent",
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5",
+          "original_response_pdu_ref": [
+            0,
+            1
+          ],
+          "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000",
+          "request_pdu_ref": [
+            0,
+            1
+          ],
+          "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+          "sent_response_pdu_ref": [
+            0,
+            2
+          ]
+        },
+        {
+          "at_ms": 1792636494209,
+          "operation": 0,
+          "original_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+          "positive": false,
+          "request_hex": "0300001611e00000000100c0010ac1020100c2020101",
+          "request_ref": [
+            192,
+            1
+          ],
+          "response_ref": [
+            192,
+            1
+          ],
+          "sent_response_hex": null
+        },
+        {
+          "at_ms": 1792636494210,
+          "operation": 240,
+          "original_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+          "positive": false,
+          "request_hex": "0300001902f08032010000000000080000f0000001000101e0",
+          "request_ref": [
+            0,
+            0
+          ],
+          "response_ref": [
+            0,
+            0
+          ],
+          "sent_response_hex": null
+        },
+        {
+          "at_ms": 1792636494227,
+          "operation": 5,
+          "original_response_hex": "0300001602f0803203000000010002000100000501ff",
+          "positive": true,
+          "request_hex": "0300002502f080320100000001000e00060501120a1002000200018400000000040010002a",
+          "request_ref": [
+            0,
+            1
+          ],
+          "response_ref": [
+            0,
+            1
+          ],
+          "sent_response_hex": null
+        },
+        {
+          "changed_absolute_tpkt_index": 12,
+          "event": "unmatched_response_sent",
+          "operation": 5,
+          "original_response_hex": "0300001602f0803203000000010002000100000501ff",
+          "original_response_pdu_ref": [
+            0,
+            1
+          ],
+          "request_hex": "0300002502f080320100000001000e00060501120a1002000200018400000000040010002a",
+          "request_pdu_ref": [
+            0,
+            1
+          ],
+          "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+          "sent_response_pdu_ref": [
+            0,
+            2
+          ]
+        },
+        {
+          "at_ms": 1792636494337,
+          "operation": 0,
+          "original_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+          "positive": false,
+          "request_hex": "0300001611e00000000100c0010ac1020100c2020101",
+          "request_ref": [
+            192,
+            1
+          ],
+          "response_ref": [
+            192,
+            1
+          ],
+          "sent_response_hex": "0300001611d00001000100c0010ac1020100c2020101"
+        },
+        {
+          "at_ms": 1792636494338,
+          "operation": 240,
+          "original_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+          "positive": false,
+          "request_hex": "0300001902f08032010000000000080000f0000001000101e0",
+          "request_ref": [
+            0,
+            0
+          ],
+          "response_ref": [
+            0,
+            0
+          ],
+          "sent_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0"
+        },
+        {
+          "at_ms": 1792636494339,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010002a",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000",
+          "request_ref": [
+            0,
+            1
+          ],
+          "response_ref": [
+            0,
+            1
+          ],
+          "sent_response_hex": "0300001b02f0803203000000010002000600000401ff040010002a"
+        },
+        {
+          "at_ms": 1792636494340,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000010",
+          "request_ref": [
+            0,
+            2
+          ],
+          "response_ref": [
+            0,
+            2
+          ],
+          "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5"
+        },
+        {
+          "at_ms": 1792636494342,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000030002000600000401ff040010a5a5",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000003000e00000401120a10020002000184000020",
+          "request_ref": [
+            0,
+            3
+          ],
+          "response_ref": [
+            0,
+            3
+          ],
+          "sent_response_hex": "0300001b02f0803203000000030002000600000401ff040010a5a5"
+        },
+        {
+          "at_ms": 1792636494343,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000040002000600000401ff040010a5a5",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000004000e00000401120a10020002000184000030",
+          "request_ref": [
+            0,
+            4
+          ],
+          "response_ref": [
+            0,
+            4
+          ],
+          "sent_response_hex": "0300001b02f0803203000000040002000600000401ff040010a5a5"
+        },
+        {
+          "at_ms": 1792636494344,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000050002000600000401ff040010a5a5",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000005000e00000401120a10020002000184000040",
+          "request_ref": [
+            0,
+            5
+          ],
+          "response_ref": [
+            0,
+            5
+          ],
+          "sent_response_hex": "0300001b02f0803203000000050002000600000401ff040010a5a5"
+        },
+        {
+          "at_ms": 1792636494346,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000060002000600000401ff040010a5a5",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000006000e00000401120a10020002000184000050",
+          "request_ref": [
+            0,
+            6
+          ],
+          "response_ref": [
+            0,
+            6
+          ],
+          "sent_response_hex": "0300001b02f0803203000000060002000600000401ff040010a5a5"
+        },
+        {
+          "at_ms": 1792636494347,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000070002000600000401ff040010a5a5",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000007000e00000401120a10020002000184000060",
+          "request_ref": [
+            0,
+            7
+          ],
+          "response_ref": [
+            0,
+            7
+          ],
+          "sent_response_hex": "0300001b02f0803203000000070002000600000401ff040010a5a5"
+        },
+        {
+          "at_ms": 1792636494348,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000080002000600000401ff040010a5a5",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000008000e00000401120a10020002000184000070",
+          "request_ref": [
+            0,
+            8
+          ],
+          "response_ref": [
+            0,
+            8
+          ],
+          "sent_response_hex": "0300001b02f0803203000000080002000600000401ff040010a5a5"
+        }
+      ],
+      "read_result": {
+        "Err": "s7_reference_mismatch"
+      },
+      "released_ports": [
+        31102,
+        31103,
+        31880
+      ],
+      "revision": "r3",
+      "store_dir": "/private/tmp/ff-001-r1-r3-rust-stale-reference-probe-1792636493802-14685-251/state",
+      "task": "FF-001",
+      "write_iteration_result": {
+        "Err": "s7_reference_mismatch"
+      }
+    },
+    {
+      "ac": "AC10/AC13",
+      "applied": 1,
+      "child_gone": true,
+      "duration_to_observation_ms": 5651,
+      "kill_parent": false,
+      "old_child_end_ms": 40,
+      "old_child_pid": 14949,
+      "store": "/private/tmp/ff-001-r1-r3-rust-child-death-1792636494781-14946-0/state",
+      "unknown": 1
+    },
+    {
+      "ac": "AC10/AC13",
+      "applied": 1,
+      "child_gone": true,
+      "duration_to_observation_ms": 5754,
+      "kill_parent": true,
+      "old_child_end_ms": 118,
+      "old_child_pid": 15001,
+      "store": "/private/tmp/ff-001-r1-r3-rust-parent-death-1792636500494-14946-2/state",
+      "unknown": 1
+    }
+  ],
+  "rust-isolated-copy": [
+    {
+      "ac": "AC10/AC12",
+      "actual_writes": 1,
+      "case": "confirmed-then-sink-failure",
+      "confirmed": 1,
+      "ports_rebound": [
+        31102,
+        31103,
+        31880
+      ],
+      "repeat_after_restart": 10,
+      "store": "/private/tmp/ff-001-r1-r3-rust-confirmed-then-sink-1792637103092-23938-0/state"
+    },
+    {
+      "ac": "AC03/AC05",
+      "case": "INT-and-ten-repeats-restart",
+      "evidence": {
+        "generation": 1,
+        "initial_pid": 23958,
+        "readback": [
+          127,
+          255,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165,
+          165
+        ],
+        "writes": 5
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC04",
+      "case": "invalid-idle-body-clock",
+      "evidence": {
+        "new_writes": 0,
+        "rejected": 9
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC06",
+      "case": "three-independent-readers",
+      "evidence": {
+        "pid": 23961,
+        "samples_per_flow": 20,
+        "sessions": 1
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC07",
+      "case": "slow-GET-independent-read",
+      "evidence": {
+        "max_gap_ms": 111,
+        "samples": 77
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC11",
+      "case": "separate-dry-store",
+      "evidence": {
+        "new_writes": 0,
+        "simulated": 1
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC08/AC09",
+      "case": "applied-ACK-lost-reap-unknown",
+      "evidence": {
+        "elapsed_ms": 4633,
+        "error": "forced_driver_stop:driver_deadline",
+        "store": "/private/tmp/ff-001-r1-r3-rust-lost-ack-1792637113158-23956-165/state",
+        "writes": 1
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC08",
+      "case": "split",
+      "evidence": {
+        "driver_pid": 24070,
+        "duration_ms": 4621,
+        "pid_gone": true,
+        "result": {
+          "Err": "forced_driver_stop:driver_deadline"
+        }
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC08",
+      "case": "slow",
+      "evidence": {
+        "driver_pid": 24103,
+        "duration_ms": 4617,
+        "pid_gone": true,
+        "result": {
+          "Err": "forced_driver_stop:driver_deadline"
+        }
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC08",
+      "case": "stale",
+      "evidence": {
+        "driver_pid": 24146,
+        "duration_ms": 91,
+        "pid_gone": true,
+        "result": {
+          "Err": "s7_reference_mismatch"
+        }
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC08",
+      "case": "silent-COTP",
+      "evidence": {
+        "connect_budget_ms": 500,
+        "result": "no_io_before_ready"
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC09",
+      "case": "T1-T2-recovery-and-physical-overlap",
+      "evidence": {
+        "alias_rejections": 4,
+        "confirmed": 1,
+        "unknown": 1
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC10",
+      "case": "ACK-then-T3-failure",
+      "evidence": {
+        "actual_writes": 1,
+        "recovery": "unknown"
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "ac": "AC13",
+      "case": "child-precall-and-parent-queue-stop",
+      "evidence": {
+        "actual_writes": 0,
+        "duration_ms": 90,
+        "store": "/private/tmp/ff-001-r1-r3-rust-queued-stop-1792637129400-23956-214/state"
+      },
+      "result": "dev_check_passed"
+    },
+    {
+      "actual_writevar_count": 1,
+      "applied_positive_ack_count": 1,
+      "case": "unmatched-S7-PDU-reference",
+      "child_pid": 24182,
+      "child_pid_gone": true,
+      "fixture_natural_close": {
+        "Ok": null
+      },
+      "native_memory_readback_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "neighbor_bytes_preserved": true,
+      "parent_store": {
+        "counts": {
+          "unknown": 1
+        },
+        "meta": {
+          "implementation": "rust",
+          "instance_id": "ff-rust-demo01",
+          "mode": "execute",
+          "schema_version": 1,
+          "store_uuid": "1792637131201-23956-252"
+        }
+      },
+      "protocol_trace": [
+        {
+          "at_ms": 1792637131223,
+          "operation": 0,
+          "original_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+          "positive": false,
+          "request_hex": "0300001611e00000000100c0010ac1020100c2020101",
+          "request_ref": [
+            192,
+            1
+          ],
+          "response_ref": [
+            192,
+            1
+          ],
+          "sent_response_hex": "0300001611d00001000100c0010ac1020100c2020101"
+        },
+        {
+          "at_ms": 1792637131225,
+          "operation": 240,
+          "original_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+          "positive": false,
+          "request_hex": "0300001902f08032010000000000080000f0000001000101e0",
+          "request_ref": [
+            0,
+            0
+          ],
+          "response_ref": [
+            0,
+            0
+          ],
+          "sent_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0"
+        },
+        {
+          "at_ms": 1792637131235,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000",
+          "request_ref": [
+            0,
+            1
+          ],
+          "response_ref": [
+            0,
+            1
+          ],
+          "sent_response_hex": null
+        },
+        {
+          "changed_absolute_tpkt_index": 12,
+          "event": "unmatched_response_sent",
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5",
+          "original_response_pdu_ref": [
+            0,
+            1
+          ],
+          "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000",
+          "request_pdu_ref": [
+            0,
+            1
+          ],
+          "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+          "sent_response_pdu_ref": [
+            0,
+            2
+          ]
+        },
+        {
+          "at_ms": 1792637131607,
+          "operation": 0,
+          "original_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+          "positive": false,
+          "request_hex": "0300001611e00000000100c0010ac1020100c2020101",
+          "request_ref": [
+            192,
+            1
+          ],
+          "response_ref": [
+            192,
+            1
+          ],
+          "sent_response_hex": null
+        },
+        {
+          "at_ms": 1792637131608,
+          "operation": 240,
+          "original_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+          "positive": false,
+          "request_hex": "0300001902f08032010000000000080000f0000001000101e0",
+          "request_ref": [
+            0,
+            0
+          ],
+          "response_ref": [
+            0,
+            0
+          ],
+          "sent_response_hex": null
+        },
+        {
+          "at_ms": 1792637131625,
+          "operation": 5,
+          "original_response_hex": "0300001602f0803203000000010002000100000501ff",
+          "positive": true,
+          "request_hex": "0300002502f080320100000001000e00060501120a1002000200018400000000040010002a",
+          "request_ref": [
+            0,
+            1
+          ],
+          "response_ref": [
+            0,
+            1
+          ],
+          "sent_response_hex": null
+        },
+        {
+          "changed_absolute_tpkt_index": 12,
+          "event": "unmatched_response_sent",
+          "operation": 5,
+          "original_response_hex": "0300001602f0803203000000010002000100000501ff",
+          "original_response_pdu_ref": [
+            0,
+            1
+          ],
+          "request_hex": "0300002502f080320100000001000e00060501120a1002000200018400000000040010002a",
+          "request_pdu_ref": [
+            0,
+            1
+          ],
+          "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+          "sent_response_pdu_ref": [
+            0,
+            2
+          ]
+        },
+        {
+          "at_ms": 1792637131726,
+          "operation": 0,
+          "original_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+          "positive": false,
+          "request_hex": "0300001611e00000000100c0010ac1020100c2020101",
+          "request_ref": [
+            192,
+            1
+          ],
+          "response_ref": [
+            192,
+            1
+          ],
+          "sent_response_hex": "0300001611d00001000100c0010ac1020100c2020101"
+        },
+        {
+          "at_ms": 1792637131727,
+          "operation": 240,
+          "original_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+          "positive": false,
+          "request_hex": "0300001902f08032010000000000080000f0000001000101e0",
+          "request_ref": [
+            0,
+            0
+          ],
+          "response_ref": [
+            0,
+            0
+          ],
+          "sent_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0"
+        },
+        {
+          "at_ms": 1792637131728,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010002a",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000",
+          "request_ref": [
+            0,
+            1
+          ],
+          "response_ref": [
+            0,
+            1
+          ],
+          "sent_response_hex": "0300001b02f0803203000000010002000600000401ff040010002a"
+        },
+        {
+          "at_ms": 1792637131730,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000010",
+          "request_ref": [
+            0,
+            2
+          ],
+          "response_ref": [
+            0,
+            2
+          ],
+          "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5"
+        },
+        {
+          "at_ms": 1792637131732,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000030002000600000401ff040010a5a5",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000003000e00000401120a10020002000184000020",
+          "request_ref": [
+            0,
+            3
+          ],
+          "response_ref": [
+            0,
+            3
+          ],
+          "sent_response_hex": "0300001b02f0803203000000030002000600000401ff040010a5a5"
+        },
+        {
+          "at_ms": 1792637131733,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000040002000600000401ff040010a5a5",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000004000e00000401120a10020002000184000030",
+          "request_ref": [
+            0,
+            4
+          ],
+          "response_ref": [
+            0,
+            4
+          ],
+          "sent_response_hex": "0300001b02f0803203000000040002000600000401ff040010a5a5"
+        },
+        {
+          "at_ms": 1792637131735,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000050002000600000401ff040010a5a5",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000005000e00000401120a10020002000184000040",
+          "request_ref": [
+            0,
+            5
+          ],
+          "response_ref": [
+            0,
+            5
+          ],
+          "sent_response_hex": "0300001b02f0803203000000050002000600000401ff040010a5a5"
+        },
+        {
+          "at_ms": 1792637131736,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000060002000600000401ff040010a5a5",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000006000e00000401120a10020002000184000050",
+          "request_ref": [
+            0,
+            6
+          ],
+          "response_ref": [
+            0,
+            6
+          ],
+          "sent_response_hex": "0300001b02f0803203000000060002000600000401ff040010a5a5"
+        },
+        {
+          "at_ms": 1792637131738,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000070002000600000401ff040010a5a5",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000007000e00000401120a10020002000184000060",
+          "request_ref": [
+            0,
+            7
+          ],
+          "response_ref": [
+            0,
+            7
+          ],
+          "sent_response_hex": "0300001b02f0803203000000070002000600000401ff040010a5a5"
+        },
+        {
+          "at_ms": 1792637131739,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000080002000600000401ff040010a5a5",
+          "positive": false,
+          "request_hex": "0300001f02f080320100000008000e00000401120a10020002000184000070",
+          "request_ref": [
+            0,
+            8
+          ],
+          "response_ref": [
+            0,
+            8
+          ],
+          "sent_response_hex": "0300001b02f0803203000000080002000600000401ff040010a5a5"
+        }
+      ],
+      "read_result": {
+        "Err": "s7_reference_mismatch"
+      },
+      "released_ports": [
+        31102,
+        31103,
+        31880
+      ],
+      "revision": "r3",
+      "store_dir": "/private/tmp/ff-001-r1-r3-rust-stale-reference-probe-1792637131196-23956-251/state",
+      "task": "FF-001",
+      "write_iteration_result": {
+        "Err": "s7_reference_mismatch"
+      }
+    },
+    {
+      "ac": "AC10/AC13",
+      "applied": 1,
+      "child_gone": true,
+      "duration_to_observation_ms": 5696,
+      "kill_parent": false,
+      "old_child_end_ms": 42,
+      "old_child_pid": 24202,
+      "store": "/private/tmp/ff-001-r1-r3-rust-child-death-1792637132155-24199-0/state",
+      "unknown": 1
+    },
+    {
+      "ac": "AC10/AC13",
+      "applied": 1,
+      "child_gone": true,
+      "duration_to_observation_ms": 5764,
+      "kill_parent": true,
+      "old_child_end_ms": 113,
+      "old_child_pid": 24252,
+      "store": "/private/tmp/ff-001-r1-r3-rust-parent-death-1792637137903-24199-2/state",
+      "unknown": 1
+    }
+  ]
+}

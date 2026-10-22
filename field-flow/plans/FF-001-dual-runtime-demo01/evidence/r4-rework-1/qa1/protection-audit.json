@@ -1,0 +1,20 @@
+{
+  "protected": {
+    "AGENTS.md": true,
+    "ROADMAP.md": true,
+    "ROADMAP.zh-CN.md": true,
+    "field-flow/plans/ARCH-TOOL-001-field-flow-runner/spec.md": true
+  },
+  "history_mismatches": [],
+  "r4_evidence_manifest": {
+    "checks": 126,
+    "mismatches": 0,
+    "missing": []
+  },
+  "r3_evidence_manifest": {
+    "checks": 67,
+    "mismatches": 0,
+    "missing": []
+  },
+  "candidate_rust_delta": "relative project paths"
+}

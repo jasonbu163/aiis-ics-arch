@@ -1,0 +1,77 @@
+# coding: utf-8
+from pathlib import Path
+p=Path('/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/plans/FF-001-dual-runtime-demo01/tasks.md');s=p.read_text();s=s.replace('Status: implementation_in_progress','Status: developer_handoff',1);s=s.replace(s.splitlines()[5],'Handoff: same approved r4 rework1 complete for new fresh Verification; QA1 qa_failed history preserved; Rust F001/F002/F003 DEV red-green/formal/isolated checks exit0; Python48 frozen QA1 candidate; no QA2 verdict or Owner acceptance',1)
+text='''## r4返工1 最终统一 developer_handoff（最新有效交接）
+
+本次同一Human Owner已批r4，spec SHA256仍`e30641845b63f295b408568009c25514f314101d0a2e2b72d331d4255a73045d`。正式工作树`/Users/jason/Desktop/DreamCode/aiis-ics-arch`，HEAD仍`dbed9107dce5701fa138a66b3c13aba637a27b86`，无commit/push/refs。QA1真实qa_failed不被改写：checklist与其持久原副本保持`5e0048a80396b3b6a985a8f767782fe0d2e9a228add148f1db4810fa35705f3e`，原tasks全文b750…和原candidate4221…/全部239既有evidence不覆盖。旧交接中“尚无checklist/QA”只属于QA1前历史；本节优先，当前须协调器实际另启新的fresh-context Verification。Development不写QA2、checklist或Owner验收。
+
+### 精确候选、文件与边界
+
+[返工后双版本candidate](evidence/r4-rework-1/candidate-manifest-final.json) SHA256=`701272f1ea19c4759d604810c1aaac4cdce3e4ee5930aaba62c147f4dd52c15b`。Rust44文件与本次隔离副本逐字节相等；Python48文件与QA1精确正式/隔离候选逐字节保持。Rust Cargo.toml/Cargo.lock、SQLite schema和INT adapter不变，无新依赖/库替换/私有transport/第三方patch。Python源码、说明、锁和环境入口本轮零写入，没有无理由重跑Python DEV全套；QA1 Python完整正式/隔离AC01–15通过是QA1事实，新的统一QA仍由新角色决定。
+
+相对QA1 Rust43输入共12份新增/变更：`src/runtime.rs`、`src/domain.rs`、`src/driver_process.rs`、`src/services/execution.rs`为三个缺陷最少接线；`src/fixture.rs`仅自身600ms响应故障；`tests/local_protocol.rs`仅传入原任务Clock；新`tests/runtime_regressions.rs`三项真实回归；README/PLAN双语和CODE_INDEX共5文档同步，最新QA状态指向唯一bundle。无任务外重构。完整逐文件hash/变更集合见candidate。
+
+F-001修复：ready/queue各自受配置与原source deadline约束，队列原子phase标记已dispatch后不再由旧queue期限取消；实际dispatch新建IO总deadline，取原命令monotonic有效期较小值，原source UTC/issued/max_age/expiry不刷新。400ms仍在本次IO预算内，child只收到工作期，不第二次再扣400ms；合法IO500ms的真实read/write均成功。没有增加timeout或清理宽限。
+
+F-002修复：同一任务wall/CLOCK_MONOTONIC锚点从Execution进入owner队列、再随有限私有IPC到child；排队后和实际开始闸门内重查，不能重建锚点逃逸。超过1000ms漂移明确clock_invalid，证明未开始的原T2记canceled（dispatch仍1），原Clock与owner写闸门稳定暂停新写、独立read继续；可能已开始的错误仍unknown，confirmed不倒退。ClockAnchor不进入SQLite/配置摘要，不改schema/身份。时钟偏移文件与可释放precall屏障仅test-fixture，未改宿主系统时间。
+
+F-003修复：Driver接收并校验request_id/generation的实际started事件后，原work期限内立即回调更新watch执行数和必要driver_call_started审计；T2/IPC未开始数0，真实已开始数1，完成或实际故障reap后0。副作用后审计失败仍保守unknown/暂停，不用计数替代T2或ACK。普通读不逐tick日志。
+
+### 实际先红后绿与命令
+
+红：red-3真实命令`CARGO_TARGET_DIR=/private/tmp/ff-001-r1-r4-rework1-32onn0fh/target cargo test --locked --offline --features test-fixture --test runtime_regressions -- --test-threads=1 --nocapture` exit101，3 failed/4.86秒，所有case在最终断言前实际close/join/reap/rebind。FIFO第二read与queued write canceled约593/602ms；queued/precall受控-2000ms两例实际WriteVar1/confirmed1，Clock未锁定；precall health1但started0/write0，ACK等待时started日志仍0。各红报告原字节保存，不能由后续通过掩去。red-1错cwd/无target、red-2 sandbox fixture_port_conflict未协议、临时Python辅助解析UTF-8问题均在[实际辅助/测试事实](evidence/r4-rework-1/interim-command-facts.json)，不当成三项真实缺陷的协议证据。
+
+绿：green-1/2/3相同三目标均exit0；原queue2000先红后绿保留。最终正式`dispatch-outlives-queue.txt`同target exit0：queue1000/IO1200/每响应600ms，第二读1211ms、queued write1207ms（两段之和超过queue1000但各段合法），同PID/generation/session；500ms最小IO也成功。queued/precall两例均clock_invalid/canceled/WriteVar0，偏移恢复后新ID仍拒绝且read good；started前0/事件0/写0，ACK等待1/事件1，正常结束0，另真实hold ACK超时强制reap后0，运行fault_cleanup/unknown不冒充正常退出。
+
+正式与隔离副本均从自身工程cwd依序执行，全部exit0；完整argv/cwd/target/timeout/用时见[正式ledger](evidence/r4-rework-1/formal-commands.json)、[副本ledger](evidence/r4-rework-1/copy-commands.json)，stdout原样.txt持久。
+
+```bash
+cargo fmt --check
+cargo check --locked --offline --all-targets --features test-fixture
+cargo build --locked --offline --bins --features test-fixture
+cargo test --locked --offline --test s7_int_pdu -- --test-threads=1 --nocapture
+cargo test --locked --offline --features test-fixture --test local_protocol matched_ack_preflight -- --test-threads=1 --nocapture
+cargo test --locked --offline --features test-fixture -- --test-threads=1 --nocapture
+cargo run --locked --offline --bin field-flow --
+```
+
+正式全套18个integration tests（原15+新增3）exit0/68.75秒；lib/bins/doc自身0-case不当功能证据。正式全套时新FIFO仍queue2000，之后只把本回归参数改1000并完整重跑对应3目标exit0；运行实现未再改变。最终隔离副本全套用当前queue1000版本，18个tests exit0/68.72秒，FIFO第二读1204ms/write1205ms，同一PID。R14两边gate外层仍120秒，实际2.99/3.05秒；full harness180秒，400ms内部reap预留与原3000/5000+500上界不变。原五INT、29 ACK矩阵、历史ref/另一操作ref、unknown/审计/队列stop/父子死亡/正常和fault退出都随核心修改重新通过。
+
+新的Rust隔离工程`/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project`，直接父目录仅project，没有父运行清单/兄弟项目；新独立`copy-target`，没有修改QA1原target/失败副本。自身cargo metadata exit0确认workspace_root/manifest/targets均来自该复制品，见[实际来源](evidence/r4-rework-1/copy-provenance.json)。构建/启动/driver/fixture均由复制工程自身编译；正常公共Cargo缓存可用。最后仅阶段文档同步并重新hash，非源码或锁变化，不重复无关协议测试。
+
+### 逐AC本轮交接映射
+
+本表是DEV self-check；Python列均指**QA1正式和父/兄弟缺席副本相同48文件的精确证据**，不是本轮重新执行或QA2 verdict。其完整QA1原checklist、全部command ledgers/原样输出/报文索引及引用JSON在[原样QA1保留映射](evidence/r4-rework-1/preserved-inputs.json)及qa1子目录。Rust所有行引用上述新正式/隔离全套exit0，目标补充另见report-map和原stdout。
+
+| AC | Rust本轮实际DEV | Python冻结输入与交接边界 |
+| --- | --- | --- |
+| AC01 | 正式/隔离各自fmt/locked check/build/codec/R14/full/bare，44文件一致、私有child自身入口，独立target与无父兄弟依赖。 | 原48文件一致；继承QA1两边lock/sync/build/compile/unit/gate/local/CLI/provenance全exit0。 |
+| AC02 | cli_contract 3tests、typed无参/中英help/配置/显式schema/模式反例重跑通过。 | 同QA1精确源码、说明和锁，无新变更。 |
+| AC03 | remaining/local真实五INT GET→写→各次停止后独立匹配读回及A5，非法类型/声明/实际范围拒绝。 | QA1五INT与自身IntMemory有限边界通过；第三方Server原partial-write失败及限制保持。 |
+| AC04 | 原输入/TTL/queued-expiry重跑；新增queued/precall真实anchor偏移两case零写、canceled/clock_invalid、稳定拒新ID/read继续，修复F-002。 | QA1已通过queued clock用例；本轮hash不变。 |
+| AC05 | 原十轮/原库重启/身份冲突/代次不重建通过；clock取消仍保dispatch和身份。 | 原QA1十轮/重启/冲突证据继承，无重发新逻辑。 |
+| AC06 | 三独立读流各20样本/request、单PID/session/串行；新增合法FIFO两read和queued write复用同PID。 | QA1三流独立60 request/1session证据继承。 |
+| AC07 | 1200ms GET与100ms读8秒并发、>=20/maxgap<=500ms、同flow不重叠重新通过。 | 原QA1正式/隔离窗口通过，源码无变更。 |
+| AC08 | 原静默COTP/initial absence/disconnect/split/slow/stale总预算+实际reap；F-001两个queue参数先红后绿，实际dispatch IO独立起算且不被旧queue截止截断。 | 原QA1整体deadline/真实回收通过，未新增DEV执行。 |
+| AC09 | T1/T2恢复/已应用丢ACK/10轮+原库重启/物理别名overlap阻断/read继续重跑通过。 | QA1对应unknown/物理范围通过；旧库与错误confirmed证据不触碰。 |
+| AC10 | 子/父真实死亡、<=500ms/继承锁/原库unknown不重发、T3失败/confirmed-sink通过。新增hold ACK实际forced故障统计归0。 | QA1实际父/子死亡、锁与state组合通过，保留原报告。 |
+| AC11 | dry真实GET/read、zero write/simulated及模式隔离重跑通过。 | QA1真实两模式CLI/协议通过，候选冻结。 |
+| AC12 | 容量/轮转/审计前后故障/queued闭闸/read继续重跑；F-003未开始0、started1、结束/fault0且事件时点正确。 | QA1日志/容量/审计及实际统计通过，未改生产adapter。 |
+| AC13 | 原child屏障+父队列stop零写/全join、正常exit0与forced非零/回收/单global end重跑；F-003区分T2与执行状态。 | QA1正常/forced/端口冲突与全局退出通过，新QA仍独立决定双版。 |
+| AC14 | 本工程README/PLAN双语/索引少量同步；99工程链接/locale对称/空白/范围检查通过，逐AC/命令/资源完整。 | Python文档48内保持；最新QA结果以唯一bundle为准，DEV不代签。 |
+| AC15 | 原R14/codec、29真实ACK及实际历史旧ref/另一操作ref、短长/迟到/近ref上界/unknown不重发完整重跑。 | QA1 R15/30真实ACK/4096/4097/65528及最大声明短body等通过，原48输入保持。 |
+
+### 证据、资源与限制
+
+[完整报文与状态报告映射](evidence/r4-rework-1/report-map.json)保留28份红/绿协议报告；[只读三表](evidence/r4-rework-1/selected-stores.json)从44个本轮明确记录的新合成库导出store_meta/commands/command_events，红的错误confirmed也原样保留，只读复核、不修旧库。普通native/protocol日志完整输出持久；hold_ack分支的trace预先记录native原ACK，实际未转发由该故障路径/强制结果证明，不能将预记录的ACK字段当“客户端已收到”。正常、corrupt及短包例保存实发三帧，原始输出不修饰。证据清单以本目录evidence-manifest.txt固定，不依赖被忽略的.log/.sha256。
+
+[保护/范围](evidence/r4-rework-1/integrity-final.json)：239既有evidence、4长期保护文档、原tasks原字节/QA1全文/spec以及Python48均保持；Rust自身manifest/锁不变。原QA1根和target/失败副本未写入。root/FF13导航只由Main维护，本Development未写spec/checklist/Backend/AW/CA/tools/真实配置或Git refs。本轮Main机械索引后实际checkerexit1/322行（318原任务外多重集一致+4合法../plans识别限制），原332快照的8+2暂时导航诊断已消除；[准确原输出/分类](evidence/r4-rework-1/coordinator-governance-qa1-indexed.json)持久，未借机改checker/造子任务，不称QA。
+
+[实际资源](evidence/r4-rework-1/resources-final.json)：本轮输出/报告明确记录230 PID全部不存在，六固定端口逐个lsof exit1/空，并实际bind127.0.0.1后立即close。所有harness命令已结束；协议内native自然exit0/真join/rebind与driver正常wait或forced/parent_lost分开，不把停止等待当结束。79个从本轮输出识别的自有根（沿用support helper的r3名称前缀但ID/时间属于本轮）及主根/target/copy/合成库/日志暂留供QA2/Owner复现；未导出路径的unit临时目录不冒称完整枚举。关键证据已持久，后续无验证/证据依赖时由协调器按归属安全回收，不删除历史或归属不明资源。
+
+Main自有`/private/tmp/ff-001-r4-coordinator-1y0z0h4z`仅批准/归档/allowlist/导航基线及小报告、无运行服务，供QA2/Owner复核暂留，验收后无证据依赖再由Main清理；qa1-rework-baseline已原样持久。旧r1/r2/r3协调器根、QA1根/失败副本和原错误confirmed库沿历史保留，本Development不代删。
+
+未验/外部gate不变：限macOS本机合成、固定INT形状和有界窗口；无真实endpoint、长期浸泡/生产容量、全OS/PLC型号、第三方完整内存安全、部署/发布。原source时效/unknown/confirmed、400ms内部回收、全局shutdown预算不变。Python4096后验cap/65528接收边界和Rust4096FFI限制仍按批准合同。**当前交接只将三项DEV修复和统一精确候选交Main实际启动新的fresh Verification；QA1失败历史仍在，QA2与Human Owner最终验收均未授予。**
+
+'''
+idx=s.index('## R15 gate 批次1');s=s[:idx]+text+s[idx:];s=s.replace('## r4 最终双版本 developer_handoff','## r4 QA1输入的原最终双版本 developer_handoff（历史）',1);p.write_text(s)

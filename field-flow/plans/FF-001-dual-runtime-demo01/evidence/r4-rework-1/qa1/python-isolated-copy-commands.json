@@ -1,0 +1,284 @@
+[
+  {
+    "label": "lock",
+    "argv": [
+      "uv",
+      "lock",
+      "--check",
+      "--offline",
+      "--python",
+      "3.11",
+      "--no-python-downloads"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/isolated/python/project",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-target"
+    },
+    "pid": 19779,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.089998042,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-lock.txt",
+    "output_sha256": "03f316b033ad3a6f1c631f6f09b74e80c3627046afce553b130da3cbf9fd0b0e"
+  },
+  {
+    "label": "sync",
+    "argv": [
+      "uv",
+      "sync",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/isolated/python/project",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-target"
+    },
+    "pid": 19780,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.450266542,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-sync.txt",
+    "output_sha256": "528b3de3d486e4c289b1d716aa24014a62a4d298724c772025286038c138b209"
+  },
+  {
+    "label": "build",
+    "argv": [
+      "uv",
+      "build",
+      "--offline",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "--out-dir",
+      "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-dist"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/isolated/python/project",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-target"
+    },
+    "pid": 19785,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.71616625,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-build.txt",
+    "output_sha256": "9223f0b7edbfed4d0f497dfb71aa0a7903eba742a6a7b1b2de9332b8d4dbaf0b"
+  },
+  {
+    "label": "compile",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "python",
+      "-m",
+      "compileall",
+      "-q",
+      "src",
+      "tests"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/isolated/python/project",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-target"
+    },
+    "pid": 19828,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.14741433299999995,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-compile.txt",
+    "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "label": "unit",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "tests/unit",
+      "-s"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/isolated/python/project",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-target"
+    },
+    "pid": 19834,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 5.4391057499999995,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-unit.txt",
+    "output_sha256": "829b29a475a274ab3d9b26a513c2b2615f8693003d43cc6a7627839839583a3f"
+  },
+  {
+    "label": "gate",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "tests/test_matched_ack_gate.py",
+      "-s"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/isolated/python/project",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-target"
+    },
+    "pid": 20206,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 5.895029583,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-gate.txt",
+    "output_sha256": "7f850564dad9e3d4d81ffb70e5444b68b213b56da8a971f05e68742b6ca949fc"
+  },
+  {
+    "label": "protocol",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-p",
+      "no:cacheprovider",
+      "-q",
+      "tests/test_local_protocol.py",
+      "-s"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/isolated/python/project",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-target"
+    },
+    "pid": 21281,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 55.665863042,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-protocol.txt",
+    "output_sha256": "f5364707fdf11866ca10e23d5637bcaefa0598c274f3ac469182f92b901d5bba"
+  },
+  {
+    "label": "bare",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "field-flow"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/isolated/python/project",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-target"
+    },
+    "pid": 23078,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.43453004199999157,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-bare.txt",
+    "output_sha256": "e0da32ec8bb2533a1077076b454dadfaa4fc27bf52c0c7a46549c29cd1382509"
+  },
+  {
+    "label": "cli",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "python",
+      "-m",
+      "tests.fixtures.cli_smoke"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/isolated/python/project",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-target"
+    },
+    "pid": 23094,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 2.4570865409999953,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-cli.txt",
+    "output_sha256": "24123f0084d81a230b3788b2b305fa0c65a568ef2d1630cd5118e85b22c5ea39"
+  },
+  {
+    "label": "provenance",
+    "argv": [
+      "uv",
+      "run",
+      "--offline",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "python",
+      "-c",
+      "import sys,field_flow,tests.fixtures,sqlite3,snap7; import importlib.metadata as m,json; print(json.dumps(dict(executable=sys.executable,source=field_flow.__file__,fixture=tests.fixtures.__file__,python=sys.version,sqlite=sqlite3.sqlite_version,snap7=m.version(\"python-snap7\"))))"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/isolated/python/project",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "UV_PROJECT_ENVIRONMENT": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-venv",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-target"
+    },
+    "pid": 23121,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.19919470800000738,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-provenance.txt",
+    "output_sha256": "4fa31e6eaf6842fab997610d288cbc648d92280cce374777c85ef6af907b4bf2"
+  }
+]

@@ -1,0 +1,547 @@
+Task ID: FF-001
+Revision: r4
+Status: qa_failed
+Owner Role: QA / Verification
+Allowed Writers: QA / Verification, Human Owner
+Handoff: QA1 failed; return F-001/F-002/F-003 to actual Development for r4 rework, then a new fresh-context Verification; Human Owner final acceptance remains pending
+Workflow Mode: STD
+Execution Mode: agent_team_same_session
+Verification Run: QA1
+Selected Role: verification
+Fresh Context: fork_turns="none"
+
+# FF-001 r4 独立 Verification QA1
+
+## 1. Verdict 与交接
+
+**本次精确双版本交接的 verdict 为 `qa_failed`。** Python 在本机已执行的 AC01–AC15 内通过；Rust 原测试均通过，但独立复核发现 F-001（真实 S7 排队 IO 期限起算错误）、F-002（静态可证的调用前时钟漂移检查缺口）、F-003（真实调用前屏障下的执行计数提前置位）。Rust AC04、AC08、AC12/AC13 相应部分不通过。这三项是已批准 r4 内的实现 failure，不能 deferred、由 Python 通过抵消、或用原 DEV exit0 覆盖。
+
+本记录交给协调器转实际 Development 新 turn 修复同一 r4，保留本 QA1 全文、失败候选和原始输出；修复完成后须新 developer_handoff 与新 fresh-context Verification。**Human Owner final acceptance：pending，尚未授予。** 当前不进入发布、现场、部署、Git refs 或生产操作。没有需要 PM 消解的已证需求歧义；若返工实质改变合同/风险/allowlist，则另回 PM，不在 QA 改 spec。
+
+## 2. 身份、权限与输入
+
+本执行者为 `/root/ff001_verification_r4`，调度选择实际 `verification`，使用 `fork_turns="none"`；开始仅收到批准范围和 Development handoff 输入，没有继承 Development 对话推理，也没有委派通用 Agent。已独立读取根 AGENTS、根 README/PLAN 双语、canonical workflow、角色 TOML、Field Flow 和两个工程的 README/PLAN、完整 spec/tasks、归档差异、源码、diff、原始报告及锁。Field Flow 下未发现更近 AGENTS。
+
+角色 TOML 配置 `model=gpt-6.1-sol`、`model_reasoning_effort=max`；这属于配置证据，工具没有提供可独立证实的底层运行 model/effort 遥测。`contract_only` 不等于平台 ACL 或强制路由。仓库中本 QA 只写本 checklist；临时脚本、独立源码副本、env、构建、私有合成库和输出均放 `/private/tmp`。没有修改 spec/tasks/source/tests/config、没有修实现、没有改 shared skills。Memory 仅快速搜索 FF-001/field-flow 未命中；未用历史结论代替当前证据。
+
+消费的 Human Owner 明确授权：“批准 FF-001 r4，按方案继续完成 Python 版本，完成后按 STD 进入双版本独立 QA。”它只覆盖本机合成验证。本 QA 只使用六个固定 127.0.0.1 端口；两版夹具串行，不绑定 wildcard/102、不自动换口、不杀未知占用者。构建静态工作可并行，协议夹具按版/用例顺序结束后才启动下一套。
+
+使用 shared skills：project-governance、aiis、rust-runtime、backend-arch（仅本地 SQLite/事务/稳定 key）、plc-point-mapping（仅标准 DB INT）、i18n-workflow、code-document-indexer。相关分层、数据治理、工业合同与跨语言结构 reference 一并复核；不套 FastAPI/ORM/Celery/UI/Tauri 模板。
+
+正式交付树 `/Users/jason/Desktop/DreamCode/aiis-ics-arch`；HEAD `dbed9107dce5701fa138a66b3c13aba637a27b86`。Dirty 是输入事实，不 reset、回滚或覆盖。QA 自有主根记为下文 `Q=/private/tmp/ff-001-r4-qa-wY5eCh`。
+
+| 精确输入 | SHA256 |
+| --- | --- |
+| `field-flow/plans/FF-001-dual-runtime-demo01/spec.md` | `e30641845b63f295b408568009c25514f314101d0a2e2b72d331d4255a73045d` |
+| `field-flow/plans/FF-001-dual-runtime-demo01/tasks.md` | `b75074662ca2e763553c2ba8081908ad0f694de4cc6fd6acecfec7a88243e219` |
+| `field-flow/plans/FF-001-dual-runtime-demo01/evidence/r4-dev/candidate-manifest-final.json` | `4221b6ded6ea871bb01cf7ac12059e0794d83550ea9d8fe755979a702ab5067f` |
+| `field-flow/plans/FF-001-dual-runtime-demo01/evidence/r4-dev/evidence-manifest.txt` | `8046b6af23c492897b526a8791ac953e498ac10d40766b6b8800105c669bc497` |
+| `.codex/agents/verification.toml` | `ac3f369876fb1a2b54e8f78e7c3054b01a8d3b70be66cb0456507ac4a010f67e` |
+
+还原归档均逐字节匹配：r3 spec 180301 bytes / `cf2ff0ff8e8d7bf1bc2302127f5f5bc7a32d767be470ddf9875cf3ced59efbb1`；r2 spec 107258 / `1bd11a1dd3ef1dd69ac67943c2a74d0c446f525d4a2378c8cbbb2f05a846a522`；r1 spec 47049 / `13ed64444c5c4df5916adbf8c5f6ae0b668c7c32ef1747b95e560eb1b99bbc70`。r3 tasks 52447 / `48a52ef056ccced510bc4c24c685b4ef7d03fd03868487dff1616a1ba829dd76`；r2 tasks `ce9dfe615dbfc69c2e0dccf00178d7bcb8856ea51458e4e2d405c3a55389d0e9`；r1 tasks `d68e3e01be185ce124dff1387bed5784bf65ecbc9a0510022f066f9a203fbcc3`。归档通过去一层唯一前缀读取并逐代做活动内容差异复核，未改归档。
+
+Python 48 文件、Rust 43 文件的正式树与固定 candidate manifest 全部一致；最终隔离复制也逐文件一致。两个最终复制目录分别为 `Q/isolated/python/project`、`Q/isolated/rust/project`，其各自直接父目录只包含 `project`，没有父运行清单/兄弟工程。各用新建自有 env/target，不借兄弟源码、fixture、venv 或可写库。早期同 Q 下 copy 的历史命令保留；副本后来移动到上述隔离目录，旧 env 仅留作历史记录，最终结论取重新 sync/build/start/test 的隔离副本。
+
+4 份长期保护文档、112 份旧证据哈希全部保持；r4 evidence-manifest 的 126 项和 r3 evidence-manifest 的 67 项均存在且哈希匹配。QA 写入前对基线 2307 个已跟踪/未跟踪非忽略文件复核，差异为零。Rust r4 对原候选仅说明文档同步，验证仍按当前 hash 实际重跑；没有用旧结果替代本次运行。
+
+## 3. 环境、命令与原始输出
+
+实际环境：macOS 15.7.7 (24G720)、arm64，rustc/cargo 1.89.0，Apple clang 17.0.0，uv 0.7.8；Python 使用已有 CPython 3.11.12，sqlite3 3.47.1，python-snap7 3.0.0，httpx 0.28.1、PyYAML 6.0.3、pytest 8.4.2，hatchling 1.32.4。Rust 保持 Cargo.lock 与 rust-snap7 1.142.2/rusqlite 0.32.1，无库替换或第三方补丁。
+
+全部 uv 命令显式 `--python 3.11 --no-python-downloads`，并额外 `--offline`。`UV_CACHE_DIR=Q/uv-cache` 为复制的正常包缓存；正式/隔离工程分别使用 Q 下自己的 `UV_PROJECT_ENVIRONMENT`，`PYTHONPATH`/`VIRTUAL_ENV` 清除，`PYTHONPYCACHEPREFIX` 指向 Q、pytest 关闭 cacheprovider；Cargo 用每次独立的 Q 下 `CARGO_TARGET_DIR`。`uv build --out-dir` 指向 Q，不将 venv/dist/pycache 写入仓库。没有下载解释器、全局安装或改锁。
+
+Python 正式树和最终隔离副本各执行锁检查/sync/build/compile、6 unit、R15 gate 1、local 15、无参、真实 CLI init/fixture/dry/execute/inspect/SIGTERM 与 provenance。Rust 正式树和最终隔离副本各执行 fmt/check/build/codec 3/R14 gate/full tests/无参；全套 15 个 integration target tests 全部 exit0，lib 自身 0-case 不当作功能证据。Rust 实际 product execute/SIGTERM/重启由 process_lifecycle 检查，dry GET/read 由运行时矩阵检查；另实际调用两个模式的 product CLI state init/inspect，均 exit0、无网络。未另重复一套 Rust product CLI dry 组合。
+
+初次 Python gate 在 sandbox 绑定 127.0.0.1:32102 时 PermissionError，尚未开始协议。原输出/exit1 保留；工具允许后以同一授权 loopback 测试重跑通过，属于已解除环境限制。不是实现 failure，也没有 automatic approval rejection。
+
+下表 cwd/env 取各行对应 ledger 的实际值：`python-formal-net`、`rust-formal` 为正式源码；`*-isolated-copy` 为上述隔离源码。每行输出在 Q 下同前缀 `.txt`，SHA256 为原样输出，不仅是摘要。
+
+| Run / label | 实际 argv | exit | seconds | stdout SHA256 |
+| --- | --- | --- | --- | --- |
+| `python-formal-net/lock` | `uv lock --check --offline --python 3.11 --no-python-downloads` | 0 | 0.090 | `c24f70856eea62e6903465d316f2808776b99a58a7890e0c6a5b8881e703475c` |
+| `python-formal-net/sync` | `uv sync --offline --locked --python 3.11 --no-python-downloads` | 0 | 0.044 | `2a208586c0b461bef54124ec9113b9d71d4ea51ffb1aea83b9b9ba5ddd264e41` |
+| `python-formal-net/build` | `uv build --offline --python 3.11 --no-python-downloads --out-dir /private/tmp/ff-001-r4-qa-wY5eCh/python-formal-net-dist` | 0 | 0.846 | `b1db5c6f81bd5b2963a199de84a8f8ab3e6dcddaa02758c6f3a7df320c66312d` |
+| `python-formal-net/compile` | `uv run --offline --locked --python 3.11 --no-python-downloads python -m compileall -q src tests` | 0 | 0.202 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `python-formal-net/unit` | `uv run --offline --locked --python 3.11 --no-python-downloads pytest -p no:cacheprovider -q tests/unit -s` | 0 | 2.372 | `9fb4c909bbc074802f77aa9d629de6cb757ceac0d4ce5aad48e9a9da9f96fd8b` |
+| `python-formal-net/gate` | `uv run --offline --locked --python 3.11 --no-python-downloads pytest -p no:cacheprovider -q tests/test_matched_ack_gate.py -s` | 0 | 3.248 | `3803fa4375f88ab5544cb6acddbf9b906e2588d9966bdac1b434ffcc836f6fc0` |
+| `python-formal-net/protocol` | `uv run --offline --locked --python 3.11 --no-python-downloads pytest -p no:cacheprovider -q tests/test_local_protocol.py -s` | 0 | 51.976 | `481f8451e0f1c6e04db109242f9711413eabb4037588b56c1cf0e340908f7dcd` |
+| `python-formal-net/bare` | `uv run --offline --locked --python 3.11 --no-python-downloads field-flow` | 0 | 0.643 | `e0da32ec8bb2533a1077076b454dadfaa4fc27bf52c0c7a46549c29cd1382509` |
+| `python-formal-net/cli` | `uv run --offline --locked --python 3.11 --no-python-downloads python -m tests.fixtures.cli_smoke` | 0 | 2.365 | `cedd63cd895aef8c7b4a3291ccc6e11998427ef5ea31d11cc1a06e7362c42743` |
+| `python-formal-net/provenance` | `uv run --offline --locked --python 3.11 --no-python-downloads python -c 'import sys,field_flow,tests.fixtures,sqlite3,snap7; import importlib.metadata as m,json; print(json.dumps(dict(executable=sys.executable,source=field_flow.__file__,fixture=tests.fixtures.__file__,python=sys.version,sqlite=sqlite3.sqlite_version,snap7=m.version("python-snap7"))))'` | 0 | 0.150 | `e724f538c3a0c11a51ca5a14de242e8fc40b447e12c49f23ef16d35460a8b9e4` |
+| `python-isolated-copy/lock` | `uv lock --check --offline --python 3.11 --no-python-downloads` | 0 | 0.090 | `03f316b033ad3a6f1c631f6f09b74e80c3627046afce553b130da3cbf9fd0b0e` |
+| `python-isolated-copy/sync` | `uv sync --offline --locked --python 3.11 --no-python-downloads` | 0 | 0.450 | `528b3de3d486e4c289b1d716aa24014a62a4d298724c772025286038c138b209` |
+| `python-isolated-copy/build` | `uv build --offline --python 3.11 --no-python-downloads --out-dir /private/tmp/ff-001-r4-qa-wY5eCh/python-isolated-copy-dist` | 0 | 0.716 | `9223f0b7edbfed4d0f497dfb71aa0a7903eba742a6a7b1b2de9332b8d4dbaf0b` |
+| `python-isolated-copy/compile` | `uv run --offline --locked --python 3.11 --no-python-downloads python -m compileall -q src tests` | 0 | 0.147 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `python-isolated-copy/unit` | `uv run --offline --locked --python 3.11 --no-python-downloads pytest -p no:cacheprovider -q tests/unit -s` | 0 | 5.439 | `829b29a475a274ab3d9b26a513c2b2615f8693003d43cc6a7627839839583a3f` |
+| `python-isolated-copy/gate` | `uv run --offline --locked --python 3.11 --no-python-downloads pytest -p no:cacheprovider -q tests/test_matched_ack_gate.py -s` | 0 | 5.895 | `7f850564dad9e3d4d81ffb70e5444b68b213b56da8a971f05e68742b6ca949fc` |
+| `python-isolated-copy/protocol` | `uv run --offline --locked --python 3.11 --no-python-downloads pytest -p no:cacheprovider -q tests/test_local_protocol.py -s` | 0 | 55.666 | `f5364707fdf11866ca10e23d5637bcaefa0598c274f3ac469182f92b901d5bba` |
+| `python-isolated-copy/bare` | `uv run --offline --locked --python 3.11 --no-python-downloads field-flow` | 0 | 0.435 | `e0da32ec8bb2533a1077076b454dadfaa4fc27bf52c0c7a46549c29cd1382509` |
+| `python-isolated-copy/cli` | `uv run --offline --locked --python 3.11 --no-python-downloads python -m tests.fixtures.cli_smoke` | 0 | 2.457 | `24123f0084d81a230b3788b2b305fa0c65a568ef2d1630cd5118e85b22c5ea39` |
+| `python-isolated-copy/provenance` | `uv run --offline --locked --python 3.11 --no-python-downloads python -c 'import sys,field_flow,tests.fixtures,sqlite3,snap7; import importlib.metadata as m,json; print(json.dumps(dict(executable=sys.executable,source=field_flow.__file__,fixture=tests.fixtures.__file__,python=sys.version,sqlite=sqlite3.sqlite_version,snap7=m.version("python-snap7"))))'` | 0 | 0.199 | `4fa31e6eaf6842fab997610d288cbc648d92280cce374777c85ef6af907b4bf2` |
+| `rust-formal/fmt` | `cargo fmt --check` | 0 | 0.334 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `rust-formal/check` | `cargo check --locked --offline --all-targets --features test-fixture` | 0 | 13.940 | `1379f01fe2d4e46032e6104c5e2f404f4c2396e51e23e3aa46883e53fc6428f3` |
+| `rust-formal/build` | `cargo build --locked --offline --bins --features test-fixture` | 0 | 13.567 | `ba33363faf53dd0d838803d75aeead39629fbbff84a347b2fae9dd228ef5b655` |
+| `rust-formal/unit` | `cargo test --locked --offline --test s7_int_pdu -- --test-threads=1 --nocapture` | 0 | 2.115 | `fb36f6add1b06f0ec874aca93c24c46b4b32c07ecfaa51406f20fcb1e347c392` |
+| `rust-formal/gate` | `cargo test --locked --offline --features test-fixture --test local_protocol matched_ack_preflight -- --test-threads=1 --nocapture` | 0 | 4.230 | `f2da7d262c66c4558ca12ee43c5b1ef133a4e0337ed69c06ac0783a0b88aa0ce` |
+| `rust-formal/protocol` | `cargo test --locked --offline --features test-fixture -- --test-threads=1 --nocapture` | 0 | 65.760 | `33c1e82c81a02b639b1ad1820e96a72e896675858e7f8feb698080fb486d6c51` |
+| `rust-formal/bare` | `cargo run --locked --offline --bin field-flow --` | 0 | 0.505 | `eade5443aa76aed42f6adefcc3a46e681a190d521b6081c21d72b8d0fc32a55e` |
+| `rust-isolated-copy/fmt` | `cargo fmt --check` | 0 | 0.205 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `rust-isolated-copy/check` | `cargo check --locked --offline --all-targets --features test-fixture` | 0 | 14.296 | `3a12a7d9033f8097b650c13894166ff2356ccc5142bcc33fd537fdabecaeb413` |
+| `rust-isolated-copy/build` | `cargo build --locked --offline --bins --features test-fixture` | 0 | 14.699 | `84dc66494888d2d21a53c4fdb6107a583b0960ffd2810318aabb2ee1819ce7e0` |
+| `rust-isolated-copy/unit` | `cargo test --locked --offline --test s7_int_pdu -- --test-threads=1 --nocapture` | 0 | 2.263 | `7f5ef11fbc35bb687d8e94e7d4e475377149171bda884b1484f528ecc1a5a8f7` |
+| `rust-isolated-copy/gate` | `cargo test --locked --offline --features test-fixture --test local_protocol matched_ack_preflight -- --test-threads=1 --nocapture` | 0 | 3.112 | `9c01f289592f933560e76edded118ee6f5ef437e194bbd8bc2f356023f5b9fb8` |
+| `rust-isolated-copy/protocol` | `cargo test --locked --offline --features test-fixture -- --test-threads=1 --nocapture` | 0 | 62.756 | `3d7bd01f3d74e6fdd6683dcfe640c5a4636d9f6191a15230d02a44faf11a0506` |
+| `rust-isolated-copy/bare` | `cargo run --locked --offline --bin field-flow --` | 0 | 0.491 | `e81dfb3f1e1e7eeccbb94a1357b82bac21681fd53024b868c28dc76bbc4ab989` |
+
+provenance 实际断言：正式 field_flow 来自正式 src，最终隔离 field_flow/fixture 来自 `Q/isolated/python/project/{src,tests}`，sys.executable 来自该次自有 env。正式/隔离 wheel SHA256 相同 `5b64ee1e5b36cccc2417330a0d1c65e277ca90efa13b9b09bff5511fa2815b25`，sdist 相同 `6ba7f52fc4ba63791bf364607392b5608a58ee6f1b8e74859cd533555cb65483`；wheel 实含中英 locale，无 env/SQLite 混入；未发布产物。
+
+## 4. 逐 AC 独立结果
+
+`通过` 只针对本机有限合成范围；下表与 F 项优先于测试代码中固定打印的 `dev_check_passed` 字符串。该字符串是原测试标签，本 QA 依据自己的实际命令、报文、状态与源码作 verdict。
+
+| AC | Rust QA1 | Python QA1 | 独立证据及边界 |
+| --- | --- | --- | --- |
+| AC01 | 通过 | 通过 | 当前候选逐文件匹配；正式树和父/兄弟缺席隔离副本各自锁/build/start/tests；无参/help 空 cwd 零写、独立自身 driver；Python真实CLI完整两模式、Rust产品execute进程及显式两模式init/inspect。 |
+| AC02 | 通过 | 通过 | 分层源码复核；未知/缺失/隐式类型/重复ID与endpoint/重叠范围/预算错误拒绝；无参/help不读配置联网；init不覆盖、缺库/版本/实现/模式/instance拒绝，普通run无建表。两版locale三键对称，实际中英帮助通过。 |
+| AC03 | 通过 | 通过 | 五INT真实GET/WriteVar/停止后独立匹配raw读回，大端补码 -32768=8000/-1=ffff/0=0000/42=002a/32767=7fff，邻接A5保持；非法float/bool/string/超范围拒绝。Rust追加真实越实际块WriteVar负ACK/整16byte A5不变；Pythonguard实际边界另见§6。 |
+| AC04 | **失败 F-002** | 通过 | 两版非法输入/idle/时效/原TTL排队到期零新写均实际通过；Python真实queued local anchor注入取消零写。Rust原Clock直接单元向量通过，但实际ready/queue之后至child调用前没有漂移检查，不能据此给整个AC04通过。未改宿主时钟。 |
+| AC05 | 通过 | 通过 | 相同身份至少10轮、原execute库重启和child换代不重发；值/时间/目标冲突保持原意图，Runtime暂停冲突flow；所有confirmed/unknown保留。 |
+| AC06 | 通过（普通窗口） | 通过（普通窗口） | 三独立读流各20独立sample/request，正常单PID/generation/一session、唯一同步IO、正确归流；Python实际60个不同request_id。正常低延迟窗口不触发F-001；不外推排队时预算。 |
+| AC07 | 通过 | 通过 | GET延迟1200ms与独立100ms读8秒并行，同flow最大在途1。Rust正式/隔离77/77样本、maxgap110/111ms；Python78/77样本、maxgap104.786/113.950ms。无补跑tick。 |
+| AC08 | **失败 F-001** | 通过 | 原静默COTP/初始缺席/断连恢复/split/slow/stale、整体期限内实际旧PID结束及恢复均通过；Rustsplit/slow约4620/4622ms、stale100ms，Pythonsplit4608.871ms、slow808.875ms、max-short808.592ms。Rust独立FIFO探针实证IO期限从入队前消耗，不符合R04；不能只因未超过上界就算完整通过。 |
+| AC09 | 通过 | 通过 | T1/T2原库恢复、已写扣ACK→unknown、10轮/原库重启不重发；flow/source/plc物理别名、新ID和overlap不绕过unknown，不相关读推进。独立回读42不升级unknown。 |
+| AC10 | 通过 | 通过 | 实际父SIGKILL/childSIGKILL、已应用写unknown及原库重启不重发；继承锁在旧child存活窗口阻止writer。Python父失联正式64.753ms/隔离64.440ms旧child实际结束；Rust原PID结束<=500ms断言通过。T3故障与confirmed后sink故障保持事实，原库10轮actualWriteVar仍1。 |
+| AC11 | 通过 | 通过 | 实际GET/read、dry写计数0、simulated且confirmed0；dry/execute metadata交叉拒绝，独立可写状态未互换。 |
+| AC12 | **失败 F-003（执行计数）** | 通过 | JSONL、真实2048byte降低阈值轮转/最多5文件、10/100容量及必要审计故障闭新写均通过，读继续、confirmed10保留；Rusthealth将未越开始闸门的IPC请求统计in_flight=1，不能接受为真实执行统计。 |
+| AC13 | **失败 F-003（执行统计部分）** | 通过 | 实际父队列+child调用前屏障stop零写/取消、正常join/父wait、forced故障非零/真实reap、global end均通过；F-003观察字段仍违反R04。该失败不表示stop闸门失效；新增探针也证明stop后canceled/零写与自然退出/端口释放。 |
+| AC14 | 文档/角色核查通过；新checklist导航待Main同步 | 文档/角色核查通过；新checklist导航待Main同步 | bilingual README/PLAN/locale/索引与当前候选及角色阶段相符；新生成checklist的catalog链接待Main机械同步。bundle当前Rev一致、独立Verification本checklist、Human Owner待决定。未将DEV或checker失败伪装QA。最终静态/治理实测记录见末。 |
+| AC15 | 通过（关联/拒绝矩阵） | 通过（关联/拒绝矩阵） | Rust真实29向量、Python30向量，ID/ROSCTR/reserved/ref/function/count/error/长度/transport/bitlen/短空附加/4096与4097；Python另65528真实raw返回。实际历史同操作/另一操作ref来自先成功请求，非+1标签；近65535正常换session。坏后正确/迟到ACK不补good/T3、旧进程退出；追加Rust该case10轮+原库重启10轮仍unknown/WriteVar1。原AC失败不由AC15通过抵消。 |
+
+## 5. 必须返工的实现 failure
+
+### F-001：IO期限在排队前起算，合法排队请求被取消（R04 / AC08）
+
+证据类型：**独立真实S7协议失败，实际exit1。** 正式候选源码没有改动。QA临时Rust probe使用冻结native S7 Server、当前正式driver和自己的有限透明代理；代理只对每个原生ReadVar正响应延迟600ms、不改报文、不生成stub ACK。固定31102/31103，单持久session。配置io_timeout_ms=1200、queue_wait_ms=2000，queue_capacity16，其余来自同hash loopback.yaml。
+
+第一个读在约600ms成功；第二个读在第一个进入真实ReadVar后入队，等候约600ms后收到`canceled`，实际ReadVar总数只有1。队列等待低于2000ms，若按实际dispatch起算，每次600ms IO均在1200-400=800ms工作预算内。当前行为提前消耗了后一个请求的IO预算。
+
+准确路径：`src/runtime.rs:214–220` read在request前建立now+IO，`:224–233` write在ready/queue前取min；`:173–201` request持有旧deadline穿过ready/queue；`:353` owner直接把r.deadline传给Driver.call。`src/driver_process.rs:431–443`再预留400ms并将剩余work发送；`:230` child拒绝remaining_ms<400，探针因此没有下发第二次ReadVar。不是端口冲突、native失败、响应错配、原输入TTL已过期或停止请求。本次无write、无unknown重发。
+
+返工须在实际dispatch建立IO整体截止，分别保持ready/queue期限与原命令UTC/monotonic截止，400ms回收预算仍在原上限内；不能以增加超时、延长原TTL或去掉清理预算绕过。需加真实多请求FIFO回归并保留原失败。
+
+实际命令（cwd为正式Rust工程）：
+
+```text
+/private/tmp/ff-001-r4-qa-wY5eCh/rust-fifo-probe /private/tmp/ff-001-r4-qa-wY5eCh > /private/tmp/ff-001-r4-qa-wY5eCh/rust-fifo-probe.txt 2>&1
+exit=1
+```
+
+持久化原结果及三份请求/native响应/透传响应如下；Setup和COTP属于同一S7 session。probe真实proxy join、native exit0、两端口rebind；runtime shutdown Ok只表示本次资源正常结束，不抵消F-001。
+
+```json
+{
+  "duration_ms": 876,
+  "native_exit": 0,
+  "native_pid": 18445,
+  "ports_rebound": [
+    31102,
+    31103
+  ],
+  "protocol": [
+    {
+      "forwarded_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+      "operation": 0,
+      "original_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+      "request_hex": "0300001611e00000000100c0010ac1020100c2020101"
+    },
+    {
+      "forwarded_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+      "operation": 240,
+      "original_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+      "request_hex": "0300001902f08032010000000000080000f0000001000101e0"
+    },
+    {
+      "forwarded_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5",
+      "operation": 4,
+      "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5",
+      "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000"
+    }
+  ],
+  "proxy_joined": true,
+  "summary": {
+    "actual_readvar": 1,
+    "case": "queued-IO-budget",
+    "expected": "both fresh S7 reads succeed: queue wait under2000ms, each dispatched IO600ms under800ms work budget",
+    "first": {
+      "Ok": -23131
+    },
+    "io_timeout_ms": 1200,
+    "per_response_delay_ms": 600,
+    "queue_wait_ms": 2000,
+    "second": {
+      "Err": "canceled"
+    },
+    "second_elapsed_ms": 600,
+    "shutdown": {
+      "Ok": null
+    },
+    "state": {
+      "counts": {},
+      "meta": {
+        "implementation": "rust",
+        "instance_id": "ff-rust-demo01",
+        "mode": "execute",
+        "schema_version": 1,
+        "store_uuid": "1792636788612-18436-0"
+      }
+    },
+    "total_ms": 715
+  }
+}
+```
+
+### F-002：实际调用前路径没有时钟漂移复核（R06 / AC04）
+
+证据类型：**静态完整控制流 + 本地算术反例**，不是已运行的宿主系统时钟跳变实验。`src/app/demo01.rs:22`及`src/services/execution.rs:20/30`做Clock.check；最后一次检查在Owner.write的ready/queue等待之前。之后`src/runtime.rs:185/329`和`src/driver_process.rs:233–235`只调用Intent.validate_time(now_ms)，该方法只比较来源UTC与TTL/age，不能检测wall相对monotonic的跳变；owner/child没有Clock漂移锚点。
+
+一个初始年龄5000ms、仍有效命令，在队列中墙钟倒拨2000ms后，validate_time仍Ok（年龄变成3000ms），但同一幅度的Clock.check应返回clock_invalid。原Rust测试只直接调用Clock.check(now-2000)，未覆盖这个排队/调用前生产路径。原expires的monotonic上界仍能限制最终expiry，但不满足“检测>1000ms漂移后暂停新写”的独立要求。
+
+返工应保持同一任务的UTC/monotonic锚点，并在真实driver开始闸门前复核；用仅test-fixture受控anchor/clock注入证明queued/precall零WriteVar、稳定clock_invalid及读流继续。不改宿主时钟，也不以仅增加domain单元测试关闭本项。
+
+### F-003：未越过开始闸门就记录执行中（R04/R11 / AC12/AC13）
+
+证据类型：**真实HTTP/S7夹具及child调用前屏障，实际探针exit1。** 使用原test-fixture特性driver、原生产Runtime/Execution，屏障尚未放行时观察100ms：SQLite保守in_flight=1合理，但OwnerHealth.in_flight=1、driver_call_started事件0、actualWriteVar0。`src/runtime.rs:341`在调用Driver.call前就update(...,1)，不是根据匹配的child started事件更新；`:358–359`的driver_call_started日志反而在结果返回后才记录。
+
+规格允许T2先保守in_flight，但明确运行时“正在执行”统计必须过真实开始闸门。需要区分IPC等待/dispatching和实际driver started，不能把T2/IPC已交付直接记成执行。stop本身有效：闭闸后请求canceled，WriteVar仍0，parent/driver实际结束，native自然exit0，fixture真join，三端口rebind。此处没有宣称误写或stop失效。
+
+本地时钟向量和屏障原观察（不含长trace）持久如下：
+
+```json
+{
+  "clock_counterexample": {
+    "initial_source_age_ms": 5000,
+    "proper_drift_check": {
+      "Err": "clock_invalid"
+    },
+    "scope": "local arithmetic model plus source control-flow review; host system clock unchanged; not a real wall-clock-jump runtime experiment",
+    "utc_only_validation": {
+      "Ok": null
+    },
+    "wall_jump_ms": -2000
+  },
+  "fixture_joined": true,
+  "native_exit": 0,
+  "native_pid": 25119,
+  "ports_rebound": [
+    31102,
+    31103,
+    31880
+  ],
+  "precall_barrier": {
+    "actual_WriteVar": 0,
+    "after_stop": {
+      "counts": {
+        "canceled": 1
+      },
+      "meta": {
+        "implementation": "rust",
+        "instance_id": "ff-rust-demo01",
+        "mode": "execute",
+        "schema_version": 1,
+        "store_uuid": "1792637239509-25096-0"
+      }
+    },
+    "driver_call_started_events": 0,
+    "durable_before_stop": {
+      "counts": {
+        "in_flight": 1
+      },
+      "meta": {
+        "implementation": "rust",
+        "instance_id": "ff-rust-demo01",
+        "mode": "execute",
+        "schema_version": 1,
+        "store_uuid": "1792637239509-25096-0"
+      }
+    },
+    "health": {
+      "generation": 1,
+      "in_flight": 1,
+      "pid": 25120,
+      "queue_depth": 0,
+      "state": "ready"
+    },
+    "job_result": {
+      "Err": "canceled"
+    },
+    "shutdown": {
+      "Ok": null
+    }
+  }
+}
+```
+
+F-003实际argv：`Q/rust-clock-health Q Q/rust-formal-target/debug/deps/field_flow-fa1bacbcdf9e3c31 > Q/rust-clock-health.txt 2>&1`，exit1；feature binary为当前正式源码自身构建，不借兄弟实现。F-002算术观察由同一probe输出，语义如上，不伪称一次真实时钟异常写已发生。
+
+### 关键源码与 QA探针完整性
+
+| 文件 | SHA256 |
+| --- | --- |
+| `field-flow/field-flow-rust/src/runtime.rs` | `ee6348a38cc7ce1e394fdee0b7155e30d2d81f4353062b3f0ab118c30c2ae72c` |
+| `field-flow/field-flow-rust/src/driver_process.rs` | `650f61202eb987ce8e4e5e807d1e0d51bd8ae031d3fb2e922a718973fd1bb202` |
+| `field-flow/field-flow-rust/src/domain.rs` | `9bb342326805a6a9fc0a95d5fb7d6f8de15209b38b34c28e23400b2642af24bf` |
+| `field-flow/field-flow-rust/src/services/execution.rs` | `73b0d16bc328ce079620d240d77823cf2426c99b9954aac0d199b681cddbe719` |
+| `Q/rust_probe.rs` | `061e6e72dc80497b8abd0774671d7c8333b3cf03a79f5d97b88072a1ed46a6e9` |
+| `Q/rust-fifo-probe.json` | `9f276d66cfeefed012445a48c74b57c24085926e06ddcc64fe6a784204b24f33` |
+| `Q/rust-fifo-probe.txt` | `f6bc880f2caea465be9ef46cdc82d1fb81cdac735ebdce130be8bb09b9bbdcc6` |
+| `Q/rust-fifo-compile.json` | `2bcd15bee3a093c5aa76f098fff8bf72a61df1e32acaac308e9089b75f19a9c8` |
+| `Q/rust_clock_health.rs` | `63792691b5ce34853afddea99eb4c041f849267152ceaf9cbe5d1ff69731a185` |
+| `Q/rust-clock-health.json` | `551c411ef97cf8d7b692422fe334110cf087aa8504ccce6fe96d1d930f279103` |
+| `Q/rust-clock-health.txt` | `2277b0baefd0e2c060a08220b51f6192b6ac4af960a103f407295566bd16a928` |
+| `Q/rust-clock-health-compile.json` | `75f7e2a0bafb3fc497af4ec88eab82001e8b4bf25ac6bccb1e8a33cb6dfb4ff4` |
+| `Q/rust_extra.rs` | `9db02c0eb1736acd0001b8bce47133e153a479400883514a0b489142004e9c03` |
+| `Q/rust-extra.txt` | `834549d212fec0da6111acb33a78f85903f68979768a9000bd99e444e69775d4` |
+| `Q/rust_extra_v2.rs` | `2ac6128d548d9cda59b84aff2577877b8157aae794120532e08d2903c763f1ba` |
+| `Q/rust-extra-2.json` | `7bbeb8fa2ee2968835fe094af89a3a32bc65d9268a68c3d92259a73ea13dbbaf` |
+| `Q/rust-extra-2.txt` | `f4be72f95b2339a898786c5dfb14387d0774dec906827654712097f68ed0c749` |
+| `Q/selected-stores.json` | `5770fce0ff6a7b00847488a1bd396933fed551e94494b1847fc8cc770ae2322e` |
+
+为使关键失败不依赖临时文件，F-001实际probe源码原样保存在本checklist；它只在QA私有目录编译、建新合成状态，未进入产品或改第三方。编译argv与native库搜索路径在上述有hash的compile ledger；当前Cargo锁/工具链作为来源。
+
+```rust
+// QA-only independent FIFO/deadline/health probe. Real frozen native S7 Server, transparent finite proxy.
+use field_flow::{config::Config, domain::id, infrastructure::state::{self,State},runtime::Runtime};
+use serde_json::json;
+use std::{io::{Read,Write,BufRead,BufReader},net::{TcpListener,TcpStream,Shutdown},path::Path,sync::{Arc,Mutex,atomic::{AtomicBool,AtomicU64,Ordering}},thread,time::Duration,process::{Command,Stdio}};
+fn frame(s:&mut TcpStream)->std::io::Result<Vec<u8>>{let mut h=[0;4];s.read_exact(&mut h)?;let n=u16::from_be_bytes([h[2],h[3]])as usize;if h[..2]!=[3,0]||!(4..=4096).contains(&n){return Err(std::io::ErrorKind::InvalidData.into())}let mut v=vec![0;n];v[..4].copy_from_slice(&h);s.read_exact(&mut v[4..])?;Ok(v)}
+fn main(){let q=std::env::args().nth(1).unwrap();let root=Path::new(&q);let until=std::time::Instant::now();
+let listener=TcpListener::bind("127.0.0.1:31102").unwrap(); listener.set_nonblocking(true).unwrap();
+drop(TcpListener::bind("127.0.0.1:31103").unwrap());
+let mut native=Command::new(root.join("rust-formal-target/debug/ff-fixture")).arg("__native_fixture").stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::null()).spawn().unwrap();
+let native_pid=native.id();let mut line=String::new();BufReader::new(native.stdout.take().unwrap()).read_line(&mut line).unwrap();assert_eq!(line.trim(),"ready");
+let stop=Arc::new(AtomicBool::new(false));let received=Arc::new(AtomicU64::new(0));let connections=Arc::new(Mutex::new(Vec::<TcpStream>::new()));let trace=Arc::new(Mutex::new(Vec::new()));
+let (s,r,peers,tr)=(stop.clone(),received.clone(),connections.clone(),trace.clone());
+let proxy=thread::spawn(move||{let mut jobs=Vec::new();while !s.load(Ordering::Acquire){match listener.accept(){Ok((mut front,_))=>{front.set_read_timeout(Some(Duration::from_millis(100))).unwrap();let mut back=TcpStream::connect("127.0.0.1:31103").unwrap();back.set_read_timeout(Some(Duration::from_secs(1))).unwrap();peers.lock().unwrap().extend([front.try_clone().unwrap(),back.try_clone().unwrap()]);let(s,r,tr)=(s.clone(),r.clone(),tr.clone());jobs.push(thread::spawn(move||{while !s.load(Ordering::Acquire){let req=match frame(&mut front){Ok(v)=>v,Err(e)if matches!(e.kind(),std::io::ErrorKind::WouldBlock|std::io::ErrorKind::TimedOut)=>continue,Err(_)=>break};let op=if req.get(7..9)==Some(&[0x32,1]){req.get(17).copied().unwrap_or(0)}else{0};if back.write_all(&req).is_err(){break}let ack=match frame(&mut back){Ok(v)=>v,Err(_)=>break};if op==4{r.fetch_add(1,Ordering::SeqCst);thread::sleep(Duration::from_millis(600));}tr.lock().unwrap().push(json!({"operation":op,"request_hex":req.iter().map(|b|format!("{b:02x}")).collect::<String>(),"original_response_hex":ack.iter().map(|b|format!("{b:02x}")).collect::<String>(),"forwarded_response_hex":ack.iter().map(|b|format!("{b:02x}")).collect::<String>()}));if front.write_all(&ack).is_err(){break}}}));},Err(e)if e.kind()==std::io::ErrorKind::WouldBlock=>thread::sleep(Duration::from_millis(2)),Err(e)=>panic!("accept {e}")}}for h in jobs{h.join().unwrap();}});
+let rt=tokio::runtime::Builder::new_multi_thread().worker_threads(4).enable_all().build().unwrap();
+let summary=rt.block_on(async{
+let mut c=Config::load(Path::new("config/loopback.yaml")).unwrap();c.plcs[0].io_timeout_ms=1200;c.plcs[0].queue_wait_ms=2000;c.validate().unwrap();
+let dir=root.join("rust-fifo-probe-state");state::init(&dir,"execute",&c.instance_id).unwrap();let(st,task)=State::open(&dir,"execute",&c.instance_id,&id()).unwrap();let runtime=Runtime::start(&c,&dir,&root.join("rust-formal-target/debug/field-flow"),st.clone()).unwrap();
+let end=tokio::time::Instant::now()+Duration::from_secs(4);while runtime.owners["plc_demo"].health().state!="ready"{assert!(tokio::time::Instant::now()<end);tokio::time::sleep(Duration::from_millis(2)).await;}
+let owner=runtime.owners["plc_demo"].clone();let start=tokio::time::Instant::now();let first=tokio::spawn(async move{owner.read("first",1,0).await});while received.load(Ordering::Acquire)<1{tokio::time::sleep(Duration::from_millis(2)).await;}
+let second_start=tokio::time::Instant::now();let second=runtime.owners["plc_demo"].read("second",1,0).await;let second_ms=second_start.elapsed().as_millis();let first=first.await.unwrap();let first_result=first.as_ref().map(|s|s.value).map_err(|e|e.clone());let second_result=second.as_ref().map(|s|s.value).map_err(|e|e.clone());let shutdown=runtime.shutdown(15000).await;drop(st);task.join().await.unwrap();
+json!({"case":"queued-IO-budget","io_timeout_ms":1200,"queue_wait_ms":2000,"per_response_delay_ms":600,"first":first_result,"second":second_result,"second_elapsed_ms":second_ms,"total_ms":start.elapsed().as_millis(),"expected":"both fresh S7 reads succeed: queue wait under2000ms, each dispatched IO600ms under800ms work budget","shutdown":shutdown,"actual_readvar":received.load(Ordering::Acquire),"state":state::inspect(&dir).unwrap()})});
+stop.store(true,Ordering::Release);for peer in connections.lock().unwrap().iter(){let _=peer.shutdown(Shutdown::Both);}proxy.join().unwrap();native.stdin.as_mut().unwrap().write_all(b"stop\n").unwrap();drop(native.stdin.take());let status=native.wait().unwrap();assert!(status.success());for port in[31102,31103]{drop(TcpListener::bind(("127.0.0.1",port)).unwrap());}
+let output=json!({"summary":summary,"protocol":trace.lock().unwrap().clone(),"native_pid":native_pid,"native_exit":status.code(),"proxy_joined":true,"ports_rebound":[31102,31103],"duration_ms":until.elapsed().as_millis()});std::fs::write(root.join("rust-fifo-probe.json"),serde_json::to_vec_pretty(&output).unwrap()).unwrap();println!("{}",output);
+if output["summary"]["second"]["Err"].is_string(){std::process::exit(1)}
+}
+
+```
+
+## 6. S7、状态、审计证据与已知限度
+
+Python正式与隔离R15 gate均在120秒外层/110秒内层内完成，直接复用正式State/Owner/Driver/Execution，不是另写probe-only业务机。单次公开connect完成协商、Setup ref1，自有raw2..65535，每job仅一次公开iso_exchange_buffer；len>4096在返回后先拒绝，不向IPC转发raw。4096/4097/65528真实注入有证据；单TPKT实际payload上界65528，存在临时拷贝，绝不是预收包4096硬cap或RSS上界。Rust初始化4096 FFI工作缓冲、合法24/30请求长度、actualSize非负/容量/精确结构交叉验证。两版均不声称修复第三方native/协议栈或完整内存安全。
+
+已从本QA实际env原包读取哈希：
+
+| Python原第三方文件 | SHA256 |
+| --- | --- |
+| `snap7/client.py` | `0d4ca7c3f178fe3484b8282b61635c14d2edf1ef925b1761e2f5b2865251c2ff` |
+| `snap7/connection.py` | `fd0f1dde0786bb66709bdec4f46d5f63bb1562b47893feb97056a824a5e62b8b` |
+| `snap7/s7protocol.py` | `fef41a421ad01213621422c0599631061640dc7f558e1e700b87bf6975ef74ad` |
+| `snap7/server/__init__.py` | `2340809a899725cad73a3ec663c3066b8b632fab9d04aeb279df830e42eac201` |
+
+这些与r3/r4源核查一致。生产代码没有私有transport、monkeypatch、vendor、换库或高层db_read/db_write回落；公开Server未替换。Python自身tests/fixtures/runtime.py的IntMemory通过公开register_area注册完整2byte slice检查，原Server普通bytearray会越界先写1byte再报错的targets-2真实失败及原源码/hash保持；本QA不重写其历史为原子拒绝。正式/隔离新的actual-boundary均unknown1/confirmed0/dispatch1、actualWriteVar1，整16byte A5保持，10轮+原库重启不再写。该guard只证明自有合成内存边界；runtime只校验声明范围，不能证明真实PLC块大小、写保护或工艺完成。
+
+Rust追加真实越实际注册块WriteVar与坏后正确ACK重放用例均完整结束。block-write：offset15/声明32/实际16，s7_remote_error、native正ACK数0、整16byte A5保持、unknown1；late-correct：只改ref，native正ACK1且42+A5，但父unknown1/confirmed0。每case原身份/原库前后各10轮、actualWriteVar仍1、旧PID已不存在、fixture自然exit0/真join/三端口rebind。完整报文/配置/状态在 `Q/rust-extra-2.json`，关键事实在本段与下表持久化。
+
+补证初次临时QA helper错误断言“unknown库重启后shutdown一定Err”，实际正常阻塞重启可以正常资源关闭，因此helper exit101；这不是产品失败或吞掉unknown。旧helper、原输出和旧库保留；只修Q下helper断言，在新case私有库验证，第二次exit0。本QA未修实现/测试。父业务健康blocked与正常资源关闭分开；全局unknown仍不升级或重发。
+
+| 追加真实case | 错误 | actualWriteVar | native正ACK | 保留状态 | 10轮/原库再10轮 | 独立读回 |
+| --- | --- | --- | --- | --- | --- | --- |
+| actual block write | s7_remote_error | 1 | 0 | unknown1，confirmed0 | 不重发 | a5×16 |
+| bad ref then correct ACK | s7_reference_mismatch | 1 | 1 | unknown1，confirmed0 | 不重发 | 002a + a5×14 |
+
+已按只读SQLite连接导出10个关键新合成库的store_meta/commands/command_events到selected-stores.json；未打开修改旧r2错误confirmed库，没有普通run执行DDL或把unknown改confirmed。confirmed后sink故障、T1/T2审计失败、T3失败、容量背压均保留原身份和append-only链；读回相同值不提供工艺exactly-once或未知核实。
+
+本QA只验证有限macOS loopback窗口。真实PLC/HTTP/Backend、全型号/OS、长期浸泡/生产容量、service hosting、安装器/签名/许可分发、部署/refs/外部发送仍是独立deferred gates。本轮没有这些执行或授权。F-001/F-002/F-003是当前验收失败，不在deferred gates中。
+
+## 7. 关键原始报告索引（均为本QA重新执行）
+
+每份报告有真实三报文、状态/计数、PID/join/rebind；下表路径和hash保留来源，关键结果已在§4–6落盘，不只引用可能消失的/tmp。
+
+| Run | 报告 | SHA256 |
+| --- | --- | --- |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-gate-du4ize04/gate.json` | `e9f63547a155f4d2ec460d0d4adbbefbd2712953eff0dbd95ee84dd1e43a086d` |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-values-lu81v4vn/report.json` | `533e4ea2b6b49276433f1d580c0a94559e44fd6d0cd5d1e53b2663d8774f1f3e` |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-concurrency-y_thgz0o/report.json` | `fbe278372f4234e94807c18ce71b999b0b78a06c0bccda08e50a50d9e8637955` |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-ack-matrix-4b08rd0j/report.json` | `1f80777e746088ea27dbc25a4c45a4da540ead9749f83ca0a6e35f94caa832a9` |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-deadline-split-a9mov9mf/report.json` | `ac74cf4db23fcc91752e0d975bf295b86d58950cb84d67a07467a06cffd600f0` |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-deadline-slow-5nu4rovn/report.json` | `89ac3e463239370a8b6a475948cad5cb8e928c85f62c5f13c83c447b39db57be` |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-deadline-stale-l7p_rauy/report.json` | `78fa0d5bd5e5e919877ba3f3cf1b93199f5c8eaf89cf755b03bdfcda5a47dd38` |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-deadline-max_short-3wb6gydq/report.json` | `9208c017e3c21fada281498a5956288bd3bc89f5fe0124fb1949177323dcaddb` |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-connect-queue-85u_rmp_/report.json` | `7bf35ab4afae30f39b4ca8e96652abae449a81e391ddcb7c53cae1e0e29a6777` |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-recovery-lw931nm_/report.json` | `f60f2c8f2dc0840a8f93767a47b48627115b34a0351a081e908349b93b059964` |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-audit-stop-swwo99ox/report.json` | `2a9727e6c4121b42313800cd5816c2ec661a663b07208a981acc928d40f23c6a` |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-audit-order-jfo0znbk/report.json` | `bb4dd8989ef97c7c60ab277ce2a9b6a410e3baa64aafdb1f2ccda69317ef0132` |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-ref-maintenance-10rf78x7/report.json` | `f62d4c878f143effb554e0b1d16dbebeffa0d3ff9a2cde7ccc064191a3f5c595` |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-process-death-k8q26hm8/report.json` | `08e1cccce8c6ad55d2c451bcd1b90714141f613a9f98957e915ffbe58d915533` |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-absence-alias-njfcpkj0/report.json` | `9f60e1f51eb9105a0c6d7c0345a39f16feffa71f33a07e8fcbeaedc55b0769ee` |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-clock-conflict-ret4osjq/report.json` | `5024b575aef92503c1252f4a02a83cd64dd3399d745593a26e34eef00566d1af` |
+| `python-formal-net` | `/private/tmp/ff-001-r1-r4-python-cli-smoke-09r4k1xn/report.json` | `101f6c3a36a4db6e93dfac3182e7fb8af81b9172fe9a128b7f8414def43c2c7e` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-gate-ty7_o_lz/gate.json` | `ed2e57a91f6bc93b08912f83f02cd11a13ad53843944985443fd504948fbdbd5` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-values-ibkcbs_s/report.json` | `597eb32231c21a0d64e6250df0198407ab3ef977a670216df3a25932980efdcf` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-concurrency-oabo0zem/report.json` | `3d377d191c15128f8158ba92b9cd450904786143eefa178b7a7ed1e549132c0d` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-ack-matrix-1pjefpq3/report.json` | `dceeb5da5167caeaab809a595e3557def8eddca0100e60a670d0e544afad4592` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-deadline-split-saawerit/report.json` | `33e0811202247845360fb10ed76c0948f661c2142479aa3f600bccff656ad16c` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-deadline-slow-9lvayqb1/report.json` | `3ee57e64f2db6eda1c4dafe8c5bc6d15ed82cfed2c56c0530b54b226852bd3b5` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-deadline-stale-c3yqgm_h/report.json` | `b4e9b88e4f845137e2549ce9495120bf863dd4a3838dc56af8c99e3e9563118f` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-deadline-max_short-nno25ezc/report.json` | `767dd5deeb05e92d34d09b0829a4e00fff04797f9e7384a5ef43fccf9586cbc3` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-connect-queue-qdsoczvd/report.json` | `77192601cd3d85eb138205f0e9a186fe63a3160601e2290241501c4af5dd165d` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-recovery-3glnpisz/report.json` | `568ee295d77f7b91013e40bded22f24af52d28221aaba8210dc3bf23a53f88cf` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-audit-stop-xlc51h_1/report.json` | `6dfec77379ed535427588ea9b2e9c5316dd08055b60ad9b77eeeb397034421d8` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-audit-order-42cxgsou/report.json` | `d237ddbad607342f5bfb675dc59c527583d6aee50ceea00404c669a6276e6483` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-ref-maintenance-kv2hs851/report.json` | `3abef84052ec9099f824f8b23bb4a3655f4feb2cc6f254f57736ece05b91e013` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-process-death-cvkh885r/report.json` | `c8333a451ac429db5145ce69e4bb306f9a2cc3440acc26f7d3206adbc7327e29` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-absence-alias-svy6oav7/report.json` | `a4ce1c09b437350d6fac42045db001274f0061d167d272897647ce1a4ba4a017` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-clock-conflict-dq45e7x2/report.json` | `78147cc53fa2cff0051ead9db17c43900ad9c3c3ceed4e14f0560222b939e7d6` |
+| `python-isolated-copy` | `/private/tmp/ff-001-r1-r4-python-cli-smoke-_fiduros/report.json` | `780e785e9cff83b88bad20a4998a0b53d94b584f474cf5c636c260f79a50d90c` |
+
+以下Rust原样stdout包含按AC输出的真实case/报文/状态目录；test-only trace可大于普通产品日志行，不能将它冒充产品审计行。正式和隔离的原full测试均0失败；F项来自独立probe/源码复核。
+
+| 报告 | SHA256 |
+| --- | --- |
+| `Q/rust-formal-gate.txt` | `f2da7d262c66c4558ca12ee43c5b1ef133a4e0337ed69c06ac0783a0b88aa0ce` |
+| `Q/rust-formal-protocol.txt` | `33c1e82c81a02b639b1ad1820e96a72e896675858e7f8feb698080fb486d6c51` |
+| `Q/rust-isolated-copy-gate.txt` | `9c01f289592f933560e76edded118ee6f5ef437e194bbd8bc2f356023f5b9fb8` |
+| `Q/rust-isolated-copy-protocol.txt` | `3d7bd01f3d74e6fdd6683dcfe640c5a4636d9f6191a15230d02a44faf11a0506` |
+| `Q/rust-metrics.json` | `912384fd883beee2c327e5fc2f6309c1b1f4b54ac2e8b9d4b592a68735a01b4c` |
+| `Q/python-report-summary.json` | `822e9021e446267e120b3762c38beff3bb7f71a4331282ee745a19de2d46ef7b` |
+| `Q/protocol-output-index.json` | `b580c1b04f1ab7a8dac4341e6617f9667af10eb700b5e45a7b47cd9b8b359435` |
+| `Q/environment.json` | `20d70bfe991cc78b6e7b31bf44ef7f33d5acb466c7f3dcbf4721a3308b3d24ab` |
+| `Q/artifacts.json` | `703aa6343620d623358aa11560e3a6bb43ac279352c5480cb56715b5825f795b` |
+| `Q/final-source-audit.json` | `ecf07e1e952071167d802a5ecab45ad4784b3f5ae41d2053af25515a17ab4acc` |
+| `Q/protection-audit.json` | `7405ef0e8487438296303f62eaa06530965816f3e32c763cbe2a5f1f3d02d930` |
+| `Q/rust-cli-offline.json` | `fd228dca9eaa1c83d660c8d88bd0c0f62cb035a3d4034dd9ae36b99019ff6cd9` |
+
+## 8. 静态治理、资源与最终审计
+
+本QA在创建checklist前实际运行governance checker exit1/332行：318任务外旧诊断与原r4输出多重集相等；8条为Main将catalog同步为Verification运行中而checklist尚未落盘的暂时诊断；2条为FF PLAN同一行合法辅助tasks链接被checker要求只指spec；4条为独立工程合法../plans唯一父bundle链接不被字面](plans/规则识别。没有改checker、造子任务、改spec/tasks来消警。最终落盘后的真实输出/手工链接与范围审计见本节末追加，不能引用原DEV的322行当作本QA当前结果。
+
+当前自有资源均停止，目录/环境/源码副本/构建/合成状态/原报告保留供Development窄修和Human Owner复核；没有删除目录、归档worktree或清理归属不明资源。下列PID/端口盘点仅针对本QA命令输出和其报告引用中的确切PID，不按进程名杀进程。正常例在报告中有自然exit0/父wait/线程join/rebind；forced/parent_lost例保留非零故障，不冒称优雅退出。
+
+资源暂留的清理触发：返工与新的fresh QA/Owner复核不再依赖后，由协调器先核对归属、当前占用及必要证据归档再安全回收；本QA不代执行目录回收。早期复制品已移动，其旧env/旧路径仅为历史，后续复现请用最终isolated目录及各自新env。
+
+## 9. 后续 gate
+
+1. 协调器将本真实qa_failed与F-001/F-002/F-003交实际Development新turn；保留QA1全文/原失败候选/hash，不覆盖本次失败。
+2. Development在原r4内修复，记录先红后绿的新回归、正式树/隔离copy受影响验证及新candidate/handoff，不能更改原来源TTL、unknown/confirmed语义、真实started边界或deadline/回收预算。
+3. 新的实际verification角色在fresh context独立消费新handoff并追加QA2；当前QA1不可就地伪改qa_passed。
+4. 只有满足全部验收后才交Human Owner决定最终验收；本记录未授予最终验收、发布、部署或真实操作权限。
+
+
+### QA1 最终审计快照（2026-10-22T03:00:10Z）
+
+- 实际checker命令为 `bash /Users/jason/Desktop/DreamCode/AI/AIIS/skills/project-governance/scripts/check-governance-bundle.sh /Users/jason/Desktop/DreamCode/aiis-ics-arch field-flow field-flow/field-flow-rust field-flow/field-flow-python`，**exit1，332行**；318条任务外旧诊断与原r4多重集相同。checklist落盘后，两份FF catalog尚缺本checklist新链接（重复扫描共8条）；这是Main下一次机械同步，不能声称目录当下已完整。另2条FF PLAN辅助tasks链接诊断及4条子工程../plans识别限制如原输出保留。
+- 原输出 `Q/governance-final.txt` SHA256=`8fe2aa91aff38f976b6cdeeab3e44c212db6f7c19edb142aeb1fa5bbb0494dd4`；完整分类/命令/手工检查 `Q/final-audit.json` SHA256=`7c2fe051d6c8ddd2ffe16bae08311ba8ab8affc742b76b4c59927dad0794c22a`。Main随后实际只删除FF PLAN双语行的重复tasks辅助链接、保留唯一spec链接；此为协调器允许导航写入，发生在上述checker快照之后。本QA未据此猜造新的exit/行数，也不为其重跑协议；Main可在同步QA verdict/catalog后做机械检查。
+- 独立手工检查34份活动文档、549个本地路径均存在，空白检查通过；`git diff --check` exit0。checklist为未跟踪新文件，已另逐行检查无尾随空白，不能用git diff --check替代它。
+- QA写checklist前2307基线文件差异0；交接末复核仅上面Main明确写入的 `field-flow/PLAN.md` / `field-flow/PLAN.zh-CN.md` 两项不同。正式源码、测试、锁、spec/tasks、candidate/evidence manifest精确hash及4长期文档/112历史保持。本QA仓库唯一写入为本checklist；HEAD仍dbed9107dce5701fa138a66b3c13aba637a27b86。未进行commit/push/refs。
+- 最终资源检查 `python3 Q/audit_resources.py` exit0；**512个确切记录PID全部不存在**，没有未回收/权限不明PID。六个固定端口逐个 `lsof -nP -iTCP:PORT -sTCP:LISTEN` 均exit1/零输出，并逐个实际bind127.0.0.1成功后立即关闭。没有残留本QA runtime/driver/fixture/listener，没有杀未知占用者。
+- `Q/resources.json` SHA256=`db67a91764e88381a8d3dcb811736915b1d80b60e137a444a164bd57a09ebfd2`；完整记录512 PID、51份被引用JSON报告hash和81个从输出明确识别的保留根。测试内部未导出的单元临时目录不冒称已经完整枚举；没有对这些或其他目录执行删除。关键failure/状态/报文/命令/版本/资源结论已持久在本checklist，原大报告保留供返工复核，不能仅凭/tmp仍存在就认为Owner已验收。
+- 离线Rust真实CLI两模式init/inspect四条均exit0，准确argv/PID/stdout在 `Q/rust-cli-offline.json`（SHA256=`fd228dca9eaa1c83d660c8d88bd0c0f62cb035a3d4034dd9ae36b99019ff6cd9`）。没有为补写报告再启动协议服务。
+
+| 固定端口 | lsof exit / output | 实际rebind |
+| --- | --- | --- |
+| `127.0.0.1:31102` | `1` / 空 | `True` |
+| `127.0.0.1:31103` | `1` / 空 | `True` |
+| `127.0.0.1:31880` | `1` / 空 | `True` |
+| `127.0.0.1:32102` | `1` / 空 | `True` |
+| `127.0.0.1:32103` | `1` / 空 | `True` |
+| `127.0.0.1:32880` | `1` / 空 | `True` |
+
+已从自己输出识别且保留的根路径（原源码/状态/日志/证据，不是运行服务；清理触发见§8）：
+
+```text
+/private/tmp/ff-001-r1-20261021-r2dev
+/private/tmp/ff-001-r1-r3-rust-ack-rejections-1792636455628-14552-0
+/private/tmp/ff-001-r1-r3-rust-ack-rejections-1792636809180-18682-0
+/private/tmp/ff-001-r1-r3-rust-ack-rejections-1792637092938-23813-0
+/private/tmp/ff-001-r1-r3-rust-child-death-1792636494781-14946-0
+/private/tmp/ff-001-r1-r3-rust-child-death-1792636848100-19047-0
+/private/tmp/ff-001-r1-r3-rust-child-death-1792637132155-24199-0
+/private/tmp/ff-001-r1-r3-rust-confirmed-then-sink-1792636466060-14667-0
+/private/tmp/ff-001-r1-r3-rust-confirmed-then-sink-1792636819282-18796-0
+/private/tmp/ff-001-r1-r3-rust-confirmed-then-sink-1792637103092-23938-0
+/private/tmp/ff-001-r1-r3-rust-lost-ack-1792636475910-14685-165
+/private/tmp/ff-001-r1-r3-rust-lost-ack-1792636829172-18800-165
+/private/tmp/ff-001-r1-r3-rust-lost-ack-1792637113158-23956-165
+/private/tmp/ff-001-r1-r3-rust-matched-ack-preflight-1792636450629-14479-0
+/private/tmp/ff-001-r1-r3-rust-matched-ack-preflight-1792636492464-14685-220
+/private/tmp/ff-001-r1-r3-rust-matched-ack-preflight-1792636804714-18608-0
+/private/tmp/ff-001-r1-r3-rust-matched-ack-preflight-1792636845753-18800-220
+/private/tmp/ff-001-r1-r3-rust-matched-ack-preflight-1792637088292-23738-0
+/private/tmp/ff-001-r1-r3-rust-matched-ack-preflight-1792637129775-23956-220
+/private/tmp/ff-001-r1-r3-rust-parent-death-1792636500494-14946-2
+/private/tmp/ff-001-r1-r3-rust-parent-death-1792636853805-19047-2
+/private/tmp/ff-001-r1-r3-rust-parent-death-1792637137903-24199-2
+/private/tmp/ff-001-r1-r3-rust-queued-stop-1792636492092-14685-214
+/private/tmp/ff-001-r1-r3-rust-queued-stop-1792636845380-18800-214
+/private/tmp/ff-001-r1-r3-rust-queued-stop-1792637129400-23956-214
+/private/tmp/ff-001-r1-r3-rust-stale-reference-probe-1792636493802-14685-251
+/private/tmp/ff-001-r1-r3-rust-stale-reference-probe-1792636847133-18800-251
+/private/tmp/ff-001-r1-r3-rust-stale-reference-probe-1792637131196-23956-251
+/private/tmp/ff-001-r1-r3dev-k989azay
+/private/tmp/ff-001-r1-r4-python-absence-alias-3adinjb1
+/private/tmp/ff-001-r1-r4-python-absence-alias-njfcpkj0
+/private/tmp/ff-001-r1-r4-python-absence-alias-svy6oav7
+/private/tmp/ff-001-r1-r4-python-ack-matrix-1pjefpq3
+/private/tmp/ff-001-r1-r4-python-ack-matrix-4b08rd0j
+/private/tmp/ff-001-r1-r4-python-ack-matrix-lv86alnt
+/private/tmp/ff-001-r1-r4-python-audit-order-42cxgsou
+/private/tmp/ff-001-r1-r4-python-audit-order-jfo0znbk
+/private/tmp/ff-001-r1-r4-python-audit-order-sjaorq4h
+/private/tmp/ff-001-r1-r4-python-audit-stop-bnxce5ah
+/private/tmp/ff-001-r1-r4-python-audit-stop-swwo99ox
+/private/tmp/ff-001-r1-r4-python-audit-stop-xlc51h_1
+/private/tmp/ff-001-r1-r4-python-cli-smoke-09r4k1xn
+/private/tmp/ff-001-r1-r4-python-cli-smoke-2evkl2_3
+/private/tmp/ff-001-r1-r4-python-cli-smoke-_fiduros
+/private/tmp/ff-001-r1-r4-python-clock-conflict-dq45e7x2
+/private/tmp/ff-001-r1-r4-python-clock-conflict-efrhx15e
+/private/tmp/ff-001-r1-r4-python-clock-conflict-ret4osjq
+/private/tmp/ff-001-r1-r4-python-concurrency-oabo0zem
+/private/tmp/ff-001-r1-r4-python-concurrency-tvkd5kza
+/private/tmp/ff-001-r1-r4-python-concurrency-y_thgz0o
+/private/tmp/ff-001-r1-r4-python-connect-queue-85u_rmp_
+/private/tmp/ff-001-r1-r4-python-connect-queue-bn14z_2c
+/private/tmp/ff-001-r1-r4-python-connect-queue-qdsoczvd
+/private/tmp/ff-001-r1-r4-python-deadline-max_short-3wb6gydq
+/private/tmp/ff-001-r1-r4-python-deadline-max_short-cbx38yd2
+/private/tmp/ff-001-r1-r4-python-deadline-max_short-nno25ezc
+/private/tmp/ff-001-r1-r4-python-deadline-slow-5nu4rovn
+/private/tmp/ff-001-r1-r4-python-deadline-slow-9lvayqb1
+/private/tmp/ff-001-r1-r4-python-deadline-slow-w79m35cj
+/private/tmp/ff-001-r1-r4-python-deadline-split-a9mov9mf
+/private/tmp/ff-001-r1-r4-python-deadline-split-pdcs2nx2
+/private/tmp/ff-001-r1-r4-python-deadline-split-saawerit
+/private/tmp/ff-001-r1-r4-python-deadline-stale-c3yqgm_h
+/private/tmp/ff-001-r1-r4-python-deadline-stale-l7p_rauy
+/private/tmp/ff-001-r1-r4-python-deadline-stale-mtjn20w9
+/private/tmp/ff-001-r1-r4-python-gate-ah_p5sf7
+/private/tmp/ff-001-r1-r4-python-gate-du4ize04
+/private/tmp/ff-001-r1-r4-python-gate-ty7_o_lz
+/private/tmp/ff-001-r1-r4-python-process-death-1ipdoucf
+/private/tmp/ff-001-r1-r4-python-process-death-cvkh885r
+/private/tmp/ff-001-r1-r4-python-process-death-k8q26hm8
+/private/tmp/ff-001-r1-r4-python-recovery-3glnpisz
+/private/tmp/ff-001-r1-r4-python-recovery-8sf1czgr
+/private/tmp/ff-001-r1-r4-python-recovery-lw931nm_
+/private/tmp/ff-001-r1-r4-python-ref-maintenance-10rf78x7
+/private/tmp/ff-001-r1-r4-python-ref-maintenance-kv2hs851
+/private/tmp/ff-001-r1-r4-python-ref-maintenance-oyy17e0l
+/private/tmp/ff-001-r1-r4-python-values-ibkcbs_s
+/private/tmp/ff-001-r1-r4-python-values-lu81v4vn
+/private/tmp/ff-001-r1-r4-python-values-y7819zow
+/private/tmp/ff-001-r4-qa-wY5eCh
+```
+
+最终状态：`qa_failed`；F-001/F-002/F-003均未修复、未关闭；没有环境blocker。下一实际gate为Development返工与新的fresh Verification，Human Owner最终验收继续pending。

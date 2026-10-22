@@ -1,0 +1,40 @@
+{
+  "candidate_hashes": {
+    "rust": 43,
+    "python": 16,
+    "all_equal": true
+  },
+  "standalone_copy": {
+    "files": 43,
+    "all_equal": true
+  },
+  "local_markdown_links": {
+    "documents": 17,
+    "links": 84,
+    "missing": []
+  },
+  "candidate_trailing_whitespace": [],
+  "locale_keys_equal": true,
+  "git_diff_check": {
+    "command": [
+      "git",
+      "diff",
+      "--check",
+      "--",
+      "field-flow/field-flow-rust",
+      "field-flow/field-flow-python",
+      "field-flow/plans/FF-001-dual-runtime-demo01/tasks.md",
+      "field-flow/plans/FF-001-dual-runtime-demo01/evidence/r3-dev"
+    ],
+    "exit_code": 0,
+    "output": ""
+  },
+  "evidence_git_ignore": {
+    "checked": 66,
+    "exit_code": 1,
+    "ignored_paths": []
+  },
+  "r2_tasks_reconstructed_sha256": "ce9dfe615dbfc69c2e0dccf00178d7bcb8856ea51458e4e2d405c3a55389d0e9",
+  "tasks_sha256": "48a52ef056ccced510bc4c24c685b4ef7d03fd03868487dff1616a1ba829dd76",
+  "exit_code": 0
+}

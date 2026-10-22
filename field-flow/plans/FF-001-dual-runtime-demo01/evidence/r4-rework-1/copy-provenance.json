@@ -1,0 +1,182 @@
+{
+  "metadata_command": [
+    "cargo",
+    "metadata",
+    "--no-deps",
+    "--locked",
+    "--offline",
+    "--format-version",
+    "1"
+  ],
+  "exit_code": 0,
+  "workspace_root": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project",
+  "target_directory": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/copy-target",
+  "parent_contents": [
+    "project"
+  ],
+  "package_sources": [
+    {
+      "name": "field-flow",
+      "manifest_path": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project/Cargo.toml",
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "field_flow",
+          "src_path": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        {
+          "kind": [
+            "bin"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "ff-fixture",
+          "src_path": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project/src/bin/ff-fixture.rs",
+          "edition": "2021",
+          "required-features": [
+            "test-fixture"
+          ],
+          "doc": true,
+          "doctest": false,
+          "test": true
+        },
+        {
+          "kind": [
+            "bin"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "field-flow",
+          "src_path": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project/src/main.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": false,
+          "test": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "ack_rejection_matrix",
+          "src_path": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project/tests/ack_rejection_matrix.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "cli_contract",
+          "src_path": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project/tests/cli_contract.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "confirmed_audit",
+          "src_path": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project/tests/confirmed_audit.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "local_protocol",
+          "src_path": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project/tests/local_protocol.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "process_lifecycle",
+          "src_path": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project/tests/process_lifecycle.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "remaining_matrix",
+          "src_path": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project/tests/remaining_matrix.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "runtime_regressions",
+          "src_path": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project/tests/runtime_regressions.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "s7_int_pdu",
+          "src_path": "/private/tmp/ff-001-r1-r4-rework1-32onn0fh/isolated-rust/project/tests/s7_int_pdu.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        }
+      ]
+    }
+  ]
+}

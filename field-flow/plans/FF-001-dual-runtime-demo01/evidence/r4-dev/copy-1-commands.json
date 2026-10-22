@@ -1,0 +1,167 @@
+[
+  {
+    "label": "lock",
+    "command": [
+      "uv",
+      "lock",
+      "--check",
+      "--python",
+      "3.11",
+      "--no-python-downloads"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy",
+    "timeout_seconds": 60,
+    "exit_code": 0,
+    "duration_seconds": 0.040454958,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/copy-1-lock.txt"
+  },
+  {
+    "label": "sync",
+    "command": [
+      "uv",
+      "sync",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy",
+    "timeout_seconds": 120,
+    "exit_code": 0,
+    "duration_seconds": 1.8335503750000002,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/copy-1-sync.txt"
+  },
+  {
+    "label": "build",
+    "command": [
+      "uv",
+      "build",
+      "--python",
+      "3.11",
+      "--no-python-downloads"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy",
+    "timeout_seconds": 120,
+    "exit_code": 0,
+    "duration_seconds": 0.40888900000000006,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/copy-1-build.txt"
+  },
+  {
+    "label": "compile",
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "python",
+      "-m",
+      "compileall",
+      "-q",
+      "src",
+      "tests"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy",
+    "timeout_seconds": 60,
+    "exit_code": 0,
+    "duration_seconds": 0.07264770799999987,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/copy-1-compile.txt"
+  },
+  {
+    "label": "unit",
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-q",
+      "tests/unit",
+      "-s"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy",
+    "timeout_seconds": 60,
+    "exit_code": 0,
+    "duration_seconds": 1.159387916,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/copy-1-unit.txt"
+  },
+  {
+    "label": "gate",
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-q",
+      "tests/test_matched_ack_gate.py",
+      "-s"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy",
+    "timeout_seconds": 120,
+    "exit_code": 0,
+    "duration_seconds": 0.9405660000000005,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/copy-1-gate.txt"
+  },
+  {
+    "label": "local",
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "pytest",
+      "-q",
+      "tests/test_local_protocol.py",
+      "-s"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy",
+    "timeout_seconds": 180,
+    "exit_code": 0,
+    "duration_seconds": 33.171187625,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/copy-1-local.txt"
+  },
+  {
+    "label": "help",
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "field-flow"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy",
+    "timeout_seconds": 30,
+    "exit_code": 0,
+    "duration_seconds": 0.40472366699999895,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/copy-1-help.txt"
+  },
+  {
+    "label": "cli-smoke",
+    "command": [
+      "uv",
+      "run",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "python",
+      "-m",
+      "tests.fixtures.cli_smoke"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy",
+    "timeout_seconds": 45,
+    "exit_code": 0,
+    "duration_seconds": 0.8329056250000022,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/copy-1-cli-smoke.txt"
+  }
+]

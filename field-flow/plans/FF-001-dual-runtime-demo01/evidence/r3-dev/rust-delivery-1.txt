@@ -1,0 +1,71 @@
+   Compiling aws-lc-sys v0.46.0
+   Compiling libsqlite3-sys v0.30.1
+   Compiling rust-snap7 v1.142.2
+    Checking rusqlite v0.32.1
+   Compiling aws-lc-rs v1.18.2
+   Compiling rustls v0.23.46
+    Checking rustls-webpki v0.103.16
+    Checking tokio-rustls v0.26.6
+    Checking rustls-platform-verifier v0.7.1
+    Checking hyper-rustls v0.27.10
+    Checking reqwest v0.13.5
+    Checking field-flow v0.1.0 (/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust)
+warning: unused import: `time::Duration`
+ --> tests/ack_rejection_matrix.rs:6:23
+  |
+6 | use std::{path::Path, time::Duration};
+  |                       ^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: function `eventually` is never used
+  --> tests/support/mod.rs:94:14
+   |
+94 | pub async fn eventually(mut f: impl FnMut() -> bool) {
+   |              ^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: function `intent` is never used
+   --> tests/support/mod.rs:101:8
+    |
+101 | pub fn intent(c: &Config, command: &str, value: i16) -> field_flow::domain::Intent {
+    |        ^^^^^^
+
+warning: function `readback` is never used
+   --> tests/support/mod.rs:116:8
+    |
+116 | pub fn readback(_offset: i32) -> [u8; 16] {
+    |        ^^^^^^^^
+
+warning: struct `Run` is never constructed
+  --> tests/support/mod.rs:19:12
+   |
+19 | pub struct Run {
+   |            ^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: associated items `new`, `open`, `ready`, `close`, and `iteration` are never used
+  --> tests/support/mod.rs:26:12
+   |
+25 | impl Run {
+   | -------- associated items in this implementation
+26 |     pub fn new(label: &str, mode: &str, c: &Config) -> Self {
+   |            ^^^
+...
+32 |     pub fn open(dir: PathBuf, mode: &str, c: &Config) -> Self {
+   |            ^^^^
+...
+48 |     pub async fn ready(&self) {
+   |                  ^^^^^
+...
+59 |     pub async fn close(self, normal: bool) -> PathBuf {
+   |                  ^^^^^
+...
+80 |     pub async fn iteration(&self, c: &Config) -> Result<()> {
+   |                  ^^^^^^^^^
+
+warning: `field-flow` (test "ack_rejection_matrix") generated 4 warnings (run `cargo fix --test "ack_rejection_matrix"` to apply 1 suggestion)
+warning: `field-flow` (test "process_lifecycle") generated 4 warnings (2 duplicates)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7.52s

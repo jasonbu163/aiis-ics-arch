@@ -1,0 +1,229 @@
+{
+  "results": [
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-audit-order-awhdk9q_/queued",
+      "normal": false,
+      "summary": {
+        "commands": {
+          "expired": 2
+        },
+        "log_writable": false,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "4a3df4cfeacb4d708768b7f87be60b31",
+          "created_at": "2026-10-22T01:50:48.893Z"
+        },
+        "counts": {
+          "expired": 2
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "4a3df4cfeacb4d708768b7f87be60b31",
+              "created_at": "2026-10-22T01:50:48.893Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "queued-one",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "f8aa56c8967c18280c0378a889eded75523087f4a5e1d2877fda1135b8200269",
+              "value_i16": 42,
+              "issued_at_ms": 1792633848965,
+              "expires_at_ms": 1792633878965,
+              "state": "expired",
+              "dispatch_count": 1,
+              "run_id": "84008af9f0a848d1bf3743f8249d88a5",
+              "request_id": "d63f160dfcb148358d604d67f6206263",
+              "last_error_key": null,
+              "ack_kind": null,
+              "created_at": "2026-10-22T01:50:48.965Z",
+              "updated_at": "2026-10-22T01:50:49.766Z"
+            },
+            {
+              "source_id": "demo01-feed",
+              "command_id": "queued-two",
+              "flow_id": "second-flow",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":2,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "c6d2382ac919ec575de0e35f55ddb0cf65e2e49a3c84028b56e5055a38f766d9",
+              "value_i16": 42,
+              "issued_at_ms": 1792633848965,
+              "expires_at_ms": 1792633878965,
+              "state": "expired",
+              "dispatch_count": 1,
+              "run_id": "84008af9f0a848d1bf3743f8249d88a5",
+              "request_id": "12602b9a0df144a18e4fffaab7a29a6a",
+              "last_error_key": null,
+              "ack_kind": null,
+              "created_at": "2026-10-22T01:50:48.966Z",
+              "updated_at": "2026-10-22T01:50:49.767Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "queued-one",
+              "run_id": "84008af9f0a848d1bf3743f8249d88a5",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "f8aa56c8967c18280c0378a889eded75523087f4a5e1d2877fda1135b8200269",
+              "created_at": "2026-10-22T01:50:48.966Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "queued-two",
+              "run_id": "84008af9f0a848d1bf3743f8249d88a5",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "c6d2382ac919ec575de0e35f55ddb0cf65e2e49a3c84028b56e5055a38f766d9",
+              "created_at": "2026-10-22T01:50:48.966Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "queued-one",
+              "run_id": "84008af9f0a848d1bf3743f8249d88a5",
+              "request_id": "d63f160dfcb148358d604d67f6206263",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:50:48.966Z"
+            },
+            {
+              "seq": 4,
+              "source_id": "demo01-feed",
+              "command_id": "queued-two",
+              "run_id": "84008af9f0a848d1bf3743f8249d88a5",
+              "request_id": "12602b9a0df144a18e4fffaab7a29a6a",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:50:48.967Z"
+            },
+            {
+              "seq": 5,
+              "source_id": "demo01-feed",
+              "command_id": "queued-one",
+              "run_id": "84008af9f0a848d1bf3743f8249d88a5",
+              "request_id": "d63f160dfcb148358d604d67f6206263",
+              "from_state": "in_flight",
+              "to_state": "expired",
+              "reason_key": "expired",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:50:49.766Z"
+            },
+            {
+              "seq": 6,
+              "source_id": "demo01-feed",
+              "command_id": "queued-two",
+              "run_id": "84008af9f0a848d1bf3743f8249d88a5",
+              "request_id": "12602b9a0df144a18e4fffaab7a29a6a",
+              "from_state": "in_flight",
+              "to_state": "expired",
+              "reason_key": "expired",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:50:49.767Z"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "fixture": {
+    "memory_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+    "writes": 0,
+    "reads": 2,
+    "gets": 0,
+    "sessions": 2,
+    "closed_sessions": 1,
+    "trace": [
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "split",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      }
+    ],
+    "server_pid": 77632,
+    "server_exit": 0,
+    "server_close": {
+      "remaining_threads": []
+    },
+    "proxy_threads_joined": 2,
+    "ports_rebound": [
+      32102,
+      32103,
+      32880
+    ]
+  }
+}

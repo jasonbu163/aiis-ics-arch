@@ -1,0 +1,52 @@
+   Compiling field-flow v0.1.0 (/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust)
+warning: struct `Run` is never constructed
+  --> tests/support/mod.rs:19:12
+   |
+19 | pub struct Run {
+   |            ^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: associated items `new`, `open`, `ready`, `close`, and `iteration` are never used
+  --> tests/support/mod.rs:26:12
+   |
+25 | impl Run {
+   | -------- associated items in this implementation
+26 |     pub fn new(label: &str, mode: &str, c: &Config) -> Self {
+   |            ^^^
+...
+32 |     pub fn open(dir: PathBuf, mode: &str, c: &Config) -> Self {
+   |            ^^^^
+...
+48 |     pub async fn ready(&self) {
+   |                  ^^^^^
+...
+59 |     pub async fn close(self, normal: bool) -> PathBuf {
+   |                  ^^^^^
+...
+80 |     pub async fn iteration(&self, c: &Config) -> Result<()> {
+   |                  ^^^^^^^^^
+
+warning: function `intent` is never used
+   --> tests/support/mod.rs:101:8
+    |
+101 | pub fn intent(c: &Config, command: &str, value: i16) -> field_flow::domain::Intent {
+    |        ^^^^^^
+
+warning: function `readback` is never used
+   --> tests/support/mod.rs:116:8
+    |
+116 | pub fn readback(_offset: i32) -> [u8; 16] {
+    |        ^^^^^^^^
+
+warning: `field-flow` (test "process_lifecycle") generated 4 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.06s
+     Running tests/process_lifecycle.rs (/private/tmp/ff-001-r1-20261021-r2dev/rust-target/debug/deps/process_lifecycle-f1b6e4b25b2df0ae)
+
+running 1 test
+test child_and_parent_death_are_real ... {"ac":"AC10/AC13","applied":1,"child_gone":true,"duration_to_observation_ms":5703,"kill_parent":false,"old_child_pid":21271,"store":"/private/tmp/ff-001-r1-r3-rust-child-death-1792628748522-21254-0/state","unknown":1}
+{"ac":"AC10/AC13","applied":1,"child_gone":true,"duration_to_observation_ms":5764,"kill_parent":true,"old_child_pid":21323,"store":"/private/tmp/ff-001-r1-r3-rust-parent-death-1792628754622-21254-2/state","unknown":1}
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 12.41s
+

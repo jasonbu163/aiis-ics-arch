@@ -1,0 +1,13 @@
+Error handling client ('127.0.0.1', 51155): Expected COTP DT, got 0x80
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python/tests/python_api_preflight.py", line 47, in <module>
+    main()
+  File "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python/tests/python_api_preflight.py", line 27, in main
+    closed = fixture.close()
+             ^^^^^^^^^^^^^^^
+  File "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python/tests/fixtures/public_api.py", line 208, in close
+    assert self.error is None, self.error
+           ^^^^^^^^^^^^^^^^^^
+AssertionError: EOFError()

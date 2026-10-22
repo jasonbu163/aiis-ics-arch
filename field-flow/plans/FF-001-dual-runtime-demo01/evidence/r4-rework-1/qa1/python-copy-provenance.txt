@@ -1,0 +1,1 @@
+{"executable": "/private/tmp/ff-001-r4-qa-wY5eCh/python-copy-venv/bin/python3", "source": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-python/src/field_flow/__init__.py", "fixture": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-python/tests/fixtures/__init__.py", "python": "3.11.12 (main, May 22 2025, 01:39:08) [Clang 20.1.4 ]", "sqlite": "3.47.1", "snap7": "3.0.0"}

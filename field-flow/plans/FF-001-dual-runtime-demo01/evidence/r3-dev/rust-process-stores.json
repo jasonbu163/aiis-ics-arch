@@ -1,0 +1,286 @@
+{
+  "/private/tmp/ff-001-r1-r3-rust-child-death-1792629205299-27608-0/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792629205305-27608-1",
+        "created_at": "2026-10-22T00:33:25.305Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "child-lost",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "28204966efa8b763c553ce628db3f2fed377a8c0b10abcac541c2b22053b8258",
+        "value_i16": 42,
+        "issued_at_ms": 1792629205306,
+        "expires_at_ms": 1792629265306,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792629205314-27610-0",
+        "request_id": "1792629205344-27610-2",
+        "last_error_key": "forced_driver_stop:ipc_closed",
+        "ack_kind": null,
+        "created_at": "2026-10-22T00:33:25.334Z",
+        "updated_at": "2026-10-22T00:33:25.384Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "child-lost",
+        "run_id": "1792629205314-27610-0",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "28204966efa8b763c553ce628db3f2fed377a8c0b10abcac541c2b22053b8258",
+        "created_at": "2026-10-22T00:33:25.335Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "child-lost",
+        "run_id": "1792629205314-27610-0",
+        "request_id": "1792629205344-27610-2",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T00:33:25.352Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "child-lost",
+        "run_id": "1792629205314-27610-0",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "forced_driver_stop:ipc_closed",
+        "summary": "{}",
+        "created_at": "2026-10-22T00:33:25.385Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-parent-death-1792629211005-27608-2/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792629211011-27608-3",
+        "created_at": "2026-10-22T00:33:31.011Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "parent-lost",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "40f3043223acae9bc99dd23df0693b160cbde91084e0d0c1caee5f884b2df99d",
+        "value_i16": 42,
+        "issued_at_ms": 1792629211012,
+        "expires_at_ms": 1792629271012,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792629211024-27662-0",
+        "request_id": "1792629211047-27662-2",
+        "last_error_key": "recovered_in_flight",
+        "ack_kind": null,
+        "created_at": "2026-10-22T00:33:31.041Z",
+        "updated_at": "2026-10-22T00:33:31.181Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "parent-lost",
+        "run_id": "1792629211024-27662-0",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "40f3043223acae9bc99dd23df0693b160cbde91084e0d0c1caee5f884b2df99d",
+        "created_at": "2026-10-22T00:33:31.041Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "parent-lost",
+        "run_id": "1792629211024-27662-0",
+        "request_id": "1792629211047-27662-2",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T00:33:31.055Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "parent-lost",
+        "run_id": "1792629211180-27664-0",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "recovered_in_flight",
+        "summary": "{}",
+        "created_at": "2026-10-22T00:33:31.182Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-child-death-1792628748522-21254-0/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792628748530-21254-1",
+        "created_at": "2026-10-22T00:25:48.530Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "child-lost",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "9839abbd8fc2df9d2404711b83661c46b6153aa427c5591dcf49049fe8595944",
+        "value_i16": 42,
+        "issued_at_ms": 1792628748531,
+        "expires_at_ms": 1792628808531,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792628748843-21270-0",
+        "request_id": "1792628748882-21270-2",
+        "last_error_key": "forced_driver_stop:ipc_closed",
+        "ack_kind": null,
+        "created_at": "2026-10-22T00:25:48.865Z",
+        "updated_at": "2026-10-22T00:25:48.938Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "child-lost",
+        "run_id": "1792628748843-21270-0",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "9839abbd8fc2df9d2404711b83661c46b6153aa427c5591dcf49049fe8595944",
+        "created_at": "2026-10-22T00:25:48.866Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "child-lost",
+        "run_id": "1792628748843-21270-0",
+        "request_id": "1792628748882-21270-2",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T00:25:48.903Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "child-lost",
+        "run_id": "1792628748843-21270-0",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "forced_driver_stop:ipc_closed",
+        "summary": "{}",
+        "created_at": "2026-10-22T00:25:48.939Z"
+      }
+    ]
+  },
+  "/private/tmp/ff-001-r1-r3-rust-parent-death-1792628754622-21254-2/state": {
+    "store_meta": [
+      {
+        "schema_version": 1,
+        "implementation": "rust",
+        "mode": "execute",
+        "instance_id": "ff-rust-demo01",
+        "store_uuid": "1792628754628-21254-3",
+        "created_at": "2026-10-22T00:25:54.628Z"
+      }
+    ],
+    "commands": [
+      {
+        "source_id": "demo01-feed",
+        "command_id": "parent-lost",
+        "flow_id": "demo01",
+        "target_key": "{\"host\":\"127.0.0.1\",\"port\":31102,\"rack\":0,\"slot\":1,\"db\":1,\"offset\":0,\"length\":2}",
+        "config_identity_hash": "00f2a8526d4abb51dea4597510589fc3fe50d65e72a73ba1d05b620ccef1a7d6",
+        "payload_hash": "fd7d8145ee1eb13c50af2b3ebac193dd811a020e8082171829ea76be6c11594d",
+        "value_i16": 42,
+        "issued_at_ms": 1792628754629,
+        "expires_at_ms": 1792628814629,
+        "state": "unknown",
+        "dispatch_count": 1,
+        "run_id": "1792628754643-21322-0",
+        "request_id": "1792628754670-21322-2",
+        "last_error_key": "recovered_in_flight",
+        "ack_kind": null,
+        "created_at": "2026-10-22T00:25:54.656Z",
+        "updated_at": "2026-10-22T00:25:54.820Z"
+      }
+    ],
+    "command_events": [
+      {
+        "seq": 1,
+        "source_id": "demo01-feed",
+        "command_id": "parent-lost",
+        "run_id": "1792628754643-21322-0",
+        "request_id": null,
+        "from_state": null,
+        "to_state": "pending",
+        "reason_key": "intent",
+        "summary": "fd7d8145ee1eb13c50af2b3ebac193dd811a020e8082171829ea76be6c11594d",
+        "created_at": "2026-10-22T00:25:54.657Z"
+      },
+      {
+        "seq": 2,
+        "source_id": "demo01-feed",
+        "command_id": "parent-lost",
+        "run_id": "1792628754643-21322-0",
+        "request_id": "1792628754670-21322-2",
+        "from_state": "pending",
+        "to_state": "in_flight",
+        "reason_key": "dispatch_permit",
+        "summary": "{}",
+        "created_at": "2026-10-22T00:25:54.679Z"
+      },
+      {
+        "seq": 3,
+        "source_id": "demo01-feed",
+        "command_id": "parent-lost",
+        "run_id": "1792628754819-21324-0",
+        "request_id": null,
+        "from_state": "in_flight",
+        "to_state": "unknown",
+        "reason_key": "recovered_in_flight",
+        "summary": "{}",
+        "created_at": "2026-10-22T00:25:54.820Z"
+      }
+    ]
+  }
+}

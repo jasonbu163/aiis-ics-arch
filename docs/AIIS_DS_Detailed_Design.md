@@ -1,6 +1,6 @@
 # DS 设备模拟器详细设计
 
-内容修订：2026-10-21（Asia/Shanghai）· `ARCH-AW-005 r5`产品MVP设计/实施增补（当前实施中，未授QA或Owner终验）；原`ARCH-AW-004 r2`已验收快照SHA `0eb3c149bf7093bbdce2f0b7a07af71e769fe24cb04a542c7f4dc43e6979eecb`保持历史效力。005范围与实现/验证归[005 spec](../plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md)及[005 tasks](../plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md)，不倒记为004旧QA。本文件交付首版目标设计；范围批准见 [spec](../plans/ARCH-AW-004-ds-detailed-design/spec.md)，实施核对与文档自检见 [Development 记录](../plans/ARCH-AW-004-ds-detailed-design/tasks.md)。本文不记录本r2独立QA verdict或Human Owner最终验收。r1原正文367行SHA-256为`77216e4233c0b3c0a06fe624d93fee7f826a1a26e5f0bf497f58498aff4bd94c`，其交付/独立文档qa_passed与终验pending保留在任务角色历史；r2重新核验整版R1–R23/AC1–AC29，不继承r1结论。此次已采纳一次性hold维护写和preserve_compatible_hold推荐，所有连接/负载/时延/资源数值都是已批准设计目标，尚非实测能力。
+内容修订：2026-10-22（Asia/Shanghai）· `ARCH-AW-005 r5`产品MVP与操作手册增补（原技术候选的独立核验事实见005 checklist；新增文档另核验，自定义初值输入问题未关闭，Owner终验待定）；原`ARCH-AW-004 r2`已验收快照SHA `0eb3c149bf7093bbdce2f0b7a07af71e769fe24cb04a542c7f4dc43e6979eecb`保持历史效力。005范围与实现/验证归[005 spec](../plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md)及[005 tasks](../plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md)，不倒记为004旧QA。本文件交付首版目标设计；范围批准见 [spec](../plans/ARCH-AW-004-ds-detailed-design/spec.md)，实施核对与文档自检见 [Development 记录](../plans/ARCH-AW-004-ds-detailed-design/tasks.md)。本文不记录本r2独立QA verdict或Human Owner最终验收。r1原正文367行SHA-256为`77216e4233c0b3c0a06fe624d93fee7f826a1a26e5f0bf497f58498aff4bd94c`，其交付/独立文档qa_passed与终验pending保留在任务角色历史；r2重新核验整版R1–R23/AC1–AC29，不继承r1结论。此次已采纳一次性hold维护写和preserve_compatible_hold推荐，所有连接/负载/时延/资源数值都是已批准设计目标，尚非实测能力。
 
 <a id="boundary"></a>
 ## 1. 定位、依据与效力
@@ -587,3 +587,28 @@ r5 DEV已在原件逐SHA持久保存与产品门汇总后，按102成员闭集�
 #### r5 六页面布局收口
 
 DS 自有 ConsoleCard 为内容提供统一 token 间距，选择栏采用自适应网格；运行值/连接技术列保持完整字段并在表内横滚。日志筛选同行、事实分组自适应，空态使用紧凑图示；指标卡采用相同密度以对齐数字。弹窗在视口内保留可滚动表体与有间距的可换行按钮区，表单不叠加默认项间距。切换页面后只重置 `.agent-workspace`，同页手动滚动保留。提示色消费 CU 主题 token，兼容深浅色。实际原生 DOM 几何/IPC/正常关闭与浏览器像素分别记录，来源和最终 DEV/独立核验状态见 owning tasks/checklist。
+
+<a id="user-guide"></a>
+## 15. 操作手册入口、实际操作顺序与已知输入限制
+
+完整逐步操作见[中文使用手册](../automation-world/device-simulator/USER_GUIDE.zh-CN.md)与[English user guide](../automation-world/device-simulator/USER_GUIDE.md)，真实原生图的来源/哈希见[图片索引](../automation-world/device-simulator/docs/user-guide/images/README.zh-CN.md)。本节按005 r5[spec附录B](../plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md#附录b-2026-10-22-已批准的操作手册与截图文档增量当前文档gate)同步使用入口，不改变004历史或产品技术范围。冻结227成员技术候选仍为306a09d5…；本轮只增文档/图片，原产品QA保留其时间与输入身份，不重新赋予文档或新发现问题通过结论。
+
+| 顺序/页面 | 操作与预期事实 |
+| --- | --- |
+| 正常桌面启动 | pnpm tauri dev，独立profile/空配置；pnpm dev无桌面bridge。pnpm临时store只属于历史验证环境，store不匹配按手册排查，不改锁。 |
+| 实例 | PLC_Test、127.0.0.1:30102、rack0/slot1、Calling TSAP256、C16/H4；保留编辑后显式保存候选。 |
+| 手工DB点位 | DB31长8，Run_Bool BOOL0.0、Setpoint_Int INT2、Temperature_Real REAL4；逐点理由+整DB人工理由，保存后预览/确认完整地址，选点命名并确认。 |
+| 逐点策略 | false/0/0作为当前可执行显式初值；BOOL半周期1500ms、INT hold/ui owner可普通写、REAL ramp0..100周期10000ms。逐点保存并确认初值/策略。 |
+| 选版本/停机加载 | 显式选最高保存序号，预览保留/初始化/删除，勾清单确认，加载后仍stopped；版本下拉不自动跟随所有后续保存。 |
+| 工作台/在线值 | 显式start；看实际loaded revision/DB/byte/bit/值，普通写INT12；pause仅冻结规则，stop保同进程值，停止态reset丢值回初值，重开按selected初始化且stopped。 |
+| 多源导入 | 冻结multi.db/types.udt，仅Alpha→DB71（无UDT）、Beta→DB88（仅Measure）；其它声明不选，:=/BEGIN不导入。每DB标准地址/命名后，以DB层hold/none/读允许写禁止并保持类型初值继承，选该DB全部点确认当前有效初值/策略，再重新选版本停机加载；批量确认不赋规则。 |
+
+本例共享word布局为Alpha长4（ready0.0/count2），Beta长8（unit.running0.0/unit.value2/bytes[3]6/bytes[4]7）；REAL不强制4B对齐。数组Index命名地址兜底DB88_B6_Byte/DB88_B7_Byte，其余名称按结构路径；人工手工名称保留。UI可见刷新≤1Hz，单帧不能证明BOOL翻转，故教程采用1500ms半周期。保值/全初始化/回滚、STRING整DB人工地址、重导失效、多实例/连接及日志均在手册单独说明，不把配置上限当容量证明。
+
+### 15.1 当前真实键入阻断与证据继承
+
+2026-10-22原生取图在“模拟与读写策略→点→DS显式初值/显式覆盖”用普通输入Temperature_Real初值20并Tab时仍回旧0。只读代码核对：PolicyEditor初值/持续fixed值的受控el-input仅监听change，锁内Element Plus在input后nextTick按未更新modelValue回填；fixed同样绑定，现作为风险保留，不给出可执行非零设值承诺。原拟7/20及导入count10不写成已跑通，教程改为显式默认false/0，在线普通写12演示非零运行值。普通写弹层有自己的输入状态，不改变配置初值。
+
+既有native driver同步派发input/change后才await，与普通人逐步键入事件次序不同；其真实IPC/服务/协议原件和独立QA事实继续有效，但不能扩成真人初值输入通过。当前未关闭产品问题及Owner最终验收仍需另行处理，本次文档授权不修代码、不以注入绕过，不重跑原协议矩阵。文档/图片fresh Verification只核新增材料、按钮/案例一致性和原件/保护SHA，不能关闭该产品问题。实际操作、截图和问题来源见[005 tasks](../plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md)，最新独立结论及Owner状态仍以[owning checklist](../plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md)为准；DAA应用→SQLite联调另批、阶段C不开展。
+
+本轮现有7张真实原生图只覆盖手工DB31主流程；导入绑定/命名和停止态重开尚无图，完整步骤保留待Owner手动反馈。实际已观察写12、BOOL/REAL变化、暂停/恢复/停止；未执行reset、导入提交或正常重开。Owner接管仍打开的文件选择器，资源保持使用中，不记正常退出或清理完成。最新Owner自行操作指令覆盖附录B原机械10图目标。

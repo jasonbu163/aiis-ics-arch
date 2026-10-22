@@ -1,0 +1,677 @@
+{
+  "results": [
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-audit-order-82jknnvq/queued",
+      "normal": false,
+      "summary": {
+        "commands": {
+          "canceled": 2
+        },
+        "log_writable": false,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "079e4e0d300e463ab7df413d1954c333",
+          "created_at": "2026-10-22T01:55:12.524Z"
+        },
+        "counts": {
+          "canceled": 2
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "079e4e0d300e463ab7df413d1954c333",
+              "created_at": "2026-10-22T01:55:12.524Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "queued-one",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "cfa26584faab665ae25baa9c7f549e9020aa6c58e7afce0c62a23631c156aa9a",
+              "value_i16": 42,
+              "issued_at_ms": 1792634112591,
+              "expires_at_ms": 1792634142591,
+              "state": "canceled",
+              "dispatch_count": 1,
+              "run_id": "dfdff973286e4edb804321cf1c00aea9",
+              "request_id": "68773935a2454da6a05d491381e391f5",
+              "last_error_key": null,
+              "ack_kind": null,
+              "created_at": "2026-10-22T01:55:12.591Z",
+              "updated_at": "2026-10-22T01:55:13.714Z"
+            },
+            {
+              "source_id": "demo01-feed",
+              "command_id": "queued-two",
+              "flow_id": "second-flow",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":2,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "f034d0166d241f6768311a2f45584147eef4e1f3763cbdeae699a8722e7536ea",
+              "value_i16": 42,
+              "issued_at_ms": 1792634112591,
+              "expires_at_ms": 1792634142591,
+              "state": "canceled",
+              "dispatch_count": 1,
+              "run_id": "dfdff973286e4edb804321cf1c00aea9",
+              "request_id": "1d7b3867f8ac4a6497ca25cb5c7ef466",
+              "last_error_key": null,
+              "ack_kind": null,
+              "created_at": "2026-10-22T01:55:12.592Z",
+              "updated_at": "2026-10-22T01:55:13.714Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "queued-one",
+              "run_id": "dfdff973286e4edb804321cf1c00aea9",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "cfa26584faab665ae25baa9c7f549e9020aa6c58e7afce0c62a23631c156aa9a",
+              "created_at": "2026-10-22T01:55:12.591Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "queued-two",
+              "run_id": "dfdff973286e4edb804321cf1c00aea9",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "f034d0166d241f6768311a2f45584147eef4e1f3763cbdeae699a8722e7536ea",
+              "created_at": "2026-10-22T01:55:12.592Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "queued-one",
+              "run_id": "dfdff973286e4edb804321cf1c00aea9",
+              "request_id": "68773935a2454da6a05d491381e391f5",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:55:12.592Z"
+            },
+            {
+              "seq": 4,
+              "source_id": "demo01-feed",
+              "command_id": "queued-two",
+              "run_id": "dfdff973286e4edb804321cf1c00aea9",
+              "request_id": "1d7b3867f8ac4a6497ca25cb5c7ef466",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:55:12.592Z"
+            },
+            {
+              "seq": 5,
+              "source_id": "demo01-feed",
+              "command_id": "queued-one",
+              "run_id": "dfdff973286e4edb804321cf1c00aea9",
+              "request_id": "68773935a2454da6a05d491381e391f5",
+              "from_state": "in_flight",
+              "to_state": "canceled",
+              "reason_key": "canceled",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:55:13.714Z"
+            },
+            {
+              "seq": 6,
+              "source_id": "demo01-feed",
+              "command_id": "queued-two",
+              "run_id": "dfdff973286e4edb804321cf1c00aea9",
+              "request_id": "1d7b3867f8ac4a6497ca25cb5c7ef466",
+              "from_state": "in_flight",
+              "to_state": "canceled",
+              "reason_key": "canceled",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:55:13.714Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-audit-order-82jknnvq/t1-audit",
+      "normal": false,
+      "summary": {
+        "commands": {
+          "pending": 1
+        },
+        "log_writable": false,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "d577de2800aa4a37b35b47d86161111b",
+          "created_at": "2026-10-22T01:55:13.755Z"
+        },
+        "counts": {
+          "pending": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "d577de2800aa4a37b35b47d86161111b",
+              "created_at": "2026-10-22T01:55:13.755Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "t1-before-audit",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "9dde94b3b483934556ef53041eaef77c509d10d490300229aade1cf9461b1be3",
+              "value_i16": 42,
+              "issued_at_ms": 1792634113804,
+              "expires_at_ms": 1792634143804,
+              "state": "pending",
+              "dispatch_count": 0,
+              "run_id": "f333776df7f04dc5a4e90f1019ed68d4",
+              "request_id": null,
+              "last_error_key": null,
+              "ack_kind": null,
+              "created_at": "2026-10-22T01:55:13.806Z",
+              "updated_at": "2026-10-22T01:55:13.806Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "t1-before-audit",
+              "run_id": "f333776df7f04dc5a4e90f1019ed68d4",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "9dde94b3b483934556ef53041eaef77c509d10d490300229aade1cf9461b1be3",
+              "created_at": "2026-10-22T01:55:13.806Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-audit-order-82jknnvq/t2-audit",
+      "normal": false,
+      "summary": {
+        "commands": {
+          "canceled": 1
+        },
+        "log_writable": false,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "1a9ab41110b6421f98dc046079eadf8c",
+          "created_at": "2026-10-22T01:55:13.843Z"
+        },
+        "counts": {
+          "canceled": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "1a9ab41110b6421f98dc046079eadf8c",
+              "created_at": "2026-10-22T01:55:13.843Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "t2-before-permit",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "38496ae5be7e7eb87b379dfd652828afdd4f810e0bbe549e6cf37b01e3d54021",
+              "value_i16": 42,
+              "issued_at_ms": 1792634113888,
+              "expires_at_ms": 1792634143888,
+              "state": "canceled",
+              "dispatch_count": 1,
+              "run_id": "cec480c5eec24277aaee61d3e5859e33",
+              "request_id": "edb3e771522648d4a03dcbc0d4d6e854",
+              "last_error_key": null,
+              "ack_kind": null,
+              "created_at": "2026-10-22T01:55:13.888Z",
+              "updated_at": "2026-10-22T01:55:13.889Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "t2-before-permit",
+              "run_id": "cec480c5eec24277aaee61d3e5859e33",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "38496ae5be7e7eb87b379dfd652828afdd4f810e0bbe549e6cf37b01e3d54021",
+              "created_at": "2026-10-22T01:55:13.888Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "t2-before-permit",
+              "run_id": "cec480c5eec24277aaee61d3e5859e33",
+              "request_id": "edb3e771522648d4a03dcbc0d4d6e854",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:55:13.889Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "t2-before-permit",
+              "run_id": "cec480c5eec24277aaee61d3e5859e33",
+              "request_id": "edb3e771522648d4a03dcbc0d4d6e854",
+              "from_state": "in_flight",
+              "to_state": "canceled",
+              "reason_key": "canceled",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:55:13.889Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-audit-order-82jknnvq/ack-audit",
+      "normal": false,
+      "summary": {
+        "commands": {
+          "confirmed": 1
+        },
+        "log_writable": false,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "51286642d5684845b149ab8475921500",
+          "created_at": "2026-10-22T01:55:13.929Z"
+        },
+        "counts": {
+          "confirmed": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "51286642d5684845b149ab8475921500",
+              "created_at": "2026-10-22T01:55:13.929Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "ack-commit-then-sink",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "27adfc0fa55e90a49b4f6f0fe6379bb9eac2a78c4479a5a2f1cccbedeb963e41",
+              "value_i16": 42,
+              "issued_at_ms": 1792634113974,
+              "expires_at_ms": 1792634143974,
+              "state": "confirmed",
+              "dispatch_count": 1,
+              "run_id": "8fc69c9c62f2422587916261500c00a4",
+              "request_id": "fa4b3b77c4d64dac922fd8bf0e08b694",
+              "last_error_key": null,
+              "ack_kind": "s7_protocol",
+              "created_at": "2026-10-22T01:55:13.976Z",
+              "updated_at": "2026-10-22T01:55:13.977Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "ack-commit-then-sink",
+              "run_id": "8fc69c9c62f2422587916261500c00a4",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "27adfc0fa55e90a49b4f6f0fe6379bb9eac2a78c4479a5a2f1cccbedeb963e41",
+              "created_at": "2026-10-22T01:55:13.976Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "ack-commit-then-sink",
+              "run_id": "8fc69c9c62f2422587916261500c00a4",
+              "request_id": "fa4b3b77c4d64dac922fd8bf0e08b694",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:55:13.977Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "ack-commit-then-sink",
+              "run_id": "8fc69c9c62f2422587916261500c00a4",
+              "request_id": "fa4b3b77c4d64dac922fd8bf0e08b694",
+              "from_state": "in_flight",
+              "to_state": "confirmed",
+              "reason_key": "s7_protocol",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:55:13.977Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "state_dir": "/private/tmp/ff-001-r1-r4-python-audit-order-82jknnvq/ack-audit",
+      "normal": true,
+      "summary": {
+        "commands": {
+          "confirmed": 1
+        },
+        "log_writable": true,
+        "capacity": true
+      },
+      "state": {
+        "meta": {
+          "schema_version": 1,
+          "implementation": "python",
+          "mode": "execute",
+          "instance_id": "ff-python-demo01",
+          "store_uuid": "51286642d5684845b149ab8475921500",
+          "created_at": "2026-10-22T01:55:13.929Z"
+        },
+        "counts": {
+          "confirmed": 1
+        },
+        "tables": {
+          "store_meta": [
+            {
+              "schema_version": 1,
+              "implementation": "python",
+              "mode": "execute",
+              "instance_id": "ff-python-demo01",
+              "store_uuid": "51286642d5684845b149ab8475921500",
+              "created_at": "2026-10-22T01:55:13.929Z"
+            }
+          ],
+          "commands": [
+            {
+              "source_id": "demo01-feed",
+              "command_id": "ack-commit-then-sink",
+              "flow_id": "demo01",
+              "target_key": "{\"db\":1,\"host\":\"127.0.0.1\",\"length\":2,\"offset\":0,\"port\":32102,\"rack\":0,\"slot\":1}",
+              "config_identity_hash": "6ea249c63eba0244af8d0ae38d426804298beea3cafba0e0ad99ea9cb8d2e4f8",
+              "payload_hash": "27adfc0fa55e90a49b4f6f0fe6379bb9eac2a78c4479a5a2f1cccbedeb963e41",
+              "value_i16": 42,
+              "issued_at_ms": 1792634113974,
+              "expires_at_ms": 1792634143974,
+              "state": "confirmed",
+              "dispatch_count": 1,
+              "run_id": "8fc69c9c62f2422587916261500c00a4",
+              "request_id": "fa4b3b77c4d64dac922fd8bf0e08b694",
+              "last_error_key": null,
+              "ack_kind": "s7_protocol",
+              "created_at": "2026-10-22T01:55:13.976Z",
+              "updated_at": "2026-10-22T01:55:13.977Z"
+            }
+          ],
+          "command_events": [
+            {
+              "seq": 1,
+              "source_id": "demo01-feed",
+              "command_id": "ack-commit-then-sink",
+              "run_id": "8fc69c9c62f2422587916261500c00a4",
+              "request_id": null,
+              "from_state": null,
+              "to_state": "pending",
+              "reason_key": "intent",
+              "summary": "27adfc0fa55e90a49b4f6f0fe6379bb9eac2a78c4479a5a2f1cccbedeb963e41",
+              "created_at": "2026-10-22T01:55:13.976Z"
+            },
+            {
+              "seq": 2,
+              "source_id": "demo01-feed",
+              "command_id": "ack-commit-then-sink",
+              "run_id": "8fc69c9c62f2422587916261500c00a4",
+              "request_id": "fa4b3b77c4d64dac922fd8bf0e08b694",
+              "from_state": "pending",
+              "to_state": "in_flight",
+              "reason_key": "dispatch_permit",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:55:13.977Z"
+            },
+            {
+              "seq": 3,
+              "source_id": "demo01-feed",
+              "command_id": "ack-commit-then-sink",
+              "run_id": "8fc69c9c62f2422587916261500c00a4",
+              "request_id": "fa4b3b77c4d64dac922fd8bf0e08b694",
+              "from_state": "in_flight",
+              "to_state": "confirmed",
+              "reason_key": "s7_protocol",
+              "summary": "{}",
+              "created_at": "2026-10-22T01:55:13.977Z"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "fixture": {
+    "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+    "writes": 1,
+    "reads": 2,
+    "gets": 12,
+    "sessions": 6,
+    "closed_sessions": 5,
+    "trace": [
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "split",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "split",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "split",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 4,
+        "fault": "",
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 5,
+        "fault": "",
+        "request_hex": "0300002502f080320100000002000e00060501120a1002000200018400000000040010002a",
+        "original_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "sent_response_hex": "0300001602f0803203000000020002000100000501ff",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 0,
+        "fault": "",
+        "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+        "original_response_hex": "0300000b06d00001000100",
+        "sent_response_hex": "0300000b06d00001000100",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      },
+      {
+        "operation": 240,
+        "fault": "",
+        "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+        "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+        "previous_same_ref": null,
+        "previous_other_ref": null
+      }
+    ],
+    "server_pid": 79811,
+    "server_exit": 0,
+    "server_close": {
+      "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "remaining_threads": [],
+      "pid": 79811,
+      "exit_code": 0
+    },
+    "server_epochs": [
+      {
+        "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+        "remaining_threads": [],
+        "pid": 79811,
+        "exit_code": 0
+      }
+    ],
+    "proxy_threads_joined": 6,
+    "ports_rebound": [
+      32102,
+      32103,
+      32880
+    ]
+  }
+}

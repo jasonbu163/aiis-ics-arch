@@ -618,3 +618,11 @@ QA3 checklist b1d6d7c4…及A55 receipt e3019ab7…明确qa_failed，F1/F2已独
 旧948dd826…receipt/P5与QA3 checklist b1d6d7c4…/A55 e3019ab7…及A54真实F3原件都保留身份。F1/F2独立closed、QA1/2/3 qa_failed历史不改，DEV修复结果不授QA或Owner验收。新精确receipt仍为T5/tmp/dev/developer-handoff-receipt.json，固定source/九bin/tasks/P5/patch/实际run来源及限制；本轮生成/静态检查helper和原命令随最终DEV archive保存。
 
 收尾无owned DEV产品/test/reference/launcher、五固定端口空；T5 role cache/build/profile/raw、新owned WK store、历史T3/T4/P0与A4/A5保留供fresh QA/另批联调，不删未知系统/共享资源。旧协调caffeinate已到期，DEV未启/续awake或改系统设置；实际本轮桌面可用，不推定以后环境。G0已退役102成员历史不再删除/重写。Development至此停止写入，交唯一主协调启动全新fresh Verification；Owner final acceptance pending，DAA→SQLite另批，StageC/真实设备/安装发布/Git提交推送不开展。
+
+### 9.25 r5 附录B 使用手册文档增量（2026-10-22）
+
+Human Owner明确批准完整双语使用手册：先手工DB31跑通，再冻结Alpha/Beta多DB/UDT导入，逐步页面/按钮/参数/预期及10张真实原生截图。PM已停写，附录B spec SHA6bb6532c92c4fd8e8f7b8ea7076a661ef078d9195265cc2be8fa8bdbccf29695；其前458218原字节/原批准SHA67155…完整保留。本节为当前documentation_in_progress；前部全部实施/交接历史原字节保留，不把旧developer_handoff误记本增量已完。
+
+当前产品227成员candidate306a09d5…及3锁、5P5、技术QA checklist已建立只读保护基线A330。只写附录B手册/图片README、既有README/PLAN/必要BUILD和docs入口及本tasks；不改代码/依赖/锁/schema/真实profile/既有A5或P5，不重跑协议/构建/产品测试。原生操作取图由主协调使用冻结产物及隔离合成profile完成，DEV待其原图/操作与hash后登记；不以旧browser图或placeholder冒充。首个辅助baseline因误假设D/Cargo.lock路径exit1，在仓库写入前发生；按既有receipt真实两Cargo锁路径收准，原失败随A330保存。
+
+文档取图过程中，主协调报告真实原生初值20经setValue/键盘+Tab仍回0；DEV只读核PolicyEditor初值/fixed输入仅@change、EP锁内input在nextTick按未更新modelValue回填，既有固定driver同步input+change的事件次序不同。该现象按附录B.3作为操作阻断回报；未授予新QA finding/verdict，未在文档授权下改产品或用DOM注入冒充用户操作。原件归协调，DEV只读依据/各source SHA在T5/tmp/dev/user-guide-20261022/documentation/initial-input-read-only-observation.json；手册/截图当前仍in_progress，未交接或宣称7/20流程通过。

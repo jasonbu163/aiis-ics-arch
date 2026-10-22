@@ -1,0 +1,2718 @@
+{
+  "task": "FF-001",
+  "revision": "r3",
+  "recorded_pid_checks": [
+    {
+      "pid": 12136,
+      "state": "pid_absent",
+      "sources": [
+        "gate-1.json"
+      ]
+    },
+    {
+      "pid": 12573,
+      "state": "pid_absent",
+      "sources": [
+        "gate-1.txt"
+      ]
+    },
+    {
+      "pid": 13119,
+      "state": "pid_absent",
+      "sources": [
+        "gate-1.json",
+        "gate-1.txt"
+      ]
+    },
+    {
+      "pid": 13272,
+      "state": "pid_absent",
+      "sources": [
+        "gate-1.json",
+        "gate-1.txt"
+      ]
+    },
+    {
+      "pid": 13500,
+      "state": "pid_absent",
+      "sources": [
+        "gate-1.txt"
+      ]
+    },
+    {
+      "pid": 13647,
+      "state": "pid_absent",
+      "sources": [
+        "gate-1.json",
+        "gate-1.txt"
+      ]
+    },
+    {
+      "pid": 13800,
+      "state": "pid_absent",
+      "sources": [
+        "gate-1.json",
+        "gate-1.txt"
+      ]
+    },
+    {
+      "pid": 14015,
+      "state": "pid_absent",
+      "sources": [
+        "gate-1.txt"
+      ]
+    },
+    {
+      "pid": 20639,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20640,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20641,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20642,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20644,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20660,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20727,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20728,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20761,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20763,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20793,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20839,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20840,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20841,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20842,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20843,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20844,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20845,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20846,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20861,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20862,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20864,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20865,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20866,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20867,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20869,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20870,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20871,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20873,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 20888,
+      "state": "pid_absent",
+      "sources": [
+        "rust-full-1.txt"
+      ]
+    },
+    {
+      "pid": 21271,
+      "state": "pid_absent",
+      "sources": [
+        "rust-process-1.txt"
+      ]
+    },
+    {
+      "pid": 21323,
+      "state": "pid_absent",
+      "sources": [
+        "rust-process-1.txt"
+      ]
+    },
+    {
+      "pid": 22380,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-2.txt"
+      ]
+    },
+    {
+      "pid": 22384,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-2.txt"
+      ]
+    },
+    {
+      "pid": 22385,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-2.txt"
+      ]
+    },
+    {
+      "pid": 22386,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-2.txt"
+      ]
+    },
+    {
+      "pid": 22387,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-2.txt"
+      ]
+    },
+    {
+      "pid": 22388,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-2.txt"
+      ]
+    },
+    {
+      "pid": 22389,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-2.txt"
+      ]
+    },
+    {
+      "pid": 22404,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-2.txt"
+      ]
+    },
+    {
+      "pid": 22435,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-2.txt"
+      ]
+    },
+    {
+      "pid": 22436,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-2.txt"
+      ]
+    },
+    {
+      "pid": 22437,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-2.txt"
+      ]
+    },
+    {
+      "pid": 22438,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-2.txt"
+      ]
+    },
+    {
+      "pid": 23214,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json"
+      ]
+    },
+    {
+      "pid": 23216,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23217,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23218,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23219,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23234,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23235,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23236,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23238,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23239,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23240,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23241,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23245,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23246,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23247,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23248,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23291,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23294,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23295,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23296,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23297,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23299,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23300,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23301,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23302,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23303,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23304,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23305,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23306,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 23321,
+      "state": "pid_absent",
+      "sources": [
+        "rust-ack-1-ack-rejections.json",
+        "rust-ack-1.txt"
+      ]
+    },
+    {
+      "pid": 24244,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-3.txt"
+      ]
+    },
+    {
+      "pid": 24246,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-3.txt"
+      ]
+    },
+    {
+      "pid": 24247,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-3.txt"
+      ]
+    },
+    {
+      "pid": 24248,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-3.txt"
+      ]
+    },
+    {
+      "pid": 24249,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-3.txt"
+      ]
+    },
+    {
+      "pid": 24250,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-3.txt"
+      ]
+    },
+    {
+      "pid": 24251,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-3.txt"
+      ]
+    },
+    {
+      "pid": 24252,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-3.txt"
+      ]
+    },
+    {
+      "pid": 24298,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-3.txt"
+      ]
+    },
+    {
+      "pid": 24299,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-3.txt"
+      ]
+    },
+    {
+      "pid": 24300,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-3.txt"
+      ]
+    },
+    {
+      "pid": 24301,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-3.txt"
+      ]
+    },
+    {
+      "pid": 24303,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-3.txt"
+      ]
+    },
+    {
+      "pid": 24304,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-3.txt"
+      ]
+    },
+    {
+      "pid": 24320,
+      "state": "pid_absent",
+      "sources": [
+        "rust-remaining-3.txt"
+      ]
+    },
+    {
+      "pid": 27234,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json"
+      ]
+    },
+    {
+      "pid": 27235,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27236,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27237,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27238,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27239,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27254,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27255,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27256,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27257,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27258,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27259,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27260,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27261,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27262,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27263,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27311,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27312,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27313,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27314,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27315,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27316,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27317,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27318,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27319,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27320,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27321,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27323,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27324,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27325,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-ack-rejections.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27350,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27351,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27352,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27353,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27354,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27369,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27437,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27438,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27470,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27472,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27502,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27554,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27557,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27558,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27559,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27560,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27561,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27562,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27563,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27564,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27579,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27580,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-gate.json"
+      ]
+    },
+    {
+      "pid": 27581,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27585,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-gate.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27586,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-gate.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27587,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27588,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-gate.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27589,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4-gate.json",
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27590,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27592,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27607,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27611,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27663,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27713,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27714,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27715,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27716,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27718,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27719,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27720,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27721,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27771,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27772,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27773,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27774,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27775,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27776,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 27792,
+      "state": "pid_absent",
+      "sources": [
+        "rust-delivery-4.txt"
+      ]
+    },
+    {
+      "pid": 28162,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28177,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28178,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28179,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28180,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28181,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28183,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28184,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28185,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28186,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28187,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28188,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28189,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28204,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28206,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28238,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28239,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28240,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28241,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28242,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28243,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28244,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28245,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28246,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28261,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28262,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28263,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28264,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28265,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28276,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28277,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28278,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28279,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28280,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28296,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28358,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28359,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28389,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28391,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28423,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28467,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28468,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28469,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28470,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28471,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28472,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28473,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28474,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28475,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28490,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28492,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28493,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28494,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28495,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28499,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28500,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28501,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28503,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28518,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28522,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28640,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28676,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28677,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28692,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28693,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28694,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28695,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28696,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28697,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28728,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28729,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28744,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28745,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28746,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28750,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 28752,
+      "state": "pid_absent",
+      "sources": [
+        "rust-copy-2.txt"
+      ]
+    },
+    {
+      "pid": 32026,
+      "state": "pid_absent",
+      "sources": [
+        "python-api-preflight-3.txt",
+        "python-api-preflight.json"
+      ]
+    },
+    {
+      "pid": 32027,
+      "state": "pid_absent",
+      "sources": [
+        "python-api-preflight-3.txt",
+        "python-api-preflight.json"
+      ]
+    }
+  ],
+  "temporary_roots": [
+    {
+      "path": "/private/tmp/ff-001-r1-r3dev-k989azay",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-ack-rejections-1792628977547-23199-0",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-ack-rejections-1792629166862-27233-0",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-ack-rejections-1792629273671-28160-0",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-audit-queued-1792628885951-22351-54",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-audit-queued-1792629101653-24221-54",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-audit-queued-1792629223547-27711-54",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-audit-queued-1792629328785-28674-54",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-bad-ref-read-1792628630656-11821-7",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-bad-ref-read-1792628714376-20624-227",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-bad-ref-read-1792629203047-27349-227",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-bad-ref-read-1792629309014-28275-227",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-bad-ref-write-1792628630790-11821-12",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-bad-ref-write-1792628714530-20624-232",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-bad-ref-write-1792629203182-27349-232",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-bad-ref-write-1792629309163-28275-232",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-block-boundary-1792628880398-22351-25",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-block-boundary-1792629096225-24221-25",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-block-boundary-1792629218110-27711-25",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-block-boundary-1792629323341-28674-25",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-capacity-1792628885381-22351-40",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-capacity-1792629101195-24221-40",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-capacity-1792629223083-27711-40",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-capacity-1792629328320-28674-40",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-child-death-1792628748522-21254-0",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-child-death-1792629205299-27608-0",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-child-death-1792629310863-28519-0",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-concurrent-1792628689005-20624-15",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-concurrent-1792629177890-27349-15",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-concurrent-1792629283872-28275-15",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-disconnect-1792628712634-20624-192",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-disconnect-1792629201402-27349-192",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-disconnect-1792629307315-28275-192",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-dry-1792628697438-20624-160",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-dry-1792629186258-27349-160",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-dry-1792629292146-28275-160",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-gate-normal-1792628630130-11821-1",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-gate-normal-1792628714202-20624-221",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-gate-normal-1792629202876-27349-221",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-gate-normal-1792629308847-28275-221",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-immutable-1792628880544-22351-30",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-immutable-1792629096370-24221-30",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-immutable-1792629218256-27711-30",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-immutable-1792629323486-28674-30",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-1792628687617-20624-0",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-1792629177012-27349-0",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-1792629283000-28275-0",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792628879206-22351-0",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792628879693-22351-5",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792628879870-22351-10",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792628880048-22351-15",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792628880217-22351-20",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792629095159-24221-0",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792629095551-24221-5",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792629095718-24221-10",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792629095884-24221-15",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792629096056-24221-20",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792629217257-27711-0",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792629217425-27711-5",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792629217597-27711-10",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792629217764-27711-15",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792629217933-27711-20",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792629322506-28674-0",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792629322674-28674-5",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792629322835-28674-10",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792629323007-28674-15",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-int-readback-1792629323175-28674-20",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-lost-ack-1792628697591-20624-165",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-lost-ack-1792629186416-27349-165",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-lost-ack-1792629292302-28275-165",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-matched-ack-preflight-1792628629784-11821-0",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-matched-ack-preflight-1792628714192-20624-220",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-matched-ack-preflight-1792629202865-27349-220",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-matched-ack-preflight-1792629308834-28275-220",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-parent-death-1792628754622-21254-2",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-parent-death-1792629211005-27608-2",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-parent-death-1792629316561-28519-2",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-queued-expiry-1792628880712-22351-34",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-queued-expiry-1792629096524-24221-34",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-queued-expiry-1792629218410-27711-34",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-queued-expiry-1792629323640-28674-34",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-queued-stop-1792628713817-20624-214",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-queued-stop-1792629202501-27349-214",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-queued-stop-1792629308467-28275-214",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-ref-epoch-1792628886190-22351-61",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-ref-epoch-1792629101890-24221-61",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-ref-epoch-1792629223791-27711-61",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-ref-epoch-1792629329022-28674-61",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-1792628688744-20624-11",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-1792629177737-27349-11",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-1792629283721-28275-11",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-bits-1792628979183-23199-46",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-bits-1792629168561-27233-46",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-bits-1792629275230-28160-46",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-count-1792628978589-23199-26",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-count-1792628986282-23199-131",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-count-1792629167973-27233-26",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-count-1792629175660-27233-131",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-count-1792629274659-28160-26",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-count-1792629282325-28160-131",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-data_length-1792628978885-23199-36",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-data_length-1792629168267-27233-36",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-data_length-1792629274943-28160-36",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-empty-1792628979631-23199-61",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-empty-1792629169009-27233-61",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-empty-1792629275671-28160-61",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-extra-1792628979783-23199-66",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-extra-1792628986437-23199-136",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-extra-1792629169156-27233-66",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-extra-1792629175809-27233-136",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-extra-1792629275819-28160-66",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-extra-1792629282480-28160-136",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-follow_correct-1792628986596-23199-141",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-follow_correct-1792629175966-27233-141",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-follow_correct-1792629282636-28160-141",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-function-1792628978436-23199-21",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-function-1792628986128-23199-126",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-function-1792629167824-27233-21",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-function-1792629175508-27233-126",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-function-1792629274514-28160-21",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-function-1792629282172-28160-126",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-global0-1792628985668-23199-111",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-global0-1792629175050-27233-111",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-global0-1792629281721-28160-111",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-global1-1792628985824-23199-116",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-global1-1792629175203-27233-116",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-global1-1792629281873-28160-116",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-id-1792628977547-23199-1",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-id-1792629166862-27233-1",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-id-1792629273671-28160-1",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-item-1792628985976-23199-121",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-item-1792629175356-27233-121",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-item-1792629282022-28160-121",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-oldref-1792628985064-23199-91",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-oldref-1792629174438-27233-91",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-oldref-1792629281114-28160-91",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-otherref-1792628985212-23199-96",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-otherref-1792629174593-27233-96",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-otherref-1792629281262-28160-96",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-param_length-1792628978740-23199-31",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-param_length-1792629168120-27233-31",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-param_length-1792629274801-28160-31",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-payload4096-1792628979936-23199-71",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-payload4096-1792629169305-27233-71",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-payload4096-1792629275966-28160-71",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-payload4097-1792628984608-23199-76",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-payload4097-1792629173978-27233-76",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-payload4097-1792629280652-28160-76",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-ref0-1792628984762-23199-81",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-ref0-1792628985358-23199-101",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-ref0-1792629174132-27233-81",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-ref0-1792629174740-27233-101",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-ref0-1792629280807-28160-81",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-ref0-1792629281414-28160-101",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-ref1-1792628984914-23199-86",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-ref1-1792628985515-23199-106",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-ref1-1792629174285-27233-86",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-ref1-1792629174895-27233-106",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-ref1-1792629280959-28160-86",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-ref1-1792629281567-28160-106",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-reserved0-1792628978141-23199-11",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-reserved0-1792629167525-27233-11",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-reserved0-1792629274217-28160-11",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-reserved1-1792628978292-23199-16",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-reserved1-1792629167672-27233-16",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-reserved1-1792629274364-28160-16",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-rosctr-1792628977994-23199-6",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-rosctr-1792629167375-27233-6",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-rosctr-1792629274067-28160-6",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-short_data-1792628979481-23199-56",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-short_data-1792629168856-27233-56",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-short_data-1792629275522-28160-56",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-short_header-1792628979332-23199-51",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-short_header-1792629168710-27233-51",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-short_header-1792629275375-28160-51",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-transport-1792628979042-23199-41",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-transport-1792629168412-27233-41",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-reject-transport-1792629275085-28160-41",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-server-absent-1792629102276-24221-66",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-server-absent-1792629224188-27711-66",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-server-absent-1792629329415-28674-66",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-short-read-1792628631150-11821-19",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-short-read-1792628714901-20624-239",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-short-read-1792629203531-27349-239",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-short-read-1792629309525-28275-239",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-short-write-1792628631286-11821-24",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-short-write-1792628715053-20624-244",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-short-write-1792629203687-27349-244",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-short-write-1792629309678-28275-244",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-silent-cotp-1792628712102-20624-188",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-silent-cotp-1792629200880-27349-188",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-silent-cotp-1792629306782-28275-188",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-slow-1792628707271-20624-178",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-slow-1792629196061-27349-178",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-slow-1792629301957-28275-178",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-slow-http-1792628689259-20624-79",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-slow-http-1792629178140-27349-79",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-slow-http-1792629284025-28275-79",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-split-1792628702601-20624-173",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-split-1792629191395-27349-173",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-split-1792629297277-28275-173",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-stale-1792628711954-20624-183",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-stale-1792629200732-27349-183",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-stale-1792629306637-28275-183",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-stale-reference-probe-1792628715567-20624-251",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-stale-reference-probe-1792629204177-27349-251",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-stale-reference-probe-1792629310168-28275-251",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-t1-1792628713156-20624-198",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-t1-1792629201905-27349-198",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-t1-1792629307838-28275-198",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-t2-1792628713326-20624-203",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-t2-1792629202062-27349-203",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-t2-1792629308005-28275-203",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-t3-fail-1792628713508-20624-207",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-t3-fail-1792629202228-27349-207",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    },
+    {
+      "path": "/private/tmp/ff-001-r1-r3-rust-t3-fail-1792629308177-28275-207",
+      "purpose": "owned synthetic state/log/fixture evidence; retain for PM/new Revision and later Verification until coordinator confirms no dependencies"
+    }
+  ],
+  "reused_cache": "/private/tmp/ff-001-r1-20261021-r2dev/rust-target",
+  "project_python_environment": "field-flow/field-flow-python/.venv",
+  "auxiliary_files": [
+    "/private/tmp/ff-001-r1-r3-active-root.txt",
+    "/private/tmp/ff-001-r1-r3-consumed-entrypoints.txt"
+  ],
+  "cleanup": "No active known owned process or port remains according to finite protocol join/rebind and exact PID/lsof checks. No process-name scanning/termination, no worktree or Git refs were created. Preserve these owned resources for PM review; coordinator handles eventual reclamation."
+}

@@ -1,0 +1,168 @@
+{
+  "fixture_joined": true,
+  "native_exit": 0,
+  "native_pid": 65903,
+  "ports_rebound": [
+    31102,
+    31103,
+    31880
+  ],
+  "protocol": {
+    "applied": 1,
+    "gets": 0,
+    "native_pid": 65903,
+    "reads": 3,
+    "sessions": 1,
+    "trace": [
+      {
+        "at_ms": 1792638912356,
+        "operation": 0,
+        "original_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+        "positive": false,
+        "request_hex": "0300001611e00000000100c0010ac1020100c2020101",
+        "request_ref": [
+          192,
+          1
+        ],
+        "response_ref": [
+          192,
+          1
+        ],
+        "sent_response_hex": "0300001611d00001000100c0010ac1020100c2020101"
+      },
+      {
+        "at_ms": 1792638912356,
+        "operation": 240,
+        "original_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+        "positive": false,
+        "request_hex": "0300001902f08032010000000000080000f0000001000101e0",
+        "request_ref": [
+          0,
+          0
+        ],
+        "response_ref": [
+          0,
+          0
+        ],
+        "sent_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0"
+      },
+      {
+        "at_ms": 1792638912367,
+        "operation": 4,
+        "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5",
+        "positive": false,
+        "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000",
+        "request_ref": [
+          0,
+          1
+        ],
+        "response_ref": [
+          0,
+          1
+        ],
+        "sent_response_hex": "0300001b02f0803203000000010002000600000401ff040010a5a5"
+      },
+      {
+        "at_ms": 1792638912974,
+        "operation": 4,
+        "original_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5",
+        "positive": false,
+        "request_hex": "0300001f02f080320100000002000e00000401120a10020002000184000000",
+        "request_ref": [
+          0,
+          2
+        ],
+        "response_ref": [
+          0,
+          2
+        ],
+        "sent_response_hex": "0300001b02f0803203000000020002000600000401ff040010a5a5"
+      },
+      {
+        "at_ms": 1792638913580,
+        "operation": 4,
+        "original_response_hex": "0300001b02f0803203000000030002000600000401ff040010a5a5",
+        "positive": false,
+        "request_hex": "0300001f02f080320100000003000e00000401120a10020002000184000000",
+        "request_ref": [
+          0,
+          3
+        ],
+        "response_ref": [
+          0,
+          3
+        ],
+        "sent_response_hex": "0300001b02f0803203000000030002000600000401ff040010a5a5"
+      },
+      {
+        "at_ms": 1792638914184,
+        "operation": 5,
+        "original_response_hex": "0300001602f0803203000000040002000100000501ff",
+        "positive": true,
+        "request_hex": "0300002502f080320100000004000e00060501120a1002000200018400000000040010002a",
+        "request_ref": [
+          0,
+          4
+        ],
+        "response_ref": [
+          0,
+          4
+        ],
+        "sent_response_hex": "0300001602f0803203000000040002000100000501ff"
+      }
+    ],
+    "writes": 1
+  },
+  "result": {
+    "final": {
+      "clock_invalid": false,
+      "generation": 1,
+      "in_flight": 0,
+      "pid": 65904,
+      "queue_depth": 0,
+      "state": "ready"
+    },
+    "first": {
+      "Ok": -23131
+    },
+    "original": {
+      "clock_invalid": false,
+      "generation": 1,
+      "in_flight": 0,
+      "pid": 65904,
+      "queue_depth": 0,
+      "state": "ready"
+    },
+    "second": {
+      "Ok": -23131
+    },
+    "second_ms": 1200,
+    "store": {
+      "driver_gone": true,
+      "driver_pid": 65904,
+      "shutdown": {
+        "Ok": null
+      },
+      "state": {
+        "counts": {
+          "confirmed": 1
+        },
+        "meta": {
+          "implementation": "rust",
+          "instance_id": "ff-rust-demo01",
+          "mode": "execute",
+          "schema_version": 1,
+          "store_uuid": "1792638912075-65902-2"
+        }
+      },
+      "state_dir": "/private/tmp/ff-001-r1-r3-rust-r4-rework-fifo-state-1792638912065-65902-1/state"
+    },
+    "third": {
+      "Ok": -23131
+    },
+    "write": {
+      "Ok": null
+    },
+    "write_ms": 1202
+  }
+}

@@ -1,0 +1,68 @@
+[
+  {
+    "argv": [
+      "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-target/debug/field-flow",
+      "state",
+      "init",
+      "--synthetic",
+      "--mode",
+      "dry_run",
+      "--state-dir",
+      "/private/tmp/ff-001-r4-qa-wY5eCh/rust-cli-dry_run",
+      "--instance-id",
+      "ff-rust-demo01"
+    ],
+    "pid": 35871,
+    "exit_code": 0,
+    "duration_seconds": 0.030566875,
+    "stdout": "{\"timestamp\":\"2026-10-22T02:52:43.629514Z\",\"level\":\"INFO\",\"event\":\"state_init\",\"implementation\":\"rust\",\"run_id\":\"1792637563628-35871-1\",\"instance_id\":\"ff-rust-demo01\",\"flow_id\":\"\",\"target_id\":\"\",\"command_id\":\"\",\"request_id\":\"\",\"state\":\"\",\"old\":\"\",\"new\":\"\",\"result\":\"ok\",\"duration_ms\":0,\"error_key\":\"\",\"context\":\"{\\\"result\\\":\\\"ok\\\"}\",\"target\":\"field_flow::infrastructure::audit\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-target/debug/field-flow",
+      "state",
+      "inspect",
+      "--state-dir",
+      "/private/tmp/ff-001-r4-qa-wY5eCh/rust-cli-dry_run"
+    ],
+    "pid": 35872,
+    "exit_code": 0,
+    "duration_seconds": 0.004505584,
+    "stdout": "{\"counts\":{},\"meta\":{\"implementation\":\"rust\",\"instance_id\":\"ff-rust-demo01\",\"mode\":\"dry_run\",\"schema_version\":1,\"store_uuid\":\"1792637563628-35871-0\"}}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-target/debug/field-flow",
+      "state",
+      "init",
+      "--synthetic",
+      "--mode",
+      "execute",
+      "--state-dir",
+      "/private/tmp/ff-001-r4-qa-wY5eCh/rust-cli-execute",
+      "--instance-id",
+      "ff-rust-demo01"
+    ],
+    "pid": 35873,
+    "exit_code": 0,
+    "duration_seconds": 0.011286167000000007,
+    "stdout": "{\"timestamp\":\"2026-10-22T02:52:43.649234Z\",\"level\":\"INFO\",\"event\":\"state_init\",\"implementation\":\"rust\",\"run_id\":\"1792637563649-35873-1\",\"instance_id\":\"ff-rust-demo01\",\"flow_id\":\"\",\"target_id\":\"\",\"command_id\":\"\",\"request_id\":\"\",\"state\":\"\",\"old\":\"\",\"new\":\"\",\"result\":\"ok\",\"duration_ms\":0,\"error_key\":\"\",\"context\":\"{\\\"result\\\":\\\"ok\\\"}\",\"target\":\"field_flow::infrastructure::audit\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "/private/tmp/ff-001-r4-qa-wY5eCh/rust-formal-target/debug/field-flow",
+      "state",
+      "inspect",
+      "--state-dir",
+      "/private/tmp/ff-001-r4-qa-wY5eCh/rust-cli-execute"
+    ],
+    "pid": 35874,
+    "exit_code": 0,
+    "duration_seconds": 0.00392841699999999,
+    "stdout": "{\"counts\":{},\"meta\":{\"implementation\":\"rust\",\"instance_id\":\"ff-rust-demo01\",\"mode\":\"execute\",\"schema_version\":1,\"store_uuid\":\"1792637563648-35873-0\"}}\n",
+    "stderr": ""
+  }
+]

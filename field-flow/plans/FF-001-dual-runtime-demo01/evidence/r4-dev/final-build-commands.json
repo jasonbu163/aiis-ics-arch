@@ -1,0 +1,28 @@
+[
+  {
+    "command": [
+      "uv",
+      "build",
+      "--python",
+      "3.11",
+      "--no-python-downloads"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+    "exit_code": 0,
+    "duration_seconds": 0.34703025,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/formal-final-build.txt"
+  },
+  {
+    "command": [
+      "uv",
+      "build",
+      "--python",
+      "3.11",
+      "--no-python-downloads"
+    ],
+    "cwd": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/python-copy",
+    "exit_code": 0,
+    "duration_seconds": 0.3504125,
+    "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/copy-final-build.txt"
+  }
+]

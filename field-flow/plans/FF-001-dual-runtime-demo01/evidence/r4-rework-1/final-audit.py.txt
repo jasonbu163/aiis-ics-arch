@@ -1,0 +1,62 @@
+# coding: utf-8
+from pathlib import Path
+import hashlib,json,os,re,socket,subprocess,time
+repo=Path('/Users/jason/Desktop/DreamCode/aiis-ics-arch');ff=repo/'field-flow';b=ff/'plans/FF-001-dual-runtime-demo01';e=b/'evidence/r4-rework-1';r=Path('/private/tmp/ff-001-r1-r4-rework1-32onn0fh');h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();baseline=json.loads((e/'coordinator-qa1-rework-baseline.json').read_text());old=json.loads((b/'evidence/r4-dev/candidate-manifest-final.json').read_text());manifest={'task':'FF-001','revision':'r4','turn':'Development rework 1 after QA1 qa_failed','status':'developer_handoff','workspace':str(repo),'head':subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip(),'approved_spec_sha256':h(b/'spec.md'),'qa1_checklist_sha256':h(b/'checklist.md'),'previous_candidate_sha256':h(b/'evidence/r4-dev/candidate-manifest-final.json'),'projects':{}}
+assert manifest['approved_spec_sha256']=='e30641845b63f295b408568009c25514f314101d0a2e2b72d331d4255a73045d';assert manifest['qa1_checklist_sha256']=='5e0048a80396b3b6a985a8f767782fe0d2e9a228add148f1db4810fa35705f3e'
+changes=[]
+for name,copy in [('field-flow-rust',r/'isolated-rust/project'),('field-flow-python',Path('/private/tmp/ff-001-r4-qa-wY5eCh/isolated/python/project'))]:
+ files={str(p.relative_to(ff/name)):h(p) for p in (ff/name).rglob('*') if p.is_file() and not any(x in ('.venv','__pycache__','.pytest_cache','dist','target','.git') for x in p.relative_to(ff/name).parts)}
+ assert all(h(copy/k)==v for k,v in files.items())
+ if name=='field-flow-python':assert files==old['projects'][name]['files_sha256']
+ else:changes=[k for k,v in files.items() if old['projects'][name]['files_sha256'].get(k)!=v]
+ manifest['projects'][name]={'file_count':len(files),'files_sha256':dict(sorted(files.items())),'copy':str(copy),'copy_equal':True,'validation_basis':'current formal full plus affected regression and isolated full' if name.endswith('rust') else 'unchanged QA1 exact formal/isolated candidate; no redundant Development Python rerun'}
+manifest['rust_changes_from_qa1']=sorted(changes);assert manifest['projects']['field-flow-rust']['files_sha256']['Cargo.lock']==old['projects']['field-flow-rust']['files_sha256']['Cargo.lock'];assert manifest['projects']['field-flow-rust']['files_sha256']['Cargo.toml']==old['projects']['field-flow-rust']['files_sha256']['Cargo.toml']
+assert all(h(repo/k)==v for k,v in baseline['protected_evidence_sha256'].items());protection=json.loads(Path('/private/tmp/ff-001-r4-coordinator-1y0z0h4z/baseline.json').read_text());assert all(h(repo/k)==v for k,v in protection['protected_sha256'].items());assert h(e/'tasks-before-qa1-rework.txt')=='b75074662ca2e763553c2ba8081908ad0f694de4cc6fd6acecfec7a88243e219';assert h(e/'qa1-checklist-original.txt')==manifest['qa1_checklist_sha256']
+md=json.loads((r/'copy-metadata.json').read_text());assert Path(md['workspace_root'])==r/'isolated-rust/project';assert Path(md['target_directory'])==r/'copy-target';assert [p.name for p in (r/'isolated-rust').iterdir()]==['project'];assert all(Path(p['manifest_path']).is_relative_to(r/'isolated-rust/project') for p in md['packages']);provenance={'metadata_command':['cargo','metadata','--no-deps','--locked','--offline','--format-version','1'],'exit_code':0,'workspace_root':md['workspace_root'],'target_directory':md['target_directory'],'parent_contents':['project'],'package_sources':[{k:p[k] for k in ('name','manifest_path','targets')} for p in md['packages']]}
+links=[]
+for name in manifest['projects']:
+ for p in (ff/name).rglob('*.md'):
+  if any(x in ('.venv','dist','target') for x in p.relative_to(ff/name).parts):continue
+  for link in re.findall(r'\]\(([^)]+)\)',re.sub(r'`[^`]*`','',p.read_text())):
+   if link.startswith(('http:','https:','#')):continue
+   assert (p.parent/link.split('#')[0]).exists(),(p,link);links.append((str(p),link))
+ for file in manifest['projects'][name]['files_sha256']:
+  p=ff/name/file
+  if p.suffix in ('.md','.py','.rs','.toml','.json','.yaml'):
+   assert all(s.rstrip()==s for s in p.read_text().splitlines()),p
+ a=json.loads((ff/name/'locales/en-US.json').read_text());z=json.loads((ff/name/'locales/zh-CN.json').read_text());assert a.keys()==z.keys()
+result=subprocess.run(['git','diff','--check','--','field-flow/field-flow-rust','field-flow/plans/FF-001-dual-runtime-demo01/tasks.md'],cwd=repo,capture_output=True,text=True);assert result.returncode==0,result.stdout
+pids=set();roots=set([str(r)])
+def walk(v,key=''):
+ if isinstance(v,dict):
+  for k,x in v.items():walk(x,k)
+ elif isinstance(v,list):
+  for x in v:walk(x,key)
+ elif isinstance(v,int) and not isinstance(v,bool) and (key=='pid' or key.endswith('_pid')) and v>1:pids.add(v)
+ elif isinstance(v,str):
+  if key=='context' and v.startswith('{'):
+   try:walk(json.loads(v))
+   except ValueError:pass
+  for root in re.findall(r'/private/tmp/(ff-001-r1-[A-Za-z0-9_.-]+)',v):
+   p=Path('/private/tmp')/root
+   if p.is_dir():roots.add(str(p))
+for p in r.iterdir():
+ if p.is_file() and p.suffix=='.txt':
+  for line in p.read_text().splitlines():
+   try:walk(json.loads(line[line.index('{'):]))
+   except (ValueError,TypeError):pass
+for p in e.glob('*ff-001-r1-*.json'):walk(json.loads(p.read_text()))
+live=[]
+for pid in sorted(pids):
+ try:os.kill(pid,0);live.append(pid)
+ except ProcessLookupError:pass
+ except PermissionError:live.append(pid)
+assert not live,live
+ports=[]
+for port in (31102,31103,31880,32102,32103,32880):
+ x=subprocess.run(['lsof','-nP',f'-iTCP:{port}','-sTCP:LISTEN'],capture_output=True,text=True);assert x.returncode==1 and not x.stdout
+ with socket.socket() as s:s.bind(('127.0.0.1',port))
+ ports.append({'port':port,'lsof_exit':x.returncode,'stdout':x.stdout,'rebound':True})
+resources={'recorded_at_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'recorded_pids':sorted(pids),'recorded_pid_count':len(pids),'live_pids':live,'ports':ports,'retained_owned_roots_from_outputs':sorted(roots),'retention':'Own source copies/new targets/synthetic states/logs/protocol reports retained for QA2/Owner reproduction and failure review; remove by coordinator after no verification/evidence dependency, durable reports first. No branch/worktree or unknown resource cleaned. Normal, forced and parentlost joins/reaps remain separate in raw reports.','main_coordinator_root':{'path':'/private/tmp/ff-001-r4-coordinator-1y0z0h4z','purpose':'approval/archive/allowlist/navigation baselines and coordinator reports only; no service; retained for QA2/Owner; Main cleans after acceptance and no evidence dependency'},'prior_roots':'QA1 root/failed copy/target, prior r1/r2/r3 coordinator roots and incorrect confirmed stores remain unchanged for historical evidence; no deletion.'}
+(e/'candidate-manifest-final.json').write_text(json.dumps(manifest,indent=2)+'\n');(e/'copy-provenance.json').write_text(json.dumps(provenance,indent=2)+'\n');(e/'resources-final.json').write_text(json.dumps(resources,indent=2)+'\n');(e/'integrity-final.json').write_text(json.dumps({'protected_evidence_count':len(baseline['protected_evidence_sha256']),'old_4_documents_unchanged':True,'python_48_unchanged':True,'rust_manifest_lock_unchanged':True,'original_tasks_sha256':h(e/'tasks-before-qa1-rework.txt'),'qa1_checklist_original_sha256':h(e/'qa1-checklist-original.txt'),'local_project_links_checked':len(links),'locale_parity':True,'whitespace_check':True,'git_diff_check_exit':result.returncode},indent=2)+'\n')
+print(json.dumps({'candidate_sha256':h(e/'candidate-manifest-final.json'),'files':{k:v['file_count']for k,v in manifest['projects'].items()},'changed_rust':changes,'recorded_pids':len(pids),'retained_roots':len(roots),'links':len(links)},indent=2))

@@ -2,9 +2,9 @@
 
 Chinese version: [README.zh-CN.md](README.zh-CN.md)
 
-Field Flow (FF) is the home for independently maintained, handwritten field-flow runtimes that may work with Backend for an extended period while AW develops. This directory owns FF planning and future source; it is separate from the offline tools collection.
+Field Flow (FF) is the home for independently maintained, handwritten field-flow runtimes that may work with Backend for an extended period while AW develops. This directory owns FF planning and source; it is separate from the offline tools collection.
 
-The partial Rust candidate compiles and has local protocol evidence, but r2 Development is blocked: the high-level S7 driver accepts an unmatched acknowledgement as success. [Development records and failure evidence](plans/FF-001-dual-runtime-demo01/tasks.md) are retained. The [r3 proposal](plans/FF-001-dual-runtime-demo01/spec.md) keeps the same libraries and adds a restricted INT request/response adapter through the public raw ISO exchange API; exact Human Owner approval is pending. Python has not started, and complete runtime acceptance and QA remain pending.
+The exact [FF-001 r4](plans/FF-001-dual-runtime-demo01/spec.md) [dual-version Development handoff](plans/FF-001-dual-runtime-demo01/tasks.md) passed fresh-context [QA2](plans/FF-001-dual-runtime-demo01/checklist.md), covering local AC01–AC15 for both projects. Rust queued IO deadlines, pre-call clock guards and actual started statistics were independently verified after repair; formal/isolated full18 passed. Python48 is unchanged, with verified QA1 complete independent evidence and fresh build/unit/gate/CLI checks. All earlier failures/candidates remain. Human Owner final acceptance, field validation and long-running acceptance are pending.
 
 ## Independent implementations
 
@@ -15,13 +15,13 @@ The partial Rust candidate compiles and has local protocol evidence, but r2 Deve
 
 Each implementation must be independently copyable, buildable and runnable. Neither depends on its sibling's source, executable, fixture process, virtual environment or writable state, or on a parent runtime manifest. Equivalent flow behavior and acceptance scenarios are shared; file and function layouts may follow each language.
 
-The Rust directory contains a partial, blocked implementation; the Python directory is still planned. Full build/start instructions will accompany completed implementation and verification evidence.
+The [Rust project guide](field-flow-rust/README.md) and [Python project guide](field-flow-python/README.md) provide each project's independent build/start/validation commands. Both implement demo01's local HTTP GET → PLC INT loop and passed independent local QA. Field validation and long-running acceptance remain later stages.
 
 ## Handwritten flows
 
 Each application flow module represents one logical flow. A stable flow ID and business name identify its trigger, steps, typed inputs/outputs, cross-round state and failure behavior. The runtime owns scheduling and lifecycle; infrastructure adapters own PLC/HTTP communication.
 
-Initial scenarios are HTTP GET -> condition -> S7 DB write, and S7 DB read -> condition/rising edge -> HTTP POST. These describe intended scenarios, not implemented connectors or successful field tests.
+demo01 is HTTP GET -> condition -> S7 DB INT write; both Rust and Python candidates have local DEV evidence. demo02, S7 DB rising edge -> HTTP POST, belongs to the next increment.
 
 ## Backend and long-running operation
 
@@ -42,5 +42,5 @@ The [CA follow-up prompt](plans/ARCH-TOOL-001-field-flow-runner/spec.md#ca-hando
 - [PLAN.md](PLAN.md) tracks FF-owned work and the next gate.
 - [Task catalog](plans/README.md) links only role documents that exist.
 - [Discussion baseline](plans/ARCH-TOOL-001-field-flow-runner/spec.md) owns detailed scope, decisions, staged acceptance and recoverable r1 history.
-- [First implementation scope](plans/FF-001-dual-runtime-demo01/spec.md) defines the independent runtimes and demo01 local loop; r3 is a draft, with the complete approved r2/r1 history retained.
+- [First implementation scope](plans/FF-001-dual-runtime-demo01/spec.md) defines the independent runtimes and demo01 local loop; exact r4 is owner-approved, with complete approved r3/r2/r1 history retained.
 - [Repository contract](../AGENTS.md) and [development workflow](../.codex/workflows/development-lifecycle-workflow.md) continue to apply.

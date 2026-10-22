@@ -1,0 +1,81 @@
+[
+  {
+    "label": "gate",
+    "argv": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--features",
+      "test-fixture",
+      "--test",
+      "local_protocol",
+      "matched_ack_preflight",
+      "--",
+      "--test-threads=1",
+      "--nocapture"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-rust",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-target"
+    },
+    "pid": 18586,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 3.9857865830000003,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-gate.txt",
+    "output_sha256": "b527384e02a8a0e6d7bd471f03d9bb108874ac3276a2b57950a774fb948d8c68"
+  },
+  {
+    "label": "protocol",
+    "argv": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--features",
+      "test-fixture",
+      "--",
+      "--test-threads=1",
+      "--nocapture"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-rust",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-target"
+    },
+    "pid": 18635,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 62.005070041,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-protocol.txt",
+    "output_sha256": "0fa36730510ef44c1eae46c91f31e65ef2ccb5cc6fcf668e4dd04c08f637c463"
+  },
+  {
+    "label": "bare",
+    "argv": [
+      "cargo",
+      "run",
+      "--locked",
+      "--offline",
+      "--bin",
+      "field-flow",
+      "--"
+    ],
+    "cwd": "/private/tmp/ff-001-r4-qa-wY5eCh/field-flow-rust",
+    "env": {
+      "UV_CACHE_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/uv-cache",
+      "PYTHONPYCACHEPREFIX": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-pycache",
+      "CARGO_TARGET_DIR": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-target"
+    },
+    "pid": 19235,
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_seconds": 0.4021710420000062,
+    "output": "/private/tmp/ff-001-r4-qa-wY5eCh/rust-copy-bare.txt",
+    "output_sha256": "3be5c0cb13dfb2ff3a7c07a2da3396b9e991c801be6d61217d4021714daf0d3b"
+  }
+]

@@ -1,0 +1,73 @@
+[
+  {
+    "command": [
+      "cargo",
+      "fmt",
+      "--check"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "exit_code": 0,
+    "duration_seconds": 0.18153704199999998,
+    "output": "/private/tmp/ff-001-r1-r3dev-k989azay/rust-delivery-0.txt"
+  },
+  {
+    "command": [
+      "cargo",
+      "check",
+      "--locked",
+      "--offline",
+      "--all-targets",
+      "--features",
+      "test-fixture"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "exit_code": 0,
+    "duration_seconds": 7.585132292,
+    "output": "/private/tmp/ff-001-r1-r3dev-k989azay/rust-delivery-1.txt"
+  },
+  {
+    "command": [
+      "cargo",
+      "build",
+      "--locked",
+      "--offline",
+      "--bins",
+      "--features",
+      "test-fixture"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "exit_code": 0,
+    "duration_seconds": 8.8641255,
+    "output": "/private/tmp/ff-001-r1-r3dev-k989azay/rust-delivery-2.txt"
+  },
+  {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--lib"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "exit_code": 0,
+    "duration_seconds": 0.7213344159999977,
+    "output": "/private/tmp/ff-001-r1-r3dev-k989azay/rust-delivery-3.txt"
+  },
+  {
+    "command": [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--features",
+      "test-fixture",
+      "--",
+      "--test-threads=1",
+      "--nocapture"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "exit_code": 0,
+    "duration_seconds": 62.15832316699999,
+    "output": "/private/tmp/ff-001-r1-r3dev-k989azay/rust-delivery-4.txt"
+  }
+]

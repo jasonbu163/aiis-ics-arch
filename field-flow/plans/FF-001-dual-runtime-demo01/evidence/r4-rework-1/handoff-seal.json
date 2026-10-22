@@ -1,0 +1,10 @@
+{
+  "tasks_sha256": "81fa30cdec9ce2f1640cdbd2ca7abd43bd127f8f910db5e1f87b3d3e068bc60c",
+  "candidate_sha256": "701272f1ea19c4759d604810c1aaac4cdce3e4ee5930aaba62c147f4dd52c15b",
+  "qa1_checklist_sha256": "5e0048a80396b3b6a985a8f767782fe0d2e9a228add148f1db4810fa35705f3e",
+  "tasks_active_links_checked": 43,
+  "new_evidence_not_ignored": true,
+  "workspace": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+  "status": "developer_handoff",
+  "QA2": "not_started_by_Development; coordinator must dispatch fresh Verification"
+}

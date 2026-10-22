@@ -1,0 +1,22 @@
+{
+  "command": [
+    "uv",
+    "run",
+    "--locked",
+    "--python",
+    "3.11",
+    "--no-python-downloads",
+    "pytest",
+    "-q",
+    "tests/unit",
+    "tests/test_matched_ack_gate.py",
+    "tests/test_local_protocol.py",
+    "-x",
+    "-s"
+  ],
+  "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-python",
+  "timeout_seconds": 240,
+  "exit_code": 1,
+  "duration_seconds": 0.37768720800000005,
+  "output": "/private/tmp/ff-001-r1-r4dev-pc36ki7o/matrix-1.txt"
+}
