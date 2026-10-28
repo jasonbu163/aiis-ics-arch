@@ -1,0 +1,1 @@
+{"event": "fixture_ready", "implementation": "python"}

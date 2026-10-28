@@ -1,6 +1,6 @@
 # DS 设备模拟器详细设计
 
-内容修订：2026-10-22（Asia/Shanghai）· `ARCH-AW-005 r5`产品MVP与操作手册增补（原技术候选的独立核验事实见005 checklist；新增文档另核验，自定义初值输入问题未关闭，Owner终验待定）；原`ARCH-AW-004 r2`已验收快照SHA `0eb3c149bf7093bbdce2f0b7a07af71e769fe24cb04a542c7f4dc43e6979eecb`保持历史效力。005范围与实现/验证归[005 spec](../plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md)及[005 tasks](../plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md)，不倒记为004旧QA。本文件交付首版目标设计；范围批准见 [spec](../plans/ARCH-AW-004-ds-detailed-design/spec.md)，实施核对与文档自检见 [Development 记录](../plans/ARCH-AW-004-ds-detailed-design/tasks.md)。本文不记录本r2独立QA verdict或Human Owner最终验收。r1原正文367行SHA-256为`77216e4233c0b3c0a06fe624d93fee7f826a1a26e5f0bf497f58498aff4bd94c`，其交付/独立文档qa_passed与终验pending保留在任务角色历史；r2重新核验整版R1–R23/AC1–AC29，不继承r1结论。此次已采纳一次性hold维护写和preserve_compatible_hold推荐，所有连接/负载/时延/资源数值都是已批准设计目标，尚非实测能力。
+内容修订：2026-10-27（Asia/Shanghai）· Human Owner已最终接受`DS-001 r1`、`ARCH-AW-005 r5`及DS当前版本（旧技术QA保持精确候选；初值/纯文字手册由DS-001接续，新增截图及DS-001独立QA已按Owner指令取消，当前真实验收见各自记录）；原`ARCH-AW-004 r2`已验收快照SHA `0eb3c149bf7093bbdce2f0b7a07af71e769fe24cb04a542c7f4dc43e6979eecb`保持历史效力。005范围与实现/验证归[005 spec](../plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md)及[005 tasks](../plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md)，不倒记为004旧QA。本文件交付首版目标设计；范围批准见 [spec](../plans/ARCH-AW-004-ds-detailed-design/spec.md)，实施核对与文档自检见 [Development 记录](../plans/ARCH-AW-004-ds-detailed-design/tasks.md)。本文不记录本r2独立QA verdict或Human Owner最终验收。r1原正文367行SHA-256为`77216e4233c0b3c0a06fe624d93fee7f826a1a26e5f0bf497f58498aff4bd94c`，其交付/独立文档qa_passed与终验pending保留在任务角色历史；r2重新核验整版R1–R23/AC1–AC29，不继承r1结论。此次已采纳一次性hold维护写和preserve_compatible_hold推荐，所有连接/负载/时延/资源数值都是已批准设计目标，尚非实测能力。
 
 <a id="boundary"></a>
 ## 1. 定位、依据与效力
@@ -373,7 +373,9 @@ reserved/padding默认读零、禁止全部写来源，读取权限可收紧；�
 
 日志stdout/文件正常时保留有界JSON Lines、轮转与内存事件；纯介质/sink/轮转失败时告警为observability_degraded，降级到有界内存环。环满允许丢最旧事件，累计丢弃数/首末时间，恢复后记录缺口，不重放已提交写来补审计。日志队列与磁盘I/O在owner/网络外，不能反压无限积压；不承诺无限逐item持久审计或断电后完整记录。最小result ID/epoch/seq与真实回执独立于可丢弃事件，日志降级不改变操作结果。配置SQLite失败/commit未知按§4.3处理，内存提交正确性本身失效才封实例为runtime_fault；三类不得混称“存储故障全部停写”。
 
-生命周期、配置保存/冲突/apply、listener/连接变化、普通UI/一次性维护、client写成功/拒绝与adapter故障是事件触发点。正常可用的有界写事件至少含UTC时间、instance、session/request/item、epoch/revision、触达地址/长度、来源、seq/result/error；payload用摘要/有界长度，不全量转储配置源。高频相同拒绝/成功可按instance/session/范围/原因聚合短时间计数并保留首末ID；不得伪称无限逐item持久审计。规则tick只记状态变化、错误与周期汇总，不逐tick无限写日志。日志无令牌、真实环境地址或密钥；本工具不加载DAA真实env。
+生命周期、配置保存/冲突/apply、listener/连接变化、普通UI/一次性维护、client写成功/拒绝与adapter故障是事件触发点。正常可用的有界写事件至少含上海日历时间（RFC3339，显式`+08:00`）与独立`monotonic_ns`、instance、session/request/item、epoch/revision、触达地址/长度、来源、seq/result/error；payload用摘要/有界长度，不全量转储配置源。高频相同拒绝/成功可按instance/session/范围/原因聚合短时间计数并保留首末ID；不得伪称无限逐item持久审计。规则tick只记状态变化、错误与周期汇总，不逐tick无限写日志。日志无令牌、真实环境地址或密钥；本工具不加载DAA真实env。
+
+当前日期显示与新日志使用Asia/Shanghai（UTC+08:00），不跟随宿主时区；界面显示到秒，原始毫秒保留，日历时间不参与规则调度。在线值IPC新增`updatedAt`，由初始化/重置或成功提交时记录的日历时间生成，不随刷新改变；原`updatedNs`及协议/测试用单调计数保留。规则值未变的无提交路径不推进更新时间。版本界面以真实保存序号及一致/待加载状态显示，完整UUID、saved/selected/loaded三类事实及字段说明收在问号悬停/聚焦提示中；不改变保存、选择、加载和启动语义。旧日志没有日历字段时明确显示未记录，不由单调计数倒推日期。既有SQLite `*_utc`字段及版本内容仍保留原UTC格式，显示时只转换一次；存储格式及历史迁移须另按显式schema-maintenance范围处理，本次时间修复不修改真实配置库或历史日志。
 
 <a id="selection"></a>
 ## 10. 服务核心候选与首个原型 gate
@@ -589,26 +591,20 @@ r5 DEV已在原件逐SHA持久保存与产品门汇总后，按102成员闭集�
 DS 自有 ConsoleCard 为内容提供统一 token 间距，选择栏采用自适应网格；运行值/连接技术列保持完整字段并在表内横滚。日志筛选同行、事实分组自适应，空态使用紧凑图示；指标卡采用相同密度以对齐数字。弹窗在视口内保留可滚动表体与有间距的可换行按钮区，表单不叠加默认项间距。切换页面后只重置 `.agent-workspace`，同页手动滚动保留。提示色消费 CU 主题 token，兼容深浅色。实际原生 DOM 几何/IPC/正常关闭与浏览器像素分别记录，来源和最终 DEV/独立核验状态见 owning tasks/checklist。
 
 <a id="user-guide"></a>
-## 15. 操作手册入口、实际操作顺序与已知输入限制
+## 15. DS-001操作手册入口与当前前端编辑面
 
-完整逐步操作见[中文使用手册](../automation-world/device-simulator/USER_GUIDE.zh-CN.md)与[English user guide](../automation-world/device-simulator/USER_GUIDE.md)，真实原生图的来源/哈希见[图片索引](../automation-world/device-simulator/docs/user-guide/images/README.zh-CN.md)。本节按005 r5[spec附录B](../plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md#附录b-2026-10-22-已批准的操作手册与截图文档增量当前文档gate)同步使用入口，不改变004历史或产品技术范围。冻结227成员技术候选仍为306a09d5…；本轮只增文档/图片，原产品QA保留其时间与输入身份，不重新赋予文档或新发现问题通过结论。
+当前步骤见[中文纯文字手册](../automation-world/device-simulator/USER_GUIDE.zh-CN.md)和[English text guide](../automation-world/device-simulator/USER_GUIDE.md)。本节依据本地[DS-001 r1 spec](../automation-world/device-simulator/plans/DS-001-policy-table-and-usability/spec.md)同步操作入口；实施、自检和Owner反馈归[DS-001 tasks](../automation-world/device-simulator/plans/DS-001-policy-table-and-usability/tasks.md)。不改变004/005历史设计或原技术验证；本任务独立QA由Owner明确豁免，前端编译/纯函数不能替代真人输入和运行核对。
 
-| 顺序/页面 | 操作与预期事实 |
+| 顺序/页面 | 操作与预期结果 |
 | --- | --- |
-| 正常桌面启动 | pnpm tauri dev，独立profile/空配置；pnpm dev无桌面bridge。pnpm临时store只属于历史验证环境，store不匹配按手册排查，不改锁。 |
-| 实例 | PLC_Test、127.0.0.1:30102、rack0/slot1、Calling TSAP256、C16/H4；保留编辑后显式保存候选。 |
-| 手工DB点位 | DB31长8，Run_Bool BOOL0.0、Setpoint_Int INT2、Temperature_Real REAL4；逐点理由+整DB人工理由，保存后预览/确认完整地址，选点命名并确认。 |
-| 逐点策略 | false/0/0作为当前可执行显式初值；BOOL半周期1500ms、INT hold/ui owner可普通写、REAL ramp0..100周期10000ms。逐点保存并确认初值/策略。 |
-| 选版本/停机加载 | 显式选最高保存序号，预览保留/初始化/删除，勾清单确认，加载后仍stopped；版本下拉不自动跟随所有后续保存。 |
-| 工作台/在线值 | 显式start；看实际loaded revision/DB/byte/bit/值，普通写INT12；pause仅冻结规则，stop保同进程值，停止态reset丢值回初值，重开按selected初始化且stopped。 |
-| 多源导入 | 冻结multi.db/types.udt，仅Alpha→DB71（无UDT）、Beta→DB88（仅Measure）；其它声明不选，:=/BEGIN不导入。每DB标准地址/命名后，以DB层hold/none/读允许写禁止并保持类型初值继承，选该DB全部点确认当前有效初值/策略，再重新选版本停机加载；批量确认不赋规则。 |
+| 源码启动 | pnpm tauri dev、独立合成profile；浏览器pnpm dev没有桌面bridge。按手册核store/端口，不操作未知用户库。 |
+| 实例/手工DB | PLC_Test回环30102；DB31长度8，BOOL0.0、INT2、REAL4，逐点理由。保存后完整人工预览显示目标DB/长度/三行地址，再确认真实命名行。 |
+| 草稿策略表 | 先PLC再多选DB；未筛DB显示本PLC全部点。模式/初值/owner/规则摘要为主列，逐属性权限/来源按行展开。表头选择全部筛选页，翻页保留，换PLC/DB筛选清零。 |
+| 副本及三态批量 | 单点先编辑副本；批量默认不修改，可统一设置或恢复继承，显示逐点前后值和来源/必要联动，全量预校验后一次性保留草稿。混合类型任一点失败整批不改，基线过期拒交。 |
+| 初值与fixed | 独立文本缓冲处理input更新，合法非零7/20.5/fixed12及false/0可提交；非法/未完成文本保留并阻断。普通键入/失焦/保存重选按手册操作；Owner已接受当前版本，不补造逐项执行原件。 |
+| 保存/版本/加载 | 保存只产生不可变候选。未手选旧版时待加载选择跟最新；手选历史后保留并提示，显式选最新恢复跟随。核实际revision后停机预览/确认加载，另行启动。 |
+| 只读导入 | 固定multi.db/types.udt仅Alpha→DB71（无UDT）、Beta→DB88（仅Measure闭包）；不改源。各DB地址/命名/DS初值策略确认后选最新版停机加载。:=/BEGIN初值不导入、RETAIN不代表DS保值。 |
 
-本例共享word布局为Alpha长4（ready0.0/count2），Beta长8（unit.running0.0/unit.value2/bytes[3]6/bytes[4]7）；REAL不强制4B对齐。数组Index命名地址兜底DB88_B6_Byte/DB88_B7_Byte，其余名称按结构路径；人工手工名称保留。UI可见刷新≤1Hz，单帧不能证明BOOL翻转，故教程采用1500ms半周期。保值/全初始化/回滚、STRING整DB人工地址、重导失效、多实例/连接及日志均在手册单独说明，不把配置上限当容量证明。
+共享标准word布局示例仍为Alpha长度4（ready0.0/count2），Beta长度8（unit.running0.0/unit.value2/bytes[3]6/bytes[4]7）；REAL不强制4字节对齐。DS初值是主动配置或类型默认，运行值按既有加载/重置/保留合同处理。手册提供混合类型失败、继承恢复、保存旧版选择和正常重开步骤；当前版本已获Owner最终接受；本节仍是操作说明，不新增逐项执行、协议或容量证据。
 
-### 15.1 当前真实键入阻断与证据继承
-
-2026-10-22原生取图在“模拟与读写策略→点→DS显式初值/显式覆盖”用普通输入Temperature_Real初值20并Tab时仍回旧0。只读代码核对：PolicyEditor初值/持续fixed值的受控el-input仅监听change，锁内Element Plus在input后nextTick按未更新modelValue回填；fixed同样绑定，现作为风险保留，不给出可执行非零设值承诺。原拟7/20及导入count10不写成已跑通，教程改为显式默认false/0，在线普通写12演示非零运行值。普通写弹层有自己的输入状态，不改变配置初值。
-
-既有native driver同步派发input/change后才await，与普通人逐步键入事件次序不同；其真实IPC/服务/协议原件和独立QA事实继续有效，但不能扩成真人初值输入通过。当前未关闭产品问题及Owner最终验收仍需另行处理，本次文档授权不修代码、不以注入绕过，不重跑原协议矩阵。文档/图片fresh Verification只核新增材料、按钮/案例一致性和原件/保护SHA，不能关闭该产品问题。实际操作、截图和问题来源见[005 tasks](../plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md)，最新独立结论及Owner状态仍以[owning checklist](../plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md)为准；DAA应用→SQLite联调另批、阶段C不开展。
-
-本轮现有7张真实原生图只覆盖手工DB31主流程；导入绑定/命名和停止态重开尚无图，完整步骤保留待Owner手动反馈。实际已观察写12、BOOL/REAL变化、暂停/恢复/停止；未执行reset、导入提交或正常重开。Owner接管仍打开的文件选择器，资源保持使用中，不记正常退出或清理完成。最新Owner自行操作指令覆盖附录B原机械10图目标。
+2026-10-22真实键入后回退问题及旧同步input/change驱动的证据边界保留在[005 tasks](../plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md)，旧[owning checklist](../plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md)保持原时间与候选身份。本次前端实现修复事件绑定并补缓冲，开发自检和手册不追认旧真人输入通过；2026-10-27真实Owner最终接受见[DS-001记录](../automation-world/device-simulator/plans/DS-001-policy-table-and-usability/spec.md#owner-acceptance-ds001)及[005记录](../plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md#owner-acceptance-r5)。[七张旧原生图及来源](../automation-world/device-simulator/docs/user-guide/images/README.zh-CN.md)保留为历史，不要求新增截图；DAA–DS读取至SQLite联调另批，阶段C暂不开展。

@@ -1,0 +1,27 @@
+{
+  "task": "aiis-ics-arch::DAA-007",
+  "revision": "r2",
+  "status": "draft",
+  "recordedAt": "2026-10-27T17:08:21+08:00",
+  "specSha256": "29745638c38b9d4d58ada07e6f48739ce883a6391024a3caf34ccc2f0c1a04d3",
+  "scope": "PM-only runtime-control and profile-only daily env refinement with coordinator document integrity check; not implementation or QA",
+  "requirements": 14,
+  "acceptanceCriteria": 22,
+  "localFileLinks": 17,
+  "protectedFiles": 412,
+  "protectedFileDrift": {},
+  "r1ArchivesAndTasksUnchanged": true,
+  "checklistAbsent": true,
+  "mechanicalIndexFiles": [
+    "PLAN.md",
+    "PLAN.zh-CN.md",
+    "automation-world/PLAN.md",
+    "automation-world/PLAN.zh-CN.md",
+    "automation-world/data-acquisition-agent/PLAN.md",
+    "automation-world/data-acquisition-agent/PLAN.zh-CN.md"
+  ],
+  "r2ImplementationApproval": "pending",
+  "productTestsBuildsNativeSqlEnvOperations": false,
+  "pmRole": "/root/daa007_r2_pm_refine",
+  "pmReportedCheck": "14 requirements, 22 AC, 17 local links and 3 anchored targets passed; git diff --no-index --check exit 1 with no whitespace diagnostics"
+}

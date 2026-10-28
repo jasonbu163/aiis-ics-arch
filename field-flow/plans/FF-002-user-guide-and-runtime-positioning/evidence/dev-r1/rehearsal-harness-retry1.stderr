@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/private/tmp/ff-002-r1-dev-vncfzod3/rehearse.py", line 86, in <module>
+    for mode in ('dry_run','execute'):scenario(lang,'demo01',mode)
+  File "/private/tmp/ff-002-r1-dev-vncfzod3/rehearse.py", line 67, in scenario
+    after=release();assert inspect['counts']==({'simulated':1} if mode=='dry_run' else {'confirmed':1}),inspect
+  File "/private/tmp/ff-002-r1-dev-vncfzod3/rehearse.py", line 15, in release
+    s=socket.socket();s.bind(('127.0.0.1',port));s.close();out.append(port)
+OSError: [Errno 48] Address already in use

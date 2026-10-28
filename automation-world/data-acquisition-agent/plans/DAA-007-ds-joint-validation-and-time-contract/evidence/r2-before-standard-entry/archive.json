@@ -1,0 +1,13 @@
+{
+  "reason": "Previous unapproved r2 draft retained before Human Owner corrected the public Tauri startup convention; r2 remains unapproved, no new revision number",
+  "files": {
+    "spec.md": {
+      "sha256": "87fcc74c5eaa9f746e994c90f6d7c8a9787aa6efeba9f6fc3506020633d4276f",
+      "bytes": 61534
+    },
+    "r2-draft-review.json": {
+      "sha256": "579005117df1bed5531a593ccd467517460ac658f9db176cfbebafe3d7bb463e",
+      "bytes": 862
+    }
+  }
+}

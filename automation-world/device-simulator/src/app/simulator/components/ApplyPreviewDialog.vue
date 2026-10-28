@@ -4,17 +4,17 @@
     <div v-if="preview" class="console-stack" data-testid="apply-preview">
       <el-alert :title="t(preview.details.initializeAll?'simulator.initializeAllHint':'simulator.preserveHint')" type="warning" :closable="false" />
       <el-checkbox :model-value="preview.details.initializeAll===true" :disabled="preview.details.rollback===true||busy" @update:model-value="emit('retention',$event?'initialize_all':'preserve_compatible_hold')">{{ t('simulator.initializeAll') }}</el-checkbox>
-      <el-table :data="rows" max-height="380">
-        <el-table-column :label="t('simulator.name')">
+      <ConsoleDataTable table-id="preview.apply" :data="rows" max-height="380">
+        <el-table-column column-key="point" min-width="220" :label="t('simulator.name')">
           <template #default="{row}">{{ pointName(row.pointId) }}</template>
         </el-table-column>
-        <el-table-column :label="t('simulator.action')">
+        <el-table-column column-key="result" min-width="160" :label="t('simulator.action')">
           <template #default="{row}">{{ t('simulator.actions.'+row.action) }}</template>
         </el-table-column>
-        <el-table-column :label="t('simulator.reason')">
+        <el-table-column column-key="reason" min-width="280" :label="t('simulator.reason')">
           <template #default="{row}">{{ t('simulator.reasons.'+row.reason) }}</template>
         </el-table-column>
-      </el-table>
+      </ConsoleDataTable>
       <el-checkbox v-model="acknowledged" data-testid="apply-ack">{{ t('simulator.applyAcknowledge') }}</el-checkbox>
     </div>
     <template #footer>
@@ -24,6 +24,7 @@
   </el-dialog>
 </template>
 <script setup lang="ts">
+import ConsoleDataTable from '../../../components/console/ConsoleDataTable.vue';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Preview, Json } from '../../../services/deviceSimulator';

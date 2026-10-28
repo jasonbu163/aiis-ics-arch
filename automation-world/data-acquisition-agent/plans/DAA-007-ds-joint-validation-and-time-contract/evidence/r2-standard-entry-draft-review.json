@@ -1,0 +1,20 @@
+{
+  "task": "aiis-ics-arch::DAA-007",
+  "revision": "r2",
+  "status": "draft",
+  "recordedAt": "2026-10-27T16:18:19.156+08:00",
+  "specSha256": "d66a1b075bd6d727261f3a4abb42e3618b05f4c096d5913f9232391f4e8c02fa",
+  "scope": "Unapproved same-r2 standard Tauri entry draft correction and coordinator integrity check, not implementation/QA",
+  "requirements": 14,
+  "acceptanceCriteria": 22,
+  "localFileLinks": 16,
+  "issues": [],
+  "r1ArchivesAndTasksUnchanged": true,
+  "previousR2DraftPreserved": true,
+  "implementation32AndSource397StillMatch": true,
+  "rootAGENTSUnchanged": true,
+  "tauriBuildFeaturesNotImplemented": true,
+  "testsBuildsNativeDatabaseEnvOperations": false,
+  "r2Approval": "pending",
+  "coordinatorHelperHistory": "First numeric sequence assertion compared padded IDs with unpadded strings; corrected numeric normalization, not a product failure or additional product test."
+}

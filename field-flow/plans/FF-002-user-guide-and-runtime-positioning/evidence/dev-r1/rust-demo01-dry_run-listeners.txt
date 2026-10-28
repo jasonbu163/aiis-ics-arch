@@ -1,0 +1,4 @@
+COMMAND     PID  USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+ff-fixtur 19827 jason    3u  IPv4  0x732fdc49e028139      0t0  TCP 127.0.0.1:31102 (LISTEN)
+ff-fixtur 19827 jason    4u  IPv4 0x43071ab1aef77916      0t0  TCP 127.0.0.1:31880 (LISTEN)
+ff-fixtur 19855 jason    3u  IPv4 0x6efa451b0b7057d6      0t0  TCP 127.0.0.1:31103 (LISTEN)

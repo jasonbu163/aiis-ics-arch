@@ -145,7 +145,7 @@
     "freeBytes": "卷剩余空间",
     "pendingBytes": "待上报字节",
     "pendingCount": "待上报包数",
-    "oldestPending": "最早待上报时间",
+    "oldestPending": "最老待传保存时间（上海）",
     "storagePolicy": "存储策略草稿",
     "quotaMiB": "运行库限额（MiB）",
     "retentionDays": "已确认数据保留天数",
@@ -279,7 +279,7 @@
       "yaml_policy_unmatched": "旧策略未匹配候选点，仅归档",
       "yaml_status_persistence_unknown": "状态持久化未知，请检查存储后重开",
       "yaml_unsaved_edits": "请先保存或取消编辑再重试",
-      "yaml_retry_forbidden": "已有配置或迁入成功，不能重试覆盖",
+      "yaml_retry_forbidden": "YAML迁入已退出常驻运行，不能重试",
       "yaml_attempt_conflict": "迁入尝试已变化；请保留编辑并重新读取",
       "yaml_private_source": "迁入记录为服务私有，不能编辑",
       "yaml_receipt_corrupt": "迁入记录损坏；保留 SQLite 并检查",
@@ -371,7 +371,8 @@
       "point_name_profile": "技术命名profile或数量无效",
       "point_name_blocked": "所选名称存在未解决的地址或冲突",
       "name_preview_required": "请重新取得名称差异预览后保存",
-      "name_preview_conflict": "名称预览已过期或输入发生变化，请重新预览"
+      "name_preview_conflict": "名称预览已过期或输入发生变化，请重新预览",
+      "time_profile_unsupported": "此 profile 的时间合同不受支持，旧配置和历史已保留；请使用新的隔离 profile，旧数据迁移需另行批准。"
     },
     "selectedTargets": "已勾选 {count} 台 PLC",
     "selectTarget": "勾选此 PLC",
@@ -381,7 +382,7 @@
     "pauseSelected": "暂停已选",
     "controlTargetsConfirm": "确认对固定勾选的 {count} 台 PLC 执行操作？逐对象返回结果。",
     "currentEtag": "当前持久草稿 ETag",
-    "staleSnapshot": "快照刷新失败，保留 {time} 的最近成功状态。",
+    "staleSnapshot": "快照刷新失败，保留上海时间 {time} 的最近成功快照；该时间为快照生成时间。",
     "configuration": "配置草稿",
     "draftDirty": "有未保存编辑",
     "draftSaved": "草稿已保存",
@@ -440,7 +441,7 @@
     "discardEditorConfirm": "放弃当前尚未完成的编辑并切换页面？",
     "workflowHint": "保存 PLC → 导入点位并分组 → 显式应用配置 → 到工作台连接并启采。",
     "configurePoints": "配置点位",
-    "historyTimezone": "按本机时区 {timezone} 选择，查询时转换为 UTC。",
+    "historyTimezone": "按上海时区 {timezone} 选择和显示；保存时间是持久化事务时间，结束条件包含所选秒的全部毫秒。",
     "previous": "上一页",
     "historyPage": "第 {page} 页 · 本页 {count} 条",
     "historyPageSize": "每页条数",
@@ -466,6 +467,7 @@
       "example": "迁入时的应用默认来源指向仓内脱敏示例；当时生成停用候选，不能当现场配置使用。",
       "diagnostics": "诊断共 {total} 项，省略 {omitted} 项。",
       "attempt": "尝试 ID"
-    }
+    },
+    "resetHistoryWidths": "恢复默认列宽"
   }
 }

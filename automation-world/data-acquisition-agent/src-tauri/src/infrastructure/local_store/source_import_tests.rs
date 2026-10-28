@@ -440,7 +440,7 @@ fn old_v1_raw_decode_history_receipt_and_unselected_protected() {
         assert_eq!(
             conn.query_row("PRAGMA user_version", [], |r| r.get::<_, u32>(0))
                 .unwrap(),
-            1
+            2
         );
     }
     let before_engine = protected(&s);

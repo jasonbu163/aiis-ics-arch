@@ -7,6 +7,7 @@ pub(crate) struct Bootstrap {
     pub profile: PathBuf,
     pub read_allowed: bool,
     pub validation: bool,
+    #[cfg(test)]
     pub migration: Option<crate::domain::yaml_migration::MigrationPaths>,
     pub ignored_keys: Vec<String>,
     #[cfg_attr(not(any(test, feature = "local-validation")), allow(dead_code))]
@@ -51,18 +52,12 @@ pub(crate) fn load(args: Vec<String>) -> LocalResult<Bootstrap> {
         if args.iter().any(|a| a.starts_with("--ca-")) {
             return Err("legacy_entry_retired".into());
         }
-        for key in ["DAA_ENV_FILE", "DAA_PROFILE_DIR"] {
-            if let Some(v) = std::env::var_os(key) {
-                if !PathBuf::from(v).is_absolute() {
-                    return Err("locator_absolute_required".into());
-                }
-            }
-        }
-        let c = super::AgentConfig::load();
+        let c = super::AgentConfig::load()?;
         let b = ordinary(
             &c,
             std::env::var("DAA_RUNTIME_MODE").ok(),
-            super::profile_dir(),
+            c.profile(std::env::var_os("DAA_PROFILE_DIR"))?,
+            std::env::var("DAA_PLC_READ_ALLOWED"),
         )?;
         let _ = CURRENT.set(b.clone());
         Ok(b)
@@ -175,6 +170,7 @@ fn validation(args: &[String]) -> LocalResult<Bootstrap> {
         profile,
         read_allowed: true,
         validation: true,
+        #[cfg(test)]
         migration: None,
         ignored_keys: vec![],
         fixture: Some(paths["--fixture-file"].clone()),
@@ -185,6 +181,7 @@ fn ordinary(
     c: &super::AgentConfig,
     process_mode: Option<String>,
     profile: PathBuf,
+    process_read: Result<String, std::env::VarError>,
 ) -> LocalResult<Bootstrap> {
     let mode = c.value_or_default("DAA_RUNTIME_MODE", "local_sqlite");
     check_mode(&mode, process_mode.is_some())?;
@@ -193,33 +190,25 @@ fn ordinary(
         "DAA_PROFILE_DIR",
         "DAA_RUNTIME_MODE",
         "DAA_PLC_READ_ALLOWED",
-        "DAA_PLC_CONFIG_PATH",
-        "DAA_PLC_SNAPSHOT_POLICY_PATH",
     ];
     let mut ignored_keys: Vec<String> = c
         .configured_keys()
         .into_iter()
         .filter(|k| k.starts_with("DAA_") && !allowed.contains(&k.as_str()))
         .collect();
+    if c.values.contains_key("DAA_PLC_READ_ALLOWED") {
+        ignored_keys.push("DAA_PLC_READ_ALLOWED".into());
+    }
     if mode.trim() == "legacy_snapshot" {
         ignored_keys.push("DAA_RUNTIME_MODE".into());
     }
-    let (points, points_origin) = c.locator("DAA_PLC_CONFIG_PATH", "config/plc_points.yaml");
-    let (policy, policy_origin) = c.locator(
-        "DAA_PLC_SNAPSHOT_POLICY_PATH",
-        "config/plc_snapshot_policy.yaml",
-    );
     Ok(Bootstrap {
         mode: "local_sqlite".into(),
         profile,
-        read_allowed: c.bool_or_default("DAA_PLC_READ_ALLOWED", false),
+        read_allowed: ordinary_read_allowed(process_read),
         validation: false,
-        migration: Some(crate::domain::yaml_migration::MigrationPaths {
-            points,
-            points_origin,
-            policy,
-            policy_origin,
-        }),
+        #[cfg(test)]
+        migration: None,
         ignored_keys,
         fixture: None,
     })
@@ -232,13 +221,56 @@ fn check_mode(mode: &str, process: bool) -> LocalResult<()> {
         _ => Err("runtime_mode_invalid".into()),
     }
 }
+// 仅普通native使用；NotUnicode与空/非法均拒绝，不能把解码失败当缺失。
+fn ordinary_read_allowed(value: Result<String, std::env::VarError>) -> bool {
+    match value {
+        Err(std::env::VarError::NotPresent) => true,
+        Ok(v) => matches!(
+            v.as_str(),
+            "1" | "true" | "TRUE" | "True" | "yes" | "YES" | "on" | "ON"
+        ),
+        Err(std::env::VarError::NotUnicode(_)) => false,
+    }
+}
+
 #[cfg(test)]
-mod retirement_tests {
+mod startup_env_tests {
     use super::*;
     #[test]
-    fn mode_source_is_explicit() {
-        for m in ["", "local_sqlite"] {
-            assert!(check_mode(m, true).is_ok());
+    fn startup_env_read_admission_is_process_only_and_stopped() {
+        for file_value in ["true", "false"] {
+            let c = super::super::AgentConfig::from_values(std::collections::HashMap::from([
+                ("DAA_PLC_READ_ALLOWED".into(), file_value.into()),
+                ("DAA_PLC_CONFIG_PATH".into(), "ignored.yaml".into()),
+            ]));
+            let b = ordinary(
+                &c,
+                None,
+                PathBuf::from("/private/tmp/unused"),
+                Err(std::env::VarError::NotPresent),
+            )
+            .unwrap();
+            assert!(
+                b.read_allowed && !b.validation && b.fixture.is_none() && b.migration.is_none()
+            );
+            assert!(b.ignored_keys.contains(&"DAA_PLC_CONFIG_PATH".into()));
+            for value in ["false", "", " ", "typo", "0", " true "] {
+                assert!(
+                    !ordinary(&c, None, b.profile.clone(), Ok(value.into()))
+                        .unwrap()
+                        .read_allowed
+                );
+            }
+        }
+        for value in ["1", "true", "TRUE", "True", "yes", "YES", "on", "ON"] {
+            assert!(ordinary_read_allowed(Ok(value.into())));
+        }
+        #[cfg(unix)]
+        {
+            use std::os::unix::ffi::OsStringExt;
+            assert!(!ordinary_read_allowed(Err(std::env::VarError::NotUnicode(
+                std::ffi::OsString::from_vec(vec![255])
+            ))));
         }
         assert!(check_mode("legacy_snapshot", false).is_ok());
         assert_eq!(
@@ -250,47 +282,64 @@ mod retirement_tests {
             "runtime_mode_invalid"
         );
     }
+    #[cfg(feature = "local-validation")]
     #[test]
-    fn ordinary_bootstrap_ignores_retired_business_values_and_fixes_locators() {
-        use std::collections::HashMap;
-        let profile = PathBuf::from("/private/tmp/daa003-bootstrap-test-no-write");
-        let c = super::super::AgentConfig::from_values(HashMap::new());
-        let b = ordinary(&c, None, profile.clone()).unwrap();
-        assert_eq!(b.mode, "local_sqlite");
-        assert!(!b.read_allowed);
-        assert!(!profile.exists());
-        assert_eq!(
-            b.migration.unwrap().points,
-            super::super::application_root().join("config/plc_points.yaml")
-        );
-        let c = super::super::AgentConfig::from_values(HashMap::from([
-            ("DAA_RUNTIME_MODE".into(), "legacy_snapshot".into()),
-            ("DAA_LOCAL_STORAGE_ENABLED".into(), "false".into()),
-            ("DAA_DATABASE_ENABLED".into(), "true".into()),
-            ("DAA_DATABASE_URL".into(), "SECRET_NOT_EXPOSED".into()),
-            ("DAA_PLC_AUTOSTART_MODE".into(), "collect".into()),
-            ("DAA_PLC_HOST".into(), "not-an-endpoint".into()),
-            (
-                "DAA_PLC_CONFIG_PATH".into(),
-                "config/owned-test.yaml".into(),
-            ),
-        ]));
-        let b = ordinary(&c, None, profile.clone()).unwrap();
-        assert!(!b.read_allowed);
-        assert!(b.ignored_keys.contains(&"DAA_DATABASE_ENABLED".into()));
-        assert!(b.ignored_keys.contains(&"DAA_RUNTIME_MODE".into()));
-        let m = b.migration.unwrap();
-        assert_eq!(m.points_origin, "env_file");
-        assert_eq!(
-            m.points,
-            super::super::application_root().join("config/owned-test.yaml")
-        );
-        std::env::set_var("DAA_PLC_CONFIG_PATH", "/private/tmp/daa003-process.yaml");
-        let (p, origin) = c.locator("DAA_PLC_CONFIG_PATH", "unused");
-        std::env::remove_var("DAA_PLC_CONFIG_PATH");
-        assert_eq!(p, PathBuf::from("/private/tmp/daa003-process.yaml"));
-        assert_eq!(origin, "process");
-        assert!(ordinary(&c, Some("legacy_snapshot".into()), profile.clone()).is_err());
-        assert!(!profile.exists());
+    fn startup_env_validation_fixture_contract() {
+        use std::{fs, process::Command};
+        const CHILD: &str = "DAA007_VALIDATION_CHILD";
+        let case = std::env::var(CHILD).ok();
+        if case.is_none() {
+            for case in ["clean", "inherited_true"] {
+                let mut command = Command::new(std::env::current_exe().unwrap());
+                command.args(["--exact", "config::local_bootstrap::startup_env_tests::startup_env_validation_fixture_contract", "--nocapture"]);
+                for (key, _) in
+                    std::env::vars_os().filter(|(k, _)| k.to_string_lossy().starts_with("DAA_"))
+                {
+                    command.env_remove(key);
+                }
+                command.env(CHILD, case);
+                if case == "inherited_true" {
+                    command.env("DAA_PLC_READ_ALLOWED", "true");
+                }
+                assert!(command.status().unwrap().success());
+            }
+            return;
+        }
+        assert!(matches!(load(vec![]), Err(e) if e == "validation_arguments_required"));
+        let profile =
+            std::env::temp_dir().join(format!("validation-bootstrap-{}", uuid::Uuid::new_v4()));
+        fs::create_dir(&profile).unwrap();
+        let env = profile.join("fixture.env");
+        let fixture = profile.join("fixture.json");
+        fs::write(&env, "DAA_RUNTIME_MODE=local_sqlite\nDAA_LOCAL_STORAGE_ENABLED=true\nDAA_PLC_READ_ALLOWED=true\n").unwrap();
+        fs::write(&fixture, "{}").unwrap();
+        let args = vec![
+            "--daa-local-validation".into(),
+            "--env-file".into(),
+            env.display().to_string(),
+            "--profile-dir".into(),
+            profile.display().to_string(),
+            "--fixture-file".into(),
+            fixture.display().to_string(),
+        ];
+        assert!(matches!(validation(&args), Err(e) if e == "validation_owner_required"));
+        fs::write(
+            profile.join(".daa-local-validation-owner"),
+            "DAA-002-r2-owned\n",
+        )
+        .unwrap();
+        if case.as_deref() == Some("inherited_true") {
+            assert!(matches!(validation(&args), Err(e) if e == "validation_inherited_environment"));
+        } else {
+            let b = validation(&args).unwrap();
+            assert!(b.read_allowed && b.validation && b.fixture.as_ref() == Some(&fixture));
+            fs::write(&env, "DAA_RUNTIME_MODE=local_sqlite\nDAA_LOCAL_STORAGE_ENABLED=true\nDAA_PLC_READ_ALLOWED=false\n").unwrap();
+            assert!(matches!(validation(&args), Err(e) if e == "validation_env_conflict"));
+            let missing_fixture = args[..args.len() - 2].to_vec();
+            assert!(
+                matches!(validation(&missing_fixture), Err(e) if e == "validation_arguments_required")
+            );
+        }
+        fs::remove_dir_all(profile).unwrap();
     }
 }

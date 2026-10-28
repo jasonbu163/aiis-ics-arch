@@ -13,7 +13,7 @@
 | [AW Runtime Principles and Design](AIIS_AW_Runtime_Design.md) | SQLite, S7 points, APIs, shared Flow Core and device execution/recovery design; no implementation claim. |
 | [DAA Detailed Design](AIIS_DAA_Detailed_Design.md) | Chinese target design for multi-PLC acquisition, dual SQLite, bounded latest-first replay and a maximum three-calendar-month Backend window; includes CU consumption, workspace/configuration pages, runtime data flows, DB-packet/batch examples and phased implementation; no implementation authorization. |
 | [SMA Detailed Design](AIIS_SMA_Detailed_Design.md) | Chinese target design for local form-based bindings, API materials/manual targets, definition checks, transformations, persistent progress/outbox and reliable business API delivery; no implementation authorization. |
-| [DS Detailed Design](AIIS_DS_Detailed_Design.md) · [User guide](../automation-world/device-simulator/USER_GUIDE.md) | 004 accepted history and r5 product design; step-by-step manual DB31 then Alpha/Beta import, native images and startup/store guidance. Current custom initial/fixed-value typing issue is disclosed; document verification and Owner acceptance are separate from prior technical QA. DAA-to-SQLite integration remains separately gated. |
+| [DS Detailed Design](AIIS_DS_Detailed_Design.md) · [User guide](../automation-world/device-simulator/USER_GUIDE.md) | Human Owner accepted DS-001 r1 and ARCH-AW-005 r5/current DS on 2026-10-27. Manual DB31 then Alpha/Beta/Measure import, policy/bulk editing, initial/fixed input and version selection remain documented. Original DEV/QA history retained; independent QA waived only for DS-001. DAA-to-SQLite integration separately gated, Stage C deferred. |
 
 
 ## Authority Boundaries

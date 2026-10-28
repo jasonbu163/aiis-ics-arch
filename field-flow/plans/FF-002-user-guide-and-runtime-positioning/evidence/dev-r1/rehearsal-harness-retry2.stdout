@@ -1,0 +1,6 @@
+python demo01 execute OK
+rust teaching01 dry_run OK
+rust teaching01 execute OK
+python teaching01 dry_run OK
+python teaching01 execute OK
+all eight scenes OK; all six fixed ports released

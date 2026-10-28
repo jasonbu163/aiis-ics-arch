@@ -1,0 +1,11 @@
+{
+  "protected581_equal": true,
+  "protected_count": 581,
+  "qa1_checklist_sha256": "bb3d6eb203e21e6bbfa4081684b566fd723daa073f2d21c9fd1024786d1b976e",
+  "qa1_unchanged": true,
+  "prior_dev_evidence_files_checked": 140,
+  "prior_dev_evidence_all_equal": true,
+  "prior_candidate_manifest_sha256": "6217888378795ca536f13079fa65b1c7a1294ea534642f1bc44671cd87627d3b",
+  "old_handoff_sha256": "64adc404ae897618dade858b8576e0950c3d5af345f95bd2fcc4814be34f8d13",
+  "spec_sha256": "de9e338f495e1ae756ff50bc12d798edefb1a2f572ec6bc6cd6fb3e150ef3b7c"
+}

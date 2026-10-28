@@ -1,10 +1,16 @@
-//! 锁后一次性迁入用例：既有SQLite先行；失败可编辑，重试须空实例及双CAS。
+//! 常驻迁入已退役：显式兼容摘要只读，retry写前拒绝；历史算法仅测试编译。
+#[cfg(test)]
 use crate::{
-    domain::{local_configuration::*, yaml_migration::*},
+    domain::{local_configuration::id, yaml_migration::MigrationPaths},
     infrastructure::{local_store::Stores, yaml_migration},
+};
+use crate::{
+    domain::{local_configuration::LocalResult, yaml_migration::MigrationSummary},
     services::local_supervisor::LocalEngine,
 };
+#[cfg(test)]
 use std::time::Instant;
+#[cfg(test)]
 fn failed(code: &str) -> MigrationSummary {
     let mut s = MigrationSummary::state("failed");
     s.error_code = Some(
@@ -17,6 +23,7 @@ fn failed(code: &str) -> MigrationSummary {
     s.diagnostic("yaml_status_persistence_unknown", "migration");
     s
 }
+#[cfg(test)]
 fn execute(
     stores: &mut Stores,
     paths: &MigrationPaths,
@@ -65,6 +72,7 @@ fn execute(
         source_sha=?summary.sources.iter().map(|s|s.sha256.clone()).collect::<Vec<_>>(), duration_ms=start.elapsed().as_millis() as u64);
     summary
 }
+#[cfg(test)]
 pub(crate) fn startup(stores: &mut Stores, paths: Option<&MigrationPaths>) -> MigrationSummary {
     let Some(paths) = paths else {
         return MigrationSummary::state("validation_excluded");
@@ -86,36 +94,13 @@ pub(crate) fn startup(stores: &mut Stores, paths: Option<&MigrationPaths>) -> Mi
 }
 impl LocalEngine {
     pub fn yaml_migration(&self) -> LocalResult<MigrationSummary> {
-        let fallback = self.migration_state.lock().unwrap().clone();
-        if fallback.status_persistence == "unknown" {
-            return Ok(fallback);
-        }
-        if self.bootstrap.validation {
-            return Ok(fallback);
-        }
-        self.storage.call(true, |s| s.yaml_summary())
+        self.storage.call(true, |s| {
+            let mut summary = s.yaml_summary()?;
+            summary.retry_allowed = false;
+            Ok(summary)
+        })
     }
-    pub fn retry_yaml(&self, etag: String, attempt: String) -> LocalResult<MigrationSummary> {
-        let paths = self
-            .bootstrap
-            .migration
-            .clone()
-            .ok_or("yaml_retry_forbidden")?;
-        let _guard = self.activation.lock().unwrap();
-        let summary = self.storage.call(false, move |s| {
-            let state = s.yaml_summary()?;
-            if s.configuration()?.etag != etag {
-                return Err("draft_conflict".into());
-            }
-            if state.attempt_id.as_deref() != Some(&attempt) {
-                return Err("yaml_attempt_conflict".into());
-            }
-            if !state.retry_allowed || !s.yaml_empty()? {
-                return Err("yaml_retry_forbidden".into());
-            }
-            Ok(execute(s, &paths, &etag, Some(&attempt), true))
-        })?;
-        *self.migration_state.lock().unwrap() = summary.clone();
-        Ok(summary)
+    pub fn retry_yaml(&self, _etag: String, _attempt: String) -> LocalResult<MigrationSummary> {
+        Err("yaml_retry_forbidden".into())
     }
 }

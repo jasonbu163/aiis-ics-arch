@@ -6,6 +6,10 @@ Field Flow（FF）用于独立维护、手写的现场流程运行程序；AW �
 
 精确 [FF-001 r4](plans/FF-001-dual-runtime-demo01/spec.md)的[双版本 Development 交接](plans/FF-001-dual-runtime-demo01/tasks.md)已通过 fresh-context [QA2](plans/FF-001-dual-runtime-demo01/checklist.md)，覆盖两工程本地 AC01–AC15。Rust 排队 IO 期限、调用前时钟保护及真实 started 统计修复后均独立复验关闭，正式/隔离全18项通过。Python48 保持，原 QA1 全量独立证据已核准，并完成新环境构建/单元/gate/CLI 复验。全部旧失败/候选保留；Human Owner 最终验收、现场验证及长期运行验收待定。
 
+Python定位为熟悉语言、练手及快速原型，本轮不做打包；Rust为后续长期部署runtime的主要建设方向。保留现有Python功能、测试和历史QA，不要求未来所有生产flow双语言同步；平台、现场、托管、容量和长稳仍需分别验收。
+
+完整对照及读者路线见[USER_GUIDE](USER_GUIDE.zh-CN.md)，自身完整步骤分别见[Rust手册](field-flow-rust/USER_GUIDE.zh-CN.md)、[Python手册](field-flow-python/USER_GUIDE.zh-CN.md)和[Rust BUILD](field-flow-rust/BUILD.zh-CN.md)。
+
 ## 两个独立实现
 
 | 工程 | 各自管理的工程面 |
@@ -13,7 +17,7 @@ Field Flow（FF）用于独立维护、手写的现场流程运行程序；AW �
 | `field-flow-rust/` | Cargo 清单/锁、Rust 源码、配置示例、测试和运行数据 |
 | `field-flow-python/` | Python 项目/uv 锁、Python 源码、配置示例、测试和运行数据 |
 
-每个实现应能独立复制、构建和启动，不依赖另一个版本的源码、可执行文件、测试服务进程、虚拟环境或可写状态，也不依赖父目录运行清单。两版保持流程行为与验收场景一致，文件和函数组织可以遵循各自语言习惯。
+每个实现应能独立复制、构建和启动，不依赖另一个版本的源码、可执行文件、测试服务进程、虚拟环境或可写状态，也不依赖父目录运行清单。当前对照案例保持行为与验收场景一致；后续不默认双实现，文件和函数可遵循各自语言习惯。
 
 [Rust 工程说明](field-flow-rust/README.zh-CN.md)和 [Python 工程说明](field-flow-python/README.zh-CN.md)分别提供独立构建、启动及验证命令。两版已实现 demo01 本地 HTTP GET → PLC INT 闭环，并通过独立本地 QA；现场验证和长期运行验收归后续阶段。
 

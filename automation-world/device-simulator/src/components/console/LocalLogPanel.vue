@@ -25,20 +25,27 @@
         </div>
       </dl>
       <ConsoleTableShell v-model:current-page="page" :page-size="50" :page-sizes="[50]" :total="local.logs?.retained||0">
-        <el-table :data="local.logs?.rows||[]">
-          <el-table-column prop="event" :label="t('simulator.event')" />
-          <el-table-column prop="instance" :label="t('simulator.instance')" />
-          <el-table-column prop="monotonic_ns" :label="t('simulator.updated')" />
-          <el-table-column prop="operationId" :label="t('simulator.operationId')" />
-        </el-table>
+        <ConsoleDataTable table-id="storage.events" :data="local.logs?.rows||[]">
+          <el-table-column column-key="event" min-width="200" prop="event" :label="t('simulator.event')" />
+          <el-table-column column-key="instance" min-width="180" prop="instance" :label="t('simulator.instance')" />
+          <el-table-column column-key="timestamp" min-width="205" :label="t('simulator.updated')">
+            <template #header><span>{{ t('simulator.updated') }} <ConsoleFieldHelp :label="t('simulator.updated')" :text="t('simulator.calendarTimeHint')" /></span></template>
+            <template #default="{row}"><span :title="row.timestamp||''">{{ formatShanghaiTime(row.timestamp)||t('simulator.calendarTimeUnavailable') }}</span></template>
+          </el-table-column>
+          <el-table-column column-key="monotonic_ns" min-width="180" align="right" prop="monotonic_ns" :label="t('simulator.monotonicTime')" />
+          <el-table-column column-key="operationId" min-width="180" prop="operationId" :label="t('simulator.operationId')" />
+        </ConsoleDataTable>
       </ConsoleTableShell>
     </div>
   </ConsoleCard>
 </template>
 <script setup lang="ts">
+import ConsoleDataTable from './ConsoleDataTable.vue';
 import { inject, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { simulatorKey } from '../../console/composables/useDeviceSimulator';
+import { formatShanghaiTime } from '../../console/time';
+import ConsoleFieldHelp from './ConsoleFieldHelp.vue';
 import ConsoleCard from './ConsoleCard.vue';
 import ConsoleActionButton from './ConsoleActionButton.vue';
 import ConsoleTableShell from './ConsoleTableShell.vue';

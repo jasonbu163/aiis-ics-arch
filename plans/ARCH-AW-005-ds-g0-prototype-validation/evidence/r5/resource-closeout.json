@@ -3,16 +3,21 @@
   "revision": "r5",
   "sourceCandidate": "306a09d5317931482a59f45da5eafcb9d3ee739199799f475ade1891fb0b00b4",
   "specSha256": "67155fe4fca3068ef8e616dcf0ade69a5cdc614e7175a2f1ef4c6bf98f935419",
-  "status": "qa_passed",
+  "status": "owner_accepted",
   "qaVerdict": "qa_passed",
-  "ownerFinalAcceptance": null,
-  "verificationState": "human_owner_final_acceptance_pending",
+  "ownerFinalAcceptance": {
+    "status": "owner_accepted",
+    "date": "2026-10-27",
+    "timeZone": "Asia/Shanghai",
+    "record": "plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md#owner-acceptance-r5"
+  },
+  "verificationState": "owner_accepted",
   "resources": [
     {
       "path": "/private/tmp/arch-aw-005-r5-exec",
-      "owner": "DEV role subtrees only",
-      "purpose": "resume builds/cache/profiles/raw and future QA references",
-      "cleanupTrigger": "coordinator ownership/dependency audit after necessary raw durable and no run/QA/integration dependency"
+      "owner": "historical DEV/QA role subtrees; per-run ownership retained",
+      "purpose": "fixed handoff artifacts, raw/profile provenance and separately gated joint-validation dependencies",
+      "cleanupTrigger": "per-member cleanup after referenced artifacts/raw are durable, reference consumers are migrated and no running or joint-validation consumer remains; see Owner closeout record"
     },
     {
       "path": "/Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence",
@@ -200,7 +205,7 @@
   "g0Retired": true,
   "cleanup": [
     "102 exact old source members retired only after archive/gate; A4/A5/P4/plans historical raw preserved",
-    "No foreign/system/user data deletion; caches/node_modules/gen/profile retained for fresh QA and separately approved integration"
+    "No foreign/system/user data deletion; receipt-linked artifacts/profiles, active development dependencies and separately gated integration inputs retained with cleanup triggers"
   ],
   "verificationRecord": {
     "checklist": {

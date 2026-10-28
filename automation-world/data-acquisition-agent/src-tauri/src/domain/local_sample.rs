@@ -1,11 +1,11 @@
-//! 本地样本v1：按点ID排序的无损JSON、SHA及同轮完整manifest；不可变字段与ACK分离。
+//! 本地样本v2：按点ID排序的无损JSON、SHA及同轮完整manifest；不可变字段与ACK分离。
 use super::local_configuration::{id, Point};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 use std::collections::BTreeMap;
 pub(crate) fn now() -> String {
-    chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true)
+    super::business_time::now()
 }
 pub(crate) fn digest(s: &str) -> String {
     format!("{:x}", Sha256::digest(s.as_bytes()))

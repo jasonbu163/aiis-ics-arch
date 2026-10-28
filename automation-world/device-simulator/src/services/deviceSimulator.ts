@@ -164,6 +164,7 @@ export interface RuntimePoint {
     pointSeq: string;
     source: number;
     updatedNs: string;
+    updatedAt: string | null;
     effective: Policy & {
         inheritedFrom: Record<string, string>;
     };

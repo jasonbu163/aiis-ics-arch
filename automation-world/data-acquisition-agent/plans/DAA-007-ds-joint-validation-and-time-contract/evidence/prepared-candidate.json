@@ -1,0 +1,20 @@
+{
+  "task": "aiis-ics-arch::DAA-007 r1",
+  "recordedAt": "2026-10-23T16:14:30.982+08:00",
+  "scope": "Coordinator integrity/preparation audit, not independent QA/native evidence",
+  "candidateImplementationAggregateSha256": "011c3238f02211125b6a3f4c23affc4614bf58cb40188d32c40cf11c600c2486",
+  "matchingImplementationPaths": 32,
+  "matchingSourceInputs": 397,
+  "approvedSpecSha256": "2976f02121a5f300ba7cbcb09b75f0499b098ad4af09b7993f8878fa9dcff5e5",
+  "ownerProfilesStillEmpty": {
+    "ds-profile": true,
+    "daa-profile": true
+  },
+  "ownerEnvSha256": "1ffdfe5f5257ac894c4004fecd82425f6b4c3fe7d1f8ad4897412752a293bea8",
+  "nativeSteps": "M01-M09 not_run",
+  "freshVerification": "not_started; exact developer_handoff follows Owner run and readonly reconciliation",
+  "durableAudit": "/Users/jason/.codex/visualizations/2026/10/16/01a143e5-5616-76c0-9df7-13b487bc9c26/daa007-r1-execution-e6s14xue/coordinator-preparation-audit.json",
+  "durableAuditSha256": "a3b8a5612e9cccd91899c355d9a639303976cc75f4d3c6600fce8fabdb6db9ef",
+  "durableDevelopmentArtifacts": "/Users/jason/.codex/visualizations/2026/10/16/01a143e5-5616-76c0-9df7-13b487bc9c26/daa007-r1-execution-e6s14xue/development/archive-manifest.json",
+  "durableDevelopmentArtifactsSha256": "04da8aa25c9507692dc11730ee3e40b490b448b526758048c495f024e63052f2"
+}

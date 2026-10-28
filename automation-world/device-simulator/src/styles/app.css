@@ -12,6 +12,9 @@ h1,h2,h3,p { margin-top:0; }
 .ds-inline>.el-select { width:min(280px,100%); }
 .ds-actions { padding:4px 0; }
 .ds-wrap { overflow-wrap:anywhere; }
+.ds-field-help { display:inline-flex;align-items:center;vertical-align:middle;border:0;background:transparent;padding:2px;color:var(--agent-text-muted);cursor:help; }
+.ds-field-help:focus-visible { outline:2px solid var(--el-color-primary);outline-offset:2px; }
+.ds-help-tooltip { max-width:min(480px,calc(100vw - 32px));white-space:pre-line;overflow-wrap:anywhere; }
 .ds-facts { display:grid;grid-template-columns:minmax(100px,180px) minmax(0,1fr);gap:8px; }
 .ds-facts dd { margin:0; }
 .ds-issues { margin:0;padding-left:20px;font-size:12px;color:var(--el-color-warning); }
@@ -33,9 +36,11 @@ h1,h2,h3,p { margin-top:0; }
 .ds-card-stack > * { min-width:0; }
 .ds-card-stack > p, .console-stack > p { margin:0; }
 .ds-card-stack > .el-empty { padding:12px 0; }
-.ds-selection-toolbar { display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;align-items:center;gap:var(--agent-action-gap);min-width:0; }
+.ds-selection-toolbar { display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto auto;align-items:end;gap:var(--agent-action-gap);min-width:0; }
+.ds-field { display:grid;gap:8px;min-width:0; }
 .ds-policy-selector { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--agent-action-gap);align-items:center; }
 .ds-selection-toolbar > .el-select,.ds-policy-selector > .el-select { width:100%;min-width:0; }
+.ds-selection-toolbar .ds-field > .el-select { width:100%;min-width:0; }
 .ds-form-grid > .el-form-item, .ds-inline > .el-form-item { margin-bottom:0;min-width:0; }
 .ds-form-grid > .el-alert { grid-column:1/-1; }
 .ds-form-grid .el-input-number,.ds-form-grid .el-select { width:100%; }
@@ -66,3 +71,31 @@ h1,h2,h3,p { margin-top:0; }
 .aw-ui .el-alert--error .el-alert__title { color:var(--agent-danger); }
 .aw-ui .el-alert--warning { border-color:var(--agent-warning); }
 .aw-ui .el-alert--warning .el-alert__title { color:var(--agent-warning); }
+
+/* DS-001筛选/批量预览使用已有主题，行内操作统一8px。 */
+.ds-policy-filter { display:grid;grid-template-columns:minmax(180px,1fr) minmax(240px,2fr);gap:var(--agent-action-gap); }
+.ds-batch-field { display:grid;grid-template-columns:minmax(140px,1fr) minmax(150px,1fr) minmax(180px,2fr);gap:var(--agent-action-gap);align-items:center; }
+.ds-policy-source { display:block;color:var(--agent-text-muted);font-size:12px;overflow-wrap:anywhere; }
+.ds-policy-error { color:var(--agent-danger); }
+.ds-actions > .console-action-button + .console-action-button { margin-left:0; }
+@media(max-width:640px){.ds-policy-filter,.ds-batch-field {grid-template-columns:1fr;} }
+
+/* DS所有表格消费CU密度/主题；水平滚动与冻结列仍由原生Element Plus维护。 */
+.ds-data-table { display:grid;gap:8px;min-width:0;max-width:100%;container-type:inline-size; }
+.ds-data-table__tools { display:flex;justify-content:flex-end;align-items:center;gap:8px;min-width:0;flex-wrap:wrap; }
+.ds-table-preference-warning { color:var(--agent-warning); }
+.ds-data-table__grid .cell { padding-left:12px;padding-right:12px; }
+.ds-data-table__grid .el-table__header .cell { white-space:nowrap; }
+.ds-data-table__grid .el-table__body .cell { overflow-wrap:normal;word-break:normal;line-height:22px; }
+.ds-data-table__grid .ds-cell-wrap .cell { white-space:normal;overflow-wrap:anywhere; }
+.ds-data-table__grid .ds-actions { flex-wrap:nowrap;padding:0;gap:8px; }
+.ds-data-table__grid .ds-actions > * { flex-shrink:0; }
+.ds-data-table__grid .ds-actions > .el-button + .el-button { margin-left:0; }
+.ds-data-table__grid td.el-table-fixed-column--right,.ds-data-table__grid td.el-table-fixed-column--left { background-color:var(--agent-surface); }
+.ds-data-table__grid tr:hover > td[class*="el-table-fixed-column--"],.ds-data-table__grid tr.hover-row > td[class*="el-table-fixed-column--"] { background-image:linear-gradient(var(--agent-table-row-hover),var(--agent-table-row-hover)); }
+.ds-table-tooltip { max-width:min(560px,calc(100vw - 32px));overflow-wrap:anywhere; }
+@container (max-width:760px){
+  /* EP冻结列使用!important；窄容器按同等优先级取消右侧冻结，避免遮住数据。 */
+  .ds-data-table__grid .el-table__cell.el-table-fixed-column--right { position:static!important; }
+  .ds-data-table__grid .el-table__cell.el-table-fixed-column--right::before { display:none; }
+}

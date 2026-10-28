@@ -1,0 +1,1 @@
+Error handling client ('127.0.0.1', 65500): Expected COTP DT, got 0x80

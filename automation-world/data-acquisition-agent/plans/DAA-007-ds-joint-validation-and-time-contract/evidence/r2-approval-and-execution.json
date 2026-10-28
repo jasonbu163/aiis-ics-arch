@@ -1,0 +1,15 @@
+{
+  "task": "aiis-ics-arch::DAA-007",
+  "revision": "r2",
+  "recordedAt": "2026-10-27T17:17:59+08:00",
+  "approvalQuote": "批准 **DAA-007 r2**，之后开始改代码",
+  "approvedDraftSha256": "29745638c38b9d4d58ada07e6f48739ce883a6391024a3caf34ccc2f0c1a04d3",
+  "registeredSpecSha256": "e1838a6af98e0f679b0750b11441c359437200d1a9d11eef618e703d70e1ccc5",
+  "scopeSections2to8Unchanged": true,
+  "actualPM": "/root/daa007_r2_pm_approval",
+  "actualDevelopment": "/root/daa007_r2_development",
+  "gate": "Development B0/P1/P2 in progress; Owner M01-M09, reconciliation, handoff and fresh Verification pending",
+  "nativeOwnerOnly": true,
+  "executionRoot": "/private/tmp/daa-007-r2-exec-odtninl_",
+  "persistentEvidenceRoot": "/Users/jason/.codex/visualizations/2026/10/16/01a143e5-5616-76c0-9df7-13b487bc9c26/daa007-r2-execution-odtninl_"
+}

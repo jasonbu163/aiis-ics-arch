@@ -3,7 +3,8 @@ Revision: r5
 Status: owner_approved
 Owner Role: PM
 Allowed Writers: PM, Human Owner
-Handoff: Human Owner approved exact r5 on 2026-10-21; hand off to Development for the approved DS product correction, automated validation and verification before G0 retirement, followed by new fresh-context Verification and Owner final acceptance; DAA–DS SQLite separately gated, Stage C excluded
+Handoff: Human Owner accepted ARCH-AW-005 r5 and the current DS delivery on 2026-10-27 after historical QA4 and subsequent DS-001/manual acceptance; acceptance-only closeout recorded in Appendix C and the owning checklist; DAA–DS SQLite separately gated, Stage C excluded
+Owner Final Acceptance: owner_accepted, 2026-10-27 (Asia/Shanghai), Appendix C
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch
@@ -2470,3 +2471,11 @@ PM已读根AGENTS/README/PLAN双语、docs/plans索引、canonical workflow、�
 本次只验步骤与当前UI/源码的一致性、双语对应、链接/图片存在和原件来源、合成案例、原产品及只读输入指纹未变；必要单次操作/取图不替代或改写已完成产品QA。不得安装依赖、修改Node/Cargo/锁、业务源码、schema或真实配置，不新增协议测试/性能结论，不开展DAA–DS SQLite联调或阶段C。若操作遇到真实产品阻断，如实记录并回主协调，不借文档授权修业务代码。
 
 Development交接文档差异、命令/操作事实及截图来源；fresh Verification仅核新增文档/截图/链接及源码未变，保留原协议证据和结论。旧产品指纹、原批准正文与历史不重算为“新文档已验证”；新文档指纹及本增量核验单列，最终仍交Human Owner接受。
+
+## 附录C. Human Owner最终验收与本轮收尾（2026-10-27）
+
+本协调会话Human Owner明确确认“DS 当前版本验收通过，更新 DS-001 和 ARCH-AW-005 r5 的状态并完成收尾，不再追加功能或重跑整套 QA”，同时明确DAA–DS读取至SQLite联调另批、阶段C暂不开展。完整原话、接受边界及资源收尾见[owning checklist的Owner验收记录](checklist.md#owner-acceptance-r5)。据真实决定，本任务聚合状态为**owner_accepted**，本spec范围状态仍为owner_approved。
+
+原独立QA4只证明其精确306a09d5候选和当时适用矩阵；r4、QA1–QA3、DEV N285失败及其它历史均保持原字节/来源，不倒填为当时已验收。附录B后续纯文字手册和初值输入问题由本地[DS-001 r1](../../automation-world/device-simulator/plans/DS-001-policy-table-and-usability/spec.md#owner-acceptance-ds001)接续；Owner已取消新增截图及该易用性任务的独立QA轮次，并在本次接受当前版本。本会话另批DIRECT时间/版本/表格整改保持各自的自检与交付边界，不把它们重标为旧QA4已独立运行。
+
+本次仅登记最终接受、同步文档/紧凑证据摘要的验收字段并核资源。原tasks和全部技术结果不重写，不再追加功能、构建、原生操作或协议/整套QA；DS可作为后续另批联调的协议基线，DAA–DS应用读取至SQLite、阶段B整体验收、阶段C、真实设备、长稳和跨平台交付仍各有其边界。

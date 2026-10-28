@@ -1,0 +1,15 @@
+{
+  "recordedAt": "2026-10-27T15:47:47.495+08:00",
+  "reason": "Preserve exact owner-approved r1 and Development state before pending r2 scope revision; not acceptance or implementation of r2",
+  "files": {
+    "spec.md": {
+      "sha256": "2976f02121a5f300ba7cbcb09b75f0499b098ad4af09b7993f8878fa9dcff5e5",
+      "bytes": 43357
+    },
+    "tasks.md": {
+      "sha256": "9149df3fe67c7fe0d8df426142ccd4b16029159038aa8ece0f3ae99fcc5d0b44",
+      "bytes": 17564
+    }
+  },
+  "checklistExisted": false
+}

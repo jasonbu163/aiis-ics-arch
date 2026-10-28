@@ -2,10 +2,12 @@
 use super::{sql_error, Stores};
 use crate::domain::{
     local_configuration::*,
-    local_sample::{digest, encode, now},
+    local_sample::{digest, encode},
     yaml_migration::*,
 };
-use rusqlite::{params, Connection};
+use rusqlite::Connection;
+#[cfg(test)]
+use {crate::domain::local_sample::now, rusqlite::params};
 fn config_empty(c: &Connection) -> LocalResult<bool> {
     let payload: String = c
         .query_row(
@@ -118,7 +120,11 @@ impl Stores {
         let empty = self.yaml_empty()?;
         if let Some(r) = r {
             let mut summary = r.summary;
-            summary.retry_allowed = empty && retryable(&summary.status);
+            summary.retry_allowed = false;
+            #[cfg(test)]
+            {
+                summary.retry_allowed = empty && retryable(&summary.status);
+            }
             return Ok(summary);
         }
         Ok(MigrationSummary::state(if empty {
@@ -127,6 +133,7 @@ impl Stores {
             "existing_sqlite_preserved"
         }))
     }
+    #[cfg(test)]
     pub fn commit_yaml(
         &mut self,
         mut candidate: Candidate,

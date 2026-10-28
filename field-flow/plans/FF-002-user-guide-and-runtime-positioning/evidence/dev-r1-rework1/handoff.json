@@ -1,0 +1,25 @@
+{
+  "task": "FF-002",
+  "revision": "r1",
+  "rework": "1",
+  "status": "developer_handoff",
+  "working_tree": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+  "head": "1fa1ce50a521ebd51c2c43389db011a76f2d74bf",
+  "spec_sha256": "de9e338f495e1ae756ff50bc12d798edefb1a2f572ec6bc6cd6fb3e150ef3b7c",
+  "qa1_checklist_sha256": "bb3d6eb203e21e6bbfa4081684b566fd723daa073f2d21c9fd1024786d1b976e",
+  "tasks_sha256": "eaa5f2c29991af3154d849c0723e24b31568104ac241e8255f0846fa1af0a764",
+  "candidate_documents_sha256": "81bf31fdd4f9479c1d3025de7df7f2f5a67001e3921781c1189e291531fcea93",
+  "evidence_manifest_sha256": "fc96938949fb58006feb2d9745b856eaa75742ed3369dcebaae72c5deb886b04",
+  "changed_docs": [
+    "field-flow/field-flow-rust/USER_GUIDE.md",
+    "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+    "field-flow/field-flow-python/USER_GUIDE.md",
+    "field-flow/field-flow-python/USER_GUIDE.zh-CN.md"
+  ],
+  "protected_audit_sha256": "f225efd77db1ae34c15b425dbe2b0fbf55290934500446c9a6dc85df7ee5f9a9",
+  "two_shell_results_sha256": "4f7c719b443abfa001229855d50b8999ec1e7dd26a4e1443dacd0ff742ca9e2d",
+  "resources_sha256": "d02e01878dcf467d38d13abff42e6ba4095b195d9f87f80f36100c5af1f9700c",
+  "prior_handoff_sha256": "64adc404ae897618dade858b8576e0950c3d5af345f95bd2fcc4814be34f8d13",
+  "private_root": "/private/tmp/ff-002-r1-dev-rework1-6jnwedny",
+  "next_gate": "new actual verification fork_turns=none; must independently close F-QA1-001 and complete full required product rehearsal; no verdict granted"
+}

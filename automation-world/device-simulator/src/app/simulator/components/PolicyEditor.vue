@@ -24,11 +24,11 @@
     </div>
     <el-form-item :label="t('simulator.initial')">
       <el-checkbox data-testid="policy-initial-override" :model-value="modelValue.initial!==null&&modelValue.initial!==undefined" @update:model-value="setInitialEnabled">{{ t('simulator.override') }}</el-checkbox>
-      <el-input v-if="modelValue.initial!==null&&modelValue.initial!==undefined" :model-value="initialText" data-testid="policy-initial" @change="setInitial" />
+      <el-input v-if="modelValue.initial!==null&&modelValue.initial!==undefined" :model-value="initialText" data-testid="policy-initial" @update:model-value="setInitial" />
     </el-form-item>
     <div v-if="modelValue.rule" class="ds-form-grid">
       <el-form-item v-if="modelValue.mode==='fixed'" :label="t('simulator.fixedValue')">
-        <el-input data-testid="rule-fixed" :model-value="String(modelValue.rule.fixedValue??'')" @change="setFixed" />
+        <el-input data-testid="rule-fixed" :model-value="fixedText" @update:model-value="setFixed" />
       </el-form-item>
       <template v-else>
         <el-form-item :label="t('simulator.minimum')">
@@ -51,53 +51,44 @@
         </el-form-item>
       </template>
     </div>
+    <el-alert :title="t('simulator.editing.modeLinkHint')" type="info" :closable="false" />
     <el-alert v-if="invalid" :title="t('simulator.errors.typed_value_invalid')" type="error" :closable="false" />
   </div>
 </template>
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Policy, Rule, Json } from '../../../services/deviceSimulator';
-const props = defineProps<{
-    modelValue: Policy;
-    dataType?: string;
-}>(), emit = defineEmits<{
-    'update:modelValue': [
-        value: Policy
-    ];
-}>(), { t } = useI18n(), invalid = ref(false);
+import type { Policy, Rule } from '../../../services/deviceSimulator';
+import { defaultScalar, modeChange, parseScalar } from '../policyEditing';
+const props = defineProps<{ modelValue: Policy; dataType?: string }>();
+const emit = defineEmits<{ 'update:modelValue': [value: Policy]; validity: [valid: boolean] }>();
+const { t } = useI18n();
 const modes = ['hold', 'fixed', 'ramp', 'sine', 'random', 'toggle'], owners = ['none', 'client', 'ui', 'rule'], flags = ['clientRead', 'clientWrite', 'uiWrite', 'uiMaintenance'] as const;
-const initialText = computed(() => String(props.modelValue.initial ?? ''));
+let lastInitial: unknown = undefined, lastFixed: unknown = undefined;
+const initialText = ref(''), fixedText = ref(''), initialInvalid = ref(false), fixedInvalid = ref(false);
+const invalid = computed(() => initialInvalid.value || fixedInvalid.value);
+watch(() => props.modelValue.initial, value => { if (!Object.is(value,lastInitial)) { initialText.value = String(value ?? ''); initialInvalid.value = false; } }, { immediate: true });
+watch(() => props.modelValue.rule?.fixedValue, value => { if (!Object.is(value,lastFixed)) { fixedText.value = String(value ?? ''); fixedInvalid.value = false; } }, { immediate: true });
+watch(invalid, value => emit('validity', !value), { immediate: true, flush: 'sync' });
 function patch(change: Partial<Policy>) { emit('update:modelValue', { ...props.modelValue, ...change }); }
-function parse(text: string): Json { if (props.dataType === 'BOOL') {
-    if (!['true', 'false', '0', '1'].includes(text))
-        throw Error();
-    return text === 'true' || text === '1';
-} if (props.dataType === 'CHAR' || props.dataType?.startsWith('STRING['))
-    return text; const n = Number(text); if (!Number.isFinite(n) || !text.trim())
-    throw Error(); return n; }
-function setInitial(text: string) { try {
-    patch({ initial: parse(text) });
-    invalid.value = false;
+function setInitial(text: string) {
+    initialText.value = text;
+    try { const value = parseScalar(props.dataType, text); initialInvalid.value = false; lastInitial=value; patch({ initial: value }); }
+    catch { initialInvalid.value = true; }
 }
-catch {
-    invalid.value = true;
-} }
-function setInitialEnabled(enabled: unknown) { patch({ initial: enabled ? (props.dataType === 'BOOL' ? false : props.dataType === 'CHAR' || props.dataType?.startsWith('STRING[') ? '' : 0) : null }); }
-function setFixed(text: string) { try {
-    rulePatch({ fixedValue: parse(text) });
-    invalid.value = false;
+function setFixed(text: string) {
+    fixedText.value = text;
+    try { const value = parseScalar(props.dataType, text); fixedInvalid.value = false; lastFixed=value; rulePatch({ fixedValue: value }); }
+    catch { fixedInvalid.value = true; }
 }
-catch {
-    invalid.value = true;
-} }
-function rulePatch(change: Partial<Rule>) { if (props.modelValue.rule)
-    patch({ rule: { ...props.modelValue.rule, ...change } }); }
-function setMode(mode: string) { if (mode === 'inherit') {
-    patch({ mode: null });
-    return;
-} if (mode === 'hold') {
-    patch({ mode: 'hold', rule: null, owner: props.modelValue.owner === 'rule' ? 'none' : props.modelValue.owner });
-    return;
-} patch({ mode: mode as Policy['mode'], owner: 'rule', clientWrite: false, uiWrite: false, uiMaintenance: false, rule: { fixedValue: props.dataType === 'BOOL' ? false : 0, min: 0, max: 1, periodMs: 1000, phase: 0, seed: '', halfPeriodMs: 500, ...props.modelValue.rule, kind: mode as Rule['kind'] } }); }
+function setInitialEnabled(enabled: unknown) {
+    initialInvalid.value = false;
+    const value=enabled ? defaultScalar(props.dataType || 'INT') : null;
+    lastInitial=undefined;initialText.value=String(value??'');patch({ initial:value });
+}
+function rulePatch(change: Partial<Rule>) { if (props.modelValue.rule) patch({ rule: { ...props.modelValue.rule, ...change } }); }
+function setMode(mode: string) {
+    fixedInvalid.value = false;
+    patch(mode === 'inherit' ? { mode: null } : modeChange(mode as NonNullable<Policy['mode']>, props.dataType));
+}
 </script>

@@ -9,35 +9,39 @@
         <el-tag>{{ t(local.snapshot?.stale?'simulator.stale':'simulator.current') }}</el-tag>
         <span>{{ t('simulator.epoch') }} {{ values?.epoch||'—' }}</span>
         <span>{{ t('simulator.seq') }} {{ values?.seq||'—' }}</span>
-        <code class="ds-wrap" data-testid="values-loaded-revision">{{ values?.loadedRevision||'—' }}</code>
+        <span data-testid="values-loaded-revision">{{ t('simulator.versionDisplay.loaded',{version:revisionLabel(values?.loadedRevision,local.configuration?.revisions)}) }} <ConsoleFieldHelp :label="t('simulator.versionDisplay.title')" :text="t('simulator.savedSelectedLoaded')+'\n'+(values?.loadedRevision||'—')" /></span>
       </div>
       <ConsoleTableShell v-model:current-page="page" v-model:page-size="local.valueLimit" :page-sizes="[10,20,50]" :total="values?.total||0">
-        <el-table class="ds-technical-table" :data="values?.rows||[]" row-key="pointId" data-testid="values-table">
-          <el-table-column prop="name" min-width="160" :label="t('simulator.name')" />
-          <el-table-column prop="dbNumber" min-width="90" :label="t('simulator.dbNumber')" />
-          <el-table-column :label="t('simulator.address')" min-width="110">
+        <ConsoleDataTable table-id="runtime.values" class="ds-technical-table" :data="values?.rows||[]" row-key="pointId" data-testid="values-table">
+          <el-table-column column-key="name" min-width="180" prop="name" :label="t('simulator.name')" />
+          <el-table-column column-key="dbNumber" min-width="90" prop="dbNumber" :label="t('simulator.dbNumber')" />
+          <el-table-column column-key="address" min-width="110" :label="t('simulator.address')">
             <template #default="{row}">{{ row.byte }}{{ row.bit===null?'':'.'+row.bit }}</template>
           </el-table-column>
-          <el-table-column prop="dataType" min-width="140" :label="t('simulator.dataType')" />
-          <el-table-column :label="t('simulator.value')" min-width="140">
+          <el-table-column column-key="dataType" min-width="110" prop="dataType" :label="t('simulator.dataType')" />
+          <el-table-column column-key="value" min-width="160" align="right" :label="t('simulator.value')">
             <template #default="{row}">
               <span :data-testid="'value-'+row.name">{{ row.value }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="pointSeq" min-width="160" :label="t('simulator.pointSeq')" />
-          <el-table-column :label="t('simulator.source')" min-width="150">
+          <el-table-column column-key="pointSeq" min-width="130" align="right" prop="pointSeq" :label="t('simulator.pointSeq')" />
+          <el-table-column column-key="source" min-width="150" :label="t('simulator.source')">
             <template #default="{row}">{{ t('simulator.sources.'+row.source) }}</template>
           </el-table-column>
-          <el-table-column prop="updatedNs" min-width="320" :label="t('simulator.updated')" />
-          <el-table-column :label="t('simulator.action')" min-width="340">
+          <el-table-column column-key="updatedAt" min-width="205" :label="t('simulator.pointUpdated')">
+            <template #header><span>{{ t('simulator.pointUpdated') }} <ConsoleFieldHelp :label="t('simulator.pointUpdated')" :text="t('simulator.pointUpdatedHint')" /></span></template>
+            <template #default="{row}">{{ formatShanghaiTime(row.updatedAt)||t('simulator.calendarTimeUnavailable') }}</template>
+          </el-table-column>
+          <el-table-column column-key="actions" width="340" :resizable="false" :show-overflow-tooltip="false" fixed="right" :label="t('simulator.action')">
+            <template #header><span>{{ t('simulator.action') }} <ConsoleFieldHelp :label="t('simulator.action')" :text="t('simulator.writeKindsHint')" /></span></template>
             <template #default="{row}">
               <div class="ds-actions"><ConsoleActionButton label-key="simulator.writeValue" size="small" data-testid="value-write" :disabled="!canWrite(row,false)" @click="open(row,false)" />
               <ConsoleActionButton label-key="simulator.maintenanceWrite" size="small" data-testid="value-maintenance" :disabled="!canWrite(row,true)" @click="open(row,true)" /></div>
             </template>
           </el-table-column>
-        </el-table>
+        </ConsoleDataTable>
       </ConsoleTableShell>
-      <p>{{ t('simulator.effectiveHint') }}</p>
+      <div class="ds-inline"><span>{{ t('simulator.policySourcesTitle') }}</span><ConsoleFieldHelp :label="t('simulator.policySourcesTitle')" :text="t('simulator.effectiveHint')" /></div>
       <el-descriptions v-for="row in values?.rows||[]" :key="row.pointId" :title="row.name" :column="2" size="small">
         <el-descriptions-item :label="t('simulator.owner')">{{ t('simulator.owners.'+row.effective.owner) }}</el-descriptions-item>
         <el-descriptions-item :label="t('simulator.mode')">{{ t('simulator.modes.'+row.effective.mode) }}</el-descriptions-item>
@@ -49,10 +53,14 @@
   </section>
 </template>
 <script setup lang="ts">
+import ConsoleDataTable from '../../../../components/console/ConsoleDataTable.vue';
 import { computed, inject, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { simulatorKey } from '../../../../console/composables/useDeviceSimulator';
 import type { RuntimePoint } from '../../../../services/deviceSimulator';
+import { formatShanghaiTime } from '../../../../console/time';
+import { revisionLabel } from '../../../../console/revisions';
+import ConsoleFieldHelp from '../../../../components/console/ConsoleFieldHelp.vue';
 import ConsoleCard from '../../../../components/console/ConsoleCard.vue';
 import ConsoleActionButton from '../../../../components/console/ConsoleActionButton.vue';
 import ConsoleTableShell from '../../../../components/console/ConsoleTableShell.vue';

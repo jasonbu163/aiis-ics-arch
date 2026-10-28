@@ -1,0 +1,117 @@
+[
+  {
+    "tag": "os",
+    "args": [
+      "uname",
+      "-a"
+    ],
+    "cwd": "/private/tmp/ff-002-r1-dev-vncfzod3",
+    "exit": 0,
+    "stdout": "Darwin Jason-MacBook.local 24.6.0 Darwin Kernel Version 24.6.0: Tue Apr 21 20:18:13 PDT 2026; root:xnu-11417.140.69.710.16~1/RELEASE_ARM64_T8132 arm64\n",
+    "stderr": ""
+  },
+  {
+    "tag": "rustc",
+    "args": [
+      "rustc",
+      "-Vv"
+    ],
+    "cwd": "/private/tmp/ff-002-r1-dev-vncfzod3/rust",
+    "exit": 0,
+    "stdout": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: aarch64-apple-darwin\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+    "stderr": ""
+  },
+  {
+    "tag": "cargo",
+    "args": [
+      "cargo",
+      "-V"
+    ],
+    "cwd": "/private/tmp/ff-002-r1-dev-vncfzod3/rust",
+    "exit": 0,
+    "stdout": "cargo 1.89.0 (c24e10642 2025-06-23)\n",
+    "stderr": ""
+  },
+  {
+    "tag": "clang",
+    "args": [
+      "clang++",
+      "--version"
+    ],
+    "cwd": "/private/tmp/ff-002-r1-dev-vncfzod3/rust",
+    "exit": 0,
+    "stdout": "Apple clang version 17.0.0 (clang-1700.4.4.1)\nTarget: arm64-apple-darwin24.6.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n",
+    "stderr": ""
+  },
+  {
+    "tag": "uv",
+    "args": [
+      "uv",
+      "--version"
+    ],
+    "cwd": "/private/tmp/ff-002-r1-dev-vncfzod3/python",
+    "exit": 0,
+    "stdout": "uv 0.7.8 (Homebrew 2025-05-23)\n",
+    "stderr": ""
+  },
+  {
+    "tag": "python-lock",
+    "args": [
+      "uv",
+      "lock",
+      "--check",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "--cache-dir",
+      "/private/tmp/ff-002-r1-dev-vncfzod3/uv-cache"
+    ],
+    "cwd": "/private/tmp/ff-002-r1-dev-vncfzod3/python",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "Resolved 16 packages in 0.79ms\n"
+  },
+  {
+    "tag": "python-versions",
+    "args": [
+      "uv",
+      "run",
+      "--locked",
+      "--python",
+      "3.11",
+      "--no-python-downloads",
+      "--cache-dir",
+      "/private/tmp/ff-002-r1-dev-vncfzod3/uv-cache",
+      "python",
+      "-c",
+      "import sys,importlib.metadata as m; print(sys.version); print({k:m.version(k) for k in (\"python-snap7\",\"httpx\",\"PyYAML\",\"pytest\")})"
+    ],
+    "cwd": "/private/tmp/ff-002-r1-dev-vncfzod3/python",
+    "exit": 0,
+    "stdout": "3.11.12 (main, May 22 2025, 01:39:08) [Clang 20.1.4 ]\n{'python-snap7': '3.0.0', 'httpx': '0.28.1', 'PyYAML': '6.0.3', 'pytest': '8.4.2'}\n",
+    "stderr": ""
+  },
+  {
+    "tag": "file",
+    "args": [
+      "file",
+      "/private/tmp/ff-002-r1-dev-vncfzod3/target-product/release/field-flow"
+    ],
+    "cwd": "/private/tmp/ff-002-r1-dev-vncfzod3/rust",
+    "exit": 0,
+    "stdout": "/private/tmp/ff-002-r1-dev-vncfzod3/target-product/release/field-flow: Mach-O 64-bit executable arm64\n",
+    "stderr": ""
+  },
+  {
+    "tag": "otool",
+    "args": [
+      "otool",
+      "-L",
+      "/private/tmp/ff-002-r1-dev-vncfzod3/target-product/release/field-flow"
+    ],
+    "cwd": "/private/tmp/ff-002-r1-dev-vncfzod3/rust",
+    "exit": 0,
+    "stdout": "/private/tmp/ff-002-r1-dev-vncfzod3/target-product/release/field-flow:\n\t/System/Library/Frameworks/Security.framework/Versions/A/Security (compatibility version 1.0.0, current version 61901.40.77)\n\t/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 2000.63.0)\n\t/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation (compatibility version 150.0.0, current version 4109.1.255)\n\t/usr/lib/libiconv.2.dylib (compatibility version 7.0.0, current version 7.0.0)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1356.0.0)\n",
+    "stderr": ""
+  }
+]

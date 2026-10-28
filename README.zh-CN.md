@@ -81,4 +81,4 @@ cargo test --manifest-path src-tauri/Cargo.toml --locked
 
 AW 的归属、CA冻结、DAA/SMA独立启动与后续边界见 [Automation World](automation-world/README.zh-CN.md)。
 
-独立 Rust/Python 现场运行程序见 [Field Flow](field-flow/README.zh-CN.md)。FF-001 r4 的两工程均已实现 demo01 本地 HTTP GET → PLC INT 闭环。Fresh-context [QA2](field-flow/plans/FF-001-dual-runtime-demo01/checklist.md)已通过精确[双版本交接](field-flow/plans/FF-001-dual-runtime-demo01/tasks.md)的 AC01–AC15，独立关闭全部三项 Rust QA1 缺陷。历史失败保留，Human Owner 最终验收、现场验证及长期运行验收待定。
+独立 Rust/Python 现场运行程序见 [Field Flow](field-flow/README.zh-CN.md)。Rust 是长期部署 runtime 的建设主线，Python 用于学习与快速原型。FF-001 r4 的两工程均已实现 demo01 本地 HTTP GET → PLC INT 闭环。Fresh-context [QA2](field-flow/plans/FF-001-dual-runtime-demo01/checklist.md)已通过精确[双版本交接](field-flow/plans/FF-001-dual-runtime-demo01/tasks.md)的 AC01–AC15，独立关闭全部三项 Rust QA1 缺陷。历史失败保留，Human Owner 最终验收、现场验证及长期运行验收待定。

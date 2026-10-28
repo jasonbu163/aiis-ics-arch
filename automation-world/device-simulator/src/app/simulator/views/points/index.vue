@@ -37,8 +37,8 @@
           <ConsoleActionButton label-key="simulator.confirmInitialPolicy" data-testid="points-confirm-initial" :disabled="local.busy||!selected.size" @click="local.save(Array.from(selected))" />
         </div>
         <ConsoleTableShell v-model:current-page="page" v-model:page-size="pageSize" :page-sizes="[10,20,50]" :total="db.points.length">
-          <el-table :data="rows" row-key="id" data-testid="points-table">
-            <el-table-column width="50">
+          <ConsoleDataTable table-id="configuration.points" :data="rows" row-key="id" data-testid="points-table">
+            <el-table-column column-key="selection" width="48" :resizable="false" :show-overflow-tooltip="false" fixed="left">
               <template #header>
                 <el-checkbox data-testid="point-select-page" :model-value="rows.length>0&&rows.every(p=>selected.has(p.id))" @change="selectPage" />
               </template>
@@ -46,22 +46,24 @@
                 <el-checkbox :model-value="selected.has(row.id)" :data-testid="'point-select-'+row.id" @change="toggle(row.id)" />
               </template>
             </el-table-column>
-            <el-table-column prop="name" :label="t('simulator.name')" />
-            <el-table-column prop="sourcePath" :label="t('simulator.sourcePath')" />
-            <el-table-column prop="dataType" :label="t('simulator.dataType')" />
-            <el-table-column :label="t('simulator.address')">
+            <el-table-column column-key="name" min-width="200" prop="name" :label="t('simulator.name')" />
+            <el-table-column column-key="sourcePath" min-width="240" prop="sourcePath" :label="t('simulator.sourcePath')" />
+            <el-table-column column-key="dataType" min-width="110" prop="dataType" :label="t('simulator.dataType')" />
+            <el-table-column column-key="address" min-width="110" :label="t('simulator.address')">
               <template #default="{row}">{{ row.byte??'—' }}{{ row.bit===null?'':'.'+row.bit }}</template>
             </el-table-column>
-            <el-table-column :label="t('simulator.confirmation')">
+            <el-table-column column-key="confirmation" min-width="120" :label="t('simulator.confirmation')">
               <template #default="{row}">{{ t(row.confirmations.initial&&row.confirmations.policy?'simulator.confirmed':'simulator.pending') }}</template>
             </el-table-column>
-            <el-table-column :label="t('simulator.action')">
+            <el-table-column column-key="actions" width="200" :resizable="false" :show-overflow-tooltip="false" fixed="right" :label="t('simulator.action')">
               <template #default="{row}">
+                <div class="ds-actions">
                 <ConsoleActionButton label-key="simulator.edit" size="small" data-testid="point-edit" @click="edit(row)" />
                 <ConsoleActionButton label-key="simulator.remove" size="small" tone="danger" :disabled="!db.manual" @click="deleting=row" />
+                </div>
               </template>
             </el-table-column>
-          </el-table>
+          </ConsoleDataTable>
         </ConsoleTableShell>
       </div>
       <el-empty v-else :image-size="64" :description="t('simulator.selectDb')" />
@@ -82,6 +84,7 @@
   </section>
 </template>
 <script setup lang="ts">
+import ConsoleDataTable from '../../../../components/console/ConsoleDataTable.vue';
 import { computed, inject, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { simulatorKey } from '../../../../console/composables/useDeviceSimulator';

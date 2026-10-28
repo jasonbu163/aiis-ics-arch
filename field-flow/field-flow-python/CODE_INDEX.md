@@ -31,3 +31,7 @@
 - [tests/unit/__init__.py](tests/unit/__init__.py)：本工程单元向量包，使pytest入口独立解析自身tests。
 - [tests/unit/test_cli_config.py](tests/unit/test_cli_config.py)：CLI空目录无副作用、严格配置/来源时间与只读状态边界。
 - [tests/unit/test_s7_int_pdu.py](tests/unit/test_s7_int_pdu.py)：固定请求/INT边界、逐长度截断、逐字段拒绝；不替代真实协议gate。
+
+## 使用文档 / Usage documentation
+
+- [USER_GUIDE.md](USER_GUIDE.md) / [中文](USER_GUIDE.zh-CN.md): 独立使用、真实方法与teaching01教程；示例接线仅在教程副本，不是正式已注册源码。

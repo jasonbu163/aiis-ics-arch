@@ -1,0 +1,14 @@
+[
+  {
+    "language": "rust",
+    "document_app_matches_built_private_source": true,
+    "document_yaml_matches_run_config": true,
+    "private_app_sha256": "8ef23efe304eb5bc278902ad38f536e4fad6692bc4b105aa386433748bd3fa44"
+  },
+  {
+    "language": "python",
+    "document_app_matches_built_private_source": true,
+    "document_yaml_matches_run_config": true,
+    "private_app_sha256": "ec1bd0b344842a39567c05cb4743b4c43c15b1b274f42206b8080c8d79eff315"
+  }
+]

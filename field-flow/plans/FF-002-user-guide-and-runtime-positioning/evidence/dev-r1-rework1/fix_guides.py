@@ -1,0 +1,17 @@
+from pathlib import Path
+R=Path('/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow')
+for lang in ('rust','python'):
+ for zh in (False,True):
+  p=R/f'field-flow-{lang}'/('USER_GUIDE.zh-CN.md' if zh else 'USER_GUIDE.md');s=p.read_text()
+  old=('A：按 ENTER，等前台夹具命令返回，生成 protocol.json。用 echo $? 核对其退出码。' if lang=='rust' else 'A：按 Ctrl-C（SIGINT）并等前台夹具命令返回，生成 report.json；也处理 SIGTERM。用 echo $? 核对其退出码。') if zh else ('A: press ENTER and wait for the fixture foreground command to return; expect protocol.json. Check its exit code using echo $?.' if lang=='rust' else 'A: press Ctrl-C (SIGINT) and wait for the fixture foreground command to return; expect report.json. SIGTERM is also handled. Check its exit code using echo $?.')
+  assert s.count(old)==2,(p,old)
+  a=('A：按 ENTER，等前台夹具命令返回，生成 protocol.json。命令返回后立即在A记录自身夹具退出码：' if lang=='rust' else 'A：按 Ctrl-C（SIGINT）并等前台夹具命令返回，生成 report.json；也处理 SIGTERM。命令返回后立即在A记录自身夹具退出码：') if zh else ('A: press ENTER and wait for the fixture foreground command to return; expect protocol.json. Immediately record the fixture exit code in A:' if lang=='rust' else 'A: press Ctrl-C (SIGINT) and wait for the fixture foreground command to return; expect report.json. SIGTERM is also handled. Immediately record the fixture exit code in A:')
+  code='\n\n```bash\nFF_FIXTURE_EXIT=$?\nprintf "fixture exit=%s\\n" "$FF_FIXTURE_EXIT"\n```\n'
+  b=('\n切回第3节一直保留的终端B（工程cwd），再执行下面的报告、端口和runtime PID检查。FF_PID只在B由本轮$!赋值，A不使用它。先核对下方打印的PID为本轮原PID且是正整数；空值或错误PID须停止，不能当“进程不存在”。有效PID的ps退出1只有在stdout/stderr均为空时才代表未找到；非法参数或权限诊断是检查失败。\n' if zh else '\nSwitch back to the same Terminal B retained from section3 (project cwd), then run the report, port and runtime PID checks below. Only B assigned FF_PID from this run’s $!; A does not use it. Verify the printed PID is the original positive integer for this run; stop on an empty or wrong PID. For a valid PID, ps exit1 means absent only when both stdout and stderr are empty; invalid-argument or permission diagnostics are check failures.\n')
+  s=s.replace(old,a+code+b)
+  s=s.replace('ps -p "$FF_PID" -o pid=,stat=,command=','printf "checking runtime PID=%s\\n" "$FF_PID"\nps -p "$FF_PID" -o pid=,stat=,command=')
+  old=('A按ENTER关闭夹具。照第3节核对报告、exit、精确PID absent与端口释放，再进入下一模式。' if lang=='rust' else 'A按Ctrl-C关闭夹具。照第3节核对报告、exit、精确PID absent与端口释放，再进入下一模式。') if zh else ('A: press ENTER to close the fixture. Verify report, exit, exact PIDs absent and port release as in section3 before the next mode.' if lang=='rust' else 'A: press Ctrl-C to close the fixture. Verify report, exit, exact PIDs absent and port release as in section3 before the next mode.')
+  new=('A按ENTER关闭夹具，返回后立即按第3节在A记录FF_FIXTURE_EXIT；再切回保留本轮FF_PID的B核对报告、有效精确PID和端口释放，完成后才进下一模式。A不使用B的FF_PID。' if lang=='rust' else 'A按Ctrl-C关闭夹具，返回后立即按第3节在A记录FF_FIXTURE_EXIT；再切回保留本轮FF_PID的B核对报告、有效精确PID和端口释放，完成后才进下一模式。A不使用B的FF_PID。') if zh else ('A: press ENTER to close the fixture and immediately record FF_FIXTURE_EXIT in A as in section3. Then switch back to B, which retained this run’s FF_PID, to check reports, valid exact PIDs and port release before the next mode. A does not use B’s FF_PID.' if lang=='rust' else 'A: press Ctrl-C to close the fixture and immediately record FF_FIXTURE_EXIT in A as in section3. Then switch back to B, which retained this run’s FF_PID, to check reports, valid exact PIDs and port release before the next mode. A does not use B’s FF_PID.')
+  assert s.count(old)==2,(p,'teaching closure');s=s.replace(old,new)
+  p.write_text(s)
+print('four guide terminal ownership corrections applied')

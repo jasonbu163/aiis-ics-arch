@@ -3,10 +3,15 @@
   "revision": "r5",
   "sourceCandidate": "306a09d5317931482a59f45da5eafcb9d3ee739199799f475ade1891fb0b00b4",
   "specSha256": "67155fe4fca3068ef8e616dcf0ade69a5cdc614e7175a2f1ef4c6bf98f935419",
-  "status": "qa_passed",
+  "status": "owner_accepted",
   "qaVerdict": "qa_passed",
-  "ownerFinalAcceptance": null,
-  "verificationState": "human_owner_final_acceptance_pending",
+  "ownerFinalAcceptance": {
+    "status": "owner_accepted",
+    "date": "2026-10-27",
+    "timeZone": "Asia/Shanghai",
+    "record": "plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md#owner-acceptance-r5"
+  },
+  "verificationState": "owner_accepted",
   "archives": {
     "dev-run-0001": "0470d4ed5b74a01f2f72b04e81b755b8d15630bef5792b4f03f523daeaa8b5a0",
     "dev-run-0002": "58b6a070e8ce44f89efd20956bb4760f3ca4fcbd940bb5d09676dd1d8c48518a",

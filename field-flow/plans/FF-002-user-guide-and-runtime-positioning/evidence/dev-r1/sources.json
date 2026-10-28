@@ -1,0 +1,10 @@
+{
+  "official_urls": [
+    "https://doc.rust-lang.org/cargo/commands/cargo-build.html",
+    "https://doc.rust-lang.org/rustc/platform-support.html"
+  ],
+  "rust_snap7_version": "1.142.2",
+  "cargo_checksum": "8c4d43b3a99825abd300d57a0888eda7b625b7cdbf56ee7766bd02331ac58243",
+  "native_build_source": "/Users/jason/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rust-snap7-1.142.2/build.rs",
+  "native_build_sha256": "62aa125e5ecf01b3d2690bd3360b39aa83e525836d7f7d93bddff20b08ed00f7"
+}

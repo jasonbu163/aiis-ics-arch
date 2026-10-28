@@ -1,16 +1,16 @@
 Task ID: ARCH-AW-005
 Revision: r5
-Status: qa_passed
+Status: owner_accepted
 Owner Role: QA / Verification
 Allowed Writers: QA / Verification, Human Owner
-Handoff: QA4 independently closes F-r5-003 and completes all required r5 validation; qa_passed; Human Owner final acceptance pending
+Handoff: Historical QA4 remains qa_passed; Human Owner accepted ARCH-AW-005 r5 and the current DS version on 2026-10-27; acceptance-only closeout below, with no additional QA
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch
 
 # ARCH-AW-005 Verification
 
-当前结论见本文末 r5 QA4；下方完整 r4 及 r5 QA1/QA2/QA3 历史保留其原时点状态，不作为本轮通过。
+当前最终接受见本文末Owner验收与收尾；原独立技术结论见r5 QA4。下方完整r4及r5 QA1/QA2/QA3/QA4历史保留其原时点状态，Owner接受不改写任何历史测试或QA结论。
 
 <details>
 <summary>r4 完整历史原文</summary>
@@ -672,3 +672,45 @@ K01–K10 均 **pass**：K01=A61/62/64+派生pin；K02=A60真实SQLite/跨进程
 失败史与限制：DEV N285 同源/同binary几何20s等待超时、TERM收尾的失败仍完整保留，N286为未改源码/driver/阈值的单次重试成功，根因未知；本轮 QA 三个 N 全通过，不将 DEV 写成连续无失败或已证瞬态。G0已退役102路径的原件1635298B与迁移闭合核对通过，不再次删除。默认数据目录只有 API/解析事实；实际原生使用新 owned profile，未触真实默认用户库。macOS15.7.7 arm64/Mac16,12，10核/32GiB；Rust1.89/Node22.19/pnpm11.11与锁固定。没有跨平台、完整L1–L5/8×16长负载、真实PLC/DAA app→SQLite/阶段C/发布部署或Git refs能力声明。
 
 所有实际测试结束后已立即通知协调；协调按 Owner 授权核完整 PID/argv/lstart 后精确撤销本轮 awake，随后 ps exit1 全空；这是 **coordinator-origin** 事实，未捕获子进程退出码，不宣称 exit0，QA未再启动awake。QA于10:23:44UTC的最终实际观察：自有 DS/test/launcher匹配为空，30102/30103/30104/15194/14194逐口 lsof exit1且 stdout/stderr空；原生每轮真实正常 close/DB释放另有原件。QA own stage/cache/targets/profiles/SQLite/WK stores/raw全部保留供协调按实际依赖收尾，未杀外来进程或删除资源。foreign Tool/共享并发变化保留且不归因本任务。**本轮 qa_passed 交 Human Owner 最终验收，Owner final acceptance pending；最终 receipt 封存后停止所有写入。**
+
+<a id="owner-acceptance-r5"></a>
+## Human Owner r5最终验收与资源收尾（2026-10-27，Asia/Shanghai）
+
+本协调会话Human Owner直接确认：
+
+> 可以，DS 当前版本验收通过，更新 DS-001 和 ARCH-AW-005 r5 的状态并完成收尾，不再追加功能或重跑整套 QA。DAA–DS 的 S7 读取至 SQLite 联调另批，阶段 C 暂不开展。
+
+**Owner final acceptance：owner_accepted。** 本段由当前主协调按Human Owner明确指令代录，仅机械同步验收字段/索引并盘点资源，不是新的Verification turn或QA verdict。原QA4的qa_passed、精确306a09d5候选、45AC/K01–K10/原19case及全部失败历史保持其原时间与证据边界。原QA交接checklist全字节副本仍在A5/qa-run-0109/checklist.md，SHA `0cdec7014a9e54365c4460f58e224280c9826b42f25f10247752133fa3f0c527`；该archive inventory SHA `55081e5ddf111da0c78b3ff4e69b2882623571724e83e4f9b6565106a4a25717`本轮只读复核一致。五份P5的verificationRecord继续固定原QA交接身份，本次Owner决定由ownerFinalAcceptance字段单独引用本节。
+
+### 接受对象及未扩大的边界
+
+- ARCH-AW-005 r5的产品实施、Rust runtime/Snap7协议基线及已完成G0退役获最终接受；后续[DS-001 r1](../../automation-world/device-simulator/plans/DS-001-policy-table-and-usability/spec.md#owner-acceptance-ds001)和本会话另批DIRECT整改随“DS当前版本”一并接受。实际交付仍在约定正式源码工作树，不是新发布commit/tag。
+- 原附录B的纯文字手册/初值输入修复由DS-001接续；新增截图要求已由Owner取消，DS-001仅作必要开发自检＋手册＋Owner人工验收。没有补造独立文档QA、逐项人工操作原始结果或把后续DIRECT代码重标为旧QA4候选。
+- DS有限协议基线可交给后续另批联调使用；DAA应用S7读取至SQLite及其独立核验/验收归DAA任务，阶段B整体未随本次关闭，阶段C暂不开展。跨机器、完整PLC CPU、8×16长负载、真实设备、跨平台打包、发布及部署仍不由本次接受授予。
+
+### 本轮资源盘点与处置
+
+| 资源 | 本轮事实与处置 | 保留原因及清理触发条件 |
+| --- | --- | --- |
+| 正式DS源码、node_modules、dist、src-tauri/target及gen | 保留，未删除或改造 | 正常启动与另批联调仍需要；不能把活动开发依赖当作一次性缓存清除。 |
+| 当前DS开发服务15194 | 只读核PID78579、argv和cwd，确认为本工程Vite；不是本轮创建，保留，未发送信号 | 用户当前开发环境；停止或切换由用户正常操作决定。该listener不冒充本轮协议运行或历史测试残留。 |
+| 本轮临时保持唤醒/历史r3–r5测试进程 | `/bin/ps`核对未见历史exec根、ds-test-host或caffeinate的实际匹配；匹配输出仅核查命令本身 | 本轮没有启动任何应用、测试或awake进程，无需停止用户窗口。初次受沙箱限制的ps失败未当作空进程证据，随后仅对只读观察使用许可后的真实结果。 |
+| 13表格DIRECT临时服务和独立页 | 原交付已关闭；本轮15196、14194未见listener | 合成表格图仍在专属visualizations目录；保留为有限组件检查证据，不冒充原生测试。 |
+| G0旧入口 | 正式`automation-world/device-simulator/g0`仍不存在；原102成员退役证据与恢复原件保留 | 已完成退役，本轮不再次删除或改写历史。 |
+| A4/A5持久证据及QA1–QA4、旧图/失败原件 | 保留；QA109原checklist和inventory实际存在且SHA匹配 | 唯一历史证据、审计和回退依据；后续联调验收前不清除。 |
+| `/private/tmp/arch-aw-005-r5-exec` | 保留其已有stage/build/cache/profile/runs/tmp/coordinator，当前未运行旧测试 | 旧receipt、可复现产物及原件引用仍依赖这些路径，且另批联调尚未收尾；待引用迁入持久证据、无后续消费者后按成员清理，禁止整体盲删。 |
+| `/private/tmp/arch-aw-005-r3-exec`、`/private/tmp/arch-aw-005-r4-exec` | 当前存在，保留 | 旧候选/失败/迁移和恢复链仍保留原路径引用；仅在对应引用/恢复消费者迁移后核归属回收。 |
+| r2旧包、WebKit stores及用户库 | 历史r2下载包路径当前不存在，本轮未删除；已归属测试stores仍保留，未知/系统stores及用户默认配置/日志未触达 | 不把缺失旧路径说成本轮清理，不猜测UUID或删除用户数据；按原resource-closeout保留条件后续处理。 |
+
+本轮仅新增一个自有文档核对临时目录用于修改前哈希清单，核对结束后回收；结果写入本轮协调交付，不以临时目录作为唯一证据。没有删除共享依赖、数据库、历史、分支或worktree。未改源码、测试、权限、schema、依赖/锁或其它任务；未追加构建、协议矩阵、原生操作或整套QA。必要检查限于状态/引用/JSON、历史原字节保护、git diff空白及本次改动范围；未运行项不补记pass。
+
+### 本轮协调必要检查结果
+
+| 实际命令/观察 | 退出码及结果 |
+| --- | --- |
+| 仓库根`python3 -`标准库内联验收/链接/哈希核对 | exit0：本轮只改变25份文档/验收JSON；470处本地链接及34处明确验收锚点可达，5份JSON可解析且Owner状态一致；两份spec保留owner_approved，DS-001无新checklist，tasks、源码/权限/协议/schema/依赖及其它所有已跟踪/未忽略文件保持修改前SHA，HEAD未变。 |
+| 同一内联核对的历史保护项 | exit0：原QA109的checklist全文件SHA匹配，当前checklist的完整r4/QA1–QA4历史正文逐字保留；五P5的qaVerdict和306a09d5身份未改；G0仍不存在。 |
+| 根`git diff --check` | exit0；仅空白/格式核对。 |
+| `/usr/sbin/lsof -nP -iTCP:15196 -sTCP:LISTEN`及14194同式 | 两次均exit1、输出为空；未启动或重跑服务/测试。15194另有既有Vite，按上述真实PID/cwd观察保留。 |
+
+修改前2808文件哈希清单已持久保留在[协调收尾清单](</Users/jason/.codex/visualizations/2026/10/18/01a14e52-eeb4-7c82-bade-bc0a237fa2ff/arch-aw-005-r5-evidence/coordinator-owner-closeout-20261027/before.json>)，SHA `4bf0e9addd32228800b08ca278c5c82f4ebc366c3e24ca91cb2115cf3332c7a7`。该小型清单用于审计本次文档收尾未改代码，不替代技术QA原件；临时副本在核对结束后删除。初次辅助尝试把全清单打印到工具输出导致截断/JSON解析失败，未写仓库；随后改为文件清单并完成上述真实exit0检查，未把失败尝试计为通过。

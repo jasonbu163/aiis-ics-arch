@@ -1,0 +1,5 @@
+Field Flow Python
+field-flow [--lang en-US|zh-CN] --help
+初始化新合成库：field-flow state init --synthetic --mode dry_run|execute --state-dir NEW --instance-id ID
+只读查看：field-flow state inspect --state-dir PATH
+运行：field-flow run --config FILE --state-dir PATH [--execute]

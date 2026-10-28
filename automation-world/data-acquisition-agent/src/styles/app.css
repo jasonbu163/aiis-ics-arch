@@ -97,3 +97,8 @@ h1,h2,h3,p { margin-top:0; }
 .daa-name-dialog .muted-cell { display: block; margin-top: 4px; overflow-wrap: anywhere; }
 .daa-name-dialog .console-action-group { flex-wrap: wrap; justify-content: flex-end; }
 @media (max-width: 1000px) { .daa-name-dialog .el-dialog__footer { padding-top: var(--agent-card-padding); } }
+
+/* 历史表保持业务列最小宽度并使用表内横向滚动；时间筛选不压缩。 */
+.daa-history-table { width: 100%; }
+.daa-local-filters .el-date-editor { min-width: 210px; }
+.daa-history-pagination .row-actions { flex-wrap: wrap; }

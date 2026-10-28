@@ -21,7 +21,7 @@
           <p class="daa-capability-note">{{ t('common.local.retentionNote') }}</p>
         </ElCollapseItem>
         <ElCollapseItem name="files" :title="t('common.local.storageDetails')">
-          <dl class="daa-local-facts"><template v-for="key in ['mainBytes', 'journalBytes', 'configBytes', 'configJournalBytes', 'logBytes', 'reservedBytes', 'freeBytes', 'pendingBytes'] as const" :key="key"><dt>{{ t('common.local.' + key) }}</dt><dd>{{ local.formatBytes(local.snapshot?.capacity[key]) }}</dd></template><dt>{{ t('common.local.oldestPending') }}</dt><dd>{{ local.snapshot?.capacity.oldestPending ?? '—' }}</dd></dl>
+          <dl class="daa-local-facts"><template v-for="key in ['mainBytes', 'journalBytes', 'configBytes', 'configJournalBytes', 'logBytes', 'reservedBytes', 'freeBytes', 'pendingBytes'] as const" :key="key"><dt>{{ t('common.local.' + key) }}</dt><dd>{{ local.formatBytes(local.snapshot?.capacity[key]) }}</dd></template><dt>{{ t('common.local.oldestPending') }}</dt><dd>{{ formatBusinessTime(local.snapshot?.capacity.oldestPending) }}</dd></dl>
         </ElCollapseItem>
       </ElCollapse>
     </ConsoleCard>
@@ -36,6 +36,7 @@ import ConsoleMetricCard from '../../../../components/console/ConsoleMetricCard.
 import LocalHistoryPanel from '../../../../components/console/LocalHistoryPanel.vue';
 import LocalLogPanel from '../../../../components/console/LocalLogPanel.vue';
 import { inject } from 'vue';
+import { formatBusinessTime } from '../../../../console/time';
 import { localConsoleKey } from '../../../../console/composables/useLocalAcquisitionConsole';
 const local = inject(localConsoleKey);
 import { Tickets } from '@element-plus/icons-vue';

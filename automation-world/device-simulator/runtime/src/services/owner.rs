@@ -16,7 +16,7 @@ use std::{
     collections::{BTreeMap, BTreeSet, VecDeque},
     sync::{Arc, Condvar, Mutex},
     thread::{self, JoinHandle},
-    time::Duration,
+    time::{Duration, SystemTime},
 };
 pub struct Job {
     pub request: Request,
@@ -328,6 +328,7 @@ impl Owner {
         out.seq = s.image.seq;
         out.ok = true;
         let now = clock::ns();
+        let updated_at = SystemTime::now();
         let db = s.image.dbs.get_mut(&access.db).unwrap();
         if r.bit.is_some() {
             let mask = 1 << (r.start % 8);
@@ -341,6 +342,7 @@ impl Owner {
             point.seq = out.seq;
             point.source = r.source;
             point.updated = now;
+            point.updated_at = updated_at;
         }
         let committed = hex(&db.bytes[access.begin..access.end]);
         s.generation += 1;
@@ -500,7 +502,7 @@ impl Owner {
     }
     pub fn values(&self, offset: usize, limit: usize) -> Value {
         let s = self.state.lock().unwrap();
-        let rows=s.config.dbs.iter().flat_map(|(number,db)|db.points.iter().enumerate().map(move|(index,p)|(*number,index,p))).skip(offset).take(limit.min(100)).map(|(number,index,p)|{let state=&s.image.dbs[&number].points[index];json!({"pointId":p.config.id,"dbNumber":number,"byte":p.byte,"bit":p.bit,"name":p.config.name,"dataType":p.config.data_type,"value":s.image.typed(number,index,p).ok(),"pointSeq":state.seq.to_string(),"source":state.source as i32,"updatedNs":state.updated.to_string(),"effective":p.policy})}).collect::<Vec<_>>();
+        let rows=s.config.dbs.iter().flat_map(|(number,db)|db.points.iter().enumerate().map(move|(index,p)|(*number,index,p))).skip(offset).take(limit.min(100)).map(|(number,index,p)|{let state=&s.image.dbs[&number].points[index];json!({"pointId":p.config.id,"dbNumber":number,"byte":p.byte,"bit":p.bit,"name":p.config.name,"dataType":p.config.data_type,"value":s.image.typed(number,index,p).ok(),"pointSeq":state.seq.to_string(),"source":state.source as i32,"updatedNs":state.updated.to_string(),"updatedAt":clock::calendar_timestamp_at(state.updated_at),"effective":p.policy})}).collect::<Vec<_>>();
         json!({"instanceId":self.instance,"loadedRevision":s.image.loaded_revision,"epoch":s.image.epoch.to_string(),"seq":s.image.seq.to_string(),"rows":rows,"total":s.config.point_index.len(),"stale":false})
     }
     pub fn write_point(
@@ -597,5 +599,127 @@ impl Owner {
         } else {
             true
         }
+    }
+}
+
+#[cfg(test)]
+mod point_calendar_tests {
+    use super::*;
+    use crate::domain::{
+        configuration::InstanceConfig,
+        layout::{CompiledDb, CompiledPoint, Span},
+    };
+
+    #[test]
+    fn point_calendar_tracks_commit_and_reset_but_not_refresh_or_rejection() {
+        // 纯内存owner：不创建监听器、配置库或桌面窗口。
+        let config: InstanceConfig = serde_json::from_value(json!({
+            "id":"calendar-instance", "name":"Calendar", "port":30102,
+            "dbs":[{"id":"calendar-db", "name":"Manual", "number":31, "length":2,
+                "points":[{"id":"calendar-point", "name":"Setpoint_Int", "dataType":"INT", "byte":0,
+                    "policy":{"mode":"hold", "owner":"ui", "uiWrite":true, "initial":7}}]}]
+        }))
+        .unwrap();
+        let point = config.dbs[0].points[0].clone();
+        let policy =
+            crate::domain::layout::effective_policy(&config, &config.dbs[0], &point).unwrap();
+        let compiled = CompiledInstance {
+            config,
+            dbs: [(
+                31,
+                CompiledDb {
+                    id: "calendar-db".into(),
+                    number: 31,
+                    length: 2,
+                    structure_sha256: String::new(),
+                    layout_sha256: String::new(),
+                    points: vec![CompiledPoint {
+                        config: point,
+                        byte: 0,
+                        bit: None,
+                        width: 2,
+                        initial: vec![0, 7],
+                        policy,
+                    }],
+                    coverage: vec![Span {
+                        first: 0,
+                        end: 16,
+                        point: 0,
+                    }],
+                },
+            )]
+            .into(),
+            point_index: [("calendar-point".into(), (31, 0))].into(),
+            rule_points: vec![],
+            allocation_upper: 0,
+        };
+        let owner = Owner::new(
+            Arc::new(compiled),
+            "calendar-revision".into(),
+            Evidence::default(),
+        )
+        .unwrap();
+        let initialized = owner.values(0, 1);
+        // 固定旧日期，避免依赖sleep或两次操作是否落在同一毫秒。
+        owner
+            .state
+            .lock()
+            .unwrap()
+            .image
+            .dbs
+            .get_mut(&31)
+            .unwrap()
+            .points[0]
+            .updated_at = std::time::UNIX_EPOCH;
+        let before = owner.values(0, 1);
+        owner.control("start", 0);
+        let result = owner.write_point(
+            "calendar-point",
+            &json!(12),
+            "calendar-revision",
+            1,
+            0,
+            false,
+        );
+        let committed = owner.values(0, 1);
+        let rejected = owner.write_point(
+            "calendar-point",
+            &json!(13),
+            "calendar-revision",
+            1,
+            0,
+            false,
+        );
+        let refreshed = owner.values(0, 1);
+        owner.control("stop", 0);
+        owner.control("reset", 0);
+        let reset = owner.values(0, 1);
+        assert!(owner.shutdown());
+        assert!(initialized["rows"][0]["updatedAt"]
+            .as_str()
+            .unwrap()
+            .ends_with("+08:00"));
+        assert!(result.unwrap().ok);
+        assert_eq!(committed["rows"][0]["value"], 12);
+        assert_ne!(
+            committed["rows"][0]["updatedAt"],
+            before["rows"][0]["updatedAt"]
+        );
+        assert!(
+            committed["rows"][0]["updatedNs"]
+                .as_str()
+                .unwrap()
+                .parse::<u64>()
+                .unwrap()
+                > 0
+        );
+        assert!(rejected.is_err());
+        assert_eq!(refreshed["rows"][0], committed["rows"][0]);
+        assert_eq!(reset["epoch"], "2");
+        assert_eq!(reset["rows"][0]["value"], 7);
+        assert!(reset["rows"][0]["updatedAt"]
+            .as_str()
+            .unwrap()
+            .ends_with("+08:00"));
     }
 }

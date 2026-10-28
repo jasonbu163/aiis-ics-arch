@@ -1,0 +1,7 @@
+Field Flow（本地合成运行时）
+用法：
+  field-flow [--lang en-US|zh-CN] --help
+  field-flow state init --synthetic --mode dry_run|execute --state-dir 新目录 --instance-id 标识
+  field-flow state inspect --state-dir 目录
+  field-flow run --config 文件 --state-dir 目录 [--execute]
+运行前必须显式初始化状态目录。使用SIGINT或SIGTERM停止。

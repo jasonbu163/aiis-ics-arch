@@ -24,7 +24,7 @@ pub fn run_headless_command(args: impl IntoIterator<Item = String>) -> Result<bo
 pub fn run_headless_runtime() -> i32 {
     eprintln!(
         "{}",
-        serde_json::json!({"event":"legacy_entry_rejected","process":"daa","resource":"headless","result":"rejected","error_code":"legacy_entry_retired","next":"Use pnpm tauri dev; YAML is a one-time migration source"})
+        serde_json::json!({"event":"legacy_entry_rejected","process":"daa","resource":"headless","result":"rejected","error_code":"legacy_entry_retired","next":"Use pnpm tauri dev; configure PLCs in UI and SQLite"})
     );
     2
 }
@@ -90,12 +90,23 @@ pub fn run() {
             config::local_bootstrap::load(std::env::args().skip(1).collect())
                 .expect("invalid runtime bootstrap")
         });
-    let local = services::local_recovery::open(bootstrap.clone()).expect("local runtime refused");
+    let (local, startup_error) = match services::local_recovery::open(bootstrap.clone()) {
+        Ok(engine) => (Some(engine), None),
+        Err(error) if error.starts_with("time_profile_unsupported:") => {
+            eprintln!(
+                "{}",
+                serde_json::json!({"event":"runtime_rejected","process":"daa","resource":"profile","result":"rejected","error_code":error})
+            );
+            (None, Some(error))
+        }
+        Err(error) => panic!("local runtime refused: {error}"),
+    };
     let shutdown = local.clone();
     tauri::Builder::default()
         .manage(commands::local_acquisition::LocalState {
             bootstrap,
-            engine: Some(local),
+            engine: local,
+            startup_error,
         })
         .invoke_handler(tauri::generate_handler![
             commands::local_acquisition::daa_get_bootstrap,
@@ -125,7 +136,9 @@ pub fn run() {
                 event,
                 tauri::RunEvent::ExitRequested { .. } | tauri::RunEvent::Exit
             ) {
-                shutdown.shutdown();
+                if let Some(engine) = &shutdown {
+                    engine.shutdown();
+                }
             }
         });
 }

@@ -1,0 +1,264 @@
+--- before/field-flow/field-flow-rust/USER_GUIDE.md
++++ after/field-flow/field-flow-rust/USER_GUIDE.md
+@@ -87,12 +87,21 @@
+ printf "runtime exit=%s\n" "$FF_EXIT"
+ "$FF_BIN" state inspect --state-dir "$FF_LESSON/dry-lesson/state"
+ ```
+-A: press ENTER and wait for the fixture foreground command to return; expect protocol.json. Check its exit code using echo $?.
++A: press ENTER and wait for the fixture foreground command to return; expect protocol.json. Immediately record the fixture exit code in A:
++
++```bash
++FF_FIXTURE_EXIT=$?
++printf "fixture exit=%s\n" "$FF_FIXTURE_EXIT"
++```
++
++Switch back to the same Terminal B retained from section3 (project cwd), then run the report, port and runtime/driver/server PID checks below. Only B assigned FF_PID from this run’s $!; A does not use it. Verify the printed PID is the original positive integer for this run; stop on an empty or wrong PID. For a valid PID, ps exit1 means absent only when both stdout and stderr are empty; invalid-argument or permission diagnostics are check failures.
++
+ 
+ ```bash
+ cat "$FF_LESSON/dry-lesson/fixture/protocol.json"
+ cat "$FF_LESSON/dry-lesson/stderr.txt"
+ lsof -nP -iTCP:31102 -iTCP:31103 -iTCP:31880 -sTCP:LISTEN
++printf "checking runtime PID=%s\n" "$FF_PID"
+ ps -p "$FF_PID" -o pid=,stat=,command=
+ ```
+ Expected: inspect counts simulated=1, fixture writes/applied=0. Normal runtime and fixture exit 0; no listener and recorded runtime PID absent. Also extract driver_ready PID from stdout.jsonl (Rust context is a JSON string) and native_pid from Rust protocol.json; use ps -p on each exact PID and require absence.  Sending SIGINT alone is not release evidence.
+@@ -117,12 +126,21 @@
+ printf "runtime exit=%s\n" "$FF_EXIT"
+ "$FF_BIN" state inspect --state-dir "$FF_LESSON/execute-lesson/state"
+ ```
+-A: press ENTER and wait for the fixture foreground command to return; expect protocol.json. Check its exit code using echo $?.
++A: press ENTER and wait for the fixture foreground command to return; expect protocol.json. Immediately record the fixture exit code in A:
++
++```bash
++FF_FIXTURE_EXIT=$?
++printf "fixture exit=%s\n" "$FF_FIXTURE_EXIT"
++```
++
++Switch back to the same Terminal B retained from section3 (project cwd), then run the report, port and runtime/driver/server PID checks below. Only B assigned FF_PID from this run’s $!; A does not use it. Verify the printed PID is the original positive integer for this run; stop on an empty or wrong PID. For a valid PID, ps exit1 means absent only when both stdout and stderr are empty; invalid-argument or permission diagnostics are check failures.
++
+ 
+ ```bash
+ cat "$FF_LESSON/execute-lesson/fixture/protocol.json"
+ cat "$FF_LESSON/execute-lesson/stderr.txt"
+ lsof -nP -iTCP:31102 -iTCP:31103 -iTCP:31880 -sTCP:LISTEN
++printf "checking runtime PID=%s\n" "$FF_PID"
+ ps -p "$FF_PID" -o pid=,stat=,command=
+ ```
+ Expected: inspect counts confirmed=1, fixture writes/applied=1 and value bytes 00 2a at DB1 offset 0. Normal runtime and fixture exit 0; no listener and recorded runtime PID absent. Also extract driver_ready PID from stdout.jsonl (Rust context is a JSON string) and native_pid from Rust protocol.json; use ps -p on each exact PID and require absence.  Sending SIGINT alone is not release evidence.
+@@ -343,7 +361,7 @@
+ printf "runtime exit=%s\n" "$?"
+ "$FF_BIN" state inspect --state-dir "$FF_LESSON/dry-lesson/state"
+ ```
+-A: press ENTER to close the fixture. Verify report, exit, exact PIDs absent and port release as in section3 before the next mode.
++A: press ENTER to close the fixture and immediately record FF_FIXTURE_EXIT in A as in section3. Then switch back to B, which retained this run’s FF_PID, to check reports, valid exact PIDs and port release before the next mode. A does not use B’s FF_PID.
+ 
+ **execute — A**
+ 
+@@ -361,7 +379,7 @@
+ printf "runtime exit=%s\n" "$?"
+ "$FF_BIN" state inspect --state-dir "$FF_LESSON/execute-lesson/state"
+ ```
+-A: press ENTER to close the fixture. Verify report, exit, exact PIDs absent and port release as in section3 before the next mode.
++A: press ENTER to close the fixture and immediately record FF_FIXTURE_EXIT in A as in section3. Then switch back to B, which retained this run’s FF_PID, to check reports, valid exact PIDs and port release before the next mode. A does not use B’s FF_PID.
+ 
+ Expect simulated1/write0 in dry-run, confirmed1/write1 in execute, and inspect meta.instance_id=ff-rust-teaching01. Fixture load and product startup validate kind; Rust compilation alone does not validate YAML. Preserve old state; no schema/driver/API change is required.
+ 
+--- before/field-flow/field-flow-rust/USER_GUIDE.zh-CN.md
++++ after/field-flow/field-flow-rust/USER_GUIDE.zh-CN.md
+@@ -87,12 +87,21 @@
+ printf "runtime exit=%s\n" "$FF_EXIT"
+ "$FF_BIN" state inspect --state-dir "$FF_LESSON/dry-lesson/state"
+ ```
+-A：按 ENTER，等前台夹具命令返回，生成 protocol.json。用 echo $? 核对其退出码。
++A：按 ENTER，等前台夹具命令返回，生成 protocol.json。命令返回后立即在A记录自身夹具退出码：
++
++```bash
++FF_FIXTURE_EXIT=$?
++printf "fixture exit=%s\n" "$FF_FIXTURE_EXIT"
++```
++
++切回第3节一直保留的终端B（工程cwd），再执行下面的报告、端口和runtime/driver/server PID检查。FF_PID只在B由本轮$!赋值，A不使用它。先核对下方打印的PID为本轮原PID且是正整数；空值或错误PID须停止，不能当“进程不存在”。有效PID的ps退出1只有在stdout/stderr均为空时才代表未找到；非法参数或权限诊断是检查失败。
++
+ 
+ ```bash
+ cat "$FF_LESSON/dry-lesson/fixture/protocol.json"
+ cat "$FF_LESSON/dry-lesson/stderr.txt"
+ lsof -nP -iTCP:31102 -iTCP:31103 -iTCP:31880 -sTCP:LISTEN
++printf "checking runtime PID=%s\n" "$FF_PID"
+ ps -p "$FF_PID" -o pid=,stat=,command=
+ ```
+ 预期 inspect 为 simulated=1，fixture writes/applied=0。正常 runtime/fixture 均退出0；端口无 listener、记录的 runtime PID 不存在。还须从 stdout.jsonl 的 driver_ready 取 driver PID（Rust context 是 JSON 字符串），Rust 从 protocol.json 取 native_pid；逐个精确 PID 执行 ps -p 并确认不存在。仅发送 SIGINT 不算释放证据。
+@@ -117,12 +126,21 @@
+ printf "runtime exit=%s\n" "$FF_EXIT"
+ "$FF_BIN" state inspect --state-dir "$FF_LESSON/execute-lesson/state"
+ ```
+-A：按 ENTER，等前台夹具命令返回，生成 protocol.json。用 echo $? 核对其退出码。
++A：按 ENTER，等前台夹具命令返回，生成 protocol.json。命令返回后立即在A记录自身夹具退出码：
++
++```bash
++FF_FIXTURE_EXIT=$?
++printf "fixture exit=%s\n" "$FF_FIXTURE_EXIT"
++```
++
++切回第3节一直保留的终端B（工程cwd），再执行下面的报告、端口和runtime/driver/server PID检查。FF_PID只在B由本轮$!赋值，A不使用它。先核对下方打印的PID为本轮原PID且是正整数；空值或错误PID须停止，不能当“进程不存在”。有效PID的ps退出1只有在stdout/stderr均为空时才代表未找到；非法参数或权限诊断是检查失败。
++
+ 
+ ```bash
+ cat "$FF_LESSON/execute-lesson/fixture/protocol.json"
+ cat "$FF_LESSON/execute-lesson/stderr.txt"
+ lsof -nP -iTCP:31102 -iTCP:31103 -iTCP:31880 -sTCP:LISTEN
++printf "checking runtime PID=%s\n" "$FF_PID"
+ ps -p "$FF_PID" -o pid=,stat=,command=
+ ```
+ 预期 inspect 为 confirmed=1，fixture writes/applied=1，DB1 offset0 为 00 2a。正常 runtime/fixture 均退出0；端口无 listener、记录的 runtime PID 不存在。还须从 stdout.jsonl 的 driver_ready 取 driver PID（Rust context 是 JSON 字符串），Rust 从 protocol.json 取 native_pid；逐个精确 PID 执行 ps -p 并确认不存在。仅发送 SIGINT 不算释放证据。
+@@ -343,7 +361,7 @@
+ printf "runtime exit=%s\n" "$?"
+ "$FF_BIN" state inspect --state-dir "$FF_LESSON/dry-lesson/state"
+ ```
+-A按ENTER关闭夹具。照第3节核对报告、exit、精确PID absent与端口释放，再进入下一模式。
++A按ENTER关闭夹具，返回后立即按第3节在A记录FF_FIXTURE_EXIT；再切回保留本轮FF_PID的B核对报告、有效精确PID和端口释放，完成后才进下一模式。A不使用B的FF_PID。
+ 
+ **execute — A**
+ 
+@@ -361,7 +379,7 @@
+ printf "runtime exit=%s\n" "$?"
+ "$FF_BIN" state inspect --state-dir "$FF_LESSON/execute-lesson/state"
+ ```
+-A按ENTER关闭夹具。照第3节核对报告、exit、精确PID absent与端口释放，再进入下一模式。
++A按ENTER关闭夹具，返回后立即按第3节在A记录FF_FIXTURE_EXIT；再切回保留本轮FF_PID的B核对报告、有效精确PID和端口释放，完成后才进下一模式。A不使用B的FF_PID。
+ 
+ 预期dry为simulated1/write0、execute为confirmed1/write1，inspect meta.instance_id=ff-rust-teaching01。夹具load与产品启动均校验kind，Rust仅编译不能验证YAML。保留旧状态，不需要schema/driver/API变化。
+ 
+--- before/field-flow/field-flow-python/USER_GUIDE.md
++++ after/field-flow/field-flow-python/USER_GUIDE.md
+@@ -88,12 +88,21 @@
+ printf "runtime exit=%s\n" "$FF_EXIT"
+ "$FF_BIN" state inspect --state-dir "$FF_LESSON/dry-lesson/state"
+ ```
+-A: press Ctrl-C (SIGINT) and wait for the fixture foreground command to return; expect report.json. SIGTERM is also handled. Check its exit code using echo $?.
++A: press Ctrl-C (SIGINT) and wait for the fixture foreground command to return; expect report.json. SIGTERM is also handled. Immediately record the fixture exit code in A:
++
++```bash
++FF_FIXTURE_EXIT=$?
++printf "fixture exit=%s\n" "$FF_FIXTURE_EXIT"
++```
++
++Switch back to the same Terminal B retained from section3 (project cwd), then run the report, port and runtime/driver/server PID checks below. Only B assigned FF_PID from this run’s $!; A does not use it. Verify the printed PID is the original positive integer for this run; stop on an empty or wrong PID. For a valid PID, ps exit1 means absent only when both stdout and stderr are empty; invalid-argument or permission diagnostics are check failures.
++
+ 
+ ```bash
+ cat "$FF_LESSON/dry-lesson/fixture/report.json"
+ cat "$FF_LESSON/dry-lesson/stderr.txt"
+ lsof -nP -iTCP:32102 -iTCP:32103 -iTCP:32880 -sTCP:LISTEN
++printf "checking runtime PID=%s\n" "$FF_PID"
+ ps -p "$FF_PID" -o pid=,stat=,command=
+ ```
+ Expected: inspect counts simulated=1, fixture writes=0. Normal runtime and fixture exit 0; no listener and recorded runtime PID absent. Also extract the driver_ready pid from stdout.jsonl and server_pid from fixture/report.json; use ps -p on each exact PID and require absence. Fixture server_exit/server_close.exit_code must be 0, server_close.remaining_threads empty, and report ports_rebound must contain all three Python ports. Sending SIGINT alone is not release evidence.
+@@ -118,12 +127,21 @@
+ printf "runtime exit=%s\n" "$FF_EXIT"
+ "$FF_BIN" state inspect --state-dir "$FF_LESSON/execute-lesson/state"
+ ```
+-A: press Ctrl-C (SIGINT) and wait for the fixture foreground command to return; expect report.json. SIGTERM is also handled. Check its exit code using echo $?.
++A: press Ctrl-C (SIGINT) and wait for the fixture foreground command to return; expect report.json. SIGTERM is also handled. Immediately record the fixture exit code in A:
++
++```bash
++FF_FIXTURE_EXIT=$?
++printf "fixture exit=%s\n" "$FF_FIXTURE_EXIT"
++```
++
++Switch back to the same Terminal B retained from section3 (project cwd), then run the report, port and runtime/driver/server PID checks below. Only B assigned FF_PID from this run’s $!; A does not use it. Verify the printed PID is the original positive integer for this run; stop on an empty or wrong PID. For a valid PID, ps exit1 means absent only when both stdout and stderr are empty; invalid-argument or permission diagnostics are check failures.
++
+ 
+ ```bash
+ cat "$FF_LESSON/execute-lesson/fixture/report.json"
+ cat "$FF_LESSON/execute-lesson/stderr.txt"
+ lsof -nP -iTCP:32102 -iTCP:32103 -iTCP:32880 -sTCP:LISTEN
++printf "checking runtime PID=%s\n" "$FF_PID"
+ ps -p "$FF_PID" -o pid=,stat=,command=
+ ```
+ Expected: inspect counts confirmed=1, fixture writes=1 and report memory_hex starts with 00 2a at DB1 offset 0. Normal runtime and fixture exit 0; no listener and recorded runtime PID absent. Also extract the driver_ready pid from stdout.jsonl and server_pid from fixture/report.json; use ps -p on each exact PID and require absence. Fixture server_exit/server_close.exit_code must be 0, server_close.remaining_threads empty, and report ports_rebound must contain all three Python ports. Sending SIGINT alone is not release evidence.
+@@ -326,7 +344,7 @@
+ printf "runtime exit=%s\n" "$?"
+ "$FF_BIN" state inspect --state-dir "$FF_LESSON/dry-lesson/state"
+ ```
+-A: press Ctrl-C to close the fixture. Verify report, exit, exact PIDs absent and port release as in section3 before the next mode.
++A: press Ctrl-C to close the fixture and immediately record FF_FIXTURE_EXIT in A as in section3. Then switch back to B, which retained this run’s FF_PID, to check reports, valid exact PIDs and port release before the next mode. A does not use B’s FF_PID.
+ 
+ **execute — A**
+ 
+@@ -344,7 +362,7 @@
+ printf "runtime exit=%s\n" "$?"
+ "$FF_BIN" state inspect --state-dir "$FF_LESSON/execute-lesson/state"
+ ```
+-A: press Ctrl-C to close the fixture. Verify report, exit, exact PIDs absent and port release as in section3 before the next mode.
++A: press Ctrl-C to close the fixture and immediately record FF_FIXTURE_EXIT in A as in section3. Then switch back to B, which retained this run’s FF_PID, to check reports, valid exact PIDs and port release before the next mode. A does not use B’s FF_PID.
+ 
+ Expect simulated1/write0 in dry-run, confirmed1/write1 in execute, and inspect meta.instance_id=ff-python-teaching01. Fixture load and product startup validate kind; Rust compilation alone does not validate YAML. Preserve old state; no schema/driver/API change is required.
+ 
+--- before/field-flow/field-flow-python/USER_GUIDE.zh-CN.md
++++ after/field-flow/field-flow-python/USER_GUIDE.zh-CN.md
+@@ -88,12 +88,21 @@
+ printf "runtime exit=%s\n" "$FF_EXIT"
+ "$FF_BIN" state inspect --state-dir "$FF_LESSON/dry-lesson/state"
+ ```
+-A：按 Ctrl-C（SIGINT）并等前台夹具命令返回，生成 report.json；也处理 SIGTERM。用 echo $? 核对其退出码。
++A：按 Ctrl-C（SIGINT）并等前台夹具命令返回，生成 report.json；也处理 SIGTERM。命令返回后立即在A记录自身夹具退出码：
++
++```bash
++FF_FIXTURE_EXIT=$?
++printf "fixture exit=%s\n" "$FF_FIXTURE_EXIT"
++```
++
++切回第3节一直保留的终端B（工程cwd），再执行下面的报告、端口和runtime/driver/server PID检查。FF_PID只在B由本轮$!赋值，A不使用它。先核对下方打印的PID为本轮原PID且是正整数；空值或错误PID须停止，不能当“进程不存在”。有效PID的ps退出1只有在stdout/stderr均为空时才代表未找到；非法参数或权限诊断是检查失败。
++
+ 
+ ```bash
+ cat "$FF_LESSON/dry-lesson/fixture/report.json"
+ cat "$FF_LESSON/dry-lesson/stderr.txt"
+ lsof -nP -iTCP:32102 -iTCP:32103 -iTCP:32880 -sTCP:LISTEN
++printf "checking runtime PID=%s\n" "$FF_PID"
+ ps -p "$FF_PID" -o pid=,stat=,command=
+ ```
+ 预期 inspect 为 simulated=1，fixture writes=0。正常 runtime/fixture 均退出0；端口无 listener、记录的 runtime PID 不存在。还须从stdout.jsonl的driver_ready取pid、从fixture/report.json取server_pid，逐个精确PID执行ps -p并确认不存在。server_exit/server_close.exit_code须为0、server_close.remaining_threads为空，ports_rebound含全部三个Python端口。仅发送 SIGINT 不算释放证据。
+@@ -118,12 +127,21 @@
+ printf "runtime exit=%s\n" "$FF_EXIT"
+ "$FF_BIN" state inspect --state-dir "$FF_LESSON/execute-lesson/state"
+ ```
+-A：按 Ctrl-C（SIGINT）并等前台夹具命令返回，生成 report.json；也处理 SIGTERM。用 echo $? 核对其退出码。
++A：按 Ctrl-C（SIGINT）并等前台夹具命令返回，生成 report.json；也处理 SIGTERM。命令返回后立即在A记录自身夹具退出码：
++
++```bash
++FF_FIXTURE_EXIT=$?
++printf "fixture exit=%s\n" "$FF_FIXTURE_EXIT"
++```
++
++切回第3节一直保留的终端B（工程cwd），再执行下面的报告、端口和runtime/driver/server PID检查。FF_PID只在B由本轮$!赋值，A不使用它。先核对下方打印的PID为本轮原PID且是正整数；空值或错误PID须停止，不能当“进程不存在”。有效PID的ps退出1只有在stdout/stderr均为空时才代表未找到；非法参数或权限诊断是检查失败。
++
+ 
+ ```bash
+ cat "$FF_LESSON/execute-lesson/fixture/report.json"
+ cat "$FF_LESSON/execute-lesson/stderr.txt"
+ lsof -nP -iTCP:32102 -iTCP:32103 -iTCP:32880 -sTCP:LISTEN
++printf "checking runtime PID=%s\n" "$FF_PID"
+ ps -p "$FF_PID" -o pid=,stat=,command=
+ ```
+ 预期 inspect 为 confirmed=1，fixture writes=1，report memory_hex前缀002a，DB1 offset0 为 00 2a。正常 runtime/fixture 均退出0；端口无 listener、记录的 runtime PID 不存在。还须从stdout.jsonl的driver_ready取pid、从fixture/report.json取server_pid，逐个精确PID执行ps -p并确认不存在。server_exit/server_close.exit_code须为0、server_close.remaining_threads为空，ports_rebound含全部三个Python端口。仅发送 SIGINT 不算释放证据。
+@@ -326,7 +344,7 @@
+ printf "runtime exit=%s\n" "$?"
+ "$FF_BIN" state inspect --state-dir "$FF_LESSON/dry-lesson/state"
+ ```
+-A按Ctrl-C关闭夹具。照第3节核对报告、exit、精确PID absent与端口释放，再进入下一模式。
++A按Ctrl-C关闭夹具，返回后立即按第3节在A记录FF_FIXTURE_EXIT；再切回保留本轮FF_PID的B核对报告、有效精确PID和端口释放，完成后才进下一模式。A不使用B的FF_PID。
+ 
+ **execute — A**
+ 
+@@ -344,7 +362,7 @@
+ printf "runtime exit=%s\n" "$?"
+ "$FF_BIN" state inspect --state-dir "$FF_LESSON/execute-lesson/state"
+ ```
+-A按Ctrl-C关闭夹具。照第3节核对报告、exit、精确PID absent与端口释放，再进入下一模式。
++A按Ctrl-C关闭夹具，返回后立即按第3节在A记录FF_FIXTURE_EXIT；再切回保留本轮FF_PID的B核对报告、有效精确PID和端口释放，完成后才进下一模式。A不使用B的FF_PID。
+ 
+ 预期dry为simulated1/write0、execute为confirmed1/write1，inspect meta.instance_id=ff-python-teaching01。夹具load与产品启动均校验kind，Rust仅编译不能验证YAML。保留旧状态，不需要schema/driver/API变化。
+ 

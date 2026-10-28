@@ -16,7 +16,7 @@ export let bootstrapError = '';
 export async function initializeBootstrap() {
     if (!isTauri()) return;
     try { bootstrap = await invoke<Bootstrap>('daa_get_bootstrap'); }
-    catch { bootstrapError = 'bootstrap_failed'; bootstrap.origin = 'bootstrap_error'; }
+    catch (reason) { bootstrapError = typeof reason === 'string' ? reason : 'bootstrap_failed'; bootstrap.origin = 'bootstrap_error'; }
 }
 export interface MigrationSummary {
     status: string; statusPersistence: string; attemptId: string | null; committedEtag: string | null;
@@ -195,6 +195,7 @@ export interface History {
     items: HistoryRow[];
     nextCursor: number | null;
 }
+/** IPC envelope remains v1; original payload/manifest JSON carry schemaVersion 2, configuration context remains 1. */
 export interface RawSample {
     payload: string;
     sha256: string;

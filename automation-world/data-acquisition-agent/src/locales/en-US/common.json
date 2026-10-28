@@ -145,7 +145,7 @@
     "freeBytes": "Volume free space",
     "pendingBytes": "Pending bytes",
     "pendingCount": "Pending packages",
-    "oldestPending": "Oldest pending time",
+    "oldestPending": "Oldest pending saved time (Shanghai)",
     "storagePolicy": "Storage policy draft",
     "quotaMiB": "Runtime quota (MiB)",
     "retentionDays": "Acknowledged retention days",
@@ -279,7 +279,7 @@
       "yaml_policy_unmatched": "Retired policy has no matching candidate; archived only",
       "yaml_status_persistence_unknown": "Status persistence unknown; repair storage and reopen",
       "yaml_unsaved_edits": "Save or cancel edits before retrying",
-      "yaml_retry_forbidden": "Existing configuration or successful import prevents retry",
+      "yaml_retry_forbidden": "Resident YAML migration is retired; retry is unavailable",
       "yaml_attempt_conflict": "Migration attempt changed; retain edits and reload",
       "yaml_private_source": "Migration receipt is service-private and cannot be edited",
       "yaml_receipt_corrupt": "Corrupt migration receipt; preserve SQLite and investigate",
@@ -371,7 +371,8 @@
       "point_name_profile": "Invalid naming profile or point count",
       "point_name_blocked": "Resolve selected address/name conflicts first",
       "name_preview_required": "Refresh the name preview before saving",
-      "name_preview_conflict": "Name preview expired or input changed; preview again"
+      "name_preview_conflict": "Name preview expired or input changed; preview again",
+      "time_profile_unsupported": "This profile has an unsupported time contract. Existing configuration and history are preserved. Use a new isolated profile; legacy migration requires separate approval."
     },
     "selectedTargets": "{count} selected PLCs",
     "selectTarget": "Select this PLC",
@@ -381,7 +382,7 @@
     "pauseSelected": "Pause selected",
     "controlTargetsConfirm": "Apply this action to these {count} fixed PLC targets? Each reports independently.",
     "currentEtag": "Current persisted draft ETag",
-    "staleSnapshot": "Snapshot refresh failed; retaining the last successful state from {time}.",
+    "staleSnapshot": "Snapshot refresh failed. Showing the last successful snapshot generated at {time} (Asia/Shanghai).",
     "configuration": "Configuration draft",
     "draftDirty": "Unsaved edits",
     "draftSaved": "Draft saved",
@@ -440,7 +441,7 @@
     "discardEditorConfirm": "Discard the unfinished edits and switch page?",
     "workflowHint": "Save PLC → import points and assign groups → explicitly apply configuration → connect and collect in Workbench.",
     "configurePoints": "Configure points",
-    "historyTimezone": "Select in local time ({timezone}); queries use UTC.",
+    "historyTimezone": "Inputs and display use {timezone}. Saved time is persistence transaction time; the end includes every millisecond of the selected second.",
     "previous": "Previous",
     "historyPage": "Page {page} · {count} rows on this page",
     "historyPageSize": "Rows per page",
@@ -466,6 +467,7 @@
       "example": "Application defaults at migration referred to sanitized repository examples and created disabled candidates, not site configuration.",
       "diagnostics": "{total} diagnostics; {omitted} omitted.",
       "attempt": "Attempt ID"
-    }
+    },
+    "resetHistoryWidths": "Reset column widths"
   }
 }

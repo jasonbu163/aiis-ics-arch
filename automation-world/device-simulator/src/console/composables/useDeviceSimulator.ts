@@ -2,6 +2,7 @@
 import { ref, computed, type InjectionKey, type UnwrapNestedRefs } from 'vue';
 import * as ipc from '../../services/deviceSimulator';
 export function useDeviceSimulator() {
+    const lastSavedRevision = ref<string | null>(null);
     const editing = ref(false), finishEditor = ref<null | (() => boolean)>(null), discardEditor = ref<null | (() => void)>(null);
     const busy = ref(false), refreshing = ref(false), error = ref<string | null>(null), unknown = ref(false), conflictEtag = ref<string | null>(null);
     const bootstrap = ref<ipc.Bootstrap | null>(null), configuration = ref<ipc.Configuration | null>(null), draft = ref<ipc.Workspace | null>(null), base = ref(''), snapshot = ref<ipc.RuntimeSnapshot | null>(null);
@@ -52,14 +53,14 @@ export function useDeviceSimulator() {
     finally {
         busy.value = false;
     } }
-    async function save(confirmPoints: string[] = []) { if (!draft.value || !configuration.value)
-        return false; const result = await action(() => ipc.saveConfiguration(configuration.value!.etag, JSON.parse(JSON.stringify(draft.value)), confirmPoints), true); return result !== undefined; }
+    async function save(confirmPoints: string[] = []) { if (editing.value || !draft.value || !configuration.value)
+        return false; const result = await action(() => ipc.saveConfiguration(configuration.value!.etag, JSON.parse(JSON.stringify(draft.value)), confirmPoints), true); if (result !== undefined) lastSavedRevision.value = configuration.value?.latestRevision || null; return result !== undefined; }
     function newInstance() { if (!draft.value || draft.value.instances.length >= 8)
         return; const i: ipc.Instance = { id: crypto.randomUUID(), name: '', host: '127.0.0.1', port: 30102, rack: 0, slot: 1, callingTsap: 256, maxConnections: 16, maxHandshakes: 4, policy: {}, dbs: [], namesConfirmation: null }; return i; }
     async function control(row: ipc.RuntimeInstance, command: string, discardValues = false) { return action(() => ipc.controlInstance({ instanceId: row.instanceId, command, expectedLoadedRevision: row.loadedRevision, epoch: row.epoch, discardValues })); }
     async function loadLogs(offset = 0, event: string | null = null) { const result = await action(() => ipc.queryLogs(offset, 50, event)); if (result)
         logs.value = result; }
-    return { editing, finishEditor, discardEditor, busy, refreshing, error, unknown, conflictEtag, bootstrap, configuration, draft, snapshot, instanceId, dbId, valueOffset, valueLimit, logs, dirty, selected, selectedDb, runtime, available: ipc.desktopAvailable, reload, refresh, action, save, newInstance, control, loadLogs };
+    return { lastSavedRevision, editing, finishEditor, discardEditor, busy, refreshing, error, unknown, conflictEtag, bootstrap, configuration, draft, snapshot, instanceId, dbId, valueOffset, valueLimit, logs, dirty, selected, selectedDb, runtime, available: ipc.desktopAvailable, reload, refresh, action, save, newInstance, control, loadLogs };
 }
 export type SimulatorConsole = UnwrapNestedRefs<ReturnType<typeof useDeviceSimulator>>;
 export const simulatorKey: InjectionKey<SimulatorConsole> = Symbol('DS console');

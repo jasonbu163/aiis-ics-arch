@@ -1,10 +1,16 @@
 //! YAML一次性迁入v1：安全摘要与服务私有receipt；不提供文件备份或运行模式。
-use crate::domain::local_configuration::{Configuration, Issue};
+#[cfg(test)]
+use crate::domain::local_configuration::Configuration;
+use crate::domain::local_configuration::Issue;
 use serde::{Deserialize, Serialize};
-use std::{collections::BTreeMap, path::PathBuf};
+use std::collections::BTreeMap;
+#[cfg(test)]
+use std::path::PathBuf;
 pub(crate) const PRIVATE_NAME: &str = "__daa_yaml_migration_v1__";
+#[cfg(test)]
 pub(crate) const SOURCE_LIMIT: usize = 1024 * 1024;
 pub(crate) const RECEIPT_LIMIT: usize = 8 * 1024 * 1024;
+#[cfg(test)]
 #[derive(Clone)]
 pub(crate) struct MigrationPaths {
     pub points: PathBuf,
@@ -66,6 +72,7 @@ impl MigrationSummary {
             retry_allowed: false,
         }
     }
+    #[cfg(test)]
     pub fn diagnostic(&mut self, code: &str, path: &str) {
         self.diagnostic_total += 1;
         if self.diagnostics.len() < 200 {
@@ -83,10 +90,12 @@ pub(crate) struct Receipt {
     pub archive: serde_json::Value,
     pub ids: BTreeMap<String, String>,
 }
+#[cfg(test)]
 pub(crate) struct Candidate {
     pub configuration: Configuration,
     pub receipt: Receipt,
 }
+#[cfg(test)]
 pub(crate) fn retryable(status: &str) -> bool {
     matches!(status, "failed" | "skipped_empty" | "archived_policy_only")
 }

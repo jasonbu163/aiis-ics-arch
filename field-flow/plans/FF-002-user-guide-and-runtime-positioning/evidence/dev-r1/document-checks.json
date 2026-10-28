@@ -1,0 +1,526 @@
+{
+  "pairs": [
+    {
+      "pair": [
+        "field-flow/USER_GUIDE.md",
+        "field-flow/USER_GUIDE.zh-CN.md"
+      ],
+      "code_blocks": 0,
+      "code_blocks_byte_equal": true,
+      "section_counts": [
+        4,
+        4
+      ]
+    },
+    {
+      "pair": [
+        "field-flow/README.md",
+        "field-flow/README.zh-CN.md"
+      ],
+      "code_blocks": 0,
+      "code_blocks_byte_equal": true,
+      "section_counts": [
+        6,
+        6
+      ]
+    },
+    {
+      "pair": [
+        "field-flow/field-flow-rust/USER_GUIDE.md",
+        "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md"
+      ],
+      "code_blocks": 22,
+      "code_blocks_byte_equal": true,
+      "section_counts": [
+        12,
+        12
+      ]
+    },
+    {
+      "pair": [
+        "field-flow/field-flow-rust/README.md",
+        "field-flow/field-flow-rust/README.zh-CN.md"
+      ],
+      "code_blocks": 0,
+      "code_blocks_byte_equal": true,
+      "section_counts": [
+        1,
+        1
+      ]
+    },
+    {
+      "pair": [
+        "field-flow/field-flow-python/USER_GUIDE.md",
+        "field-flow/field-flow-python/USER_GUIDE.zh-CN.md"
+      ],
+      "code_blocks": 22,
+      "code_blocks_byte_equal": true,
+      "section_counts": [
+        12,
+        12
+      ]
+    },
+    {
+      "pair": [
+        "field-flow/field-flow-python/README.md",
+        "field-flow/field-flow-python/README.zh-CN.md"
+      ],
+      "code_blocks": 0,
+      "code_blocks_byte_equal": true,
+      "section_counts": [
+        1,
+        1
+      ]
+    },
+    {
+      "pair": [
+        "field-flow/field-flow-rust/BUILD.md",
+        "field-flow/field-flow-rust/BUILD.zh-CN.md"
+      ],
+      "code_blocks": 1,
+      "code_blocks_byte_equal": true,
+      "section_counts": [
+        5,
+        5
+      ]
+    }
+  ],
+  "local_links": "checked existing paths",
+  "whitespace": "no trailing whitespace",
+  "failures": [],
+  "explicit_anchors": [
+    {
+      "file": "field-flow/README.md",
+      "target": "plans/ARCH-TOOL-001-field-flow-runner/spec.md#ca-handoff-prompt",
+      "exists": true
+    },
+    {
+      "file": "field-flow/README.zh-CN.md",
+      "target": "plans/ARCH-TOOL-001-field-flow-runner/spec.md#ca-handoff-prompt",
+      "exists": true
+    }
+  ],
+  "bash_parse_only": [
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 0,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 1,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 2,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 3,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 4,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 5,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 6,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 7,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 8,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 9,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 10,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 11,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 12,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 13,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 14,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 15,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "block": 16,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 0,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 1,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 2,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 3,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 4,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 5,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 6,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 7,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 8,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 9,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 10,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 11,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 12,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 13,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 14,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 15,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+      "block": 16,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 0,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 1,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 2,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 3,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 4,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 5,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 6,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 7,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 8,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 9,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 10,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 11,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 12,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 13,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 14,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 15,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.md",
+      "block": 16,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 0,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 1,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 2,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 3,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 4,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 5,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 6,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 7,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 8,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 9,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 10,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 11,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 12,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 13,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 14,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 15,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-python/USER_GUIDE.zh-CN.md",
+      "block": 16,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/BUILD.md",
+      "block": 0,
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "field-flow/field-flow-rust/BUILD.zh-CN.md",
+      "block": 0,
+      "exit": 0,
+      "stderr": ""
+    }
+  ],
+  "tasks_links_exist": true
+}

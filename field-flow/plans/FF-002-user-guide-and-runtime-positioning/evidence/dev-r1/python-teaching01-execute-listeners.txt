@@ -1,0 +1,4 @@
+COMMAND     PID  USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+python3.1 27849 jason    3u  IPv4 0x7fb96d1b67f569f1      0t0  TCP 127.0.0.1:32102 (LISTEN)
+python3.1 27849 jason    4u  IPv4 0x74c9609f99354d3a      0t0  TCP 127.0.0.1:32880 (LISTEN)
+python3.1 27853 jason    5u  IPv4 0x557da7d42dc421a3      0t0  TCP 127.0.0.1:32103 (LISTEN)

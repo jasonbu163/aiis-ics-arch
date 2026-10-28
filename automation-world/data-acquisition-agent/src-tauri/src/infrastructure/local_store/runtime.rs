@@ -8,7 +8,19 @@ use crate::domain::{
 use rusqlite::{params, OptionalExtension};
 use serde_json::{json, Value};
 impl Stores {
-    pub fn commit_cycle(&mut self, input: CycleInput) -> LocalResult<Value> {
+    pub fn commit_cycle(&mut self, mut input: CycleInput) -> LocalResult<Value> {
+        use crate::domain::business_time;
+        input.started_at = business_time::normalize(&input.started_at)?;
+        input.finished_at = business_time::normalize(&input.finished_at)?;
+        for points in input.points.values_mut() {
+            for point in points.values_mut() {
+                point.observed_at = business_time::normalize(&point.observed_at)?;
+            }
+        }
+        for read in &mut input.reads {
+            read.started_at = business_time::normalize(&read.started_at)?;
+            read.finished_at = business_time::normalize(&read.finished_at)?;
+        }
         let mut capacity = self.capacity(1024 * 1024 * 1024)?;
         let c = self.revision(&input.revision)?;
         capacity.quota_bytes = c.storage.quota_bytes;
@@ -63,14 +75,12 @@ impl Stores {
         }
         let cycle = cycle_id();
         let saved: String = tx
-            .query_row("SELECT strftime('%Y-%m-%dT%H:%M:%fZ','now')", [], |r| {
-                r.get(0)
-            })
+            .query_row(business_time::SQL_NOW, [], |r| r.get(0))
             .map_err(sql_error)?;
         let mut packages = vec![];
         for (db, points) in &input.points {
             let sample = SamplePayload {
-                schema_version: 1,
+                schema_version: 2,
                 sample_id: id(),
                 cycle_id: cycle.clone(),
                 instance_id: self.instance.clone(),
@@ -91,7 +101,7 @@ impl Stores {
             packages.push((sample, raw, hash));
         }
         let manifest = CycleManifest {
-            schema_version: 1,
+            schema_version: 2,
             cycle_id: cycle.clone(),
             plc_id: input.plc_id.clone(),
             source_generation: generation.clone(),
@@ -154,7 +164,7 @@ impl Stores {
         )
         .map_err(sql_error)?;
         for (s, raw, hash) in packages {
-            tx.execute("INSERT INTO samples(id,cycle_id,db_number,plc_id,group_id,source_seq,revision,quality,saved_at,schema_version,payload,sha256,payload_bytes) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,1,?10,?11,?12)",params![s.sample_id,cycle,s.db_number,s.plc_id,s.group_id,seq,s.revision,quality,saved,raw,hash,raw.len() as i64]).map_err(sql_error)?;
+            tx.execute("INSERT INTO samples(id,cycle_id,db_number,plc_id,group_id,source_seq,revision,quality,saved_at,schema_version,payload,sha256,payload_bytes) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,2,?10,?11,?12)",params![s.sample_id,cycle,s.db_number,s.plc_id,s.group_id,seq,s.revision,quality,saved,raw,hash,raw.len() as i64]).map_err(sql_error)?;
             tx.execute(
                 "INSERT INTO sample_delivery VALUES(?1,'pending',NULL)",
                 [s.sample_id],
@@ -199,11 +209,11 @@ impl Stores {
         }
         for time in [&mut q.from, &mut q.to] {
             if let Some(v) = time {
-                *v = chrono::DateTime::parse_from_rfc3339(v)
-                    .map_err(|_| "query_limits")?
-                    .with_timezone(&chrono::Utc)
-                    .to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
+                *v = crate::domain::business_time::normalize(v).map_err(|_| "query_limits")?;
             }
+        }
+        if matches!((&q.from, &q.to), (Some(from), Some(to)) if from > to) {
+            return Err("query_limits".into());
         }
         let n = q.limit.unwrap_or(50);
         if n == 0 || n > 100 {
@@ -290,7 +300,12 @@ impl Stores {
         Ok(json!({"items":rows,"cursorExpired":false}))
     }
     pub fn cleanup_acknowledged(&mut self, days: u32, quota: u64) -> LocalResult<usize> {
-        let ids=self.runtime.prepare("SELECT rowid,id,expected_samples FROM collection_cycles WHERE rowid>?2 AND saved_at < strftime('%Y-%m-%dT%H:%M:%fZ','now',?1) ORDER BY rowid LIMIT 8").map_err(sql_error)?.query_map(params![format!("-{days} days"),self.cleanup_cursor],|r|Ok((r.get::<_,i64>(0)?,r.get::<_,String>(1)?,r.get::<_,i64>(2)?))).map_err(sql_error)?.collect::<Result<Vec<_>,_>>().map_err(sql_error)?;
+        let clock: String = self
+            .runtime
+            .query_row(crate::domain::business_time::SQL_NOW, [], |r| r.get(0))
+            .map_err(sql_error)?;
+        let cutoff = crate::domain::business_time::retention_cutoff(&clock, days)?;
+        let ids=self.runtime.prepare("SELECT rowid,id,expected_samples FROM collection_cycles WHERE rowid>?2 AND saved_at < ?1 ORDER BY rowid LIMIT 8").map_err(sql_error)?.query_map(params![cutoff,self.cleanup_cursor],|r|Ok((r.get::<_,i64>(0)?,r.get::<_,String>(1)?,r.get::<_,i64>(2)?))).map_err(sql_error)?.collect::<Result<Vec<_>,_>>().map_err(sql_error)?;
         if ids.is_empty() {
             self.cleanup_cursor = 0;
         }

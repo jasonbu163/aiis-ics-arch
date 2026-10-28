@@ -19,6 +19,7 @@ impl LocalLog {
     pub fn new(dir: PathBuf) -> LocalResult<Self> {
         fs::create_dir_all(&dir).map_err(|_| "log_io")?;
         let _ = tracing_subscriber::fmt()
+            .with_timer(ShanghaiTimer)
             .json()
             .with_target(false)
             .try_init();
@@ -133,5 +134,13 @@ impl LocalLog {
         writeln!(file, "{line}").map_err(|_| "log_io")?;
         file.flush().map_err(|_| "log_io")?;
         Ok(())
+    }
+}
+
+/// stdout保留纳秒诊断精度；文件at沿用业务毫秒helper。
+pub(crate) struct ShanghaiTimer;
+impl tracing_subscriber::fmt::time::FormatTime for ShanghaiTimer {
+    fn format_time(&self, w: &mut tracing_subscriber::fmt::format::Writer<'_>) -> std::fmt::Result {
+        write!(w, "{}", crate::domain::business_time::diagnostic_now())
     }
 }

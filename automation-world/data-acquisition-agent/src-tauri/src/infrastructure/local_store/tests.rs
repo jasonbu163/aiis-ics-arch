@@ -2031,3 +2031,53 @@ fn periodic_maintenance_log_failure_keeps_history_stop_and_shutdown_available() 
         json!({"case":"worker_log_unavailable","profile":p,"errorCode":"log_io_unknown_interval","persistentSuccessNotClaimed":true,"historyReadable":true,"manualStopApplied":true,"normalShutdownReturned":true,"originalLedgerUnchanged":true,"reopenReadable":true})
     );
 }
+
+#[path = "time_contract_tests.rs"]
+mod time_contract_tests;
+
+#[test]
+fn resident_retirement_active_configuration_reopens_stopped_with_native_admission() {
+    let p = std::env::temp_dir().join(format!("resident-active-{}", id()));
+    std::fs::create_dir(&p).unwrap();
+    let b = Bootstrap {
+        mode: "local_sqlite".into(),
+        profile: p.clone(),
+        read_allowed: true,
+        validation: false,
+        migration: None,
+        ignored_keys: vec![],
+        fixture: None,
+    };
+    let mut stores = Stores::open(&p.join("local-acquisition-v1")).unwrap();
+    let active = activated(&mut stores, &configuration());
+    drop(stores);
+    let e = LocalEngine::open(b.clone()).unwrap();
+    assert!(!e.states.lock().unwrap().is_empty());
+    assert!(e
+        .states
+        .lock()
+        .unwrap()
+        .values()
+        .all(|s| !s.connected && !s.desired_connection && !s.desired_collection));
+    e.shutdown();
+    drop(e);
+    let e = LocalEngine::open(b).unwrap();
+    assert!(e.bootstrap.read_allowed && !e.bootstrap.validation && e.fixture.is_none());
+    assert_eq!(
+        e.configuration().unwrap().active.as_deref(),
+        Some(active.as_str())
+    );
+    assert!(e
+        .states
+        .lock()
+        .unwrap()
+        .values()
+        .all(|s| !s.connected && !s.desired_connection && !s.desired_collection));
+    assert!(e.history(HistoryQuery::default()).unwrap()["items"]
+        .as_array()
+        .unwrap()
+        .is_empty());
+    e.shutdown();
+    drop(e);
+    std::fs::remove_dir_all(p).unwrap();
+}

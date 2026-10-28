@@ -1,0 +1,27 @@
+{
+  "task": "aiis-ics-arch::DAA-007",
+  "revision": "r2",
+  "status": "draft",
+  "recordedAt": "2026-10-27T16:06:17.227+08:00",
+  "scope": "Coordinator scope-draft/index consistency, not implementation or independent QA",
+  "specSha256": "87fcc74c5eaa9f746e994c90f6d7c8a9787aa6efeba9f6fc3506020633d4276f",
+  "r1TasksAndArchivesUnchanged": true,
+  "r1ImplementationPathsStillMatch": 32,
+  "r1SourceInputsStillMatch": 397,
+  "requirements": 14,
+  "acceptanceCriteria": 22,
+  "indexRows": 14,
+  "localLinksChecked": 33,
+  "anchorsChecked": 3,
+  "issues": [],
+  "productTestsOrBuildsRun": false,
+  "productRuntimeOrDatabaseOperations": false,
+  "newConfigBehaviorImplemented": false,
+  "r2Approval": "pending",
+  "tasksRevision": "r1 historical record",
+  "checklistExists": false,
+  "sourceMismatches": {
+    "implementationFiles": [],
+    "sourceInputs": []
+  }
+}

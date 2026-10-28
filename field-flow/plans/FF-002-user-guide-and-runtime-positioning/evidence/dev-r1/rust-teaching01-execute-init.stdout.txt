@@ -1,0 +1,1 @@
+{"timestamp":"2026-10-23T08:07:15.809260Z","level":"INFO","event":"state_init","implementation":"rust","run_id":"1792742835809-27604-1","instance_id":"ff-rust-teaching01","flow_id":"","target_id":"","command_id":"","request_id":"","state":"","old":"","new":"","result":"ok","duration_ms":0,"error_key":"","context":"{\"result\":\"ok\"}","target":"field_flow::infrastructure::audit"}

@@ -1,0 +1,50 @@
+{
+  "memory_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+  "writes": 0,
+  "reads": 0,
+  "gets": 4,
+  "sessions": 1,
+  "closed_sessions": 1,
+  "trace": [
+    {
+      "operation": 0,
+      "fault": "",
+      "request_hex": "0300001611e00000000100c1020100c2020101c0010a",
+      "original_response_hex": "0300000b06d00001000100",
+      "sent_response_hex": "0300000b06d00001000100",
+      "previous_same_ref": null,
+      "previous_other_ref": null
+    },
+    {
+      "operation": 240,
+      "fault": "",
+      "request_hex": "0300001902f08032010000000100080000f0000001000101e0",
+      "original_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+      "sent_response_hex": "0300001b02f080320300000001000800000000f0000001000101e0",
+      "previous_same_ref": null,
+      "previous_other_ref": null
+    }
+  ],
+  "server_pid": 19980,
+  "server_exit": 0,
+  "server_close": {
+    "memory_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+    "remaining_threads": [],
+    "pid": 19980,
+    "exit_code": 0
+  },
+  "server_epochs": [
+    {
+      "memory_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "remaining_threads": [],
+      "pid": 19980,
+      "exit_code": 0
+    }
+  ],
+  "proxy_threads_joined": 1,
+  "ports_rebound": [
+    32102,
+    32103,
+    32880
+  ]
+}

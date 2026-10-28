@@ -1,0 +1,28 @@
+{
+  "pair_checks": [
+    {
+      "language": "rust",
+      "bilingual_code_blocks_byte_equal": true,
+      "block_count": 24,
+      "section3_B_ownership_labels": 2,
+      "section7_B_reuse_labels": 2
+    },
+    {
+      "language": "python",
+      "bilingual_code_blocks_byte_equal": true,
+      "block_count": 24,
+      "section3_B_ownership_labels": 2,
+      "section7_B_reuse_labels": 2
+    }
+  ],
+  "all_16_local_link_paths_exist": true,
+  "all_16_bash_parse_only": true,
+  "no_trailing_whitespace": true,
+  "changed_docs": [
+    "field-flow/field-flow-rust/USER_GUIDE.md",
+    "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+    "field-flow/field-flow-python/USER_GUIDE.md",
+    "field-flow/field-flow-python/USER_GUIDE.zh-CN.md"
+  ],
+  "other12_unchanged": true
+}

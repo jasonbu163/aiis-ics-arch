@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/private/tmp/ff-002-r1-dev-vncfzod3/rehearse.py", line 85, in <module>
+    for mode in ('dry_run','execute'):scenario(lang,'demo01',mode)
+  File "/private/tmp/ff-002-r1-dev-vncfzod3/rehearse.py", line 54, in scenario
+    else:fixture.send_signal(signal.SIGINT);fixture.wait(timeout=10)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py", line 1189, in wait
+    return self._wait(timeout=timeout)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/subprocess.py", line 1909, in _wait
+    raise TimeoutExpired(self.args, timeout)
+subprocess.TimeoutExpired: Command '['uv', 'run', '--locked', '--python', '3.11', '--no-python-downloads', 'python', '-m', 'tests.fixtures', '--config', '/private/tmp/ff-002-r1-dev-vncfzod3/python/config/loopback.yaml', '--evidence-dir', '/private/tmp/ff-002-r1-dev-vncfzod3/python-demo01-dry_run/fixture']' timed out after 10 seconds

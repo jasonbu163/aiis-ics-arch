@@ -1,4 +1,4 @@
-//! 每实例唯一可变DB image与逐点提交元数据；padding永远为零且没有逐bit版本副本。
+//! 每实例唯一可变DB image与逐点提交元数据；日历更新时间与单调计数独立保存。
 use super::{
     layout::{CompiledInstance, CompiledPoint},
     request::Source,
@@ -6,11 +6,13 @@ use super::{
 };
 use crate::infrastructure::clock;
 use std::collections::BTreeMap;
+use std::time::SystemTime;
 #[derive(Clone, Debug)]
 pub struct PointState {
     pub seq: u64,
     pub source: Source,
     pub updated: u64,
+    pub updated_at: SystemTime,
 }
 #[derive(Clone, Debug)]
 pub struct DbImage {
@@ -34,6 +36,7 @@ impl Image {
     ) -> Self {
         let mut dbs = BTreeMap::new();
         let now = clock::ns();
+        let updated_at = SystemTime::now();
         for (number, db) in &config.dbs {
             let mut image = DbImage {
                 bytes: vec![0; db.length],
@@ -41,7 +44,8 @@ impl Image {
                     PointState {
                         seq: 0,
                         source,
-                        updated: now
+                        updated: now,
+                        updated_at,
                     };
                     db.points.len()
                 ],

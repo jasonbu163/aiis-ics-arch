@@ -29,3 +29,8 @@
 - [tests/support/mod.rs](tests/support/mod.rs): 文件：tests/support/mod.rs；本机协议矩阵的有界进程与状态夹具。
 
 - [tests/runtime_regressions.rs](tests/runtime_regressions.rs)：QA1返工真实FIFO dispatch预算、原anchored clock queued/precall闭闸、匹配started统计及fault归零。
+
+## 使用文档 / Usage documentation
+
+- [USER_GUIDE.md](USER_GUIDE.md) / [中文](USER_GUIDE.zh-CN.md): 独立使用、真实方法与teaching01教程；示例接线仅在教程副本，不是正式已注册源码。
+- [BUILD.md](BUILD.md) / [中文](BUILD.zh-CN.md): 产品/夹具构建、native依赖与目标平台未测边界。

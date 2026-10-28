@@ -1,0 +1,166 @@
+[
+  {
+    "language": "rust",
+    "mode": "dry",
+    "terminalA": {
+      "argv": [
+        "/bin/zsh",
+        "-f",
+        "-c",
+        "[[ ! -v FF_PID ]] || exit 12\nsleep 0\nFF_FIXTURE_EXIT=$?\nprintf \"fixture exit=%s\\n\" \"$FF_FIXTURE_EXIT\"\n\n[[ \"$FF_FIXTURE_EXIT\" == 0 && ! -v FF_PID ]] || exit 13\nprintf \"A runtime variable remains unset\\n\"\n"
+      ],
+      "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+      "exit": 0,
+      "stdout": "fixture exit=0\nA runtime variable remains unset\n",
+      "stderr_hex": "",
+      "FF_PID": "unset"
+    },
+    "terminalB": {
+      "argv": [
+        "/bin/zsh",
+        "-f"
+      ],
+      "cwd_at_check": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+      "script": "read -r FF_PROJECT\nread -r FF_LESSON\ncd \"$FF_PROJECT\"\nsleep 0 &\nFF_PID=$!\nwait \"$FF_PID\"\nFF_EXIT=$?\nprintf \"B runtime PID=%s exit=%s\\n\" \"$FF_PID\" \"$FF_EXIT\"\nprintf \"B ready\\n\"\nread -r FF_CHECK_READY\ncat \"$FF_LESSON/dry-lesson/fixture/protocol.json\"\ncat \"$FF_LESSON/dry-lesson/stderr.txt\"\nlsof -nP -iTCP:31102 -iTCP:31103 -iTCP:31880 -sTCP:LISTEN\nprintf \"checking runtime PID=%s\\n\" \"$FF_PID\"\nps -p \"$FF_PID\" -o pid=,stat=,command=\n\nFF_PS_EXIT=$?\nprintf \"B ps exit=%s\\n\" \"$FF_PS_EXIT\"\n[[ \"$FF_PID\" == <1-> && \"$FF_PS_EXIT\" == 1 ]] || exit 10\n[[ ! -v FF_FIXTURE_EXIT ]] || exit 11\nprintf \"B fixture variable remains unset\\n\"\n",
+      "path_inputs": [
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+        "/private/tmp/ff-002-r1-dev-rework1-6jnwedny/rust-dry/lesson"
+      ],
+      "exit": 0,
+      "stdout": "B runtime PID=66064 exit=0\nB ready\n{\n  \"applied\": 0,\n  \"gets\": 4,\n  \"native_pid\": 19855,\n  \"reads\": 0,\n  \"sessions\": 1,\n  \"trace\": [\n    {\n      \"at_ms\": 1792742388912,\n      \"operation\": 0,\n      \"original_response_hex\": \"0300001611d00001000100c0010ac1020100c2020101\",\n      \"positive\": false,\n      \"request_hex\": \"0300001611e00000000100c0010ac1020100c2020101\",\n      \"request_ref\": [\n        192,\n        1\n      ],\n      \"response_ref\": [\n        192,\n        1\n      ],\n      \"sent_response_hex\": \"0300001611d00001000100c0010ac1020100c2020101\"\n    },\n    {\n      \"at_ms\": 1792742388914,\n      \"operation\": 240,\n      \"original_response_hex\": \"0300001b02f080320300000000000800000000f0000001000101e0\",\n      \"positive\": false,\n      \"request_hex\": \"0300001902f08032010000000000080000f0000001000101e0\",\n      \"request_ref\": [\n        0,\n        0\n      ],\n      \"response_ref\": [\n        0,\n        0\n      ],\n      \"sent_response_hex\": \"0300001b02f080320300000000000800000000f0000001000101e0\"\n    }\n  ],\n  \"writes\": 0\n}\nchecking runtime PID=66064\nB ps exit=1\nB fixture variable remains unset\n",
+      "stderr_hex": "",
+      "retained_FF_PID": 66064,
+      "FF_FIXTURE_EXIT": "unset"
+    },
+    "pid_recheck": {
+      "pid": 66064,
+      "exit": 1,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    "scope": "short-lived sleep0 helper only, not a product/fixture run; copied DEV real report is input for literal cat checks"
+  },
+  {
+    "language": "rust",
+    "mode": "execute",
+    "terminalA": {
+      "argv": [
+        "/bin/zsh",
+        "-f",
+        "-c",
+        "[[ ! -v FF_PID ]] || exit 12\nsleep 0\nFF_FIXTURE_EXIT=$?\nprintf \"fixture exit=%s\\n\" \"$FF_FIXTURE_EXIT\"\n\n[[ \"$FF_FIXTURE_EXIT\" == 0 && ! -v FF_PID ]] || exit 13\nprintf \"A runtime variable remains unset\\n\"\n"
+      ],
+      "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+      "exit": 0,
+      "stdout": "fixture exit=0\nA runtime variable remains unset\n",
+      "stderr_hex": "",
+      "FF_PID": "unset"
+    },
+    "terminalB": {
+      "argv": [
+        "/bin/zsh",
+        "-f"
+      ],
+      "cwd_at_check": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+      "script": "read -r FF_PROJECT\nread -r FF_LESSON\ncd \"$FF_PROJECT\"\nsleep 0 &\nFF_PID=$!\nwait \"$FF_PID\"\nFF_EXIT=$?\nprintf \"B runtime PID=%s exit=%s\\n\" \"$FF_PID\" \"$FF_EXIT\"\nprintf \"B ready\\n\"\nread -r FF_CHECK_READY\ncat \"$FF_LESSON/execute-lesson/fixture/protocol.json\"\ncat \"$FF_LESSON/execute-lesson/stderr.txt\"\nlsof -nP -iTCP:31102 -iTCP:31103 -iTCP:31880 -sTCP:LISTEN\nprintf \"checking runtime PID=%s\\n\" \"$FF_PID\"\nps -p \"$FF_PID\" -o pid=,stat=,command=\n\nFF_PS_EXIT=$?\nprintf \"B ps exit=%s\\n\" \"$FF_PS_EXIT\"\n[[ \"$FF_PID\" == <1-> && \"$FF_PS_EXIT\" == 1 ]] || exit 10\n[[ ! -v FF_FIXTURE_EXIT ]] || exit 11\nprintf \"B fixture variable remains unset\\n\"\n",
+      "path_inputs": [
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+        "/private/tmp/ff-002-r1-dev-rework1-6jnwedny/rust-execute/lesson"
+      ],
+      "exit": 0,
+      "stdout": "B runtime PID=66077 exit=0\nB ready\n{\n  \"applied\": 1,\n  \"gets\": 4,\n  \"native_pid\": 19907,\n  \"reads\": 0,\n  \"sessions\": 1,\n  \"trace\": [\n    {\n      \"at_ms\": 1792742391323,\n      \"operation\": 0,\n      \"original_response_hex\": \"0300001611d00001000100c0010ac1020100c2020101\",\n      \"positive\": false,\n      \"request_hex\": \"0300001611e00000000100c0010ac1020100c2020101\",\n      \"request_ref\": [\n        192,\n        1\n      ],\n      \"response_ref\": [\n        192,\n        1\n      ],\n      \"sent_response_hex\": \"0300001611d00001000100c0010ac1020100c2020101\"\n    },\n    {\n      \"at_ms\": 1792742391324,\n      \"operation\": 240,\n      \"original_response_hex\": \"0300001b02f080320300000000000800000000f0000001000101e0\",\n      \"positive\": false,\n      \"request_hex\": \"0300001902f08032010000000000080000f0000001000101e0\",\n      \"request_ref\": [\n        0,\n        0\n      ],\n      \"response_ref\": [\n        0,\n        0\n      ],\n      \"sent_response_hex\": \"0300001b02f080320300000000000800000000f0000001000101e0\"\n    },\n    {\n      \"at_ms\": 1792742391343,\n      \"operation\": 5,\n      \"original_response_hex\": \"0300001602f0803203000000010002000100000501ff\",\n      \"positive\": true,\n      \"request_hex\": \"0300002502f080320100000001000e00060501120a1002000200018400000000040010002a\",\n      \"request_ref\": [\n        0,\n        1\n      ],\n      \"response_ref\": [\n        0,\n        1\n      ],\n      \"sent_response_hex\": \"0300001602f0803203000000010002000100000501ff\"\n    }\n  ],\n  \"writes\": 1\n}\nchecking runtime PID=66077\nB ps exit=1\nB fixture variable remains unset\n",
+      "stderr_hex": "",
+      "retained_FF_PID": 66077,
+      "FF_FIXTURE_EXIT": "unset"
+    },
+    "pid_recheck": {
+      "pid": 66077,
+      "exit": 1,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    "scope": "short-lived sleep0 helper only, not a product/fixture run; copied DEV real report is input for literal cat checks"
+  },
+  {
+    "language": "python",
+    "mode": "dry",
+    "terminalA": {
+      "argv": [
+        "/bin/zsh",
+        "-f",
+        "-c",
+        "[[ ! -v FF_PID ]] || exit 12\nsleep 0\nFF_FIXTURE_EXIT=$?\nprintf \"fixture exit=%s\\n\" \"$FF_FIXTURE_EXIT\"\n\n[[ \"$FF_FIXTURE_EXIT\" == 0 && ! -v FF_PID ]] || exit 13\nprintf \"A runtime variable remains unset\\n\"\n"
+      ],
+      "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+      "exit": 0,
+      "stdout": "fixture exit=0\nA runtime variable remains unset\n",
+      "stderr_hex": "",
+      "FF_PID": "unset"
+    },
+    "terminalB": {
+      "argv": [
+        "/bin/zsh",
+        "-f"
+      ],
+      "cwd_at_check": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+      "script": "read -r FF_PROJECT\nread -r FF_LESSON\ncd \"$FF_PROJECT\"\nsleep 0 &\nFF_PID=$!\nwait \"$FF_PID\"\nFF_EXIT=$?\nprintf \"B runtime PID=%s exit=%s\\n\" \"$FF_PID\" \"$FF_EXIT\"\nprintf \"B ready\\n\"\nread -r FF_CHECK_READY\ncat \"$FF_LESSON/dry-lesson/fixture/report.json\"\ncat \"$FF_LESSON/dry-lesson/stderr.txt\"\nlsof -nP -iTCP:32102 -iTCP:32103 -iTCP:32880 -sTCP:LISTEN\nprintf \"checking runtime PID=%s\\n\" \"$FF_PID\"\nps -p \"$FF_PID\" -o pid=,stat=,command=\n\nFF_PS_EXIT=$?\nprintf \"B ps exit=%s\\n\" \"$FF_PS_EXIT\"\n[[ \"$FF_PID\" == <1-> && \"$FF_PS_EXIT\" == 1 ]] || exit 10\n[[ ! -v FF_FIXTURE_EXIT ]] || exit 11\nprintf \"B fixture variable remains unset\\n\"\n",
+      "path_inputs": [
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+        "/private/tmp/ff-002-r1-dev-rework1-6jnwedny/python-dry/lesson"
+      ],
+      "exit": 0,
+      "stdout": "B runtime PID=66087 exit=0\nB ready\n{\n  \"memory_hex\": \"a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5\",\n  \"writes\": 0,\n  \"reads\": 0,\n  \"gets\": 4,\n  \"sessions\": 1,\n  \"closed_sessions\": 1,\n  \"trace\": [\n    {\n      \"operation\": 0,\n      \"fault\": \"\",\n      \"request_hex\": \"0300001611e00000000100c1020100c2020101c0010a\",\n      \"original_response_hex\": \"0300000b06d00001000100\",\n      \"sent_response_hex\": \"0300000b06d00001000100\",\n      \"previous_same_ref\": null,\n      \"previous_other_ref\": null\n    },\n    {\n      \"operation\": 240,\n      \"fault\": \"\",\n      \"request_hex\": \"0300001902f08032010000000100080000f0000001000101e0\",\n      \"original_response_hex\": \"0300001b02f080320300000001000800000000f0000001000101e0\",\n      \"sent_response_hex\": \"0300001b02f080320300000001000800000000f0000001000101e0\",\n      \"previous_same_ref\": null,\n      \"previous_other_ref\": null\n    }\n  ],\n  \"server_pid\": 23992,\n  \"server_exit\": 0,\n  \"server_close\": {\n    \"memory_hex\": \"a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5\",\n    \"remaining_threads\": [],\n    \"pid\": 23992,\n    \"exit_code\": 0\n  },\n  \"server_epochs\": [\n    {\n      \"memory_hex\": \"a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5\",\n      \"remaining_threads\": [],\n      \"pid\": 23992,\n      \"exit_code\": 0\n    }\n  ],\n  \"proxy_threads_joined\": 1,\n  \"ports_rebound\": [\n    32102,\n    32103,\n    32880\n  ]\n}\nchecking runtime PID=66087\nB ps exit=1\nB fixture variable remains unset\n",
+      "stderr_hex": "",
+      "retained_FF_PID": 66087,
+      "FF_FIXTURE_EXIT": "unset"
+    },
+    "pid_recheck": {
+      "pid": 66087,
+      "exit": 1,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    "scope": "short-lived sleep0 helper only, not a product/fixture run; copied DEV real report is input for literal cat checks"
+  },
+  {
+    "language": "python",
+    "mode": "execute",
+    "terminalA": {
+      "argv": [
+        "/bin/zsh",
+        "-f",
+        "-c",
+        "[[ ! -v FF_PID ]] || exit 12\nsleep 0\nFF_FIXTURE_EXIT=$?\nprintf \"fixture exit=%s\\n\" \"$FF_FIXTURE_EXIT\"\n\n[[ \"$FF_FIXTURE_EXIT\" == 0 && ! -v FF_PID ]] || exit 13\nprintf \"A runtime variable remains unset\\n\"\n"
+      ],
+      "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+      "exit": 0,
+      "stdout": "fixture exit=0\nA runtime variable remains unset\n",
+      "stderr_hex": "",
+      "FF_PID": "unset"
+    },
+    "terminalB": {
+      "argv": [
+        "/bin/zsh",
+        "-f"
+      ],
+      "cwd_at_check": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+      "script": "read -r FF_PROJECT\nread -r FF_LESSON\ncd \"$FF_PROJECT\"\nsleep 0 &\nFF_PID=$!\nwait \"$FF_PID\"\nFF_EXIT=$?\nprintf \"B runtime PID=%s exit=%s\\n\" \"$FF_PID\" \"$FF_EXIT\"\nprintf \"B ready\\n\"\nread -r FF_CHECK_READY\ncat \"$FF_LESSON/execute-lesson/fixture/report.json\"\ncat \"$FF_LESSON/execute-lesson/stderr.txt\"\nlsof -nP -iTCP:32102 -iTCP:32103 -iTCP:32880 -sTCP:LISTEN\nprintf \"checking runtime PID=%s\\n\" \"$FF_PID\"\nps -p \"$FF_PID\" -o pid=,stat=,command=\n\nFF_PS_EXIT=$?\nprintf \"B ps exit=%s\\n\" \"$FF_PS_EXIT\"\n[[ \"$FF_PID\" == <1-> && \"$FF_PS_EXIT\" == 1 ]] || exit 10\n[[ ! -v FF_FIXTURE_EXIT ]] || exit 11\nprintf \"B fixture variable remains unset\\n\"\n",
+      "path_inputs": [
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+        "/private/tmp/ff-002-r1-dev-rework1-6jnwedny/python-execute/lesson"
+      ],
+      "exit": 0,
+      "stdout": "B runtime PID=66098 exit=0\nB ready\n{\n  \"memory_hex\": \"002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5\",\n  \"writes\": 1,\n  \"reads\": 0,\n  \"gets\": 4,\n  \"sessions\": 1,\n  \"closed_sessions\": 1,\n  \"trace\": [\n    {\n      \"operation\": 0,\n      \"fault\": \"\",\n      \"request_hex\": \"0300001611e00000000100c1020100c2020101c0010a\",\n      \"original_response_hex\": \"0300000b06d00001000100\",\n      \"sent_response_hex\": \"0300000b06d00001000100\",\n      \"previous_same_ref\": null,\n      \"previous_other_ref\": null\n    },\n    {\n      \"operation\": 240,\n      \"fault\": \"\",\n      \"request_hex\": \"0300001902f08032010000000100080000f0000001000101e0\",\n      \"original_response_hex\": \"0300001b02f080320300000001000800000000f0000001000101e0\",\n      \"sent_response_hex\": \"0300001b02f080320300000001000800000000f0000001000101e0\",\n      \"previous_same_ref\": null,\n      \"previous_other_ref\": null\n    },\n    {\n      \"operation\": 5,\n      \"fault\": \"\",\n      \"request_hex\": \"0300002502f080320100000002000e00060501120a1002000200018400000000040010002a\",\n      \"original_response_hex\": \"0300001602f0803203000000020002000100000501ff\",\n      \"sent_response_hex\": \"0300001602f0803203000000020002000100000501ff\",\n      \"previous_same_ref\": null,\n      \"previous_other_ref\": null\n    }\n  ],\n  \"server_pid\": 24651,\n  \"server_exit\": 0,\n  \"server_close\": {\n    \"memory_hex\": \"002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5\",\n    \"remaining_threads\": [],\n    \"pid\": 24651,\n    \"exit_code\": 0\n  },\n  \"server_epochs\": [\n    {\n      \"memory_hex\": \"002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5\",\n      \"remaining_threads\": [],\n      \"pid\": 24651,\n      \"exit_code\": 0\n    }\n  ],\n  \"proxy_threads_joined\": 1,\n  \"ports_rebound\": [\n    32102,\n    32103,\n    32880\n  ]\n}\nchecking runtime PID=66098\nB ps exit=1\nB fixture variable remains unset\n",
+      "stderr_hex": "",
+      "retained_FF_PID": 66098,
+      "FF_FIXTURE_EXIT": "unset"
+    },
+    "pid_recheck": {
+      "pid": 66098,
+      "exit": 1,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    "scope": "short-lived sleep0 helper only, not a product/fixture run; copied DEV real report is input for literal cat checks"
+  }
+]

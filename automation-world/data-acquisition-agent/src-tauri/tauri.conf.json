@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "identifier": "com.aiis.aw.dataacquisitionagent",
   "build": {
+    "features": ["rust-snap7-driver"],
     "beforeDevCommand": {
       "cwd": ".",
       "script": "pnpm dev",

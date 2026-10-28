@@ -1,0 +1,1 @@
+{"meta": {"schema_version": 1, "implementation": "python", "mode": "dry_run", "instance_id": "ff-python-demo01", "store_uuid": "cb69e239c405403a8d26d70ffb1fd465", "created_at": "2026-10-23T08:05:32.932Z"}, "counts": {"simulated": 1}}

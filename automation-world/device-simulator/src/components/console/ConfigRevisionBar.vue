@@ -6,8 +6,7 @@
       <ConsoleActionButton label-key="simulator.save" data-testid="configuration-save" :disabled="local.busy || local.editing || !local.draft" :loading="local.busy" :tone="local.dirty ? 'primary' : 'secondary'" @click="local.save()" />
       <ConsoleActionButton label-key="simulator.reload" :disabled="local.busy" @click="reloadOpen = true" />
     </template>
-    <p>{{ t('simulator.saveApplyHint') }}</p>
-    <code class="ds-wrap">{{ local.configuration?.etag || '—' }}</code>
+    <RevisionStatus :saved="local.configuration?.latestRevision" :selected="selection" :loaded="local.runtime?.loadedRevision" :etag="local.configuration?.etag" :hint="t('simulator.saveApplyHint')" />
     <ul v-if="local.configuration?.issues.length" class="ds-issues">
       <li v-for="(issue, index) in local.configuration.issues.slice(0, 100)" :key="index">
         {{ issueLabel(issue.code) }} · {{ issueLocation(issue) }}
@@ -17,16 +16,18 @@
   </ConsoleCard>
 </template>
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Issue } from '../../services/deviceSimulator';
 import { simulatorKey } from '../../console/composables/useDeviceSimulator';
+import RevisionStatus from './RevisionStatus.vue';
 import ConsoleCard from './ConsoleCard.vue';
 import ConsoleActionButton from './ConsoleActionButton.vue';
 import ConsoleOperationDialog from './ConsoleOperationDialog.vue';
 const local = inject(simulatorKey)!;
 const { t, te } = useI18n();
 const reloadOpen = ref(false);
+const selection=computed(()=>local.configuration?.selections.find(s=>s.instanceId===local.instanceId)?.revisionId||local.runtime?.selectedRevision);
 function issueLabel(code: string) {
     const key = 'simulator.errors.' + code;
     return te(key) ? t(key) : t('simulator.configurationBlocked');

@@ -32,7 +32,6 @@ pub(crate) struct Gate {
 }
 pub(crate) struct LocalEngine {
     pub storage: StoreHandle,
-    pub migration_state: Mutex<crate::domain::yaml_migration::MigrationSummary>,
     pub bootstrap: Bootstrap,
     pub loaded: Mutex<Option<Loaded>>,
     pub states: Mutex<BTreeMap<String, PlcState>>,
@@ -76,11 +75,15 @@ enum Message {
 }
 impl LocalEngine {
     pub fn open(bootstrap: Bootstrap) -> LocalResult<Arc<Self>> {
+        if bootstrap.profile.is_symlink() {
+            return Err("time_profile_unsupported:profile_symlink".into());
+        }
+        let dir = bootstrap.profile.join("local-acquisition-v1");
+        let before = crate::infrastructure::local_store::preflight(&dir)?;
         let lock = ProfileLock::acquire(&bootstrap.profile)?;
+        before.recheck(&dir)?;
         let dir = lock.profile.join("local-acquisition-v1");
-        let mut stores = Stores::open(&dir)?;
-        let migration_state =
-            super::local_yaml_migration::startup(&mut stores, bootstrap.migration.as_ref());
+        let stores = Stores::open(&dir)?;
         if !bootstrap.ignored_keys.is_empty() {
             stores.log.event(
                 "retired_env_keys_ignored",
@@ -107,7 +110,6 @@ impl LocalEngine {
             .transpose()?;
         let engine = Arc::new(Self {
             storage,
-            migration_state: Mutex::new(migration_state),
             bootstrap,
             loaded: Mutex::new(None),
             states: Mutex::new(BTreeMap::new()),

@@ -5,6 +5,14 @@ use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
 // 一次Evidence drain最多4096条；文件worker可容纳两批，另受16MiB字节门约束。
 const FILE_QUEUE_LINES: usize = 8192;
+fn stamp_calendar_time(event: &mut Value) {
+    if event.get("timestamp").is_none() {
+        if let Some(timestamp) = clock::calendar_timestamp() {
+            event["timestamp"] = json!(timestamp);
+            event["time_zone"] = json!(clock::BUSINESS_TIME_ZONE);
+        }
+    }
+}
 #[derive(Clone, Default)]
 pub struct Evidence(Arc<Mutex<Buffer>>, Arc<SinkHealth>);
 #[derive(Default)]
@@ -50,6 +58,7 @@ struct Buffer {
 }
 impl Evidence {
     pub fn put(&self, mut v: Value) {
+        stamp_calendar_time(&mut v);
         let mut g = self.0.lock().unwrap_or_else(|e| e.into_inner());
         let bytes = value_bytes(&v) + 256;
         self.1.event_peak.fetch_max(bytes as u64, Ordering::Relaxed);
@@ -203,6 +212,7 @@ impl<S: tracing::Subscriber> Layer<S> for Sink {
     fn on_event(&self, event: &tracing::Event<'_>, _: tracing_subscriber::layer::Context<'_, S>) {
         let mut v = JsonVisitor(json!({}));
         event.record(&mut v);
+        stamp_calendar_time(&mut v.0);
         self.health
             .parsed_event_peak
             .fetch_max(value_bytes(&v.0) as u64, Ordering::Relaxed);
@@ -238,6 +248,7 @@ impl<S: tracing::Subscriber> Layer<S> for Sink {
                 report["service"] = json!("device-simulator");
                 report["clock_id"] = json!(clock::CLOCK_ID);
                 report["monotonic_ns"] = json!(clock::ns());
+                stamp_calendar_time(&mut report);
                 if let Ok(mut bytes) = serde_json::to_vec(&report) {
                     bytes.push(b'\n');
                     self.file_line(&mut writer, &bytes);

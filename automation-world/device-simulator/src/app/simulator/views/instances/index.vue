@@ -7,15 +7,15 @@
         <ConsoleActionButton label-key="simulator.createInstance" data-testid="instance-add" :disabled="local.busy||!local.draft||local.draft.instances.length>=8" @click="create" />
       </template>
       <el-empty :image-size="64" v-if="!local.draft?.instances.length" :description="t('simulator.emptyInstances')" />
-      <el-table v-else :data="local.draft.instances" row-key="id">
-        <el-table-column prop="name" :label="t('simulator.name')" />
-        <el-table-column :label="t('simulator.endpoint')">
+      <ConsoleDataTable table-id="configuration.instances" v-else :data="local.draft.instances" row-key="id">
+        <el-table-column column-key="name" min-width="180" prop="name" :label="t('simulator.name')" />
+        <el-table-column column-key="endpoint" min-width="200" :label="t('simulator.endpoint')">
           <template #default="{row}">{{ row.host }}:{{ row.port }}</template>
         </el-table-column>
-        <el-table-column :label="t('simulator.maxConnections')">
+        <el-table-column column-key="connectionLimits" min-width="150" :label="t('simulator.maxConnections')">
           <template #default="{row}">{{ row.maxConnections }}/{{ row.maxHandshakes }}</template>
         </el-table-column>
-        <el-table-column :label="t('simulator.action')">
+        <el-table-column column-key="actions" width="220" :resizable="false" :show-overflow-tooltip="false" fixed="right" :label="t('simulator.action')">
           <template #default="{row}">
             <div class="ds-actions">
               <ConsoleActionButton size="small" label-key="simulator.edit" data-testid="instance-edit" @click="edit(row)" />
@@ -24,19 +24,27 @@
             </div>
           </template>
         </el-table-column>
-      </el-table>
+      </ConsoleDataTable>
     </ConsoleCard>
     <ConsoleCard title-key="simulator.loadRevision">
       <div class="ds-selection-toolbar">
-        <el-select v-model="local.instanceId" :placeholder="t('simulator.instance')" data-testid="instance-selection">
-          <el-option v-for="i in local.draft?.instances" :key="i.id" :value="i.id" :label="i.name" />
-        </el-select>
-        <el-select v-model="revision" :placeholder="t('simulator.revision')" data-testid="revision-selection">
-          <el-option v-for="r in local.configuration?.revisions" :key="r.revisionId" :value="r.revisionId" :label="r.savedSeq+' · '+r.createdUtc" />
-        </el-select>
+        <div class="ds-field">
+          <span>{{ t('simulator.instance') }}</span>
+          <el-select v-model="local.instanceId" :placeholder="t('simulator.instance')" data-testid="instance-selection">
+            <el-option v-for="i in local.draft?.instances" :key="i.id" :value="i.id" :label="i.name" />
+          </el-select>
+        </div>
+        <div class="ds-field">
+          <span>{{ t('simulator.versionDisplay.title') }} <ConsoleFieldHelp :label="t('simulator.versionDisplay.title')" :text="t('simulator.savedSelectedLoaded')+'\n'+t('simulator.calendarTimeHint')" /></span>
+          <el-select v-model="revision" :placeholder="t('simulator.revision')" data-testid="revision-selection">
+            <el-option v-for="r in local.configuration?.revisions" :key="r.revisionId" :value="r.revisionId" :label="'v'+r.savedSeq+' · '+(formatShanghaiTime(r.createdUtc)||'—')" />
+          </el-select>
+        </div>
+        <ConsoleActionButton label-key="simulator.editing.chooseLatest" :disabled="!local.configuration?.latestRevision" @click="chooseLatest" />
         <ConsoleActionButton label-key="simulator.previewApply" data-testid="apply-open" :disabled="local.busy||local.dirty||!local.instanceId||!revision" @click="previewApply()" />
       </div>
-      <p>{{ t('simulator.savedSelectedLoaded') }}</p>
+      <p>{{ t('simulator.editing.chosenVersion',{revision:revisionLabel(revision,local.configuration?.revisions)}) }}</p>
+      <el-alert v-if="revision&&revision!==local.configuration?.latestRevision" :title="t('simulator.editing.historicalVersion')" type="warning" :closable="false" />
     </ConsoleCard>
     <InstanceEditor v-model="editorOpen" :instance="editor" @confirm="keep" />
     <el-dialog :model-value="!!deleting" :title="t('simulator.remove')" :append-to-body="false" width="min(540px, calc(100vw - 32px))" @close="deleting=null">
@@ -50,18 +58,23 @@
   </section>
 </template>
 <script setup lang="ts">
-import { inject, ref, watch } from 'vue';
+import ConsoleDataTable from '../../../../components/console/ConsoleDataTable.vue';
+import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { simulatorKey } from '../../../../console/composables/useDeviceSimulator';
+import { formatShanghaiTime } from '../../../../console/time';
+import { revisionLabel } from '../../../../console/revisions';
+import ConsoleFieldHelp from '../../../../components/console/ConsoleFieldHelp.vue';
 import * as ipc from '../../../../services/deviceSimulator';
 import ConsoleCard from '../../../../components/console/ConsoleCard.vue';
 import ConsoleActionButton from '../../../../components/console/ConsoleActionButton.vue';
 import ConfigRevisionBar from '../../../../components/console/ConfigRevisionBar.vue';
 import InstanceEditor from '../../components/InstanceEditor.vue';
 import ApplyPreviewDialog from '../../components/ApplyPreviewDialog.vue';
-const local = inject(simulatorKey)!, { t } = useI18n(), editorOpen = ref(false), editor = ref<ipc.Instance | null>(null), deleting = ref<ipc.Instance | null>(null), revision = ref(''), candidate = ref<ipc.Preview | null>(null);
-watch(() => local.configuration?.latestRevision, v => { if (!revision.value && v)
-    revision.value = v; }, { immediate: true });
+const local = inject(simulatorKey)!, { t } = useI18n(), editorOpen = ref(false), editor = ref<ipc.Instance | null>(null), deleting = ref<ipc.Instance | null>(null), candidate = ref<ipc.Preview | null>(null);
+const choices = ref<Record<string,string>>({});
+const revision = computed({get:()=>choices.value[local.instanceId]||local.configuration?.latestRevision||'',set:value=>{choices.value[local.instanceId]=value;candidate.value=null;}});
+function chooseLatest(){delete choices.value[local.instanceId];candidate.value=null;}
 function create() { const instance = local.newInstance(); if (instance) {
     editor.value = instance;
     editorOpen.value = true;

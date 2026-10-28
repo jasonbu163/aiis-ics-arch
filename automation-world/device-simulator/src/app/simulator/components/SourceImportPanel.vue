@@ -13,16 +13,16 @@
         </el-select>
       </div>
       <ConsoleActionButton label-key="simulator.scan" data-testid="source-scan" :disabled="local.dirty||!files.length||local.busy" @click="scan" />
-      <el-table v-if="declarations.length" :data="dbDeclarations">
-        <el-table-column :label="t('simulator.select')">
+      <ConsoleDataTable table-id="import.declarations" v-if="declarations.length" :data="dbDeclarations">
+        <el-table-column column-key="selection" width="64" :resizable="false" :show-overflow-tooltip="false" fixed="left" :label="t('simulator.select')">
           <template #default="{row}">
             <el-checkbox v-model="row.selected" :data-testid="'import-select-'+row.name" />
           </template>
         </el-table-column>
-        <el-table-column :label="t('simulator.declaration')">
+        <el-table-column column-key="declaration" min-width="280" :label="t('simulator.declaration')">
           <template #default="{row}">{{ declarationLabel(row) }}</template>
         </el-table-column>
-        <el-table-column :label="t('simulator.targetDb')">
+        <el-table-column column-key="targetDb" min-width="210" :show-overflow-tooltip="false" class-name="ds-cell-wrap" :label="t('simulator.targetDb')">
           <template #default="{row}">
             <el-select v-model="row.dbId" clearable @change="chooseDb(row)">
               <el-option :value="''" :label="t('simulator.newDb')" />
@@ -30,19 +30,19 @@
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column :label="t('simulator.dbNumber')">
+        <el-table-column column-key="dbNumber" min-width="180" :show-overflow-tooltip="false" class-name="ds-cell-wrap" :label="t('simulator.dbNumber')">
           <template #default="{row}">
             <el-input-number v-model="row.number" :min="1" :max="65535" data-testid="import-db-number" />
           </template>
         </el-table-column>
-        <el-table-column :label="t('simulator.udtClosure')">
+        <el-table-column column-key="udtClosure" min-width="280" :show-overflow-tooltip="false" class-name="ds-cell-wrap" :label="t('simulator.udtClosure')">
           <template #default="{row}">
             <el-select v-model="row.closure" multiple :data-testid="'import-closure-'+row.name">
               <el-option v-for="udt in udtDeclarations" :key="key(udt)" :value="key(udt)" :label="declarationLabel(udt)" />
             </el-select>
           </template>
         </el-table-column>
-      </el-table>
+      </ConsoleDataTable>
       <ConsoleActionButton v-if="declarations.length" label-key="simulator.previewImport" data-testid="source-preview" :disabled="local.busy||!dbDeclarations.some(d=>d.selected)" @click="preview" />
       <el-dialog :model-value="!!candidate" :title="t('simulator.importPreview')" :append-to-body="false" width="min(1000px, calc(100vw - 32px))" @close="candidate=null">
         <div v-if="candidate" class="console-stack">
@@ -51,21 +51,21 @@
             <strong>{{ db.name }} · DB{{ db.number }}</strong>
             <el-tree v-if="db.binding" :data="tree(db.binding)" :props="{label:'name',children:'children'}" />
           </div>
-          <el-table :data="changes" max-height="260">
-            <el-table-column prop="path" :label="t('simulator.sourcePath')" />
-            <el-table-column :label="t('simulator.action')">
+          <ConsoleDataTable table-id="preview.import" :data="changes" max-height="260">
+            <el-table-column column-key="path" min-width="240" prop="path" :label="t('simulator.sourcePath')" />
+            <el-table-column column-key="result" min-width="160" :label="t('simulator.action')">
               <template #default="{row}">{{ t('simulator.changes.'+row.result) }}</template>
             </el-table-column>
-            <el-table-column :label="t('simulator.dbNumber')">
+            <el-table-column column-key="dbNumberChange" min-width="160" :label="t('simulator.dbNumber')">
               <template #default="{row}">{{ row.dbNumberBefore??'—' }} → {{ row.dbNumberAfter??'—' }}</template>
             </el-table-column>
-            <el-table-column :label="t('simulator.dataType')">
+            <el-table-column column-key="dataTypeChange" min-width="180" :label="t('simulator.dataType')">
               <template #default="{row}">{{ row.typeBefore??'—' }} → {{ row.typeAfter??'—' }}</template>
             </el-table-column>
-            <el-table-column :label="t('simulator.address')">
+            <el-table-column column-key="addressChange" min-width="200" :label="t('simulator.address')">
               <template #default="{row}">{{ row.byteBefore??'—' }}.{{ row.bitBefore??'—' }} → {{ row.byteAfter??'—' }}.{{ row.bitAfter??'—' }}</template>
             </el-table-column>
-          </el-table>
+          </ConsoleDataTable>
         </div>
         <template #footer>
           <ConsoleActionButton label-key="simulator.cancel" data-testid="import-cancel" @click="candidate=null" />
@@ -76,6 +76,7 @@
   </ConsoleCard>
 </template>
 <script setup lang="ts">
+import ConsoleDataTable from '../../../components/console/ConsoleDataTable.vue';
 import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import * as ipc from '../../../services/deviceSimulator';

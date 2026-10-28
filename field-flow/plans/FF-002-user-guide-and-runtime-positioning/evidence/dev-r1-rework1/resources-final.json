@@ -1,0 +1,33 @@
+{
+  "private_root": "/private/tmp/ff-002-r1-dev-rework1-6jnwedny",
+  "helper_pids_absent": {
+    "66064": true,
+    "66077": true,
+    "66087": true,
+    "66098": true
+  },
+  "shell_processes_waited": 8,
+  "lsof_args": [
+    "/usr/sbin/lsof",
+    "-nP",
+    "-iTCP:31102",
+    "-iTCP:31103",
+    "-iTCP:31880",
+    "-iTCP:32102",
+    "-iTCP:32103",
+    "-iTCP:32880",
+    "-sTCP:LISTEN"
+  ],
+  "lsof_exit": 1,
+  "lsof_stdout_hex": "",
+  "lsof_stderr_hex": "",
+  "no_product_processes_started": true,
+  "no_ports_bound": true,
+  "no_new_state_or_environments": true,
+  "preserve_until": "fresh QA and Human Owner final acceptance, followed by coordinator ownership/handles/dependencies audit",
+  "older_roots_read_only": [
+    "/private/tmp/ff-002-r1-qa-E8j08DYR",
+    "/private/tmp/ff-002-r1-dev-vncfzod3",
+    "/private/tmp/ff-002-r1-coordinator-k8s3e9_q"
+  ]
+}

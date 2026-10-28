@@ -8,4 +8,5 @@ pub(crate) mod local_store;
 pub(crate) mod managed_s7;
 pub(crate) mod plc_layout;
 pub(crate) mod tia_source;
+#[cfg(test)]
 pub(crate) mod yaml_migration;

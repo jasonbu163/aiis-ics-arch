@@ -10,6 +10,7 @@ use std::sync::Arc;
 pub(crate) struct LocalState {
     pub bootstrap: Bootstrap,
     pub engine: Option<Arc<LocalEngine>>,
+    pub startup_error: Option<String>,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -170,8 +171,13 @@ pub(crate) fn dispatch(
     }
 }
 #[tauri::command]
-pub(crate) fn daa_get_bootstrap(state: tauri::State<'_, LocalState>) -> Value {
-    json!({"schemaVersion":1,"mode":state.bootstrap.mode,"origin":if state.bootstrap.validation{"fixture"}else{"native"},"localStorage":state.engine.is_some(),"readAllowed":state.bootstrap.read_allowed,"uploadAvailable":false,"version":env!("CARGO_PKG_VERSION"),"identity":"com.aiis.aw.dataacquisitionagent","ignoredKeys":state.bootstrap.ignored_keys})
+pub(crate) fn daa_get_bootstrap(state: tauri::State<'_, LocalState>) -> Result<Value, String> {
+    if let Some(error) = &state.startup_error {
+        return Err(error.clone());
+    }
+    Ok(
+        json!({"schemaVersion":1,"mode":state.bootstrap.mode,"origin":if state.bootstrap.validation{"fixture"}else{"native"},"localStorage":state.engine.is_some(),"readAllowed":state.bootstrap.read_allowed,"uploadAvailable":false,"version":env!("CARGO_PKG_VERSION"),"identity":"com.aiis.aw.dataacquisitionagent","ignoredKeys":state.bootstrap.ignored_keys}),
+    )
 }
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -206,7 +212,10 @@ async fn invoke(
     request: Value,
 ) -> IpcResult {
     let engine = state.engine.clone().ok_or_else(|| LocalFailure {
-        error_code: "wrong_runtime_mode".into(),
+        error_code: state
+            .startup_error
+            .clone()
+            .unwrap_or_else(|| "wrong_runtime_mode".into()),
         current_etag: None,
         current_active_revision: None,
     })?;

@@ -1,6 +1,6 @@
 //! cfg(test)迁入反例与原子边界；全部资源使用独立系统tmp，无设备或旧profile。
 use super::*;
-use crate::infrastructure::local_store::Stores;
+use crate::{domain::local_runtime::HistoryQuery, infrastructure::local_store::Stores};
 use std::{
     process::Command,
     time::{Duration, Instant},
@@ -434,38 +434,128 @@ fn migration_two_plcs_multidb_policy_independent_expected() {
     assert_eq!(c.receipt.ids.len(), 16);
 }
 #[test]
-fn migration_service_explicit_retry_and_storage_failure() {
-    let p = temp();
+fn resident_retirement_empty_engine_ignores_locators_and_retry_is_read_only() {
+    let p = std::env::temp_dir().join(format!("resident-empty-{}", id()));
+    fs::create_dir(&p).unwrap();
     let locators = paths(&p);
-    fs::write(&locators.points, "broken: [").unwrap();
+    // 旧locator即使指向目录/非法YAML，也不能在普通engine打开或summary中探测。
+    fs::create_dir(&locators.points).unwrap();
+    fs::write(&locators.policy, "broken: [").unwrap();
     let b = crate::config::local_bootstrap::Bootstrap {
         mode: "local_sqlite".into(),
         profile: p.clone(),
-        read_allowed: false,
+        read_allowed: true,
         validation: false,
-        migration: Some(locators.clone()),
+        migration: Some(locators),
         ignored_keys: vec![],
         fixture: None,
     };
     let e = crate::services::local_supervisor::LocalEngine::open(b).unwrap();
-    let state = e.yaml_migration().unwrap();
-    assert_eq!(state.status, "failed");
-    assert_eq!(state.status_persistence, "persisted");
     let v = e.configuration().unwrap();
-    fs::write(&locators.points, YAML).unwrap();
-    let result = e
-        .retry_yaml(v.etag.clone(), state.attempt_id.clone().unwrap())
+    assert_eq!(v.draft, Configuration::default());
+    assert!(v.active.is_none() && e.states.lock().unwrap().is_empty());
+    let before = e
+        .storage
+        .call(true, |s| {
+            Ok((
+                s.configuration()?.etag,
+                s.config
+                    .query_row("SELECT count(*) FROM source_documents", [], |r| {
+                        r.get::<_, i64>(0)
+                    })
+                    .unwrap(),
+            ))
+        })
         .unwrap();
-    assert_eq!(result.status, "imported_with_diagnostics");
-    assert!(e.retry_yaml(v.etag, state.attempt_id.unwrap()).is_err());
-    assert!(e.configuration().unwrap().active.is_none());
+    let db = p.join("local-acquisition-v1/config.sqlite");
+    let bytes = fs::read(&db).unwrap();
+    let summary = e.yaml_migration().unwrap();
+    assert_eq!(summary.status, "not_attempted");
+    assert!(!summary.retry_allowed && summary.attempt_id.is_none());
     assert_eq!(
-        e.storage
-            .call(true, |s| Ok(s.capacity(1024 * 1024 * 1024)?.pending_count))
-            .unwrap(),
-        0
+        e.retry_yaml("stale".into(), "stale".into()).unwrap_err(),
+        "yaml_retry_forbidden"
     );
+    assert_eq!(fs::read(&db).unwrap(), bytes);
+    assert_eq!(e.configuration().unwrap().etag, before.0);
+    assert_eq!(before.1, 0);
+    assert!(e.history(HistoryQuery::default()).unwrap()["items"]
+        .as_array()
+        .unwrap()
+        .is_empty());
     e.shutdown();
+    drop(e);
+    fs::remove_dir_all(p).unwrap();
+}
+
+#[test]
+fn resident_retirement_existing_receipt_and_source_bytes_survive_save_prune() {
+    let p = std::env::temp_dir().join(format!("resident-receipt-{}", id()));
+    fs::create_dir(&p).unwrap();
+    let dir = p.join("local-acquisition-v1");
+    let mut stores = Stores::open(&dir).unwrap();
+    let etag = stores.configuration().unwrap().etag;
+    stores.commit_yaml(candidate(&p), &etag, None).unwrap();
+    let before: Vec<(String, String, String)> = stores
+        .config
+        .prepare("SELECT id,sha256,content FROM source_documents ORDER BY id")
+        .unwrap()
+        .query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))
+        .unwrap()
+        .collect::<Result<_, _>>()
+        .unwrap();
+    let saved = stores.configuration().unwrap();
+    drop(stores);
+    let e = crate::services::local_supervisor::LocalEngine::open(
+        crate::config::local_bootstrap::Bootstrap {
+            mode: "local_sqlite".into(),
+            profile: p.clone(),
+            read_allowed: true,
+            validation: false,
+            migration: None,
+            ignored_keys: vec![],
+            fixture: None,
+        },
+    )
+    .unwrap();
+    let summary = e.yaml_migration().unwrap();
+    assert_eq!(summary.status, "imported_with_diagnostics");
+    assert!(!summary.retry_allowed);
+    assert_eq!(e.configuration().unwrap().etag, saved.etag);
+    assert_eq!(
+        e.retry_yaml(saved.etag, summary.attempt_id.unwrap())
+            .unwrap_err(),
+        "yaml_retry_forbidden"
+    );
+    e.storage
+        .call(false, |s| {
+            let v = s.configuration()?;
+            let mut draft = v.draft;
+            draft.storage.retention_days = 8;
+            s.save_draft(&draft, &v.etag)?;
+            s.yaml_test_prune()
+        })
+        .unwrap();
+    let after: Vec<(String, String, String)> = e
+        .storage
+        .call(true, |s| {
+            Ok(s.config
+                .prepare("SELECT id,sha256,content FROM source_documents ORDER BY id")
+                .unwrap()
+                .query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))
+                .unwrap()
+                .collect::<Result<_, _>>()
+                .unwrap())
+        })
+        .unwrap();
+    assert_eq!(after, before);
+    e.shutdown();
+    drop(e);
+    fs::remove_dir_all(p).unwrap();
+}
+
+#[test]
+fn migration_historical_storage_failure() {
     let p = temp();
     let mut s = Stores::open(&p.join("store")).unwrap();
     let v = s.configuration().unwrap();

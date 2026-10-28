@@ -1,0 +1,34 @@
+{
+  "task": "FF-002",
+  "revision": "r1",
+  "development_rework": "1",
+  "working_tree": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+  "head": "1fa1ce50a521ebd51c2c43389db011a76f2d74bf",
+  "files": {
+    "field-flow/USER_GUIDE.md": "6dafc0ee9e24c51555408e53aac58cae2a66d7b77c6938fe68aea2a7fed2deec",
+    "field-flow/USER_GUIDE.zh-CN.md": "1565aa6fb2670a0a8432290fe98b4bd2cf93126a2934bafc264142fbbfa9c75d",
+    "field-flow/README.md": "fff8c18fc917c4aeea5c071e529f71937abcfec2b7dbce24e4ba9225265ea2aa",
+    "field-flow/README.zh-CN.md": "eeae15fa7520b6e766ed9cde2251364cecff747f39683c035eb84e79f3cab857",
+    "field-flow/field-flow-rust/USER_GUIDE.md": "7f843dcaecbdaee60db893c5cbdf8d93f4d303b7ad1c830a73e05ac2a22f4ff0",
+    "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md": "2fbde306ca22e6bac24021748cd194bf5a3a84cd3a4b7ff79642e8ab417b6e11",
+    "field-flow/field-flow-rust/README.md": "e5505c71a3267feac1415ee1fae2b02a1f40e9c879e5f6c172fbbef503617b8c",
+    "field-flow/field-flow-rust/README.zh-CN.md": "bebf614e516cf581e7878eac059deb5f961ac38778567194dec4388d516451ef",
+    "field-flow/field-flow-rust/CODE_INDEX.md": "35d34f73f86084cd59e1a2082e880a5ed5d2b293d9649455d1ae438a0108c72e",
+    "field-flow/field-flow-python/USER_GUIDE.md": "1236de0134bcd0f38030d88596b6a9f5437239b9cb62167c6f7aaef8fb442248",
+    "field-flow/field-flow-python/USER_GUIDE.zh-CN.md": "2b12386f397fbbc1c750d249a5c4c3622711a2cd28f3d481a9b1ebaccb9f0b42",
+    "field-flow/field-flow-python/README.md": "3edc753ee65ff00e31db7c593c3759343e2a97a88b898401f22b7d2c0e7fba68",
+    "field-flow/field-flow-python/README.zh-CN.md": "5a2bc18d787c976afa8ec3006ecd53d9e2225999754dfcc21c8c88ec214790b4",
+    "field-flow/field-flow-python/CODE_INDEX.md": "8d9bcc204de3dca7536b83fceec92f88a94500c5cb72f4d024faead541a45849",
+    "field-flow/field-flow-rust/BUILD.md": "12d07a8c43449478ec77b2af128249c00de48f18437a306c7c8de5088ef58418",
+    "field-flow/field-flow-rust/BUILD.zh-CN.md": "0e0765a81d1b88bb7748d6be5bef5ded77fb16e1dfe3675389e35ad83102dc18"
+  },
+  "changed_from_prior": [
+    "field-flow/field-flow-rust/USER_GUIDE.md",
+    "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md",
+    "field-flow/field-flow-python/USER_GUIDE.md",
+    "field-flow/field-flow-python/USER_GUIDE.zh-CN.md"
+  ],
+  "copy_root": "/private/tmp/ff-002-r1-dev-rework1-6jnwedny/candidate-documents",
+  "all_copy_hashes_equal": true,
+  "prior_candidate_sha256": "6217888378795ca536f13079fa65b1c7a1294ea534642f1bc44671cd87627d3b"
+}

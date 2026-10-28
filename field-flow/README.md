@@ -6,6 +6,10 @@ Field Flow (FF) is the home for independently maintained, handwritten field-flow
 
 The exact [FF-001 r4](plans/FF-001-dual-runtime-demo01/spec.md) [dual-version Development handoff](plans/FF-001-dual-runtime-demo01/tasks.md) passed fresh-context [QA2](plans/FF-001-dual-runtime-demo01/checklist.md), covering local AC01–AC15 for both projects. Rust queued IO deadlines, pre-call clock guards and actual started statistics were independently verified after repair; formal/isolated full18 passed. Python48 is unchanged, with verified QA1 complete independent evidence and fresh build/unit/gate/CLI checks. All earlier failures/candidates remain. Human Owner final acceptance, field validation and long-running acceptance are pending.
 
+Python is for learning, practice and rapid prototypes, with no packaging in this task. Rust is the main direction for future long-running deployment runtimes. Existing Python functionality/tests and QA remain; future production flows need not be duplicated in both languages. Target-platform, field, hosting, capacity and long-soak acceptance remain separate gates.
+
+See [USER_GUIDE](USER_GUIDE.md) for comparison and reader routes, the complete standalone [Rust guide](field-flow-rust/USER_GUIDE.md), [Python guide](field-flow-python/USER_GUIDE.md) and [Rust BUILD](field-flow-rust/BUILD.md).
+
 ## Independent implementations
 
 | Project | Own engineering surface |
@@ -13,7 +17,7 @@ The exact [FF-001 r4](plans/FF-001-dual-runtime-demo01/spec.md) [dual-version De
 | `field-flow-rust/` | Cargo manifest/lock, Rust source, configuration examples, tests and runtime data |
 | `field-flow-python/` | Python project/uv lock, Python source, configuration examples, tests and runtime data |
 
-Each implementation must be independently copyable, buildable and runnable. Neither depends on its sibling's source, executable, fixture process, virtual environment or writable state, or on a parent runtime manifest. Equivalent flow behavior and acceptance scenarios are shared; file and function layouts may follow each language.
+Each implementation must be independently copyable, buildable and runnable. Neither depends on its sibling's source, executable, fixture process, virtual environment or writable state, or on a parent runtime manifest. The current comparison shares equivalent behavior and acceptance scenarios; future work need not duplicate every flow, and layouts may follow each language.
 
 The [Rust project guide](field-flow-rust/README.md) and [Python project guide](field-flow-python/README.md) provide each project's independent build/start/validation commands. Both implement demo01's local HTTP GET → PLC INT loop and passed independent local QA. Field validation and long-running acceptance remain later stages.
 

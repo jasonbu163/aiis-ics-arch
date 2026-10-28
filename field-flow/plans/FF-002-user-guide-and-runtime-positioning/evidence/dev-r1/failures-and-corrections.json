@@ -1,0 +1,48 @@
+{
+  "initial_private_cache_sync": {
+    "exit": 1,
+    "reason": "DNS unavailable for frozen dependency URLs",
+    "retained": "python-sync.log"
+  },
+  "normal_cache_write_attempt": {
+    "exit": 2,
+    "reason": "sandbox denied normal cache .git write",
+    "retained": "python-sync-cache.log"
+  },
+  "copied_cache_offline_sync": {
+    "exit": 1,
+    "reason": "locked pytest wheel absent",
+    "retained": "python-sync-offline.log"
+  },
+  "network_sync": {
+    "exit": 0,
+    "reason": "auto-reviewed locked dependency preparation, no interpreter/target install",
+    "retained": "python-sync-network.log"
+  },
+  "attempt1": {
+    "reason": "helper sent SIGINT to uv wrapper, wait10 timed out; finally sent SIGTERM and wait succeeded. Runtime exited0, simulated1, fixture report writes0/server_exit0; task process/listener scan clean. Unknown internal uv child PID was not captured before exit; later successful documented direct interpreter route records fixture/server/driver/runtime PIDs.",
+    "original_scene": "/private/tmp/ff-002-r1-dev-vncfzod3/python-demo01-dry_run",
+    "extra_known_pids_absent": {
+      "19984": true,
+      "19980": true
+    }
+  },
+  "attempt2": {
+    "reason": "normal scene completed but helper no-reuse bind hit TCP TIME_WAIT. lsof had no listeners; corrected probe to SO_REUSEADDR matching Python fixture and rechecked existing state without rerunning this scene.",
+    "scene": "/private/tmp/ff-002-r1-dev-vncfzod3/python-demo01-dry_run-retry1"
+  },
+  "task_path_process_scan": {
+    "exit": 0,
+    "survivors": []
+  },
+  "documentation_corrections": [
+    "Python fixture server is a spawn child with owned server threads",
+    "Python manual TTL30s versus Rust60s; input max age10s unchanged",
+    "Python Sample has no pid member",
+    "Exact .venv/bin/python fixture signal target, no uv wrapper in scripted stop",
+    "Actual otool list includes Security/CoreFoundation/libc++/libiconv/libSystem",
+    "Removed unsupported uv python find --python option during source/CLI help check",
+    "Added explicit private tutorial source copy, environment/build/init/run steps",
+    "No formal source/config/locale/manifest/lock edits"
+  ]
+}

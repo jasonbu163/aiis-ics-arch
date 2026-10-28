@@ -1,0 +1,1 @@
+{"counts":{"simulated":1},"meta":{"implementation":"rust","instance_id":"ff-rust-demo01","mode":"dry_run","schema_version":1,"store_uuid":"1792742388566-19826-0"}}

@@ -2,14 +2,13 @@
 import { computed, watch, onMounted, onUnmounted, reactive, ref, type InjectionKey } from 'vue';
 import { ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
-import { bootstrap, localCall, LocalCommandError, type Configuration, type ConfigurationView, type Snapshot, type ImportPreview, type Source, type Offset, type Point, type History, type RawSample, type LogRow, type MigrationSummary, type Identification, type BlockMapping, type NameRequest, type NamePreview, previewPointNames, confirmPointNames } from '../../services/localAcquisition';
+import { bootstrap, localCall, LocalCommandError, type Configuration, type ConfigurationView, type Snapshot, type ImportPreview, type Source, type Offset, type Point, type History, type RawSample, type LogRow, type Identification, type BlockMapping, type NameRequest, type NamePreview, previewPointNames, confirmPointNames } from '../../services/localAcquisition';
 export const localConsoleKey: InjectionKey<LocalConsole> = Symbol('daa-local-owner');
 export type LocalConsole = ReturnType<typeof useLocalAcquisitionConsole>;
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 export function useLocalAcquisitionConsole() {
     const { t, te } = useI18n();
     const available = bootstrap.localStorage && ['native', 'fixture'].includes(bootstrap.origin);
-    const migration = ref<MigrationSummary | null>(null);
     const view = ref<ConfigurationView | null>(null), draft = ref<Configuration | null>(null), snapshot = ref<Snapshot | null>(null), busy = ref(false), error = ref(''), notice = ref(''), selectedPlc = ref(''), selectedDb = ref(''), query = ref(''), pointPage = ref(1), preview = ref<ImportPreview | null>(null), offsets = ref<Offset[]>([]), sources = ref<Source[]>([]), history = ref<History | null>(null), raw = ref<RawSample | null>(null), logs = ref<LogRow[]>([]);
     const conflictVersion = ref(''), snapshotError = ref('');
     const identification = ref<Identification | null>(null), mappings = ref<BlockMapping[]>([]), importPage = ref(1), importPageSize = ref(10);
@@ -120,20 +119,7 @@ export function useLocalAcquisitionConsole() {
             snapshotError.value = String(e instanceof Error ? e.message : e);
         }
     }
-    async function refreshMigration() {
-        migration.value = null;
-        migration.value = await localCall<MigrationSummary>('daa_get_yaml_migration');
-    }
-    async function reload() { invalidateNames(); await perform(async () => { accept(await localCall<ConfigurationView>('daa_get_configuration')); await refreshMigration(); preview.value = null; offsets.value = []; }); }
-    async function retryMigration() {
-        if (!view.value || !migration.value?.attemptId || dirty.value || editing.value) { error.value = 'yaml_unsaved_edits'; return; }
-        const expectedEtag = view.value.etag, expectedAttemptId = migration.value.attemptId;
-        await perform(async () => {
-            const result = await localCall<MigrationSummary>('daa_retry_yaml_migration', { expectedEtag, expectedAttemptId });
-            migration.value = result;
-            if (result.statusPersistence === 'persisted') accept(await localCall<ConfigurationView>('daa_get_configuration'));
-        });
-    }
+    async function reload() { invalidateNames(); await perform(async () => { accept(await localCall<ConfigurationView>('daa_get_configuration')); preview.value = null; offsets.value = []; }); }
     // Candidate stays detached until Rust/CAS returns a committed configuration.
     async function saveCandidate(candidate: Configuration) {
         invalidateNames();
@@ -146,8 +132,6 @@ export function useLocalAcquisitionConsole() {
             offsets.value = [];
             notice.value = 'saved';
             saved = true;
-            try { await refreshMigration(); }
-            catch { error.value = 'yaml_summary_after_save_unavailable'; }
         });
         return saved;
     }
@@ -343,5 +327,5 @@ export function useLocalAcquisitionConsole() {
             clearInterval(timer);
         if (nameTimer) clearTimeout(nameTimer);
     });
-    return reactive({ selectedNameIds, namePreview, namePreviewOpen, namePreviewBusy, namePage, namePageSize, pagedNames, pointPageSize, closeNames, invalidateNames, toggleNamePoint, previewNames, stagePointEdit, confirmNames, sourcePreviewOpen, offsetPreviewOpen, sourceStructureOpen, identification, mappings, importPage, importPageSize, importRows, pagedImportRows, invalidateImport, changeImportTarget, available, migration, retryMigration, editing, dirty, confirmAction, conflictVersion, snapshotError, selectedTargets, bootstrap, view, draft, snapshot, busy, error, notice, selectedPlc, selectedDb, query, pointPage, preview, offsets, sources, history, historyFilter, historyPage, historyPageSize, historyPreviousAvailable, historyNextAvailable, historyPreviousBounded, raw, rawSampleId, logs, label, plcs, dbs, groups, points, pagedPoints, perform, refresh, reload, save, saveCandidate, activate, addPlc, removePlc, addGroup, removeGroup, control, readFiles, importSources, infer, address, manual, bulk, loadHistory, inspect, loadLogs, state, formatBytes });
+    return reactive({ selectedNameIds, namePreview, namePreviewOpen, namePreviewBusy, namePage, namePageSize, pagedNames, pointPageSize, closeNames, invalidateNames, toggleNamePoint, previewNames, stagePointEdit, confirmNames, sourcePreviewOpen, offsetPreviewOpen, sourceStructureOpen, identification, mappings, importPage, importPageSize, importRows, pagedImportRows, invalidateImport, changeImportTarget, available, editing, dirty, confirmAction, conflictVersion, snapshotError, selectedTargets, bootstrap, view, draft, snapshot, busy, error, notice, selectedPlc, selectedDb, query, pointPage, preview, offsets, sources, history, historyFilter, historyPage, historyPageSize, historyPreviousAvailable, historyNextAvailable, historyPreviousBounded, raw, rawSampleId, logs, label, plcs, dbs, groups, points, pagedPoints, perform, refresh, reload, save, saveCandidate, activate, addPlc, removePlc, addGroup, removeGroup, control, readFiles, importSources, infer, address, manual, bulk, loadHistory, inspect, loadLogs, state, formatBytes });
 }

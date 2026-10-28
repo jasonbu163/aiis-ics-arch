@@ -1,0 +1,481 @@
+[
+  {
+    "language": "rust",
+    "case": "demo01",
+    "mode": "dry_run",
+    "scene": "/private/tmp/ff-002-r1-dev-vncfzod3/rust-demo01-dry_run",
+    "fixture_exit": 0,
+    "runtime_exit": 0,
+    "inspect": {
+      "counts": {
+        "simulated": 1
+      },
+      "meta": {
+        "implementation": "rust",
+        "instance_id": "ff-rust-demo01",
+        "mode": "dry_run",
+        "schema_version": 1,
+        "store_uuid": "1792742388566-19826-0"
+      }
+    },
+    "protocol_counts": {
+      "applied": 0,
+      "gets": 4,
+      "native_pid": 19855,
+      "reads": 0,
+      "sessions": 1,
+      "writes": 0
+    },
+    "pids_absent": {
+      "19827": true,
+      "19855": true,
+      "19858": true,
+      "19859": true
+    },
+    "ports_before": [
+      31102,
+      31103,
+      31880,
+      32102,
+      32103,
+      32880
+    ],
+    "ports_after": [
+      31102,
+      31103,
+      31880,
+      32102,
+      32103,
+      32880
+    ]
+  },
+  {
+    "language": "rust",
+    "case": "demo01",
+    "mode": "execute",
+    "scene": "/private/tmp/ff-002-r1-dev-vncfzod3/rust-demo01-execute",
+    "fixture_exit": 0,
+    "runtime_exit": 0,
+    "inspect": {
+      "counts": {
+        "confirmed": 1
+      },
+      "meta": {
+        "implementation": "rust",
+        "instance_id": "ff-rust-demo01",
+        "mode": "execute",
+        "schema_version": 1,
+        "store_uuid": "1792742391244-19904-0"
+      }
+    },
+    "protocol_counts": {
+      "applied": 1,
+      "gets": 4,
+      "native_pid": 19907,
+      "reads": 0,
+      "sessions": 1,
+      "writes": 1
+    },
+    "pids_absent": {
+      "19905": true,
+      "19907": true,
+      "19909": true,
+      "19910": true
+    },
+    "ports_before": [
+      31102,
+      31103,
+      31880,
+      32102,
+      32103,
+      32880
+    ],
+    "ports_after": [
+      31102,
+      31103,
+      31880,
+      32102,
+      32103,
+      32880
+    ]
+  },
+  {
+    "language": "python",
+    "case": "demo01",
+    "mode": "execute",
+    "scene": "/private/tmp/ff-002-r1-dev-vncfzod3/python-demo01-execute-retry1",
+    "fixture_exit": 0,
+    "runtime_exit": 0,
+    "inspect": {
+      "meta": {
+        "schema_version": 1,
+        "implementation": "python",
+        "mode": "execute",
+        "instance_id": "ff-python-demo01",
+        "store_uuid": "4e6b6ab424b74bd5bab07fcad0cc1260",
+        "created_at": "2026-10-23T08:06:29.792Z"
+      },
+      "counts": {
+        "confirmed": 1
+      }
+    },
+    "protocol_counts": {
+      "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "writes": 1,
+      "reads": 0,
+      "gets": 4,
+      "sessions": 1,
+      "closed_sessions": 1,
+      "server_pid": 24651,
+      "server_exit": 0,
+      "server_close": {
+        "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+        "remaining_threads": [],
+        "pid": 24651,
+        "exit_code": 0
+      },
+      "server_epochs": [
+        {
+          "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+          "remaining_threads": [],
+          "pid": 24651,
+          "exit_code": 0
+        }
+      ],
+      "proxy_threads_joined": 1,
+      "ports_rebound": [
+        32102,
+        32103,
+        32880
+      ]
+    },
+    "pids_absent": {
+      "24647": true,
+      "24651": true,
+      "24654": true,
+      "24655": true
+    },
+    "ports_before": [
+      31102,
+      31103,
+      31880,
+      32102,
+      32103,
+      32880
+    ],
+    "ports_after": [
+      31102,
+      31103,
+      31880,
+      32102,
+      32103,
+      32880
+    ]
+  },
+  {
+    "language": "rust",
+    "case": "teaching01",
+    "mode": "dry_run",
+    "scene": "/private/tmp/ff-002-r1-dev-vncfzod3/rust-teaching01-dry_run-retry1",
+    "fixture_exit": 0,
+    "runtime_exit": 0,
+    "inspect": {
+      "counts": {
+        "simulated": 1
+      },
+      "meta": {
+        "implementation": "rust",
+        "instance_id": "ff-rust-teaching01",
+        "mode": "dry_run",
+        "schema_version": 1,
+        "store_uuid": "1792742833144-27508-0"
+      }
+    },
+    "protocol_counts": {
+      "applied": 0,
+      "gets": 4,
+      "native_pid": 27518,
+      "reads": 0,
+      "sessions": 1,
+      "writes": 0
+    },
+    "pids_absent": {
+      "27509": true,
+      "27518": true,
+      "27521": true,
+      "27522": true
+    },
+    "ports_before": [
+      31102,
+      31103,
+      31880,
+      32102,
+      32103,
+      32880
+    ],
+    "ports_after": [
+      31102,
+      31103,
+      31880,
+      32102,
+      32103,
+      32880
+    ]
+  },
+  {
+    "language": "rust",
+    "case": "teaching01",
+    "mode": "execute",
+    "scene": "/private/tmp/ff-002-r1-dev-vncfzod3/rust-teaching01-execute-retry1",
+    "fixture_exit": 0,
+    "runtime_exit": 0,
+    "inspect": {
+      "counts": {
+        "confirmed": 1
+      },
+      "meta": {
+        "implementation": "rust",
+        "instance_id": "ff-rust-teaching01",
+        "mode": "execute",
+        "schema_version": 1,
+        "store_uuid": "1792742835808-27604-0"
+      }
+    },
+    "protocol_counts": {
+      "applied": 1,
+      "gets": 4,
+      "native_pid": 27607,
+      "reads": 0,
+      "sessions": 1,
+      "writes": 1
+    },
+    "pids_absent": {
+      "27605": true,
+      "27607": true,
+      "27609": true,
+      "27610": true
+    },
+    "ports_before": [
+      31102,
+      31103,
+      31880,
+      32102,
+      32103,
+      32880
+    ],
+    "ports_after": [
+      31102,
+      31103,
+      31880,
+      32102,
+      32103,
+      32880
+    ]
+  },
+  {
+    "language": "python",
+    "case": "teaching01",
+    "mode": "dry_run",
+    "scene": "/private/tmp/ff-002-r1-dev-vncfzod3/python-teaching01-dry_run-retry1",
+    "fixture_exit": 0,
+    "runtime_exit": 0,
+    "inspect": {
+      "meta": {
+        "schema_version": 1,
+        "implementation": "python",
+        "mode": "dry_run",
+        "instance_id": "ff-python-teaching01",
+        "store_uuid": "e0644e7ac06c4b709c4eac1c17ab3895",
+        "created_at": "2026-10-23T08:07:18.342Z"
+      },
+      "counts": {
+        "simulated": 1
+      }
+    },
+    "protocol_counts": {
+      "memory_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "writes": 0,
+      "reads": 0,
+      "gets": 4,
+      "sessions": 1,
+      "closed_sessions": 1,
+      "server_pid": 27735,
+      "server_exit": 0,
+      "server_close": {
+        "memory_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+        "remaining_threads": [],
+        "pid": 27735,
+        "exit_code": 0
+      },
+      "server_epochs": [
+        {
+          "memory_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+          "remaining_threads": [],
+          "pid": 27735,
+          "exit_code": 0
+        }
+      ],
+      "proxy_threads_joined": 1,
+      "ports_rebound": [
+        32102,
+        32103,
+        32880
+      ]
+    },
+    "pids_absent": {
+      "27731": true,
+      "27735": true,
+      "27738": true,
+      "27739": true
+    },
+    "ports_before": [
+      31102,
+      31103,
+      31880,
+      32102,
+      32103,
+      32880
+    ],
+    "ports_after": [
+      31102,
+      31103,
+      31880,
+      32102,
+      32103,
+      32880
+    ]
+  },
+  {
+    "language": "python",
+    "case": "teaching01",
+    "mode": "execute",
+    "scene": "/private/tmp/ff-002-r1-dev-vncfzod3/python-teaching01-execute-retry1",
+    "fixture_exit": 0,
+    "runtime_exit": 0,
+    "inspect": {
+      "meta": {
+        "schema_version": 1,
+        "implementation": "python",
+        "mode": "execute",
+        "instance_id": "ff-python-teaching01",
+        "store_uuid": "f67b5434c16c47d8a583f94eccd09b75",
+        "created_at": "2026-10-23T08:07:20.711Z"
+      },
+      "counts": {
+        "confirmed": 1
+      }
+    },
+    "protocol_counts": {
+      "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "writes": 1,
+      "reads": 0,
+      "gets": 4,
+      "sessions": 1,
+      "closed_sessions": 1,
+      "server_pid": 27853,
+      "server_exit": 0,
+      "server_close": {
+        "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+        "remaining_threads": [],
+        "pid": 27853,
+        "exit_code": 0
+      },
+      "server_epochs": [
+        {
+          "memory_hex": "002aa5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+          "remaining_threads": [],
+          "pid": 27853,
+          "exit_code": 0
+        }
+      ],
+      "proxy_threads_joined": 1,
+      "ports_rebound": [
+        32102,
+        32103,
+        32880
+      ]
+    },
+    "pids_absent": {
+      "27849": true,
+      "27853": true,
+      "27856": true,
+      "27857": true
+    },
+    "ports_before": [
+      31102,
+      31103,
+      31880,
+      32102,
+      32103,
+      32880
+    ],
+    "ports_after": [
+      31102,
+      31103,
+      31880,
+      32102,
+      32103,
+      32880
+    ]
+  },
+  {
+    "language": "python",
+    "case": "demo01",
+    "mode": "dry_run",
+    "scene": "/private/tmp/ff-002-r1-dev-vncfzod3/python-demo01-dry_run-retry1",
+    "fixture_exit": 0,
+    "runtime_exit": 0,
+    "inspect": {
+      "meta": {
+        "schema_version": 1,
+        "implementation": "python",
+        "mode": "dry_run",
+        "instance_id": "ff-python-demo01",
+        "store_uuid": "cb69e239c405403a8d26d70ffb1fd465",
+        "created_at": "2026-10-23T08:05:32.932Z"
+      },
+      "counts": {
+        "simulated": 1
+      }
+    },
+    "protocol_counts": {
+      "memory_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "writes": 0,
+      "reads": 0,
+      "gets": 4,
+      "sessions": 1,
+      "closed_sessions": 1,
+      "server_pid": 23992,
+      "server_exit": 0,
+      "server_close": {
+        "memory_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+        "remaining_threads": [],
+        "pid": 23992,
+        "exit_code": 0
+      },
+      "server_epochs": [
+        {
+          "memory_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+          "remaining_threads": [],
+          "pid": 23992,
+          "exit_code": 0
+        }
+      ],
+      "proxy_threads_joined": 1,
+      "ports_rebound": [
+        32102,
+        32103,
+        32880
+      ]
+    },
+    "pids_absent": {
+      "19969": true,
+      "19983": true,
+      "23988": true,
+      "23992": true,
+      "23997": true,
+      "23998": true
+    },
+    "helper_failure": "Completed normal scene; initial no-reuse bind probe hit TIME_WAIT, recovered using no-listener + reuse-aware bind without rerunning runtime"
+  }
+]

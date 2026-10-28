@@ -1,0 +1,10 @@
+{
+  "recordedAt": "2026-10-27T16:56:44+08:00",
+  "purpose": "Preserve unapproved r2 draft before Owner-requested runtime control and daily env scope refinement",
+  "status": "draft_not_approved",
+  "specSha256": "d66a1b075bd6d727261f3a4abb42e3618b05f4c096d5913f9232391f4e8c02fa",
+  "bytes": 66301,
+  "source": "../../spec.md",
+  "tasksSha256": "9149df3fe67c7fe0d8df426142ccd4b16029159038aa8ece0f3ae99fcc5d0b44",
+  "codeChanged": false
+}
