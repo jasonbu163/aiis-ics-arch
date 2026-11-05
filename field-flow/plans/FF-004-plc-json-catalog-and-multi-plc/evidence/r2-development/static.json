@@ -1,0 +1,48 @@
+{
+  "links_checked": 135,
+  "pairs": [
+    {
+      "en": "field-flow/field-flow-rust/config/plcs/README.md",
+      "blocks": 0,
+      "zh_blocks": 0,
+      "same": true
+    },
+    {
+      "en": "field-flow/field-flow-rust/config/README.md",
+      "blocks": 0,
+      "zh_blocks": 0,
+      "same": true
+    },
+    {
+      "en": "field-flow/field-flow-rust/README.md",
+      "blocks": 0,
+      "zh_blocks": 0,
+      "same": true
+    },
+    {
+      "en": "field-flow/field-flow-rust/USER_GUIDE.md",
+      "blocks": 33,
+      "zh_blocks": 33,
+      "same": true
+    },
+    {
+      "en": "field-flow/field-flow-rust/BUILD.md",
+      "blocks": 1,
+      "zh_blocks": 1,
+      "same": true
+    },
+    {
+      "en": "field-flow/USER_GUIDE.md",
+      "blocks": 0,
+      "zh_blocks": 0,
+      "same": true
+    }
+  ],
+  "locale_keys": [
+    "error",
+    "fixture_help",
+    "help",
+    "initialized"
+  ],
+  "failures": []
+}

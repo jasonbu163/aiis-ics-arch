@@ -31,6 +31,7 @@ import { useI18n } from 'vue-i18n';
 import { listen, emit, type UnlistenFn } from '@tauri-apps/api/event';
 import { useAgentConsoleShell } from './console/composables/useAgentConsoleShell';
 import { useDeviceSimulator, simulatorKey } from './console/composables/useDeviceSimulator';
+import { ipcStatusKey } from './console/ipcStatus';
 import type { ConsoleSectionId } from './console/types';
 import { consoleSections } from './console/sections';
 import AgentLayout from './layouts/AgentLayout.vue';
@@ -39,10 +40,10 @@ const { t, te } = useI18n(), { activeSection, appLocale, elementLocale, localeSw
 const local = reactive(useDeviceSimulator());
 provide(simulatorKey, local);
 const activeComponent = computed(() => consoleSections.find(s => s.id === activeSection.value)!.component);
-const ipcStatusText = computed(() => t(!local.available ? 'common.local.desktopPreview' : local.error ? 'common.local.bootstrapFailed' : local.bootstrap ? 'simulator.ipcReady' : 'common.local.loading'));
+const ipcStatusText = computed(() => t(ipcStatusKey(local.available, !!local.bootstrap, local.error)));
 const runtimeStatusText = computed(() => t(local.snapshot?.instances.some(i => i.state === 'running') ? 'simulator.running' : local.snapshot?.instances.some(i => i.state === 'paused') ? 'simulator.paused' : 'simulator.stopped'));
 const identityDetail = computed(() => `${local.bootstrap?.version || '—'} · ${runtimeStatusText.value}`);
-const errorLabel = computed(() => { const key = 'simulator.errors.' + local.error; return te(key) ? t(key) : t('simulator.operationFailed'); });
+const errorLabel = computed(() => { const key = 'simulator.errors.' + local.error; return te(key) ? t(key) : t('simulator.operationFailedWithCode', { code: local.error }); });
 const closeOpen = ref(false);
 let unlisten: UnlistenFn | undefined, timer: ReturnType<typeof setInterval> | undefined;
 async function requestClose() { if (local.busy) {

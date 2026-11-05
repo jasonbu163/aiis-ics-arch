@@ -1,0 +1,119 @@
+[
+  {
+    "expected": {
+      "x": "http://127.0.0.1:34880/it's",
+      "y": "http://127.0.0.1:34880/q?x=a & b/* !"
+    },
+    "outcome": "accepted",
+    "yaml": "x: http://127.0.0.1:34880/it's\ny: 'http://127.0.0.1:34880/q?x=a & b/* !'\n"
+  },
+  {
+    "expected": {
+      "x": "http://127.0.0.1:34880/it\"s",
+      "y": "literal &anchor *alias !"
+    },
+    "outcome": "accepted",
+    "yaml": "x: http://127.0.0.1:34880/it\"s\ny: \"literal &anchor *alias !\"\n"
+  },
+  {
+    "expected": {
+      "x": "words with ' and \" inside plain scalars",
+      "y": "it's & / * !"
+    },
+    "outcome": "accepted",
+    "yaml": "x: words with ' and \" inside plain scalars\ny: 'it''s & / * !'\n"
+  },
+  {
+    "expected": {
+      "x": "plain continuation ' &anchor *alias",
+      "y": "ok"
+    },
+    "outcome": "accepted",
+    "yaml": "x: plain\n  continuation ' &anchor *alias\ny: ok\n"
+  },
+  {
+    "expected": {
+      "x": "text ' \" &anchor *alias",
+      "y": "ok"
+    },
+    "outcome": "accepted",
+    "yaml": "x: |-\n  text ' \" &anchor *alias\ny: ok\n"
+  },
+  {
+    "expected": {
+      "x": "text ' \" &anchor *alias",
+      "y": "ok"
+    },
+    "outcome": "accepted",
+    "yaml": "x: >2-\n  text ' \" &anchor *alias\ny: ok\n"
+  },
+  {
+    "expected": {
+      "x": "literal &anchor *alias !",
+      "y": "ok"
+    },
+    "outcome": "accepted",
+    "yaml": "x: !!str 'literal &anchor *alias !'\ny: ok\n"
+  },
+  {
+    "expected": {
+      "x": "multiline &anchor *alias",
+      "y": "ok"
+    },
+    "outcome": "accepted",
+    "yaml": "x: 'multiline\n  &anchor *alias'\ny: ok # ' \" &anchor *alias\n"
+  },
+  {
+    "expected": {
+      "x": [
+        "http://host/it's",
+        "literal & / * !",
+        {
+          "q": "v"
+        }
+      ]
+    },
+    "outcome": "accepted",
+    "yaml": "x: [http://host/it's, 'literal & / * !', {q: !!str 'v'}]\n"
+  },
+  {
+    "outcome": "config_yaml_alias",
+    "yaml": "x: http://host/it's\ny: &deps [one]\nz: *deps\n"
+  },
+  {
+    "outcome": "config_yaml_alias",
+    "yaml": "x: http://host/it\"s\ny: &deps [one]\nz: *deps\n"
+  },
+  {
+    "outcome": "config_yaml_alias",
+    "yaml": "x: 'it''s & text'\ny: &deps [one]\nz: *deps\n"
+  },
+  {
+    "outcome": "config_yaml_alias",
+    "yaml": "x: \"it\\\"s & text\"\ny: &deps [one]\nz: *deps\n"
+  },
+  {
+    "outcome": "config_yaml_alias",
+    "yaml": "x: words with ' and \" in plain\ny: &deps [one]\nz: *deps\n"
+  },
+  {
+    "outcome": "config_yaml_alias",
+    "yaml": "x: plain\n  continuation ' *literal\ny: &deps [one]\nz: *deps\n"
+  },
+  {
+    "outcome": "config_yaml_alias",
+    "yaml": "x: |-\n  &literal *literal ' \"\ny: &deps [one]\nz: *deps\n"
+  },
+  {
+    "outcome": "config_yaml_alias",
+    "yaml": "x: !!str \"literal & text\"\ny: !!seq &deps [one]\nz: *deps\n"
+  },
+  {
+    "outcome": "config_yaml_alias",
+    "yaml": "--- &document\nx: one\n"
+  },
+  {
+    "outcome": "config_yaml_alias",
+    "yaml": "x: plain # ' \"\ny: &deps [one]\nz: *deps\n"
+  }
+]

@@ -1,0 +1,68 @@
+[
+  {
+    "name": "docker-version",
+    "argv": [
+      "docker",
+      "version",
+      "--format",
+      "{{json .Server}}"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "exitCode": 0,
+    "elapsedSeconds": 0.033215999603271484
+  },
+  {
+    "name": "preflight-container",
+    "argv": [
+      "docker",
+      "container",
+      "inspect",
+      "--format",
+      "{{.Name}}",
+      "aiis-arch-be008-mysql"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "exitCode": 1,
+    "elapsedSeconds": 0.018336772918701172
+  },
+  {
+    "name": "preflight-network",
+    "argv": [
+      "docker",
+      "network",
+      "inspect",
+      "--format",
+      "{{.Name}}",
+      "aiis-arch-be008-net"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "exitCode": 1,
+    "elapsedSeconds": 0.017061710357666016
+  },
+  {
+    "name": "preflight-volume",
+    "argv": [
+      "docker",
+      "volume",
+      "inspect",
+      "--format",
+      "{{.Name}}",
+      "aiis-arch-be008-mysql-data"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "exitCode": 1,
+    "elapsedSeconds": 0.020266056060791016
+  },
+  {
+    "name": "b-prepare",
+    "argv": [
+      "tests/scripts/run-mysql-tests.sh",
+      "prepare",
+      "--run-root",
+      "/private/tmp/arch-be008-run-s272kqdk"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "exitCode": 0,
+    "elapsedSeconds": 13.067303895950317
+  }
+]

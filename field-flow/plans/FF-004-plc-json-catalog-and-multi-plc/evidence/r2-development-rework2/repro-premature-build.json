@@ -1,0 +1,416 @@
+{
+  "binary": "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+  "binary_sha256": "9d740fdbd8b527d0c766a48b008ba32f131141446dfcdb67c0744c1f5fa03053",
+  "vectors": [
+    {
+      "input": "plain_apostrophe.yaml",
+      "sha256": "999018454e4b433910ada55c1dac22a22bf6717e442b7e494d9d29b6ab6d56bb",
+      "expected": 2,
+      "actual": 2,
+      "seconds": 0.021376958,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plain_apostrophe.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[],\"format_valid\":false,\"issues\":[{\"error_key\":\"config_yaml_alias\",\"path\":\"$\"}],\"issues_truncated\":false,\"runtime_compatible\":false,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "quoted_apostrophe.yaml",
+      "sha256": "c6040b3948c39ad400c40e900078ca11a0c11fd2731d5a4f07f4748e52229079",
+      "expected": 2,
+      "actual": 2,
+      "seconds": 0.010257124999999978,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/quoted_apostrophe.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[],\"format_valid\":false,\"issues\":[{\"error_key\":\"config_yaml_alias\",\"path\":\"$\"}],\"issues_truncated\":false,\"runtime_compatible\":false,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "control_no_apostrophe.yaml",
+      "sha256": "742fc7cd69b83ee1e70ccb4fe5127f0ff1d5ff88bcf5719e7141f824ad30f467",
+      "expected": 2,
+      "actual": 2,
+      "seconds": 0.013525624999999986,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/control_no_apostrophe.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[],\"format_valid\":false,\"issues\":[{\"error_key\":\"config_yaml_alias\",\"path\":\"$\"}],\"issues_truncated\":false,\"runtime_compatible\":false,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "valid_plain_apostrophe.yaml",
+      "sha256": "5de4ed4dcb31d35ff068c2fc1fcd6ea6532114757a02c11846eaf43f427636f4",
+      "expected": 0,
+      "actual": 0,
+      "seconds": 0.016979291000000007,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/valid_plain_apostrophe.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "valid_quoted_apostrophe.yaml",
+      "sha256": "de8e8f5c38da7ba9b854fe138916b0b296dee690bdcec0ca2ab074e06f6fb473",
+      "expected": 0,
+      "actual": 0,
+      "seconds": 0.01679670900000002,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/valid_quoted_apostrophe.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "alias-lf.yaml",
+      "sha256": "48de38c7ceedffd470ffefce38b55ca53185dce33afc39ae59a2c6be6d6bb835",
+      "expected": 2,
+      "actual": 2,
+      "seconds": 0.013840542000000011,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/alias-lf.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[],\"format_valid\":false,\"issues\":[{\"error_key\":\"config_yaml_alias\",\"path\":\"$\"}],\"issues_truncated\":false,\"runtime_compatible\":false,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "alias-crlf.yaml",
+      "sha256": "bba482a6fc5d33e60bc01e05065521ea72f7ef4aae6bbbaeb172e0f616af79f5",
+      "expected": 2,
+      "actual": 2,
+      "seconds": 0.01370095800000004,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/alias-crlf.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[],\"format_valid\":false,\"issues\":[{\"error_key\":\"config_yaml_alias\",\"path\":\"$\"}],\"issues_truncated\":false,\"runtime_compatible\":false,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "alias-cr.yaml",
+      "sha256": "ed6934396c7bd5322a393239484862c701a6f791dc17441b9a67971b140b1499",
+      "expected": 2,
+      "actual": 0,
+      "seconds": 0.01441625000000002,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/alias-cr.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "alias-nel.yaml",
+      "sha256": "b1365a737cbdb6c3b0f2a7671f9eebbff6590486b2f4ba7eaa46acf624e6a833",
+      "expected": 2,
+      "actual": 0,
+      "seconds": 0.01405424999999999,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/alias-nel.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "alias-ls.yaml",
+      "sha256": "a99f117125aad7464e60e1faeca0b9a852e27df77cdb3d9ba136813323545200",
+      "expected": 2,
+      "actual": 0,
+      "seconds": 0.014545458999999983,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/alias-ls.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "alias-ps.yaml",
+      "sha256": "e165f524aadca8ffb1e45dcbcb57920905ce1c40fc4dccfad09aaaf5771d6445",
+      "expected": 2,
+      "actual": 0,
+      "seconds": 0.013713417000000006,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/alias-ps.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "valid-lf.yaml",
+      "sha256": "35780d67e3799cf0ec3a81b2f6f5008e7bf7d0aae96e4d5bc55ad967716492fd",
+      "expected": 0,
+      "actual": 0,
+      "seconds": 0.016390542000000008,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/valid-lf.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "valid-crlf.yaml",
+      "sha256": "62fab1b009dabe51946a056b0fbd06f1da13a27a70b8e398f23e50e08a114bba",
+      "expected": 0,
+      "actual": 0,
+      "seconds": 0.014047625000000008,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/valid-crlf.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "valid-cr.yaml",
+      "sha256": "b7a83dbaba000e29ced04634360751492493a76d722f7fc86d58713193793692",
+      "expected": 0,
+      "actual": 0,
+      "seconds": 0.016317374999999967,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/valid-cr.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "valid-nel.yaml",
+      "sha256": "3fc1139e83ddd3d45c355c9e44c369d6c7209bfdc4df97aa3a14be68d1b032fd",
+      "expected": 0,
+      "actual": 0,
+      "seconds": 0.014538708000000011,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/valid-nel.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "valid-ls.yaml",
+      "sha256": "01a65cf96e1bb3b3ac51c02b59106cbf2452199155456df0eefe58f434691b1a",
+      "expected": 0,
+      "actual": 0,
+      "seconds": 0.01939108300000003,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/valid-ls.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "valid-ps.yaml",
+      "sha256": "016a9072baaaf431768138608cb0b01f39ce404fd5fad18c027da188994585d1",
+      "expected": 0,
+      "actual": 0,
+      "seconds": 0.013542374999999995,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/valid-ps.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "flow_quoted_key_alias.yaml",
+      "sha256": "d380c583f49992d998b04809cc202ae1c4688b7d48403fc710a6640f269c15ce",
+      "expected": 2,
+      "actual": 0,
+      "seconds": 0.011570749999999963,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/flow_quoted_key_alias.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "flow_alias_spaced.yaml",
+      "sha256": "68abbb1fba183d3cd64788918bb86f4216f2eb2a600908328ee42260ecc0f528",
+      "expected": 2,
+      "actual": 2,
+      "seconds": 0.01344449999999997,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/flow_alias_spaced.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[],\"format_valid\":false,\"issues\":[{\"error_key\":\"config_yaml_alias\",\"path\":\"$\"}],\"issues_truncated\":false,\"runtime_compatible\":false,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "flow_valid.yaml",
+      "sha256": "f5c0347d7988e38b1ea3527cb47c7438769fa04bcd69dec50f38549cf02b7dd3",
+      "expected": 0,
+      "actual": 0,
+      "seconds": 0.027442834000000027,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/flow_valid.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "block_quoted_spaced.yaml",
+      "sha256": "3a2bd2a318ffec494360c62c6e16846bc8ed09b59d2ec8c98ed42c9eefae79a0",
+      "expected": 2,
+      "actual": 2,
+      "seconds": 0.01362554199999999,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/block_quoted_spaced.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[],\"format_valid\":false,\"issues\":[{\"error_key\":\"config_yaml_alias\",\"path\":\"$\"}],\"issues_truncated\":false,\"runtime_compatible\":false,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "block_quoted_spaced_literal.yaml",
+      "sha256": "e508f0ab2e013ebfa68e6ca70aac5b28d799fcd95f02eb31c692a6c24c780abd",
+      "expected": 0,
+      "actual": 0,
+      "seconds": 0.014013750000000047,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/block_quoted_spaced_literal.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "block_quoted_adjacent.yaml",
+      "sha256": "3312af44012420189f8c877cfff52f2b8db6458d5bec557894639c5b6d41b6be",
+      "expected": 2,
+      "actual": 2,
+      "seconds": 0.01094841599999996,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/block_quoted_adjacent.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[],\"format_valid\":false,\"issues\":[{\"error_key\":\"config_schema\",\"path\":\"$\"}],\"issues_truncated\":false,\"runtime_compatible\":false,\"scope\":\"main\"}\n",
+      "stderr": ""
+    },
+    {
+      "input": "block_quoted_adjacent_literal.yaml",
+      "sha256": "d942cda8a8581054ae675c1a8bc73a3541144291d69c966a511b0fc7f054d056",
+      "expected": 2,
+      "actual": 2,
+      "seconds": 0.013266582999999943,
+      "argv": [
+        "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+        "config",
+        "validate",
+        "--config",
+        "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro/block_quoted_adjacent_literal.yaml"
+      ],
+      "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+      "stdout": "{\"files\":[],\"format_valid\":false,\"issues\":[{\"error_key\":\"config_schema\",\"path\":\"$\"}],\"issues_truncated\":false,\"runtime_compatible\":false,\"scope\":\"main\"}\n",
+      "stderr": ""
+    }
+  ],
+  "matches": 19,
+  "count": 24
+}

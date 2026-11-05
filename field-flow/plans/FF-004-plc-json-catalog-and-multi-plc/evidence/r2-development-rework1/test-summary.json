@@ -1,0 +1,54 @@
+{
+  "ack_rejection_matrix": {
+    "passed": 1,
+    "seconds": 10.15
+  },
+  "basic_examples": {
+    "passed": 3,
+    "seconds": 85.2
+  },
+  "catalog_compatibility": {
+    "passed": 3,
+    "seconds": 4.47
+  },
+  "cli_contract": {
+    "passed": 3,
+    "seconds": 0.05
+  },
+  "confirmed_audit": {
+    "passed": 1,
+    "seconds": 0.41
+  },
+  "local_protocol": {
+    "passed": 4,
+    "seconds": 28.09
+  },
+  "modbus_catalog": {
+    "passed": 1,
+    "seconds": 0.2
+  },
+  "multi_plc": {
+    "passed": 3,
+    "seconds": 52.35
+  },
+  "plc_catalog": {
+    "passed": 3,
+    "seconds": 0.25
+  },
+  "process_lifecycle": {
+    "passed": 1,
+    "seconds": 11.58
+  },
+  "remaining_matrix": {
+    "passed": 2,
+    "seconds": 8.11
+  },
+  "runtime_regressions": {
+    "passed": 3,
+    "seconds": 5.65
+  },
+  "s7_int_pdu": {
+    "passed": 3,
+    "seconds": 0.0
+  }
+}

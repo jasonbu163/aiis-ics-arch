@@ -48,7 +48,7 @@ ls -A "$FF_LESSON/empty"
 
 夹具父进程拥有 HTTP/proxy 线程并用自身 executable 启动 native server 子进程。runtime 是独立进程，每 PLC owner 启动一个常驻 driver 子进程/session。proxy 前后两段 TCP 不代表两个业务 PLC client。此有限协议夹具不是 Device Simulator（DS）产品，无需 DS、Backend、Docker 或另一语言。
 
-Rust CLI 没有 fixture_ready 行：核对进程持续存活且三个 listener 属于本演练。固定 source=demo01-feed、cmd-001、value=42。命令时间仅生成一次（expires=issued+60000 ms），重复 GET 不刷新。默认 input_max_age_ms=10000，故夹具启动后只有 10 秒启动 runtime，尽管 expiry 为 60 秒。先准备好终端 B 命令，再启动终端 A 夹具。超过 10 秒后出现 stale 符合语义。
+旧YAML v1夹具CLI没有 fixture_ready 行：核对进程持续存活且三个 listener 属于本演练。固定 source=demo01-feed、cmd-001、value=42。命令时间仅生成一次（expires=issued+60000 ms），重复 GET 不刷新。默认 input_max_age_ms=10000，故夹具启动后只有 10 秒启动 runtime，尽管 expiry 为 60 秒。先准备好终端 B 命令，再启动终端 A 夹具。超过 10 秒后出现 stale 符合语义。
 
 自动测试可在内部改 feed/故障；人工 CLI 没有控制面板、管理 API、持续命令生成、任意点表或交互故障编辑。本手册仅用DB1/16/offset0；native夹具不会按任意配置生成feed/DB。配置可表达的 DB/地址范围不扩大夹具能力。native server夹具不证明真实PLC写保护或现场块大小。
 
@@ -158,7 +158,7 @@ config/loopback.yaml 是完整可跑样例。对象为 Config → Plc[]、Flow[]
 | `plc.host / port / rack / slot` | IPv4 字面量 / 1–65535 / 0–7 / 0–31 |
 | `connect_timeout_ms / io_timeout_ms` | PLC：500–3000 / 500–5000 |
 | `queue_capacity / queue_wait_ms / ready_wait_ms` | 1–16 / 100–5000 / 100–5000 |
-| `flow.kind / interval_ms / input_max_age_ms` | 教程接线前仅 demo01 / 100–10000 / 1–60000 |
+| `flow.kind / interval_ms / input_max_age_ms` | demo01 / plc_guard_get_int / get_value_guard_int / 100–10000 / 1–60000 |
 | `get_url` | http(s)、host，无凭据/fragment；不走环境代理/重定向/业务重试 |
 | `target.plc_id / db_number` | 已存在 PLC / 1–65535 |
 | `db_size_bytes / byte_offset / type` | 2–65536 / 0–65534 / INT；offset+2 ≤ size |
@@ -221,7 +221,7 @@ Rust Sample含request_id/flow_id/generation/pid/value:i16/quality/sampled_at_ms�
 let sample = owner.read("teaching-read", f.target.db_number, f.target.byte_offset).await?;
 let value: i16 = sample.value;
 ```
-这不新增已注册读flow。quality=good是sampled_at_ms时刻的有效协议样本，不是物理完成。
+此旧接口片段不注册读flow；YAML v2的read_points见下文。quality=good是sampled_at_ms时刻的有效协议样本，不是物理完成。
 
 仅装配/生命周期使用：Config::load/validate、Runtime::start/launch_flows/health/shutdown、State::open/finalize与StateTask::join。State.admit/dispatch/finish与Owner.write归Execution内部，不绕过持久执行。Driver.spawn/call/close、raw iso_exchange、S7 codec、gate/lock、SQL和夹具变更hook属于内部/测试面。不存在POST/auth、BOOL/REAL或自动发现案例公共方法。第7节完整demo同能力代码展示最短合法写路径。
 
@@ -288,13 +288,13 @@ assert "pub mod teaching01;" not in s
 p.write_text(s + "\npub mod teaching01;\n")
 p = Path("src/config.rs")
 s = p.read_text()
-old = 'f.kind != "demo01"'
+old = '"demo01" | "plc_guard_get_int" | "get_value_guard_int"'
 assert s.count(old) == 1
-p.write_text(s.replace(old, '!matches!(f.kind.as_str(), "demo01" | "teaching01")'))
+p.write_text(s.replace(old, old + ' | "teaching01"'))
 p = Path("src/runtime.rs")
 s = p.read_text()
-old = 'crate::app::demo01::iteration(&f,&plc,&http,&owner,&state,&stop,&mut clock).await'
-new = 'match f.kind.as_str() { "demo01" => crate::app::demo01::iteration(&f,&plc,&http,&owner,&state,&stop,&mut clock).await, "teaching01" => crate::app::teaching01::iteration(&f,&plc,&http,&owner,&state,&stop,&mut clock).await, _ => Err("config_flow".into()) }'
+old = '"demo01"=>crate::app::demo01::iteration(&f,&plc,&http,&owner,&state,&stop,&mut clock).await,'
+new = old + '"teaching01"=>crate::app::teaching01::iteration(&f,&plc,&http,&owner,&state,&stop,&mut clock).await,'
 assert s.count(old) == 1
 p.write_text(s.replace(old, new))
 PY
@@ -388,3 +388,155 @@ A按ENTER关闭夹具，返回后立即按第3节在A记录FF_FIXTURE_EXIT；再
 FF-002有限演练使用独立macOS arm64副本、真实产品CLI、各自新synthetic dry/execute场景和已接线教程案例；真实证据与失败归FF-002 tasks。fresh Verification给出自身verdict前仅为DEV自检。不宣称重跑FF-001全部故障矩阵、真实endpoint/PLC、DS联调、生产托管、跨平台移植、长稳或分发合规。后续资源回收前先保留报告/PID/退出码/端口证据。
 
 本地导航：[README](README.zh-CN.md)、[CODE_INDEX](CODE_INDEX.md)、[组件声明](THIRD_PARTY_NOTICES.zh-CN.md)。
+
+## 基础案例
+
+三个正式案例及完整运行命令见[案例目录](examples/README.zh-CN.md)，YAML合同见[配置说明](config/README.zh-CN.md)。teaching01仍只在教程副本接线。
+
+<a id="catalog-v2"></a>
+
+## Rust目录配置v2
+
+YAML v1保留demo01/plc_guard_get_int/get_value_guard_int及原三YAML。Rust YAML v2仅支持demo01/read_points，通过plc_files显式列表每PLC加载一个ff.plc JSON v1。路径以主文件目录为基准，无扫描/热重读。Modbus仅结构validate；run在状态/日志/网络IO前拒绝整组，包括未引用或disabled的Modbus。Python/C#尚未加载，DS尚未导出。
+
+只读源码API是devices.get(device_id)?.read(point_id).await。装配绑定flow_id，仅注入device_ids子集及enabled点；app不接收原始地址/writer/SQL/全局owner表。样本保留request_id/flow_id/generation、typed int16/quality及本机响应完成received_at(+08:00)，不是设备事件时间。read_points单轮按reads顺序await，首错结束，后项not_attempted且无sample/value；新轮清空旧项。Owner/队列/会话复用，多流为独立采样，非去重/原子快照。
+
+points_health沿既有五秒节奏。仅保留最近一轮，每flow至多16项、总128项。每块至多4项，每JSONL包含审计外层/转义context至多4096B。round_id/chunk_index/chunk_count标识分块，跨块非原子。in_progress可部分成功；completed_rounds/successful_reads/errors为饱和累计计数。新observed_at/received_at按+08，旧UTC日志外层/状态producer保持。
+
+终端A：先完成全部构建和两模式init，再起夹具。把打印的两个真实绝对路径交给B逐行粘贴。端口占用即停止，不杀占用者/换端口；lsof无输出exit1仅表示未找到监听。
+
+```bash
+cd /Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust
+FF_PROJECT=$(pwd -P)
+FF_RUN_ROOT=$(mktemp -d /private/tmp/ff-004-r2-manual-XXXXXX)
+printf '%s\n' "$FF_PROJECT" "$FF_RUN_ROOT"
+cargo build --locked --release --no-default-features --bin field-flow --target-dir "$FF_RUN_ROOT/product"
+cargo build --locked --release --features test-fixture --bin ff-fixture --target-dir "$FF_RUN_ROOT/fixture"
+"$FF_RUN_ROOT/product/release/field-flow" config validate --config "$FF_PROJECT/config/catalog-demo.yaml"
+"$FF_RUN_ROOT/product/release/field-flow" config validate --plc-file "$FF_PROJECT/config/plcs/modbus-example.json"
+"$FF_RUN_ROOT/product/release/field-flow" state init --synthetic --mode dry_run --state-dir "$FF_RUN_ROOT/dry-state" --instance-id ff-rust-catalog-demo
+"$FF_RUN_ROOT/product/release/field-flow" state init --synthetic --mode execute --state-dir "$FF_RUN_ROOT/execute-state" --instance-id ff-rust-catalog-demo
+lsof -nP -iTCP:34102 -iTCP:34103 -iTCP:34112 -iTCP:34113 -iTCP:34880 -sTCP:LISTEN
+```
+
+
+A启动全新dry夹具，等fixture_ready，此时仍idle：
+
+```bash
+"$FF_RUN_ROOT/fixture/release/ff-fixture" --catalog-demo --evidence-dir "$FF_RUN_ROOT/dry-fixture"
+```
+
+B在自身shell独立赋值并启动产品：
+
+```bash
+read -r FF_PROJECT
+read -r FF_RUN_ROOT
+cd "$FF_PROJECT"
+FF_BIN="$FF_RUN_ROOT/product/release/field-flow"
+FF_SCENE=dry
+"$FF_BIN" run --config "$FF_PROJECT/config/catalog-demo.yaml" --state-dir "$FF_RUN_ROOT/dry-state" > "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" 2> "$FF_RUN_ROOT/$FF_SCENE.stderr" &
+FF_PID=$!
+printf 'runtime PID=%s\n' "$FF_PID"
+```
+
+
+B用下面有截止、只读检查核对初始完整[12,1,56,34]。此人工路径演示首个health/状态结果及正常关闭，不证明S1要求的issue后至少十次相同body GET。超时保留失败并停止，不刷新身份/放大TTL。
+
+```bash
+python3 - "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" initial <<'PY_CHECK'
+import json, pathlib, sys, time
+p, stage = pathlib.Path(sys.argv[1]), sys.argv[2]
+end = time.monotonic() + (15 if stage == "initial" else 8)
+while time.monotonic() < end:
+    for line in p.read_text().splitlines():
+        try:
+            v = json.loads(line)
+            c = v.get("context", {})
+            if isinstance(c, str): c = json.loads(c)
+        except ValueError:
+            continue
+        if stage == "initial":
+            ok = v.get("event") == "points_health" and c.get("flow_id") == "read_pair" and c.get("status") == "complete" and [i.get("sample", {}).get("value") for i in c.get("items", [])] == [12, 1, 56, 34]
+        else:
+            ok = v.get("event") == "health" and any(c.get("store", {}).get("commands", {}).get(k) == 1 for k in ["simulated", "confirmed"])
+        if ok:
+            print(json.dumps(c, ensure_ascii=False)); sys.exit(0)
+    time.sleep(0.05)
+raise SystemExit("observation deadline")
+PY_CHECK
+```
+
+
+issue前HTTP为严格七键idle、command0且writes=[0,0]。现在A在夹具stdin只输入一次`issue`并回车，它冻结该场景原body/身份/时间；第二次issue或非法输入拒绝且不改原值。B立即重跑上方检查，将其唯一`initial`参数改为`issued`。8秒内应看到simulated1；原input_max_age仍10秒。通过后B只向自己记录的产品PID发信号并实际wait：
+
+```bash
+kill -INT "$FF_PID"
+wait "$FF_PID"
+FF_EXIT=$?
+printf 'runtime exit=%s\n' "$FF_EXIT"
+"$FF_BIN" state inspect --state-dir "$FF_RUN_ROOT/$FF_SCENE-state"
+```
+
+
+A输入空行停止前台夹具，返回后立即在A记录自身退出：
+
+```bash
+FF_FIXTURE_EXIT=$?
+printf 'fixture exit=%s\n' "$FF_FIXTURE_EXIT"
+```
+
+B保留FF_PID，核报告、stderr、确切PID及端口。runtime和fixture正常exit0。final_memory为A.DB1=000c0001+12字节A5、A.DB2=0038+14字节A5、B.DB1=0022+14字节A5；writes=[0,0]。从`$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl`的driver_ready.context提取两个driver PID（字符串再解JSON），从`$FF_RUN_ROOT/$FF_SCENE-fixture/protocol.json`的native_pids取两个native server PID；下面有界检查对每个确切正整数跑ps -p确认不存在。参数错误/权限诊断不是PID消失。
+
+```bash
+cat "$FF_RUN_ROOT/$FF_SCENE-fixture/protocol.json"
+cat "$FF_RUN_ROOT/$FF_SCENE.stderr"
+ps -p "$FF_PID" -o pid=,stat=,command=
+lsof -nP -iTCP:34102 -iTCP:34103 -iTCP:34112 -iTCP:34113 -iTCP:34880 -sTCP:LISTEN
+```
+
+```bash
+python3 - "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" "$FF_RUN_ROOT/$FF_SCENE-fixture/protocol.json" <<'PY_PIDS'
+import json, pathlib, subprocess, sys
+pids = set()
+for line in pathlib.Path(sys.argv[1]).read_text().splitlines():
+    row = json.loads(line)
+    context = row.get("context", {})
+    if isinstance(context, str): context = json.loads(context)
+    if row.get("event") == "driver_ready": pids.add(context["pid"])
+assert len(pids) == 2, pids
+report = json.loads(pathlib.Path(sys.argv[2]).read_text())
+assert len(report["native_pids"]) == 2
+pids.update(report["native_pids"])
+for pid in sorted(pids):
+    assert isinstance(pid, int) and pid > 0
+    check = subprocess.run(["ps", "-p", str(pid), "-o", "pid=,stat=,command="], capture_output=True, text=True)
+    assert check.returncode == 1 and not check.stdout and not check.stderr, (pid, check.stdout, check.stderr)
+print(json.dumps({"absent_driver_and_native_pids": sorted(pids)}))
+PY_PIDS
+```
+
+
+execute为全新独立场景。A保持自身变量，重新检查五口空闲后启动：
+
+```bash
+"$FF_RUN_ROOT/fixture/release/ff-fixture" --catalog-demo --evidence-dir "$FF_RUN_ROOT/execute-fixture"
+```
+
+B保留同一shell，显式启动：
+
+```bash
+FF_SCENE=execute
+"$FF_BIN" run --config "$FF_PROJECT/config/catalog-demo.yaml" --state-dir "$FF_RUN_ROOT/execute-state" --execute > "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" 2> "$FF_RUN_ROOT/$FF_SCENE.stderr" &
+FF_PID=$!
+printf 'runtime PID=%s\n' "$FF_PID"
+```
+
+重复initial检查、A一次issue、B issued检查、B SIGINT/wait/inspect、A空行/退出、B报告/PID/端口核对。预期confirmed1，A WriteVar恰1且B0；仅A.DB1首INT改002a，ready/result/B和全部邻A5保持。ACK+本地confirmed不是工艺完成。保留原状态/日志/身份，不重新init/更名/换库绕unknown。只有原typed语义逐项一致的confirmed库才可接v2。路径/显示/source hash不是效果hash；实际地址/声明大小/业务名变化会冲突。DS UUID替换旧PLC id不承诺无缝状态继承。
+
+原teaching01精确接线锚点仍用于独立教程副本的v1；正式源码拒绝teaching01。FF-005原完整hold_ack强收限制保留。本切片B-off为已知bootstrap force/非零故障分类，不是正常关闭；普通/慢连接场景必须真实join/reap且零forced。无Modbus通信、DS导出、POST、真实设备、Windows/Linux或部署证明。
+
+两个人工场景均停止并确认五口空闲后，从FF_PROJECT运行下面有界CLI矩阵来验收定量S1。它包含S1两模式及其他catalog隔离场景，核对原input age内至少十次相同的issue后body GET，并单列预期B-off故障。使用新证据目录；首个health结果或九次GET不算S1验收。
+
+```bash
+FF004_EVIDENCE_ROOT="$FF_RUN_ROOT/s1-acceptance" cargo test --locked --features test-fixture --target-dir "$FF_RUN_ROOT/acceptance-target" --test multi_plc catalog_cli_matrix -- --nocapture --test-threads=1
+```

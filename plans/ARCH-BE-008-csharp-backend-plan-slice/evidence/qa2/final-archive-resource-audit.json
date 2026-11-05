@@ -1,0 +1,22 @@
+{
+  "task": "ARCH-BE-008",
+  "revision": "r1",
+  "qaRound": "QA2",
+  "copied115FilesAndBytesIndependentlyRehashed": true,
+  "files": 115,
+  "bytes": 1980437,
+  "archiveManifestSHA256": "840f4fff6ea5fadd77f4ab6253b283ffd4b572e5a1969089e61828f7783a30d3",
+  "coordinatorArchiveReceiptSHA256": "25495a342645f7698d35c7216429f958e2baf4c281838fbb594dd7db4b396d6f",
+  "coordinatorCleanupReceiptSHA256": "b91579a64c45e77fcc34f38b5075b7503dc3ccc4a88fcd9b5fb58ee49717922d",
+  "coordinatorCleanupObservedViaPersistentEvidence": {
+    "runId": "ab0f0fb5409b36026f53281f",
+    "cleanupExit": 0,
+    "resourcesAbsent": true,
+    "portsRebound": [
+      13388,
+      18108
+    ]
+  },
+  "verificationPerformedCleanup": false,
+  "noDbOrApiRerunAfterTechnicalVerdict": true
+}

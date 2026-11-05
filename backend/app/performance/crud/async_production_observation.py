@@ -2,10 +2,10 @@
 from sqlalchemy import select, func, null
 from app.performance.models.performance import Performance
 from app.performance.models.mapping_ingest import PerformanceObservationState as State
-async def state_for_update(db, equipment):
+async def state_for_update(db, equipment, context=None):
     state = (await db.execute(select(State).where(State.equipment_id == equipment).with_for_update())).scalar_one_or_none()
     if state is None:
-        state = State(equipment_id=equipment)
+        state = State(equipment_id=equipment, **(dict(created_at=context[1].replace(tzinfo=None),updated_at=context[1].replace(tzinfo=None)) if context else {}))
         db.add(state)
         await db.flush()
     return state

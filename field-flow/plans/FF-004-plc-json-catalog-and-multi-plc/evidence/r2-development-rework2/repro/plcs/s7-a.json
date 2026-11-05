@@ -1,0 +1,13 @@
+{
+  "format": "ff.plc",
+  "schema_version": 1,
+  "id": "s7_a",
+  "display_name": "Synthetic S7 A",
+  "protocol": "s7",
+  "source": {"kind": "manual"},
+  "connection": {"host": "127.0.0.1", "port": 34102, "rack": 0, "slot": 1, "local_tsap": 256, "remote_tsap": 257},
+  "dbs": [
+    {"number": 1, "size_bytes": 16, "points": [{"id": "value", "data_type": "int16", "byte_offset": 0}, {"id": "ready", "data_type": "int16", "byte_offset": 2}]},
+    {"number": 2, "size_bytes": 16, "points": [{"id": "result", "data_type": "int16", "byte_offset": 0}]}
+  ]
+}

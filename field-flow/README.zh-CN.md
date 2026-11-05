@@ -21,6 +21,8 @@ Python定位为熟悉语言、练手及快速原型，本轮不做打包；Rust�
 
 [Rust 工程说明](field-flow-rust/README.zh-CN.md)和 [Python 工程说明](field-flow-python/README.zh-CN.md)分别提供独立构建、启动及验证命令。两版已实现 demo01 本地 HTTP GET → PLC INT 闭环，并通过独立本地 QA；现场验证和长期运行验收归后续阶段。
 
+[FF-004 r2](plans/FF-004-plc-json-catalog-and-multi-plc/spec.md)：新的fresh-context QA通过精确r2 A的AC01–AC14，旧驱动限制与失败历史保留；Human Owner最终验收待定，后续能力与现场gate独立。 该切片约定每PLC一个JSON、YAML v2、点位句柄与多PLC读取；Modbus仅结构校验，Python/C#加载和DS导出各有后续gate。
+
 ## 手写流程
 
 每个应用流程模块代表一条逻辑流，通过稳定 flow ID 和业务名标识触发方式、步骤、有类型输入输出、跨轮状态与失败行为。runtime 负责调度和生命周期，infrastructure 负责 PLC/HTTP 通信。
@@ -48,3 +50,5 @@ FF 保持可独立维护，其流程说明和已验证场景可作为后续 CA �
 - [讨论基线](plans/ARCH-TOOL-001-field-flow-runner/spec.md)管理详细范围、决策、分阶段验收和可还原的 r1 历史。
 - [首轮实施范围](plans/FF-001-dual-runtime-demo01/spec.md)定义独立运行时与 demo01 本地闭环；精确 r4 已批准，完整已批准 r3/r2/r1 历史保留。
 - 继续遵循[仓库契约](../AGENTS.md)和[开发流程](../.codex/workflows/development-lifecycle-workflow.md)。
+
+正式基础案例：basic01复用demo01、basic02负target才GET、basic03正数且≤100；各自完整命令见[Rust案例](field-flow-rust/examples/README.zh-CN.md)与[Python案例](field-flow-python/examples/README.zh-CN.md)。进阶与C#仍为planned，精确DEV/QA/Owner阶段见FF-005 bundle。

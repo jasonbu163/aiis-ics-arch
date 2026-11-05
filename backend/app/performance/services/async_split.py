@@ -16,6 +16,9 @@ from app.performance.models.performance import Performance, Split
 from app.performance.schemas.performance_in import SplitCreate, SplitUpdate
 
 
+from app.performance.crud.async_integration import storage_context
+from common.integration.storage import to_storage_time as storage_time
+
 class SplitService:
     def __init__(self, db: AsyncSession):
         self.db = db
@@ -26,6 +29,7 @@ class SplitService:
         page_size: int = 20,
         parent_coil_no: Optional[str] = None
     ) -> Dict[str, Any]:
+        context=await storage_context(self.db)
         query = select(Split).options(
             selectinload(Split.performance)
         )
@@ -56,6 +60,7 @@ class SplitService:
         }
 
     async def get_by_id(self, split_id: int) -> Optional[Split]:
+        context=await storage_context(self.db)
         query = select(Split).options(
             selectinload(Split.performance)
         ).where(Split.id == split_id)
@@ -64,6 +69,7 @@ class SplitService:
         return result.scalar_one_or_none()
 
     async def create(self, data: SplitCreate) -> Split:
+        context=await storage_context(self.db)
         perf_result = await self.db.execute(
             select(Performance).where(Performance.id == data.performance_id)
         )
@@ -78,6 +84,8 @@ class SplitService:
         self.db.add(split)
         
         parent_perf.is_split = True
+        if context:
+            parent_perf.updated_at=storage_time(context[1])
         self.db.add(parent_perf)
         
         child_perf = Performance(
@@ -94,6 +102,9 @@ class SplitService:
             is_split=False,
             remark=f"来源于母卷分卷: {parent_perf.coil_no}"
         )
+        if context:
+            child_perf.created_at=storage_time(context[1])
+            child_perf.updated_at=storage_time(context[1])
         self.db.add(child_perf)
         
         await self.db.commit()
@@ -107,6 +118,7 @@ class SplitService:
         split_id: int,
         data: SplitUpdate
     ) -> Optional[Split]:
+        context=await storage_context(self.db)
         split = await self.get_by_id(split_id)
         if not split:
             return None
@@ -120,6 +132,7 @@ class SplitService:
         return split
 
     async def delete(self, split_id: int) -> bool:
+        context=await storage_context(self.db)
         split = await self.get_by_id(split_id)
         if not split:
             return False
@@ -129,6 +142,7 @@ class SplitService:
         return True
 
     async def get_parent_coils(self) -> List[Dict[str, Any]]:
+        context=await storage_context(self.db)
         query = select(Performance).where(
             Performance.parent_coil_no == Performance.coil_no,
             Performance.plan_id.is_not(None),
@@ -152,6 +166,7 @@ class SplitService:
         return parent_coils
 
     async def generate_split_no(self, performance_id: int) -> str:
+        context=await storage_context(self.db)
         query = select(Performance).where(Performance.id == performance_id)
         result = await self.db.execute(query)
         performance = result.scalar_one_or_none()

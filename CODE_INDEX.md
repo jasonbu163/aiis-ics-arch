@@ -6,6 +6,7 @@ source topology or important entrypoints change.
 ## Root
 
 - `backend/` — FastAPI, SQLAlchemy, Alembic and Core module registry.
+- `backend-dotnet/` — independent C# Plan learning slice; three direct-MySQL APIs, no login; [local source index](backend-dotnet/CODE_INDEX.md).
 - `frontend-js/` — JavaScript Core web shell, route/locale discovery and system UI.
 - `automation-world/control-agent/` — optional Rust/Tauri field runtime and operations console.
 - `field-flow/` — independent Rust/Python field runtimes; exact r4 passed unified fresh-context local QA2, with Human Owner final acceptance pending.
@@ -146,8 +147,10 @@ documentation initialization in this repository.
 - `automation-world/data-acquisition-agent/src-tauri/src/commands/local_{acquisition,validation}.rs` / `src/bin/daa-local-validation.rs` — named local IPC and nondefault debug JSON Lines adapter; no ACK/upload/SQL executor.
 - `automation-world/data-acquisition-agent/src/services/localAcquisition.ts` / `src/console/composables/useLocalAcquisitionConsole.ts` — bootstrap-first IPC contract, local edit-base CAS and one runtime refresh owner; normal reload/save no longer query or retry YAML migration.
 - `automation-world/data-acquisition-agent/src/components/console/{ConfigRevisionBar,LocalHistoryPanel,LocalLogPanel}.vue` — draft/active/loaded/used version facts and bounded immutable history/events; ordinary pages have no YAML migration fault/retry entry.
+- `automation-world/data-acquisition-agent/src/components/console/LocalSampleDetail.vue` — immutable sample summary, paged point facts and collapsed formatted JSON; upload state is separate from read quality.
+- `automation-world/data-acquisition-agent/src/console/sampleDetails.ts` — read-only frozen-context labels, point values and whitespace-only JSON formatting without rewriting stored originals or hashes.
 - `automation-world/data-acquisition-agent/src/console/time.ts` — host-independent Shanghai wall-time inputs, second-level views and inclusive millisecond history boundaries.
-- `automation-world/data-acquisition-agent/src/console/tableWidths.ts` — history-table column minimums, stable local preference keys and restore-default behavior without business configuration writes.
+- `automation-world/data-acquisition-agent/src/console/tableWidths.ts` — history/sample-table column minimums, separate stable local preference keys and restore-default behavior without business configuration writes.
 - `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/time_contract_tests.rs` — synthetic-profile tests for read-only admission, schema/time contracts, canonical queries and immutable cycle evidence.
 - `automation-world/data-acquisition-agent/tests/time-and-history-preferences.test.mjs` — bounded Node/TypeScript checks for host-independent time boundaries and isolated history-column preferences.
 - `automation-world/data-acquisition-agent/src-tauri/src/domain/yaml_migration.rs` / `services/local_yaml_migration.rs` — 私有历史receipt摘要的只读兼容DTO/IPC，retry写前拒绝；旧startup/execute仅测试编译，无设备连接。
@@ -156,7 +159,19 @@ documentation initialization in this repository.
 - `automation-world/data-acquisition-agent/src/console/composables/useAgentConsoleShell.ts` / `components/console/YamlMigrationNotice.vue` — 纯壳偏好导航与已从普通页面解绑的历史迁入组件；无桥预览无外发/假保存。
 - `automation-world/data-acquisition-agent/vite.validation.config.ts` / `src-tauri/tests/fixtures/local-acquisition/` — env-isolated validation build and bounded sanitized parser/layout/transport fixtures.
 - `automation-world/data-acquisition-agent/src-tauri/tests/fixtures/source-import-minimal/` — handwritten DB21/UDT three-leaf controlled import pair, independent expected checklist and paired notes; no TIA export or live address proof.
-- `automation-world/semantic-mapping-agent/` — filtered TSS HTTP mapping/facts console, native gates and local help; no customer/SQL/legacy command closure.
+- `automation-world/semantic-mapping-agent/` — Rust/SQLite-owned local connection/catalog/materials/targets/rules/mappings and saved-revision pure preview; normal delivery admission disabled for SMA-004. Read-only facts and inert startup v1 compatibility remain; production/help/legacy SQL responsibilities stay retired.
+- `automation-world/semantic-mapping-agent/src/console/uiPreferences.ts` — isolated SMA theme/language preferences; App consumes CU public layout/sidebar/topbar/cards/actions/status and themed Element Plus dialogs without business-state remounts.
+- `automation-world/semantic-mapping-agent/tests/cu-integration.test.mjs` — UI preference persistence/fallback, cross-application/business-key isolation and no-HTTP regression; all native business tables reuse SMA tableWidths state/directive.
+- `automation-world/semantic-mapping-agent/src-tauri/src/contracts/local_configuration.rs` — finite local configuration, CAS intent, import preview and complete JSON backup DTOs.
+- `automation-world/semantic-mapping-agent/src-tauri/src/domain/local_configuration/` — complete graph/type/reference validation, normalized resource transforms and saved-revision pure mapping preview.
+- `automation-world/semantic-mapping-agent/src-tauri/src/infrastructure/config_store/mod.rs` — SMA-owned schema v1 SQLite singleton; short-transaction CAS, bounded busy failure and atomic rollback.
+- `automation-world/semantic-mapping-agent/src-tauri/src/services/local_configuration/mod.rs` — serialized local configuration use cases, runtime-busy guard and content/revision-bound preview/apply.
+- `automation-world/semantic-mapping-agent/src-tauri/src/commands/local_configuration/mod.rs` — thin local configuration/load/change/import/export/saved-preview IPC adapters.
+- `automation-world/semantic-mapping-agent/src/app/twin-facts/api/localConfiguration.ts` — native configuration facade with observed revision and explicit import token; no remote/localStorage fallback.
+- `automation-world/semantic-mapping-agent/src-tauri/tests/local_configuration_tests.rs` — disposable SQLite CAS/rollback/busy/corruption/reference/limits/profile/process-reopen tests.
+- `automation-world/semantic-mapping-agent/tests/local-configuration.test.mjs` — explicit in-memory IPC/store tests for stale editor CAS, no implicit network and JSON/XLSX boundaries.
+  - `src/app/twin-facts/store/mappingStartup.ts` — Mapping-only startup state; `src/console/tableWidths.ts` / `time.ts` — stable field column preferences and Shanghai calendar display.
+  - `src-tauri/tests/startup_cleanup_tests.rs` / `tests/cleanup.test.mjs` — isolated preference, retirement, file exchange, gate and display regressions.
 
 
 ## ARCH-BE-003 complete temperature sample slice
@@ -197,11 +212,14 @@ documentation initialization in this repository.
 ## DAA technical names and shared import core
 
 - `automation-world/shared/tia-import-core/src/{lib,model,parser,layout,naming}.rs` — std-only no-I/O catalog/structured-path DTOs and the single bounded TIA parser, expansion, standard layout and deterministic namespace naming algorithm; DAA consumes a local path dependency.
+- `automation-world/shared/tia-import-core/src/dependencies.rs` / `tests/dependencies.rs` — additive AST-based UDT dependency plans, unique recursive resolution, explicit duplicate-source choices and located missing/cycle regressions; no I/O or changes to DAA's explicit expansion contract.
 - `automation-world/shared/tia-import-core/tests/contract.rs` / `fixtures/{names.db,names.udt,expected-v1.json,daa005-layout-oracle.json}` — independent consumer/name fixtures v1 and exact prior layout-oracle mirror; no real inputs.
 - `automation-world/data-acquisition-agent/src-tauri/src/domain/point_naming.rs` / `services/local_point_naming.rs` — optional nameMode/finite preview DTO, pure adapter, single bounded token/digest/ETag cache and atomic selected/edit confirmation through existing Stores.
 - `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/tia_source/parser.rs` / `infrastructure/plc_layout.rs` — shared algorithm adapters retaining DAA raw/version/closure proof, manual-address protection, CAS and same-transaction offset/name confirmation.
 - `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/point_naming_tests.rs` — owned Engine/Stores old-JSON/selected/CAS/mode/rollback/history checks and explicit cfg(test) native seed; no product seed endpoint.
 - `automation-world/data-acquisition-agent/src/app/plc/components/PointNamePreviewDialog.vue` / `SourceImportPanel.vue` / `views/points/index.vue` — cross-page explicit selection, technical/original name differences, pending/legacy and paged dialogs under the sole owner.
+- `automation-world/data-acquisition-agent/tests/point-editing.test.mjs` — real Vue owner/SFC lifecycle tests with isolated IPC doubles: checked-only grouping, save-before-edit CAS requests, preserved conflicts, cancellation and repeat editing; no SQLite/PLC/native operations.
+- `automation-world/data-acquisition-agent/tests/sample-details.test.mjs` — immutable sample projections, exact JSON tokens, value/quality distinction, paging/column preferences and bilingual detail rendering without SQLite or PLC access.
 - `automation-world/data-acquisition-agent/src-tauri/src/config/mod.rs` — source-owned literal env parsing, process/file/default profile selection and early path/file rejection; ordinary files ignore retired read/YAML keys, while owned validation retains its original contract.
 
 ## DS product MVP and finite protocol validation
@@ -211,8 +229,75 @@ documentation initialization in this repository.
 - [Rust composition](automation-world/device-simulator/runtime/src/app.rs), [configuration](automation-world/device-simulator/runtime/src/domain/configuration.rs), [typed codec](automation-world/device-simulator/runtime/src/domain/typed_value.rs), [rules](automation-world/device-simulator/runtime/src/domain/rule.rs), [coverage](automation-world/device-simulator/runtime/src/domain/layout.rs), [image](automation-world/device-simulator/runtime/src/domain/image.rs), [owner](automation-world/device-simulator/runtime/src/services/owner.rs), [lifecycle](automation-world/device-simulator/runtime/src/services/lifecycle.rs): UUID manager, single mutation owner and joint admission/stop truth.
 - [Config store](automation-world/device-simulator/runtime/src/infrastructure/config_store/mod.rs), [v1 schema](automation-world/device-simulator/runtime/src/infrastructure/config_store/migrations/0001_initial.sql), [profile lock](automation-world/device-simulator/runtime/src/infrastructure/profile_lock.rs), [configuration service](automation-world/device-simulator/runtime/src/services/configuration.rs), [source import](automation-world/device-simulator/runtime/src/services/source_import.rs), [layout](automation-world/device-simulator/runtime/src/services/layout.rs), [naming](automation-world/device-simulator/runtime/src/services/naming.rs), [apply](automation-world/device-simulator/runtime/src/services/apply.rs): DS-owned SQLite revisions/CAS and shared-core consumers, with explicit stopped loading.
 - [Thin desktop host](automation-world/device-simulator/src-tauri/src/lib.rs), [16 command adapters](automation-world/device-simulator/src-tauri/src/commands/mod.rs), [strict DTOs](automation-world/device-simulator/runtime/src/config/workspace.rs), [frontend facade](automation-world/device-simulator/src/services/deviceSimulator.ts), [host state](automation-world/device-simulator/src/console/composables/useDeviceSimulator.ts) and [six page registry](automation-world/device-simulator/src/console/sections.ts): normal IPC and dirty-close workflow; source/build evidence is distinct from native verification.
+- [Source import panel](automation-world/device-simulator/src/app/simulator/components/SourceImportPanel.vue), [IPC health](automation-world/device-simulator/src/console/ipcStatus.ts), [feedback tests](automation-world/device-simulator/tests/import-feedback.test.mjs): Rust-owned automatic UDT links and explicit ambiguity resolution through the existing import command; business validation is separate from bridge availability.
 - [Native C bridge](automation-world/device-simulator/native/bridge/ds_s7_bridge.cpp), [ABI header](automation-world/device-simulator/native/bridge/ds_s7_bridge.h), [CMake](automation-world/device-simulator/native/CMakeLists.txt), [automatic Cargo build](automation-world/device-simulator/runtime/build.rs), [native FFI](automation-world/device-simulator/runtime/src/infrastructure/native_ffi.rs), [clock](automation-world/device-simulator/runtime/src/infrastructure/clock.rs), [logging](automation-world/device-simulator/runtime/src/infrastructure/logging.rs): finite Snap7 protocol/IO/join adapter, no C++ business image.
 - [Owner tests](automation-world/device-simulator/runtime/tests/owner_contract.rs), [retention/receipt tests](automation-world/device-simulator/runtime/tests/apply_retention.rs), [store tests](automation-world/device-simulator/runtime/tests/configuration_store.rs), [v1 consumer tests](automation-world/device-simulator/runtime/tests/layout_naming.rs) and [typed/rule tests](automation-world/device-simulator/runtime/tests/typed_rules.rs): real runtime/configuration contracts, including typed snapshot consumers and failure receipts; the owning bundle records K/N/original protocol execution separately from independent verification. Obsolete G0 entry points were retired after the approved archive and DEV product gate; the owning task preserves the per-file migration and subsequent checks.
 
 - [Formal validation](automation-world/device-simulator/scripts/run_validation.py), [B0 build/ABI/budget](automation-world/device-simulator/scripts/build_native.py), [original wire matrix](automation-world/device-simulator/scripts/run_protocol.py), [sealed raw](automation-world/device-simulator/scripts/collect_evidence.py), [verification](automation-world/device-simulator/scripts/verify_evidence.py), [conditional retirement](automation-world/device-simulator/scripts/retire_g0.py): explicit role/owned paths, no default side effects.
 - [Fixed native driver](automation-world/device-simulator/tests/ui/native_driver.js), [bounded report adapter](automation-world/device-simulator/src-tauri/src/testing/native_driver.rs), [product test host](automation-world/device-simulator/runtime/src/bin/ds-test-host.rs), [test-only hooks](automation-world/device-simulator/runtime/src/testing/hooks.rs), [generic fixture](automation-world/device-simulator/tests/fixtures/product-workspace.json), [protocol fixture](automation-world/device-simulator/tests/fixtures/protocol-workspace.json): real DOM/normal IPC and same product runtime; non-default feature plus owned manifest.
+
+
+## ARCH-BE-010 A0 integration source
+
+- [backend/common/integration/__init__.py](backend/common/integration/__init__.py) — finite JSON/envelope/digest/receipt/HTTP primitives; no DB wiring.
+- [backend/common/integration/canonical.py](backend/common/integration/canonical.py) — finite JSON/envelope/digest/receipt/HTTP primitives; no DB wiring.
+- [backend/common/integration/envelope.py](backend/common/integration/envelope.py) — finite JSON/envelope/digest/receipt/HTTP primitives; no DB wiring.
+- [backend/common/integration/http.py](backend/common/integration/http.py) — finite JSON/envelope/digest/receipt/HTTP primitives; no DB wiring.
+- [backend/common/integration/receipt.py](backend/common/integration/receipt.py) — finite JSON/envelope/digest/receipt/HTTP primitives; no DB wiring.
+- [backend/app/equipment/api/integration.py](backend/app/equipment/api/integration.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/equipment/schemas/integration.py](backend/app/equipment/schemas/integration.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/equipment/models/integration.py](backend/app/equipment/models/integration.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/equipment/integration_config.py](backend/app/equipment/integration_config.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/equipment/integration_domain.py](backend/app/equipment/integration_domain.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/equipment/integration_error_codes.py](backend/app/equipment/integration_error_codes.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/performance/api/integration.py](backend/app/performance/api/integration.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/performance/schemas/integration.py](backend/app/performance/schemas/integration.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/performance/models/integration.py](backend/app/performance/models/integration.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/performance/integration_config.py](backend/app/performance/integration_config.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/performance/integration_domain.py](backend/app/performance/integration_domain.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/performance/integration_error_codes.py](backend/app/performance/integration_error_codes.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/monitor/api/integration.py](backend/app/monitor/api/integration.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/monitor/schemas/integration.py](backend/app/monitor/schemas/integration.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/monitor/models/integration.py](backend/app/monitor/models/integration.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/monitor/integration_config.py](backend/app/monitor/integration_config.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/monitor/integration_domain.py](backend/app/monitor/integration_domain.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/monitor/integration_error_codes.py](backend/app/monitor/integration_error_codes.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/tests/test_business_integration_contract.py](backend/tests/test_business_integration_contract.py) — A0 no-DB validation and frozen public vectors.
+- [backend/tests/test_business_integration_api.py](backend/tests/test_business_integration_api.py) — A0 no-DB validation and frozen public vectors.
+- [backend/tests/test_business_integration_migration.py](backend/tests/test_business_integration_migration.py) — A0 no-DB validation and frozen public vectors.
+- [backend/tests/test_business_integration_compatibility.py](backend/tests/test_business_integration_compatibility.py) — A0 no-DB validation and frozen public vectors.
+
+## ARCH-BE-009 PLC facts source
+
+- `backend/app/plc_facts/manifest.py` — API-only module v1 registration, three routes, no permission grant.
+- `backend/app/plc_facts/{config,error_codes,canonical,source,retention,cursors}.py` — default-off admission, strict Decimal JSON, original v2 validation, definition and part digests, Shanghai nanoseconds/natural months, signed bounded cursors.
+- `backend/app/plc_facts/api/{routes,batches,latest,history,http,dependencies}.py` — thin anonymous adapters, local typed failures, admission before session, complete dependency exit before send.
+- `backend/app/plc_facts/schemas/{source,batch_in,query,receipt_out,read_out}.py` — original material, batch/receipt, strict query, latest/changes/range and gap schemas.
+- `backend/app/plc_facts/models/{state,receipts,facts}.py` — seven owner tables with binary identity and UTF-8 BLOB precision.
+- `backend/app/plc_facts/crud/{async_ingest,async_query,sync_maintenance}.py` — async facts/query and explicit synchronous maintenance SQL; no commits.
+- `backend/app/plc_facts/services/{async_ingest,async_query,sync_maintenance}.py` — transaction ownership, replay/rejection, publication order, expiry guards and bounded maintenance.
+- `backend/alembic/versions/20261104_1200_0a2c4e6f8b10_add_plc_facts_integration.py` — explicit seven-table successor of f6, empty/unadopted downgrade guard.
+- `backend/scripts/plc_facts_maintenance/main.py` — no-argument help before settings import; explicit status/adopt/cleanup and JSON Lines evidence.
+- `backend/tests/test_plc_facts_{contract,api,source,ordering,cursor,retention,migration,compatibility,maintenance}.py` — no-DB source and behavior checks.
+- `backend/tests_mysql/test_plc_facts.py` — separately gated MySQL verification entry, never run by A.
+- `contracts/published/http-api/plc-facts-v1/` — generated OpenAPI/schema and independent source vectors; source-only gate.
+
+Package `__init__.py` files, `mocks/` and `seeds/` are import-safe and do not execute setup or fallback providers.
+
+
+## ARCH-BE-010 r2 bounded business integration
+
+- `backend/common/integration/storage.py` — pure adoption manifest/probe values, finite basis and Shanghai/legacy conversions; no IO/SQL.
+- `backend/common/integration/{envelope,receipt,http,canonical}.py` — strict numeric JSON/OpenAPI, typed success/receipt, complete dependency exit and frozen dual digests.
+- `backend/app/{equipment,performance,monitor}/integration_storage.py` — owner-fixed 13-table/41-column profile and read-only legacy views.
+- `backend/app/{equipment,performance,monitor}/crud/{async_integration,sync_integration}.py` — passed-session current-read adoption probes and owner async business/receipt SQL.
+- `backend/app/equipment/services/async_integration.py` — temperature immutability and drive/parameter NULL-fill transactions.
+- `backend/app/performance/services/async_integration_{observation,process}.py` — serialized production event/watermark/receipt and proven-parent process transactions.
+- `backend/app/monitor/services/async_integration.py` — immutable 33-metric curve transactions and permanent source/mapping receipt.
+- `backend/alembic/versions/20261104_1400_1b3d5f7a9c20_add_business_integration_receipts.py` — exact four-table successor of BE009 0a2; rejects nonempty destructive downgrade.
+- `backend/scripts/business_time_adoption/main.py` — explicit read-only inspect/plan/verify, candidate reports, bare help without target/config IO.
+- `backend/tests/test_business_integration_{service,storage,provider}.py` — no-DB transaction/compatibility/time/typed provider tests.
+- `backend/tests/test_business_time_adoption.py` — no-side-effect CLI and finite candidate boundary tests.
+- `backend/tests_mysql/test_business_integration.py` — separately gated real MySQL business/concurrency/commit-loss/retention entry source; A never executes it.
+- `backend/tests_mysql/test_business_time_adoption.py` — separately gated isolated 13-table/41-column synthetic time fixture; never a production historical apply tool.
+- `contracts/published/http-api/business-integration-v1/` — closed eight-operation OpenAPI, normative examples, units/precision/replay and adoption boundaries.

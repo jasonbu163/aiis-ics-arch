@@ -31,6 +31,16 @@ from common.exceptions import BusinessException
 from app.performance.mapping_error_codes import MappingError
 
 
+from app.performance.crud.async_integration import storage_context
+from app.performance.integration_storage import legacy_view
+from common.integration.storage import to_storage_time as storage_time
+
+
+async def legacy_output(db, record):
+    context=await storage_context(db)
+    return legacy_view(record,context[0],"legacy") if context else record
+
+
 class PerformanceService:
     """生产实绩服务 - 业务逻辑层"""
 
@@ -73,7 +83,12 @@ class PerformanceService:
 
     @staticmethod
     async def create(db: AsyncSession, performance_data: PerformanceCreate) -> Performance:
+        context=await storage_context(db)
         payload = performance_data.model_dump()
+        if context:
+            for field in ("start_time","end_time"):
+                if payload.get(field) is not None:
+                    payload[field]=storage_time(payload[field],context[0]["basisProfile"]["manualNaive"])
         payload["parent_coil_no"] = normalize_parent_coil_no(
             payload["coil_no"],
             payload.get("parent_coil_no"),
@@ -82,7 +97,7 @@ class PerformanceService:
             payload["manual_override_weight"] = payload["weight"]
             payload["effective_weight"] = payload["weight"]
             payload["effective_weight_source"] = PerformanceEffectiveWeightSource.MANUAL_OVERRIDE_WEIGHT.value
-            payload["manual_override_at"] = datetime.now()
+            payload["manual_override_at"] = storage_time(context[1]) if context else datetime.now()
             payload["manual_override_reason"] = payload.get("remark") or "manual_entry"
         payload["record_source"] = PerformanceRecordSource.MANUAL_ENTRY.value
         performance = Performance(
@@ -104,7 +119,12 @@ class PerformanceService:
         if not performance:
             return None
 
+        context=await storage_context(db)
         update_data = performance_data.model_dump(exclude_unset=True)
+        if context:
+            for field in ("start_time","end_time"):
+                if update_data.get(field) is not None:
+                    update_data[field]=storage_time(update_data[field],context[0]["basisProfile"]["manualNaive"])
         for field in ("grade", "weight"):
             if field in update_data and update_data[field] is None:
                 raise ValueError(f"手工实绩字段 {field} 不允许为空")
@@ -116,7 +136,7 @@ class PerformanceService:
             performance.manual_override_weight = manual_weight
             performance.effective_weight = manual_weight
             performance.effective_weight_source = PerformanceEffectiveWeightSource.MANUAL_OVERRIDE_WEIGHT.value
-            performance.manual_override_at = datetime.now()
+            performance.manual_override_at = storage_time(context[1]) if context else datetime.now()
             performance.manual_override_reason = update_data.get("remark") or performance.manual_override_reason or "manual_update"
         try:
             apply_performance_duration(performance)
@@ -144,6 +164,7 @@ class PerformanceService:
             raise BusinessException(MappingError.INVALID_SAMPLE, code=422) from None
         committing = False
         try:
+            context=await storage_context(db)
             row = await by_id(db, equipment, performance_id, lock=True)
             if row is None:
                 raise BusinessException(MappingError.PARENT_NOT_FOUND, code=404)
@@ -152,14 +173,16 @@ class PerformanceService:
             row.effective_weight = weight
             row.effective_weight_source = "manual_override_weight"
             row.manual_override_by_id = actor
-            row.manual_override_at = func.now()
+            row.manual_override_at = storage_time(context[1]) if context else func.now()
+            if context:
+                row.updated_at=storage_time(context[1])
             row.manual_override_reason = reason or "manual_update"
             if reason is not None:
                 row.remark = reason
             apply_duration(row)
             await db.flush()
             await db.refresh(row)
-            result = record_out(row)
+            result = record_out(legacy_view(row,context[0]) if context else row)
             committing = True
             await db.commit()
         except BusinessException:

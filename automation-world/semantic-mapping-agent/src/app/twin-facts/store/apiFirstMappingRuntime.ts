@@ -3,7 +3,7 @@
  * Description: Reactive controls for the continuous API-first Mapping Runtime.
  * Main Features:
  *   - Starts one Tauri HTTP-only runtime from the saved Backend connection profile
- *   - Polls Runtime status independently from Simulation and legacy Service Projection
+ *   - Polls the HTTP Mapping runtime status independently from source inspection
  *   - Applies local app-open auto-start only through the same normal start action
  */
 import { onBeforeUnmount, ref } from "vue";
@@ -12,7 +12,6 @@ import {
   getApiFirstMappingRuntime,
   pauseApiFirstMappingRuntime,
   resumeApiFirstMappingRuntime,
-  savedBackendBaseUrl,
   startApiFirstMappingRuntime,
   stopApiFirstMappingRuntime,
 } from "../api";
@@ -51,7 +50,7 @@ export function useApiFirstMappingRuntimeStore() {
     await withBusy(async () => {
       if (actionName === "start") {
         runtime.value = await startApiFirstMappingRuntime({
-          backendBaseUrl: savedBackendBaseUrl(),
+          backendBaseUrl: "",
         });
       } else if (actionName === "pause") {
         runtime.value = await pauseApiFirstMappingRuntime();

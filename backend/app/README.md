@@ -209,3 +209,19 @@ Omitted measurements persist NULL; explicit null is rejected. Numeric fields pre
 FLOAT fields use bounded binary32 normalization (relative error <=1e-6, absolute error <=max(1e-6,abs(input)*1e-6));
 nonzero underflow is rejected. Receipts and business changes commit together, with bounded named-unique race
 recovery. Unknown commits return retryable failure; retry the same sampleId. No PLC provenance is invented.
+
+
+## Anonymous business integration preparation
+
+[ARCH-BE-010 r1 A0](../../plans/ARCH-BE-010-anonymous-business-integration/spec.md) adds eight typed anonymous POST routes below `/integration/` and finite [public primitives](MODULE_CONTRACT.md#anonymous-integration-primitives). Existing authenticated APIs and permissions retain their behavior. All three module switches default off, device/producer scopes default empty, and storage profiles default `unadopted`. Disabled/out-of-scope requests return 403; admitted A0 requests return 503 before any database dependency or business access. No profile value enables business writing in this preparation slice. Module `enabled=False` removes its entire new/old route group after recomposition.
+
+The four new Model declarations describe three module-owned permanent minimal receipts and the production observation-event index. They do not apply DDL or establish a migrated schema. Shared-table Shanghai time adoption, exact Alembic chain, business wiring and disposable MySQL verification remain separate gates. Anonymous producer/source declarations can be impersonated; scopes are admission policy, not authentication. The [task record](../../plans/ARCH-BE-010-anonymous-business-integration/tasks.md) contains the pending source-based time/migration proposal.
+
+## PLC facts owner
+
+[plc_facts](plc_facts/README.md) is an API-only ordinary module (`order=36`, no permissions/exports/dependencies). Its anonymous provider uses module-local HTTP/typed schemas and seven independent tables, leaving monitor/CA/Projection sources intact. The new source and schema/source-adoption gates are specified in [ARCH-BE-009 r1](../../plans/ARCH-BE-009-backend-facts-integration/spec.md).
+
+
+## BE010 r2 source boundary
+
+Eight owner-local async business entrypoints now have a closed [provider](../../contracts/published/http-api/business-integration-v1/README.md), permanent minimal receipts and the explicit 1b3 successor after BE009 0a2. Default state remains unadopted. The 13-table/41-column old-time adapter and external adoption manifest require real target evidence before writing. Existing authenticated/Projection surfaces keep their original default time behavior. Source/fixture counts and pure public/owner maintenance exports are described in [MODULE_CONTRACT](MODULE_CONTRACT.md). Database/Docker/B, historical conversion and actual adoption are separate gates.

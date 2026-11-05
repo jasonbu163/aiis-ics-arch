@@ -1,0 +1,226 @@
+{
+  "task": "ARCH-BE-008",
+  "revision": "r1",
+  "candidate": "a9afc3bb5a75a610f25e6a42cbc694e019e0e66247c8c60926ca03cff78819f6",
+  "finding": "F-QA1-001",
+  "findingClosureEvidence": [
+    {
+      "case": "media-0",
+      "contentType": "text/plain",
+      "requestId": "0HNPKO9PH33DB:00000001",
+      "status": 415,
+      "responseContentType": "application/json; charset=utf-8",
+      "bodyBytes": 132,
+      "body": {
+        "code": 415,
+        "message": "plan_invalid_request",
+        "data": null,
+        "errorCode": "plan_invalid_request",
+        "timestamp": 1793171387228,
+        "errors": null
+      },
+      "stableErrorAndAccessLogMatched": true
+    },
+    {
+      "case": "media-1",
+      "contentType": "application/octet-stream",
+      "requestId": "0HNPKO9PH33DC:00000001",
+      "status": 415,
+      "responseContentType": "application/json; charset=utf-8",
+      "bodyBytes": 132,
+      "body": {
+        "code": 415,
+        "message": "plan_invalid_request",
+        "data": null,
+        "errorCode": "plan_invalid_request",
+        "timestamp": 1793171387229,
+        "errors": null
+      },
+      "stableErrorAndAccessLogMatched": true
+    },
+    {
+      "case": "media-2",
+      "contentType": "application/x-www-form-urlencoded",
+      "requestId": "0HNPKO9PH33DD:00000001",
+      "status": 415,
+      "responseContentType": "application/json; charset=utf-8",
+      "bodyBytes": 132,
+      "body": {
+        "code": 415,
+        "message": "plan_invalid_request",
+        "data": null,
+        "errorCode": "plan_invalid_request",
+        "timestamp": 1793171387229,
+        "errors": null
+      },
+      "stableErrorAndAccessLogMatched": true
+    },
+    {
+      "case": "media-3",
+      "contentType": "application/merge-patch+json",
+      "requestId": "0HNPKO9PH33DE:00000001",
+      "status": 415,
+      "responseContentType": "application/json; charset=utf-8",
+      "bodyBytes": 132,
+      "body": {
+        "code": 415,
+        "message": "plan_invalid_request",
+        "data": null,
+        "errorCode": "plan_invalid_request",
+        "timestamp": 1793171387229,
+        "errors": null
+      },
+      "stableErrorAndAccessLogMatched": true
+    },
+    {
+      "case": "media-4",
+      "contentType": "application/problem+json",
+      "requestId": "0HNPKO9PH33DF:00000001",
+      "status": 415,
+      "responseContentType": "application/json; charset=utf-8",
+      "bodyBytes": 132,
+      "body": {
+        "code": 415,
+        "message": "plan_invalid_request",
+        "data": null,
+        "errorCode": "plan_invalid_request",
+        "timestamp": 1793171387229,
+        "errors": null
+      },
+      "stableErrorAndAccessLogMatched": true
+    },
+    {
+      "case": "media-5",
+      "contentType": "multipart/form-data; boundary=qa2",
+      "requestId": "0HNPKO9PH33DG:00000001",
+      "status": 415,
+      "responseContentType": "application/json; charset=utf-8",
+      "bodyBytes": 132,
+      "body": {
+        "code": 415,
+        "message": "plan_invalid_request",
+        "data": null,
+        "errorCode": "plan_invalid_request",
+        "timestamp": 1793171387229,
+        "errors": null
+      },
+      "stableErrorAndAccessLogMatched": true
+    },
+    {
+      "case": "media-6",
+      "contentType": null,
+      "requestId": "0HNPKO9PH33DH:00000001",
+      "status": 415,
+      "responseContentType": "application/json; charset=utf-8",
+      "bodyBytes": 132,
+      "body": {
+        "code": 415,
+        "message": "plan_invalid_request",
+        "data": null,
+        "errorCode": "plan_invalid_request",
+        "timestamp": 1793171387230,
+        "errors": null
+      },
+      "stableErrorAndAccessLogMatched": true
+    }
+  ],
+  "runtimeLogFiles": [
+    {
+      "path": "/private/tmp/arch-be008-run-s272kqdk/http-logs/backend-20261028.jsonl",
+      "sha256": "44b89b0004b8db2cbecab3ceb55c2e31e71618ae8e0810f32d4e1a97849ede07",
+      "bytes": 47224,
+      "parsedLines": 122
+    },
+    {
+      "path": "/private/tmp/arch-be008-run-s272kqdk/restarted-http-logs/backend-20261028.jsonl",
+      "sha256": "5bdff24ef8dc6c46fa2551bdc9919bb1803be578aafb55e8821ef6e7c27c0e67",
+      "bytes": 443,
+      "parsedLines": 3
+    },
+    {
+      "path": "/private/tmp/arch-be008-run-s272kqdk/outage-logs/backend-20261028.jsonl",
+      "sha256": "b4348878144194d3e4feb844b2f8ddcd14d861814b36c07ac55b53fe0251d270",
+      "bytes": 2395,
+      "parsedLines": 8
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes-attempt2/formal-utc-logs/backend-20261028.jsonl",
+      "sha256": "23ac9d2e4388ee058361c3d9950e31511ced3170b8607ea1aa9c65bba14ca898",
+      "bytes": 444,
+      "parsedLines": 3
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes-attempt2/formal-ny-logs/backend-20261028.jsonl",
+      "sha256": "0a635cc842919f9ed59cd981b54c077f89e9626813460d226f6c4ee8813092c2",
+      "bytes": 236595,
+      "parsedLines": 537
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes/formal-ny-logs/backend-20261028.jsonl",
+      "sha256": "28fdcd659b8a92fd909db4abb0f39fceb118da0b092005c5128844bba61fdff2",
+      "bytes": 217171,
+      "parsedLines": 493
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes-attempt2/formal-ny.stdout.jsonl",
+      "sha256": "0a635cc842919f9ed59cd981b54c077f89e9626813460d226f6c4ee8813092c2",
+      "bytes": 236595,
+      "parsedLines": 537
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes-attempt2/formal-utc.stdout.jsonl",
+      "sha256": "23ac9d2e4388ee058361c3d9950e31511ced3170b8607ea1aa9c65bba14ca898",
+      "bytes": 444,
+      "parsedLines": 3
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes/formal-ny.stdout.jsonl",
+      "sha256": "28fdcd659b8a92fd909db4abb0f39fceb118da0b092005c5128844bba61fdff2",
+      "bytes": 217171,
+      "parsedLines": 493
+    }
+  ],
+  "parsedRuntimeLines": 2199,
+  "allRuntimeJsonObject": true,
+  "uniqueConflictRequestIdsWithConfirmedRollback": [
+    "0HNPKO8KDVJG8"
+  ],
+  "createdEventsWithRequestIdAndPlanId": 36,
+  "rotation5Files": [
+    {
+      "path": "/private/tmp/arch-be008-log-check-2f1700a0aeb44db68afd9e83e8a6f849/backend-20261028_005.jsonl",
+      "bytes": 10487140,
+      "sha256": "aad09230ec93fb21219b42b47c92b80db5040eaab4b8e95390f73ef429d3c13c",
+      "parsedLines": 10
+    },
+    {
+      "path": "/private/tmp/arch-be008-log-check-2f1700a0aeb44db68afd9e83e8a6f849/backend-20261028_003.jsonl",
+      "bytes": 10487140,
+      "sha256": "d1f60eaa2fe0b78a8c346286e3dafb656a7f42c4e856e43bf834b579a7c93492",
+      "parsedLines": 10
+    },
+    {
+      "path": "/private/tmp/arch-be008-log-check-2f1700a0aeb44db68afd9e83e8a6f849/backend-20261028_004.jsonl",
+      "bytes": 10487140,
+      "sha256": "29b4a0a90dac8c7a65d4f25ad6745688e03805a24e62231950cb69f7df1052fc",
+      "parsedLines": 10
+    },
+    {
+      "path": "/private/tmp/arch-be008-log-check-2f1700a0aeb44db68afd9e83e8a6f849/backend-20261028_006.jsonl",
+      "bytes": 4194856,
+      "sha256": "4ce5f44ced04a7e29ba419ce5d6a0bdb4239eb2db32b402dae11cc71cd65fab6",
+      "parsedLines": 4
+    },
+    {
+      "path": "/private/tmp/arch-be008-log-check-2f1700a0aeb44db68afd9e83e8a6f849/backend-20261028_002.jsonl",
+      "bytes": 10487140,
+      "sha256": "b480dad3cb52ccf78a5c684b7e94bd9837709dbceeb80809705dd114f74aa778",
+      "parsedLines": 10
+    }
+  ],
+  "secretComparison": "no_matches",
+  "all15DecimalsExactDirectSelect": true,
+  "rawCoilHexAndBothTimesExact": true,
+  "apiPidsAbsent": true,
+  "port18108ActualRebind": true
+}

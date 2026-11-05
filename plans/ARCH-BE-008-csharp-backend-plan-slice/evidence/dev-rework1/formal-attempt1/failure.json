@@ -1,0 +1,9 @@
+{
+  "phase": "readiness helper before HTTP requests",
+  "cause": "Python3.9 HTTPConnection has no context-manager __enter__",
+  "helperExit": 1,
+  "ownedApiExit": -15,
+  "ownedPid": 59095,
+  "ownedPidAbsent": true,
+  "businessRequestsSent": 0
+}

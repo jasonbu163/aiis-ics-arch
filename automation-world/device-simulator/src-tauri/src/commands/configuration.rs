@@ -56,3 +56,86 @@ pub async fn ds_apply_revision(
     )
     .await)
 }
+
+#[tauri::command]
+pub async fn ds_preview_publish_revision(
+    s: State<'_, Desktop>,
+    request: dto::Operation<ds_runtime::services::versions::VersionIntent>,
+) -> Result<Reply, String> {
+    Ok(operation(
+        s.runtime.clone(),
+        request,
+        false,
+        "ds_preview_publish_revision",
+        |a, p| runtime_queries::value(ds_runtime::services::versions::preview_publish(a, p)?),
+    )
+    .await)
+}
+#[tauri::command]
+pub async fn ds_publish_revision(
+    s: State<'_, Desktop>,
+    request: dto::Operation<ds_runtime::services::versions::VersionConfirmation>,
+) -> Result<Reply, String> {
+    Ok(operation(
+        s.runtime.clone(),
+        request,
+        true,
+        "ds_publish_revision",
+        |a, p| {
+            runtime_queries::value(ds_runtime::services::versions::confirm(
+                a,
+                "publish_revision",
+                p,
+            )?)
+        },
+    )
+    .await)
+}
+#[tauri::command]
+pub async fn ds_preview_delete_revision(
+    s: State<'_, Desktop>,
+    request: dto::Operation<ds_runtime::services::versions::DeleteIntent>,
+) -> Result<Reply, String> {
+    Ok(operation(
+        s.runtime.clone(),
+        request,
+        false,
+        "ds_preview_delete_revision",
+        |a, p| runtime_queries::value(ds_runtime::services::versions::preview_delete(a, p)?),
+    )
+    .await)
+}
+#[tauri::command]
+pub async fn ds_delete_revisions(
+    s: State<'_, Desktop>,
+    request: dto::Operation<ds_runtime::services::versions::VersionConfirmation>,
+) -> Result<Reply, String> {
+    Ok(operation(
+        s.runtime.clone(),
+        request,
+        true,
+        "ds_delete_revisions",
+        |a, p| {
+            runtime_queries::value(ds_runtime::services::versions::confirm(
+                a,
+                "delete_revisions",
+                p,
+            )?)
+        },
+    )
+    .await)
+}
+#[tauri::command]
+pub async fn ds_cancel_preview(
+    s: State<'_, Desktop>,
+    request: dto::Operation<ds_runtime::services::versions::CancelPreview>,
+) -> Result<Reply, String> {
+    Ok(operation(
+        s.runtime.clone(),
+        request,
+        false,
+        "ds_cancel_preview",
+        ds_runtime::services::versions::cancel_preview,
+    )
+    .await)
+}

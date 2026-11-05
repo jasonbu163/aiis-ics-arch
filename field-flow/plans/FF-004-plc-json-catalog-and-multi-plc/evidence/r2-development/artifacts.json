@@ -1,0 +1,38 @@
+{
+  "formal-product": {
+    "source": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+    "sha256": "76f585bb53be5d5d8de14a42c6ea15e5309e6c895237a96d230aff40d8aa691c",
+    "test_fixture_feature": false
+  },
+  "formal-fixture": {
+    "source": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/fixture/release/ff-fixture",
+    "sha256": "8bfd782e5ad6a34e2cebf210a75d1275cb8391806decb370d74385404da2aa80",
+    "test_fixture_feature": true
+  },
+  "copy-product": {
+    "source": "/private/tmp/ff-004-r2-dev-IVyzcc/copy",
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/copy-product/release/field-flow",
+    "sha256": "3303f0434e8081b5c7fb22fb64c6e78594103becbfe76385b4403a021eabeeb5",
+    "test_fixture_feature": false
+  },
+  "copy-fixture": {
+    "source": "/private/tmp/ff-004-r2-dev-IVyzcc/copy",
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/copy-fixture/release/ff-fixture",
+    "sha256": "8bfd782e5ad6a34e2cebf210a75d1275cb8391806decb370d74385404da2aa80",
+    "test_fixture_feature": true
+  },
+  "teaching-product": {
+    "source": "/private/tmp/ff-004-r2-dev-IVyzcc/teaching",
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/teaching-product/release/field-flow",
+    "sha256": "ee0cf09ce618f77ac72b9cd8f9a658b8a310f4730ed630b71c7595531bee58ec",
+    "test_fixture_feature": false
+  },
+  "teaching-fixture": {
+    "source": "/private/tmp/ff-004-r2-dev-IVyzcc/teaching",
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/teaching-fixture/release/ff-fixture",
+    "sha256": "e7012d134bf738f8370a94e9bae7ad83bf3b9f110b3251099028b4360f4ed619",
+    "test_fixture_feature": true
+  }
+}

@@ -1,9 +1,9 @@
 Task ID: DAA-007
 Revision: r2
-Status: implementation_in_progress
+Status: developer_handoff
 Owner Role: Development
 Allowed Writers: Development
-Handoff: r2 B0/P1/P2 DEV自检已完成、源码候选冻结；awaiting_owner_native，待coordinator保护审计后交Owner M01–M09；G1 developer_handoff及fresh Verification尚未发生
+Handoff: DAA-007 r2 G1 Development交接已形成；原r2检查、独立DIRECT、Owner操作及闭库只读证据分层保留，交唯一coordinator /root启动新的fresh-context Verification；历史15:27来源疑点及缺少完整重开前新增行byte快照仍须独立审阅，非QA verdict或Owner终验
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch
@@ -234,3 +234,128 @@ coordinator已将84份真实DEV工件原字节归档到V2/development；本实�
 持久[候选](/Users/jason/.codex/visualizations/2026/10/16/01a143e5-5616-76c0-9df7-13b487bc9c26/daa007-r2-execution-odtninl_/development/dev-candidate.json)、[精确增量](/Users/jason/.codex/visualizations/2026/10/16/01a143e5-5616-76c0-9df7-13b487bc9c26/daa007-r2-execution-odtninl_/development/dev-task-delta.patch)、[检查命令/env/features/结果](/Users/jason/.codex/visualizations/2026/10/16/01a143e5-5616-76c0-9df7-13b487bc9c26/daa007-r2-execution-odtninl_/development/dev-checks.json)及[最后静态结果](/Users/jason/.codex/visualizations/2026/10/16/01a143e5-5616-76c0-9df7-13b487bc9c26/daa007-r2-execution-odtninl_/development/dev-static-result.json)均由该manifest固定，不只依赖E2临时路径。root后续完成最终保护审计并交付手册；本归档回读是Development完整性自检，不是fresh Verification或Owner原生证明。
 
 当前仍为`implementation_in_progress / awaiting_owner_native`；M01–M09全部not_run，G1 developer_handoff、独立QA及Human Owner最终验收未发生。源/文档保持冻结，本Development仅在Owner按批准顺序正常闭库后恢复限定RO checkpoint/对账及G1记录。
+
+### r2 Owner报告与M09 T1闭库基线（2026-10-30）
+
+本节是上述历史`M01–M09 not_run`之后的新事实。Task仍为`aiis-ics-arch::DAA-007 r2`，保持`implementation_in_progress / awaiting_owner_native`；实际Development `/root/daa007_m09_checkpoint`，唯一coordinator `/root`。本轮仅写本tasks及任务证据，不修改spec/checklist/实现/env/profile，不形成G1 developer_handoff、QA verdict或Owner最终接受。已消费完整spec/tasks、根及DAA README/PLAN、app/local_store说明、canonical workflow、Development配置、相关schema/sample/config/runtime/log实现，采用`rust-runtime`、`desktop-tauri`与`plc-point-mapping`的只读核验边界。
+
+正式工作树`/Users/jason/Desktop/DreamCode/aiis-ics-arch`，当前HEAD=`8030dbb3401ac6d1cf8bea46c81cfeff9e8e073b`、dirty，无commit/push。持久证据T1=`/Users/jason/.codex/visualizations/2026/10/16/01a143e5-5616-76c0-9df7-13b487bc9c26/daa007-r2-m09-first-checkpoint-20261030`。[checkpoint-manifest.json](/Users/jason/.codex/visualizations/2026/10/16/01a143e5-5616-76c0-9df7-13b487bc9c26/daa007-r2-m09-first-checkpoint-20261030/checkpoint-manifest.json) SHA256=`d85d4825f9c2af23646261b2aa4b845028366de3f0ec07ea5b28729ef607c6e1`固定capture、完整投影、原日志与首轮离线账；后续本节及业务分析另由evidence-manifest固定，不覆盖该T1清单。
+
+**Owner报告与实际时序。** coordinator转交Owner原话：
+
+> 我把所有步骤都完成了，并且M09首次退出完成。截图是M07我在ds断开a的时候的效果。
+
+登记为Owner报告M01–M08完成及M09首次退出，不能代授AC通过或终验。归档截图`owner-m07-A-retrying-B-collecting.png`仅支持该瞬间A退避重连/连接失败、B采集中、1/2连接、pending1306、A416/B95完整轮，不能证明后续恢复。没有编造Owner动作时刻。
+
+首次预检发生竞争：15:27:14+08的ps出现PID67861（启动15:27:11），当时lsof +D尚无句柄；15:27:41 PID只读核查确认其持有本次profile锁和双库。Development尚未打开SQLite，立即停止开库并报告coordinator，没有控制应用。后续原日志可见首次clean exit为15:21:50.792，但**原首次退出byte checkpoint未取得，不能倒补**。初次holder脚本assert exit1及进程证据保留，不把它归为数据损坏或产品失败。
+
+coordinator随后转交Owner原话“已用 Cmd+Q 退出，并保持关闭”。确认后立即捕获T1，完成时刻`2026-10-30T15:32:11.199+08:00`。这是提前重开后再次退出、供最后一次计划重开比较的闭库基线；目录名不改变该时序。日志有15:27:16.769 runtime_started/stopped意图及15:31:14.436 runtime_stopped/clean。15:27窗口另有4个新增bad样本，不能声称该次无新增，也不能仅凭启动stopped日志推定自动启采；该窗口Owner具体动作尚未核明。
+
+**只读准入与原件保护。** 仅访问获准`/private/tmp/daa-007-r1-exec-e6s14xue/owner-joint-run/daa-profile`的双库及`local-acquisition-v1/logs/runtime.jsonl`，未读默认/真实profile或DS库。ps/lsof在SQL前后确认DAA不存在且profile无持有者，DS可继续运行。先核无symlink、SQLite头read/write=1/1、无journal/WAL/SHM、末条日志clean；两秒间隔metadata/byte SHA稳定后才`mode=ro`及连接内`PRAGMA query_only=ON`。无immutable、恢复、DDL/DML、持久PRAGMA、seed/ACK/删除/profile写入或SQLite runtime副本。
+
+全表按主键排序保存原列，原payload/manifest/context/source TEXT完整保留；SHA直接核原UTF-8 bytes，不对重编码JSON冒充原摘要。`readonly-sql.json`保存全部SQL及Python SQLite版本。两库integrity_check均ok、FK检查空、user_version2、各自application ID正确、journal_mode=delete、query_only=1。SQL后双库/日志byte SHA、size、mtime、ctime、inode及目录清单与之前一致。此连接不用于证明产品连接的synchronous/foreign_keys配置。
+
+| 文件 | bytes | T1 SHA256 |
+| --- | --- | --- |
+| config.sqlite | 98304 | `3c87ac2ab04ba35fb470ec7caaa6321335539b4105401511b910a7fcbdfb1ec4` |
+| runtime.sqlite | 5681152 | `50386c53e036a90358fbb9fdb914f7236653768a6356064274e05e278d731ed7` |
+| logs/runtime.jsonl | 12897 | `4408814664e0e0765262d65dfd2787bdc004c6b863bc076209b5caf1647e19e6` |
+
+**T1直接数据库事实。** 两库instance ID一致、schema_version2、固定time_profile，runtime clean_exit=1；3个revision/context、3组activation intent/journal均applied。active=`c7e027a3-b366-493f-ad29-0cd0c123234e`、previous=`99c58214-c0e0-4e50-88dc-98866e8cebfd`；draft原payload与active相同。ETag/完整ID及used_revision见投影，不以used代替active/loaded语义。
+
+694完整轮、1388样本（1382good/6bad）、1388pending、0ACK/0reference，origin全部s7。原source/revision/context/sample/manifest SHA/长度、精确点成员/两DB、manifest引用、payload/索引身份/时刻、唯一delivery与连续序号核得0结构差异。A generation=`167e769e-9b6f-4f1c-9b4c-55e133f6d3e9`，559轮seq1..559/next560；B generation=`1650baae-a148-4d12-9ba2-182dc60425c7`，135轮seq1..135/next136。`reconciliation.json`的error_count0仅指账本一致性，**不是全部业务AC通过**。
+
+当前A/B端口30102/30103、rack0/slot1，每PLC仅Alpha DB71长度4及Beta DB88长度8、6启用已确认点；Fast_500仅2BOOL、Slow_1000其余4点，各跨两DB、无重复遗漏。旧oldFast全6点142轮/284样本保留，不能算双组验证。旧时间片11:55:49.425..11:56:59.797原bytes与存储SHA均一致；没有完整旧284逐行before，不能宣称已证明T1之前每行从未变化。唯一曾打印的旧DB88样本`bb77f968-6430-4bc0-be48-50931a4e73d5` SHA=`f52e48e1ec866bd2a1f02c329edcfb0f7a2237f6a4b77fc42d789d0b80f7a0c6`与coordinator完整旧token一致，其较短转录不是校验失败。
+
+双组99c...版本A Fast225/Slow113轮均good；当前双PLC版本A Fast53（51good/2bad）/Slow26good，B Fast89（88good/1bad）/Slow46good，各组至少2个good完整轮。短连续间隔中位数Fast500ms、Slow999–1000ms，轮数约2:1；长间隔可能含人工暂停/编辑，不能当重连耗时。样本/manifest/fact业务时刻均核上海毫秒+08:00。
+
+**业务缺口与限制（不由Owner一般完成报告覆盖）。**
+
+- A的111/13.25在14:57:09.971..14:58:29.630的81个good Slow轮同时出现，ready双态有good S7事实；后续双PLC版本又为101/12.5，不能拿更早动态值代替后续恢复值。
+- B全部good轮实际为count101、REAL12.5、running=false、BYTE18/52，与要求202/25/true/86/120不符。独立plcId/port/group/source成立，但**异值隔离未证成**；当前账不自动解释其DS配置/重载/操作原因。
+- A在15:20:36.876 connection_lost，bad轮保留null/bad_read；B随后55个good完整轮至15:20:54.866，支持A失联时B继续。此后A无新good历史；15:27:33.387 connection_restored发生于提前重开，不能替代恢复后good样本。Owner DS停止/恢复精确时刻缺失，不能计算45秒恢复通过或倒推功能失败原因。
+- 原首次退出byte基线缺失、提前重开4个bad样本动作未核明，最后一次重开的T1→T2比较待执行。完整分析见`business-contract-evidence.json`；只补必要窄项，不清库/修复/重跑全矩阵。
+
+**当前源码与独立DIRECT。** `current-source-manifest.json`固定541项DAA/DS/core源码/文档/fixture，aggregate=`fcd04ee5207ddaa689755688047543478b35d09a6b491ea9b4d3212566b88c93`。本r2原freeze后的DS/core唯一UDT解析、DAA selected-only分组/保存后编辑、只读样本详情，分别归同级`direct-ds-udt-import-20261028`、`direct-daa-point-groups-20261030`、`direct-daa-sample-detail-20261030`，report及artifact SHA单列。分组原10项有限DEV/build、详情原8项/build/隔离UI证据未在本轮重跑，不倒记为原r2冻结测试。Owner确认分组/单点编辑及展示按coordinator relay记录。DS专用线程draft/version/list/delete及更新USER_GUIDE保留当前来源，不授予旧DS QA/接受或本任务新增验收；未向该线程发消息、未修改DS。
+
+**实际命令。** 初次sandbox ps受限，随后获只读升级；过滤后的ps/lsof/PID来源及竞争assert exit1保留。Owner关闭确认后`python3 <T1>/capture_closed.py` exit0；`python3 <T1>/inspect_projection.py` exit0（只读归档JSON）；内联Python的分组/值/事件/样本选择/manifest exit0。一次长中文heredoc记录helper因stdin编码SyntaxError exit1，未写tasks，改用apply_patch；这是证据编辑工具失败，不是产品失败。本轮未重复cargo/pnpm build/test、DS/S7/native矩阵，没有启动应用/监听/客户端或改env。
+
+T1投影、原日志、截图及脚本为T2/fresh Verification的持久证据；没有临时源码副本，Owner profile及共享target不回收。待后续证据依赖和最终接受后由coordinator按归属/资源规则收尾。
+
+**下一gate。** 已告知coordinator可通知Owner用同一现有.env/profile仅再`pnpm tauri dev`重开一次，保持未连接未启采，不保存/激活配置，检查历史/原SHA/列宽后正常Cmd+Q并保持关闭。`owner-reopen-sample-picks.json`列旧284末条、A动态13.25及B末条good的精确ID/时间/SHA。T2再闭库逐表/原bytes核T1，允许真实生命周期事件/日志变化；业务缺口仍单列，G1/fresh QA/DAA-007最终接受/整体B/阶段C保持分别门禁。
+
+coordinator收到上述业务缺口后，已暂缓最后一次计划重开或补采，先向Owner核三个窄项：B异值是否实际保存/发布/加载；M07恢复后暂停前是否看到A新good；15:27窗口是否显式连接/启采。当前等待这些回答，不要求新测试。若之后独立授权的受影响人工补证改变profile，须保留本T1原证据，再取相应新闭库基线；本节没有授权Agent操作原生、S7或修复数据。
+
+### r2 Owner窄项回答与停止态离线诊断（同日接续）
+
+coordinator随后转交Owner精确回答，原文保存在`owner-followup-confirmed-gaps.json`：B为“ds只是启动了B，但是没有去改值。这个要测试吗？”，M07恢复为“这里没做”，15:27操作为“只打开查看，没点这些按钮”。因此B异值设置与M07重启/恢复是**明确未执行**，不再写成纯时刻缺失；B继续采集的既有证据保留。Owner否认15:27连接/采集动作，须保留与后续操作/样本证据的冲突，不归咎Owner或直接宣布自动启采缺陷。
+
+Development仅对T1工件和Rust源码离线核查，coordinator独立负责前端入口。`stopped-reopen-offline-diagnostic.json`记录完整时间线与17处源码定位；`rust-control-source-comparison.json`核9份Rust关键文件均匹配T1源清单及原r2冻结候选，不能把未定原因归到后续DIRECT变更。
+
+- 新启动15:27:16.769之后有8条`operation_completed`：A failed 15:27:24.662，B applied 15:27:28.305，A applied 15:28:05.521，B applied 15:28:06.254，随后15:28:12.970/13.601/14.223/14.767各applied；15:27:33.387另有A connection_restored。当前源码唯一操作完成事件出口是`local_supervisor.rs::complete`，只在`Message::Action`处理后调用，且依赖`request`创建的本进程内存operation。持久事件只存资源和phase，没有action、desired、operation ID、reason或caller/session/PID，无法还原具体命令来源或证明手工点击。
+- A/B新轮startedAt分别15:28:05.537/15:28:06.266，读取耗时0ms且全部null/bad_read，savedAt分别晚9/11ms；不是只有保存时间延后的旧轮。`local_scheduler.rs::collect`在实际读取前取startedAt，`local_store/runtime.rs::commit_cycle`保留该时刻并另取事务savedAt，不提供旧轮回放。
+- `local_supervisor.rs::shutdown`先停gate、join全部actor，再写runtime_stopped，随后`StoreHandle::shutdown` join writer。另已观测新PID15:27:11启动。按当前源码与既有时间证据，前一进程在途轮不能解释15:28新读轮；不能把它当作正常退出遗留工作而忽略。
+- `local_runtime.rs::PlcState::new`及新engine/actor初始化的connected和两意图均false；`local_recovery.rs`只打开engine。真正落轮要求connected且desired_collection，重连要求desired_connection；非初始意图赋值仅在`Action::Connection/Collection`。具名IPC `commands/local_acquisition.rs`是产品request入口，snapshot/history/sample/log路径不发控制。按当前代码，晚轮必须已进入连接/采集意图，但尚不能确定请求从何而来。未取得当时binary/source运行证明或完整IPC调用轨迹，不能宣称已确认根因。
+
+coordinator的前端只读复核另确认App仅一个owner、onMounted只reload/refresh和1Hz轮询、control调用归工作台click事件，未找到mount/watch自动控制路径。这与Owner无按钮动作及新operation记录仍存在未解冲突。当前AC14/停止态为潜在实际异常、待核，不记为pass或已确认autostart缺陷；没有修改任何产品代码、日志合同或测试，也没有启动原生/传输复现。
+
+当前仍`implementation_in_progress / awaiting_owner_native`，G1与fresh QA暂停。coordinator拟只让Owner做一次同profile、不点任何控制的60秒窄观察，核两台停止/未连接且pending1388不变，窗口保持打开等待后续指示；Development尚未登记该观察已发生。之后仅B异值与M07恢复需按协调者必要增量指示补证。若需修改actor/transport/scheduler或新增IPC/audit记录才能解决，先交PM界定精确新范围并获Owner批准，不在本轮静默修复。T1完整原证据保持，不把后续补采或新基线覆盖为原首次退出证明。
+
+
+### r2 Owner受控重开60秒观察（同日，仅记录）
+
+coordinator转交Owner最新原话：
+
+> 60 秒后均未连接、未启采，待上报仍是 1388
+
+此前指示为同一现有.env/profile执行`pnpm tauri dev`，不做连接、采集、连接测试或激活，观察60秒并保持窗口打开。本次仅登记为**Owner在这一次受控观察中**看到两台均未连接/未启采，pending仍1388、无增长；不是Development直接观察或SQL证明。逐字报告和边界见T1目录新增`owner-controlled-stopped-60s-observation.json`。
+
+该结果不追溯解释15:27窗口的operation_completed和4个bad样本，不消除此前未明冲突；不替代完整T1→T2闭库原bytes/逻辑账比较，不授予AC14/QA/DAA-007终验/整体B接受。既有T1和诊断manifest保持原件。本次记录时DAA **OPEN**，Development未查询profile、未操作原生、未改代码或运行测试。
+
+状态仍`implementation_in_progress / awaiting_owner_native`。下一步仅由coordinator指导B异值初值与简短采集、M07 A重启/恢复，再完成必要最终闭库checkpoint/同profile重开比较；不重跑完整矩阵。G1 developer_handoff、新fresh Verification及Human Owner最终接受均待发生。本次只追加本tasks与新增证据，无其他写入面。
+
+### r2 必要增量补证、最终闭库账与G1 Developer handoff（2026-10-30）
+
+本节接续上述历史等待状态。精确范围仍为已批准`aiis-ics-arch::DAA-007 r2`，spec SHA256=`e1838a6af98e0f679b0750b11441c359437200d1a9d11eef618e703d70e1ccc5`未改；实际Development `/root/daa007_m09_checkpoint`，唯一coordinator `/root`。**当前Status改为developer_handoff，仅交新的fresh-context Verification，不给出QA verdict或Owner验收。** 本轮没有产品实现修复；原生操作全部由Owner执行，DEV只读日志/闭库SQLite及离线证据。
+
+新证据T2=`/Users/jason/.codex/visualizations/2026/10/16/01a143e5-5616-76c0-9df7-13b487bc9c26/daa007-r2-followup-joint-reconciliation-20261030`，与原T1目录分开；T1所有文件和manifest未覆盖。T2的`capture_closed.py`、`inspect_projection.py`、`compare_t1_followup.py`及完整SQL/投影、逐行原SHA、截图、报告、before/diff/候选由最终`handoff-evidence-manifest.json`逐SHA固定。正式工作树`/Users/jason/Desktop/DreamCode/aiis-ics-arch`、HEAD=`8030dbb3401ac6d1cf8bea46c81cfeff9e8e073b`、dirty，无源码副本/commit/push。
+
+**Owner实际补证与截图。** coordinator转交原话：
+
+> 1、图1 2、图2，图3 3、没异常 其中涉及到的要你去看看日志了，可以作为验证的一个证据。
+
+T2归档3张原截图：图1为DS B007-B loaded v18、六值ready=false/count202/running=true/REAL25/BYTE86/120；图2为A重连中/B采集、pending8370、A30/B3461轮；图3为A/B均采集、pending8466、A36/B3503轮。这些是Owner原生截图，DEV仅查看/归档，没有操作窗口。截图没有精确时间标记，不当作同时原子快照或替代日志/SQL。泛称“3没异常”之后，coordinator另取得Owner精确确认：
+
+> 重开后未连接未启采、历史正常，现已退出并保持关闭
+
+此句独立归档在`owner-final-reopen-and-close.json`。DEV收到正常关闭确认后立即检查占用再开库；此前PID14949仍持有该profile时未查询SQLite。没有为了补证额外要求Owner再重开。
+
+**最终T2闭库准入与账本。** capture于`2026-10-30T16:23:41.166+08:00`完成；ps/lsof在SQL前后均无DAA/该profile持有者，DS可继续运行。唯一读取仍为原Owner合成DAA profile，不读取DS库、真实.env、默认/真实profile。DELETE头1/1、无symlink/WAL/SHM/journal，末条runtime_stopped/clean；两秒metadata/byte SHA稳定后mode=ro/query_only读全表。两库integrity_check=ok、FK检查空、user_version/schema_version2、time_profile及instance ID匹配；原件size/SHA/mtime/ctime/inode与目录清单在读取前后相同。无immutable、恢复、备份runtime输入、DDL/DML、持久PRAGMA、seed/ACK/删除或profile写入。
+
+| T2文件 | bytes | SHA256 |
+| --- | --- | --- |
+| config.sqlite | 98304 | `3c87ac2ab04ba35fb470ec7caaa6321335539b4105401511b910a7fcbdfb1ec4` |
+| runtime.sqlite | 31420416 | `b397627f8c844224616874ace793f6b9b5b2c10687fd61d14b2c159cb5c57491` |
+| logs/runtime.jsonl | 14904 | `acdc84dc9e22a4028992b567bf6300c737ea042444e0a31e6725c802f51b11de` |
+
+共4295完整轮/8590样本，8582good/8bad，全部origin=s7，8590pending、0ACK/0reference。所有source/revision/context/sample/manifest原UTF-8 SHA/长度、完整轮exact point-ID/两DB成员、payload/索引/manifest身份与引用、唯一delivery、日历格式及源序号检查均0结构差异。额外97条migration/revision/intent/event日历字段符合上海毫秒+08:00。保存时刻仍与读取/观察时刻分别核，未用GUI刷新伪装业务时刻。
+
+T1→T2新增3601轮/7202样本单列为Owner有意补证增长，不机械要求总数相等。T1的694轮/1388样本及全部原source/revision/context/manifest/payload/delivery/reference行按完整原列逐行一致；全部config表逻辑相同，config.sqlite整文件SHA亦相同。旧284全部在该逐行保护集合内；T1之前缺少完整旧284 before的限制不撤销。3个active/revision/context及activation applied保持，active/used均c7e027a3...，draft/ETag原字节保持；instance=`99f8a911-3bea-421c-a9d4-75759cb1e296`未变。A原generation保持，seq1..625/next626（T1 next560，新增66轮）；B原generation保持，seq1..3670/next3671（T1 next136，新增3535轮）。完整ID与payload在投影，不以截短显示代替精确键。
+
+**已补齐的B异值和A恢复直接事实。** 新B good事实count202/REAL25/BYTE86/120各1179次，running=true 2356次；A同期good仍为独立DB71/88的101/12.5/false/18/52，不能与B串线。相邻Slow轮示例A16:15:59.100、B16:15:59.288携带各自原point-ID/值/原SHA；跨PLC不是原子快照。当前各PLC Fast仅2BOOL/500ms、Slow其余4点/1000ms且跨两DB，原配置无变化。新good轮数A Fast43/Slow22，B Fast2356/Slow1179，各组远超过两轮；短间隔中位数A Fast499ms/Slow990.5ms、B Fast500ms/Slow1000ms，按实际调度/故障解释，不作吞吐保证。
+
+DAA日志A lost=`16:15:43.119`、restored=`16:15:58.964`，两事件间隔15.845秒（含DS停止时间，**不是精确重启到重连耗时**）。此窗口B持续48个good完整轮（Fast32/Slow16）；A只有实际提交的一个bad完整轮、两DB样本null/bad_read，不制造断线每tick行或回填真实值。恢复后A在16:15:59.100..16:16:10.663有36个新good完整轮（Fast24/Slow12），两组、两DB和原generation/seq均可核。它补齐原先未执行的恢复条目，不改写原M07缺口历史。`focused-point-and-time-evidence.json`固定故障轮及恢复首/末轮的原样本ID/值/原因/SHA。
+
+**最后一次无控制重开的事实及严格证明界限。** 停止采集后16:16:24.591有clean退出，16:16:48.346启动stopped，16:22:01.251再次clean退出。312.905秒的最后窗口仅有start/stop两条生命周期日志，0 operation_completed、0新业务样本；最后业务样本保存于此前16:16:11.174。Owner另明确观察未连接未启采且历史正常。结合T1完整不变子集、当前所有原SHA/成员/seq检查、最终窗口无样本/动作与Owner记录，DEV认为已足以将当前事实交fresh Verification独立审阅，不再要求额外原生重开。
+
+严格限制仍保留：没有在16:16:48重开前取得**全部7202新增样本**的独立byte checkpoint，因此不能宣称已逐字节证明这些新增行在该最终重开前后全部相等；不能把T1子集保护/当前SHA/时间线/Owner观察包装成该缺失快照。最初首次退出byte基线也确实未取得。15:27的4个bad样本/8个action事件与Owner“未点按钮”的历史来源冲突仍未解决；后来60秒及本次312秒受控无增长观察不追溯消除它，也没有确认autostart根因。独立QA须明确审阅这些限制，不能用当前G1当作AC14或全部AC通过。M08日期筛选/分页/拖拽/偏好仍按原DEV纯检查和Owner一般完成报告分层，没有新增Developer原生拖拽证明。
+
+**R11必要文档状态修正及最终复合候选。** 本轮经coordinator明确路由，只修改DAA `JOINT_TEST_GUIDE.md`/`.zh-CN.md`与`README.md`/`.zh-CN.md`的过时not_run/全未来状态，注明已记录Owner/闭库事实、原freeze与当前HEAD、原profile已有数据、空白模板与实际tasks区别；手册仍试行，fresh QA/Owner终验待定。按code-document-indexer双语/局部规则，无结构变化、无代码索引或DS手册修改。`doc-status-before.json`、`doc-status-delta.patch`保存精确before→after；44个本地链接目标存在，限定4文件`git diff --check` exit0，文档状态修改不触发产品build重跑。
+
+补证读取前541项源码/文档/fixture全部匹配T1 aggregate fcd04ee5...；此后只有上述4个允许文档发生本轮增量，最终`handoff-source-manifest.json`固定541项复合候选aggregate=`0b3bc5502023f78004d1d2941e8bbee3fa73655b7e50f162984f5b8fb9a3d4b9`。原r2实现51项aggregate740207f8...、397输入和84工件archive manifest、原失败与13项final结果保持原时点；本轮无新产品代码/依赖/features/锁改动，不借文档修正重跑完整cargo/pnpm/DS矩阵。后续DIRECT的DS/core UDT、DAA分组/编辑、样本详情及DS专用版本管理仍分别归原报告/源SHA，不倒记为原r2检查或旧DS接受。当前复合候选是fresh QA输入，不能只对原freeze报通过。
+
+**实际新增DEV self-check命令。** Owner关闭确认后`python3 <T2>/capture_closed.py` exit0；`python3 <T2>/inspect_projection.py` exit0；`python3 <T2>/compare_t1_followup.py` exit0；内联Python对原T1行、值/故障/时刻/源码before→after/文档链接/清单核查exit0。所有SQL在`readonly-sql.json`，脚本/raw结果和actual argv/exit在`followup-execution-results.json`；没有native、DS/S7客户端、监听、数据库写入或新的完整测试。Python SQLite为外部只读证据读取器，不替代产品bundled版本证明。此为DEV self-check，不是独立QA。
+
+**资源与精确handoff。** 当前修改文件仅上述4个文档及本tasks（头部Status/Handoff更新和本节追加），精确patch/当前SHA由T2最终manifest固定。T1/T2持久完整投影、原日志、截图和helper供fresh Verification；无临时源码副本或runtime输入数据库副本。原E/E2自有dist/失败合成fixture及共享target的归属/保留规则仍按历史记录，不清理他人资源。原Owner合成profile内8590pending样本继续保留；本轮未回收env/profile/数据库/日志，后续只由coordinator按最终接受、证据依赖和明确资源授权收尾。
+
+现交唯一coordinator `/root`：以本精确r2、正式dirty工作树HEAD8030dbb...、最终541项复合候选、原r2 before/diff/checks、独立DIRECT来源、T1/T2完整证据及以上限制，实际启动**新的`verification`角色、fresh context（fork_turns="none"）**。Verification只独立核验并创建checklist，不由本Development写verdict或代修。QA未发生，Owner最终接受、整体B明确接受、阶段C/上传/ACK/Backend/SMA/真实PLC/生产/发布/部署均未获本handoff放行。

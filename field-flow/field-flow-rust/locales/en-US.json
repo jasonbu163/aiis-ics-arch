@@ -1,1 +1,6 @@
-{"help":"Field Flow (synthetic local runtime)\nUsage:\n  field-flow [--lang en-US|zh-CN] --help\n  field-flow state init --synthetic --mode dry_run|execute --state-dir NEW_DIR --instance-id ID\n  field-flow state inspect --state-dir DIR\n  field-flow run --config FILE --state-dir DIR [--execute]\nRun requires an explicitly initialized state directory. Stop with SIGINT or SIGTERM.","error":"Operation failed","initialized":"Synthetic state initialized"}
+{
+  "help": "Field Flow (synthetic local runtime)\nUsage:\n  field-flow [--lang en-US|zh-CN] --help\n  field-flow state init --synthetic --mode dry_run|execute --state-dir NEW_DIR --instance-id ID\n  field-flow state inspect --state-dir DIR\n  field-flow run --config FILE --state-dir DIR [--execute]\nRun requires an explicitly initialized state directory. Stop with SIGINT or SIGTERM.\nconfig validate --config FILE | --plc-file FILE",
+  "error": "Operation failed",
+  "initialized": "Synthetic state initialized",
+  "fixture_help": "ff-fixture --config config/loopback.yaml --evidence-dir NEW_DIRECTORY\nff-fixture --catalog-demo --evidence-dir NEW_DIRECTORY\nEnter issue once to publish; an empty line stops the catalog fixture."
+}

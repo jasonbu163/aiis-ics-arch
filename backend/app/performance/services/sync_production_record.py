@@ -7,12 +7,15 @@ Main Features:
     - Leaves transaction commit and rollback to the Projection host
 """
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from math import isfinite
 
 from sqlalchemy.orm import Session
+from app.performance.crud.sync_integration import storage_context
+from app.performance.integration_storage import legacy_input
+from common.integration.storage import to_storage_time as storage_time
 
 from app.performance.crud import sync_production_record as sync_crud
 from app.performance.domain import (
@@ -235,6 +238,12 @@ def sync_production_record(
 ) -> ProductionRecordSyncResult:
     """Synchronize a fixed-provenance PLC coil fact without committing it."""
     _validate_provenance(fact)
+    context=storage_context(db)
+    original_date=fact.collected_at.date()
+    if context:
+        fact=replace(fact,collected_at=legacy_input(fact.collected_at,fact.collected_at,context[0]),
+            start_time_value=legacy_input(fact.start_time_value,None,context[0],"manualNaive") if fact.start_time_value not in (None,"") else fact.start_time_value,
+            end_time_value=legacy_input(fact.end_time_value,None,context[0],"manualNaive") if fact.end_time_value not in (None,"") else fact.end_time_value)
     observation = _classify_fact(fact)
     latest_raw_snapshot_id = sync_crud.get_latest_raw_snapshot_id_for_device(
         db,
@@ -250,14 +259,14 @@ def sync_production_record(
         )
 
     if observation.status is PerformanceObservationStatus.IN_PRODUCTION:
-        return _sync_in_production(db, fact, observation)
+        return _sync_in_production(db, fact, observation, context=context, production_date=original_date)
     if observation.status is PerformanceObservationStatus.NOT_IN_PRODUCTION:
         return _sync_active_rows(
             db,
             fact,
-            PerformanceObservationStatus.NOT_IN_PRODUCTION,
+            PerformanceObservationStatus.NOT_IN_PRODUCTION, context=context,
         )
-    return _sync_active_rows(db, fact, PerformanceObservationStatus.UNKNOWN)
+    return _sync_active_rows(db, fact, PerformanceObservationStatus.UNKNOWN, context=context)
 
 
 def _validate_provenance(fact: ProductionRecordFact) -> None:
@@ -290,6 +299,7 @@ def _sync_in_production(
     db: Session,
     fact: ProductionRecordFact,
     observation: CoilObservation,
+    context=None, production_date=None,
 ) -> ProductionRecordSyncResult:
     if observation.coil_no is None:
         raise ValueError("in_production observations require a canonical coil number")
@@ -312,9 +322,12 @@ def _sync_in_production(
         return ProductionRecordSyncResult(action="noop", performance_id=performance.id)
 
     if performance is None:
-        performance = _new_performance(fact, observation.coil_no)
+        performance = _new_performance(fact, observation.coil_no, production_date=production_date)
         _write_optional_main_fields(performance, fact)
         apply_performance_duration(performance)
+        if context:
+            performance.created_at=storage_time(context[1])
+            performance.updated_at=storage_time(context[1])
         sync_crud.add_performance(db, performance)
         action = "created"
     else:
@@ -330,6 +343,8 @@ def _sync_in_production(
         )
         _write_optional_main_fields(performance, fact)
         apply_performance_duration(performance)
+        if context:
+            performance.updated_at=storage_time(context[1])
 
     for active_row in active_rows:
         if performance.id is not None and active_row.id == performance.id:
@@ -340,6 +355,8 @@ def _sync_in_production(
             PerformanceObservationStatus.NOT_IN_PRODUCTION,
         )
         apply_performance_duration(active_row)
+        if context:
+            active_row.updated_at=storage_time(context[1])
 
     sync_crud.flush(db)
     return ProductionRecordSyncResult(action=action, performance_id=performance.id)
@@ -349,6 +366,7 @@ def _sync_active_rows(
     db: Session,
     fact: ProductionRecordFact,
     target_status: PerformanceObservationStatus,
+    context=None,
 ) -> ProductionRecordSyncResult:
     active_rows = sync_crud.list_active_for_device_for_update(
         db,
@@ -359,6 +377,8 @@ def _sync_active_rows(
 
     for performance in active_rows:
         _write_last_observation(performance, fact, target_status)
+        if context:
+            performance.updated_at=storage_time(context[1])
         apply_performance_duration(performance)
 
     if active_rows:
@@ -369,14 +389,14 @@ def _sync_active_rows(
     )
 
 
-def _new_performance(fact: ProductionRecordFact, coil_no: str) -> Performance:
+def _new_performance(fact: ProductionRecordFact, coil_no: str, production_date=None) -> Performance:
     return Performance(
         plan_id=None,
         coil_no=coil_no,
         parent_coil_no=normalize_parent_coil_no(coil_no, None),
         grade=None,
         weight=None,
-        production_date=fact.collected_at.date(),
+        production_date=production_date if production_date is not None else fact.collected_at.date(),
         output_quantity=Decimal("0"),
         qualified_quantity=Decimal("0"),
         device_id=fact.device_id,

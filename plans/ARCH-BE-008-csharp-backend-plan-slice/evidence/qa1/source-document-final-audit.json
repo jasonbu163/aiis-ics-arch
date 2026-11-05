@@ -1,0 +1,14 @@
+{
+  "changedBaselineFiles": [],
+  "addedFiles": [
+    "plans/ARCH-BE-008-csharp-backend-plan-slice/checklist.md"
+  ],
+  "candidate44StillExact": true,
+  "markdownFiles": 17,
+  "localLinksExist": 546,
+  "sourceHeaderAndIndexCount": 32,
+  "scopedGitDiffCheckExit": 0,
+  "bashSyntaxExit": 0,
+  "bareScriptHelpExit": 0,
+  "noSecretProjectFiles": true
+}

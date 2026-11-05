@@ -1,0 +1,149 @@
+{
+  "beforeRows": 11,
+  "startupNoDdlOrSeed": true,
+  "openApiOperations": [
+    [
+      "/api/v1/plans",
+      "post"
+    ],
+    [
+      "/api/v1/plans",
+      "get"
+    ],
+    [
+      "/api/v1/plans/{id}",
+      "get"
+    ],
+    [
+      "/health",
+      "get"
+    ]
+  ],
+  "rejectedRequestsNoDataMutation": true,
+  "minimalPlan": {
+    "id": 14,
+    "coilNo": " \tQA1-Raw-Case \r",
+    "grade": "G",
+    "spec": "S",
+    "weight": "1.2300",
+    "thickness": "0.123",
+    "width": "10.00",
+    "materialStatus": "special",
+    "density": "0.00",
+    "entryLength": "0.00",
+    "uncoiler1Tension": "0.00",
+    "exitTension": "0.00",
+    "process1Tension": "0.00",
+    "entryLoopTension": "0.00",
+    "exitLoopTension": "0.00",
+    "entryUnitTension": "0.0000",
+    "entryLoopUnitTension": "0.0000",
+    "processUnitTension": "0.0000",
+    "exitLoopUnitTension": "0.0000",
+    "exitUnitTension": "0.0000",
+    "status": "planned",
+    "priority": 5,
+    "remark": null,
+    "createdAt": "2026-10-28T14:24:04+08:00",
+    "updatedAt": "2026-10-28T14:24:04+08:00"
+  },
+  "databaseClockBracket": [
+    "2026-10-28 14:24:04",
+    "2026-10-28 14:24:05"
+  ],
+  "rowsAfterProbes": 18,
+  "probeCount": 284,
+  "groups": {
+    "missingRequired": 6,
+    "nullNonRemark": 20,
+    "wrongObjectOrArray": 42,
+    "wrongScalarType": 10,
+    "shapeAndMedia": 21,
+    "decimalAllFieldsRejected": 105,
+    "rejectedHttpRequests": 234
+  },
+  "beforeRestartPlan": {
+    "id": 14,
+    "coilNo": " \tQA1-Raw-Case \r",
+    "grade": "G",
+    "spec": "S",
+    "weight": "1.2300",
+    "thickness": "0.123",
+    "width": "10.00",
+    "materialStatus": "special",
+    "density": "0.00",
+    "entryLength": "0.00",
+    "uncoiler1Tension": "0.00",
+    "exitTension": "0.00",
+    "process1Tension": "0.00",
+    "entryLoopTension": "0.00",
+    "exitLoopTension": "0.00",
+    "entryUnitTension": "0.0000",
+    "entryLoopUnitTension": "0.0000",
+    "processUnitTension": "0.0000",
+    "exitLoopUnitTension": "0.0000",
+    "exitUnitTension": "0.0000",
+    "status": "planned",
+    "priority": 5,
+    "remark": null,
+    "createdAt": "2026-10-28T14:24:04+08:00",
+    "updatedAt": "2026-10-28T14:24:04+08:00"
+  },
+  "restartNoDdlOrSeed": true,
+  "restartPlanUnchanged": true,
+  "task": "ARCH-BE-008",
+  "revision": "r1",
+  "runId": "500b7e71711c83fdb763a0a3",
+  "processes": [
+    {
+      "name": "formal-ny",
+      "pid": 16379,
+      "TZ": "America/New_York",
+      "argv": [
+        "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet/bin/Debug/net10.0/AIIS.Backend.Api.dll"
+      ],
+      "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+      "stdout": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-attempt3/formal-ny.stdout.jsonl",
+      "stderr": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-attempt3/formal-ny.stderr",
+      "logs": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-attempt3/formal-ny-logs",
+      "startedUtc": "2026-10-28T06:24:03Z",
+      "exitCode": 0,
+      "stoppedUtc": "2026-10-28T06:24:05Z",
+      "pidAbsent": true,
+      "port18108Rebind": true
+    },
+    {
+      "name": "formal-utc",
+      "pid": 16419,
+      "TZ": "UTC",
+      "argv": [
+        "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet/bin/Debug/net10.0/AIIS.Backend.Api.dll"
+      ],
+      "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+      "stdout": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-attempt3/formal-utc.stdout.jsonl",
+      "stderr": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-attempt3/formal-utc.stderr",
+      "logs": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-attempt3/formal-utc-logs",
+      "startedUtc": "2026-10-28T06:24:05Z",
+      "exitCode": 0,
+      "stoppedUtc": "2026-10-28T06:24:06Z",
+      "pidAbsent": true,
+      "port18108Rebind": true
+    }
+  ],
+  "totalRecordedHttpCases": 286,
+  "failed": [
+    {
+      "classification": "implementation_contract_failure",
+      "id": "F-QA1-001",
+      "case": "media-text",
+      "actualStatus": 415,
+      "actualBodyBytes": 0,
+      "expectedErrorCode": "plan_invalid_request",
+      "requestId": "0HNPKNG84IN17:00000001"
+    }
+  ],
+  "candidateSha256": "20a7474a4f9766bec0f70f081c56a7f5a77922caf1efe64ccad839efe022aad5",
+  "dllSha256": "1ce88a2684f58996200f0d0a2e39493c5bffbd61ecee550e594e4647cc76b1c1"
+}

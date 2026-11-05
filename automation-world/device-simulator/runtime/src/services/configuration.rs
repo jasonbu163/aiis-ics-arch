@@ -264,6 +264,21 @@ impl Configuration {
     pub fn finish_preview(&self, token: &str) {
         self.pending.lock().unwrap().remove(token);
     }
+    /// 未完成的加载票据也拥有版本引用；取消或过期后释放，不保护删除清单本身。
+    pub fn revision_previews(&self) -> Vec<(String, String)> {
+        let mut pending = self.pending.lock().unwrap();
+        pending.retain(|_, p| p.expires > Instant::now());
+        pending
+            .values()
+            .filter(|p| p.kind == "apply")
+            .filter_map(|p| {
+                Some((
+                    p.details["revisionId"].as_str()?.into(),
+                    p.details["instanceId"].as_str()?.into(),
+                ))
+            })
+            .collect()
+    }
     pub fn confirm(
         &self,
         kind: &str,

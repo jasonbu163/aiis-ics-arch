@@ -96,7 +96,7 @@ def parse(data):
             integer(getattr(p, k), low, high, "config_range")
     ids, resources = set(), []
     for f in c.flows:
-        require(valid_id(f.id) and f.id not in ids and valid_id(f.source_id) and valid_id(f.business_name) and f.kind == "demo01", "config_flow")
+        require(valid_id(f.id) and f.id not in ids and valid_id(f.source_id) and valid_id(f.business_name) and f.kind in ("demo01", "plc_guard_get_int", "get_value_guard_int"), "config_flow")
         ids.add(f.id)
         integer(f.interval_ms, 100, 10000, "config_range")
         integer(f.input_max_age_ms, 1, 60000, "config_range")

@@ -7,6 +7,9 @@
     - Keeps local previews side-effect free while a saved row can emit one explicit manual-run confirmation
 -->
 <script setup lang="ts">
+import { ElDialog } from "element-plus";
+import { useTableWidths, vTableWidths } from "../../../console/tableWidths";
+import { ConsoleCard, ConsoleActionButton, StatusCapsule } from "@aw-ui";
 import { computed, ref, watch } from "vue";
 
 import type { LocaleMessages } from "../../../locales";
@@ -31,6 +34,7 @@ import MappingBatchOperationsDialog from "./MappingBatchOperationsDialog.vue";
 
 const props = defineProps<{
   labels: LocaleMessages;
+  savedPreview?: Record<string, unknown> | null;
   configurations: MappingConfiguration[];
   localDrafts: LocalMappingConfigurationDraft[];
   targetApis: TargetApiConfiguration[];
@@ -60,6 +64,7 @@ const emit = defineEmits<{
   "open-draft": [localId: string];
   "remove-draft": [localId: string];
   "load-source-facts": [];
+  "preview-saved": [id: string];
   "update-draft": [patch: Partial<MappingConfigurationDraft>];
   "initialize-bindings": [targetApiKey: string];
   "update-binding": [jsonPath: string, patch: Partial<MappingConfigurationBinding>];
@@ -166,12 +171,6 @@ function bindingValidation(parameter: TargetApiConfiguration["parameterSchema"][
     : props.labels.mappingConfigurationRuleRejected;
 }
 
-const sourceKeys = computed(() => [...new Set(props.sourceFacts.map((fact) => fact.sourceKey))].sort());
-
-function compatibleFacts(sourceKey: string | null, dataType: string) {
-  return props.sourceFacts.filter((fact) => fact.sourceKey === sourceKey
-    && (fact.dataType === dataType || (fact.dataType === "integer" && dataType === "number")));
-}
 
 function bindingSummary(bindings: Record<string, MappingConfigurationBinding>) {
   const entries = Object.values(bindings);
@@ -258,32 +257,37 @@ function requestManualRun(mapping: MappingConfiguration) {
   if (globalThis.confirm(confirmation)) emit("run-manual", mapping.id);
 }
 
+
+const mappingsTable = useTableWidths("mappings", [{ id: "state", width: 140 }, { id: "key", width: 200 }, { id: "name", width: 220 }, { id: "targetApi", width: 220 }, { id: "bindings", width: 180 }, { id: "enabled", width: 140 }, { id: "manualRun", width: 220 }, { id: "actions", width: 380, min: 380, fixed: true }]);
+const bindingsTable = useTableWidths("mapping-bindings", [{ id: "parameter", width: 220 }, { id: "mode", width: 180 }, { id: "value", width: 400 }, { id: "rule", width: 240 }, { id: "validation", width: 230 }]);
 </script>
 
 <template>
   <div class="mapping-page-stack mapping-configurations-stack">
-    <section class="panel">
-      <header class="panel-header"><div><p class="panel-kicker">{{ labels.mappingBackendConfiguration }}</p><h2>{{ labels.mappingConfigurationsTitle }}</h2></div><span class="status-pill">HTTP</span></header>
+    <p class="hint">{{ labels.localConfigurationOnly }}</p>
+    <section v-if="savedPreview"><h3>{{ labels.localSavedPreview }}</h3><pre>{{ JSON.stringify(savedPreview, null, 2) }}</pre></section>
+    <ConsoleCard :title="labels.mappingConfigurationsTitle">
+    <p v-if="busy" class="hint" role="status">{{ labels.loading }}</p>
+<template #actions><StatusCapsule label="HTTP" /></template>
       <p>{{ labels.mappingConfigurationsHint }}</p>
-      <div class="action-row"><button class="secondary-action" type="button" :disabled="!enabled || busy" @click="emit('load-target-apis')">{{ labels.mappingConfigurationsLoadTargetApis }}</button><button class="secondary-action" type="button" :disabled="!enabled || busy" @click="batchOpen = true">{{ labels.mappingBatchOperations }}</button><button class="primary-action" type="button" :disabled="!enabled || busy" @click="startCreate">{{ labels.mappingConfigurationNew }}</button></div>
-      <p v-if="error" class="warning">{{ labels.mappingConfigurationOperationFailed }}</p>
+      <div class="action-row"><ConsoleActionButton tone="secondary" native-type="button" :disabled="!enabled || busy" @click="emit('load-target-apis')">{{ labels.mappingConfigurationsLoadTargetApis }}</ConsoleActionButton><ConsoleActionButton tone="secondary" native-type="button" :disabled="!enabled || busy" @click="batchOpen = true">{{ labels.mappingBatchOperations }}</ConsoleActionButton><ConsoleActionButton tone="primary" native-type="button" :disabled="!enabled || busy" @click="startCreate">{{ labels.mappingConfigurationNew }}</ConsoleActionButton></div>
+      <p v-if="error" class="warning" role="alert">{{ labels.mappingConfigurationOperationFailed }} {{ /CONFLICT|PREVIEW_CHANGED/.test(error) ? labels.localConfigurationConflict : error }}</p>
       <p v-if="status === 'saved'" class="notice">{{ labels.mappingConfigurationSaved }}</p>
-    </section>
+    </ConsoleCard>
 
-    <section class="panel">
-      <header class="panel-header"><div><p class="panel-kicker">{{ labels.mappingBackendConfiguration }}</p><h2>{{ labels.mappingConfigurationsListTitle }}</h2></div></header>
-      <div class="table-scroll mapping-list-scroll" tabindex="0"><table class="mapping-list-table mapping-configurations-table"><thead><tr><th>{{ labels.mappingConfigurationState }}</th><th>{{ labels.mappingConfigurationKey }}</th><th>{{ labels.targetApiName }}</th><th>{{ labels.mappingConfigurationTargetApi }}</th><th>{{ labels.mappingConfigurationBindingSummary }}</th><th>{{ labels.targetApiState }}</th><th>{{ labels.mappingManualRunResult }}</th><th>{{ labels.targetApiActions }}</th></tr></thead>
+    <ConsoleCard :title="labels.mappingConfigurationsListTitle">
+      <div class="table-scroll mapping-list-scroll" tabindex="0"><ConsoleActionButton size="small" @click="mappingsTable.reset">{{ labels.resetTableWidths }}</ConsoleActionButton>
+<table v-table-widths="[mappingsTable, labels.resizeTableColumn]" class="mapping-list-table mapping-configurations-table"><thead><tr><th>{{ labels.mappingConfigurationState }}</th><th>{{ labels.mappingConfigurationKey }}</th><th>{{ labels.targetApiName }}</th><th>{{ labels.mappingConfigurationTargetApi }}</th><th>{{ labels.mappingConfigurationBindingSummary }}</th><th>{{ labels.targetApiState }}</th><th>{{ labels.mappingManualRunResult }}</th><th>{{ labels.targetApiActions }}</th></tr></thead>
         <tbody>
-          <tr v-for="pending in localDrafts" :key="pending.localId"><td>{{ labels.mappingConfigurationDraft }}</td><td><code>{{ pending.draft.mappingKey }}</code></td><td>{{ pending.draft.name }}</td><td><code>{{ pending.draft.targetApiKey }}</code></td><td>{{ bindingSummary(pending.draft.bindings) }}</td><td>{{ pending.draft.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td>{{ labels.mappingManualRunSavedOnly }}</td><td><div class="mapping-list-row-actions"><button class="secondary-action" type="button" :disabled="!enabled || busy" @click="openDraft(pending.localId)">{{ labels.mappingValueRuleConfigure }}</button><button class="danger-action" type="button" :disabled="!enabled || busy" @click="emit('remove-draft', pending.localId)">{{ labels.mappingConfigurationRemoveDraft }}</button></div></td></tr>
-          <tr v-for="mapping in configurations" :key="mapping.id"><td>{{ labels.mappingConfigurationSavedState }}</td><td><code>{{ mapping.mappingKey }}</code></td><td>{{ mapping.name }}</td><td><code>{{ mapping.targetApiKey }}</code></td><td>{{ bindingSummary(mapping.bindings) }}</td><td>{{ mapping.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td><div class="mapping-manual-run-result"><span>{{ manualRunStatus(mapping) }}</span><small v-if="manualRunUnresolved(mapping)">{{ manualRunUnresolved(mapping) }}</small></div></td><td><div class="mapping-list-row-actions"><button class="primary-action" type="button" :disabled="!enabled || busy || !canRunManual(mapping) || manualRunBusyIds.includes(mapping.id) || manualRunFor(mapping)?.status === 'in_progress'" @click="requestManualRun(mapping)">{{ labels.mappingManualRunOnce }}</button><button class="secondary-action" type="button" :disabled="!enabled || busy" @click="openEditor(mapping.id)">{{ labels.targetApiEdit }}</button><button class="danger-action" type="button" :disabled="!enabled || busy" @click="remove(mapping)">{{ labels.targetApiDelete }}</button></div></td></tr>
+          <tr v-for="pending in localDrafts" :key="pending.localId"><td>{{ labels.mappingConfigurationDraft }}</td><td><code>{{ pending.draft.mappingKey }}</code></td><td>{{ pending.draft.name }}</td><td><code>{{ pending.draft.targetApiKey }}</code></td><td>{{ bindingSummary(pending.draft.bindings) }}</td><td>{{ pending.draft.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td>{{ labels.mappingManualRunSavedOnly }}</td><td><div class="mapping-list-row-actions"><ConsoleActionButton size="small" tone="secondary" native-type="button" :disabled="!enabled || busy" @click="openDraft(pending.localId)">{{ labels.mappingValueRuleConfigure }}</ConsoleActionButton><ConsoleActionButton size="small" tone="danger" native-type="button" :disabled="!enabled || busy" @click="emit('remove-draft', pending.localId)">{{ labels.mappingConfigurationRemoveDraft }}</ConsoleActionButton></div></td></tr>
+          <tr v-for="mapping in configurations" :key="mapping.id"><td>{{ labels.mappingConfigurationSavedState }}</td><td><code>{{ mapping.mappingKey }}</code></td><td>{{ mapping.name }}</td><td><code>{{ mapping.targetApiKey }}</code></td><td>{{ bindingSummary(mapping.bindings) }}</td><td>{{ mapping.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td><div class="mapping-manual-run-result"><span>{{ manualRunStatus(mapping) }}</span><small v-if="manualRunUnresolved(mapping)">{{ manualRunUnresolved(mapping) }}</small></div></td><td><div class="mapping-list-row-actions"><ConsoleActionButton size="small" tone="secondary" :disabled="!enabled || busy" @click="emit('preview-saved', mapping.id)">{{ labels.localSavedPreview }}</ConsoleActionButton><ConsoleActionButton size="small" tone="primary" native-type="button" :disabled="!enabled || busy || !canRunManual(mapping) || manualRunBusyIds.includes(mapping.id) || manualRunFor(mapping)?.status === 'in_progress'" @click="requestManualRun(mapping)">{{ labels.mappingManualRunOnce }}</ConsoleActionButton><ConsoleActionButton size="small" tone="secondary" native-type="button" :disabled="!enabled || busy" @click="openEditor(mapping.id)">{{ labels.targetApiEdit }}</ConsoleActionButton><ConsoleActionButton size="small" tone="danger" native-type="button" :disabled="!enabled || busy" @click="remove(mapping)">{{ labels.targetApiDelete }}</ConsoleActionButton></div></td></tr>
         </tbody>
       </table></div>
       <p v-if="!configurations.length && !localDrafts.length" class="empty-state">{{ labels.mappingConfigurationsEmpty }}</p>
-    </section>
+    </ConsoleCard>
 
-    <div v-if="editorOpen" class="facts-dialog-backdrop" @click.self="editorOpen = false">
-      <section class="panel facts-dialog mapping-configuration-dialog" role="dialog" aria-modal="true">
-        <header class="panel-header facts-dialog-header">
+    <Teleport to="#sma-overlays"><ElDialog :model-value="Boolean(editorOpen)" :append-to-body="false" :title="selectedId || selectedDraftId ? labels.mappingConfigurationEdit : labels.mappingConfigurationNew" class="sma-dialog mapping-configuration-dialog" @close="editorOpen = false">
+<template #header><div class="panel-header facts-dialog-header">
           <div>
             <p class="panel-kicker">{{ labels.mappingLocalPreviewOnly }}</p>
             <h2>{{ selectedId || selectedDraftId ? labels.mappingConfigurationEdit : labels.mappingConfigurationNew }}</h2>
@@ -292,7 +296,7 @@ function requestManualRun(mapping: MappingConfiguration) {
             <input :checked="draft.enabled" type="checkbox" :disabled="!enabled || busy" @change="emit('update-draft', { enabled: ($event.target as HTMLInputElement).checked })" />
             <span>{{ labels.targetApiEnabled }}</span>
           </label>
-        </header>
+        </div></template>
         <form class="mapping-configuration-form" @submit.prevent="emit('save')">
           <div class="mapping-configuration-form-grid">
             <label class="field"><span>{{ labels.mappingConfigurationKey }}</span><input :value="draft.mappingKey" :readonly="Boolean(selectedId)" :disabled="!enabled || busy" @input="emit('update-draft', { mappingKey: ($event.target as HTMLInputElement).value })" /></label>
@@ -300,23 +304,19 @@ function requestManualRun(mapping: MappingConfiguration) {
             <label class="field"><span>{{ labels.mappingConfigurationTargetApi }}</span><select :value="draft.targetApiKey" :disabled="!enabled || busy || selectedTargetApiLocked" @change="updateTargetApi"><option value="">—</option><option v-for="target in targetApis.filter((item) => item.enabled)" :key="target.apiKey" :value="target.apiKey">{{ target.name }} · {{ target.apiKey }}</option></select></label>
             <label class="field"><span>{{ labels.mappingProcessingInterval }}</span><input :value="draft.intervalMs" type="number" min="1" :disabled="!enabled || busy" @input="emit('update-draft', { intervalMs: Number(($event.target as HTMLInputElement).value) })" /></label>
           </div>
+          <p class="hint">{{ labels.localSourceUnverified }}</p>
           <p v-if="factsBusy" class="hint">{{ labels.loading }}</p>
           <section v-if="selectedTargetApi" class="mapping-bindings">
             <h3>{{ labels.mappingConfigurationBindings }}</h3>
             <div class="table-scroll" tabindex="0">
-              <table class="mapping-bindings-table">
-                <colgroup>
-                  <col class="mapping-binding-parameter-column" />
-                  <col class="mapping-binding-mode-column" />
-                  <col class="mapping-binding-value-column" />
-                  <col class="mapping-binding-rule-column" />
-                  <col class="mapping-binding-validation-column" />
-                </colgroup>
+              <ConsoleActionButton size="small" @click="bindingsTable.reset">{{ labels.resetTableWidths }}</ConsoleActionButton>
+<table v-table-widths="[bindingsTable, labels.resizeTableColumn]" class="mapping-bindings-table">
+
                 <thead><tr><th>{{ labels.mappingConfigurationParameterIdentity }}</th><th>{{ labels.mappingConfigurationUseFixedValue }}</th><th>{{ labels.mappingConfigurationValue }}</th><th>{{ labels.mappingConfigurationValueRule }}</th><th>{{ labels.mappingConfigurationValidation }}</th></tr></thead>
                 <tbody>
                   <tr v-for="parameter in selectedTargetApi.parameterSchema" :key="parameter.parameterKey">
                     <td class="mapping-binding-parameter">
-                      <span class="status-pill">{{ parameter.location }}</span>
+                      <StatusCapsule :label="parameter.location" />
                       <code>{{ parameter.jsonPath ?? parameter.name }}</code>
                       <small>{{ parameter.dataType }} · {{ parameter.required ? labels.targetApiRequired : '—' }}</small>
                     </td>
@@ -330,11 +330,11 @@ function requestManualRun(mapping: MappingConfiguration) {
                       <div v-if="draft.bindings[parameter.parameterKey]?.kind === 'fact'" class="mapping-fact-selects">
                         <label>
                           <span>{{ labels.twinSourceKey }}</span>
-                          <select :value="draft.bindings[parameter.parameterKey]?.sourceKey ?? ''" :disabled="!enabled || busy" @change="emit('update-binding', parameter.parameterKey, { sourceKey: ($event.target as HTMLSelectElement).value || null, factName: null, value: null })"><option value="">—</option><option v-for="sourceKey in sourceKeys" :key="sourceKey" :value="sourceKey">{{ sourceKey }}</option></select>
+                          <input type="text" :value="draft.bindings[parameter.parameterKey]?.sourceKey ?? ''" :disabled="!enabled || busy" @change="emit('update-binding', parameter.parameterKey, { sourceKey: ($event.target as HTMLInputElement).value || null, factName: null, value: null })" />
                         </label>
                         <label>
                           <span>{{ labels.mappingConfigurationFact }}</span>
-                          <select :value="draft.bindings[parameter.parameterKey]?.factName ?? ''" :disabled="!enabled || busy" @change="emit('update-binding', parameter.parameterKey, { factName: ($event.target as HTMLSelectElement).value || null, value: null })"><option value="">—</option><option v-for="fact in compatibleFacts(draft.bindings[parameter.parameterKey]?.sourceKey ?? null, parameter.dataType)" :key="`${fact.sourceKey}\u0000${fact.name}`" :value="fact.name">{{ fact.name }}</option></select>
+                          <input type="text" :value="draft.bindings[parameter.parameterKey]?.factName ?? ''" :disabled="!enabled || busy" @change="emit('update-binding', parameter.parameterKey, { factName: ($event.target as HTMLInputElement).value || null, value: null })" />
                         </label>
                       </div>
                       <input v-else :value="constantInputValue(draft.bindings[parameter.parameterKey]?.value)" :class="{ invalid: constantErrors[parameter.parameterKey] }" :disabled="!enabled || busy" @input="updateConstant(parameter.parameterKey, parameter.dataType, $event)" />
@@ -350,14 +350,14 @@ function requestManualRun(mapping: MappingConfiguration) {
             <summary>{{ labels.mappingConfigurationPreview }}</summary>
             <div class="mapping-local-preview-content">
               <div class="mapping-preview-grid"><div><strong>{{ labels.mappingPreviewResolvedPath }}</strong><pre>{{ requestPreview.resolvedPath }}</pre></div><div><strong>{{ labels.mappingPreviewQuery }}</strong><pre>{{ JSON.stringify(requestPreview.query, null, 2) }}</pre></div><div><strong>{{ labels.mappingPreviewHeaders }}</strong><pre>{{ JSON.stringify(requestPreview.headers, null, 2) }}</pre></div><div><strong>{{ labels.mappingPreviewBody }}</strong><pre>{{ JSON.stringify(requestPreview.body, null, 2) }}</pre></div></div>
-              <p v-if="requestPreview.unresolved.length" class="warning">{{ labels.mappingPreviewUnresolved.replace('{parameters}', requestPreview.unresolved.join(', ')) }}</p>
+              <p v-if="requestPreview.unresolved.length" class="warning" role="alert">{{ labels.mappingPreviewUnresolved.replace('{parameters}', requestPreview.unresolved.join(', ')) }}</p>
               <p>{{ labels.mappingConfigurationPreviewHint }}</p>
             </div>
           </details>
-          <div class="action-row facts-editor-actions"><button class="secondary-action" type="button" :disabled="busy" @click="editorOpen = false">{{ labels.collectionFactsCancel }}</button><button class="primary-action" type="submit" :disabled="!enabled || busy">{{ labels.targetApiSave }}</button></div>
+          <div class="action-row facts-editor-actions"><ConsoleActionButton tone="secondary" native-type="button" :disabled="busy" @click="editorOpen = false">{{ labels.collectionFactsCancel }}</ConsoleActionButton><ConsoleActionButton tone="primary" native-type="submit" :disabled="!enabled || busy">{{ labels.targetApiSave }}</ConsoleActionButton></div>
         </form>
-      </section>
-    </div>
+
+</ElDialog></Teleport>
 
     <MappingBatchOperationsDialog v-if="batchOpen" :labels="labels" :title="labels.mappingConfigurationsBatchTitle" :busy="busy" :saving-file="savingFile" :preview="importPreview" :error="fileError || error" :enabled="enabled" @close="closeBatch" @download-template="downloadTemplate" @export="exportMappings" @import="importFile" @apply="emit('apply-import')" />
   </div>
@@ -372,11 +372,11 @@ function requestManualRun(mapping: MappingConfiguration) {
 .mapping-configurations-table .mapping-list-row-actions > button { flex: 0 0 auto; white-space: nowrap; }
 .mapping-configurations-table td, .mapping-bindings-table td { vertical-align: top; white-space: normal; }
 .mapping-configurations-table td:first-child { white-space: nowrap; }
-.facts-dialog-backdrop { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 24px; background: rgb(25 48 53 / 42%); }
-.mapping-configuration-dialog { width: min(1440px, calc(100vw - 48px)); max-width: none; max-height: calc(100vh - 48px); overflow: auto; box-shadow: 0 18px 48px rgb(21 46 53 / 26%); }
+
+.mapping-configuration-dialog { width: min(1440px, calc(100vw - 48px)); max-width: none; max-height: calc(100vh - 48px); overflow: auto; box-shadow: var(--agent-shadow); }
 .mapping-configuration-form { display: grid; gap: 18px; }
 .mapping-configuration-form-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(280px, 1.45fr) minmax(130px, 0.5fr); gap: 14px; }
-.mapping-configuration-enabled, .mapping-binding-mode-toggle { display: inline-flex; align-items: center; gap: 8px; color: #3d535b; font-size: 13px; white-space: nowrap; }
+.mapping-configuration-enabled, .mapping-binding-mode-toggle { display: inline-flex; align-items: center; gap: 8px; color: var(--agent-text-muted); font-size: 13px; white-space: nowrap; }
 .mapping-bindings h3 { margin: 0 0 10px; font-size: 15px; }
 .mapping-bindings-table { min-width: 1040px; table-layout: fixed; }
 .mapping-binding-parameter-column { width: 18%; }
@@ -386,22 +386,22 @@ function requestManualRun(mapping: MappingConfiguration) {
 .mapping-binding-validation-column { width: 16%; }
 .mapping-bindings-table select, .mapping-bindings-table input:not([type="checkbox"]) { width: 100%; min-width: 0; }
 .mapping-binding-parameter { display: grid; gap: 6px; }
-.mapping-binding-parameter small, .mapping-fact-selects span { color: #6b828a; font-size: 12px; }
+.mapping-binding-parameter small, .mapping-fact-selects span { color: var(--agent-text-muted); font-size: 12px; }
 .mapping-binding-mode { vertical-align: middle !important; }
 .mapping-fact-selects { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .mapping-fact-selects label { display: grid; min-width: 0; gap: 4px; }
-.mapping-binding-validation { color: #3d535b; line-height: 1.45; }
-.mapping-local-preview { border-top: 1px solid #d9e2e5; padding-top: 16px; }
-.mapping-local-preview summary { cursor: pointer; color: #172026; font-size: 15px; font-weight: 650; }
+.mapping-binding-validation { color: var(--agent-text-muted); line-height: 1.45; }
+.mapping-local-preview { border-top: 1px solid var(--agent-border); padding-top: 16px; }
+.mapping-local-preview summary { cursor: pointer; color: var(--agent-text); font-size: 15px; font-weight: 650; }
 .mapping-local-preview[open] summary { margin-bottom: 12px; }
 .mapping-local-preview-content { display: grid; gap: 12px; }
-.mapping-local-preview pre { max-height: 240px; margin: 0; padding: 12px; overflow: auto; background: #f3f7f8; border: 1px solid #d9e2e5; border-radius: 4px; }
+.mapping-local-preview pre { max-height: 240px; margin: 0; padding: 12px; overflow: auto; background: var(--agent-surface-muted); border: 1px solid var(--agent-border); border-radius: 4px; }
 .mapping-preview-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .mapping-preview-grid strong { display: block; margin-bottom: 6px; font-size: 12px; }
-.mapping-configuration-dialog .facts-editor-actions { position: sticky; bottom: -18px; z-index: 1; margin: 0 -18px -18px; padding: 14px 18px; background: #ffffff; border-top: 1px solid #d9e2e5; }
+.mapping-configuration-dialog .facts-editor-actions { position: sticky; bottom: -18px; z-index: 1; margin: 0 -18px -18px; padding: 14px 18px; background: var(--agent-surface); border-top: 1px solid var(--agent-border); }
 .mapping-manual-run-result { display: grid; gap: 4px; min-width: 180px; }
-.mapping-manual-run-result small { color: #875b10; }
-.invalid { border-color: #d95c48; }
+.mapping-manual-run-result small { color: var(--agent-warning); }
+.invalid { border-color: var(--agent-danger); }
 @media (max-width: 1180px) { .mapping-configuration-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 800px) { .facts-dialog-backdrop { align-items: start; padding: 12px; } .mapping-configuration-dialog { width: calc(100vw - 24px); max-height: calc(100vh - 24px); } .mapping-configuration-form-grid, .mapping-preview-grid { grid-template-columns: 1fr; } }
+@media (max-width: 800px) {  .mapping-configuration-dialog { width: calc(100vw - 24px); max-height: calc(100vh - 24px); } .mapping-configuration-form-grid, .mapping-preview-grid { grid-template-columns: 1fr; } }
 </style>

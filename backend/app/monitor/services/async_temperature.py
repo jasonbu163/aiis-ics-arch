@@ -9,6 +9,8 @@ from typing import Any, Dict
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.monitor.crud.async_integration import storage_context
+from app.monitor.integration_storage import legacy_view
 from app.monitor.crud import async_temperature as temperature_crud
 
 
@@ -18,7 +20,10 @@ async def get_curve_dashboard_data(
     date_str: str,
 ) -> Dict[str, Any]:
     """获取生产过程曲线数据。"""
+    context=await storage_context(db)
     records = await temperature_crud.list_curves_by_date(db, date_str)
+    if context:
+        records=[legacy_view(row,context[0],"legacy") for row in records]
     if not records:
         return {"trends": [], "latest": {}}
 

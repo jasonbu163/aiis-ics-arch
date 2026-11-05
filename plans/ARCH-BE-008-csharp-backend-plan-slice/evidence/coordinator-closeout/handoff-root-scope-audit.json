@@ -1,0 +1,18 @@
+{
+  "PLAN.md": "only approved 007/008 index rows changed",
+  "PLAN.zh-CN.md": "only approved 007/008 index rows changed",
+  "plans/README.md": "only approved 007/008 index rows changed",
+  "plans/README.zh-CN.md": "only approved 007/008 index rows changed",
+  "README.md": {
+    "only_backend_dotnet_insertions": true,
+    "added_lines": 3
+  },
+  "README.zh-CN.md": {
+    "only_backend_dotnet_insertions": true,
+    "added_lines": 3
+  },
+  "CODE_INDEX.md": {
+    "only_backend_dotnet_insertions": true,
+    "added_lines": 1
+  }
+}

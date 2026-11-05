@@ -1,0 +1,156 @@
+[
+  {
+    "scene": "catalog_compatibility/confirmed",
+    "seconds": 1.6928952499999999,
+    "product_exit": 0,
+    "writes": [
+      1,
+      0
+    ],
+    "reads": [
+      18,
+      6
+    ],
+    "result": "passed"
+  },
+  {
+    "scene": "multi_plc/b_off",
+    "seconds": 8.207653792,
+    "product_exit": 1,
+    "writes": [
+      0,
+      0
+    ],
+    "reads": [
+      87,
+      0
+    ],
+    "result": "passed"
+  },
+  {
+    "scene": "multi_plc/dry_run",
+    "seconds": 5.423478,
+    "product_exit": 0,
+    "writes": [
+      0,
+      0
+    ],
+    "reads": [
+      75,
+      25
+    ],
+    "result": "passed"
+  },
+  {
+    "scene": "multi_plc/execute",
+    "seconds": 5.420517542,
+    "product_exit": 0,
+    "writes": [
+      1,
+      0
+    ],
+    "reads": [
+      75,
+      25
+    ],
+    "result": "passed"
+  },
+  {
+    "scene": "multi_plc/parallel_io",
+    "seconds": 5.420238416,
+    "product_exit": 0,
+    "writes": [
+      0,
+      0
+    ],
+    "reads": [
+      23,
+      23
+    ],
+    "result": "passed"
+  },
+  {
+    "scene": "multi_plc/slow_http",
+    "seconds": 8.338082458,
+    "product_exit": 0,
+    "writes": [
+      0,
+      0
+    ],
+    "reads": [
+      78,
+      0
+    ],
+    "result": "passed"
+  },
+  {
+    "scene": "multi_plc/slow_setup",
+    "seconds": 8.338586791,
+    "product_exit": 0,
+    "writes": [
+      0,
+      0
+    ],
+    "reads": [
+      195,
+      39
+    ],
+    "result": "passed"
+  },
+  {
+    "scene": "multi_plc/three_readers",
+    "seconds": 5.324789625,
+    "product_exit": 0,
+    "writes": [
+      0,
+      0
+    ],
+    "reads": [
+      144,
+      0
+    ],
+    "result": "passed"
+  },
+  {
+    "scene": "unknown_compatibility/alias",
+    "seconds": 0.505608833,
+    "product_exit": 0,
+    "writes": [
+      0,
+      0
+    ],
+    "reads": [
+      3,
+      1
+    ],
+    "result": "passed"
+  },
+  {
+    "scene": "unknown_compatibility/same",
+    "seconds": 0.504195833,
+    "product_exit": 0,
+    "writes": [
+      0,
+      0
+    ],
+    "reads": [
+      3,
+      1
+    ],
+    "result": "passed"
+  },
+  {
+    "scene": "unknown_readback/truncated_ack",
+    "seconds": 1.589264166,
+    "product_exit": 0,
+    "writes": [
+      1,
+      0
+    ],
+    "reads": [
+      18,
+      6
+    ],
+    "result": "passed"
+  }
+]

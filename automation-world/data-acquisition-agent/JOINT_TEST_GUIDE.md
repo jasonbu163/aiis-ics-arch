@@ -1,14 +1,16 @@
-# DAA–DS Stage B Joint Test Guide (Trial r2)
+# DAA–DS Stage B Joint Test Guide (Accepted Baseline r2)
 
 [中文](JOINT_TEST_GUIDE.zh-CN.md) · [DAA-007 r2 spec](plans/DAA-007-ds-joint-validation-and-time-contract/spec.md) · [DAA](README.md) · [DS guide](../device-simulator/USER_GUIDE.md)
 
-**r2 exactly approved; Owner operation follows P2 freeze. All M01–M09 remain not_run.** r1 time/storage changes remain. r2 adds source .env/profile selection, explicit ordinary UI read admission, standard Tauri startup and resident YAML retirement. See [tasks](plans/DAA-007-ds-joint-validation-and-time-contract/tasks.md) for actual checks/candidate. Operate native windows only after coordinator P2 freeze delivery. Expectations, Owner observations, closed-store RO reconciliation, fresh Verification and final acceptance remain distinct.
+**Finalized and accepted with DAA-007 r2 on 2026-10-30 for this controlled DS scope.** [Tasks](plans/DAA-007-ds-joint-validation-and-time-contract/tasks.md) preserves actual Development/Owner/ledger facts; the [checklist](plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2) records AC01–AC22 QA, the complete 8590-sample/4295-round reopen comparison and Stage B acceptance. Missing early checkpoints and unexplained 15:27 actions remain historical limits. This run already contains configuration/history: never recreate or clear it to match a blank template. Steps are a reference for an explicitly selected future run, not a request to repeat completed work.
 
 **Upgrade limitation.** Only genuinely empty profiles initialize Shanghai-time dual-store v2. Legacy UTC v1/missing/unknown contracts are rejected read-only before writing; configuration/history/raw/SHA remain without automatic migration or replacement stores. Old profiles need their compatible binary; migration/downgrade is separately approved. local-acquisition-v1 is a locator only. Reuse only the original Owner synthetic profiles, never defaults or a third profile, and never copy DEV fixtures/databases.
 
 ## P00 — Configure once and check before running
 
-Formal source `/Users/jason/Desktop/DreamCode/aiis-ics-arch`, HEAD=`1fa1ce50a521ebd51c2c43389db011a76f2d74bf` (dirty; scoped delta recorded separately). Use tasks' new r2 freeze manifest, with no source hot edits during operation. Original RUN_ROOT=`/private/tmp/daa-007-r1-exec-e6s14xue/owner-joint-run`. B0 found both original profiles empty and nonsymlink without opening stores. Before startup the Owner rechecks ownership/state and ports15191/15194/30102/30103. Stop on conflict; do not kill unknown processes or change ports for a pass.
+The separately authorized 2026-10-28 DIRECT increment updates M02: DS links unique UDT dependencies automatically, asks for duplicate-source choices, locates missing definitions and separates business errors from IPC health. This follows the r2 freeze, whose manifest remains historical. Continue with formal source containing this fix and its separately recorded delta/checks; do not attribute these changes to the old r2 checks or substitute them for native operation, reconciliation or independent verification.
+
+Formal source `/Users/jason/Desktop/DreamCode/aiis-ics-arch`; original r2 freeze HEAD=`1fa1ce50a521ebd51c2c43389db011a76f2d74bf`, 2026-10-30 reconciliation HEAD=`8030dbb3401ac6d1cf8bea46c81cfeff9e8e073b` (dirty; scoped deltas and current hashes in tasks). Keep original freeze checks and subsequent DIRECT increments distinct, with no source hot edits during operation. Original RUN_ROOT=`/private/tmp/daa-007-r1-exec-e6s14xue/owner-joint-run`. B0 found both original profiles empty and nonsymlink without opening stores; they now contain the Owner run and must be preserved. Before a separately requested startup the Owner rechecks ownership/state and ports15191/15194/30102/30103. Stop on conflict; do not kill unknown processes or change ports for a pass.
 
 The Owner accepted current DS, DS-001 r1 and ARCH-AW-005 r5 on2026-10-27; see [existing acceptance](../device-simulator/plans/DS-001-policy-table-and-usability/spec.md#owner-acceptance-ds001). Historical QA4/DS-001/DIRECT and the new r2 DS bootstrap delta remain distinct; DS's QA exception does not transfer here. r1's227 DS/158 DAA/12 core planning drift is recorded in tasks history. r2 fixes its new before/51-file implementation/protection manifests without assigning old passes to new changes.
 
@@ -32,7 +34,7 @@ Check inherited overrides once in the actual launch terminals without dumping th
 
 Ordinary native reads need no .env authorization. The Owner may remove the old DAA_PLC_READ_ALLOWED file key once or understand that either true/false is ignored. The advanced **process** key allows later UI actions only when truly absent or valid true; false/empty/invalid/undecodable denies reads and file true cannot override it. This ordinary joint run records that the process key is unset; if unintentionally inherited, the Owner may once `unset DAA_PLC_READ_ALLOWED`. Do not fix it with file true or repeat long startup commands. Stopped initial state and enable/address/activation/capacity/log/time protections remain.
 
-| Pre-run record | Owner confirmation pending |
+| Pre-run checklist template | Actual run records belong to tasks |
 | --- | --- |
 | Candidate/drivers | New freeze; DAA Tauri build.features=[rust-snap7-driver], local-validation off; DS native-s7, test-automation off |
 | Configuration source | Both resolved profiles and their sources, ordinary process read key unset; no unintended default/old stores |
@@ -64,10 +66,10 @@ DAA Tauri configuration supplies existing rust-snap7-driver (the S7 communicatio
 
 Configure A first; B can wait until M06.
 
-1. DS Configuration → Instances: create `B007-A`, `127.0.0.1:30102`, rack0/slot1, Calling TSAP256 (0x0100), Called TSAP257 (0x0101), connection/handshake limits16/4. Keep edit, then save candidate.
-2. In DB Points, follow [DS guide §3](../device-simulator/USER_GUIDE.md#3-read-only-multi-db--udt-import): select `automation-world/data-acquisition-agent/src-tauri/tests/fixtures/source-import-multi-db/multi.db` and adjacent `types.udt`. Scan, select only Alpha/Beta; Alpha needs no UDT, Beta selects only Measure in its closure.
+1. DS Configuration → Instances: create `B007-A`, `127.0.0.1:30102`, rack0/slot1, Calling TSAP256 (0x0100), Called TSAP257 (0x0101), connection/handshake limits16/4. Finish editing, then Save draft.
+2. In DB Points, follow [DS guide §3](../device-simulator/USER_GUIDE.md#3-read-only-multi-db--udt-import): select `automation-world/data-acquisition-agent/src-tauri/tests/fixtures/source-import-multi-db/multi.db` and adjacent `types.udt`. Scan, select only Alpha/Beta; Alpha needs no UDT and Beta should have Measure linked automatically. No prior DB creation is needed. Choose a source only for duplicate definitions; missing definitions show the field/type to add.
 3. Map Alpha to DB71 and Beta to DB88, preview and confirm import. Preview/confirm standard addresses per DB and review naming. Leave Gamma/Delta/Epsilon/Zeta unselected and source files unchanged.
-4. Explicitly set the following DS initial values/policies, enable all six points and allow client reads. Unspecified writes stay denied. `count := 7` and `BEGIN` are not imported initial values. Save and confirm selected initial values/policies. Match physical addresses, not cross-application UUIDs.
+4. Explicitly set the following DS initial values/policies, enable all six points and allow client reads. Unspecified writes stay denied. `count := 7` and `BEGIN` are not imported initial values. Save draft and confirm selected initial values/policies. Match physical addresses, not cross-application UUIDs.
 
 | DB / length | Source path / type / address | Technical name | A initial | B initial | Policy |
 | --- | --- | --- | --- | --- | --- |
@@ -78,8 +80,8 @@ Configure A first; B can wait until M06.
 | 88 / 8B | bytes[3] / BYTE / 6 | DB88_B6_Byte | 18 | 86 | Hold, no owner, all three writes denied |
 | 88 / 8B | bytes[4] / BYTE / 7 | DB88_B7_Byte | 52 | 120 | Hold, no owner, all three writes denied |
 
-5. Toggle changes each `halfPeriodMs`; the UI has no `base` field. False is the initial value, not a continuous-rule parameter. Retain established valid defaults for other rule fields. Instances: select latest saved version, preview loading/preservation, review six points/DBs/lengths/initials and confirm load while stopped. Explicitly start A in Workbench, then **pause rules** while retaining readable S7 service.
-6. Online Values: check six points. Count/REAL/BYTE match the loaded table values; ready may already have toggled, so record its actual paused snapshot. Record the loaded revision: saving is not loading.
+5. Toggle changes each `halfPeriodMs`; the UI has no `base` field. False is the initial value, not a continuous-rule parameter. Retain established valid defaults for other rule fields. First Save draft → Save as version; review the proposed number and cleanup list, then explicitly confirm (cancel publishes/deletes nothing; identical content adds nothing). In Instances → Configuration versions and loading, target A and click Preview loading in the intended row; review six points/DBs/lengths/initials and confirm load while stopped. Explicitly start A in Workbench, then **pause rules** while retaining readable S7 service.
+6. Online Values: check six points. Count/REAL/BYTE match the loaded table values; ready may already have toggled, so record its actual paused snapshot. Record the loaded revision: draft save, publication, loading and starting are separate. Versions snapshot the whole DS workspace; the default retains the latest5 plus every protected older version. Startup and this development do not trim existing v14/history.
 
 For address/name confirmation failures return to that step; for policy confirmation inspect the selected points. For read rejection check enable/client-read rather than granting unrelated writes.
 
@@ -137,7 +139,7 @@ The developer checks non-Shanghai host-timezone behavior and the legacy guard us
 1. Pause and disconnect both DAA PLCs, wait for DS sessions to release, resolve unsaved edits and Cmd+Q DAA once. Do not force-kill. Report **M09 first exit complete** and leave DAA closed until the coordinator records a read-only closed-store baseline and confirms reopening. This proves the next step preserves existing samples; acquisition is not repeated.
 2. After that baseline confirmation, reopen DAA with the **same .env and original Owner profile** from M01, retaining env/profile. Expect both configurations/groups/history and recorded IDs/hashes, with no connection/acquisition. History widths persist; then restore defaults.
 3. Query/open the two known samples, then normally exit DAA for coordinator read-only reconciliation. Stop both DS instances and normally exit DS. Three repeated window cycles are not required.
-4. Keep this run's data until feedback and final acceptance. After evidence archival and dependency/ownership checks the coordinator may reclaim only owned run data, never defaults/shared targets/original sources.
+4. Retain this run until reconciliation and final acceptance. The coordinator archives required evidence and reclaims only temporary build/helper resources without runtime, follow-up or evidence dependencies. Preserve this run’s Owner profiles and SQLite configuration/history; never delete defaults, shared target or original DB/UDT sources.
 
 M09 also records the resolved profile/source, same r2 candidate/features, ordinary process read key unset and stopped initial state. Wait for the DEV RO checkpoint after first exit before one same-profile reopen; do not repeat M02–M08.
 
@@ -153,7 +155,7 @@ M09 also records the resolved profile/source, same r2 candidate/features, ordina
 
 ## Feedback and finalization
 
-Record actual outcomes. Use `not_run` for unperformed work and `blocked` for a blocker, including step ID, page/button/input/message and approximate time. Text feedback is sufficient; screenshots are optional evidence where useful.
+Record actual outcomes. Use `not_run` for unperformed work and `blocked` for a blocker, including step ID, page/button/input/message and approximate time. Text feedback is sufficient; screenshots are optional evidence where useful. The table below is a blank reusable template; its initial values do not describe the recorded 2026-10-30 run, whose authoritative facts remain in tasks.
 
 | Stage | Operator/run | Actual result (initially not_run) | Issue/recheck scope |
 | --- | --- | --- | --- |
@@ -163,6 +165,6 @@ Record actual outcomes. Use `not_run` for unperformed work and `blocked` for a b
 | M06–M07 | Pending | not_run | Multiple PLCs, sessions and recovery |
 | M08–M09 | Pending | not_run | Time, history and normal reopen |
 
-Walk the trial once, repair only affected items and record focused rechecks. Development self-checks, Owner native observation, post-exit read-only reconciliation, fresh-context Verification and Owner final acceptance remain separate. Verification must not claim it operated native windows or repeat the entire DS/DAA stress matrix. Finalize the guide only after the steps work in practice and the Owner confirms them.
+The necessary affected steps were exercised and finally confirmed by the Owner, finalizing this guide for the scope above. Development self-checks, Owner native observations, read-only ledgers, fresh Verification and final acceptance remain separate. The blank table is only for a future explicitly selected run and does not replace this run’s actual records.
 
-DAA-007 acceptance does not accept DS-001 or older DAA tasks automatically. Overall Stage B needs the finite baseline/joint evidence and explicit Owner acceptance. Stage C reliable upload, Backend/SMA, real PLCs, production databases/APIs and field switching remain separately scoped.
+The Owner explicitly accepted DAA-002 r2, DAA-003 r1, DAA-004 r1 and DAA-007 r2, completing Stage B in the controlled DS scope; no task implicitly accepts another and earlier DS acceptance remains independent. Existing SQLite configuration/history and original joint profiles are retained. Stage C, automatic-start policy, Backend/SMA and real PLC/production-field work remain separate and are not started here.

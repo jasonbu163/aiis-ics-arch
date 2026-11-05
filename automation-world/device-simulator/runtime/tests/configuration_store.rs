@@ -51,7 +51,8 @@ fn real_cas_sources_selection_and_reopen() {
         .save(&initial.etag, workspace.clone())
         .unwrap_err()
         .starts_with("etag_conflict:"));
-    let revision = saved.revision_id.unwrap();
+    assert!(saved.revision_id.is_none());
+    let revision = store.publish(&saved.etag).unwrap().revision_id.unwrap();
     assert_eq!(store.revision(&revision).unwrap(), workspace);
     let selection = store
         .select(&workspace.instances[0].id, &revision, None)
@@ -210,13 +211,14 @@ fn concurrent_cas_real_rollback_committed_reply_loss_and_preserved_readonly_data
         store.save(&state.etag, changed.clone()).unwrap_err(),
         "save_receipt_unknown"
     );
-    // No retry: query the actual immutable revision and draft after the lost receipt.
+    // 草稿回执丢失后先读回事实；只有后续明确publish才创建版本，不盲重试。
     let committed = store.load().unwrap();
     assert_ne!(committed.etag, state.etag);
     assert_eq!(committed.workspace, changed);
-    assert_eq!(store.revisions(0).unwrap().len(), 2);
+    assert_eq!(store.revisions(0).unwrap().len(), 0);
+    let published = store.publish(&committed.etag).unwrap();
     let id = &committed.workspace.instances[0].id;
-    let revision = committed.latest_revision.as_ref().unwrap();
+    let revision = published.revision_id.as_ref().unwrap();
     store.test_fault("before_select_commit").unwrap();
     assert_eq!(store.select(id, revision, None).unwrap_err(), "test_fault");
     assert!(store.selections().unwrap().is_empty());

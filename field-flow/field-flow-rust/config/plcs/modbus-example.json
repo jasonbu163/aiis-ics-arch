@@ -1,0 +1,14 @@
+{
+  "format": "ff.plc",
+  "schema_version": 1,
+  "id": "modbus_station",
+  "protocol": "modbus_tcp",
+  "source": {"kind": "manual", "note": "Synthetic addresses only"},
+  "connection": {"host": "127.0.0.1", "port": 34502, "unit_id": 1},
+  "tables": [
+    {"table": "coils", "points": [{"id": "request", "data_type": "bool", "pdu_address": 0, "functions": {"read": 1, "write": 5}}]},
+    {"table": "discrete_inputs", "points": [{"id": "ready", "data_type": "bool", "pdu_address": 0, "functions": {"read": 2, "write": null}}]},
+    {"table": "holding_registers", "points": [{"id": "counter", "data_type": "int16", "pdu_address": 0, "functions": {"read": 3, "write": 6}}]},
+    {"table": "input_registers", "points": [{"id": "temperature", "data_type": "float32", "pdu_address": 10, "word_order": "high_word_first", "scale": {"factor": 0.1, "offset": 0}, "functions": {"read": 4, "write": null}}]}
+  ]
+}

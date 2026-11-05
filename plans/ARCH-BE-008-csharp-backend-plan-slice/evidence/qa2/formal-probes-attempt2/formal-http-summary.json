@@ -1,0 +1,139 @@
+{
+  "beforeRows": 17,
+  "startupNoDdlOrSeed": true,
+  "openApiOperations": [
+    [
+      "/api/v1/plans",
+      "post"
+    ],
+    [
+      "/api/v1/plans",
+      "get"
+    ],
+    [
+      "/api/v1/plans/{id}",
+      "get"
+    ],
+    [
+      "/health",
+      "get"
+    ]
+  ],
+  "rejectedRequestsNoDataMutation": true,
+  "minimalPlan": {
+    "id": 19,
+    "coilNo": " \tQA2B-Raw-Case \r",
+    "grade": "G",
+    "spec": "S",
+    "weight": "1.2300",
+    "thickness": "0.123",
+    "width": "10.00",
+    "materialStatus": "special",
+    "density": "0.00",
+    "entryLength": "0.00",
+    "uncoiler1Tension": "0.00",
+    "exitTension": "0.00",
+    "process1Tension": "0.00",
+    "entryLoopTension": "0.00",
+    "exitLoopTension": "0.00",
+    "entryUnitTension": "0.0000",
+    "entryLoopUnitTension": "0.0000",
+    "processUnitTension": "0.0000",
+    "exitLoopUnitTension": "0.0000",
+    "exitUnitTension": "0.0000",
+    "status": "planned",
+    "priority": 5,
+    "remark": null,
+    "createdAt": "2026-10-28T15:09:47+08:00",
+    "updatedAt": "2026-10-28T15:09:47+08:00"
+  },
+  "databaseClockBracket": [
+    "2026-10-28 15:09:47",
+    "2026-10-28 15:09:47"
+  ],
+  "rowsAfterProbes": 23,
+  "probeCount": 289,
+  "groups": {
+    "missingRequired": 6,
+    "nullNonRemark": 20,
+    "wrongObjectOrArray": 42,
+    "wrongScalarType": 10,
+    "shapeAndMedia": 26,
+    "decimalAllFieldsRejected": 105,
+    "rejectedHttpRequests": 239
+  },
+  "beforeRestartPlan": {
+    "id": 19,
+    "coilNo": " \tQA2B-Raw-Case \r",
+    "grade": "G",
+    "spec": "S",
+    "weight": "1.2300",
+    "thickness": "0.123",
+    "width": "10.00",
+    "materialStatus": "special",
+    "density": "0.00",
+    "entryLength": "0.00",
+    "uncoiler1Tension": "0.00",
+    "exitTension": "0.00",
+    "process1Tension": "0.00",
+    "entryLoopTension": "0.00",
+    "exitLoopTension": "0.00",
+    "entryUnitTension": "0.0000",
+    "entryLoopUnitTension": "0.0000",
+    "processUnitTension": "0.0000",
+    "exitLoopUnitTension": "0.0000",
+    "exitUnitTension": "0.0000",
+    "status": "planned",
+    "priority": 5,
+    "remark": null,
+    "createdAt": "2026-10-28T15:09:47+08:00",
+    "updatedAt": "2026-10-28T15:09:47+08:00"
+  },
+  "restartNoDdlOrSeed": true,
+  "restartPlanUnchanged": true,
+  "task": "ARCH-BE-008",
+  "revision": "r1",
+  "runId": "ab0f0fb5409b36026f53281f",
+  "processes": [
+    {
+      "name": "formal-ny",
+      "pid": 84291,
+      "TZ": "America/New_York",
+      "argv": [
+        "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet/bin/Debug/net10.0/AIIS.Backend.Api.dll"
+      ],
+      "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+      "stdout": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes-attempt2/formal-ny.stdout.jsonl",
+      "stderr": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes-attempt2/formal-ny.stderr",
+      "logs": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes-attempt2/formal-ny-logs",
+      "startedUtc": "2026-10-28T07:09:46Z",
+      "exitCode": 0,
+      "stoppedUtc": "2026-10-28T07:09:48Z",
+      "pidAbsent": true,
+      "port18108Rebind": true
+    },
+    {
+      "name": "formal-utc",
+      "pid": 84332,
+      "TZ": "UTC",
+      "argv": [
+        "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet/bin/Debug/net10.0/AIIS.Backend.Api.dll"
+      ],
+      "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+      "stdout": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes-attempt2/formal-utc.stdout.jsonl",
+      "stderr": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes-attempt2/formal-utc.stderr",
+      "logs": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes-attempt2/formal-utc-logs",
+      "startedUtc": "2026-10-28T07:09:48Z",
+      "exitCode": 0,
+      "stoppedUtc": "2026-10-28T07:09:49Z",
+      "pidAbsent": true,
+      "port18108Rebind": true
+    }
+  ],
+  "totalRecordedHttpCases": 291,
+  "failed": [],
+  "candidateSha256": "a9afc3bb5a75a610f25e6a42cbc694e019e0e66247c8c60926ca03cff78819f6",
+  "dllSha256": "8abae9632c4f6bff12e675e000adaa2af8c35bb25941180e3fdb08b6bc49f152"
+}

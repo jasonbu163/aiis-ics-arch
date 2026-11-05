@@ -39,7 +39,7 @@ The Python signatures are actual duck-typed object contracts, not an already typ
 5. A matching S7 INT ACK plus local T3 commit makes confirmed; no proof after a possible send is unknown. This is not physical process completion.
 6. Return to runtime, then await interval_ms. Different flow tasks remain concurrent; each flow does not overlap itself or catch up missed ticks. One PLC session serializes its own IO only.
 
-Both complete guides include the full equivalent teaching01 app, YAML, exact module/import/kind/dispatch edits and build/import plus CLI validation. The delivered code still accepts only demo01; files are not automatically discovered. teaching01 is the same GET→INT capability with a different flow/business identity, not demo02. POST/auth, BOOL/DINT/REAL and rising-edge flows are not implemented. Writes must pass through Execution.apply.
+Both complete guides include the full equivalent teaching01 app, YAML, exact module/import/kind/dispatch edits and build/import plus CLI validation. With YAML v1, both projects register demo01, plc_guard_get_int and get_value_guard_int; basic01 reuses demo01. teaching01 remains a tutorial-copy exercise; unknown kinds are rejected and files are not automatically discovered. teaching01 is the same GET→INT capability with a different flow/business identity, not demo02. POST/auth, BOOL/DINT/REAL and rising-edge flows are not implemented. Writes must pass through Execution.apply.
 
 ## Fixture, state and evidence boundaries
 
@@ -50,3 +50,7 @@ state init --synthetic explicitly creates a new schema1 directory; normal run ne
 Source Unix milliseconds and monotonic durations retain their meanings. Existing SQLite calendar metadata and JSONL timestamps are UTC, unlike the current root Asia/Shanghai calendar-storage contract. This documentation reports that limitation without rewriting implementation, schema or history. Platform ports, time-data migration, field endpoints, DS/Backend integration, service management, backup/upgrade, long-soak/capacity and distribution require separate approval and evidence.
 
 FF-001 r4 passed independent local QA2 but awaits Human Owner final acceptance. FF-002 documents and bounded rehearsals have their own [spec](plans/FF-002-user-guide-and-runtime-positioning/spec.md) and [Development record](plans/FF-002-user-guide-and-runtime-positioning/tasks.md); Development self-check is not independent QA. [FF PLAN](PLAN.md) indexes the next gate.
+
+The basic library reuses demo01 for basic01, adds negative-target GET for basic02 and positive value≤100 for basic03. Complete standalone commands: [Rust examples](field-flow-rust/examples/README.md), [Python examples](field-flow-python/examples/README.md). Advanced and C# cases remain planned; precise DEV/QA/Owner gates belong to the FF-005 bundle.
+
+Rust adds the [YAML v2 catalog tutorial](field-flow-rust/USER_GUIDE.md#catalog-v2): one JSON per PLC, demo01/read_points only. All three v1 kinds/basic02/basic03 remain. Python/C# loading and DS export are not implemented; Modbus is structural validation only.

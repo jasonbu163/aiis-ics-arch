@@ -1,9 +1,9 @@
 Task ID: DAA-003
 Revision: r1
-Status: qa_passed
+Status: owner_accepted
 Owner Role: QA / Verification
 Allowed Writers: QA / Verification, Human Owner
-Handoff: QA2 independently passed exact DAA-003 r1 rework handoff and closed F-001/F-002; preserve QA1 qa_failed history and raw, hand through sole coordinator /root to Human Owner final acceptance; DAA-002 acceptance remains independently pending
+Handoff: Human Owner 于 2026-10-30（Asia/Shanghai）明确验收精确 DAA-003 r1；由实际 Verification 仅登记真实决定，原 QA verdict/失败/限制保留；阶段 B 仅在本次受控 DS 联调范围完成，资源由唯一 coordinator /root 另行收尾，阶段 C/自动启动策略/真实现场验证未启动
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch
@@ -225,3 +225,27 @@ H1旧失败（编译E0282、空policy解析、初始harness跨realm及fmt等）�
 须保留E的原before/DEV全部raw与H1、原受控profile/frozen binary/双库/源seal/Owner relay、59个closed迁入测试目录、Q1失败证据、D2 before/H2/raw/dist，以及Q2的独立脚本/raw、完整diff重建、失败尝试、构建与final checklist副本，供Owner终验和溯源；不是唯一解释面，关键判断/事实/限制已写入本持久checklist。验收后由唯一coordinator按实际归属与依赖决定安全收尾，不清旧DAA-002 live76。
 
 Q2/verification-manifest.json封存最新checklist SHA、QA1正文保留核对、精确输入/冻结源/完整diff与所有本轮证据、退出码和最终写入审计。最新handoff：**QA2 qa_passed / F-001、F-002已解除 → 唯一coordinator `/root` → Human Owner决定DAA-003最终验收**。本角色封存manifest后停止全部写入，不授予最终验收、部署、真实配置迁入或现场权限。
+
+
+<a id="owner-acceptance-r1"></a>
+## Human Owner 最终验收登记（2026-10-30，Asia/Shanghai）
+
+**当前状态：`owner_accepted`；原独立 QA verdict 保持 `qa_passed`。** 上文各轮 QA 的 pending、未授予接受和下一 gate 表述均是各自交付时点的历史；其当前效力由本节的真实 Owner 决定取代，原文原样保留。
+
+本次由实际 Verification `/root/daa007_r2_verification_1` 按唯一 coordinator `/root` 在当前根会话转交的真实 Human Owner 决定登记。它是验收事实记录，不是新的 fresh-context QA、Development 或本角色代作接受。已完整消费四个 bundle；本任务登记前最新记录为：QA2（2026-10-19），AC01–AC12 通过，F-001/F-002 已解除。
+
+Human Owner 原话（四个精确 Revision 的共同最终决定）：
+
+> 验收 DAA-002 r2、DAA-003 r1、DAA-004 r1、DAA-007 r2，确认 DAA 阶段 B 在本次受控 DS 联调范围内完成。已知历史证据限制和来源未明事项按核验记录保留跟踪。请完成验收登记及无依赖临时资源收尾，保留已有 SQLite 配置、历史和联调 profile。阶段 C、自动启动策略及真实现场验证另行推进，本次不启动。
+
+本任务接受范围：接受精确 DAA-003 r1 的唯一 SQLite 普通入口、旧 YAML 执行图退役、当时获批的一次性候选迁入及受控普通原生保存/重开增量。DAA-007 r2 后续已退役常驻迁入路径；本次接受历史交付，不恢复已退役机制，也不扩展为真实 YAML/profile 迁入。
+
+原失败与限制：QA1 的两项真实界面失败与 QA2 解除记录、首个 native binary 仅有当时 SHA/日志而缺副本、4 处前端返工仅由函数/SSR/构建支撑及原 native/CUA/网络观察限制全部保留。
+
+历史附件可用性（本次收尾）：唯一 coordinator `/root` 报告原 `/private/tmp/daa-003-r1-u8mv6s_f` 现仅空目录、原 QA 目录/持久 raw 未找到；本角色只读检查所列旧 manifest 路径亦不在。**当前收尾未能重验已不在原临时位置的历史 raw；原 QA 结论、命令结果和证据 hash 按其原时点保留，不声称本次再次核准附件。** 本附件只保存当前完整 3MD 前像，不伪补原 raw 或已失机器码/数据库快照。
+
+阶段边界：Owner 明确确认 DAA 阶段 B **仅在本次受控 DS 联调范围内完成**。阶段 C、Backend/SMA/上传 ACK、自动启动策略及真实现场验证不由本次接受启动；当前默认停止策略保持，不推断已实施或批准未来自动采集/上传。真实配置/profile 迁入、真实 PLC/生产库/API、安装包/跨平台、发布部署/Git 或外发动作不在本次登记中执行。
+
+资源 handoff：根协调会话 `/root` 另行盘点、归档和收尾，本角色未清理任何资源，亦不声称清理已完成。必须保留已有 SQLite 配置、历史、联调 profile 和现存证据；原文中的旧 PID/临时资源状态仅属其记录时点，不当作当前存活遥测。
+
+登记证据：[验收前 checklist 全文](/Users/jason/.codex/visualizations/2026/10/16/01a143e5-5616-76c0-9df7-13b487bc9c26/daa-stage-b-owner-acceptance-20261030/verification/before/DAA-003-r1/checklist.md)、[验收登记证据清单](/Users/jason/.codex/visualizations/2026/10/16/01a143e5-5616-76c0-9df7-13b487bc9c26/daa-stage-b-owner-acceptance-20261030/verification/acceptance-evidence-manifest.json)；清单另固定本任务 spec/tasks 全文前像、登记后 checklist 与四文件增量。除顶层 Status/Handoff 和本节追加，原 QA 正文及所有失败历史逐字保持。

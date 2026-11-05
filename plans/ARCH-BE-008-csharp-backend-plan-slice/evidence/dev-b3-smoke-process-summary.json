@@ -1,0 +1,28 @@
+{
+  "processes": [
+    {
+      "phase": "first",
+      "pid": 84752,
+      "processTZ": "America/New_York"
+    },
+    {
+      "phase": "second",
+      "pid": 94303,
+      "processTZ": "UTC"
+    }
+  ],
+  "exits": [
+    0,
+    0
+  ],
+  "pidsAbsent": true,
+  "port18108ListenerAbsent": true,
+  "port18108RebindWithReuseAddr": true,
+  "createGetRestartIdentical": true,
+  "planId": 13,
+  "createdAt": "2026-10-28T14:02:45+08:00",
+  "updatedAt": "2026-10-28T14:02:45+08:00",
+  "rows": 11,
+  "schemaOnlyPlans": true,
+  "openApiDecimalAnyOfAndSixQueries": true
+}

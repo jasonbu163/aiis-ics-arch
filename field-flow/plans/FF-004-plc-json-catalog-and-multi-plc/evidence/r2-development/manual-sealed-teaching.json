@@ -1,0 +1,156 @@
+[
+  {
+    "scene": "dry",
+    "kind": "teaching",
+    "seconds": 2.623441334,
+    "A_pid": 36106,
+    "B_pid": 36119,
+    "A_exit": 0,
+    "B_exit": 0,
+    "runtime_exit": 0,
+    "counts": {
+      "simulated": 1
+    },
+    "protocol": {
+      "applied": 0,
+      "gets": 4,
+      "native_pid": 36116,
+      "reads": 0,
+      "sessions": 1,
+      "trace": [
+        {
+          "at_ms": 1793779311310,
+          "operation": 0,
+          "original_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+          "positive": false,
+          "request_hex": "0300001611e00000000100c0010ac1020100c2020101",
+          "request_ref": [
+            192,
+            1
+          ],
+          "response_ref": [
+            192,
+            1
+          ],
+          "sent_response_hex": "0300001611d00001000100c0010ac1020100c2020101"
+        },
+        {
+          "at_ms": 1793779311311,
+          "operation": 240,
+          "original_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+          "positive": false,
+          "request_hex": "0300001902f08032010000000000080000f0000001000101e0",
+          "request_ref": [
+            0,
+            0
+          ],
+          "response_ref": [
+            0,
+            0
+          ],
+          "sent_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0"
+        }
+      ],
+      "writes": 0
+    },
+    "reaped_pids": [
+      36120,
+      36116,
+      36122
+    ],
+    "ports_rebound": [
+      31102,
+      31103,
+      31880
+    ],
+    "product": "/private/tmp/ff-004-r2-dev-IVyzcc/teaching-product/release/field-flow",
+    "product_sha256": "ee0cf09ce618f77ac72b9cd8f9a658b8a310f4730ed630b71c7595531bee58ec",
+    "project": "/private/tmp/ff-004-r2-dev-IVyzcc/teaching",
+    "result": "passed"
+  },
+  {
+    "scene": "execute",
+    "kind": "teaching",
+    "seconds": 2.3011083329999997,
+    "A_pid": 36161,
+    "B_pid": 36166,
+    "A_exit": 0,
+    "B_exit": 0,
+    "runtime_exit": 0,
+    "counts": {
+      "confirmed": 1
+    },
+    "protocol": {
+      "applied": 1,
+      "gets": 4,
+      "native_pid": 36164,
+      "reads": 0,
+      "sessions": 1,
+      "trace": [
+        {
+          "at_ms": 1793779313604,
+          "operation": 0,
+          "original_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+          "positive": false,
+          "request_hex": "0300001611e00000000100c0010ac1020100c2020101",
+          "request_ref": [
+            192,
+            1
+          ],
+          "response_ref": [
+            192,
+            1
+          ],
+          "sent_response_hex": "0300001611d00001000100c0010ac1020100c2020101"
+        },
+        {
+          "at_ms": 1793779313604,
+          "operation": 240,
+          "original_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+          "positive": false,
+          "request_hex": "0300001902f08032010000000000080000f0000001000101e0",
+          "request_ref": [
+            0,
+            0
+          ],
+          "response_ref": [
+            0,
+            0
+          ],
+          "sent_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0"
+        },
+        {
+          "at_ms": 1793779313619,
+          "operation": 5,
+          "original_response_hex": "0300001602f0803203000000010002000100000501ff",
+          "positive": true,
+          "request_hex": "0300002502f080320100000001000e00060501120a1002000200018400000000040010002a",
+          "request_ref": [
+            0,
+            1
+          ],
+          "response_ref": [
+            0,
+            1
+          ],
+          "sent_response_hex": "0300001602f0803203000000010002000100000501ff"
+        }
+      ],
+      "writes": 1
+    },
+    "reaped_pids": [
+      36167,
+      36164,
+      36169
+    ],
+    "ports_rebound": [
+      31102,
+      31103,
+      31880
+    ],
+    "product": "/private/tmp/ff-004-r2-dev-IVyzcc/teaching-product/release/field-flow",
+    "product_sha256": "ee0cf09ce618f77ac72b9cd8f9a658b8a310f4730ed630b71c7595531bee58ec",
+    "project": "/private/tmp/ff-004-r2-dev-IVyzcc/teaching",
+    "result": "passed"
+  }
+]

@@ -46,7 +46,9 @@ def test_three_examples_add_only_empty_scope_with_english_comment():
         assert "EQUIPMENT_TEMPERATURE_PILOT_ID=''" in source
         assert "Single allowed business equipment key" in source
         assignments=[line.split("=",1)[0] for line in source.splitlines() if line and not line.startswith("#") and "=" in line]
-        assert len(assignments)==len(set(assignments))==69
+        historical=[key for key in assignments if key not in {"EQUIPMENT_MAPPING_INGEST_ID","PERFORMANCE_MAPPING_INGEST_ID","MONITOR_MAPPING_INGEST_ID"} and "_INTEGRATION_" not in key and not key.startswith("PLC_FACTS_")]
+        assert len(historical)==len(set(historical))==69
+        assert len(assignments)==len(set(assignments))==91
 
 
 def test_app_local_lazy_snapshot_requires_restart_and_no_cross_app_cache(tmp_path,monkeypatch):

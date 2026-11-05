@@ -1,0 +1,13 @@
+{
+  "archiveSha512": "5893c66b48ea3674c7da18501059d606e96f3672fabe4d5e41762e692c7c83df3ee0b2b9dc5a0786191da2dc413d7335158101c14c935ab217f31ac2529770f3",
+  "metadataSha512": "5893c66b48ea3674c7da18501059d606e96f3672fabe4d5e41762e692c7c83df3ee0b2b9dc5a0786191da2dc413d7335158101c14c935ab217f31ac2529770f3",
+  "matches": true,
+  "officialUrl": "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.403/dotnet-sdk-10.0.403-osx-arm64.tar.gz",
+  "toolRootMode": "0o700",
+  "sdk": "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+  "privateCachePaths": {
+    "cli-home": "/private/tmp/arch-be008-sdk-rfSK3RBg/cli-home",
+    "nuget-packages": "/private/tmp/arch-be008-sdk-rfSK3RBg/nuget-packages",
+    "nuget-http-cache": "/private/tmp/arch-be008-sdk-rfSK3RBg/nuget-http-cache"
+  }
+}

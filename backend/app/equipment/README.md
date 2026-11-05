@@ -50,3 +50,15 @@ source time. The three equipment pages keep `dataSource=legacy|http` and `equipm
 reads the old tables; external reporting requires a business equipment key and never falls back to legacy/mock.
 Switching sources clears the old data and ignores late responses. Legacy rows cannot be filtered by guessed PLC
 identity. TV/KM units remain unspecified; set values are observations, never control commands.
+
+
+## Anonymous business integration preparation
+
+[ARCH-BE-010 r1 A0](../../../plans/ARCH-BE-010-anonymous-business-integration/spec.md) adds eight typed anonymous POST routes below `/integration/` and finite [public primitives](../MODULE_CONTRACT.md#anonymous-integration-primitives). Existing authenticated APIs and permissions retain their behavior. All three module switches default off, device/producer scopes default empty, and storage profiles default `unadopted`. Disabled/out-of-scope requests return 403; admitted A0 requests return 503 before any database dependency or business access. No profile value enables business writing in this preparation slice. Module `enabled=False` removes its entire new/old route group after recomposition.
+
+The four new Model declarations describe three module-owned permanent minimal receipts and the production observation-event index. They do not apply DDL or establish a migrated schema. Shared-table Shanghai time adoption, exact Alembic chain, business wiring and disposable MySQL verification remain separate gates. Anonymous producer/source declarations can be impersonated; scopes are admission policy, not authentication. The [task record](../../../plans/ARCH-BE-010-anonymous-business-integration/tasks.md) contains the pending source-based time/migration proposal.
+
+
+## Bounded business integration (r2)
+
+The anonymous integration Service/CRUD is implemented against this owner's existing business tables, with permanent minimal receipts and typed [provider](../../../contracts/published/http-api/business-integration-v1/README.md). Defaults stay disabled/empty/unadopted. A valid external adoption manifest and a matching transaction-local UUID/schema/revision/DB-clock probe are required; the shared schema successor is BE010 1b3 after BE009 0a2. Legacy HTTP and Projection time adaptation is finite and owner-local; unadopted retains the original path. Real historical conversion/target adoption and database/Docker/B remain separately approved; no raw/latest retention or PLC writer changes are implied.

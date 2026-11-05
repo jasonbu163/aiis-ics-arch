@@ -1,0 +1,11 @@
+{
+  "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+  "argv": [
+    "tests/scripts/run-mysql-tests.sh",
+    "prepare",
+    "--run-root",
+    "/private/tmp/arch-be008-run-eihb7rry"
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 10.853
+}

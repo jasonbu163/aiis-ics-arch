@@ -1,0 +1,297 @@
+[
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/bounded_service_identities_and_connecting_state.txt",
+    "sha256": "5e7ab462fcba4788166c634dcfb73c0d4531cb46613c29407104b830dbe77de3",
+    "bytes": 12464
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/catalog-fifth-project.txt",
+    "sha256": "934f8fbf673ce819a4c4a4cccbe1d8b75d48c21f6f3b6f0f85619261b3df267a",
+    "bytes": 23018
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/catalog-fifth.txt",
+    "sha256": "6ca75bd4b6f1baf44003f4172c062dd8134f5e1cfb743802abfaa41dbb61d95e",
+    "bytes": 109
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/catalog-first.txt",
+    "sha256": "b6c1239bcf705563d6a42d621df5641b812654e79c11913eb5fb953203cf9014",
+    "bytes": 3597
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/catalog-fourth.txt",
+    "sha256": "16093fbf66020adf66ac9200979d0cbd453f757cdfc36f47c8b2102482ba61d5",
+    "bytes": 22814
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/catalog-second.txt",
+    "sha256": "8fae42801dcc8dc4af653647924f4fae83685154fcf394042179b11986d6cfbb",
+    "bytes": 3420
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/catalog-seventh.txt",
+    "sha256": "0b06d098500032227ca08ee40c22e93a2bcf355ef1d92f2df40ecaabf3864f64",
+    "bytes": 27202
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/catalog-sixth.txt",
+    "sha256": "d1d0363e6f2b81ee8b1a36dcd26221efec4c6c7342cb9a2d43670363961a3d19",
+    "bytes": 1154
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/catalog-third.txt",
+    "sha256": "881de0e9c3277015b35e4b8a3059a265b20e052617c15c7f2ff7a2fe94c403d4",
+    "bytes": 3420
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/check-1.txt",
+    "sha256": "a1fe08b7f3d37c05a8b0c4305d096c9dfe0fa3612ab4cfbe1321c4f88bacb80a",
+    "bytes": 4659
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/check-2.txt",
+    "sha256": "34fe085331208c2de90a820541398778b6fa05af3b7feab543e553c2e7b232e8",
+    "bytes": 177
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/copy-final-build.txt",
+    "sha256": "7b02399ab9c75a0ede760ad1d2a760066a59571da30bcfe3629ff09661ac4601",
+    "bytes": 135
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/copy-fixture-build-1.txt",
+    "sha256": "c0bbd8ec00d4b46104047623994902064b965ee4928b34ad0aa24a2cf36e97fc",
+    "bytes": 4616
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/copy-fixture-final-build.txt",
+    "sha256": "9f1c5a180f0f0bad780ebf748b30b9adfd32dc6c8857fc33b24400d24ec7d109",
+    "bytes": 135
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/copy-fixture-sealed-build.txt",
+    "sha256": "063d09bf94fcaf8cf4be250ba4ae96eefa7a26257c5c32152ef332d45a042c83",
+    "bytes": 135
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/copy-product-build-1.txt",
+    "sha256": "c67d9935d0d02f662ec9f5513666901accc8108a282df8abdb45c0f20d94adc8",
+    "bytes": 4616
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/copy-product-build-2.txt",
+    "sha256": "e70e3f13644939f4105eb3f726f2297e9053f178d4448e08f22bd9b168ba8174",
+    "bytes": 135
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/copy-tests-final.txt",
+    "sha256": "1e9b807345a6b18471fe85425b736268a775f6c5dde81cac41886f1c4d7a42b0",
+    "bytes": 14663
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/copy-tests.txt",
+    "sha256": "f71157e674147adec57bdac32d089d580c8ebcf0b068bd7ff0207368b2be51f5",
+    "bytes": 14663
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/failed_round_has_no_stale_or_fabricated_samples.txt",
+    "sha256": "411011bafa4222c51c034f921f6d29ef33e1d65d0148360c44716ed44fa1d60b",
+    "bytes": 12980
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/fixture-build-1.txt",
+    "sha256": "73484aebb2cccf18d9406e4cfff19691c2e9eb30d3de798a757a68739cd79640",
+    "bytes": 4649
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/fixture-build-2.txt",
+    "sha256": "d18cee839fc7587ca61cb565712eebcd76fab602fe630f340ff175994f3b5053",
+    "bytes": 168
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/fixture-final-build.txt",
+    "sha256": "fd6de74084bb17b82c4c24f8c98e3b81afd7222202866ff39baf84740463d38e",
+    "bytes": 168
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/fixture-sealed-build.txt",
+    "sha256": "2e2dc9e8ac96372006d1b39e4effdd025a9d7c802bd0caf22f329ccaacef7ccd",
+    "bytes": 168
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/full-1.txt",
+    "sha256": "b98729b1e4e7006f733e3cd57cbbebb21acbec5f5b1dc48a6c04c293ccecad06",
+    "bytes": 556342
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/full-2.txt",
+    "sha256": "c550fb0e8e2ed3a2ddbf34085a5397f463cb2b9bee866e5306b6f7c5b6b181b7",
+    "bytes": 155376
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/full-3.txt",
+    "sha256": "990a5e33d8c921f33d44f8124a37510dafd7f8c20be71a48591a2864c7465754",
+    "bytes": 558373
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/full-4.txt",
+    "sha256": "cb04ffa88b9951b16e9e7f553bd8efa02a0540ddddff0274574c80d9d3cc7f70",
+    "bytes": 559265
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/full-final.txt",
+    "sha256": "0f3f2c75a374f5b78c253a218011338207702bf37be91202e61c76d5ce970a6c",
+    "bytes": 559284
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/guide-catalog-shell.txt",
+    "sha256": "acf8ddade12e499c0b345b0e116a85d0ce726972da59213793f8f85e7d612204",
+    "bytes": 1038
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/guide-check.txt",
+    "sha256": "ff33baafebc94817e1a8c8a2dd365a25ef1432dc07037d0699f022314aef9d74",
+    "bytes": 220
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/guide-en.txt",
+    "sha256": "64b4da4b19a67d74d866d9b9c766eb06bdd13df28d8a61826905208855ea2459",
+    "bytes": 5311
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/guide-launch.txt",
+    "sha256": "da423c97ec7c97972794fa46ddbe2c888ded798edef922ae19f293f9680a8104",
+    "bytes": 352
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/guide-poll.txt",
+    "sha256": "d81f10f5cf4b150221e10fd2dd69068cf34fad9c60f2a4fe5df609b6b5b7c800",
+    "bytes": 1024
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/guide-stop.txt",
+    "sha256": "4e3c86dc70a0653f073c8570870972b8aacfe55da559e01adf92eb6bda77e0be",
+    "bytes": 163
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/guide-zh.txt",
+    "sha256": "fecc3baa1d29e3dddef6f437c6c8b64aac7484f0cf6387b91c3e0469581e541d",
+    "bytes": 4385
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/manual-copy.txt",
+    "sha256": "fa62671a8b1126527c310efea2015fb3f372bf7ddf42ed174a9055d4eaa1d2ec",
+    "bytes": 193
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/manual-final.txt",
+    "sha256": "7c0dbdb12f3d8b1428da67ba2b41822ff9b0ce504fce1cb67e477de9a3b85ef8",
+    "bytes": 199
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/manual-formal.txt",
+    "sha256": "72fdd17d753adb3459696476fb4d14b8952c2d9b92ca187765c60a266884e04a",
+    "bytes": 192
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/manual-teaching.txt",
+    "sha256": "a29697be2cfd60787e6adf5a04094edfaf4508f4fa2744f1deca48ba75689b67",
+    "bytes": 185
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/product-build-1.txt",
+    "sha256": "4425789aeedd077eb1f58281a8dcb4bb87988e89f14857845a341aa2921dff47",
+    "bytes": 4649
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/product-build-2.txt",
+    "sha256": "9fa11664fadc8f29b1996e4bc20f42da18459e5df490b2afda97174545b5f180",
+    "bytes": 168
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/product-build-3.txt",
+    "sha256": "6451b8990995b36b451c1c55b589a88576c5e1f91d89c730d0e9c11190786bb9",
+    "bytes": 168
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/product-final-build.txt",
+    "sha256": "9ead74f45372f44c79c2fc30833183680fba9f4c2954d3b3d15e2009f84bd551",
+    "bytes": 168
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rustfmt-final.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/seal-evidence.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/sealed-copy.txt",
+    "sha256": "8a16f92591210b83d334f9f6af743a021e874db85676943edbd55fdbf54076ba",
+    "bytes": 187
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/sealed-formal.txt",
+    "sha256": "7982d1f2c09c6dc289bad841e048e5d20f1bde976aeb608f8f40f0f4c7e16dc3",
+    "bytes": 192
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/sealed-manuals.txt",
+    "sha256": "2f152649400c65f96e1bd7c960c416a742eeea70a98f3e3b023cf8332a3e118a",
+    "bytes": 1346
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/sealed-teaching.txt",
+    "sha256": "277ad2c70cbc5b5f779f8c4006bba62def182164328fbbd5c84c1149af2f30a9",
+    "bytes": 192
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/service-timings.txt",
+    "sha256": "257cd978b8393200c70336f6a39efafae44905eca63ccabe7bec258a31e1848d",
+    "bytes": 388
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/static-final.txt",
+    "sha256": "2c4d15607a70dab58aba9fcf5d8e7dda3391063e5d29ca596e6d6148533187aa",
+    "bytes": 673
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/teaching-fixture-build.txt",
+    "sha256": "c20c7d31ea1e034d3d3ae9db719ff6e6e03f0e2cb6d1478992d807413d7af17c",
+    "bytes": 4620
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/teaching-fixture-final-build.txt",
+    "sha256": "8a85c388d9b06d2d645671c388949ba4043bb9d32c513a5f8032533c0599ccb2",
+    "bytes": 139
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/teaching-fixture-sealed-build.txt",
+    "sha256": "35c5434c66bc633e1e3564f898b2fd49236a85ce85def95fb8302297fe23f26c",
+    "bytes": 139
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/teaching-product-build.txt",
+    "sha256": "80e318f433ceb71eb96917c868c6778db1bd7112e4947a6e59fa485244fb220a",
+    "bytes": 4620
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/teaching-product-final-build.txt",
+    "sha256": "184be6e1d1e3e1f6a416d355faa869d353c1170a24e81fd784e964f0ab56cad0",
+    "bytes": 139
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/test-build-1.txt",
+    "sha256": "f89ad39f3a1665a2ddb972cc7705fd7c5f4372752f582967c01e54339290e845",
+    "bytes": 7096
+  },
+  {
+    "path": "/private/tmp/ff-004-r2-dev-IVyzcc/test-build-2.txt",
+    "sha256": "21ed7683303c2a2814f3834d4395eed88e9fb0bd31297326a33177e50b9f7f59",
+    "bytes": 4803
+  }
+]

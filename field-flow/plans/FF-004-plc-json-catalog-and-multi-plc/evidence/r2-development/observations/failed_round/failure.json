@@ -1,0 +1,114 @@
+{
+  "fixture": {
+    "close_result": {
+      "Ok": null
+    },
+    "closed": true,
+    "final_memory": [
+      {
+        "exit_code": 0,
+        "memory": {
+          "db1": "000c0001a5a5a5a5a5a5a5a5a5a5a5a5",
+          "db2": "0038a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+        },
+        "pid": 33000,
+        "plc": 0
+      }
+    ],
+    "gets": 0,
+    "native_pids": [
+      33000
+    ],
+    "reads": [
+      1,
+      0
+    ],
+    "sessions": [
+      1,
+      0
+    ],
+    "trace": [
+      [
+        {
+          "elapsed_us": 36918,
+          "event": "response_complete",
+          "operation": 0,
+          "original_response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+          "request_hex": "0300001611e00000000100c0010ac1020100c2020101",
+          "response_hex": "0300001611d00001000100c0010ac1020100c2020101",
+          "sequence": 0,
+          "session": 1,
+          "started_us": 36807
+        },
+        {
+          "elapsed_us": 37245,
+          "event": "response_complete",
+          "operation": 240,
+          "original_response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+          "request_hex": "0300001902f08032010000000000080000f0000001000101e0",
+          "response_hex": "0300001b02f080320300000000000800000000f0000001000101e0",
+          "sequence": 1,
+          "session": 1,
+          "started_us": 37194
+        },
+        {
+          "byte_offset": 0,
+          "db": 1,
+          "elapsed_us": 48943,
+          "event": "response_complete",
+          "length": 2,
+          "operation": 4,
+          "original_response_hex": "0300001b02f0803203000000010002000600000401ff040010000c",
+          "request_hex": "0300001f02f080320100000001000e00000401120a10020002000184000000",
+          "response_hex": "0300001b02f0803203000000010002000600000401ff040010000c",
+          "sequence": 2,
+          "session": 1,
+          "started_us": 48855,
+          "wire_value": 12
+        }
+      ],
+      []
+    ],
+    "trace_bytes": 1016,
+    "trace_truncated": false,
+    "writes": [
+      0,
+      0
+    ]
+  },
+  "round": {
+    "completed_rounds": 0,
+    "errors": 1,
+    "items": [
+      {
+        "device_id": "s7_a",
+        "point_id": "value",
+        "sample": {
+          "device_id": "s7_a",
+          "flow_id": "failure",
+          "generation": 1,
+          "point_id": "value",
+          "quality": "good",
+          "received_at": "2026-11-04T15:59:26.082+08:00",
+          "request_id": "1793779166070-31356-131",
+          "value": 12
+        },
+        "status": "success"
+      },
+      {
+        "device_id": "s7_b",
+        "error_key": "plc_unavailable",
+        "point_id": "value",
+        "status": "error"
+      },
+      {
+        "device_id": "s7_a",
+        "point_id": "result",
+        "status": "not_attempted"
+      }
+    ],
+    "round_id": "1793779166067-31356-130",
+    "status": "failed",
+    "successful_reads": 1
+  }
+}

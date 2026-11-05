@@ -1,0 +1,12 @@
+{
+  "fixtureSourceColumnsMatch": true,
+  "fourSourceIndexesMatch": true,
+  "all15DecimalColumnsDirectSelectEqualApi": true,
+  "fullPlanId": 15,
+  "rawCoilHex": "20095141312D5261772D43617365200D",
+  "bothDbTimesEqualResponseLocal": true,
+  "schemaTables": [
+    "plans"
+  ],
+  "finalRowCount": 18
+}

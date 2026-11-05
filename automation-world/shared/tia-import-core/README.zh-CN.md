@@ -6,6 +6,8 @@
 
 [src/lib.rs](src/lib.rs)公开`scan_sources(&[SourceInput], ImportProfile)`，保留调用方UTF-8/BOM/CRLF原字节、安全分界及块级定位诊断；`expand_db(catalog, DeclarationRef, closure)`逐DB使用显式闭包；`layout_standard(ExpandedDb, LayoutProfile)`输出理论byte/bit/长度；`plan_names(NameBatch)`对完整namespace同时命名；`validate_manual_name`与`type_suffix`复用固定规则。低层parser DTO/函数仅用于DAA原来源适配，不构成来源证明或持久化API。
 
+增量API `resolve_udt_dependencies(catalog, db, choices)`复用已扫描AST，自动补全唯一的直接/嵌套UDT依赖；同名定义保留显式来源选择，缺失/循环返回字段路径和类型诊断。它只生成计划，不分配ID或改写来源；原`expand_db`与命名/布局合同不变。DS扫描/预览消费该计划，DAA原显式闭包行为保持。
+
 profile固定为`tia-subset-v1`、`siemens-step7-v20-standard-word-v1`、`tia-point-name-v1`，命名黄金版本v1。见[fixture](fixtures/README.zh-CN.md)、[DTO](src/model.rs)、[命名](src/naming.rs)和[独立消费者测试](tests/contract.rs)。
 
 支持命名DATA_BLOCK/TYPE、有界STRUCT/UDT闭包、负/非零下界的一维标量/STRUCT/UDT数组、注释、VERSION、NON_RETAIN/RETAIN和既有布尔S7_SetPoint属性；展开≤8层/4096叶、数组≤1024。UTF-8/源预算明确。初值/BEGIN跳过，不导入或执行。未知语法/类型/属性、声明歧义、缺失/循环UDT、嵌套/多维数组与超限拒绝。STRING[1..254]可导入但整DB拒推；布局要求明确非优化完整结构，oracle不代表真实PLC地址。

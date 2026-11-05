@@ -15,3 +15,5 @@ __all__ = [
 from .business_history import HistoryProcessCurve, HistoryEnergyConsumption
 
 from app.monitor.models.mapping_ingest import MonitorMappingReceipt
+
+from app.monitor.models.integration import MonitorIntegrationReceipt  # noqa: F401

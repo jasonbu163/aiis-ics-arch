@@ -17,6 +17,7 @@ from app.performance.schemas.performance_lineage import (
     PerformanceTransformResponse,
     SplitTransformCreateIn,
 )
+from app.performance.services.async_performance import legacy_output
 from app.performance.services.async_lineage import async_performance_lineage_service
 from app.user.models.user import User
 from common.response import SuccessResponse
@@ -97,7 +98,7 @@ async def override_effective_weight(
 
     return SuccessResponse(
         message="effective weight updated",
-        data=PerformanceResponse.model_validate(performance).model_dump(by_alias=True),
+        data=PerformanceResponse.model_validate(await legacy_output(db,performance)).model_dump(by_alias=True),
     )
 
 

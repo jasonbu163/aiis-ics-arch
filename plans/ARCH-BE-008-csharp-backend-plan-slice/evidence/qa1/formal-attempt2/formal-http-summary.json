@@ -1,0 +1,58 @@
+{
+  "beforeRows": 11,
+  "startupNoDdlOrSeed": true,
+  "openApiOperations": [
+    [
+      "/api/v1/plans",
+      "post"
+    ],
+    [
+      "/api/v1/plans",
+      "get"
+    ],
+    [
+      "/api/v1/plans/{id}",
+      "get"
+    ],
+    [
+      "/health",
+      "get"
+    ]
+  ],
+  "failure": {
+    "type": "TypeError",
+    "detail": "'NoneType' object is not subscriptable"
+  },
+  "task": "ARCH-BE-008",
+  "revision": "r1",
+  "runId": "500b7e71711c83fdb763a0a3",
+  "processes": [
+    {
+      "name": "formal-ny",
+      "pid": 15151,
+      "TZ": "America/New_York",
+      "argv": [
+        "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet/bin/Debug/net10.0/AIIS.Backend.Api.dll"
+      ],
+      "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+      "stdout": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-attempt2/formal-ny.stdout.jsonl",
+      "stderr": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-attempt2/formal-ny.stderr",
+      "logs": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-attempt2/formal-ny-logs",
+      "startedUtc": "2026-10-28T06:22:41Z",
+      "exitCode": 0,
+      "stoppedUtc": "2026-10-28T06:22:41Z",
+      "pidAbsent": true,
+      "port18108Rebind": true
+    }
+  ],
+  "totalRecordedHttpCases": 100,
+  "failed": [
+    {
+      "type": "TypeError",
+      "detail": "'NoneType' object is not subscriptable"
+    }
+  ],
+  "candidateSha256": "20a7474a4f9766bec0f70f081c56a7f5a77922caf1efe64ccad839efe022aad5",
+  "dllSha256": "1ce88a2684f58996200f0d0a2e39493c5bffbd61ecee550e594e4647cc76b1c1"
+}

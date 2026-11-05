@@ -1,0 +1,247 @@
+{
+  "phase": "final",
+  "task": "ARCH-BE-008",
+  "runId": "ab0f0fb5409b36026f53281f",
+  "containerId": "2add411f89f9a093abfa77b393e957e9353710131a77aff7d10bc5fa52658719",
+  "resources": {
+    "aiis-arch-be008-mysql": {
+      "com.docker.compose.config-hash": "e381b1a0e0e76c28e7a9cec419d3602ebae4f3f25be2d64bf469c03c6c38eaa1",
+      "com.docker.compose.container-number": "1",
+      "com.docker.compose.depends_on": "",
+      "com.docker.compose.image": "sha256:6752fee1ed70df146fe22d5d1656deee79463f780a24cb7e67c807f2f07d7dc5",
+      "com.docker.compose.oneoff": "False",
+      "com.docker.compose.project": "aiis-arch-be008",
+      "com.docker.compose.project.config_files": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet/tests/infra/mysql.compose.yml",
+      "com.docker.compose.project.environment_file": "/private/tmp/arch-be008-run-s272kqdk/compose.env",
+      "com.docker.compose.project.working_dir": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet/tests/infra",
+      "com.docker.compose.service": "mysql",
+      "com.docker.compose.version": "5.4.0",
+      "runId": "ab0f0fb5409b36026f53281f",
+      "task": "ARCH-BE-008"
+    },
+    "aiis-arch-be008-net": {
+      "com.docker.compose.config-hash": "2325c5c1c4ebaba9d4a303b1a1e6cf2e7ec3d7e289b1a63c5eff3b14e63287c2",
+      "com.docker.compose.network": "private",
+      "com.docker.compose.project": "aiis-arch-be008",
+      "com.docker.compose.version": "5.4.0",
+      "runId": "ab0f0fb5409b36026f53281f",
+      "task": "ARCH-BE-008"
+    },
+    "aiis-arch-be008-mysql-data": {
+      "com.docker.compose.config-hash": "1767a80b6533a0690300a30ef7e18ddc95edb0363705131f00180a07687197ba",
+      "com.docker.compose.project": "aiis-arch-be008",
+      "com.docker.compose.version": "5.4.0",
+      "com.docker.compose.volume": "mysql-data",
+      "runId": "ab0f0fb5409b36026f53281f",
+      "task": "ARCH-BE-008"
+    }
+  },
+  "rootMode": "0o700",
+  "secretFileModes": {
+    "root-password": "0o600",
+    "app-password": "0o600",
+    "fixture-password": "0o600",
+    "app-connection": "0o600",
+    "fixture-connection": "0o600"
+  },
+  "serverTime": "8.4.6\t+08:00\t+08:00\t28800",
+  "imageDigest": [
+    "mysql@sha256:869218921e61d6c3c89820955d63cca42971f0e3e6c1e2792247bbd944ebc6e9"
+  ],
+  "imageArchitecture": "arm64",
+  "columnsExactMigrationAndFixture": true,
+  "columns": [
+    [
+      "id",
+      "int",
+      "NO",
+      "NULL",
+      "auto_increment"
+    ],
+    [
+      "coil_no",
+      "varchar(50)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "grade",
+      "varchar(20)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "spec",
+      "varchar(50)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "weight",
+      "decimal(12,4)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "thickness",
+      "decimal(10,3)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "width",
+      "decimal(10,2)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "material_status",
+      "varchar(20)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "density",
+      "decimal(10,2)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "entry_length",
+      "decimal(10,2)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "uncoiler1_tension",
+      "decimal(10,2)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "exit_tension",
+      "decimal(10,2)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "process1_tension",
+      "decimal(10,2)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "entry_loop_tension",
+      "decimal(10,2)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "exit_loop_tension",
+      "decimal(10,2)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "entry_unit_tension",
+      "decimal(12,4)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "entry_loop_unit_tension",
+      "decimal(12,4)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "process_unit_tension",
+      "decimal(12,4)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "exit_loop_unit_tension",
+      "decimal(12,4)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "exit_unit_tension",
+      "decimal(12,4)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "status",
+      "varchar(20)",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "priority",
+      "smallint",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "remark",
+      "varchar(500)",
+      "YES",
+      "NULL",
+      ""
+    ],
+    [
+      "created_at",
+      "datetime",
+      "NO",
+      "NULL",
+      ""
+    ],
+    [
+      "updated_at",
+      "datetime",
+      "NO",
+      "NULL",
+      ""
+    ]
+  ],
+  "indexes": [
+    "ix_plans_coil_no\t0\tcoil_no",
+    "ix_plans_id\t1\tid",
+    "ix_plans_priority\t1\tpriority",
+    "ix_plans_status\t1\tstatus",
+    "PRIMARY\t0\tid"
+  ],
+  "tables": [
+    "plans"
+  ],
+  "grants": [
+    "GRANT USAGE ON *.* TO `arch_be008_app`@`%`",
+    "GRANT SELECT, INSERT ON `arch_be008_plan`.* TO `arch_be008_app`@`%`"
+  ],
+  "rows": 23,
+  "rowsSHA256": "6fb1d31d37b4222f58eb6c71a56540b67a17f7c66c122c476808e1ab31392602",
+  "normalizedSchema": "plans\tCREATE TABLE `plans` (\\n  `id` int NOT NULL AUTO_INCREMENT,\\n  `coil_no` varchar(50) NOT NULL,\\n  `grade` varchar(20) NOT NULL,\\n  `spec` varchar(50) NOT NULL,\\n  `weight` decimal(12,4) NOT NULL,\\n  `thickness` decimal(10,3) NOT NULL,\\n  `width` decimal(10,2) NOT NULL,\\n  `material_status` varchar(20) NOT NULL,\\n  `density` decimal(10,2) NOT NULL,\\n  `entry_length` decimal(10,2) NOT NULL,\\n  `uncoiler1_tension` decimal(10,2) NOT NULL,\\n  `exit_tension` decimal(10,2) NOT NULL,\\n  `process1_tension` decimal(10,2) NOT NULL,\\n  `entry_loop_tension` decimal(10,2) NOT NULL,\\n  `exit_loop_tension` decimal(10,2) NOT NULL,\\n  `entry_unit_tension` decimal(12,4) NOT NULL,\\n  `entry_loop_unit_tension` decimal(12,4) NOT NULL,\\n  `process_unit_tension` decimal(12,4) NOT NULL,\\n  `exit_loop_unit_tension` decimal(12,4) NOT NULL,\\n  `exit_unit_tension` decimal(12,4) NOT NULL,\\n  `status` varchar(20) NOT NULL,\\n  `priority` smallint NOT NULL,\\n  `remark` varchar(500) DEFAULT NULL,\\n  `created_at` datetime NOT NULL,\\n  `updated_at` datetime NOT NULL,\\n  PRIMARY KEY (`id`),\\n  UNIQUE KEY `ix_plans_coil_no` (`coil_no`),\\n  KEY `ix_plans_id` (`id`),\\n  KEY `ix_plans_priority` (`priority`),\\n  KEY `ix_plans_status` (`status`)\\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci\n"
+}

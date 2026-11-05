@@ -1,0 +1,28 @@
+# ARCH-BE-008 私有测试实例；秘密只由显式 run-root 文件挂载。
+name: aiis-arch-be008
+services:
+  mysql:
+    image: mysql:8.4.6
+    container_name: aiis-arch-be008-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/root_password
+      MYSQL_DATABASE: arch_be008_plan
+    command: ["--default-time-zone=+08:00", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    ports: ["127.0.0.1:13388:3306"]
+    labels: {task: ARCH-BE-008, runId: "${BE008_RUN_ID:?explicit runId required}"}
+    secrets: [root_password, root_client]
+    volumes: ["mysql-data:/var/lib/mysql"]
+    networks: [private]
+secrets:
+  root_password:
+    file: ${BE008_RUN_ROOT:?explicit run root required}/root-password
+  root_client:
+    file: ${BE008_RUN_ROOT:?explicit run root required}/root-client.cnf
+volumes:
+  mysql-data:
+    name: aiis-arch-be008-mysql-data
+    labels: {task: ARCH-BE-008, runId: "${BE008_RUN_ID:?explicit runId required}"}
+networks:
+  private:
+    name: aiis-arch-be008-net
+    labels: {task: ARCH-BE-008, runId: "${BE008_RUN_ID:?explicit runId required}"}

@@ -21,6 +21,8 @@ Each implementation must be independently copyable, buildable and runnable. Neit
 
 The [Rust project guide](field-flow-rust/README.md) and [Python project guide](field-flow-python/README.md) provide each project's independent build/start/validation commands. Both implement demo01's local HTTP GET → PLC INT loop and passed independent local QA. Field validation and long-running acceptance remain later stages.
 
+[FF-004 r2](plans/FF-004-plc-json-catalog-and-multi-plc/spec.md): New fresh-context QA passed AC01–AC14 for exact r2 A. Known driver limits and failure history remain recorded. Human Owner final acceptance is pending; later capabilities and field gates stay separate. The slice covers one JSON per PLC, YAML v2, point handles and multi-PLC reads; Modbus is format-only, while Python/C# loading and DS export have separate gates.
+
 ## Handwritten flows
 
 Each application flow module represents one logical flow. A stable flow ID and business name identify its trigger, steps, typed inputs/outputs, cross-round state and failure behavior. The runtime owns scheduling and lifecycle; infrastructure adapters own PLC/HTTP communication.
@@ -48,3 +50,5 @@ The [CA follow-up prompt](plans/ARCH-TOOL-001-field-flow-runner/spec.md#ca-hando
 - [Discussion baseline](plans/ARCH-TOOL-001-field-flow-runner/spec.md) owns detailed scope, decisions, staged acceptance and recoverable r1 history.
 - [First implementation scope](plans/FF-001-dual-runtime-demo01/spec.md) defines the independent runtimes and demo01 local loop; exact r4 is owner-approved, with complete approved r3/r2/r1 history retained.
 - [Repository contract](../AGENTS.md) and [development workflow](../.codex/workflows/development-lifecycle-workflow.md) continue to apply.
+
+The basic library reuses demo01 for basic01, adds negative-target GET for basic02 and positive value≤100 for basic03. Complete standalone commands: [Rust examples](field-flow-rust/examples/README.md), [Python examples](field-flow-python/examples/README.md). Advanced and C# cases remain planned; precise DEV/QA/Owner gates belong to the FF-005 bundle.

@@ -1,0 +1,19 @@
+{
+  "task": "ARCH-BE-008",
+  "revision": "r1",
+  "specSection": "7.2",
+  "candidateSha256": "20a7474a4f9766bec0f70f081c56a7f5a77922caf1efe64ccad839efe022aad5",
+  "actual": {
+    "case": "media-text",
+    "method": "POST",
+    "path": "/api/v1/plans",
+    "input": "{\"coilNo\":\"QA1-INPUT\",\"grade\":\"G\",\"spec\":\"S\",\"weight\":\"1.2300\",\"thickness\":\"0.123\",\"width\":\"10.00\"}",
+    "expectedStatus": 415,
+    "actualStatus": 415,
+    "body": "",
+    "requestId": "0HNPKNFFGP8NP:00000001",
+    "elapsedMs": 0.252
+  },
+  "expected": "HTTP415 with unified code/message/data:null/errorCode:plan_invalid_request/timestamp JSON error envelope",
+  "implementationChanged": false
+}

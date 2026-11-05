@@ -1,0 +1,13 @@
+{
+  "attempt1": {
+    "exitCode": 1,
+    "httpCases": 249,
+    "productFailure": false,
+    "reason": "private helper renamed uppercase QA1 identifiers to QA2 but retained lowercase qa1-abc duplicate probe; this was a different new coil and correctly created200",
+    "acceptedSyntheticRowPreserved": {
+      "id": 18,
+      "coilNo": "qa1-abc"
+    },
+    "retry": "same candidate and run; new QA2B identifiers and distinct Unicode 50-scalar coil, no row cleanup or source changes"
+  }
+}

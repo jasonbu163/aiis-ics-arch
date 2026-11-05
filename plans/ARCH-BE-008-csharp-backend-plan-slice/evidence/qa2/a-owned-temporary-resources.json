@@ -1,0 +1,34 @@
+[
+  {
+    "path": "/private/tmp/arch-be008-log-check-2f1700a0aeb44db68afd9e83e8a6f849",
+    "files": 5,
+    "bytes": 46143416,
+    "mode": "0o755",
+    "createdEpoch": 1793171011.1971283,
+    "purpose": "A11 HTTP/disabled process/real log rotation; no running process dependency"
+  },
+  {
+    "path": "/private/tmp/arch-be008-test-logs-beaa92bd0bb8434088a3a0e01f64a7eb",
+    "files": 1,
+    "bytes": 5901,
+    "mode": "0o755",
+    "createdEpoch": 1793171010.23179,
+    "purpose": "A11 HTTP/disabled process/real log rotation; no running process dependency"
+  },
+  {
+    "path": "/private/tmp/arch-be008-disabled-af0b498180554c869c1ccd2a667fd955",
+    "files": 1,
+    "bytes": 1718,
+    "mode": "0o755",
+    "createdEpoch": 1793171010.4765842,
+    "purpose": "A11 HTTP/disabled process/real log rotation; no running process dependency"
+  },
+  {
+    "path": "/private/tmp/arch-be008-test-logs-0bb1bf219a4046e182080e73765a0cf2",
+    "files": 1,
+    "bytes": 11864,
+    "mode": "0o755",
+    "createdEpoch": 1793171009.9165454,
+    "purpose": "A11 HTTP/disabled process/real log rotation; no running process dependency"
+  }
+]

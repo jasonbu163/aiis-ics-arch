@@ -1,0 +1,42 @@
+[
+  {
+    "input": "plain_apostrophe.yaml",
+    "sha256": "999018454e4b433910ada55c1dac22a22bf6717e442b7e494d9d29b6ab6d56bb",
+    "expected": 2,
+    "actual": 0,
+    "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework1/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework1/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+    "stderr": ""
+  },
+  {
+    "input": "quoted_apostrophe.yaml",
+    "sha256": "c6040b3948c39ad400c40e900078ca11a0c11fd2731d5a4f07f4748e52229079",
+    "expected": 2,
+    "actual": 2,
+    "stdout": "{\"files\":[],\"format_valid\":false,\"issues\":[{\"error_key\":\"config_yaml_alias\",\"path\":\"$\"}],\"issues_truncated\":false,\"runtime_compatible\":false,\"scope\":\"main\"}\n",
+    "stderr": ""
+  },
+  {
+    "input": "control_no_apostrophe.yaml",
+    "sha256": "742fc7cd69b83ee1e70ccb4fe5127f0ff1d5ff88bcf5719e7141f824ad30f467",
+    "expected": 2,
+    "actual": 2,
+    "stdout": "{\"files\":[],\"format_valid\":false,\"issues\":[{\"error_key\":\"config_yaml_alias\",\"path\":\"$\"}],\"issues_truncated\":false,\"runtime_compatible\":false,\"scope\":\"main\"}\n",
+    "stderr": ""
+  },
+  {
+    "input": "valid_plain_apostrophe.yaml",
+    "sha256": "5de4ed4dcb31d35ff068c2fc1fcd6ea6532114757a02c11846eaf43f427636f4",
+    "expected": 0,
+    "actual": 2,
+    "stdout": "{\"files\":[],\"format_valid\":false,\"issues\":[{\"error_key\":\"config_yaml_alias\",\"path\":\"$\"}],\"issues_truncated\":false,\"runtime_compatible\":false,\"scope\":\"main\"}\n",
+    "stderr": ""
+  },
+  {
+    "input": "valid_quoted_apostrophe.yaml",
+    "sha256": "de8e8f5c38da7ba9b854fe138916b0b296dee690bdcec0ca2ab074e06f6fb473",
+    "expected": 0,
+    "actual": 0,
+    "stdout": "{\"files\":[{\"id\":\"s7_a\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework1/repro/plcs/s7-a.json\",\"protocol\":\"s7\",\"sha256\":\"fcda187b9a72bd75720409a4a9b84c1feb0b4bb8c01f98af027e945fcad9535d\"},{\"id\":\"s7_b\",\"path\":\"/private/tmp/ff-004-r2-dev-IVyzcc/rework1/repro/plcs/s7-b.json\",\"protocol\":\"s7\",\"sha256\":\"614e35946c63a622642d881b911b5c2f869e2840dd3ee8139e5d71e8a07a4b53\"}],\"format_valid\":true,\"issues\":[],\"issues_truncated\":false,\"runtime_compatible\":true,\"scope\":\"main\"}\n",
+    "stderr": ""
+  }
+]

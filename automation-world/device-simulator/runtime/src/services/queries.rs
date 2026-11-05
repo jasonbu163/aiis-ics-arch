@@ -18,6 +18,10 @@ pub fn mutation(app: &App, operation: &str) -> Result<(), String> {
 }
 pub fn configuration(app: &App, query: ConfigurationQuery) -> Result<Value, String> {
     let state = app.configuration.get()?;
+    let draft_matches_latest = match &state.latest_revision {
+        Some(id) => app.configuration.store.revision(id)? == state.workspace,
+        None => false,
+    };
     let workspace = match query.revision_id {
         Some(id) => app.configuration.store.revision(&id)?,
         None => state.workspace,
@@ -27,8 +31,9 @@ pub fn configuration(app: &App, query: ConfigurationQuery) -> Result<Value, Stri
         .iter()
         .flat_map(|i| crate::domain::layout::compile(i).err().unwrap_or_default())
         .collect::<Vec<_>>();
+    let versions = crate::services::versions::list(app, query.revision_offset)?;
     Ok(
-        json!({"etag":state.etag,"workspace":workspace,"latestRevision":state.latest_revision,"revisions":app.configuration.store.revisions(query.revision_offset)?,"selections":app.configuration.store.selections()?,"issues":issues}),
+        json!({"etag":state.etag,"workspace":workspace,"latestRevision":state.latest_revision,"draftMatchesLatest":draft_matches_latest,"revisions":versions["rows"],"revisionTotal":versions["total"],"selections":app.configuration.store.selections()?,"issues":issues}),
     )
 }
 pub fn snapshot(app: &App, query: SnapshotQuery) -> Result<Value, String> {

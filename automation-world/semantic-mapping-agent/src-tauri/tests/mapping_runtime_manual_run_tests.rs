@@ -11,7 +11,7 @@ use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, Instant};
 
-use aiis_semantic_mapping_agent_lib::services::mapping_runtime::run_mapping_manual_once;
+use aiis_semantic_mapping_agent_lib::services::mapping_runtime::legacy_run_mapping_manual_once as run_mapping_manual_once;
 use serde_json::{json, Value};
 
 #[derive(Debug)]
@@ -395,4 +395,76 @@ async fn required_rule_rejection_completes_preflight_without_target_request() {
         0,
         "required unresolved parameters must suppress all target requests"
     );
+}
+
+#[test]
+fn retained_five_types_fact_constant_locations_and_rejection_are_pure() {
+    use aiis_semantic_mapping_agent_lib::domain::mapping_runtime::{
+        evaluate_snapshot, MappingRuntimeSnapshot,
+    };
+    let evaluate = |value: Value| {
+        evaluate_snapshot(&serde_json::from_value::<MappingRuntimeSnapshot>(value).unwrap())
+            .unwrap()
+    };
+    for (data_type, text, typed) in [
+        ("string", "A01", json!("A01")),
+        ("integer", "42", json!(42)),
+        ("number", "3.5", json!(3.5)),
+        ("boolean", "true", json!(true)),
+        (
+            "datetime",
+            "2026-11-04T12:34:56.123+08:00",
+            json!("2026-11-04T12:34:56.123+08:00"),
+        ),
+    ] {
+        let mut value = snapshot(FixtureScenario::OptionalOmission);
+        value["targetApi"]["parameterSchema"][0]["dataType"] = json!(data_type);
+        value["facts"][0]["dataType"] = json!(data_type);
+        value["facts"][0]["value"] = json!(text);
+        assert_eq!(
+            evaluate(value.clone()).request.unwrap().body["required"],
+            typed
+        );
+        value["mapping"]["bindings"]["body:required"] = json!({"kind":"constant","value":typed,"sourceKey":null,"factName":null,"valueRuleKey":null});
+        assert_eq!(evaluate(value).request.unwrap().body["required"], typed);
+    }
+    for bad in [Value::Null, json!("invalid-number")] {
+        let mut value = snapshot(FixtureScenario::OptionalOmission);
+        value["targetApi"]["parameterSchema"][0]["dataType"] = json!("integer");
+        value["facts"][0]["dataType"] = json!("integer");
+        value["facts"][0]["value"] = bad;
+        let rejected = evaluate(value);
+        assert!(rejected.request.is_none());
+        assert!(!rejected.diagnostics.is_empty());
+    }
+    assert!(evaluate(snapshot(FixtureScenario::RequiredRuleRejected))
+        .request
+        .is_none());
+    let mut all_locations = snapshot(FixtureScenario::OptionalOmission);
+    all_locations["targetApi"]["path"] = json!("/fixture/{id}");
+    all_locations["targetApi"]["parameterSchema"] = json!([
+        {"parameterKey":"path:id","location":"path","name":"id","jsonPath":null,"dataType":"string","required":true},
+        {"parameterKey":"query:mode","location":"query","name":"mode","jsonPath":null,"dataType":"string","required":true},
+        {"parameterKey":"header:X-Fixture","location":"header","name":"X-Fixture","jsonPath":null,"dataType":"string","required":true},
+        {"parameterKey":"body:required","location":"body","name":"required","jsonPath":"required","dataType":"string","required":true}
+    ]);
+    for (key, text) in [
+        ("path:id", "a/b"),
+        ("query:mode", "local"),
+        ("header:X-Fixture", "review"),
+    ] {
+        all_locations["mapping"]["bindings"][key] = json!({"kind":"constant","value":text,"sourceKey":null,"factName":null,"valueRuleKey":null});
+    }
+    let request = evaluate(all_locations).request.unwrap();
+    assert_eq!(request.path, "/fixture/{id}");
+    assert_eq!(request.path_parameters.get("id").unwrap(), "a/b");
+    assert_eq!(
+        request.query,
+        vec![("mode".to_string(), "local".to_string())]
+    );
+    assert_eq!(
+        request.headers,
+        vec![("X-Fixture".to_string(), "review".to_string())]
+    );
+    assert_eq!(request.body["required"], json!("A01"));
 }

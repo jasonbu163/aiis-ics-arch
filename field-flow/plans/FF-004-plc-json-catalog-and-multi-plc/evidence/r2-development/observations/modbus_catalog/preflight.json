@@ -1,0 +1,33 @@
+{
+  "after": {
+    "instance.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runtime.jsonl": "d6851d99fcf4dc5c9bbe69e98cd3abac478f23f701a734a5c792518b5326c9dc",
+    "state.sqlite": "b5b77a192bc148f35cbb5fb981fa38fe56c32f9e988d4688af050f8f6fd7739a"
+  },
+  "before": {
+    "instance.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runtime.jsonl": "d6851d99fcf4dc5c9bbe69e98cd3abac478f23f701a734a5c792518b5326c9dc",
+    "state.sqlite": "b5b77a192bc148f35cbb5fb981fa38fe56c32f9e988d4688af050f8f6fd7739a"
+  },
+  "missing_state_absent": true,
+  "single_validate": {
+    "files": [
+      {
+        "id": "modbus_station",
+        "path": "/private/tmp/ff-004-r2-dev-IVyzcc/full-catalog-final/modbus_catalog/config/plcs/modbus-example.json",
+        "protocol": "modbus_tcp",
+        "sha256": "96a0fd3cdd27df2e25e3ca0d4914d03bfb975beeafdc1d2d9392f76e4cfa602d"
+      }
+    ],
+    "format_valid": true,
+    "issues": [
+      {
+        "error_key": "unsupported_protocol",
+        "path": "$.connection"
+      }
+    ],
+    "issues_truncated": false,
+    "runtime_compatible": false,
+    "scope": "plc_file"
+  }
+}

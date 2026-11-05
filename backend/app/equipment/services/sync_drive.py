@@ -8,6 +8,10 @@ Main Features:
 """
 from __future__ import annotations
 
+from app.equipment.crud.sync_integration import storage_context
+from app.equipment.integration_storage import legacy_input
+from common.integration.storage import to_storage_time as storage_time
+
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
@@ -126,12 +130,15 @@ projection_handler = ProjectionHandlerDescriptor(
 
 def sync_drive(db: Session, fact: EquipmentDriveFact) -> EquipmentSyncResult:
     """Synchronize one equipment drive fact without committing it."""
+    context = storage_context(db)
     validate_equipment_provenance(fact)
     if not is_good_quality(fact):
         return EquipmentSyncResult(action="skipped", skipped_reason="source_quality_not_good")
 
     try:
         timestamp = normalize_timestamp(fact.values.get("timestamp"), collected_at=fact.collected_at)
+        if context:
+            timestamp=legacy_input(fact.values.get("timestamp"),fact.collected_at,context[0])
         values = _normalize_measurements(fact.values)
     except ValueError as exc:
         return EquipmentSyncResult(action="skipped", skipped_reason=str(exc))

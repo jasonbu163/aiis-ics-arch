@@ -1,18 +1,12 @@
-/**
- * File Path: /automation-world/semantic-mapping-agent/src/app/twin-facts/store/targetApiConfiguration.ts
- * Description: Reactive backend-owned Target API configuration state.
- * Main Features: Saves location-aware manual targets, imports selected API Materials, and safely removes selected Targets.
- */
+/** 本地目标配置、材料派生与全集引用校验。 */
 import { computed, ref } from "vue";
+import { loadLocalConfiguration, localConfiguration, currentRevision } from "../api/localConfiguration";
 
 import {
   applyTargetApiImportInBackend,
   createTargetApiConfigurationInBackend,
   deleteTargetApiConfigurationInBackend,
-  getTargetApiConfigurationFromBackend,
-  listApiMaterialsFromBackend,
   listMappingConfigurationsFromBackend,
-  listTargetApiConfigurationsFromBackend,
   loadTargetApisFromMaterialsInBackend,
   previewTargetApiImportInBackend,
   updateTargetApiConfigurationInBackend,
@@ -27,7 +21,7 @@ import type {
   TargetApiParameter,
   TargetApiMaterialLoadResult,
 } from "../types";
-import { savedBackendBaseUrl } from "../api";
+
 
 const TARGET_API_DATA_TYPES = new Set<CollectionFactDataType>([
   "string",
@@ -146,6 +140,8 @@ function isJsonRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export function useTargetApiConfigurationStore() {
+  let loadedRevision = localConfiguration.value?.revision ?? 0;
+  let draftRevision = loadedRevision;
   const configurations = ref<TargetApiConfiguration[]>([]);
   const draft = ref<TargetApiDraft>(emptyDraft());
   const selectedId = ref<string | null>(null);
@@ -163,11 +159,13 @@ export function useTargetApiConfigurationStore() {
 
   async function load() {
     await run(async () => {
-      configurations.value = await listTargetApiConfigurationsFromBackend();
+      const snapshot = await loadLocalConfiguration();
+      configurations.value = snapshot.document.targetApis; loadedRevision = snapshot.revision;
     });
   }
 
   function startManual() {
+    draftRevision = currentRevision();
     selectedId.value = null;
     draft.value = emptyDraft();
     status.value = "idle";
@@ -176,8 +174,9 @@ export function useTargetApiConfigurationStore() {
 
   async function loadApiMaterials() {
     await run(async () => {
-      configurations.value = await listTargetApiConfigurationsFromBackend();
-      apiMaterials.value = await listApiMaterialsFromBackend(`${savedBackendBaseUrl()}/openapi.json`);
+      const snapshot = await loadLocalConfiguration();
+      configurations.value = snapshot.document.targetApis; loadedRevision = snapshot.revision;
+      apiMaterials.value = snapshot.document.materials;
       selectedMaterialKeys.value = [];
       materialLoadResult.value = null;
     });
@@ -193,17 +192,23 @@ export function useTargetApiConfigurationStore() {
   async function loadSelectedMaterials() {
     await run(async () => {
       if (!selectedMaterialKeys.value.length) throw new Error("TARGET_API_MATERIAL_SELECTION_REQUIRED");
-      materialLoadResult.value = await loadTargetApisFromMaterialsInBackend(selectedMaterialKeys.value);
+      materialLoadResult.value = await loadTargetApisFromMaterialsInBackend(selectedMaterialKeys.value, loadedRevision);
       configurations.value = materialLoadResult.value.targetApis;
       selectedMaterialKeys.value = [];
+      loadedRevision = currentRevision(); draftRevision = loadedRevision;
       status.value = "saved";
     });
   }
 
   async function open(targetApiId: string) {
+    draftRevision = loadedRevision;
     await run(async () => {
-      const configuration = await getTargetApiConfigurationFromBackend(targetApiId);
+      const snapshot = await loadLocalConfiguration();
+      const configuration = snapshot.document.targetApis.find(t => t.id === targetApiId);
+      if (!configuration) throw new Error("SMA_CONFIGURATION_NOT_FOUND");
+      loadedRevision = snapshot.revision;
       selectedId.value = configuration.id;
+      draftRevision = loadedRevision;
       draft.value = draftFromConfiguration(configuration);
       status.value = "idle";
     });
@@ -236,21 +241,23 @@ export function useTargetApiConfigurationStore() {
     await run(async () => {
       const input = validateDraft(draft.value);
       const saved = selectedId.value
-        ? await updateTargetApiConfigurationInBackend(selectedId.value, input)
-        : await createTargetApiConfigurationInBackend(input);
+        ? await updateTargetApiConfigurationInBackend(selectedId.value, input, draftRevision)
+        : await createTargetApiConfigurationInBackend(input, draftRevision);
       selectedId.value = saved.id;
       draft.value = draftFromConfiguration(saved);
       configurations.value = [
         ...configurations.value.filter((configuration) => configuration.id !== saved.id),
         saved,
       ].sort((left, right) => left.name.localeCompare(right.name));
+      loadedRevision = currentRevision(); draftRevision = loadedRevision;
       status.value = "saved";
     });
   }
 
   async function remove(targetApiId: string) {
     await run(async () => {
-      await deleteTargetApiConfigurationInBackend(targetApiId);
+      await deleteTargetApiConfigurationInBackend(targetApiId, loadedRevision);
+      loadedRevision = currentRevision();
       configurations.value = configurations.value.filter((configuration) => configuration.id !== targetApiId);
       if (selectedId.value === targetApiId) startManual();
       status.value = "deleted";
@@ -263,11 +270,11 @@ export function useTargetApiConfigurationStore() {
     await run(async () => {
       const selected = new Set(ids);
       const mappings = await listMappingConfigurationsFromBackend();
-      if (mappings.some((mapping) => selected.has(mapping.targetApiId))) {
-        throw new Error("tss_target_api_in_use");
-      }
+      const references = mappings.filter(mapping => selected.has(mapping.targetApiId)).map(mapping => mapping.mappingKey);
+      if (references.length) throw new Error(`SMA_CONFIGURATION_REFERENCE_IN_USE:${references.join(",")}`);
       for (const targetApiId of ids) {
-        await deleteTargetApiConfigurationInBackend(targetApiId);
+        await deleteTargetApiConfigurationInBackend(targetApiId, loadedRevision);
+      loadedRevision = currentRevision();
         configurations.value = configurations.value.filter((item) => item.id !== targetApiId);
         if (selectedId.value === targetApiId) startManual();
       }
@@ -291,7 +298,9 @@ export function useTargetApiConfigurationStore() {
       await applyTargetApiImportInBackend(importItems.value);
       importItems.value = [];
       importPreview.value = null;
-      configurations.value = await listTargetApiConfigurationsFromBackend();
+      const snapshot = await loadLocalConfiguration();
+      configurations.value = snapshot.document.targetApis; loadedRevision = snapshot.revision;
+      loadedRevision = currentRevision(); draftRevision = loadedRevision;
       status.value = "saved";
     });
   }

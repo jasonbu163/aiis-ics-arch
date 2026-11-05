@@ -1,0 +1,16 @@
+{
+  "targeted.txt": {
+    "exit": 101,
+    "reason": "cargo invoked at repository root without manifest"
+  },
+  "targeted2.txt": {
+    "exit": 101,
+    "reason": "one new auxiliary multiline quoted-key vector rejected by actual parser; 3 passed/1 failed; invalid vector removed"
+  },
+  "repro-premature-build.json": {
+    "helper_exit": 1,
+    "matches": 19,
+    "count": 24,
+    "reason": "called before product build returned, still old executable; not current candidate result"
+  }
+}

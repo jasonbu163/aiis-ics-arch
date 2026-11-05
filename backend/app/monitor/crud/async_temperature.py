@@ -5,7 +5,9 @@
     - 按日期查询与计数过程曲线
     - 添加过程曲线样例行但不提交事务
 """
-from datetime import datetime
+from datetime import datetime, timedelta
+from app.monitor.crud.async_integration import storage_context
+from common.integration.storage import to_storage_time as storage_time
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,6 +19,10 @@ async def list_curves_by_date(
     db: AsyncSession,
     date_str: str,
 ) -> list[HistoryProcessCurve]:
+    context=await storage_context(db)
+    if context:
+        start=storage_time(datetime.fromisoformat(date_str),context[0]["basisProfile"]["systemWire"])
+        return list((await db.execute(select(HistoryProcessCurve).where(HistoryProcessCurve.equipment_id.is_(None),HistoryProcessCurve.created_at>=start,HistoryProcessCurve.created_at<start+timedelta(days=1)).order_by(HistoryProcessCurve.created_at))).scalars().all())
     result = await db.execute(
         select(HistoryProcessCurve)
         .where(HistoryProcessCurve.equipment_id.is_(None), func.date(HistoryProcessCurve.created_at) == date_str)
@@ -26,6 +32,10 @@ async def list_curves_by_date(
 
 
 async def count_curves_by_date(db: AsyncSession, date_str: str) -> int:
+    context=await storage_context(db)
+    if context:
+        start=storage_time(datetime.fromisoformat(date_str),context[0]["basisProfile"]["systemWire"])
+        return int((await db.scalar(select(func.count()).select_from(HistoryProcessCurve).where(HistoryProcessCurve.equipment_id.is_(None),HistoryProcessCurve.created_at>=start,HistoryProcessCurve.created_at<start+timedelta(days=1)))) or 0)
     value = await db.scalar(
         select(func.count()).select_from(HistoryProcessCurve).where(
             HistoryProcessCurve.equipment_id.is_(None), func.date(HistoryProcessCurve.created_at) == date_str

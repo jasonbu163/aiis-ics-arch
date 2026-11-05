@@ -8,10 +8,14 @@ Complete reproducible steps: [USER_GUIDE](USER_GUIDE.md), including preparation,
 
 [BUILD](BUILD.md) explains product release, test-fixture, native dependencies, three-platform limits and state lifecycle. The product starts its own hidden __driver child; there is no ff-driver binary. Windows source needs adaptation; Linux is untested in this task.
 
-Run defaults to dry_run and does not create schema; state init --synthetic creates only a new private directory. Execute needs its own matching store; inspect is read-only. Preserve unknown state/identities without clearing history, changing IDs or blind retry. App writes use Execution.apply. Only demo01 is registered; no automatic discovery, demo02, POST/auth or BOOL/REAL.
+Run defaults to dry_run and does not create schema; state init --synthetic creates only a new private directory. Execute needs its own matching store; inspect is read-only. Preserve unknown state/identities without clearing history, changing IDs or blind retry. App writes use Execution.apply. The YAML v1 registered kinds are demo01, plc_guard_get_int and get_value_guard_int; basic01 reuses demo01 and teaching01 remains a tutorial-copy exercise. Unknown kinds are rejected; no automatic discovery, demo02, POST/auth or BOOL/REAL.
 
 Copy this directory independently with its own source, manifest/lock, config, locale, fixture and state; no parent/sibling runtime is required. Parent task links below are optional governance navigation.
 
 The exact dual-version [FF-001 r4](../plans/FF-001-dual-runtime-demo01/spec.md) handoff passed independent [QA2](../plans/FF-001-dual-runtime-demo01/checklist.md); Human Owner final acceptance, field and long-soak remain pending. Earlier failures/evidence are preserved. [FF-002](../plans/FF-002-user-guide-and-runtime-positioning/spec.md) guides have their own DEV/QA/Owner chain, without inheriting FF-001 acceptance.
 
 [PLAN](PLAN.md) · [CODE_INDEX](CODE_INDEX.md) · [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md)
+
+See the [three basic examples](examples/README.md) for standalone commands and the [YAML configuration guide](config/README.md).
+
+For Rust YAML v2 see the [catalog tutorial](USER_GUIDE.md#catalog-v2): one ff.plc JSON per PLC, registered kinds demo01/read_points, S7 standard DB int16. Modbus is structure-validation only; Python/C# loading and DS export are not implemented.

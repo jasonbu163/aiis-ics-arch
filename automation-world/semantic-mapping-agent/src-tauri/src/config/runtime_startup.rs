@@ -1,7 +1,7 @@
 //! File Path: /automation-world/semantic-mapping-agent/src-tauri/src/config/runtime_startup.rs
 //! Description: Local app-open runtime auto-start and Mapping facts polling preference persistence.
 //! Main Features:
-//!   - Stores only Simulation source selection, Mapping runtime enablement, and facts polling interval in app-data JSON
+//!   - Exposes mapping-only IPC preferences; retains the inert v1 producer segment on disk
 //!   - Rejects invalid or unknown preference documents without storing credentials or runtime state
 //!   - Uses atomic local-file replacement; it never configures operating-system boot start
 
@@ -29,15 +29,7 @@ pub struct RuntimeStartupPreferences {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuntimeAutoStartPreferences {
-    pub collection_fact_simulation: CollectionFactSimulationAutoStart,
     pub api_mapping_runtime: ApiMappingRuntimeAutoStart,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct CollectionFactSimulationAutoStart {
-    pub enabled: bool,
-    pub source_key: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -54,10 +46,6 @@ impl Default for RuntimeStartupPreferences {
         Self {
             schema_version: SCHEMA_VERSION,
             runtime_auto_start: RuntimeAutoStartPreferences {
-                collection_fact_simulation: CollectionFactSimulationAutoStart {
-                    enabled: false,
-                    source_key: None,
-                },
                 api_mapping_runtime: ApiMappingRuntimeAutoStart {
                     enabled: false,
                     facts_polling_interval_ms: DEFAULT_MAPPING_FACTS_POLLING_INTERVAL_MS,
@@ -70,7 +58,7 @@ impl Default for RuntimeStartupPreferences {
 pub fn load(app: &AppHandle) -> Result<RuntimeStartupPreferences, String> {
     let path = preferences_path(app)?;
     let preferences = load_from_path(&path)?;
-    tracing::info!(event="sma_startup_preferences_loaded", process="aiis-semantic-mapping-agent", path=%path.display(), simulation_autostart=preferences.runtime_auto_start.collection_fact_simulation.enabled, mapping_autostart=preferences.runtime_auto_start.api_mapping_runtime.enabled, result="loaded");
+    tracing::info!(event="sma_startup_preferences_loaded", process="aiis-semantic-mapping-agent", path=%path.display(), mapping_autostart=preferences.runtime_auto_start.api_mapping_runtime.enabled, result="loaded");
     Ok(preferences)
 }
 
@@ -78,19 +66,62 @@ pub fn save(app: &AppHandle, preferences: &RuntimeStartupPreferences) -> Result<
     save_to_path(&preferences_path(app)?, preferences)
 }
 
-pub fn load_from_path(path: &Path) -> Result<RuntimeStartupPreferences, String> {
-    match fs::read_to_string(path) {
-        Ok(value) => parse(&value),
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-            Ok(RuntimeStartupPreferences::default())
+// v1磁盘兼容DTO，无执行者。旧段作为Value惰性保存，不解释其enabled/sourceKey。
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct DiskPreferences {
+    schema_version: u8,
+    runtime_auto_start: DiskAutoStart,
+}
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct DiskAutoStart {
+    #[serde(default = "neutral_legacy")]
+    collection_fact_simulation: serde_json::Value,
+    api_mapping_runtime: ApiMappingRuntimeAutoStart,
+}
+fn neutral_legacy() -> serde_json::Value {
+    serde_json::json!({"enabled": false, "sourceKey": null})
+}
+impl DiskPreferences {
+    fn mapping(&self) -> RuntimeStartupPreferences {
+        RuntimeStartupPreferences {
+            schema_version: self.schema_version,
+            runtime_auto_start: RuntimeAutoStartPreferences {
+                api_mapping_runtime: self.runtime_auto_start.api_mapping_runtime.clone(),
+            },
         }
-        Err(_) => Err("RUNTIME_STARTUP_PREFERENCES_READ_FAILED".to_string()),
     }
+}
+fn load_disk(path: &Path) -> Result<DiskPreferences, String> {
+    let disk: DiskPreferences = match fs::read_to_string(path) {
+        Ok(value) => serde_json::from_str(&value)
+            .map_err(|_| "RUNTIME_STARTUP_PREFERENCES_INVALID".to_string())?,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => DiskPreferences {
+            schema_version: SCHEMA_VERSION,
+            runtime_auto_start: DiskAutoStart {
+                collection_fact_simulation: neutral_legacy(),
+                api_mapping_runtime: RuntimeStartupPreferences::default()
+                    .runtime_auto_start
+                    .api_mapping_runtime,
+            },
+        },
+        Err(_) => return Err("RUNTIME_STARTUP_PREFERENCES_READ_FAILED".to_string()),
+    };
+    validate(&disk.mapping())?;
+    Ok(disk)
+}
+pub fn load_from_path(path: &Path) -> Result<RuntimeStartupPreferences, String> {
+    Ok(load_disk(path)?.mapping())
 }
 
 pub fn save_to_path(path: &Path, preferences: &RuntimeStartupPreferences) -> Result<(), String> {
     validate(preferences)?;
-    let content = serde_json::to_string_pretty(preferences)
+    // Read before writing so corrupt/unknown documents cannot be overwritten by stale UI state.
+    let mut disk = load_disk(path)?;
+    disk.runtime_auto_start.api_mapping_runtime =
+        preferences.runtime_auto_start.api_mapping_runtime.clone();
+    let content = serde_json::to_string_pretty(&disk)
         .map_err(|_| "RUNTIME_STARTUP_PREFERENCES_SERIALIZE_FAILED".to_string())?;
     let directory = path
         .parent()
@@ -112,29 +143,9 @@ fn preferences_path(app: &AppHandle) -> Result<PathBuf, String> {
         .map_err(|_| "RUNTIME_STARTUP_PREFERENCES_PATH_INVALID".to_string())
 }
 
-fn parse(value: &str) -> Result<RuntimeStartupPreferences, String> {
-    let preferences = serde_json::from_str(value)
-        .map_err(|_| "RUNTIME_STARTUP_PREFERENCES_INVALID".to_string())?;
-    validate(&preferences)?;
-    Ok(preferences)
-}
-
 fn validate(preferences: &RuntimeStartupPreferences) -> Result<(), String> {
     if preferences.schema_version != SCHEMA_VERSION {
         return Err("RUNTIME_STARTUP_PREFERENCES_VERSION_UNSUPPORTED".to_string());
-    }
-    if preferences
-        .runtime_auto_start
-        .collection_fact_simulation
-        .enabled
-        && preferences
-            .runtime_auto_start
-            .collection_fact_simulation
-            .source_key
-            .as_deref()
-            .is_none_or(|source_key| source_key.trim().is_empty())
-    {
-        return Err("RUNTIME_STARTUP_SIMULATION_SOURCE_REQUIRED".to_string());
     }
     if preferences
         .runtime_auto_start

@@ -7,19 +7,13 @@ export type AppPage =
   | "backendConnection"
   | "twinFacts"
   | "mappingIdentity"
-  | "simulationRuntime"
-  | "helpQuickStart"
-  | "helpGlossary";
+  | "mappingRuntime";
 
-export type WorkspaceId =
-  | "dataWorkspace"
-  | "helpCenter";
+export type WorkspaceId = "dataWorkspace";
 
 export interface ModulePageManifest {
   id: AppPage;
   labelKey: string;
-  helpKey: string;
-  helpTopicId?: string;
   defaultDetail: string;
   views?: readonly ModuleViewManifest[];
 }

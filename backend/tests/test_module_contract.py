@@ -64,6 +64,26 @@ def test_camel_case_success_contract():
     assert wire["data"] == {"nestedItems": [{"stableKey": "active"}]}
 
 
+def test_integration_public_surface_and_private_boundary(tmp_path):
+    from app.module_preflight import check_source, ModulePreflightError
+    from tests.module_admission_fixtures import generate_core_profile, add_probe
+    from common.integration.canonical import DIGEST_PROFILE, canonical_bytes, integration_digests
+    from common.integration.envelope import CONTRACT_VERSION, validate_source_clock
+    assert DIGEST_PROFILE == "bi-json/v1"
+    assert CONTRACT_VERSION == "aiis.business-integration/v1"
+    assert tuple(inspect.signature(integration_digests).parameters) == ("envelope", "resource", "parent_record_id")
+    assert tuple(inspect.signature(validate_source_clock).parameters) == ("value", "database_now")
+    assert canonical_bytes({"point_id": "原样"}) == '{"point_id":"原样"}'.encode()
+    profile = generate_core_profile(tmp_path / "integration-core")
+    add_probe(profile)
+    domain = profile / "app/admission_probe/domain.py"
+    domain.write_text('from common.integration.canonical import canonical_bytes\nACTIVE = "active"\ndef valid_label(value): return bool(canonical_bytes(value))\n')
+    check_source(profile)
+    domain.write_text('from common.integration.canonical import hashlib\nACTIVE = "active"\ndef valid_label(value): return True\n')
+    with pytest.raises(ModulePreflightError, match="private-core"):
+        check_source(profile)
+
+
 def test_temperature_env_helper_is_only_additive_public_setting(tmp_path):
     from pathlib import Path
     from app.module_preflight import check_source, ModulePreflightError
@@ -76,4 +96,19 @@ def test_temperature_env_helper_is_only_additive_public_setting(tmp_path):
     check_source(profile)
     domain.write_text('from settings import settings\nACTIVE = settings.MYSQL_PASSWORD\ndef valid_label(value): return bool(value.strip())\n')
     with pytest.raises(ModulePreflightError,match="private-setting"):
+        check_source(profile)
+
+
+def test_business_time_public_pure_symbols_and_private_rejection(tmp_path):
+    from app.module_preflight import check_source, ModulePreflightError
+    from tests.module_admission_fixtures import generate_core_profile, add_probe
+    expected=("StorageProbe","AdoptionContext","parse_adoption_manifest","validate_adoption_probe","to_storage_time","to_legacy_time")
+    assert PUBLIC_SYMBOLS["common.integration.storage"]==expected
+    profile=generate_core_profile(tmp_path/"business-time-core")
+    add_probe(profile)
+    domain=profile/"app/admission_probe/domain.py"
+    domain.write_text('from common.integration.storage import StorageProbe, AdoptionContext, parse_adoption_manifest, validate_adoption_probe, to_storage_time, to_legacy_time\nACTIVE="active"\ndef valid_label(value): return bool(value)\n')
+    check_source(profile)
+    domain.write_text('from common.integration.storage import SCHEMA_REVISION\nACTIVE="active"\ndef valid_label(value): return bool(value)\n')
+    with pytest.raises(ModulePreflightError,match="private-core"):
         check_source(profile)

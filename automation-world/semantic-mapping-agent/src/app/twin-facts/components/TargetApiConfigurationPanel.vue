@@ -8,6 +8,9 @@
     - Does not render OpenAPI candidates or execute a target request
 -->
 <script setup lang="ts">
+import { ElDialog } from "element-plus";
+import { useTableWidths, vTableWidths } from "../../../console/tableWidths";
+import { ConsoleCard, ConsoleActionButton, StatusCapsule } from "@aw-ui";
 import { computed, ref, watch } from "vue";
 
 import type { LocaleMessages } from "../../../locales";
@@ -66,7 +69,8 @@ const fileError = ref("");
 const displayedError = computed(() => {
   if (!props.error) return "";
   if (props.error.includes("tss_target_api_in_use")) return props.labels.targetApiInUse;
-  return props.labels.targetApiOperationFailed;
+  if (/CONFLICT|PREVIEW_CHANGED/.test(props.error)) return props.labels.localConfigurationConflict;
+  return `${props.labels.targetApiOperationFailed} ${props.error}`;
 });
 
 watch(() => props.status, (status) => {
@@ -195,43 +199,47 @@ function confirmDelete() {
   if (targetApiIds.length === 1) emit("remove", targetApiIds[0]);
   else emit("remove-many", targetApiIds);
 }
+
+const targetsTable = useTableWidths("target-apis", [{ id: "select", width: 64, min: 64, fixed: true }, { id: "apiKey", width: 220 }, { id: "name", width: 220 }, { id: "method", width: 110 }, { id: "path", width: 240 }, { id: "origin", width: 160 }, { id: "parameters", width: 130 }, { id: "idempotency", width: 180 }, { id: "enabled", width: 140 }, { id: "actions", width: 220, min: 220, fixed: true }]);
+const parametersTable = useTableWidths("target-parameters", [{ id: "location", width: 140 }, { id: "name", width: 220 }, { id: "jsonPath", width: 220 }, { id: "dataType", width: 150 }, { id: "required", width: 140 }, { id: "actions", width: 170, min: 170, fixed: true }]);
+const targetMaterialsTable = useTableWidths("target-materials", [{ id: "select", width: 64, min: 64, fixed: true }, { id: "method", width: 110 }, { id: "name", width: 220 }, { id: "path", width: 260 }, { id: "parameters", width: 160 }, { id: "source", width: 180 }, { id: "loadState", width: 240 }]);
 </script>
 
 <template>
   <p>{{ labels.targetApiPartIdentityHint }}</p>
   <div class="mapping-page-stack target-api-configuration-stack">
-    <section class="panel target-api-configuration-panel">
-      <header class="panel-header"><div><p class="panel-kicker">{{ labels.mappingBackendConfiguration }}</p><h2>{{ labels.targetApiConfigurationTitle }}</h2></div><span class="status-pill">HTTP</span></header>
+    <ConsoleCard class="target-api-configuration-panel" :title="labels.targetApiConfigurationTitle">
+    <p v-if="busy" class="hint" role="status">{{ labels.loading }}</p>
+<template #actions><StatusCapsule label="HTTP" /></template>
       <p>{{ labels.targetApiConfigurationHint }}</p>
       <div class="action-row target-api-actions">
-        <button class="secondary-action" type="button" :disabled="!enabled || busy" @click="openMaterialDialog">{{ labels.targetApiLoadMaterials }}</button>
-        <button class="secondary-action" type="button" :disabled="!enabled || busy" @click="batchOpen = true">{{ labels.mappingBatchOperations }}</button>
-        <button class="primary-action" type="button" :disabled="!enabled || busy" @click="startManual">{{ labels.targetApiNewManual }}</button>
+        <ConsoleActionButton tone="secondary" native-type="button" :disabled="!enabled || busy" @click="openMaterialDialog">{{ labels.targetApiLoadMaterials }}</ConsoleActionButton>
+        <ConsoleActionButton tone="secondary" native-type="button" :disabled="!enabled || busy" @click="batchOpen = true">{{ labels.mappingBatchOperations }}</ConsoleActionButton>
+        <ConsoleActionButton tone="primary" native-type="button" :disabled="!enabled || busy" @click="startManual">{{ labels.targetApiNewManual }}</ConsoleActionButton>
       </div>
-      <p v-if="displayedError" class="warning">{{ displayedError }}</p>
+      <p v-if="displayedError" class="warning" role="alert">{{ displayedError }}</p>
       <p v-if="status === 'saved'" class="notice">{{ labels.targetApiSaved }}</p>
       <p v-if="materialLoadResult" class="notice">{{ labels.targetApiMaterialLoadResult.replace('{created}', String(materialLoadResult.created.length)).replace('{skipped}', String(materialLoadResult.skipped.length)).replace('{requiresConfiguration}', String(materialLoadResult.requiresConfiguration.length)) }}</p>
-    </section>
+    </ConsoleCard>
 
-    <section class="panel target-api-configuration-panel">
-      <header class="panel-header"><div><p class="panel-kicker">{{ labels.mappingValueRuleSavedState }}</p><h2>{{ labels.targetApiConfigured }}</h2></div><button class="danger-action" type="button" :disabled="!enabled || busy || !selectedTargetApiIds.length" @click="requestSelectedDelete">{{ labels.targetApiRemoveSelected.replace('{count}', String(selectedTargetApiIds.length)) }}</button></header>
-      <div class="table-scroll mapping-list-scroll target-api-table-scroll" tabindex="0"><table class="mapping-list-table target-api-list-table"><thead><tr><th><input :aria-label="labels.targetApiSelectAll" :checked="allTargetApisSelected" :disabled="!enabled || busy || !configurations.length" :indeterminate="targetApiSelectionIndeterminate" type="checkbox" @change="toggleAllTargetApis(($event.target as HTMLInputElement).checked)" /></th><th>{{ labels.targetApiKey }}</th><th>{{ labels.targetApiName }}</th><th>{{ labels.targetApiMethod }}</th><th>{{ labels.targetApiPath }}</th><th>{{ labels.targetApiSchemaSource }}</th><th>{{ labels.targetApiParameters }}</th><th>{{ labels.targetApiDuplicateRequest }}</th><th>{{ labels.targetApiState }}</th><th>{{ labels.targetApiActions }}</th></tr></thead>
-        <tbody><tr v-for="configuration in configurations" :key="configuration.id"><td><input type="checkbox" :checked="selectedTargetApiIds.includes(configuration.id)" :disabled="!enabled || busy" @change="toggleTargetApi(configuration.id, ($event.target as HTMLInputElement).checked)" /></td><td><code>{{ configuration.apiKey }}</code></td><td>{{ configuration.name }}</td><td><span class="status-pill">{{ configuration.httpMethod }}</span></td><td><code>{{ configuration.path }}</code></td><td>{{ sourceLabel(configuration.originType) }}</td><td>{{ configuration.parameterSchema.length }}</td><td>{{ configuration.idempotencySupported ? labels.yes : labels.no }}</td><td>{{ configuration.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td><div class="mapping-list-row-actions"><button class="secondary-action" type="button" :disabled="!enabled || busy" @click="openEditor(configuration.id)">{{ labels.targetApiEdit }}</button><button class="danger-action" type="button" :disabled="!enabled || busy" @click="requestDelete(configuration)">{{ labels.targetApiDelete }}</button></div></td></tr></tbody>
+    <ConsoleCard class="target-api-configuration-panel" :title="labels.targetApiConfigured">
+<template #actions><ConsoleActionButton tone="danger" native-type="button" :disabled="!enabled || busy || !selectedTargetApiIds.length" @click="requestSelectedDelete">{{ labels.targetApiRemoveSelected.replace('{count}', String(selectedTargetApiIds.length)) }}</ConsoleActionButton></template>
+      <div class="table-scroll mapping-list-scroll target-api-table-scroll" tabindex="0"><ConsoleActionButton size="small" @click="targetsTable.reset">{{ labels.resetTableWidths }}</ConsoleActionButton>
+<table v-table-widths="[targetsTable, labels.resizeTableColumn]" class="mapping-list-table target-api-list-table"><thead><tr><th><input :aria-label="labels.targetApiSelectAll" :checked="allTargetApisSelected" :disabled="!enabled || busy || !configurations.length" :indeterminate="targetApiSelectionIndeterminate" type="checkbox" @change="toggleAllTargetApis(($event.target as HTMLInputElement).checked)" /></th><th>{{ labels.targetApiKey }}</th><th>{{ labels.targetApiName }}</th><th>{{ labels.targetApiMethod }}</th><th>{{ labels.targetApiPath }}</th><th>{{ labels.targetApiSchemaSource }}</th><th>{{ labels.targetApiParameters }}</th><th>{{ labels.targetApiDuplicateRequest }}</th><th>{{ labels.targetApiState }}</th><th>{{ labels.targetApiActions }}</th></tr></thead>
+        <tbody><tr v-for="configuration in configurations" :key="configuration.id"><td><input type="checkbox" :checked="selectedTargetApiIds.includes(configuration.id)" :disabled="!enabled || busy" @change="toggleTargetApi(configuration.id, ($event.target as HTMLInputElement).checked)" /></td><td><code>{{ configuration.apiKey }}</code></td><td>{{ configuration.name }}</td><td><StatusCapsule :label="configuration.httpMethod" /></td><td><code>{{ configuration.path }}</code></td><td>{{ sourceLabel(configuration.originType) }}</td><td>{{ configuration.parameterSchema.length }}</td><td>{{ configuration.idempotencySupported ? labels.yes : labels.no }}</td><td>{{ configuration.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td><div class="mapping-list-row-actions"><ConsoleActionButton size="small" tone="secondary" native-type="button" :disabled="!enabled || busy" @click="openEditor(configuration.id)">{{ labels.targetApiEdit }}</ConsoleActionButton><ConsoleActionButton size="small" tone="danger" native-type="button" :disabled="!enabled || busy" @click="requestDelete(configuration)">{{ labels.targetApiDelete }}</ConsoleActionButton></div></td></tr></tbody>
       </table></div>
       <p v-if="!configurations.length" class="empty-state">{{ labels.targetApiEmpty }}</p>
-    </section>
+    </ConsoleCard>
 
-    <div v-if="pendingDeleteIds.length" class="facts-dialog-backdrop" @click.self="pendingDeleteIds = []">
-      <section class="panel facts-dialog target-api-delete-dialog" role="alertdialog" aria-modal="true" aria-labelledby="target-api-delete-confirm-title">
-        <header class="panel-header facts-dialog-header"><div><p class="panel-kicker">HTTP</p><h2 id="target-api-delete-confirm-title">{{ pendingSingleDelete ? labels.targetApiDeleteConfirmTitle : labels.targetApiRemoveSelectedConfirmTitle }}</h2></div></header>
+    <Teleport to="#sma-overlays"><ElDialog :model-value="Boolean(pendingDeleteIds.length)" :append-to-body="false" :title="pendingSingleDelete ? labels.targetApiDeleteConfirmTitle : labels.targetApiRemoveSelectedConfirmTitle" class="sma-dialog target-api-delete-dialog" @close="pendingDeleteIds = []">
+<template #header><div class="panel-header facts-dialog-header"><div><p class="panel-kicker">HTTP</p><h2 id="target-api-delete-confirm-title">{{ pendingSingleDelete ? labels.targetApiDeleteConfirmTitle : labels.targetApiRemoveSelectedConfirmTitle }}</h2></div></div></template>
         <p>{{ pendingSingleDelete ? labels.targetApiDeleteConfirm.replace('{name}', pendingSingleDelete.name) : labels.targetApiRemoveSelectedConfirm.replace('{count}', String(pendingDeleteIds.length)) }}</p>
-        <div class="action-row facts-editor-actions"><button class="secondary-action" type="button" :disabled="busy" @click="pendingDeleteIds = []">{{ labels.collectionFactsCancel }}</button><button class="danger-action" type="button" :disabled="!enabled || busy" @click="confirmDelete">{{ labels.targetApiDelete }}</button></div>
-      </section>
-    </div>
+        <div class="action-row facts-editor-actions"><ConsoleActionButton tone="secondary" native-type="button" :disabled="busy" @click="pendingDeleteIds = []">{{ labels.collectionFactsCancel }}</ConsoleActionButton><ConsoleActionButton tone="danger" native-type="button" :disabled="!enabled || busy" @click="confirmDelete">{{ labels.targetApiDelete }}</ConsoleActionButton></div>
 
-    <div v-if="editorOpen" class="facts-dialog-backdrop" @click.self="editorOpen = false">
-      <section class="panel facts-dialog target-api-dialog" role="dialog" aria-modal="true">
-        <header class="panel-header facts-dialog-header"><div><p class="panel-kicker">HTTP</p><h2>{{ selectedId ? labels.targetApiEditTitle : labels.targetApiNewTitle }}</h2></div></header>
+</ElDialog></Teleport>
+
+    <Teleport to="#sma-overlays"><ElDialog :model-value="Boolean(editorOpen)" :append-to-body="false" :title="selectedId ? labels.targetApiEditTitle : labels.targetApiNewTitle" class="sma-dialog target-api-dialog" @close="editorOpen = false">
+<template #header><div class="panel-header facts-dialog-header"><div><p class="panel-kicker">HTTP</p><h2>{{ selectedId ? labels.targetApiEditTitle : labels.targetApiNewTitle }}</h2></div></div></template>
         <form class="target-api-form" @submit.prevent="emit('save')">
           <div class="form-grid">
             <label class="field"><span>{{ labels.targetApiKey }}</span><input :value="draft.apiKey" :readonly="Boolean(selectedId)" :disabled="!enabled || busy" @input="textPatch('apiKey', $event)" /></label>
@@ -245,25 +253,26 @@ function confirmDelete() {
           </div>
           <p class="hint">{{ labels.targetApiIdempotencyHelp }}</p>
           <label class="field target-api-body-template"><span>{{ labels.targetApiBodyTemplate }}</span><textarea :value="draft.bodyTemplateJson" rows="10" spellcheck="false" :disabled="!enabled || busy" @input="emit('update-draft', { bodyTemplateJson: ($event.target as HTMLTextAreaElement).value })" /></label>
-          <div class="target-api-parameters"><div class="target-api-parameters-header"><h3>{{ labels.targetApiParameterSchema }}</h3><button class="secondary-action" type="button" :disabled="!enabled || busy" @click="emit('add-parameter')">{{ labels.targetApiAddParameter }}</button></div>
-            <div class="table-scroll target-api-table-scroll" tabindex="0"><table class="target-api-parameter-table"><thead><tr><th>{{ labels.targetApiParameterLocation }}</th><th>{{ labels.targetApiParameterName }}</th><th>{{ labels.targetApiJsonPath }}</th><th>{{ labels.collectionFactsDataType }}</th><th>{{ labels.targetApiRequired }}</th><th>{{ labels.targetApiActions }}</th></tr></thead><tbody><tr v-for="(parameter, index) in draft.parameterSchema" :key="index"><td><select :value="parameter.location" :disabled="!enabled || busy" @change="parameterPatch(index, 'location', $event)"><option v-for="location in ['body','query','path','header']" :key="location" :value="location">{{ location }}</option></select></td><td><input :value="parameter.name" :disabled="!enabled || busy" @input="parameterPatch(index, 'name', $event)" /></td><td><input :value="parameter.jsonPath ?? ''" :disabled="!enabled || busy || parameter.location !== 'body'" @input="parameterPatch(index, 'jsonPath', $event)" /></td><td><select :value="parameter.dataType" :disabled="!enabled || busy" @change="parameterPatch(index, 'dataType', $event)"><option v-for="dataType in ['string', 'integer', 'number', 'boolean', 'datetime']" :key="dataType" :value="dataType">{{ dataType }}</option></select></td><td><input :checked="parameter.required" type="checkbox" :disabled="!enabled || busy || parameter.location === 'path'" @change="parameterPatch(index, 'required', $event)" /></td><td><button class="danger-action" type="button" :disabled="!enabled || busy" @click="emit('remove-parameter', index)">{{ labels.targetApiRemoveParameter }}</button></td></tr></tbody></table></div>
+          <div class="target-api-parameters"><div class="target-api-parameters-header"><h3>{{ labels.targetApiParameterSchema }}</h3><ConsoleActionButton tone="secondary" native-type="button" :disabled="!enabled || busy" @click="emit('add-parameter')">{{ labels.targetApiAddParameter }}</ConsoleActionButton></div>
+            <div class="table-scroll target-api-table-scroll" tabindex="0"><ConsoleActionButton size="small" @click="parametersTable.reset">{{ labels.resetTableWidths }}</ConsoleActionButton>
+<table v-table-widths="[parametersTable, labels.resizeTableColumn]" class="target-api-parameter-table"><thead><tr><th>{{ labels.targetApiParameterLocation }}</th><th>{{ labels.targetApiParameterName }}</th><th>{{ labels.targetApiJsonPath }}</th><th>{{ labels.collectionFactsDataType }}</th><th>{{ labels.targetApiRequired }}</th><th>{{ labels.targetApiActions }}</th></tr></thead><tbody><tr v-for="(parameter, index) in draft.parameterSchema" :key="index"><td><select :value="parameter.location" :disabled="!enabled || busy" @change="parameterPatch(index, 'location', $event)"><option v-for="location in ['body','query','path','header']" :key="location" :value="location">{{ location }}</option></select></td><td><input :value="parameter.name" :disabled="!enabled || busy" @input="parameterPatch(index, 'name', $event)" /></td><td><input :value="parameter.jsonPath ?? ''" :disabled="!enabled || busy || parameter.location !== 'body'" @input="parameterPatch(index, 'jsonPath', $event)" /></td><td><select :value="parameter.dataType" :disabled="!enabled || busy" @change="parameterPatch(index, 'dataType', $event)"><option v-for="dataType in ['string', 'integer', 'number', 'boolean', 'datetime']" :key="dataType" :value="dataType">{{ dataType }}</option></select></td><td><input :checked="parameter.required" type="checkbox" :disabled="!enabled || busy || parameter.location === 'path'" @change="parameterPatch(index, 'required', $event)" /></td><td><ConsoleActionButton tone="danger" native-type="button" :disabled="!enabled || busy" @click="emit('remove-parameter', index)">{{ labels.targetApiRemoveParameter }}</ConsoleActionButton></td></tr></tbody></table></div>
           </div>
-          <div class="action-row facts-editor-actions"><button class="secondary-action" type="button" :disabled="busy" @click="editorOpen = false">{{ labels.collectionFactsCancel }}</button><button class="primary-action" type="submit" :disabled="!enabled || busy">{{ labels.targetApiSave }}</button></div>
+          <div class="action-row facts-editor-actions"><ConsoleActionButton tone="secondary" native-type="button" :disabled="busy" @click="editorOpen = false">{{ labels.collectionFactsCancel }}</ConsoleActionButton><ConsoleActionButton tone="primary" native-type="submit" :disabled="!enabled || busy">{{ labels.targetApiSave }}</ConsoleActionButton></div>
         </form>
-      </section>
-    </div>
 
-    <div v-if="materialDialogOpen" class="facts-dialog-backdrop" @click.self="materialDialogOpen = false">
-      <section class="panel facts-dialog target-api-material-dialog" role="dialog" aria-modal="true">
-        <header class="panel-header facts-dialog-header"><div><p class="panel-kicker">{{ labels.apiMaterialsSourceOpenApi }}</p><h2>{{ labels.targetApiLoadMaterials }}</h2></div></header>
+</ElDialog></Teleport>
+
+    <Teleport to="#sma-overlays"><ElDialog :model-value="Boolean(materialDialogOpen)" :append-to-body="false" :title="labels.targetApiLoadMaterials" class="sma-dialog target-api-material-dialog" @close="materialDialogOpen = false">
+<template #header><div class="panel-header facts-dialog-header"><div><p class="panel-kicker">{{ labels.apiMaterialsSourceOpenApi }}</p><h2>{{ labels.targetApiLoadMaterials }}</h2></div></div></template>
         <p>{{ labels.targetApiMaterialDialogHint }}</p>
-        <div class="table-scroll target-api-table-scroll" tabindex="0"><table class="target-api-material-table"><thead><tr><th>{{ labels.apiMaterialsUse }}</th><th>{{ labels.targetApiMethod }}</th><th>{{ labels.targetApiName }}</th><th>{{ labels.targetApiPath }}</th><th>{{ labels.apiMaterialsParameters }}</th><th>{{ labels.apiMaterialsSource }}</th><th>{{ labels.targetApiMaterialLoadState }}</th></tr></thead><tbody>
-          <tr v-for="material in apiMaterials" :key="material.materialKey"><td><input type="checkbox" :checked="selectedMaterialKeys.includes(material.materialKey)" :disabled="busy || loadedMaterialKeys.has(material.materialKey)" @change="emit('toggle-material', material.materialKey, ($event.target as HTMLInputElement).checked)" /></td><td><span class="status-pill">{{ material.httpMethod }}</span></td><td>{{ material.name }}</td><td><code>{{ material.path }}</code></td><td>{{ materialParameterSummary(material) }}</td><td>{{ labels.apiMaterialsSourceOpenApi }}</td><td>{{ loadedMaterialKeys.has(material.materialKey) ? labels.targetApiMaterialAlreadyLoaded : material.normalizationStatus === 'ready' ? labels.apiMaterialsReady : labels.targetApiMaterialRequiresConfiguration.replace('{reason}', normalizationReason(material.normalizationErrorCode)) }}</td></tr>
+        <div class="table-scroll target-api-table-scroll" tabindex="0"><ConsoleActionButton size="small" @click="targetMaterialsTable.reset">{{ labels.resetTableWidths }}</ConsoleActionButton>
+<table v-table-widths="[targetMaterialsTable, labels.resizeTableColumn]" class="target-api-material-table"><thead><tr><th>{{ labels.apiMaterialsUse }}</th><th>{{ labels.targetApiMethod }}</th><th>{{ labels.targetApiName }}</th><th>{{ labels.targetApiPath }}</th><th>{{ labels.apiMaterialsParameters }}</th><th>{{ labels.apiMaterialsSource }}</th><th>{{ labels.targetApiMaterialLoadState }}</th></tr></thead><tbody>
+          <tr v-for="material in apiMaterials" :key="material.materialKey"><td><input type="checkbox" :checked="selectedMaterialKeys.includes(material.materialKey)" :disabled="busy || loadedMaterialKeys.has(material.materialKey)" @change="emit('toggle-material', material.materialKey, ($event.target as HTMLInputElement).checked)" /></td><td><StatusCapsule :label="material.httpMethod" /></td><td>{{ material.name }}</td><td><code>{{ material.path }}</code></td><td>{{ materialParameterSummary(material) }}</td><td>{{ labels.apiMaterialsSourceOpenApi }}</td><td>{{ loadedMaterialKeys.has(material.materialKey) ? labels.targetApiMaterialAlreadyLoaded : material.normalizationStatus === 'ready' ? labels.apiMaterialsReady : labels.targetApiMaterialRequiresConfiguration.replace('{reason}', normalizationReason(material.normalizationErrorCode)) }}</td></tr>
         </tbody></table></div>
         <p v-if="!apiMaterials.length" class="empty-state">{{ labels.targetApiMaterialEmpty }}</p>
-        <div class="action-row facts-editor-actions"><button class="secondary-action" type="button" :disabled="busy" @click="materialDialogOpen = false">{{ labels.collectionFactsCancel }}</button><button class="primary-action" type="button" :disabled="!enabled || busy || !selectedMaterialKeys.length" @click="emit('import-materials')">{{ labels.targetApiMaterialLoadAction }}</button></div>
-      </section>
-    </div>
+        <div class="action-row facts-editor-actions"><ConsoleActionButton tone="secondary" native-type="button" :disabled="busy" @click="materialDialogOpen = false">{{ labels.collectionFactsCancel }}</ConsoleActionButton><ConsoleActionButton tone="primary" native-type="button" :disabled="!enabled || busy || !selectedMaterialKeys.length" @click="emit('import-materials')">{{ labels.targetApiMaterialLoadAction }}</ConsoleActionButton></div>
+
+</ElDialog></Teleport>
 
     <MappingBatchOperationsDialog v-if="batchOpen" :labels="labels" :title="labels.targetApiBatchTitle" :busy="busy" :saving-file="savingFile" :preview="importPreview" :error="fileError || error" :enabled="enabled" @close="closeBatch" @download-template="downloadTemplate" @export="exportConfigurations" @import="importFile" @apply="emit('apply-import')" />
   </div>

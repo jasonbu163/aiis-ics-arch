@@ -1,0 +1,13 @@
+{
+  "jsonLinesParsed": 146,
+  "actualServiceNamed1062Count": 1,
+  "eachHasConfirmedRollbackSameRequestId": true,
+  "uniqueConflictRequestIds": [
+    "0HNPKN3CLC5KN"
+  ],
+  "createdEventsWithRequestIdPlanId": 12,
+  "secretLeakScan": "no_match",
+  "stdoutFileParse": "pass",
+  "ownedApiPidsAbsent": true,
+  "port18108RebindWithReuseAddr": true
+}

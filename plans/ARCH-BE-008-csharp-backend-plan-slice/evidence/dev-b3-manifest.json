@@ -1,0 +1,20 @@
+{
+  "task": "ARCH-BE-008",
+  "runId": "2c9e03db9080c5c960a29359",
+  "root": "/private/tmp/arch-be008-run-uzFgtzgt",
+  "project": "aiis-arch-be008",
+  "container": "aiis-arch-be008-mysql",
+  "network": "aiis-arch-be008-net",
+  "volume": "aiis-arch-be008-mysql-data",
+  "database": "arch_be008_plan",
+  "host": "127.0.0.1",
+  "port": 13388,
+  "image": "mysql:8.4.6",
+  "state": "prepared",
+  "containerId": "0139dd32f355467fa6e9137517a598ba4378103215da2b40d673fbc63055994c",
+  "serverVersion": "8.4.6",
+  "imageDigest": [
+    "mysql@sha256:869218921e61d6c3c89820955d63cca42971f0e3e6c1e2792247bbd944ebc6e9"
+  ],
+  "imageArchitecture": "arm64"
+}

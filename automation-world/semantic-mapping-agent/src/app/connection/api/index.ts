@@ -12,15 +12,10 @@ import type {
   BackendOpenApiResult,
 } from "../types";
 
-const BACKEND_CONNECTION_STORAGE_KEY = "sma.backend-connection.v1";
+import { currentConnection, changeConfiguration } from "../../twin-facts/api/localConfiguration";
 const OPENAPI_REQUEST_TIMEOUT_MS = 5000;
 const OPENAPI_HTTP_METHODS = ["get", "put", "post", "delete", "options", "head", "patch", "trace"] as const;
 const MAX_OPENAPI_TEMPLATE_DEPTH = 8;
-const DEFAULT_BACKEND_CONNECTION: BackendConnectionProfile = {
-  scheme: "http",
-  host: "",
-  port: 0,
-};
 
 let defaults: AppDefaults = { backendBaseUrl: "", externalIoEnabled: false, configurationSource: "browser-preview" };
 export async function loadAppDefaults(): Promise<AppDefaults> {
@@ -35,6 +30,7 @@ export async function requireExternalIo(): Promise<void> {
 
 /** HTTP management uses the saved Backend profile in both WebView and browser. */
 export async function managementRequest<T>(path: string, options: { method?: string; body?: unknown } = {}): Promise<T> {
+  if (options.method && options.method !== "GET") throw new Error("SMA_LOCAL_CONFIGURATION_EXECUTION_NOT_AVAILABLE");
   await requireExternalIo();
   const baseUrl = formatBackendBaseUrl(loadBackendConnectionProfile());
   const controller = new AbortController();
@@ -58,39 +54,13 @@ export async function managementRequest<T>(path: string, options: { method?: str
   } finally { globalThis.clearTimeout(timer); }
 }
 
-export function loadBackendConnectionProfile(): BackendConnectionProfile {
-  if (typeof window === "undefined") return { ...DEFAULT_BACKEND_CONNECTION };
-
-  try {
-    const raw = window.localStorage.getItem(BACKEND_CONNECTION_STORAGE_KEY);
-    if (!raw) {
-      if (!defaults.backendBaseUrl) return { ...DEFAULT_BACKEND_CONNECTION };
-      const url = new URL(defaults.backendBaseUrl);
-      return { scheme: url.protocol === "https:" ? "https" : "http", host: url.hostname, port: Number(url.port || (url.protocol === "https:" ? 443 : 80)) };
-    }
-    return normalizeBackendConnection(JSON.parse(raw));
-  } catch {
-    return { ...DEFAULT_BACKEND_CONNECTION };
-  }
-}
-
-export function saveBackendConnectionProfile(profile: BackendConnectionProfile): BackendConnectionProfile {
-  const normalized = normalizeBackendConnection(profile);
-  formatBackendBaseUrl(normalized);
-
-  if (typeof window !== "undefined") {
-    if (!window.dispatchEvent(new Event("sma-backend-connection-changing", { cancelable: true }))) {
-      throw new Error("BACKEND_CONNECTION_CHANGE_CANCELLED");
-    }
-    try {
-      window.localStorage.setItem(BACKEND_CONNECTION_STORAGE_KEY, JSON.stringify(normalized));
-      window.dispatchEvent(new Event("sma-backend-connection-changed"));
-    } catch {
-      throw new Error("BACKEND_CONNECTION_SAVE_FAILED");
-    }
-  }
-
-  return normalized;
+export function loadBackendConnectionProfile(): BackendConnectionProfile { return currentConnection(); }
+export async function saveBackendConnectionProfile(profile: BackendConnectionProfile, expectedRevision?: number): Promise<BackendConnectionProfile> {
+  const normalized = normalizeBackendConnection(profile); formatBackendBaseUrl(normalized);
+  if (!window.dispatchEvent(new Event("sma-backend-connection-changing", { cancelable: true }))) throw new Error("BACKEND_CONNECTION_CHANGE_CANCELLED");
+  const saved = await changeConfiguration({ kind: "connection", resource: "connection", id: null, payload: normalized }, expectedRevision);
+  window.dispatchEvent(new Event("sma-backend-connection-changed"));
+  return saved.document.connection;
 }
 
 export async function testBackendOpenApi(

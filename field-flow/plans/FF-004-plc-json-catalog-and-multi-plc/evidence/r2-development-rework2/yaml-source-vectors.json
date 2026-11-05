@@ -1,0 +1,1026 @@
+[
+  {
+    "ast": {
+      "x": "http://host/it's:a&b*c!",
+      "y": "ok"
+    },
+    "family": "lf",
+    "outcome": "accepted",
+    "source": "# comment ' \" & *\nx: http://host/it's:a&b*c!\ny: ok\n"
+  },
+  {
+    "ast": {
+      "x": "plain continuation ' &literal *literal !",
+      "y": "ok"
+    },
+    "family": "lf",
+    "outcome": "accepted",
+    "source": "x: plain\n  continuation ' &literal *literal !\ny: ok\n"
+  },
+  {
+    "ast": {
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "lf",
+    "outcome": "accepted",
+    "source": "x: 'quoted\n  &literal *literal !'\ny: ok\n"
+  },
+  {
+    "ast": {
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "lf",
+    "outcome": "accepted",
+    "source": "x: \"quoted\n  &literal *literal !\"\ny: ok\n"
+  },
+  {
+    "ast": {
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "lf",
+    "outcome": "accepted",
+    "source": "x: |-\n  &literal *literal ' \"\ny: ok\n"
+  },
+  {
+    "ast": {
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "lf",
+    "outcome": "accepted",
+    "source": "x: >2-\n  &literal *literal ' \"\ny: ok\n"
+  },
+  {
+    "ast": {
+      "x": {
+        "a": "literal & * !",
+        "b": "http://host/it's:a&b*c!"
+      }
+    },
+    "family": "lf",
+    "outcome": "accepted",
+    "source": "x: {\"a\":\"literal & * !\", 'b':http://host/it's:a&b*c!}\n"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "http://host/it's:a&b*c!",
+      "y": "ok"
+    },
+    "family": "lf",
+    "outcome": "config_yaml_alias",
+    "source": "# comment ' \" & *\nx: http://host/it's:a&b*c!\ny: ok\na: &deps [one]\nb: *deps\n"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "plain continuation ' &literal *literal !",
+      "y": "ok"
+    },
+    "family": "lf",
+    "outcome": "config_yaml_alias",
+    "source": "x: plain\n  continuation ' &literal *literal !\ny: ok\na: &deps [one]\nb: *deps\n"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "lf",
+    "outcome": "config_yaml_alias",
+    "source": "x: 'quoted\n  &literal *literal !'\ny: ok\na: &deps [one]\nb: *deps\n"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "lf",
+    "outcome": "config_yaml_alias",
+    "source": "x: \"quoted\n  &literal *literal !\"\ny: ok\na: &deps [one]\nb: *deps\n"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "lf",
+    "outcome": "config_yaml_alias",
+    "source": "x: |-\n  &literal *literal ' \"\ny: ok\na: &deps [one]\nb: *deps\n"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "lf",
+    "outcome": "config_yaml_alias",
+    "source": "x: >2-\n  &literal *literal ' \"\ny: ok\na: &deps [one]\nb: *deps\n"
+  },
+  {
+    "ast": {
+      "x": "http://host/it's:a&b*c!",
+      "y": "ok"
+    },
+    "family": "crlf",
+    "outcome": "accepted",
+    "source": "# comment ' \" & *\r\nx: http://host/it's:a&b*c!\r\ny: ok\r\n"
+  },
+  {
+    "ast": {
+      "x": "plain continuation ' &literal *literal !",
+      "y": "ok"
+    },
+    "family": "crlf",
+    "outcome": "accepted",
+    "source": "x: plain\r\n  continuation ' &literal *literal !\r\ny: ok\r\n"
+  },
+  {
+    "ast": {
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "crlf",
+    "outcome": "accepted",
+    "source": "x: 'quoted\r\n  &literal *literal !'\r\ny: ok\r\n"
+  },
+  {
+    "ast": {
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "crlf",
+    "outcome": "accepted",
+    "source": "x: \"quoted\r\n  &literal *literal !\"\r\ny: ok\r\n"
+  },
+  {
+    "ast": {
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "crlf",
+    "outcome": "accepted",
+    "source": "x: |-\r\n  &literal *literal ' \"\r\ny: ok\r\n"
+  },
+  {
+    "ast": {
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "crlf",
+    "outcome": "accepted",
+    "source": "x: >2-\r\n  &literal *literal ' \"\r\ny: ok\r\n"
+  },
+  {
+    "ast": {
+      "x": {
+        "a": "literal & * !",
+        "b": "http://host/it's:a&b*c!"
+      }
+    },
+    "family": "crlf",
+    "outcome": "accepted",
+    "source": "x: {\"a\":\"literal & * !\", 'b':http://host/it's:a&b*c!}\r\n"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "http://host/it's:a&b*c!",
+      "y": "ok"
+    },
+    "family": "crlf",
+    "outcome": "config_yaml_alias",
+    "source": "# comment ' \" & *\r\nx: http://host/it's:a&b*c!\r\ny: ok\r\na: &deps [one]\r\nb: *deps\r\n"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "plain continuation ' &literal *literal !",
+      "y": "ok"
+    },
+    "family": "crlf",
+    "outcome": "config_yaml_alias",
+    "source": "x: plain\r\n  continuation ' &literal *literal !\r\ny: ok\r\na: &deps [one]\r\nb: *deps\r\n"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "crlf",
+    "outcome": "config_yaml_alias",
+    "source": "x: 'quoted\r\n  &literal *literal !'\r\ny: ok\r\na: &deps [one]\r\nb: *deps\r\n"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "crlf",
+    "outcome": "config_yaml_alias",
+    "source": "x: \"quoted\r\n  &literal *literal !\"\r\ny: ok\r\na: &deps [one]\r\nb: *deps\r\n"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "crlf",
+    "outcome": "config_yaml_alias",
+    "source": "x: |-\r\n  &literal *literal ' \"\r\ny: ok\r\na: &deps [one]\r\nb: *deps\r\n"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "crlf",
+    "outcome": "config_yaml_alias",
+    "source": "x: >2-\r\n  &literal *literal ' \"\r\ny: ok\r\na: &deps [one]\r\nb: *deps\r\n"
+  },
+  {
+    "ast": {
+      "x": "http://host/it's:a&b*c!",
+      "y": "ok"
+    },
+    "family": "cr",
+    "outcome": "accepted",
+    "source": "# comment ' \" & *\rx: http://host/it's:a&b*c!\ry: ok\r"
+  },
+  {
+    "ast": {
+      "x": "plain continuation ' &literal *literal !",
+      "y": "ok"
+    },
+    "family": "cr",
+    "outcome": "accepted",
+    "source": "x: plain\r  continuation ' &literal *literal !\ry: ok\r"
+  },
+  {
+    "ast": {
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "cr",
+    "outcome": "accepted",
+    "source": "x: 'quoted\r  &literal *literal !'\ry: ok\r"
+  },
+  {
+    "ast": {
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "cr",
+    "outcome": "accepted",
+    "source": "x: \"quoted\r  &literal *literal !\"\ry: ok\r"
+  },
+  {
+    "ast": {
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "cr",
+    "outcome": "accepted",
+    "source": "x: |-\r  &literal *literal ' \"\ry: ok\r"
+  },
+  {
+    "ast": {
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "cr",
+    "outcome": "accepted",
+    "source": "x: >2-\r  &literal *literal ' \"\ry: ok\r"
+  },
+  {
+    "ast": {
+      "x": {
+        "a": "literal & * !",
+        "b": "http://host/it's:a&b*c!"
+      }
+    },
+    "family": "cr",
+    "outcome": "accepted",
+    "source": "x: {\"a\":\"literal & * !\", 'b':http://host/it's:a&b*c!}\r"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "http://host/it's:a&b*c!",
+      "y": "ok"
+    },
+    "family": "cr",
+    "outcome": "config_yaml_alias",
+    "source": "# comment ' \" & *\rx: http://host/it's:a&b*c!\ry: ok\ra: &deps [one]\rb: *deps\r"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "plain continuation ' &literal *literal !",
+      "y": "ok"
+    },
+    "family": "cr",
+    "outcome": "config_yaml_alias",
+    "source": "x: plain\r  continuation ' &literal *literal !\ry: ok\ra: &deps [one]\rb: *deps\r"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "cr",
+    "outcome": "config_yaml_alias",
+    "source": "x: 'quoted\r  &literal *literal !'\ry: ok\ra: &deps [one]\rb: *deps\r"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "cr",
+    "outcome": "config_yaml_alias",
+    "source": "x: \"quoted\r  &literal *literal !\"\ry: ok\ra: &deps [one]\rb: *deps\r"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "cr",
+    "outcome": "config_yaml_alias",
+    "source": "x: |-\r  &literal *literal ' \"\ry: ok\ra: &deps [one]\rb: *deps\r"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "cr",
+    "outcome": "config_yaml_alias",
+    "source": "x: >2-\r  &literal *literal ' \"\ry: ok\ra: &deps [one]\rb: *deps\r"
+  },
+  {
+    "ast": {
+      "x": "http://host/it's:a&b*c!",
+      "y": "ok"
+    },
+    "family": "nel",
+    "outcome": "accepted",
+    "source": "# comment ' \" & *x: http://host/it's:a&b*c!y: ok"
+  },
+  {
+    "ast": {
+      "x": "plain continuation ' &literal *literal !",
+      "y": "ok"
+    },
+    "family": "nel",
+    "outcome": "accepted",
+    "source": "x: plain  continuation ' &literal *literal !y: ok"
+  },
+  {
+    "ast": {
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "nel",
+    "outcome": "accepted",
+    "source": "x: 'quoted  &literal *literal !'y: ok"
+  },
+  {
+    "ast": {
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "nel",
+    "outcome": "accepted",
+    "source": "x: \"quoted  &literal *literal !\"y: ok"
+  },
+  {
+    "ast": {
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "nel",
+    "outcome": "accepted",
+    "source": "x: |-  &literal *literal ' \"y: ok"
+  },
+  {
+    "ast": {
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "nel",
+    "outcome": "accepted",
+    "source": "x: >2-  &literal *literal ' \"y: ok"
+  },
+  {
+    "ast": {
+      "x": {
+        "a": "literal & * !",
+        "b": "http://host/it's:a&b*c!"
+      }
+    },
+    "family": "nel",
+    "outcome": "accepted",
+    "source": "x: {\"a\":\"literal & * !\", 'b':http://host/it's:a&b*c!}"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "http://host/it's:a&b*c!",
+      "y": "ok"
+    },
+    "family": "nel",
+    "outcome": "config_yaml_alias",
+    "source": "# comment ' \" & *x: http://host/it's:a&b*c!y: oka: &deps [one]b: *deps"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "plain continuation ' &literal *literal !",
+      "y": "ok"
+    },
+    "family": "nel",
+    "outcome": "config_yaml_alias",
+    "source": "x: plain  continuation ' &literal *literal !y: oka: &deps [one]b: *deps"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "nel",
+    "outcome": "config_yaml_alias",
+    "source": "x: 'quoted  &literal *literal !'y: oka: &deps [one]b: *deps"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "nel",
+    "outcome": "config_yaml_alias",
+    "source": "x: \"quoted  &literal *literal !\"y: oka: &deps [one]b: *deps"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "nel",
+    "outcome": "config_yaml_alias",
+    "source": "x: |-  &literal *literal ' \"y: oka: &deps [one]b: *deps"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "nel",
+    "outcome": "config_yaml_alias",
+    "source": "x: >2-  &literal *literal ' \"y: oka: &deps [one]b: *deps"
+  },
+  {
+    "ast": {
+      "x": "http://host/it's:a&b*c!",
+      "y": "ok"
+    },
+    "family": "ls",
+    "outcome": "accepted",
+    "source": "# comment ' \" & * x: http://host/it's:a&b*c! y: ok "
+  },
+  {
+    "ast": {
+      "x": "plain continuation ' &literal *literal !",
+      "y": "ok"
+    },
+    "family": "ls",
+    "outcome": "accepted",
+    "source": "x: plain   continuation ' &literal *literal ! y: ok "
+  },
+  {
+    "ast": {
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "ls",
+    "outcome": "accepted",
+    "source": "x: 'quoted   &literal *literal !' y: ok "
+  },
+  {
+    "ast": {
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "ls",
+    "outcome": "accepted",
+    "source": "x: \"quoted   &literal *literal !\" y: ok "
+  },
+  {
+    "ast": {
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "ls",
+    "outcome": "accepted",
+    "source": "x: |-   &literal *literal ' \" y: ok "
+  },
+  {
+    "ast": {
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "ls",
+    "outcome": "accepted",
+    "source": "x: >2-   &literal *literal ' \" y: ok "
+  },
+  {
+    "ast": {
+      "x": {
+        "a": "literal & * !",
+        "b": "http://host/it's:a&b*c!"
+      }
+    },
+    "family": "ls",
+    "outcome": "accepted",
+    "source": "x: {\"a\":\"literal & * !\", 'b':http://host/it's:a&b*c!} "
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "http://host/it's:a&b*c!",
+      "y": "ok"
+    },
+    "family": "ls",
+    "outcome": "config_yaml_alias",
+    "source": "# comment ' \" & * x: http://host/it's:a&b*c! y: ok a: &deps [one] b: *deps "
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "plain continuation ' &literal *literal !",
+      "y": "ok"
+    },
+    "family": "ls",
+    "outcome": "config_yaml_alias",
+    "source": "x: plain   continuation ' &literal *literal ! y: ok a: &deps [one] b: *deps "
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "ls",
+    "outcome": "config_yaml_alias",
+    "source": "x: 'quoted   &literal *literal !' y: ok a: &deps [one] b: *deps "
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "ls",
+    "outcome": "config_yaml_alias",
+    "source": "x: \"quoted   &literal *literal !\" y: ok a: &deps [one] b: *deps "
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "ls",
+    "outcome": "config_yaml_alias",
+    "source": "x: |-   &literal *literal ' \" y: ok a: &deps [one] b: *deps "
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "ls",
+    "outcome": "config_yaml_alias",
+    "source": "x: >2-   &literal *literal ' \" y: ok a: &deps [one] b: *deps "
+  },
+  {
+    "ast": {
+      "x": "http://host/it's:a&b*c!",
+      "y": "ok"
+    },
+    "family": "ps",
+    "outcome": "accepted",
+    "source": "# comment ' \" & * x: http://host/it's:a&b*c! y: ok "
+  },
+  {
+    "ast": {
+      "x": "plain continuation ' &literal *literal !",
+      "y": "ok"
+    },
+    "family": "ps",
+    "outcome": "accepted",
+    "source": "x: plain   continuation ' &literal *literal ! y: ok "
+  },
+  {
+    "ast": {
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "ps",
+    "outcome": "accepted",
+    "source": "x: 'quoted   &literal *literal !' y: ok "
+  },
+  {
+    "ast": {
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "ps",
+    "outcome": "accepted",
+    "source": "x: \"quoted   &literal *literal !\" y: ok "
+  },
+  {
+    "ast": {
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "ps",
+    "outcome": "accepted",
+    "source": "x: |-   &literal *literal ' \" y: ok "
+  },
+  {
+    "ast": {
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "ps",
+    "outcome": "accepted",
+    "source": "x: >2-   &literal *literal ' \" y: ok "
+  },
+  {
+    "ast": {
+      "x": {
+        "a": "literal & * !",
+        "b": "http://host/it's:a&b*c!"
+      }
+    },
+    "family": "ps",
+    "outcome": "accepted",
+    "source": "x: {\"a\":\"literal & * !\", 'b':http://host/it's:a&b*c!} "
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "http://host/it's:a&b*c!",
+      "y": "ok"
+    },
+    "family": "ps",
+    "outcome": "config_yaml_alias",
+    "source": "# comment ' \" & * x: http://host/it's:a&b*c! y: ok a: &deps [one] b: *deps "
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "plain continuation ' &literal *literal !",
+      "y": "ok"
+    },
+    "family": "ps",
+    "outcome": "config_yaml_alias",
+    "source": "x: plain   continuation ' &literal *literal ! y: ok a: &deps [one] b: *deps "
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "ps",
+    "outcome": "config_yaml_alias",
+    "source": "x: 'quoted   &literal *literal !' y: ok a: &deps [one] b: *deps "
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "quoted &literal *literal !",
+      "y": "ok"
+    },
+    "family": "ps",
+    "outcome": "config_yaml_alias",
+    "source": "x: \"quoted   &literal *literal !\" y: ok a: &deps [one] b: *deps "
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "ps",
+    "outcome": "config_yaml_alias",
+    "source": "x: |-   &literal *literal ' \" y: ok a: &deps [one] b: *deps "
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "b": [
+        "one"
+      ],
+      "x": "&literal *literal ' \"",
+      "y": "ok"
+    },
+    "family": "ps",
+    "outcome": "config_yaml_alias",
+    "source": "x: >2-   &literal *literal ' \" y: ok a: &deps [one] b: *deps "
+  },
+  {
+    "ast": {
+      "x": {
+        "a": [
+          "one"
+        ],
+        "c": [
+          "one"
+        ]
+      }
+    },
+    "literal": "x: {\"a\":[one], \"c\":[one]}\n",
+    "outcome": "config_yaml_alias",
+    "source": "x: {\"a\":&b [one], \"c\":*b}\n"
+  },
+  {
+    "ast": {
+      "x": {
+        "a": [
+          "one"
+        ],
+        "c": [
+          "one"
+        ]
+      }
+    },
+    "literal": "x: {'a':[one], 'c':[one]}\n",
+    "outcome": "config_yaml_alias",
+    "source": "x: {'a':&b [one], 'c':*b}\n"
+  },
+  {
+    "ast": {
+      "x": {
+        "a": [
+          "one"
+        ],
+        "c": [
+          "one"
+        ]
+      }
+    },
+    "literal": "x: {\"a\": [one], \"c\": [one]}\n",
+    "outcome": "config_yaml_alias",
+    "source": "x: {\"a\": &b [one], \"c\": *b}\n"
+  },
+  {
+    "ast": {
+      "a": [
+        "one"
+      ],
+      "c": [
+        "one"
+      ]
+    },
+    "literal": "\"a\": [one]\n\"c\": [one]\n",
+    "outcome": "config_yaml_alias",
+    "source": "\"a\": &b [one]\n\"c\": *b\n"
+  },
+  {
+    "alias_config": "# source comment\nschema_version: 2\ninstance_id: ff-rust-catalog-demo\nplc_files: [plcs/s7-a.json, plcs/s7-b.json]\nplc_runtime:\n  - {device_id: s7_a, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}\n  - {device_id: s7_b, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}\nflows:\n  - id: read_pair\n    kind: read_points\n    business_name: synthetic_pair_samples\n    interval_ms: 200\n    device_ids: &deps [s7_a, s7_b]\n    reads: [{device_id: s7_a, point_id: value}, {device_id: s7_a, point_id: ready}, {device_id: s7_a, point_id: result}, {device_id: s7_b, point_id: value}]\n  - id: demo01\n    kind: demo01\n    business_name: synthetic_command_to_int\n    interval_ms: 500\n    device_ids: *deps\n    source_id: demo01-feed\n    get_url: http://127.0.0.1:34880/demo01/command\n    input_max_age_ms: 10000\n    target: {device_id: s7_a, point_id: value}\nhttp: {connect_timeout_ms: 500, total_timeout_ms: 1500, pool_wait_ms: 500, max_connections: 8, max_body_bytes: 4096}\nshutdown_timeout_ms: 15000\n",
+    "family": "lf",
+    "full_config": "# source comment\nschema_version: 2\ninstance_id: ff-rust-catalog-demo\nplc_files: [plcs/s7-a.json, plcs/s7-b.json]\nplc_runtime:\n  - {device_id: s7_a, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}\n  - {device_id: s7_b, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}\nflows:\n  - id: read_pair\n    kind: read_points\n    business_name: synthetic_pair_samples\n    interval_ms: 200\n    device_ids: [s7_a, s7_b]\n    reads: [{device_id: s7_a, point_id: value}, {device_id: s7_a, point_id: ready}, {device_id: s7_a, point_id: result}, {device_id: s7_b, point_id: value}]\n  - id: demo01\n    kind: demo01\n    business_name: synthetic_command_to_int\n    interval_ms: 500\n    device_ids: [s7_a]\n    source_id: demo01-feed\n    get_url: http://127.0.0.1:34880/demo01/command\n    input_max_age_ms: 10000\n    target: {device_id: s7_a, point_id: value}\nhttp: {connect_timeout_ms: 500, total_timeout_ms: 1500, pool_wait_ms: 500, max_connections: 8, max_body_bytes: 4096}\nshutdown_timeout_ms: 15000\n",
+    "outcome": "typed_equal_and_alias_rejected"
+  },
+  {
+    "alias_config": "# source comment\r\nschema_version: 2\r\ninstance_id: ff-rust-catalog-demo\r\nplc_files: [plcs/s7-a.json, plcs/s7-b.json]\r\nplc_runtime:\r\n  - {device_id: s7_a, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}\r\n  - {device_id: s7_b, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}\r\nflows:\r\n  - id: read_pair\r\n    kind: read_points\r\n    business_name: synthetic_pair_samples\r\n    interval_ms: 200\r\n    device_ids: &deps [s7_a, s7_b]\r\n    reads: [{device_id: s7_a, point_id: value}, {device_id: s7_a, point_id: ready}, {device_id: s7_a, point_id: result}, {device_id: s7_b, point_id: value}]\r\n  - id: demo01\r\n    kind: demo01\r\n    business_name: synthetic_command_to_int\r\n    interval_ms: 500\r\n    device_ids: *deps\r\n    source_id: demo01-feed\r\n    get_url: http://127.0.0.1:34880/demo01/command\r\n    input_max_age_ms: 10000\r\n    target: {device_id: s7_a, point_id: value}\r\nhttp: {connect_timeout_ms: 500, total_timeout_ms: 1500, pool_wait_ms: 500, max_connections: 8, max_body_bytes: 4096}\r\nshutdown_timeout_ms: 15000\r\n",
+    "family": "crlf",
+    "full_config": "# source comment\r\nschema_version: 2\r\ninstance_id: ff-rust-catalog-demo\r\nplc_files: [plcs/s7-a.json, plcs/s7-b.json]\r\nplc_runtime:\r\n  - {device_id: s7_a, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}\r\n  - {device_id: s7_b, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}\r\nflows:\r\n  - id: read_pair\r\n    kind: read_points\r\n    business_name: synthetic_pair_samples\r\n    interval_ms: 200\r\n    device_ids: [s7_a, s7_b]\r\n    reads: [{device_id: s7_a, point_id: value}, {device_id: s7_a, point_id: ready}, {device_id: s7_a, point_id: result}, {device_id: s7_b, point_id: value}]\r\n  - id: demo01\r\n    kind: demo01\r\n    business_name: synthetic_command_to_int\r\n    interval_ms: 500\r\n    device_ids: [s7_a]\r\n    source_id: demo01-feed\r\n    get_url: http://127.0.0.1:34880/demo01/command\r\n    input_max_age_ms: 10000\r\n    target: {device_id: s7_a, point_id: value}\r\nhttp: {connect_timeout_ms: 500, total_timeout_ms: 1500, pool_wait_ms: 500, max_connections: 8, max_body_bytes: 4096}\r\nshutdown_timeout_ms: 15000\r\n",
+    "outcome": "typed_equal_and_alias_rejected"
+  },
+  {
+    "alias_config": "# source comment\rschema_version: 2\rinstance_id: ff-rust-catalog-demo\rplc_files: [plcs/s7-a.json, plcs/s7-b.json]\rplc_runtime:\r  - {device_id: s7_a, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}\r  - {device_id: s7_b, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}\rflows:\r  - id: read_pair\r    kind: read_points\r    business_name: synthetic_pair_samples\r    interval_ms: 200\r    device_ids: &deps [s7_a, s7_b]\r    reads: [{device_id: s7_a, point_id: value}, {device_id: s7_a, point_id: ready}, {device_id: s7_a, point_id: result}, {device_id: s7_b, point_id: value}]\r  - id: demo01\r    kind: demo01\r    business_name: synthetic_command_to_int\r    interval_ms: 500\r    device_ids: *deps\r    source_id: demo01-feed\r    get_url: http://127.0.0.1:34880/demo01/command\r    input_max_age_ms: 10000\r    target: {device_id: s7_a, point_id: value}\rhttp: {connect_timeout_ms: 500, total_timeout_ms: 1500, pool_wait_ms: 500, max_connections: 8, max_body_bytes: 4096}\rshutdown_timeout_ms: 15000\r",
+    "family": "cr",
+    "full_config": "# source comment\rschema_version: 2\rinstance_id: ff-rust-catalog-demo\rplc_files: [plcs/s7-a.json, plcs/s7-b.json]\rplc_runtime:\r  - {device_id: s7_a, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}\r  - {device_id: s7_b, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}\rflows:\r  - id: read_pair\r    kind: read_points\r    business_name: synthetic_pair_samples\r    interval_ms: 200\r    device_ids: [s7_a, s7_b]\r    reads: [{device_id: s7_a, point_id: value}, {device_id: s7_a, point_id: ready}, {device_id: s7_a, point_id: result}, {device_id: s7_b, point_id: value}]\r  - id: demo01\r    kind: demo01\r    business_name: synthetic_command_to_int\r    interval_ms: 500\r    device_ids: [s7_a]\r    source_id: demo01-feed\r    get_url: http://127.0.0.1:34880/demo01/command\r    input_max_age_ms: 10000\r    target: {device_id: s7_a, point_id: value}\rhttp: {connect_timeout_ms: 500, total_timeout_ms: 1500, pool_wait_ms: 500, max_connections: 8, max_body_bytes: 4096}\rshutdown_timeout_ms: 15000\r",
+    "outcome": "typed_equal_and_alias_rejected"
+  },
+  {
+    "alias_config": "# source commentschema_version: 2instance_id: ff-rust-catalog-demoplc_files: [plcs/s7-a.json, plcs/s7-b.json]plc_runtime:  - {device_id: s7_a, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}  - {device_id: s7_b, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}flows:  - id: read_pair    kind: read_points    business_name: synthetic_pair_samples    interval_ms: 200    device_ids: &deps [s7_a, s7_b]    reads: [{device_id: s7_a, point_id: value}, {device_id: s7_a, point_id: ready}, {device_id: s7_a, point_id: result}, {device_id: s7_b, point_id: value}]  - id: demo01    kind: demo01    business_name: synthetic_command_to_int    interval_ms: 500    device_ids: *deps    source_id: demo01-feed    get_url: http://127.0.0.1:34880/demo01/command    input_max_age_ms: 10000    target: {device_id: s7_a, point_id: value}http: {connect_timeout_ms: 500, total_timeout_ms: 1500, pool_wait_ms: 500, max_connections: 8, max_body_bytes: 4096}shutdown_timeout_ms: 15000",
+    "family": "nel",
+    "full_config": "# source commentschema_version: 2instance_id: ff-rust-catalog-demoplc_files: [plcs/s7-a.json, plcs/s7-b.json]plc_runtime:  - {device_id: s7_a, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}  - {device_id: s7_b, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}flows:  - id: read_pair    kind: read_points    business_name: synthetic_pair_samples    interval_ms: 200    device_ids: [s7_a, s7_b]    reads: [{device_id: s7_a, point_id: value}, {device_id: s7_a, point_id: ready}, {device_id: s7_a, point_id: result}, {device_id: s7_b, point_id: value}]  - id: demo01    kind: demo01    business_name: synthetic_command_to_int    interval_ms: 500    device_ids: [s7_a]    source_id: demo01-feed    get_url: http://127.0.0.1:34880/demo01/command    input_max_age_ms: 10000    target: {device_id: s7_a, point_id: value}http: {connect_timeout_ms: 500, total_timeout_ms: 1500, pool_wait_ms: 500, max_connections: 8, max_body_bytes: 4096}shutdown_timeout_ms: 15000",
+    "outcome": "typed_equal_and_alias_rejected"
+  },
+  {
+    "alias_config": "# source comment schema_version: 2 instance_id: ff-rust-catalog-demo plc_files: [plcs/s7-a.json, plcs/s7-b.json] plc_runtime:   - {device_id: s7_a, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}   - {device_id: s7_b, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000} flows:   - id: read_pair     kind: read_points     business_name: synthetic_pair_samples     interval_ms: 200     device_ids: &deps [s7_a, s7_b]     reads: [{device_id: s7_a, point_id: value}, {device_id: s7_a, point_id: ready}, {device_id: s7_a, point_id: result}, {device_id: s7_b, point_id: value}]   - id: demo01     kind: demo01     business_name: synthetic_command_to_int     interval_ms: 500     device_ids: *deps     source_id: demo01-feed     get_url: http://127.0.0.1:34880/demo01/command     input_max_age_ms: 10000     target: {device_id: s7_a, point_id: value} http: {connect_timeout_ms: 500, total_timeout_ms: 1500, pool_wait_ms: 500, max_connections: 8, max_body_bytes: 4096} shutdown_timeout_ms: 15000 ",
+    "family": "ls",
+    "full_config": "# source comment schema_version: 2 instance_id: ff-rust-catalog-demo plc_files: [plcs/s7-a.json, plcs/s7-b.json] plc_runtime:   - {device_id: s7_a, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}   - {device_id: s7_b, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000} flows:   - id: read_pair     kind: read_points     business_name: synthetic_pair_samples     interval_ms: 200     device_ids: [s7_a, s7_b]     reads: [{device_id: s7_a, point_id: value}, {device_id: s7_a, point_id: ready}, {device_id: s7_a, point_id: result}, {device_id: s7_b, point_id: value}]   - id: demo01     kind: demo01     business_name: synthetic_command_to_int     interval_ms: 500     device_ids: [s7_a]     source_id: demo01-feed     get_url: http://127.0.0.1:34880/demo01/command     input_max_age_ms: 10000     target: {device_id: s7_a, point_id: value} http: {connect_timeout_ms: 500, total_timeout_ms: 1500, pool_wait_ms: 500, max_connections: 8, max_body_bytes: 4096} shutdown_timeout_ms: 15000 ",
+    "outcome": "typed_equal_and_alias_rejected"
+  },
+  {
+    "alias_config": "# source comment schema_version: 2 instance_id: ff-rust-catalog-demo plc_files: [plcs/s7-a.json, plcs/s7-b.json] plc_runtime:   - {device_id: s7_a, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}   - {device_id: s7_b, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000} flows:   - id: read_pair     kind: read_points     business_name: synthetic_pair_samples     interval_ms: 200     device_ids: &deps [s7_a, s7_b]     reads: [{device_id: s7_a, point_id: value}, {device_id: s7_a, point_id: ready}, {device_id: s7_a, point_id: result}, {device_id: s7_b, point_id: value}]   - id: demo01     kind: demo01     business_name: synthetic_command_to_int     interval_ms: 500     device_ids: *deps     source_id: demo01-feed     get_url: http://127.0.0.1:34880/demo01/command     input_max_age_ms: 10000     target: {device_id: s7_a, point_id: value} http: {connect_timeout_ms: 500, total_timeout_ms: 1500, pool_wait_ms: 500, max_connections: 8, max_body_bytes: 4096} shutdown_timeout_ms: 15000 ",
+    "family": "ps",
+    "full_config": "# source comment schema_version: 2 instance_id: ff-rust-catalog-demo plc_files: [plcs/s7-a.json, plcs/s7-b.json] plc_runtime:   - {device_id: s7_a, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}   - {device_id: s7_b, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000} flows:   - id: read_pair     kind: read_points     business_name: synthetic_pair_samples     interval_ms: 200     device_ids: [s7_a, s7_b]     reads: [{device_id: s7_a, point_id: value}, {device_id: s7_a, point_id: ready}, {device_id: s7_a, point_id: result}, {device_id: s7_b, point_id: value}]   - id: demo01     kind: demo01     business_name: synthetic_command_to_int     interval_ms: 500     device_ids: [s7_a]     source_id: demo01-feed     get_url: http://127.0.0.1:34880/demo01/command     input_max_age_ms: 10000     target: {device_id: s7_a, point_id: value} http: {connect_timeout_ms: 500, total_timeout_ms: 1500, pool_wait_ms: 500, max_connections: 8, max_body_bytes: 4096} shutdown_timeout_ms: 15000 ",
+    "outcome": "typed_equal_and_alias_rejected"
+  }
+]

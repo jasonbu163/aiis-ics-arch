@@ -1,0 +1,22 @@
+{
+  "task": "ARCH-BE-008",
+  "revision": "r1",
+  "round": "rework1",
+  "workRoot": "/private/tmp/arch-be008-dev-rework1-57i2YIoP",
+  "runRoot": "/private/tmp/arch-be008-run-GnRSwKDz",
+  "runId": "013d21e7c16865760980de3a",
+  "apiPids": [
+    59837,
+    59873
+  ],
+  "apiExitCodes": [
+    0,
+    0
+  ],
+  "pidsAbsent": true,
+  "port18108RebindWithReuseAddr": true,
+  "resourcesReadyForCoordinatorCleanup": true,
+  "privateCredentialsCopied": false,
+  "retainedResourcesReason": "original logs, secrets and private SDK retained until coordinator verifies persistence and QA2 dependency",
+  "coordinatorCleanupCommand": "BE008_COORDINATOR_CLEANUP_CONFIRMED=013d21e7c16865760980de3a backend-dotnet/tests/scripts/run-mysql-tests.sh cleanup --run-root /private/tmp/arch-be008-run-GnRSwKDz"
+}

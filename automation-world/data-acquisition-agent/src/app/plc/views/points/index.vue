@@ -1,4 +1,4 @@
-<!-- DAA本地SQLite视图：技术名/原路径、当前页全选与跨页显式选择，状态/动作仍归唯一local owner。 -->
+<!-- DAA点位：勾选统一用于命名/分组；保存草稿后编辑，预览/CAS与状态仍归唯一local owner。 -->
 <template>
   <template v-if="local">
 
@@ -10,7 +10,7 @@
           <ElFormItem :label="t('common.local.filter')"><ElInput v-model="local.query" clearable @input="local.pointPage = 1" /></ElFormItem>
         </ElForm>
       </template>
-      <div class="console-action-group daa-name-tools"><span>{{ t('plc.naming.selected', { count: local.selectedNameIds.length }) }}</span><ConsoleActionButton label-key="plc.naming.preview" :disabled="local.busy || local.dirty || local.editing || !local.selectedNameIds.length" @click="local.previewNames" /></div>
+      <div class="console-action-group daa-name-tools"><span>{{ t('plc.naming.selected', { count: local.selectedPoints.length }) }}</span><ConsoleActionButton label-key="plc.naming.preview" :disabled="local.busy || local.dirty || local.editing || !local.selectedPoints.length" @click="local.previewNames" /></div>
       <PointNamePreviewDialog :local="local" />
       <ConsoleTableShell v-model:current-page="local.pointPage" v-model:page-size="local.pointPageSize" :page-sizes="[10,20,50]" :total="local.points.length" layout="total, sizes, prev, pager, next">
         <el-table :data="local.pagedPoints" row-key="id" :empty-text="t(local.draft ? 'common.local.emptyPoints' : 'common.feedback.notLoaded')" :tooltip-options="{ appendTo: '#daa-feedback' }">
@@ -23,7 +23,7 @@
           <el-table-column :label="t('common.local.addressSummary')" min-width="145"><template #default="{ row }"><span v-if="row.address?.confirmed">DB{{ local.draft?.dbs.find(d => d.id === row.dbId)?.number }} / {{ row.address.offset }}<template v-if="row.address.bit !== null">.{{ row.address.bit }}</template></span><el-tag v-else type="warning" effect="plain">{{ t('common.local.addressUnconfirmed') }}</el-tag><small v-if="row.address?.origin === 'manual'" class="muted-cell">{{ t('common.local.protected') }}</small></template></el-table-column>
           <el-table-column :label="t('common.local.group')" min-width="135"><template #default="{ row }">{{ local.draft?.groups.find(g => g.id === row.groupId)?.name ?? t('common.local.unassigned') }}</template></el-table-column>
           <el-table-column :label="t('common.local.enabled')" width="90"><template #default="{ row }"><el-tag :type="row.enabled ? 'success' : 'info'" effect="plain">{{ local.label(String(row.enabled)) }}</el-tag></template></el-table-column>
-          <el-table-column :label="t('common.local.actions')" width="195"><template #default="{ row }"><div class="row-actions"><ConsoleActionButton size="small" label-key="common.local.edit" :disabled="local.busy || local.dirty || !!pointEditor" @click="editLocalPoint(row)" /><ConsoleActionButton size="small" label-key="common.local.diagnose" :disabled="local.busy || !local.view?.active" @click="local.control('daa_diagnose_point', [row.plcId], false, row.id)" /></div></template></el-table-column>
+          <el-table-column :label="t('common.local.actions')" width="260"><template #default="{ row }"><div class="row-actions"><ConsoleActionButton size="small" :label-key="local.dirty ? 'common.local.saveAndEdit' : 'common.local.edit'" :disabled="local.busy || local.editing || !!pointEditor" @click="editLocalPoint(row)" /><ConsoleActionButton size="small" label-key="common.local.diagnose" :disabled="local.busy || !local.view?.active" @click="local.control('daa_diagnose_point', [row.plcId], false, row.id)" /></div></template></el-table-column>
         </el-table>
       </ConsoleTableShell>
       <Teleport to="#daa-feedback">
@@ -67,9 +67,9 @@
           </ElDialog></Teleport>
         </ElCollapseItem>
         <ElCollapseItem name="groups" :title="t('common.local.groupTools')">
-          <div class="console-action-group"><ConsoleActionButton label-key="common.local.disableFiltered" :disabled="local.busy" @click="local.bulk(null, false)" /><ConsoleActionButton label-key="common.local.addGroup" :disabled="local.busy || !local.selectedPlc || local.groups.length >= 8" @click="local.addGroup" /></div>
-          <p class="daa-capability-note">{{ t('common.local.filtered', { count: local.points.length }) }}</p>
-          <section v-for="g in local.groups" :key="g.id" class="daa-local-edit-section"><ElForm inline label-position="top" @submit.prevent><ElFormItem :label="t('common.local.name')"><ElInput v-model="g.name" /></ElFormItem><ElFormItem :label="t('common.local.period')"><ElInputNumber v-model="g.intervalMs" :min="500" :max="3600000" :precision="0" controls-position="right" /></ElFormItem><ElFormItem :label="t('common.local.enabled')"><ElSwitch v-model="g.enabled" /></ElFormItem></ElForm><div class="console-action-group"><ConsoleActionButton size="small" label-key="common.local.assignFiltered" @click="local.bulk(g.id, true)" /><ConsoleActionButton size="small" label-key="common.local.remove" tone="danger" @click="removeLocalGroup(g.id)" /></div></section>
+          <div class="console-action-group"><ConsoleActionButton label-key="common.local.disableSelected" :disabled="local.busy || local.editing || !local.selectedPoints.length" @click="local.bulk(null, false)" /><ConsoleActionButton label-key="common.local.addGroup" :disabled="local.busy || local.editing || !local.selectedPlc || local.groups.length >= 8" @click="local.addGroup" /></div>
+          <p class="daa-capability-note">{{ t('common.local.selectedGroupHint', { count: local.selectedPoints.length }) }}</p>
+          <section v-for="g in local.groups" :key="g.id" class="daa-local-edit-section"><ElForm inline label-position="top" :disabled="local.busy || local.editing" @submit.prevent><ElFormItem :label="t('common.local.name')"><ElInput v-model="g.name" /></ElFormItem><ElFormItem :label="t('common.local.period')"><ElInputNumber v-model="g.intervalMs" :min="500" :max="3600000" :precision="0" controls-position="right" /></ElFormItem><ElFormItem :label="t('common.local.enabled')"><ElSwitch v-model="g.enabled" /></ElFormItem></ElForm><div class="console-action-group"><ConsoleActionButton size="small" label-key="common.local.assignSelected" :disabled="local.busy || local.editing || !local.selectedPoints.length" @click="local.bulk(g.id, true)" /><ConsoleActionButton size="small" label-key="common.local.remove" tone="danger" :disabled="local.busy || local.editing" @click="removeLocalGroup(g.id)" /></div></section>
         </ElCollapseItem>
       </ElCollapse>
     </ConsoleCard>
@@ -77,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue';
+import { ref, watch, onUnmounted, nextTick } from 'vue';
 import { ElCheckbox, ElDialog, ElForm, ElFormItem, ElInput, ElInputNumber, ElSelect, ElOption, ElSwitch, ElCollapse, ElCollapseItem, ElTree } from 'element-plus';
 import SourceImportPanel from '../../components/SourceImportPanel.vue';
 import PointNamePreviewDialog from '../../components/PointNamePreviewDialog.vue';
@@ -108,15 +108,22 @@ async function removeLocalGroup(id: string) {
 
 const pointEditor = ref<Point | null>(null);
 function changePointScope() { if (local) { local.selectedDb = ''; local.pointPage = 1; local.sources = []; local.identification = null; local.mappings = []; local.preview = null; local.offsets = []; } pointEditor.value = null; }
-function editLocalPoint(p: Point) { const copy: Point = JSON.parse(JSON.stringify(p)); if (!copy.address) copy.address = { offset: 0, bit: p.dataType === 'BOOL' ? 0 : null, confirmed: false, origin: 'manual', reason: '' }; pointEditor.value = copy; }
+async function editLocalPoint(p: Point) {
+    const copy = await local?.preparePointEdit(p.id);
+    if (!copy) return;
+    // 新保存回执的scope watcher先完成，避免其关闭随后打开的弹窗。
+    await nextTick();
+    if (!copy.address) copy.address = { offset: 0, bit: copy.dataType === 'BOOL' ? 0 : null, confirmed: false, origin: 'manual', reason: '' };
+    pointEditor.value = copy;
+}
 function manualPointAddress() { if (pointEditor.value?.address) { pointEditor.value.address.origin = 'manual'; pointEditor.value.address.confirmed = false; } }
-function cancelLocalPoint() { pointEditor.value = null; local?.invalidateNames(); }
+function cancelLocalPoint() { pointEditor.value = null; local?.finishPointEdit(); }
 async function applyLocalPoint() {
     if (await local?.confirmNames()) pointEditor.value = null;
 }
 
-watch(() => [local?.view, local?.selectedPlc, local?.selectedDb], () => { pointEditor.value = null; });
+watch(() => [local?.view, local?.selectedPlc, local?.selectedDb], cancelLocalPoint, { flush: 'sync' });
 
-watch(pointEditor, v => { if (local) { local.editing = !!v; local.stagePointEdit(v); } }, { deep: true });
-onUnmounted(() => { if (local) local.editing = false; });
+watch(pointEditor, v => { if (local) { local.editing = !!v; local.stagePointEdit(v); } }, { deep: true, flush: 'sync' });
+onUnmounted(cancelLocalPoint);
 </script>

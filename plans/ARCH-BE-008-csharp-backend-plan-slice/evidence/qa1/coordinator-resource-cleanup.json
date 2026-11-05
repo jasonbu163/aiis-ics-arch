@@ -1,0 +1,35 @@
+{
+  "task": "ARCH-BE-008",
+  "runId": "500b7e71711c83fdb763a0a3",
+  "archiveFilesVerified": 95,
+  "resources": [
+    {
+      "kind": "container",
+      "name": "aiis-arch-be008-mysql",
+      "id": "5e43c43860796ae028396e43dcae915810a77acf451d3ac420ef60ca2a73e98b",
+      "task": "ARCH-BE-008",
+      "runId": "500b7e71711c83fdb763a0a3"
+    },
+    {
+      "kind": "network",
+      "name": "aiis-arch-be008-net",
+      "id": "6fd5781a036158c06388d21381bf36da911dd0d62268b0792c9e4030fb47432b",
+      "task": "ARCH-BE-008",
+      "runId": "500b7e71711c83fdb763a0a3"
+    },
+    {
+      "kind": "volume",
+      "name": "aiis-arch-be008-mysql-data",
+      "id": "aiis-arch-be008-mysql-data",
+      "task": "ARCH-BE-008",
+      "runId": "500b7e71711c83fdb763a0a3"
+    }
+  ],
+  "cleanup_exit": 0,
+  "output": "owned_resources_removed\n",
+  "resources_absent": true,
+  "ports_rebindable_SO_REUSEADDR": [
+    13388,
+    18108
+  ]
+}

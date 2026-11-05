@@ -9,11 +9,12 @@
 | 文档 | 用途 |
 | --- | --- |
 | [多项目开发指南](multi-project-pm.md) | Core、复用模块仓和项目仓之间的长期边界与治理指引。 |
-| [AW 白皮书与演进路线](AIIS_AW_Whitepaper_Roadmap_v0.4.md) | CAF/CU/DAA/SMA/CA 角色、近期本地配置与长期路线；中文设计正文。 |
-| [AW 运行原理与详细设计](AIIS_AW_Runtime_Design.md) | SQLite、S7 点位、API、共享流程 Core 与设备执行/恢复的设计依据；非实现声明。 |
-| [DAA 详细设计](AIIS_DAA_Detailed_Design.md) | 多 PLC、双 SQLite、有界最新优先补传及 Backend 最多三自然月窗口的中文目标设计；补充 CU 消费、工作台/配置页面、运行数据流、DB 包/批次示例与分阶段实施；不授权实现。 |
-| [SMA 详细设计](AIIS_SMA_Detailed_Design.md) | 本地表单绑定、API 材料/手工目标、定义校验/转换、持久进度/outbox 与可靠业务 API 投递的中文目标设计；不授权实现。 |
-| [DS 详细设计](AIIS_DS_Detailed_Design.md) · [使用手册](../automation-world/device-simulator/USER_GUIDE.zh-CN.md) | Human Owner于2026-10-27最终接受DS-001 r1及ARCH-AW-005 r5/DS当前版本；手工DB31→Alpha/Beta/Measure导入、策略表格/批量、初值/fixed输入及版本选择步骤保留。原DEV/QA历史不改写，独立QA仅DS-001例外未执行；DAA至SQLite联调另批，阶段C暂不开展。 |
+| [AW 白皮书与演进路线](AIIS_AW_Whitepaper_Roadmap_v0.4.md) | 角色与分阶段路线；ARCH-AW-008对齐事实到业务的生命周期，不授权软件。 |
+| [AW 运行原理与详细设计](AIIS_AW_Runtime_Design.md) | 采集、配置与执行边界；匿名事实集成及独立业务确认；中文设计正文。 |
+| [DAA 详细设计](AIIS_DAA_Detailed_Design.md) | 已接受的受控阶段B基线；阶段C不可变双SQLite事实、有界最新优先上传、可靠回执与Backend读取／保留需求。 |
+| [SMA 详细设计](AIIS_SMA_Detailed_Design.md) | 当前Backend-held配置与分期HTTP映射；后续定义检查、安全历史消费和可靠typed业务投递，不要求立即迁库。 |
+| [AW事实集成共同需求](../contracts/demands/automation-world-facts-integration.zh-CN.md) · [English](../contracts/demands/automation-world-facts-integration.md) | proposed：匿名一写两读、JSON／可靠回执、逐点latest、安全history、上海三自然月及业务永久保存；不是provider实现。 |
+| [DS 详细设计](AIIS_DS_Detailed_Design.md) · [使用手册](../automation-world/device-simulator/USER_GUIDE.zh-CN.md) · [快速流程](../automation-world/device-simulator/USER_GUIDE.zh-CN.md#quick-start) | 手册覆盖创建实例/点位→确认→保存草稿→保存为版本→停机加载→启动，以及[版本切换/回退](../automation-world/device-simulator/USER_GUIDE.zh-CN.md#switch-version)、单个/批量删除、多DB/UDT导入和策略编辑。2026-10-27的DS-001 r1、ARCH-AW-005 r5验收与原DEV/QA历史保持原范围，独立QA仅DS-001例外未执行；DAA至SQLite联调另批，阶段C暂不开展。 |
 
 
 ## 权威边界

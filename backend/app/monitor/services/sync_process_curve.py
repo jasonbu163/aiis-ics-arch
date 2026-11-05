@@ -8,6 +8,10 @@ Main Features:
 """
 from __future__ import annotations
 
+from app.monitor.crud.sync_integration import storage_context
+from app.monitor.integration_storage import legacy_input
+from common.integration.storage import to_storage_time as storage_time
+
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -171,6 +175,7 @@ def sync_process_curve(
     fact: ProcessCurveFact,
 ) -> ProcessCurveSyncResult:
     """Synchronize one monitor process curve fact without committing it."""
+    context = storage_context(db)
     _validate_process_provenance(fact)
     if fact.quality.strip().lower() != RAW_QUALITY_GOOD:
         return ProcessCurveSyncResult(
@@ -200,7 +205,7 @@ def sync_process_curve(
         db,
         device_id=fact.device_id,
         coil_number=coil_number,
-        created_at=_normalize_datetime(fact.collected_at, input_key="collected_at"),
+        created_at=legacy_input(fact.collected_at,fact.collected_at,context[0]) if context else _normalize_datetime(fact.collected_at, input_key="collected_at"),
         values=values,
     )
     sync_crud.flush(db)

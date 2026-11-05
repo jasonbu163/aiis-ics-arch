@@ -1,7 +1,7 @@
 """异步独立flow监督、每PLC持久owner及单global shutdown截止。"""
 import asyncio
 import time
-from field_flow.app import demo01
+from field_flow.app import demo01, plc_guard_get_int, get_value_guard_int
 from field_flow.domain import Clock, Failure, now_ms, require
 from field_flow.infrastructure.http import HttpClient
 from field_flow.infrastructure.state import State
@@ -37,7 +37,11 @@ class Runtime:
                 if permanent:
                     raise Failure(permanent)
                 health["in_flight"] = 1; health["max_in_flight"] = max(health["max_in_flight"], 1)
-                result = await demo01.once(self.http, flow, plc, execution)
+                if flow.kind == "plc_guard_get_int":
+                    result = await plc_guard_get_int.once(self.http, flow, plc, execution, self.owners[plc.id])
+                else:
+                    case = {"demo01": demo01.once, "get_value_guard_int": get_value_guard_int.once}[flow.kind]
+                    result = await case(self.http, flow, plc, execution)
                 health.update(state="running", consecutive_errors=0, last_success_ms=now_ms(), result=result)
             except Failure as exc:
                 key = str(exc)

@@ -1,9 +1,9 @@
 Task ID: ARCH-BE-007
 Revision: r1
-Status: draft
+Status: owner_approved
 Owner Role: PM
 Allowed Writers: PM, Human Owner
-Handoff: 待 Human Owner 审阅精确 ARCH-BE-007 r1；本次仅交付设计草案，未授权 C# 软件实施
+Handoff: Human Owner 于 2026-10-28 明确批准精确 ARCH-BE-007 r1 设计；软件实施范围另归 ARCH-BE-008 r1 草案，尚待独立批准，不据此进入 Dev
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch
@@ -379,10 +379,13 @@ S1 可以调整首个切片，但必须重新明确其合同和边界；“少�
 | --- | --- | --- |
 | 2026-10-28 | Human Owner 要求参考现有 FastAPI 落 C# 架构 spec，先只改文档，C# 首期不做登录 | 授权形成 PM 草案；尚未看见并批准精确 ARCH-BE-007 r1 |
 | 2026-10-28 | 命名 pm 角色形成此 r1 | draft；无 Development、独立 Verification 或 Owner 最终验收结果 |
+| 2026-10-28 | Human Owner 明确表示“批准 ARCH-BE-007 r1 设计”，并要求先只形成首期实施 spec、审阅后再批准进入 Dev | 本设计 r1 为 owner_approved；被批准原文 SHA256 为 efa08166cf32d29203472bf530000951b039f652498fb990edf6daf68ade6f73。仅记录设计批准，不是 owner_accepted 或 QA 结论，也不授权软件实施 |
+
+R01/AC02 中的 draft 描述保留为首稿成文阶段事实；本次只更新真实审批状态与 handoff，不改设计正文、范围或验收标准，不升 r2。首期软件切片采用独立 ARCH-BE-008 r1，只有 Related Task 关系，不继承本设计的批准。
 
 PM 配置入口为 [.codex/agents/pm.toml](../../.codex/agents/pm.toml)，本次选择 agent_type=pm。该 TOML 的 gpt-6.1-sol/max 是配置证据，不作为独立观测到的运行模型/effort 遥测。
 
-本次停在设计审阅 gate。精确设计批准不等于软件开工、数据库采用或部署授权。后续若整理/核验本设计，仍按文档 allowlist 和角色权威推进；若进入 C# 工程或接口实施，须建立明确切片、源码 allowlist、依赖、数据库及验证范围的独立实施任务，再按 PM -> Human Owner -> Development -> fresh-context Verification -> Human Owner 推进。
+本设计的精确审阅批准已发生；软件开工、数据库采用和部署仍未获授权。后续若整理/核验本设计，仍按文档 allowlist 和角色权威推进；首期软件的明确切片、源码 allowlist、依赖、数据库及验证范围另归 ARCH-BE-008 r1 草案，待其独立批准后再按 PM -> Human Owner -> Development -> fresh-context Verification -> Human Owner 推进。
 
 适用 skill：本设计使用 aiis、project-governance，并参考 backend-arch 和跨语言结构标准。后续后端实施继续使用 backend-arch；新增用户可见文案使用 i18n-workflow；源码/结构变化使用 code-document-indexer；若涉及打包、前端或现场 runtime，再进入相应 skill，不因为本架构草案就启动这些范围。
 
@@ -418,7 +421,7 @@ bash /Users/jason/Desktop/DreamCode/AI/AIIS/skills/project-governance/scripts/ch
 
 内联文本检查的复现口径为：按行解析唯一元数据；提取 Markdown 链接并相对本 spec 解析本地目标；比较声明的需求/AC 集合及其引用；检查围栏配对和逐行尾空白；核对后续角色文件及 C# 工程目录未形成。索引保全检查须在写入前保留各索引字节快照，再去除本任务新增行作等值比较；不能拿 Git HEAD 代替已有 dirty 内容。
 
-当前未运行 C# restore/build、API、数据库、Docker、PLC、部署或现场验证；未发生 Development handoff、fresh-context Verification 或 Human Owner 精确 Revision 批准。这些检查只证明本次文档结构、链接与索引保全，不能记为软件验证、独立 QA 或架构已获最终接受。
+上述成文检查发生于首稿 draft 阶段；其后发生的 Human Owner 精确 r1 设计批准见第 17.1 节。当前仍未运行 C# restore/build、API、数据库、Docker、PLC、部署或现场验证，未发生 Development handoff 或 fresh-context Verification。这些检查只证明文档结构、链接与索引保全，不能记为软件验证、独立 QA 或架构已获最终接受。
 
 ## 18. 官方技术来源与核验边界
 

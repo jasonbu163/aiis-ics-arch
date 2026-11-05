@@ -1,0 +1,12 @@
+diff --git a/CODE_INDEX.md b/CODE_INDEX.md
+index bbf7a82..d698a05 100644
+--- a/CODE_INDEX.md
++++ b/CODE_INDEX.md
+@@ -6,6 +6,7 @@ source topology or important entrypoints change.
+ ## Root
+ 
+ - `backend/` — FastAPI, SQLAlchemy, Alembic and Core module registry.
++- `backend-dotnet/` — independent C# Plan learning slice; three direct-MySQL APIs, no login; [local source index](backend-dotnet/CODE_INDEX.md).
+ - `frontend-js/` — JavaScript Core web shell, route/locale discovery and system UI.
+ - `automation-world/control-agent/` — optional Rust/Tauri field runtime and operations console.
+ - `field-flow/` — independent Rust/Python field runtimes; exact r4 passed unified fresh-context local QA2, with Human Owner final acceptance pending.

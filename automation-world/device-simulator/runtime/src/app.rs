@@ -25,6 +25,8 @@ pub struct App {
     pub accepting: AtomicBool,
     pub global: Arc<Mutex<Global>>,
     pub load_errors: Mutex<BTreeMap<String, String>>,
+    // 仅串行化版本引用/加载提交；stop和S7 IO从不等待此锁。
+    pub revision_control: Mutex<()>,
 }
 impl App {
     pub fn open(profile: &Path) -> Result<Self, String> {
@@ -57,6 +59,7 @@ impl App {
                 ..Global::default()
             })),
             load_errors: Mutex::new(BTreeMap::new()),
+            revision_control: Mutex::new(()),
         };
         out.events.put(json!({"event":"runtime_thread_budget","host":host,"fixedThreads":fixed_threads,"fixedIncludes":"main-process host/SQL/logging/resource/control; owners/listeners/reapers/TCP separate","externalWebKitXpcIncluded":false,"threadLimit":64}));
         for selection in out.configuration.store.selections()? {

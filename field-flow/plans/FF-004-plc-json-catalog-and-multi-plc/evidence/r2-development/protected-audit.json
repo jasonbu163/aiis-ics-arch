@@ -1,0 +1,11 @@
+{
+  "protected_count": 776,
+  "protected_changed": [],
+  "extra_protected": {
+    "field-flow/field-flow-rust/.gitignore": "cbb176cbce6141bd798392b5fce6c8431efea60146239c355abb2ac2adae5195",
+    "field-flow/field-flow-python/.gitignore": "3bb27201783aaad3a8327267e4195ac59b8238ebd69718aec3437c4d4e964643",
+    "field-flow/field-flow-python/.python-version": "49a506dd32096b010d75205acf3430c9ae6c40351888129499e5a5e487126c93"
+  },
+  "extra_changed": [],
+  "approved_spec_matches": true
+}

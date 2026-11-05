@@ -158,7 +158,7 @@ change passwords. Keep using the [host-source initialization tutorial](../INITIA
 
 ## Configuration reference
 
-These tables cover the same 69 active keys in the three public env examples. Source defaults come from Settings; required fields fail configuration loading when absent. Template values show distinct public host/dev/prod values, merging equal entries; passwords/secrets are shown only as placeholder. Templates are not local effective configuration. Use True/False for booleans, single or double quotes for strings, and outer single quotes with inner double quotes for JSON arrays.
+These tables describe the historical 69-key BE003 configuration surface. Current public examples contain 91 assignments: 69 baseline + 3 BE006 mapping scopes + 12 r1 A0 integration keys + 4 BE009 facts keys + 3 r2 adoption paths (detailed below). Source defaults come from Settings; required fields fail configuration loading when absent. Template values show distinct public host/dev/prod values, merging equal entries; passwords/secrets are shown only as placeholder. Templates are not local effective configuration. Use True/False for booleans, single or double quotes for strings, and outer single quotes with inner double quotes for JSON arrays.
 
 ### App/API
 
@@ -321,7 +321,7 @@ The [equipment module](app/equipment/README.md) adds independent async POST/GET 
 | --- | --- | --- | --- |
 | `EQUIPMENT_TEMPERATURE_PILOT_ID` | One exact business equipment key for the new sample APIs; empty/invalid denies every caller including admin. Module-local BaseSettings, restart to adopt. (str) | `''` | `''` |
 
-This additional key brings each public env example to 69 assignments; the original eleven English section headings and all prior values/grants are preserved. Synthetic documentation uses `temperature-pilot-01`. Source, frozen and Docker dotenv paths follow the existing public path helper; process environment overrides dotenv, explicit injected config overrides process env. This setting neither grants permissions nor alters old GET behavior. The dedicated [MySQL entry](tests_mysql/test_equipment_temperature.py) only prepares gated disposable verification and never runs through the shared destructive conftest.
+At the BE003 checkpoint this additional key brought each public env example to 69 assignments; the original eleven English section headings and all prior values/grants are preserved. Synthetic documentation uses `temperature-pilot-01`. Source, frozen and Docker dotenv paths follow the existing public path helper; process environment overrides dotenv, explicit injected config overrides process env. This setting neither grants permissions nor alters old GET behavior. The dedicated [MySQL entry](tests_mysql/test_equipment_temperature.py) only prepares gated disposable verification and never runs through the shared destructive conftest.
 
 
 ## HTTP mapping business observations
@@ -348,3 +348,26 @@ Omitted measurements persist NULL; explicit null is rejected. Numeric fields pre
 FLOAT fields use bounded binary32 normalization (relative error <=1e-6, absolute error <=max(1e-6,abs(input)*1e-6));
 nonzero underflow is rejected. Receipts and business changes commit together, with bounded named-unique race
 recovery. Unknown commits return retryable failure; retry the same sampleId. No PLC provenance is invented.
+
+
+## Anonymous business integration source
+
+[ARCH-BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/spec.md) wires eight typed anonymous POST routes to owner-local async Service/CRUD and existing business tables. [The closed provider](../contracts/published/http-api/business-integration-v1/README.md) defines strict JSON numbers, typed success/failure envelopes, both digests, presence/units and permanent minimal receipts. Existing JWT/admin/permission/scope and Projection transaction/cursor/audit boundaries stay intact. Producer/source declarations are admission claims, not authentication.
+
+All module switches default off, device/producer scopes empty and storage profiles `unadopted`. Default old entrypoints use the original time path without reading adoption evidence or probing a target; admitted new requests return 503 before the database dependency. `shanghai-v1` requires an explicit valid external adopted manifest plus a matching per-transaction UUID/schema/revision/clock probe. Unknown profiles, retained file paths with unadopted, missing/invalid evidence or wrong targets reject writes. A profile string alone never enables writing.
+
+| Key | Purpose/type | Source default | Public example |
+| --- | --- | --- | --- |
+| `EQUIPMENT_INTEGRATION_ADOPTION_FILE` | Absolute external equipment business-time evidence path; empty means unadopted. (str) | empty | `""` |
+| `PERFORMANCE_INTEGRATION_ADOPTION_FILE` | Absolute external production/process evidence path, including manual time bases. (str) | empty | `""` |
+| `MONITOR_INTEGRATION_ADOPTION_FILE` | Absolute external business-curve evidence path; independent of facts/raw/latest. (str) | empty | `""` |
+
+The fixed compatibility profile covers 13 old tables / 41 calendar columns. Aware values preserve their instant; naive values require explicit finite basis evidence. Pure DATE/durations, old UTC wire/fingerprints/JSON results and manual zero priority retain their semantics. The four new tables use explicit Shanghai DATETIME(3) times and no automatic UTC defaults. The unique source migration chain is f6 → BE009 `0a2c4e6f8b10` (71 application tables) → BE010 `1b3d5f7a9c20` (75). Migration source does not establish an adopted database. Nonempty integration tables prohibit destructive downgrade.
+
+[The finite read-only tool](scripts/business_time_adoption/README.md) produces candidates only. Actual historical investigation/conversion, writer isolation, backup/recovery, target adoption, database/Docker/B and deployment remain separately approved operations; unknown or unclassifiable mixed history keeps G-T closed. This source state does not prove any business row is persisted in a real target.
+
+## Bounded PLC facts source
+
+[plc_facts](app/plc_facts/README.md) owns three anonymous integration routes and seven independent facts tables. `PLC_FACTS_ENABLED=False` disables admission; `PLC_FACTS_PLC_IDS_JSON='[]'` denies every PLC; `PLC_FACTS_STORAGE_PROFILE=unadopted` keeps storage unadopted; `PLC_FACTS_CURSOR_HMAC_KEY=''` provides no cursor signing key. These module-local keys are independent of login, permissions and business integration. A configured profile alone cannot bypass schema/source/time adoption.
+
+The explicit `0a2c4e6f8b10` successor of `f6a8c0e2b4d6` contains only seven facts tables (71 migrated application tables, excluding `alembic_version`). Full source metadata also includes four BE010 tables, yielding 75. `BE009-A`/`BE009-B` are named profiles, distinct from the historical fixture/table/config counts above. [Maintenance](scripts/plc_facts_maintenance/README.md) is a bounded explicit CLI with no scheduler. Source checks do not authorize migration, adoption or database access.

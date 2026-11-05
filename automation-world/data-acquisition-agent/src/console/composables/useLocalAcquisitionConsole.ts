@@ -1,4 +1,4 @@
-/** 本地模式唯一页面owner：草稿/CAS/激活/动作与1Hz轮询；切页仅改本地视图状态。 */
+/** 本地模式唯一页面owner：共享点位选择、草稿/CAS/编辑准入/激活与1Hz轮询。 */
 import { computed, watch, onMounted, onUnmounted, reactive, ref, type InjectionKey } from 'vue';
 import { ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
@@ -69,6 +69,11 @@ export function useLocalAcquisitionConsole() {
     };
     const plcs = computed(() => draft.value?.plcs ?? []), dbs = computed(() => draft.value?.dbs.filter(d => !selectedPlc.value || d.plcId === selectedPlc.value) ?? []), groups = computed(() => draft.value?.groups.filter(g => g.plcId === selectedPlc.value) ?? []);
     const points = computed(() => draft.value?.points.filter(p => (!selectedPlc.value || p.plcId === selectedPlc.value) && (!selectedDb.value || p.dbId === selectedDb.value) && [p.sourcePath, p.name, p.dataType, p.comment].some(v => v.toLowerCase().includes(query.value.toLowerCase()))) ?? []);
+    // 勾选跨分页/DB筛选保留，但批量动作始终限定当前PLC，绝不退回整份筛选结果。
+    const selectedPoints = computed(() => {
+        const ids = new Set(selectedNameIds.value);
+        return draft.value?.points.filter(p => p.plcId === selectedPlc.value && ids.has(p.id)) ?? [];
+    });
     const dirty = computed(() => !!draft.value && !!view.value && JSON.stringify(draft.value) !== JSON.stringify(view.value.draft));
     async function confirmAction(key: string, params: Record<string, string | number> = {}) {
         try {
@@ -99,12 +104,14 @@ export function useLocalAcquisitionConsole() {
     }
     function accept(v: ConfigurationView) {
         invalidateNames();
+        editing.value = false;
         view.value = v;
         draft.value = clone(v.draft);
         if (!plcs.value.some(p => p.id === selectedPlc.value))
             selectedPlc.value = plcs.value[0]?.id ?? '';
-        if (!dbs.value.some(d => d.id === selectedDb.value))
-            selectedDb.value = dbs.value[0]?.id ?? '';
+        if (selectedDb.value && !dbs.value.some(d => d.id === selectedDb.value))
+            selectedDb.value = '';
+        selectedNameIds.value = selectedNameIds.value.filter(id => v.draft.points.some(p => p.id === id && p.plcId === selectedPlc.value));
     }
     async function refresh() {
         if (!available || busy.value)
@@ -136,6 +143,17 @@ export function useLocalAcquisitionConsole() {
         return saved;
     }
     async function save() { if (draft.value) return saveCandidate(draft.value); return false; }
+    async function preparePointEdit(id: string): Promise<Point | null> {
+        if (busy.value || editing.value) return null;
+        if (!draft.value?.points.some(p => p.id === id && p.plcId === selectedPlc.value)) return null;
+        // 行按钮明确显示“保存草稿并编辑”；保留待保存组/周期，再用新ETag进行单点预览。
+        if (dirty.value && !await save()) return null;
+        const point = draft.value?.points.find(p => p.id === id && p.plcId === selectedPlc.value);
+        if (!point) return null;
+        editing.value = true;
+        return clone(point);
+    }
+    function finishPointEdit() { editing.value = false; invalidateNames(); }
     async function activate(rollback = false) {
         await perform(async () => {
             if (!view.value)
@@ -256,7 +274,9 @@ export function useLocalAcquisitionConsole() {
     }
     function manual(p: Point) { address(p).origin = 'manual'; address(p).confirmed = false; }
     function bulk(groupId: string | null, enabled: boolean) {
-        for (const p of points.value) {
+        if (busy.value || editing.value) return;
+        if (groupId !== null && !groups.value.some(g => g.id === groupId)) return;
+        for (const p of selectedPoints.value) {
             p.groupId = groupId;
             p.enabled = enabled;
         }
@@ -327,5 +347,5 @@ export function useLocalAcquisitionConsole() {
             clearInterval(timer);
         if (nameTimer) clearTimeout(nameTimer);
     });
-    return reactive({ selectedNameIds, namePreview, namePreviewOpen, namePreviewBusy, namePage, namePageSize, pagedNames, pointPageSize, closeNames, invalidateNames, toggleNamePoint, previewNames, stagePointEdit, confirmNames, sourcePreviewOpen, offsetPreviewOpen, sourceStructureOpen, identification, mappings, importPage, importPageSize, importRows, pagedImportRows, invalidateImport, changeImportTarget, available, editing, dirty, confirmAction, conflictVersion, snapshotError, selectedTargets, bootstrap, view, draft, snapshot, busy, error, notice, selectedPlc, selectedDb, query, pointPage, preview, offsets, sources, history, historyFilter, historyPage, historyPageSize, historyPreviousAvailable, historyNextAvailable, historyPreviousBounded, raw, rawSampleId, logs, label, plcs, dbs, groups, points, pagedPoints, perform, refresh, reload, save, saveCandidate, activate, addPlc, removePlc, addGroup, removeGroup, control, readFiles, importSources, infer, address, manual, bulk, loadHistory, inspect, loadLogs, state, formatBytes });
+    return reactive({ selectedPoints, preparePointEdit, finishPointEdit, selectedNameIds, namePreview, namePreviewOpen, namePreviewBusy, namePage, namePageSize, pagedNames, pointPageSize, closeNames, invalidateNames, toggleNamePoint, previewNames, stagePointEdit, confirmNames, sourcePreviewOpen, offsetPreviewOpen, sourceStructureOpen, identification, mappings, importPage, importPageSize, importRows, pagedImportRows, invalidateImport, changeImportTarget, available, editing, dirty, confirmAction, conflictVersion, snapshotError, selectedTargets, bootstrap, view, draft, snapshot, busy, error, notice, selectedPlc, selectedDb, query, pointPage, preview, offsets, sources, history, historyFilter, historyPage, historyPageSize, historyPreviousAvailable, historyNextAvailable, historyPreviousBounded, raw, rawSampleId, logs, label, plcs, dbs, groups, points, pagedPoints, perform, refresh, reload, save, saveCandidate, activate, addPlc, removePlc, addGroup, removeGroup, control, readFiles, importSources, infer, address, manual, bulk, loadHistory, inspect, loadLogs, state, formatBytes });
 }

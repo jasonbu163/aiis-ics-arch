@@ -7,12 +7,13 @@ export function useDeviceSimulator() {
     const busy = ref(false), refreshing = ref(false), error = ref<string | null>(null), unknown = ref(false), conflictEtag = ref<string | null>(null);
     const bootstrap = ref<ipc.Bootstrap | null>(null), configuration = ref<ipc.Configuration | null>(null), draft = ref<ipc.Workspace | null>(null), base = ref(''), snapshot = ref<ipc.RuntimeSnapshot | null>(null);
     const instanceId = ref(''), dbId = ref(''), valueOffset = ref(0), valueLimit = ref(50), logs = ref<Awaited<ReturnType<typeof ipc.queryLogs>> | null>(null);
+    const revisionOffset = ref(0);
     const dirty = computed(() => !!draft.value && JSON.stringify(draft.value) !== base.value);
     const selected = computed(() => draft.value?.instances.find(i => i.id === instanceId.value) || null);
     const selectedDb = computed(() => selected.value?.dbs.find(d => d.id === dbId.value) || null);
     const runtime = computed(() => snapshot.value?.instances.find(i => i.instanceId === instanceId.value) || null);
     function failure(e: unknown) { const f = e instanceof ipc.IpcFailure ? e : new ipc.IpcFailure('operation_failed'); error.value = f.code; unknown.value = f.unknown; conflictEtag.value = f.currentEtag; }
-    async function reload() { const loaded = await ipc.getConfiguration(); configuration.value = loaded; draft.value = structuredClone(loaded.workspace); base.value = JSON.stringify(loaded.workspace); if (!loaded.workspace.instances.some(i => i.id === instanceId.value))
+    async function reload() { const loaded = await ipc.getConfiguration(null, revisionOffset.value); configuration.value = loaded; draft.value = structuredClone(loaded.workspace); base.value = JSON.stringify(loaded.workspace); if (!loaded.workspace.instances.some(i => i.id === instanceId.value))
         instanceId.value = loaded.workspace.instances[0]?.id || ''; if (!selected.value?.dbs.some(d => d.id === dbId.value))
         dbId.value = selected.value?.dbs[0]?.id || ''; }
     let lastRefresh = 0;
@@ -54,13 +55,29 @@ export function useDeviceSimulator() {
         busy.value = false;
     } }
     async function save(confirmPoints: string[] = []) { if (editing.value || !draft.value || !configuration.value)
-        return false; const result = await action(() => ipc.saveConfiguration(configuration.value!.etag, JSON.parse(JSON.stringify(draft.value)), confirmPoints), true); if (result !== undefined) lastSavedRevision.value = configuration.value?.latestRevision || null; return result !== undefined; }
+        return false; const result = await action(() => ipc.saveConfiguration(configuration.value!.etag, JSON.parse(JSON.stringify(draft.value)), confirmPoints), true); return result !== undefined; }
+    let revisionRequest = 0;
+    // 只更新版本事实，不覆盖尚未保存的编辑稿；迟到的旧列表不覆盖新结果。
+    async function refreshRevisions(offset = revisionOffset.value) {
+        const current = configuration.value, request = ++revisionRequest;
+        if (!current) return;
+        const loaded = await ipc.getConfiguration(null, offset);
+        if (request !== revisionRequest || configuration.value !== current) return;
+        Object.assign(current, { revisions: loaded.revisions, revisionTotal: loaded.revisionTotal, latestRevision: loaded.latestRevision, selections: loaded.selections, draftMatchesLatest: loaded.draftMatchesLatest });
+        revisionOffset.value = offset;
+    }
+    async function pageRevisions(offset: number) { await action(() => refreshRevisions(offset)); }
+    // 取消是幂等票据释放，离开页面时也可执行；不受其它操作busy门禁阻止，不撤销已提交操作。
+    async function releasePreview(preview: ipc.Preview) {
+        try { await ipc.cancelPreview(preview); await refreshRevisions(); }
+        catch (e) { failure(e); }
+    }
     function newInstance() { if (!draft.value || draft.value.instances.length >= 8)
         return; const i: ipc.Instance = { id: crypto.randomUUID(), name: '', host: '127.0.0.1', port: 30102, rack: 0, slot: 1, callingTsap: 256, maxConnections: 16, maxHandshakes: 4, policy: {}, dbs: [], namesConfirmation: null }; return i; }
     async function control(row: ipc.RuntimeInstance, command: string, discardValues = false) { return action(() => ipc.controlInstance({ instanceId: row.instanceId, command, expectedLoadedRevision: row.loadedRevision, epoch: row.epoch, discardValues })); }
     async function loadLogs(offset = 0, event: string | null = null) { const result = await action(() => ipc.queryLogs(offset, 50, event)); if (result)
         logs.value = result; }
-    return { lastSavedRevision, editing, finishEditor, discardEditor, busy, refreshing, error, unknown, conflictEtag, bootstrap, configuration, draft, snapshot, instanceId, dbId, valueOffset, valueLimit, logs, dirty, selected, selectedDb, runtime, available: ipc.desktopAvailable, reload, refresh, action, save, newInstance, control, loadLogs };
+    return { lastSavedRevision, revisionOffset, pageRevisions, refreshRevisions, releasePreview, editing, finishEditor, discardEditor, busy, refreshing, error, unknown, conflictEtag, bootstrap, configuration, draft, snapshot, instanceId, dbId, valueOffset, valueLimit, logs, dirty, selected, selectedDb, runtime, available: ipc.desktopAvailable, reload, refresh, action, save, newInstance, control, loadLogs };
 }
 export type SimulatorConsole = UnwrapNestedRefs<ReturnType<typeof useDeviceSimulator>>;
 export const simulatorKey: InjectionKey<SimulatorConsole> = Symbol('DS console');

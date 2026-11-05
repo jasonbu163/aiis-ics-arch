@@ -84,3 +84,32 @@ Use public explicit process configuration, the approved project uv environment a
 Approved equipment scope belongs to its local BaseSettings and lazy dependency. Explicit parameters override process env, which overrides the selected dotenv; tests explicitly pass a synthetic file or `_env_file=None`. No cross-app cache or import-time config instance is introduced. This helper is not authorization, a device directory or a new configuration platform. Real env adoption/restart and MySQL verification remain separate operational gates.
 
 BE003 callers of `generate_full_profile` explicitly pass `profile_name="BE003", expected_table_count=60, target_revision="e4f6a8b0c2d4"`; this new full-tree snapshot must not be labelled the frozen BE005 F/58 profile. C2/E 14/15/16 guarantees and original assertions remain unchanged.
+
+
+## Anonymous integration primitives
+
+A0 exports only the finite `common.integration` surface enumerated by `module_contract.PUBLIC_SYMBOLS`. Business fields, module StrEnum errors, SQL and lifecycle rules stay in their owners. The contract constants are `CONTRACT_VERSION="aiis.business-integration/v1"` and `DIGEST_PROFILE="bi-json/v1"`.
+
+| Entry | Public signature / behavior |
+| --- | --- |
+| `envelope` | `IntegrationSchema`, `IntegrationEnvelope[DataT]`, `Identifier`, `SourceTime`, `BUSINESS_TIMEZONE`; strict camelCase, unknown fields forbidden, finite discriminated source references. |
+| `envelope` | `identifier(value, maximum=128)`, `source_time(value)`, `shanghai_time(value)`, `fact_time(value)`, `validate_source_clock(value, database_now)`; Shanghai business milliseconds; reference fractional seconds retain necessary precision; DB clock must be explicitly injected. |
+| `canonical` | `canonical_bytes(value) -> bytes`; exact JSON numbers, UTF-8 byte key ordering, no key rewriting. Numbers are bounded to 256 significant digits / absolute exponent 1000 to reject extreme inputs before formatting; DTOs further restrict actual storage domains. |
+| `canonical` | `integration_digests(envelope, resource, parent_record_id=None) -> (requestDigest, businessDigest)`; data keys represent supplied fields; business object is `{resource,parentRecordId,data}`. Source refs sort by canonical bytes; absent non-process parent is null. FLOAT32 is encoded using the exact decimal value of the stored binary32, never default float repr. |
+| `http` | `strict_json(body) -> dict`, `IntegrationPayloadError(status,suffix)`, `IntegrationRoute`, `MAX_BODY_BYTES=65536`, `MAX_DEPTH=12`; raw Decimal, duplicate-key rejection, bounded HTTP streaming and local sanitized status shell. Module Route subclass supplies owner/error enum; complete yield dependency exit precedes response. |
+| `receipt` | `IntegrationReceipt`, `receipt_response(receipt, replay=False) -> bytes`; explicit stable fields and original outcome; replay changes only outcome to duplicate. Call only after durable commit and use an explicit JSON response; this pure function cannot prove database commit. |
+
+Submodules' other imports/helpers are private. These primitives never import business tables or implement a dynamic handler/CRUD platform. Legacy `serialize_api_data` behavior stays unchanged. New endpoints must define typed data, presence/units/time, natural/delivery keys, both digests, atomic transaction boundaries, stable ACK/recovery, retention and authorization/admission before implementation. Breaking meaning changes require a new major contract. The normative examples and vectors live in [ARCH-BE-010](../../plans/ARCH-BE-010-anonymous-business-integration/spec.md) and [its Development record](../../plans/ARCH-BE-010-anonymous-business-integration/tasks.md).
+
+Each owner uses local `{EQUIPMENT,PERFORMANCE,MONITOR}_INTEGRATION_{ENABLED,EQUIPMENT_IDS_JSON,PRODUCER_IDS_JSON,STORAGE_PROFILE}` settings. Defaults are False / `[]` / `[]` / `unadopted`; device scopes contain at most 256 exact identifiers. Explicit construction overrides process env, then the selected dotenv, then defaults; each application lazily fixes its own configuration. A0 always rejects admitted requests with module `integration_not_ready` before DB access; a configuration string does not prove G-T. Model declarations without an approved migration are preparation only. No consumer may deploy this slice as an enabled business provider.
+
+The separately named `BE010-A0` public fixture has 68 metadata tables and 84 public example assignments (the exact old 72-assignment prefixes plus twelve default-closed settings). `target_revision=null` and `schema_state=models_only_unadopted_no_migration` explicitly record that no new migration is implemented. Frozen C2/E/F/BE003/BE006 fixtures and assertions are unchanged; their fixed historical counts are not repurposed as this profile.
+
+
+## Bounded business-time source surface (BE010 r2)
+
+`common.integration.storage` exports exactly `StorageProbe`, `AdoptionContext`, `parse_adoption_manifest(value,module)`, `validate_adoption_probe(manifest,probe)`, `to_storage_time(value,basis)`, and `to_legacy_time(value,basis)`. All are pure: no settings, file, SQL, Session or target access. Owners export only `integration_storage:BUSINESS_TIME_COLUMN_PROFILE` and `crud.sync_integration:probe_storage(db)` through their own manifests for the read-only maintenance tool. Async probes stay owner-private; each probe uses its passed session and fixed UUID/schema/revision/UTC clock reads, without creating/committing sessions. Revision reads use a shared current-read lock.
+
+`IntegrationSuccess[ReceiptT]` supplies the typed code/message/data envelope. Owner receipt types, finite HTTP error models and eight request schemas remain local. A new module selects its own data and state rules; it need not copy these eight resources or the fixed time-column profile.
+
+The historical A0 fixture remains named `BE010-A0` (68 metadata/84 assignments/models-only); its configuration/schema surface is reconstructed without BE009/new migrations. Current source is `BE010-r2-A`: 75 application tables after the chained 71→75 successors and 91 assignments (69 earlier baseline +3 BE006 +12 A0 +4 BE009 +3 adoption paths). `source_ready_unadopted` is a source state; actual target adoption, schema migration, database/Docker/B and Owner acceptance remain separate gates.

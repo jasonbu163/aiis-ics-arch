@@ -1,0 +1,19 @@
+{
+  "candidate44Unchanged": true,
+  "specAndTasksUnchanged": true,
+  "buildArtifactsMatchHandoff": true,
+  "artifacts": {
+    "backend-dotnet/bin/Debug/net10.0/AIIS.Backend.Api.dll": "1ce88a2684f58996200f0d0a2e39493c5bffbd61ecee550e594e4647cc76b1c1",
+    "backend-dotnet/bin/Debug/net10.0/AIIS.Backend.Api.deps.json": "369268d0ca6054be1a4062e9684343402556630cfe5b3428048308350ea003a0",
+    "backend-dotnet/bin/Debug/net10.0/AIIS.Backend.Api.runtimeconfig.json": "a6de13a0197332e10778b009b28d59ebbc9a034816ea0505a22cfffdb8c0dbf8",
+    "backend-dotnet/tests/AIIS.Backend.Tests/bin/Debug/net10.0/AIIS.Backend.Tests.dll": "19b8fd304deb2bd914fc66229a8e979ca9d70eb2f1343cc9e442c4e0ab1bd266"
+  },
+  "coordinatorModifiedOnlyFourTaskIndexes": [
+    "PLAN.md",
+    "PLAN.zh-CN.md",
+    "plans/README.md",
+    "plans/README.zh-CN.md"
+  ],
+  "unrelatedIndexContentPreserved": true,
+  "verificationAddedOnly": "plans/ARCH-BE-008-csharp-backend-plan-slice/checklist.md"
+}

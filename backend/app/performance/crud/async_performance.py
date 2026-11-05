@@ -21,6 +21,10 @@ from app.performance.models.performance import (
 )
 
 
+from app.performance.crud.async_integration import storage_context
+from common.integration.storage import to_storage_time as storage_time
+
+
 class PerformanceCRUD:
     """实绩管理数据库访问层。"""
 
@@ -66,6 +70,7 @@ class PerformanceCRUD:
         start_date,
         end_date,
     ):
+        context=await storage_context(self.db)
         query = self.build_list_query(coil_no, grade, observation_status, start_date, end_date)
 
         count_query = select(sql_func.count()).select_from(query.subquery())
@@ -79,6 +84,7 @@ class PerformanceCRUD:
         return result.scalars().all(), total
 
     async def get_performance(self, performance_id: int):
+        context=await storage_context(self.db)
         query = select(Performance).options(
             selectinload(Performance.plan),
             selectinload(Performance.temperature_records),
@@ -90,21 +96,30 @@ class PerformanceCRUD:
         return result.scalar_one_or_none()
 
     async def create_performance(self, performance: Performance) -> Performance:
+        context=await storage_context(self.db)
+        if context:
+            performance.created_at=storage_time(context[1])
+            performance.updated_at=storage_time(context[1])
         self.db.add(performance)
         await self.db.commit()
         await self.db.refresh(performance)
         return performance
 
     async def save_performance(self, performance: Performance) -> Performance:
+        context=await storage_context(self.db)
+        if context:
+            performance.updated_at=storage_time(context[1])
         await self.db.commit()
         await self.db.refresh(performance)
         return performance
 
     async def delete_performance(self, performance: Performance) -> None:
+        context=await storage_context(self.db)
         await self.db.delete(performance)
         await self.db.commit()
 
     async def list_temperature_records(self, performance_id: int):
+        context=await storage_context(self.db)
         result = await self.db.execute(
             select(ProcessTemperature)
             .where(ProcessTemperature.performance_id == performance_id, ProcessTemperature.equipment_id.is_(None))
@@ -113,6 +128,7 @@ class PerformanceCRUD:
         return result.scalars().all()
 
     async def list_tension_records(self, performance_id: int):
+        context=await storage_context(self.db)
         result = await self.db.execute(
             select(ProcessTension)
             .where(ProcessTension.performance_id == performance_id, ProcessTension.equipment_id.is_(None))
@@ -121,6 +137,7 @@ class PerformanceCRUD:
         return result.scalars().all()
 
     async def list_speed_records(self, performance_id: int):
+        context=await storage_context(self.db)
         result = await self.db.execute(
             select(ProcessSpeed)
             .where(ProcessSpeed.performance_id == performance_id, ProcessSpeed.equipment_id.is_(None))
@@ -129,12 +146,18 @@ class PerformanceCRUD:
         return result.scalars().all()
 
     async def create_record(self, record: Any):
+        context=await storage_context(self.db)
+        if context and getattr(record,"__tablename__",None) in ("performance_process_temperature","performance_process_tension","performance_process_speed"):
+            record.record_time=storage_time(record.record_time,context[0]["basisProfile"]["legacyNaive"]) if record.record_time is not None else storage_time(context[1])
+            record.created_at=storage_time(context[1])
+            record.updated_at=storage_time(context[1])
         self.db.add(record)
         await self.db.commit()
         await self.db.refresh(record)
         return record
 
     async def create_push_down_records(self, records: list[PushDownRecord]) -> list[PushDownRecord]:
+        context=await storage_context(self.db)
         for record in records:
             self.db.add(record)
 
@@ -145,6 +168,7 @@ class PerformanceCRUD:
         return records
 
     async def list_push_down_records(self, performance_id: int):
+        context=await storage_context(self.db)
         result = await self.db.execute(
             select(PushDownRecord)
             .where(PushDownRecord.performance_id == performance_id)

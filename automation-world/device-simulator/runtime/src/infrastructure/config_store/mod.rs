@@ -38,6 +38,13 @@ pub struct Selection {
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct RollbackRelease {
+    pub instance_id: String,
+    pub revision_id: String,
+    pub selection_etag: String,
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RevisionInfo {
     pub revision_id: String,
     pub saved_seq: String,
@@ -50,6 +57,14 @@ enum Job {
     RevisionSeq(String, Reply<u64>),
     Load(Reply<Snapshot>),
     Save(String, Workspace, Reply<SaveResult>),
+    Revise(
+        String,
+        bool,
+        Vec<String>,
+        Vec<String>,
+        Vec<RollbackRelease>,
+        Reply<SaveResult>,
+    ),
     Revision(String, Reply<Workspace>),
     Selections(Reply<Vec<Selection>>),
     Select(String, String, Option<String>, Reply<Selection>),
@@ -131,6 +146,11 @@ impl Store {
                         Job::Save(etag, w, reply) => {
                             let _ = reply.send(transactions::save(&mut c, &lock, &etag, w));
                         }
+                        Job::Revise(etag, publish, remove, protected, releases, reply) => {
+                            let _ = reply.send(transactions::revise(
+                                &mut c, &lock, &etag, publish, remove, protected, releases,
+                            ));
+                        }
                         Job::Revision(id, reply) => {
                             let _ = reply.send(queries::revision(&c, &id));
                         }
@@ -199,6 +219,35 @@ impl Store {
     }
     pub fn revision_seq(&self, id: &str) -> Result<u64, String> {
         self.request(|r| Job::RevisionSeq(id.into(), r), "storage_query_timeout")
+    }
+    pub fn revision_catalog(&self) -> Result<Vec<RevisionInfo>, String> {
+        // 目录规划也沿用每次100行/1秒的查询预算，不加入无界SQL查询。
+        let mut rows = vec![];
+        loop {
+            let page = self.revisions(rows.len().try_into().map_err(|_| "page_limit")?)?;
+            let done = page.len() < 100;
+            rows.extend(page);
+            if done {
+                return Ok(rows);
+            }
+        }
+    }
+    /// 显式发布供固定测试/宿主装配使用；产品发布由versions服务执行确认及保留清单。
+    pub fn publish(&self, expected: &str) -> Result<SaveResult, String> {
+        self.revise(expected, true, vec![], vec![], vec![])
+    }
+    pub(crate) fn revise(
+        &self,
+        expected: &str,
+        publish: bool,
+        remove: Vec<String>,
+        protected: Vec<String>,
+        releases: Vec<RollbackRelease>,
+    ) -> Result<SaveResult, String> {
+        self.request(
+            |r| Job::Revise(expected.into(), publish, remove, protected, releases, r),
+            "save_receipt_unknown",
+        )
     }
     pub fn load(&self) -> Result<Snapshot, String> {
         self.request(Job::Load, "storage_query_timeout")

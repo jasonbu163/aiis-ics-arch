@@ -1,0 +1,5 @@
+"""事实模块v1声明；模块启用不代表匿名准入或数据库已采用。"""
+from app.module_registry import ModuleManifest
+manifest=ModuleManifest(name='plc_facts',enabled=True,order=36,core_contract='aiis.backend-module/v1',
+    requires=(),model_requires=(),exports=(),permissions=(),error_codes=('plc_facts.scope_rejected', 'plc_facts.source_rejected', 'plc_facts.batch_content_conflict', 'plc_facts.sample_content_conflict', 'plc_facts.cycle_content_conflict', 'plc_facts.binding_conflict', 'plc_facts.sample_expired', 'plc_facts.proof_expired', 'plc_facts.cursor_expired', 'plc_facts.cursor_gap', 'plc_facts.parent_proof_expired', 'plc_facts.batch_admission_expired', 'plc_facts.payload_too_large', 'plc_facts.media_type', 'plc_facts.invalid_request', 'plc_facts.digest_mismatch', 'plc_facts.cursor_mismatch', 'plc_facts.busy', 'plc_facts.not_ready', 'plc_facts.unavailable', 'plc_facts.commit_outcome_unknown', 'plc_facts.clock_invalid', 'plc_facts.capacity_exceeded', 'plc_facts.internal_error'),
+    routers=('app.plc_facts.api.routes:router',),models_package='app.plc_facts.models')

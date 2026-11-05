@@ -1,0 +1,3 @@
+docker_pull_exit=0
+docker_up_exit=0
+{"task": "ARCH-BE-008", "runId": "ab0f0fb5409b36026f53281f", "target": "127.0.0.1:13388/arch_be008_plan", "version": "8.4.6", "digest": ["mysql@sha256:869218921e61d6c3c89820955d63cca42971f0e3e6c1e2792247bbd944ebc6e9"], "architecture": "arm64", "tables": "plans\n"}

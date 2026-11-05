@@ -1,0 +1,9 @@
+{
+  "resources": {
+    "aiis-arch-be008-mysql": "absent",
+    "aiis-arch-be008-net": "absent",
+    "aiis-arch-be008-mysql-data": "absent"
+  },
+  "13388": "actual_rebind_pass",
+  "18108": "actual_rebind_pass"
+}

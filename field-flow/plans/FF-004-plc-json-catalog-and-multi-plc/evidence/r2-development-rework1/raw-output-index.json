@@ -1,0 +1,121 @@
+{
+  "scope": "completed rework1 outputs only",
+  "self_stdout_redirected": false,
+  "files": [
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/copy-fixture-build.txt",
+      "bytes": 143,
+      "sha256": "94ce82f444183aac52d40fe19ca1027509f77274f670a0f64d19739b81af6a48"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/copy-manual.txt",
+      "bytes": 198,
+      "sha256": "30db8115fa32f20f65267d27ca48cc36a22b168d8304892aaacaf686d3d42551"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/copy-product-build.txt",
+      "bytes": 143,
+      "sha256": "5f60b16a7a382eb19d8d74f3dd56505d4de973c4d7f728290479072c2d671106"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/copy-tests.txt",
+      "bytes": 14728,
+      "sha256": "29802c98a1a7e3688466b672070f0ef22604e0140d8af432a90657d1284c730c"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/fixture-build.txt",
+      "bytes": 168,
+      "sha256": "8058bebf3577b86c4ce4e1a36cc4dc3284575901360a785d15252818e815dec8"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/fmt.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/formal-manual.txt",
+      "bytes": 193,
+      "sha256": "2ac6748f50f9c7aa692b1688d06887163147c0cd115457182d55dd400960b9ce"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/full.txt",
+      "bytes": 559352,
+      "sha256": "73764ed46b0263c1913e8998305976383e9d52c96895b58588bd1131ddaa43e6"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/guide-acceptance.txt",
+      "bytes": 219,
+      "sha256": "33464906ba4f644685a0393d8dc7cceec62f12c76a32fece961313a5ddb04847"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/guide-launch.txt",
+      "bytes": 352,
+      "sha256": "da423c97ec7c97972794fa46ddbe2c888ded798edef922ae19f293f9680a8104"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/guide-pids.txt",
+      "bytes": 956,
+      "sha256": "c776273e183d4c41d27e40a4b9afef10d00ef7da8ca84ee6de142c8274582584"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/guide-poll.txt",
+      "bytes": 1024,
+      "sha256": "d81f10f5cf4b150221e10fd2dd69068cf34fad9c60f2a4fe5df609b6b5b7c800"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/guide-stop.txt",
+      "bytes": 163,
+      "sha256": "4e3c86dc70a0653f073c8570870972b8aacfe55da559e01adf92eb6bda77e0be"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/manuals.txt",
+      "bytes": 1234,
+      "sha256": "9c943ff166871205c1f5ef26a9071aa8c54ea65a5ff0643159412ce20e9a324d"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/product-build.txt",
+      "bytes": 109,
+      "sha256": "6ca75bd4b6f1baf44003f4172c062dd8134f5e1cfb743802abfaa41dbb61d95e"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/product-build2.txt",
+      "bytes": 167,
+      "sha256": "479f07bb2cf54056db88f2b07798d6593834960a6927c5177085312581b63e10"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/static.txt",
+      "bytes": 673,
+      "sha256": "d20f57b559eacfd70630ccd218e80de68d87655d68fe9cb9c8cf4b26d826df0b"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/static2.txt",
+      "bytes": 673,
+      "sha256": "d20f57b559eacfd70630ccd218e80de68d87655d68fe9cb9c8cf4b26d826df0b"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/targeted-build.txt",
+      "bytes": 293,
+      "sha256": "5baa50fb1d7a758396dd956e90235b7dbe0f7c8d7b018aedd1ad99adecd506cb"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/targeted.txt",
+      "bytes": 14649,
+      "sha256": "a615f847b30fb969c262bb900442d7dc6d58d666789a3021b979d4806fa64fff"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/teaching-fixture-build.txt",
+      "bytes": 147,
+      "sha256": "75a8d44225985df651548351785a3768accf445455d6ecfcc1500a5eb1b1dc7b"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/teaching-manual.txt",
+      "bytes": 184,
+      "sha256": "f0c10948503ba26944277710d5e6953dfd38aec99592a93c0dce29e8028ba70f"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/teaching-product-build.txt",
+      "bytes": 147,
+      "sha256": "281682d22d8aba11cd0a8bd2eea5625b28facdbc70aa811d317fccf45ec1bb31"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 # Field Flow Rust Code Index
 
 - [src/app/demo01.rs](src/app/demo01.rs): 文件：src/app/demo01.rs；手写单轮GET→typed条件→执行服务，无循环、SQL或协议IO。
-- [src/app/mod.rs](src/app/mod.rs): 文件：src/app/mod.rs；只注册已批准demo01。
+- [src/app/mod.rs](src/app/mod.rs): 文件：src/app/mod.rs；显式注册三个已批准基础案例，无自动发现。
 - [src/bin/ff-fixture.rs](src/bin/ff-fixture.rs): 文件：src/bin/ff-fixture.rs；独立本机合成夹具入口，无参仅帮助。
 - [src/commands.rs](src/commands.rs): 文件：src/commands.rs；双语CLI解析与装配；无参/help无配置读取及状态IO。
 - [src/config.rs](src/config.rs): 文件：src/config.rs；拒绝未知字段与隐式类型的配置/资源边界校验。
@@ -34,3 +34,23 @@
 
 - [USER_GUIDE.md](USER_GUIDE.md) / [中文](USER_GUIDE.zh-CN.md): 独立使用、真实方法与teaching01教程；示例接线仅在教程副本，不是正式已注册源码。
 - [BUILD.md](BUILD.md) / [中文](BUILD.zh-CN.md): 产品/夹具构建、native依赖与目标平台未测边界。
+
+## FF-005 basic examples
+
+- [src/app/plc_guard_get_int.rs](src/app/plc_guard_get_int.rs)：单轮条件、原typed解析与Execution。
+- [src/app/get_value_guard_int.rs](src/app/get_value_guard_int.rs)：单轮条件、原typed解析与Execution。
+- [tests/basic_examples.rs](tests/basic_examples.rs)：自身Fixture/正式CLI有界矩阵，分窗口计数/状态/内存/真实回收。
+- [examples/README.md](examples/README.md) / [中文](examples/README.zh-CN.md)：基础案例与YAML合同。
+- [config/README.md](config/README.md) / [中文](config/README.zh-CN.md)：基础案例与YAML合同。
+
+FF-004 Rust catalog additions:
+
+- `src/config/catalog.rs`: strict bounded ff.plc parsing, source/protocol/point validation and frozen byte hashes.
+- `src/config/runtime_v2.rs`: version routing, YAML v2 assembly to original typed demo01 identity, read-only validation report.
+- `src/services/devices.rs`: flow-bound read-only device subset delegating to original Owners.
+- `src/app/read_points.rs`: ordered single read round and bounded current observation.
+- `src/runtime/catalog.rs`: v2 reader scheduling and five-second bounded chunks.
+- `src/fixture/catalog_demo.rs`: fixed two-PLC synthetic fixture, issue-once stdin, raw trace, child/thread joins.
+- `tests/plc_catalog.rs`, `tests/modbus_catalog.rs`: strict declarations, path/capability and zero-side-effect preflight.
+- `tests/multi_plc.rs`, `tests/catalog_compatibility.rs`, `tests/catalog_support/mod.rs`: bounded real CLI, sample identities, protocol/resource and legacy-state compatibility.
+- `config/catalog-demo.yaml`, `config/plcs/*.json`: explicit synthetic v2 catalog and structure-only Modbus declaration.

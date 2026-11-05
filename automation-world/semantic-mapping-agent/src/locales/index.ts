@@ -1,7 +1,7 @@
 /**
  * File Path: /automation-world/semantic-mapping-agent/src/locales/index.ts
  * Description: Root locale assembly for module-owned bilingual messages.
- * Main Features: Merges module help and product content deterministically.
+ * Main Features: Merges module product content deterministically.
  */
 import connectionEn from "../app/connection/locales/en-US.json";
 import connectionZh from "../app/connection/locales/zh-CN.json";

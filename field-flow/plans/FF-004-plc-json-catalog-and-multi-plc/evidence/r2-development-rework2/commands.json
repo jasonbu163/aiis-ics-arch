@@ -1,0 +1,151 @@
+{
+  "copy-fixture-build-command.json": {
+    "label": "copy-fixture-build",
+    "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/copy",
+    "argv": [
+      "cargo",
+      "build",
+      "--locked",
+      "--offline",
+      "--release",
+      "--features",
+      "test-fixture",
+      "--bin",
+      "ff-fixture",
+      "--target-dir",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/copy-fixture"
+    ],
+    "exit": 0,
+    "seconds": 126.21369725,
+    "raw": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/copy-fixture-build.txt"
+  },
+  "copy-product-build-command.json": {
+    "label": "copy-product-build",
+    "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/copy",
+    "argv": [
+      "cargo",
+      "build",
+      "--locked",
+      "--offline",
+      "--release",
+      "--no-default-features",
+      "--bin",
+      "field-flow",
+      "--target-dir",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/copy-product"
+    ],
+    "exit": 0,
+    "seconds": 127.083410375,
+    "raw": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/copy-product-build.txt"
+  },
+  "copy-tests-command.json": {
+    "label": "copy-tests",
+    "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/copy",
+    "argv": [
+      "env",
+      "FF004_EVIDENCE_ROOT=/private/tmp/ff-004-r2-dev-IVyzcc/rework2/copy-tests",
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--release",
+      "--features",
+      "test-fixture",
+      "--target-dir",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/copy-fixture",
+      "--test",
+      "plc_catalog",
+      "--",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "seconds": 4.667589334,
+    "raw": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/copy-tests.txt"
+  },
+  "fixture-build-command.json": {
+    "label": "fixture-build",
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "argv": [
+      "cargo",
+      "build",
+      "--locked",
+      "--offline",
+      "--release",
+      "--features",
+      "test-fixture",
+      "--bin",
+      "ff-fixture",
+      "--target-dir",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/fixture"
+    ],
+    "exit": 0,
+    "seconds": 125.161157208,
+    "raw": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/fixture-build.txt"
+  },
+  "full-command.json": {
+    "label": "full",
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "argv": [
+      "env",
+      "FF004_EVIDENCE_ROOT=/private/tmp/ff-004-r2-dev-IVyzcc/rework2/full-catalog",
+      "FF005_EVIDENCE_ROOT=/private/tmp/ff-004-r2-dev-IVyzcc/rework2/full-legacy-basic",
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "--features",
+      "test-fixture",
+      "--target-dir",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/test",
+      "--",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "exit": 0,
+    "seconds": 263.299888042,
+    "raw": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/full.txt"
+  },
+  "manuals-command.json": {
+    "label": "manuals",
+    "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+    "argv": [
+      "python3",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/manuals.py"
+    ],
+    "exit": 0,
+    "seconds": 42.9533125,
+    "raw": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/manuals.txt"
+  },
+  "product-build-command.json": {
+    "label": "product-build",
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "argv": [
+      "cargo",
+      "build",
+      "--locked",
+      "--offline",
+      "--release",
+      "--no-default-features",
+      "--bin",
+      "field-flow",
+      "--target-dir",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/product"
+    ],
+    "exit": 0,
+    "seconds": 125.274016125,
+    "raw": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/product-build.txt"
+  },
+  "repro-after-command.json": {
+    "label": "repro-after",
+    "cwd": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+    "argv": [
+      "python3",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro.py",
+      "after"
+    ],
+    "exit": 0,
+    "seconds": 0.596217541,
+    "raw": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro-after.txt"
+  }
+}

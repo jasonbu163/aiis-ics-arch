@@ -1,6 +1,6 @@
 /**
  * File Path: /automation-world/semantic-mapping-agent/src/app/twin-facts/types.ts
- * Description: Collection-fact, API-first Mapping configuration, runtime startup, legacy profile, and managed-runtime contracts.
+ * Description: Read-only source-fact, HTTP Mapping configuration and mapping-only startup contracts.
  * Main Features: Types backend-owned Mapping configuration, local runtime startup preferences, manual-run audit summaries, editable material load outcomes, and stable material reason codes.
  */
 export type CollectionFactKind = "current" | "incremental";
@@ -225,70 +225,11 @@ export interface TargetApiMaterialLoadResult {
   targetApis: TargetApiConfiguration[];
 }
 
-export interface CollectionFactChange {
-  name: string;
-  from: string;
-  to: string;
-}
-
-export interface CollectionFactSyncSummary {
-  added: string[];
-  retained: string[];
-  deleted: string[];
-  kindChanges: CollectionFactChange[];
-  typeChanges: CollectionFactChange[];
-  versionOnly: string[];
-}
-
 export interface CollectionFactContract {
   contractVersion: string;
   sourceKey: string;
   current: Record<string, CollectionFactDataType>;
   incremental: Record<string, CollectionFactDataType>;
-}
-
-export interface CollectionFactContractPreview {
-  contract: CollectionFactContract;
-  summary: CollectionFactSyncSummary;
-}
-
-export interface CollectionFactsWorkspace {
-  contractJson: string;
-  summary: CollectionFactSyncSummary;
-  contractOrigin: "saved" | "generated";
-  generatedCounts: {
-    current: number;
-    incremental: number;
-    total: number;
-  } | null;
-}
-
-export interface CollectionFactListQuery {
-  sourceKey?: string;
-  nameContains?: string;
-  factKind?: CollectionFactKind;
-  dataType?: CollectionFactDataType;
-  page?: number;
-  pageSize?: number;
-}
-
-export interface CollectionFactRecord {
-  id: number;
-  sourceKey: string;
-  name: string;
-  factKind: CollectionFactKind;
-  dataType: CollectionFactDataType;
-  valueText: string | null;
-  contractVersion: string;
-  updatedAt: string;
-  rowVersion: string;
-}
-
-export interface CollectionFactPage {
-  items: CollectionFactRecord[];
-  page: number;
-  pageSize: number;
-  total: number;
 }
 
 export interface BackendCollectionFactListQuery {
@@ -318,71 +259,7 @@ export interface BackendCollectionFactPage {
   total: number;
 }
 
-export interface CollectionFactValueInput {
-  name: string;
-  value: string | null;
-}
-
-export interface CollectionFactValueUpdate {
-  contractVersion: string;
-  values: CollectionFactValueInput[];
-}
-
-export interface CollectionFactValueUpdateResult {
-  name: string;
-  value: string | null;
-  updatedAt: string;
-  rowVersion: string;
-}
-
-export interface CollectionFactValueUpdateResponse {
-  sourceKey: string;
-  contractVersion: string;
-  updated: CollectionFactValueUpdateResult[];
-}
-
 export type CollectionFactFileFormat = "json" | "xlsx";
-
-export interface CollectionFactDefinitionFileRow {
-  sourceKey: string;
-  name: string;
-  factKind: CollectionFactKind;
-  dataType: CollectionFactDataType;
-}
-
-export interface CollectionFactValueFileRow {
-  sourceKey: string;
-  contractVersion: string;
-  name: string;
-  value: string | null;
-}
-
-export type TwinRuntimeChannel = "both";
-
-export type SimulationCurrentTimeMode = "utc" | "system" | "custom";
-
-export interface SimulationRuleConfigurationInput {
-  sourceKey: string;
-  factName: string;
-  sequence: unknown[];
-  intervalMs: number;
-  enabled: boolean;
-  writeCurrentTime: boolean;
-  currentTimeMode: SimulationCurrentTimeMode;
-  currentTimeZone: string | null;
-}
-
-export interface SimulationRuleConfiguration extends SimulationRuleConfigurationInput {
-  id: string;
-  rowVersion: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CollectionSimulationStartRequest {
-  backendBaseUrl: string;
-  sourceKey: string;
-}
 
 export interface ApiFirstMappingRuntimeStartRequest {
   backendBaseUrl: string;
@@ -391,37 +268,12 @@ export interface ApiFirstMappingRuntimeStartRequest {
 export interface RuntimeStartupPreferences {
   schemaVersion: number;
   runtimeAutoStart: {
-    collectionFactSimulation: {
-      enabled: boolean;
-      sourceKey: string | null;
-    };
     apiMappingRuntime: {
       enabled: boolean;
       factsPollingIntervalMs: number;
     };
   };
 }
-
-export interface CollectionSimulationPointEditor {
-  ruleId: string | null;
-  factName: string;
-  dataType: CollectionFactDataType;
-  valuesJson: string;
-  intervalMs: number;
-  writeCurrentTime: boolean;
-  currentTimeMode: SimulationCurrentTimeMode;
-  currentTimeZone: string | null;
-  validationError: CollectionSimulationValidationError | null;
-}
-
-export type CollectionSimulationValidationError =
-  | "SIMULATION_POINT_INTERVAL_INVALID"
-  | "SIMULATION_POINT_VALUES_ARRAY_REQUIRED"
-  | "SIMULATION_POINT_CURRENT_TIME_INVALID"
-  | "SIMULATION_POINT_CURRENT_TIME_MODE_INVALID"
-  | "SIMULATION_POINT_CUSTOM_TIME_ZONE_REQUIRED"
-  | "SIMULATION_POINT_VALUE_TYPE_INVALID"
-  | "SIMULATION_POINT_VALUES_JSON_INVALID";
 
 export type TwinRuntimeStatus =
   | "idle"
@@ -448,7 +300,7 @@ export interface TwinRuntimeSnapshot {
   runtimeType: string;
   status: TwinRuntimeStatus;
   runId: string | null;
-  channel: TwinRuntimeChannel | null;
+  channel: "both" | null;
   profileId: string | null;
   profileVersion: string | null;
   profileHash: string | null;

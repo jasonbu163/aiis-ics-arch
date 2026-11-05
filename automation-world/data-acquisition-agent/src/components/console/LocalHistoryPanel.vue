@@ -1,4 +1,4 @@
-<!-- 本地历史主工作区：有界游标分页、上海时间筛选与原始内容只读弹窗，复用CU卡片/动作/表格壳。 -->
+<!-- 本地历史主工作区：有界游标分页、上海时间筛选与样本只读详情弹窗，复用CU卡片/动作/表格壳。 -->
 <template>
   <ConsoleCard v-if="local" title-key="common.local.history" body-class="console-card__body--table">
     <template #actions><ConsoleActionButton label-key="common.local.resetHistoryWidths" @click="resetHistoryWidths" /><ConsoleActionButton label-key="common.local.search" tone="primary" :disabled="local.busy" @click="local.loadHistory(false)" /></template>
@@ -35,13 +35,7 @@
   </ConsoleCard>
   <Teleport v-if="local" to="#daa-feedback">
     <ElDialog v-model="detailsVisible" :title="t('common.local.sampleDetails')" width="min(960px, calc(100vw - 32px))" :append-to-body="false" :close-on-click-modal="false" destroy-on-close>
-      <div v-if="local.raw && local.rawSampleId === detailSampleId" class="daa-history-detail">
-        <div class="tag-row"><h3>{{ t('common.local.original') }}</h3><el-tag type="info" effect="plain">{{ local.label(local.raw.deliveryState) }}</el-tag></div>
-        <code class="muted-cell">{{ detailSampleId }}<br>SHA-256 {{ local.raw.sha256 }}</code>
-        <pre class="daa-local-raw">{{ local.raw.payload }}</pre>
-        <details class="daa-details"><summary>{{ t('common.local.manifest') }}</summary><code class="muted-cell">SHA-256 {{ local.raw.manifestSha256 }}</code><pre class="daa-local-raw">{{ local.raw.manifest }}</pre></details>
-        <details class="daa-details"><summary>{{ t('common.local.context') }}</summary><code class="muted-cell">SHA-256 {{ local.raw.contextSha256 }}</code><pre class="daa-local-raw">{{ local.raw.context }}</pre></details>
-      </div>
+      <LocalSampleDetail v-if="local.raw && local.rawSampleId === detailSampleId" :key="detailSampleId" :raw="local.raw" :sample-id="detailSampleId" />
       <template #footer><ConsoleActionButton label-key="common.local.closeDetails" @click="detailsVisible = false" /></template>
     </ElDialog>
   </Teleport>
@@ -56,6 +50,7 @@ import { localConsoleKey } from '../../console/composables/useLocalAcquisitionCo
 import ConsoleCard from './ConsoleCard.vue'
 import ConsoleActionButton from './ConsoleActionButton.vue'
 import ConsoleTableShell from './ConsoleTableShell.vue'
+import LocalSampleDetail from './LocalSampleDetail.vue'
 const local = inject(localConsoleKey)
 const { t } = useI18n()
 const detailsVisible = ref(false), detailSampleId = ref('')

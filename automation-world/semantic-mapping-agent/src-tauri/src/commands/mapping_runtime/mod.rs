@@ -14,7 +14,7 @@ pub async fn run_mapping_manual_once(
     expected_row_version: String,
     backend_base_url: String,
 ) -> Result<MappingManualRunResult, String> {
-    crate::config::require_external_io()?;
+    crate::services::local_configuration::reject_execution()?;
     mapping_runtime::run_mapping_manual_once(mapping_id, expected_row_version, backend_base_url)
         .await
 }

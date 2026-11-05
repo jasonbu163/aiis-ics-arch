@@ -1,4 +1,4 @@
-//! 原字节多文件扫描/显式声明闭包/结构化身份继承；BEGIN及:=初值一律不消费。
+//! 原字节多文件扫描/自动UDT闭包与显式歧义选择/结构化身份继承；BEGIN及:=初值不消费。
 use super::configuration::{Configuration, Preview};
 use crate::domain::{configuration::*, source::*};
 use aiis_tia_import_core as core;
@@ -56,8 +56,17 @@ fn diagnostic(e: Vec<core::Diagnostic>) -> String {
         .map(|e| e.code.clone())
         .unwrap_or("source_invalid".into())
 }
-pub fn preview(service: &Configuration, intent: ImportIntent) -> Result<ImportPreview, String> {
-    let mut state = service.get()?;
+fn prepare(
+    service: &Configuration,
+    intent: &ImportIntent,
+) -> Result<
+    (
+        crate::infrastructure::config_store::Snapshot,
+        core::SourceCatalog,
+    ),
+    String,
+> {
+    let state = service.get()?;
     if state.etag != intent.expected_etag {
         return Err(format!("etag_conflict:{}", state.etag));
     }
@@ -92,7 +101,33 @@ pub fn preview(service: &Configuration, intent: ImportIntent) -> Result<ImportPr
     // 每一预览批次只扫描一次，声明索引只在本catalog内使用。
     let catalog =
         core::scan_sources(&inputs, core::ImportProfile::TiaSubsetV1).map_err(diagnostic)?;
-    let declarations=catalog.declarations.iter().map(|(r,d)|json!({"inputId":r.input_id,"declarationIndex":r.declaration_index,"name":d.name,"db":d.db,"issues":d.issues.iter().map(|e|e.code.clone()).collect::<Vec<_>>()})).collect();
+    Ok((state, catalog))
+}
+fn declarations(catalog: &core::SourceCatalog, intent: &ImportIntent) -> Vec<Value> {
+    let reference = |r: &core::DeclarationRef| json!({"inputId":r.input_id,"declarationIndex":r.declaration_index});
+    catalog.declarations.iter().map(|(r,d)| {
+        let choices = intent.bindings.iter().find(|b| b.declaration.core() == *r).map(|b| b.udt_closure.iter().map(Declaration::core).collect::<Vec<_>>()).unwrap_or_default();
+        let plan = d.db.then(|| core::resolve_udt_dependencies(catalog, r, &choices));
+        let (closure, dependencies) = match plan {
+            Some(Ok(plan)) => (plan.closure.iter().map(reference).collect::<Vec<_>>(), plan.issues.iter().map(|p| json!({"code":p.diagnostic.code,"path":p.diagnostic.path,"typeName":p.type_name,"candidates":p.candidates.iter().map(reference).collect::<Vec<_>>() })).collect::<Vec<_>>()),
+            Some(Err(problems)) => (vec![], problems.iter().map(|p| json!({"code":p.code,"path":p.path,"typeName":"","candidates":[]})).collect()),
+            None => (vec![], vec![]),
+        };
+        json!({"inputId":r.input_id,"declarationIndex":r.declaration_index,"name":d.name,"db":d.db,"issues":d.issues.iter().map(|e|e.code.clone()).collect::<Vec<_>>(),"udtClosure":closure,"dependencyIssues":dependencies})
+    }).collect()
+}
+/// 扫描或重选歧义来源只生成依赖计划，不建立导入票据或持久化配置。
+pub fn analyze(service: &Configuration, intent: ImportIntent) -> Result<ImportPreview, String> {
+    let (_, catalog) = prepare(service, &intent)?;
+    Ok(ImportPreview {
+        declarations: declarations(&catalog, &intent),
+        preview: None,
+        initializer_notice: true,
+    })
+}
+pub fn preview(service: &Configuration, mut intent: ImportIntent) -> Result<ImportPreview, String> {
+    let (mut state, catalog) = prepare(service, &intent)?;
+    let declarations = declarations(&catalog, &intent);
     if intent.bindings.is_empty() {
         return Ok(ImportPreview {
             declarations,
@@ -102,6 +137,29 @@ pub fn preview(service: &Configuration, intent: ImportIntent) -> Result<ImportPr
     }
     if intent.bindings.len() > 32 {
         return Err("db_capacity".into());
+    }
+    for binding in &mut intent.bindings {
+        let plan = core::resolve_udt_dependencies(
+            &catalog,
+            &binding.declaration.core(),
+            &binding
+                .udt_closure
+                .iter()
+                .map(Declaration::core)
+                .collect::<Vec<_>>(),
+        )
+        .map_err(diagnostic)?;
+        if let Some(problem) = plan.issues.first() {
+            return Err(problem.diagnostic.code.clone());
+        }
+        binding.udt_closure = plan
+            .closure
+            .into_iter()
+            .map(|r| Declaration {
+                input_id: r.input_id,
+                declaration_index: r.declaration_index,
+            })
+            .collect();
     }
     let mut versions = BTreeMap::new();
     for file in &intent.files {

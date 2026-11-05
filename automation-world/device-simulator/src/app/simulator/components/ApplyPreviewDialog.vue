@@ -1,6 +1,6 @@
 <!-- 停机apply明确列保值/初始化/删除；无隐式start，回旧版默认全初始化。 -->
 <template>
-  <el-dialog :model-value="!!preview" :title="t('simulator.applyPreview')" :append-to-body="false" width="min(980px, calc(100vw - 32px))" :close-on-click-modal="!busy" @close="emit('cancel')">
+  <el-dialog :model-value="!!preview" :title="t('simulator.applyPreview')" :append-to-body="false" width="min(980px, calc(100vw - 32px))" :show-close="!busy" :close-on-press-escape="!busy" :close-on-click-modal="!busy" @close="emit('cancel')">
     <div v-if="preview" class="console-stack" data-testid="apply-preview">
       <el-alert :title="t(preview.details.initializeAll?'simulator.initializeAllHint':'simulator.preserveHint')" type="warning" :closable="false" />
       <el-checkbox :model-value="preview.details.initializeAll===true" :disabled="preview.details.rollback===true||busy" @update:model-value="emit('retention',$event?'initialize_all':'preserve_compatible_hold')">{{ t('simulator.initializeAll') }}</el-checkbox>

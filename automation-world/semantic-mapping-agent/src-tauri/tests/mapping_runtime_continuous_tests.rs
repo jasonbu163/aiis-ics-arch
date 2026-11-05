@@ -9,8 +9,7 @@ use std::collections::BTreeMap;
 use std::fs;
 
 use aiis_semantic_mapping_agent_lib::config::runtime_startup::{
-    self, ApiMappingRuntimeAutoStart, CollectionFactSimulationAutoStart,
-    RuntimeAutoStartPreferences, RuntimeStartupPreferences,
+    self, ApiMappingRuntimeAutoStart, RuntimeAutoStartPreferences, RuntimeStartupPreferences,
     DEFAULT_MAPPING_FACTS_POLLING_INTERVAL_MS,
 };
 use aiis_semantic_mapping_agent_lib::domain::mapping_runtime::{
@@ -202,10 +201,6 @@ fn runtime_start_input_and_local_preference_json_are_strict_and_value_free() {
     let preferences = RuntimeStartupPreferences {
         schema_version: 1,
         runtime_auto_start: RuntimeAutoStartPreferences {
-            collection_fact_simulation: CollectionFactSimulationAutoStart {
-                enabled: true,
-                source_key: Some("line-a".to_string()),
-            },
             api_mapping_runtime: ApiMappingRuntimeAutoStart {
                 enabled: true,
                 facts_polling_interval_ms: 2_500,
@@ -221,7 +216,6 @@ fn runtime_start_input_and_local_preference_json_are_strict_and_value_free() {
     let legacy = serde_json::from_value::<RuntimeStartupPreferences>(json!({
         "schemaVersion": 1,
         "runtimeAutoStart": {
-            "collectionFactSimulation": {"enabled": false, "sourceKey": null},
             "apiMappingRuntime": {"enabled": true}
         }
     }))
@@ -237,10 +231,6 @@ fn runtime_start_input_and_local_preference_json_are_strict_and_value_free() {
         &path,
         &RuntimeStartupPreferences {
             runtime_auto_start: RuntimeAutoStartPreferences {
-                collection_fact_simulation: CollectionFactSimulationAutoStart {
-                    enabled: true,
-                    source_key: None,
-                },
                 api_mapping_runtime: ApiMappingRuntimeAutoStart {
                     enabled: true,
                     facts_polling_interval_ms: 0,
@@ -367,7 +357,7 @@ impl HttpFixture {
 
     async fn start(&self) -> ApiFirstMappingRuntimeState {
         let state = ApiFirstMappingRuntimeState::default();
-        mapping_runtime::start_api_first_mapping_runtime(
+        mapping_runtime::legacy_start_api_first_mapping_runtime(
             &state,
             ApiFirstMappingRuntimeStartRequest {
                 backend_base_url: self.url.clone(),
@@ -615,7 +605,7 @@ async fn pause_and_stop_during_read_do_not_send_and_resume_reads_again() {
         .await
         .unwrap();
     assert_eq!(fixture.evidence.lock().unwrap().targets.len(), 0);
-    mapping_runtime::resume_api_first_mapping_runtime(&state).unwrap();
+    mapping_runtime::legacy_resume_api_first_mapping_runtime(&state).unwrap();
     fixture.until(|log| log.reads.len() == 2).await;
     mapping_runtime::stop_api_first_mapping_runtime(&state)
         .await
@@ -631,7 +621,7 @@ async fn slow_io_finishes_before_interval_and_duplicate_start_is_rejected() {
         ..Default::default()
     });
     let state = fixture.start().await;
-    assert!(mapping_runtime::start_api_first_mapping_runtime(
+    assert!(mapping_runtime::legacy_start_api_first_mapping_runtime(
         &state,
         ApiFirstMappingRuntimeStartRequest {
             backend_base_url: fixture.url.clone()

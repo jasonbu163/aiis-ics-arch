@@ -1,0 +1,52 @@
+{
+  "task_id": "FF-004",
+  "revision": "r2",
+  "slice": "A",
+  "rework": "rework1",
+  "status": "developer_handoff",
+  "development": "/root/ff004_development_r2",
+  "repository": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+  "head": "8030dbb3401ac6d1cf8bea46c81cfeff9e8e073b",
+  "spec_sha256": "a7418cfe8f34515719beb50d9d901f42d7a283e2b33c61a2a57b129104a7870e",
+  "tasks_sha256": "aacdd237b2a59424abef7f7d65f6d37bd06acca0263ebf6ab07637f7bb7e7a82",
+  "qa1_checklist_sha256": "dc363a4675802ce710d08d10e108562a2efb96e4f6bfacf1dcf50b65e55fa00c",
+  "initial_33_evidence_unchanged": true,
+  "implementation_manifest_sha256": "7e9574a0d3da0bc08c2d6f803abb73b19b88c3fa6870e6d58ea82f89fdfa60cf",
+  "candidate_manifest_sha256": "16eba0b414ce53da09910b3336cd22dacc8a673a844052b7c7406e22efd0e313",
+  "copy_manifest_sha256": "df0ebdfb0199ff71c34cc2a016c5bdb0e4c37f01fc6d8ea8679327b7bb35b589",
+  "evidence_files_sha256": "769c9c8be492e92ca1c94a6da1c5cfefb64a4d360f95a51a034dc6141913b7f8",
+  "changed_since_QA1": [
+    "field-flow/field-flow-rust/src/config/catalog.rs",
+    "field-flow/field-flow-rust/tests/plc_catalog.rs",
+    "field-flow/field-flow-rust/USER_GUIDE.md",
+    "field-flow/field-flow-rust/USER_GUIDE.zh-CN.md"
+  ],
+  "full_tests": {
+    "raw": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/full.txt",
+    "exit": 0,
+    "nonzero_tests": 31,
+    "old_tests": 21,
+    "new_tests": 10
+  },
+  "copy_tests": {
+    "raw": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/copy-tests.txt",
+    "exit": 0,
+    "nonzero_tests": 3
+  },
+  "manual_jobs": {
+    "raw": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/manuals.txt",
+    "exit": 0,
+    "all_three_jobs_exit": 0
+  },
+  "resources": {
+    "owned_new_root": "/private/tmp/ff-004-r2-dev-IVyzcc/rework1",
+    "raw_and_cache_parent": "/private/tmp/ff-004-r2-dev-IVyzcc",
+    "running_owned": 0,
+    "recorded_pids_absent": 318,
+    "ports_rebound": 8,
+    "new_legacy_prefix_paths": 76,
+    "retention": "fresh QA2 and Owner final acceptance; coordinator then audits cleanup"
+  },
+  "next_gate": "Coordinator starts new verification with fresh context; QA2 verdict and Human Owner acceptance pending",
+  "generated_at": "2026-11-04T17:29:23.502381+08:00"
+}

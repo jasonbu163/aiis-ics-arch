@@ -27,3 +27,5 @@ __all__ = [
 ]
 
 from app.performance.models.mapping_ingest import PerformanceMappingReceipt, PerformanceObservationState
+
+from app.performance.models.integration import PerformanceIntegrationReceipt, PerformanceIntegrationObservationEvent  # noqa: F401

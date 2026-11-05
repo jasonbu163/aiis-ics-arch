@@ -6,6 +6,7 @@ Main Features:
   - Shows the derived base URL and emits explicit save and OpenAPI test intentions
 -->
 <script setup lang="ts">
+import { ConsoleCard, ConsoleActionButton, StatusCapsule } from "@aw-ui";
 import { computed } from "vue";
 
 import type { LocaleMessages } from "../../../locales";
@@ -34,26 +35,17 @@ const baseUrl = computed(() => {
 </script>
 
 <template>
-  <section class="panel connection-panel">
-    <header class="panel-header">
-      <div>
-        <p class="panel-kicker">{{ props.labels.backendConnectionKicker }}</p>
-        <h2>{{ props.labels.backendConnection }}</h2>
-      </div>
-      <div class="action-row">
-        <button class="secondary-action" type="button" :disabled="testing" @click="$emit('save')">
+  <ConsoleCard class="connection-panel" :title="props.labels.backendConnection">
+<template #actions><div class="action-row">
+        <ConsoleActionButton tone="secondary" native-type="button" :disabled="testing" @click="$emit('save')">
           {{ props.labels.saveBackendConnection }}
-        </button>
-        <button class="primary-action" type="button" :disabled="testing" @click="$emit('testOpenApi')">
+        </ConsoleActionButton>
+        <ConsoleActionButton tone="primary" native-type="button" :disabled="testing" @click="$emit('testOpenApi')">
           {{ testing ? props.labels.testingOpenApi : props.labels.testOpenApi }}
-        </button>
-      </div>
-    </header>
+        </ConsoleActionButton>
+      </div></template>
 
-    <div class="connection-status" :class="connectionStatus">
-      <span class="status-dot" />
-      <span>{{ connectionMessage || props.labels.openApiUntested }}</span>
-    </div>
+    <p class="connection-status"><StatusCapsule :label="connectionMessage || props.labels.openApiUntested" :tone="connectionStatus === 'failed' ? 'danger' : connectionStatus === 'connected' ? 'success' : 'neutral'" /></p>
 
     <div class="form-grid">
       <label class="field">
@@ -78,5 +70,5 @@ const baseUrl = computed(() => {
     </div>
 
     <p class="hint">{{ props.labels.backendConnectionHint }}</p>
-  </section>
+  </ConsoleCard>
 </template>

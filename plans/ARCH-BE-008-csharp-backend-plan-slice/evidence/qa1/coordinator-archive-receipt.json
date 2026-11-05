@@ -1,0 +1,10 @@
+{
+  "task": "ARCH-BE-008",
+  "operation": "coordinator exact mechanical archive",
+  "qaVerdictSource": "checklist.md QA1 qa_failed",
+  "filesCopied": 95,
+  "bytes": 1617137,
+  "manifestSha256": "3ad526b1da8edf54d04fe147166114c3a8450bd1aa389a6169570a80e5aa2dc8",
+  "allHashesMatched": true,
+  "copiedAtUnixMs": 1793169453393
+}

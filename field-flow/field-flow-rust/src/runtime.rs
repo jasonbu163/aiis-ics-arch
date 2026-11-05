@@ -529,7 +529,10 @@ pub struct FlowHealth {
     pub iterations: u64,
     pub in_flight: u8,
 }
+pub mod catalog;
+
 pub struct Runtime {
+    points: HashMap<String, crate::app::read_points::Snapshot>,
     pub stop: Stop,
     pub owners: HashMap<String, Owner>,
     owner_tasks: Vec<OwnerTask>,
@@ -577,6 +580,7 @@ impl Runtime {
             flow_tasks: Vec::new(),
             state,
             gates: paths,
+            points: HashMap::new(),
         })
     }
     pub fn launch_flows(&mut self, config: &Config) -> Result<()> {
@@ -605,7 +609,7 @@ impl Runtime {
                 },
             );
             self.flow_tasks.push(tokio::spawn(async move{let mut clock=crate::domain::Clock::default();let mut blocked=false;loop{if stop.stopped.load(Ordering::Acquire){break} {let mut h=health.lock().unwrap();let h=h.get_mut(&f.id).unwrap();h.in_flight=1;h.last_iteration_ms=Some(now_ms());h.iterations+=1;}
-   let result=if blocked{Err("flow_blocked".into())}else{crate::app::demo01::iteration(&f,&plc,&http,&owner,&state,&stop,&mut clock).await};
+   let result=if blocked{Err("flow_blocked".into())}else{match f.kind.as_str(){"demo01"=>crate::app::demo01::iteration(&f,&plc,&http,&owner,&state,&stop,&mut clock).await,"plc_guard_get_int"=>crate::app::plc_guard_get_int::iteration(&f,&plc,&http,&owner,&state,&stop,&mut clock).await,"get_value_guard_int"=>crate::app::get_value_guard_int::iteration(&f,&plc,&http,&owner,&state,&stop,&mut clock).await,_=>Err("config_flow".into())}};
    let mut event=None;{let mut h=health.lock().unwrap();let h=h.get_mut(&f.id).unwrap();h.in_flight=0;match result{Ok(_)=>{h.consecutive_errors=0;h.last_success_ms=Some(now_ms());h.state="running".into();},Err(ref e)=>{h.consecutive_errors+=1;if matches!(e.as_str(),"identity_conflict"|"target_unknown"|"clock_invalid"|"audit_unhealthy"|"capacity_paused"){blocked=true;h.state="blocked".into();}else{h.state="recovering".into();}if h.consecutive_errors==1||blocked{event=Some(e.clone());}}}}
    if let Some(e)=event{let _=state.log("flow_health",json!({"flow_id":f.id,"error_key":e,"state":if blocked{"blocked"}else{"recovering"}})).await;}
    tokio::select!{_=stop.wait()=>break,_=tokio::time::sleep(Duration::from_millis(f.interval_ms))=>{}}
@@ -617,6 +621,7 @@ impl Runtime {
         let flows = self.flows.lock().unwrap().clone();
         let owners: HashMap<_, _> = self.owners.iter().map(|(k, o)| (k, o.health())).collect();
         let store = self.state.snapshot().await?;
+        self.points_health().await?;
         self.state.log("health",json!({"flows":flows,"owners":owners,"store":store,"had_forced_driver_stop":self.forced.load(Ordering::Acquire)})).await
     }
     pub async fn shutdown(mut self, budget: u64) -> Result<()> {

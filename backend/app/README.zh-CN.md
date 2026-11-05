@@ -198,3 +198,19 @@ downgrade遇到HTTP数据、旧非空指标的NULL或不能无损恢复的非零
 HTTP采用带时区的UTC毫秒来源时间、严格camelCase JSON和稳定sampleId。省略观测保存NULL，显式null拒绝。
 Numeric保持声明的小数位；FLOAT采用有界binary32规范化，相对误差≤1e-6、绝对误差≤max(1e-6,abs(input)×1e-6)，非零下溢拒绝。
 回执与业务同事务提交，仅命名unique竞争有界恢复；提交未知返回可重试失败，客户端保持同sampleId。不伪造PLC来源。
+
+
+## 匿名业务集成准备
+
+[ARCH-BE-010 r1 A0](../../plans/ARCH-BE-010-anonymous-business-integration/spec.md)新增 `/integration/` 下八条 typed 匿名 POST 准备及有限[公共原语](MODULE_CONTRACT.zh-CN.md#匿名集成原语)。旧认证接口和权限保持。三个模块开关默认关闭、设备和 producer scope 默认空、storage profile 默认 `unadopted`。关闭/越界请求403；A0准入合格仍在数据库依赖或业务访问前503。任何profile值均不能在本准备阶段接通业务写入。模块 `enabled=False` 经重组统一移除新旧整组路由。
+
+四个新Model声明描述三张模块永久最小回执和生产观察事件索引，不执行DDL、不代表结构已迁移。共享表上海时间采用、精确Alembic接链、业务接线和可丢弃MySQL验证仍分别有gate。匿名producer/来源声明可被冒用，scope仅数据准入而非认证。[任务记录](../../plans/ARCH-BE-010-anonymous-business-integration/tasks.md)保存待确认的源码时区/迁移提案。
+
+## PLC事实owner
+
+[plc_facts](plc_facts/README.zh-CN.md)是仅API的普通模块（order=36，无权限/exports/依赖）。匿名provider使用模块本地HTTP/typed Schema和七张独立表，保留monitor/CA/Projection来源。[ARCH-BE-009 r1](../../plans/ARCH-BE-009-backend-facts-integration/spec.md)定义源码及schema/source采用gate。
+
+
+## BE010 r2源码边界
+
+八路owner本地async业务入口已具备[闭合provider](../../contracts/published/http-api/business-integration-v1/README.zh-CN.md)、永久最小回执及接BE009 0a2的显式1b3后继。默认仍未采用；13表41列旧时间adapter与外部凭据须在实际写入前具备真实目标证据。旧认证/Projection默认时间行为保留。源码/fixture计数及纯公共原语、owner维护export见[MODULE_CONTRACT](MODULE_CONTRACT.zh-CN.md)。数据库/Docker/B、历史转换及实际采用仍分别受gate约束。

@@ -1,0 +1,633 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "AIIS Plan learning slice",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:18108/"
+    }
+  ],
+  "paths": {
+    "/api/v1/plans": {
+      "post": {
+        "tags": [
+          "Api"
+        ],
+        "operationId": "AIISBackendappPlanEndpointsCreatePlanEndpoint",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AIISBackendappPlanContractsCreatePlanIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIISBackendCommonContractsApiResponseOfAIISBackendappPlanContractsPlanOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIISBackendCommonContractsApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIISBackendCommonContractsApiError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIISBackendCommonContractsApiError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Api"
+        ],
+        "operationId": "AIISBackendappPlanEndpointsListPlansEndpoint",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "coilNo",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "grade",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "materialStatus",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIISBackendCommonContractsApiResponseOfAIISBackendappPlanContractsPlanPageOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/plans/{id}": {
+      "get": {
+        "tags": [
+          "Api"
+        ],
+        "operationId": "AIISBackendappPlanEndpointsGetPlanEndpoint",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIISBackendCommonContractsApiResponseOfAIISBackendappPlanContractsPlanOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "AIIS.Backend.Api"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AIISBackendappPlanContractsCreatePlanIn": {
+        "required": [
+          "coilNo",
+          "grade",
+          "spec",
+          "weight",
+          "thickness",
+          "width"
+        ],
+        "type": "object",
+        "properties": {
+          "coilNo": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "string"
+          },
+          "spec": {
+            "type": "string"
+          },
+          "weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "thickness": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "materialStatus": {
+            "type": "string"
+          },
+          "density": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "entryLength": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "uncoiler1Tension": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "exitTension": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "process1Tension": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "entryLoopTension": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "exitLoopTension": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "entryUnitTension": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "entryLoopUnitTension": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "processUnitTension": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "exitLoopUnitTension": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "exitUnitTension": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "remark": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "AIISBackendappPlanContractsPlanOut": {
+        "required": [
+          "id",
+          "coilNo",
+          "grade",
+          "spec",
+          "weight",
+          "thickness",
+          "width",
+          "materialStatus",
+          "density",
+          "entryLength",
+          "uncoiler1Tension",
+          "exitTension",
+          "process1Tension",
+          "entryLoopTension",
+          "exitLoopTension",
+          "entryUnitTension",
+          "entryLoopUnitTension",
+          "processUnitTension",
+          "exitLoopUnitTension",
+          "exitUnitTension",
+          "status",
+          "priority",
+          "remark",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "coilNo": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "string"
+          },
+          "spec": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "string"
+          },
+          "thickness": {
+            "type": "string"
+          },
+          "width": {
+            "type": "string"
+          },
+          "materialStatus": {
+            "type": "string"
+          },
+          "density": {
+            "type": "string"
+          },
+          "entryLength": {
+            "type": "string"
+          },
+          "uncoiler1Tension": {
+            "type": "string"
+          },
+          "exitTension": {
+            "type": "string"
+          },
+          "process1Tension": {
+            "type": "string"
+          },
+          "entryLoopTension": {
+            "type": "string"
+          },
+          "exitLoopTension": {
+            "type": "string"
+          },
+          "entryUnitTension": {
+            "type": "string"
+          },
+          "entryLoopUnitTension": {
+            "type": "string"
+          },
+          "processUnitTension": {
+            "type": "string"
+          },
+          "exitLoopUnitTension": {
+            "type": "string"
+          },
+          "exitUnitTension": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "remark": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "AIISBackendappPlanContractsPlanPageOut": {
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize",
+          "totalPages"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "$ref": "#/components/schemas/SystemCollectionsGenericIReadOnlyListOfAIISBackendappPlanContractsPlanOut"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AIISBackendCommonContractsApiError": {
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode",
+          "timestamp",
+          "errors"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {},
+          "errorCode": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "errors": {
+            "const": null,
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/AIISBackendCommonErrorsFieldError"
+            }
+          }
+        }
+      },
+      "AIISBackendCommonContractsApiResponseOfAIISBackendappPlanContractsPlanOut": {
+        "required": [
+          "code",
+          "message",
+          "data",
+          "timestamp"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AIISBackendappPlanContractsPlanOut"
+              }
+            ]
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AIISBackendCommonContractsApiResponseOfAIISBackendappPlanContractsPlanPageOut": {
+        "required": [
+          "code",
+          "message",
+          "data",
+          "timestamp"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AIISBackendappPlanContractsPlanPageOut"
+              }
+            ]
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AIISBackendCommonErrorsFieldError": {
+        "required": [
+          "field",
+          "rule"
+        ],
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "rule": {
+            "type": "string"
+          }
+        }
+      },
+      "SystemCollectionsGenericIReadOnlyListOfAIISBackendappPlanContractsPlanOut": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AIISBackendappPlanContractsPlanOut"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "task": "ARCH-BE-008",
+  "operation": "coordinator mechanical QA2 supplement archive",
+  "filesCopied": 6,
+  "bytes": 57250,
+  "allHashesMatched": true,
+  "manifestSha256": "d97798e478ce51be011ccbf2f9f0d39520c6681a2a03ce75128b91415fac4f09",
+  "copiedAtUnixMs": 1793172336401,
+  "priorHelperFailure": "metadata inspection assumed secretComparison was object; actual signed manifest uses a statement string; failed before any copy, then corrected literal validation"
+}

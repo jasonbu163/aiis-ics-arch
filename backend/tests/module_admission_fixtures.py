@@ -115,6 +115,27 @@ def generate_mapping_business_profile(destination, source_root=None):
                                  target_revision="f6a8c0e2b4d6")
 
 
+def generate_business_integration_profile(destination, source_root=None):
+    """BE010-A0：68 metadata/84公开配置；models-only，不冒充冻结 BE006 profile。"""
+    result = generate_full_profile(destination, source_root, profile_name="BE010-A0",
+                                   expected_table_count=68, target_revision=None)
+    path = result / "profile.json"
+    metadata = json.loads(path.read_text())
+    # Recreate the named historical A0 configuration/schema surface from current public source.
+    # Runtime implementation source is current; this does not claim an old binary snapshot.
+    for filename in (".env.example",".env.docker.dev.example",".env.docker.prod.example"):
+        env = result/filename
+        env.write_text("\n".join(line for line in env.read_text().splitlines() if not line.startswith(("PLC_FACTS_","EQUIPMENT_INTEGRATION_ADOPTION_FILE=","PERFORMANCE_INTEGRATION_ADOPTION_FILE=","MONITOR_INTEGRATION_ADOPTION_FILE=")))+"\n")
+    import shutil
+    shutil.rmtree(result/"app/plc_facts",ignore_errors=True)
+    for migration in (result/"alembic/versions").glob("20261104_*.py"):
+        if "0a2c4e6f8b10" in migration.name or "1b3d5f7a9c20" in migration.name:
+            migration.unlink()
+    metadata.update(public_env_assignment_count=84, schema_state="models_only_unadopted_no_migration")
+    path.write_text(json.dumps(metadata, indent=2))
+    return result
+
+
 def run_python(profile, code, *, source_root=None):
     """复用项目已锁定环境；子进程cwd及PYTHONPATH只指公开fixture，拒绝DB连接。"""
     source_root = Path(source_root or Path(__file__).resolve().parents[1])
@@ -274,3 +295,28 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def generate_plc_facts_profile(destination, source_root=None, *, runtime=False):
+    """命名BE009-A/BE009-B：七表0a2/71 schema、完整75 metadata与四张pending分开。"""
+    result = generate_full_profile(destination, source_root, profile_name="BE009-B" if runtime else "BE009-A",
+                                   expected_table_count=71, target_revision="0a2c4e6f8b10")
+    path = result / "profile.json"
+    metadata = json.loads(path.read_text())
+    metadata.update(expected_metadata_count=75, pending_tables=["equipment_integration_receipts",
+        "performance_integration_receipts", "performance_integration_observation_events", "monitor_integration_receipts"],
+        schema_state="runtime_requires_separate_approval" if runtime else "source_only_unadopted")
+    path.write_text(json.dumps(metadata, indent=2, sort_keys=True))
+    return result
+
+
+def generate_business_integration_r2_profile(destination, source_root=None, *, runtime=False):
+    """BE010-r2-A/BE010-r2-B：75表后继与91项公开example；源码默认未采用。"""
+    result=generate_full_profile(destination, source_root, profile_name="BE010-r2-B" if runtime else "BE010-r2-A",
+        expected_table_count=75,target_revision="1b3d5f7a9c20")
+    path=result/"profile.json"
+    metadata=json.loads(path.read_text())
+    metadata.update(expected_metadata_count=75,public_env_assignment_count=91,pending_tables=[],
+        source_predecessor="0a2c4e6f8b10",schema_state="runtime_requires_separate_approval" if runtime else "source_ready_unadopted")
+    path.write_text(json.dumps(metadata,indent=2,sort_keys=True))
+    return result

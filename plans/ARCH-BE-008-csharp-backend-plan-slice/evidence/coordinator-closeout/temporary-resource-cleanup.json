@@ -1,0 +1,444 @@
+{
+  "task": "ARCH-BE-008",
+  "operation": "coordinator confirmed-owned temporary resource cleanup",
+  "removedRoots": 46,
+  "removedFiles": 432,
+  "removedBytes": 283035881,
+  "removed": [
+    {
+      "path": "/private/tmp/arch-be008-coordinator-wkj0jq0q",
+      "proof": [
+        "coordinator owned initial audit manifest; relevant before snapshots and checks now persisted"
+      ],
+      "files": 18,
+      "bytes": 221261,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-dev-rework1-57i2YIoP",
+      "proof": [
+        "named role work-root handoff; sanitized outputs archived with hashes"
+      ],
+      "files": 30,
+      "bytes": 144436,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-disabled-125b32befb344a66a205510b161edb5c",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 1,
+      "bytes": 1718,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-disabled-245599bbe6df49fe88333ea9ff1ced4b",
+      "proof": [
+        "rework-temporary-provenance.json confirmed test creation"
+      ],
+      "files": 1,
+      "bytes": 1717,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-disabled-7b5ed7c0986a4b3bac04dfa3028969f6",
+      "proof": [
+        "rework-temporary-provenance.json confirmed test creation"
+      ],
+      "files": 1,
+      "bytes": 1719,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-disabled-93b58f401cc74024a6d20fb8027dfc2e",
+      "proof": [
+        "QA1 explicit A resource inventory"
+      ],
+      "files": 1,
+      "bytes": 1717,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-disabled-af0b498180554c869c1ccd2a667fd955",
+      "proof": [
+        "QA2 explicit A resource handoff"
+      ],
+      "files": 1,
+      "bytes": 1718,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-disabled-e771324bf817481d8d686899da992398",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 1,
+      "bytes": 1717,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-log-check-19c8520fa7e846b8ac1ccbe9796a7cbc",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 5,
+      "bytes": 46143416,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-log-check-2f1700a0aeb44db68afd9e83e8a6f849",
+      "proof": [
+        "QA2 explicit A resource handoff"
+      ],
+      "files": 5,
+      "bytes": 46143416,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-log-check-943dc2392b93471680f38af1c0e434b1",
+      "proof": [
+        "rework-temporary-provenance.json confirmed test creation"
+      ],
+      "files": 5,
+      "bytes": 46143416,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-log-check-c475e9567e7049f68ffd2cc88aabcc2f",
+      "proof": [
+        "QA1 explicit A resource inventory"
+      ],
+      "files": 5,
+      "bytes": 46143416,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-log-check-c8e9d7f6a329460db42c571a59c77988",
+      "proof": [
+        "rework-temporary-provenance.json confirmed test creation"
+      ],
+      "files": 5,
+      "bytes": 46143416,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-log-check-cb4734feee334f579f76cd2d7899722f",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 5,
+      "bytes": 46143416,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa1-3c2_4j81",
+      "proof": [
+        "named role work-root handoff; sanitized outputs archived with hashes"
+      ],
+      "files": 93,
+      "bytes": 1951987,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa2-gkv496cr",
+      "proof": [
+        "named role work-root handoff; sanitized outputs archived with hashes"
+      ],
+      "files": 119,
+      "bytes": 1966086,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-release-metadata.json",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 1,
+      "bytes": 1151627,
+      "kind": "file"
+    },
+    {
+      "path": "/private/tmp/arch-be008-run-68i4YG5R",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory",
+        "exact runId manifest resources_removed plus persistent per-round cleanup proof"
+      ],
+      "files": 15,
+      "bytes": 54725,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-run-GnRSwKDz",
+      "proof": [
+        "exact runId manifest resources_removed plus persistent per-round cleanup proof"
+      ],
+      "files": 14,
+      "bytes": 108651,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-run-GyiTC6VL",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory",
+        "exact runId manifest resources_removed plus persistent per-round cleanup proof"
+      ],
+      "files": 28,
+      "bytes": 73248,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-run-eihb7rry",
+      "proof": [
+        "exact runId manifest resources_removed plus persistent per-round cleanup proof"
+      ],
+      "files": 14,
+      "bytes": 108641,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-run-root.path",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 1,
+      "bytes": 37,
+      "kind": "file"
+    },
+    {
+      "path": "/private/tmp/arch-be008-run-s272kqdk",
+      "proof": [
+        "exact runId manifest resources_removed plus persistent per-round cleanup proof"
+      ],
+      "files": 14,
+      "bytes": 108643,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-run-uzFgtzgt",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory",
+        "exact runId manifest resources_removed plus persistent per-round cleanup proof"
+      ],
+      "files": 27,
+      "bytes": 129447,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-024049ae95ec47ada0aabf92c9d03cf9",
+      "proof": [
+        "rework-temporary-provenance.json confirmed test creation"
+      ],
+      "files": 1,
+      "bytes": 818,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-0bb1bf219a4046e182080e73765a0cf2",
+      "proof": [
+        "QA2 explicit A resource handoff"
+      ],
+      "files": 1,
+      "bytes": 11864,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-31450c0574a34aa583bc1cc73a933444",
+      "proof": [
+        "rework-temporary-provenance.json confirmed test creation"
+      ],
+      "files": 1,
+      "bytes": 5901,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-45047c55af0742cd860022a126ed9052",
+      "proof": [
+        "rework-temporary-provenance.json confirmed test creation"
+      ],
+      "files": 1,
+      "bytes": 3957,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-4f53f476c38a43e3a71ed92afd21c2b0",
+      "proof": [
+        "rework-temporary-provenance.json confirmed test creation"
+      ],
+      "files": 1,
+      "bytes": 5903,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-5a7d1f677e11423091d21fe5a2b6210f",
+      "proof": [
+        "rework-temporary-provenance.json confirmed test creation"
+      ],
+      "files": 1,
+      "bytes": 3959,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-5a9f182175544700b4e82d8f4a4175ba",
+      "proof": [
+        "rework-temporary-provenance.json confirmed test creation"
+      ],
+      "files": 1,
+      "bytes": 11861,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-9d2fd6463c4d4208bad3bcaaba7984a4",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 1,
+      "bytes": 12237,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-a5b84565f9074a09a2a8aeaf862dc0ee",
+      "proof": [
+        "rework-temporary-provenance.json confirmed test creation"
+      ],
+      "files": 1,
+      "bytes": 11863,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-bd4e1b609aba4a609ed53539f80bd9b0",
+      "proof": [
+        "QA1 explicit A resource inventory"
+      ],
+      "files": 1,
+      "bytes": 12236,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-beaa92bd0bb8434088a3a0e01f64a7eb",
+      "proof": [
+        "QA2 explicit A resource handoff"
+      ],
+      "files": 1,
+      "bytes": 5901,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-fa8eef8b74b64ee083395648d937aa0d",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 1,
+      "bytes": 12233,
+      "kind": "directory"
+    },
+    {
+      "path": "/private/tmp/arch-be008-tool-root.path",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 1,
+      "bytes": 37,
+      "kind": "file"
+    },
+    {
+      "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-disabled-4e49b862eac54111a77205428d04b995",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 1,
+      "bytes": 1471,
+      "kind": "directory"
+    },
+    {
+      "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-test-logs-4ef910aee604413ca04f659915d804ed",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 1,
+      "bytes": 1047,
+      "kind": "directory"
+    },
+    {
+      "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-test-logs-5646802632714f0bbb7540d87f4276bf",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 1,
+      "bytes": 10398,
+      "kind": "directory"
+    },
+    {
+      "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-test-logs-804174906b794afaa206eafc4d02fd4c",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 1,
+      "bytes": 1047,
+      "kind": "directory"
+    },
+    {
+      "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-test-logs-bafe3654d49e400b930ad51cb949c1ab",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 1,
+      "bytes": 10396,
+      "kind": "directory"
+    },
+    {
+      "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-test-logs-d3bfacd1b3964a6eb9b856f0d539c9ff",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 1,
+      "bytes": 1324,
+      "kind": "directory"
+    },
+    {
+      "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-test-logs-e69d5529fda44d29b15655b04e6394da",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 1,
+      "bytes": 10397,
+      "kind": "directory"
+    },
+    {
+      "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-test-logs-f161b0a2429b465ba756120b1be5e580",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 1,
+      "bytes": 1047,
+      "kind": "directory"
+    },
+    {
+      "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-test-logs-f7d0cc06956944e1bcbf9f360c55f725",
+      "proof": [
+        "dev-temporary-resources.json explicit inventory"
+      ],
+      "files": 1,
+      "bytes": 10393,
+      "kind": "directory"
+    }
+  ],
+  "retained": [
+    {
+      "path": "/private/tmp/arch-be008-sdk-rfSK3RBg",
+      "purpose": "verified private .NET SDK and NuGet caches for Human Owner acceptance/replay",
+      "cleanupTrigger": "Human Owner final acceptance and no runtime or follow-up dependency"
+    },
+    {
+      "path": "backend-dotnet/**/bin and obj",
+      "purpose": "actual ignored formal build/test artifacts for acceptance; current hashes are in QA2 and rework manifests",
+      "cleanupTrigger": "after acceptance when no active runtime/build dependency"
+    }
+  ],
+  "sourceImplementationChanged": false,
+  "completedAtUnixMs": 1793172608491,
+  "auxiliaryHistory": [
+    "Read-only rework archive metadata inspection first assumed files list, but actual schema was dictionary; corrected before mutation.",
+    "QA2 supplement metadata guard first assumed secretComparison dictionary, actual statement string; corrected before copy and recorded in supplement receipt."
+  ]
+}

@@ -1,0 +1,95 @@
+[
+  {
+    "name": "sdk-info",
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "argv": [
+      "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+      "--info"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.184,
+    "stdout": "sdk-info.stdout",
+    "stderr": "sdk-info.stderr"
+  },
+  {
+    "name": "restore-api",
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "argv": [
+      "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+      "restore",
+      "AIIS.Backend.Api.csproj",
+      "--configfile",
+      "NuGet.Config",
+      "--locked-mode"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.483,
+    "stdout": "restore-api.stdout",
+    "stderr": "restore-api.stderr"
+  },
+  {
+    "name": "restore-tests",
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "argv": [
+      "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+      "restore",
+      "tests/AIIS.Backend.Tests/AIIS.Backend.Tests.csproj",
+      "--configfile",
+      "NuGet.Config",
+      "--locked-mode"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.372,
+    "stdout": "restore-tests.stdout",
+    "stderr": "restore-tests.stderr"
+  },
+  {
+    "name": "build",
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "argv": [
+      "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+      "build",
+      "AIIS.Backend.Api.csproj",
+      "--no-restore"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.44,
+    "stdout": "build.stdout",
+    "stderr": "build.stderr"
+  },
+  {
+    "name": "api-items",
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "argv": [
+      "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+      "msbuild",
+      "AIIS.Backend.Api.csproj",
+      "-getItem:Compile,Content,None",
+      "-nologo"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.228,
+    "stdout": "api-items.stdout",
+    "stderr": "api-items.stderr"
+  },
+  {
+    "name": "a-tests",
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "argv": [
+      "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+      "test",
+      "tests/AIIS.Backend.Tests/AIIS.Backend.Tests.csproj",
+      "--no-restore",
+      "--filter",
+      "TestCategory!=MySQL",
+      "--logger",
+      "trx;LogFileName=qa1-a.trx",
+      "--results-directory",
+      "/private/tmp/arch-be008-qa1-3c2_4j81/results-a"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 2.562,
+    "stdout": "a-tests.stdout",
+    "stderr": "a-tests.stderr"
+  }
+]

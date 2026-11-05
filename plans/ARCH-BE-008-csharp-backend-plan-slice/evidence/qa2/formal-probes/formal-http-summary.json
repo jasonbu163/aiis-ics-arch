@@ -1,0 +1,90 @@
+{
+  "beforeRows": 10,
+  "startupNoDdlOrSeed": true,
+  "openApiOperations": [
+    [
+      "/api/v1/plans",
+      "post"
+    ],
+    [
+      "/api/v1/plans",
+      "get"
+    ],
+    [
+      "/api/v1/plans/{id}",
+      "get"
+    ],
+    [
+      "/health",
+      "get"
+    ]
+  ],
+  "rejectedRequestsNoDataMutation": true,
+  "minimalPlan": {
+    "id": 13,
+    "coilNo": " \tQA2-Raw-Case \r",
+    "grade": "G",
+    "spec": "S",
+    "weight": "1.2300",
+    "thickness": "0.123",
+    "width": "10.00",
+    "materialStatus": "special",
+    "density": "0.00",
+    "entryLength": "0.00",
+    "uncoiler1Tension": "0.00",
+    "exitTension": "0.00",
+    "process1Tension": "0.00",
+    "entryLoopTension": "0.00",
+    "exitLoopTension": "0.00",
+    "entryUnitTension": "0.0000",
+    "entryLoopUnitTension": "0.0000",
+    "processUnitTension": "0.0000",
+    "exitLoopUnitTension": "0.0000",
+    "exitUnitTension": "0.0000",
+    "status": "planned",
+    "priority": 5,
+    "remark": null,
+    "createdAt": "2026-10-28T15:08:46+08:00",
+    "updatedAt": "2026-10-28T15:08:46+08:00"
+  },
+  "databaseClockBracket": [
+    "2026-10-28 15:08:46",
+    "2026-10-28 15:08:46"
+  ],
+  "failure": {
+    "type": "AssertionError",
+    "detail": "('ascii-sequential-qa1-abc', 200, {'code': 200, 'message': 'success', 'data': {'id': 18, 'coilNo': 'qa1-abc', 'grade': 'G', 'spec': 'S', 'weight': '1.2300', 'thickness': '0.123', 'width': '10.00', 'materialStatus': 'special', 'density': '0.00', 'entryLength': '0.00', 'uncoiler1Tension': '0.00', 'exitTension': '0.00', 'process1Tension': '0.00', 'entryLoopTension': '0.00', 'exitLoopTension': '0.00', 'entryUnitTension': '0.0000', 'entryLoopUnitTension': '0.0000', 'processUnitTension': '0.0000', 'exitLoopUnitTension': '0.0000', 'exitUnitTension': '0.0000', 'status': 'planned', 'priority': 5, 'remark': None, 'createdAt': '2026-10-28T15:08:46+08:00', 'updatedAt': '2026-10-28T15:08:46+08:00'}, 'timestamp': 1793171326909})"
+  },
+  "task": "ARCH-BE-008",
+  "revision": "r1",
+  "runId": "ab0f0fb5409b36026f53281f",
+  "processes": [
+    {
+      "name": "formal-ny",
+      "pid": 83216,
+      "TZ": "America/New_York",
+      "argv": [
+        "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet/bin/Debug/net10.0/AIIS.Backend.Api.dll"
+      ],
+      "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+      "stdout": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes/formal-ny.stdout.jsonl",
+      "stderr": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes/formal-ny.stderr",
+      "logs": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes/formal-ny-logs",
+      "startedUtc": "2026-10-28T07:08:45Z",
+      "exitCode": 0,
+      "stoppedUtc": "2026-10-28T07:08:46Z",
+      "pidAbsent": true,
+      "port18108Rebind": true
+    }
+  ],
+  "totalRecordedHttpCases": 249,
+  "failed": [
+    {
+      "type": "AssertionError",
+      "detail": "('ascii-sequential-qa1-abc', 200, {'code': 200, 'message': 'success', 'data': {'id': 18, 'coilNo': 'qa1-abc', 'grade': 'G', 'spec': 'S', 'weight': '1.2300', 'thickness': '0.123', 'width': '10.00', 'materialStatus': 'special', 'density': '0.00', 'entryLength': '0.00', 'uncoiler1Tension': '0.00', 'exitTension': '0.00', 'process1Tension': '0.00', 'entryLoopTension': '0.00', 'exitLoopTension': '0.00', 'entryUnitTension': '0.0000', 'entryLoopUnitTension': '0.0000', 'processUnitTension': '0.0000', 'exitLoopUnitTension': '0.0000', 'exitUnitTension': '0.0000', 'status': 'planned', 'priority': 5, 'remark': None, 'createdAt': '2026-10-28T15:08:46+08:00', 'updatedAt': '2026-10-28T15:08:46+08:00'}, 'timestamp': 1793171326909})"
+    }
+  ],
+  "candidateSha256": "a9afc3bb5a75a610f25e6a42cbc694e019e0e66247c8c60926ca03cff78819f6",
+  "dllSha256": "8abae9632c4f6bff12e675e000adaa2af8c35bb25941180e3fdb08b6bc49f152"
+}

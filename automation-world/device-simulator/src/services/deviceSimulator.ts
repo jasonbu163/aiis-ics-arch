@@ -1,4 +1,4 @@
-/** 正常16项IPC facade及严格字段类型；browser不可用时不返回mock成功。 */
+/** 正常IPC facade及严格字段类型；草稿/版本/加载分离，browser不返回mock成功。 */
 import { invoke, isTauri } from '@tauri-apps/api/core';
 export type Scalar = null | boolean | number | string;
 // 来源树/诊断为服务所有的opaque JSON，不在前端递归重建业务模型。
@@ -101,7 +101,10 @@ export interface Revision {
     savedSeq: string;
     sha256: string;
     createdUtc: string;
+    protection: { reason: 'latest' | 'selected' | 'loaded' | 'previous' | 'preview'; instanceId: string | null }[];
+    canDelete: boolean;
 }
+export interface RollbackRelease { instanceId: string; revisionId: string; selectionEtag: string; }
 export interface Issue {
     code: string;
     instanceId: string;
@@ -112,7 +115,9 @@ export interface Configuration {
     etag: string;
     workspace: Workspace;
     latestRevision: string | null;
+    draftMatchesLatest: boolean;
     revisions: Revision[];
+    revisionTotal: number;
     selections: {
         instanceId: string;
         revisionId: string;
@@ -210,9 +215,9 @@ export class IpcFailure extends Error {
     constructor(public code: string, public currentEtag: string | null = null, public unknown = false) { super(code); }
 }
 export const desktopAvailable = isTauri();
-async function call<T>(command: string, request?: unknown): Promise<T> { if (!desktopAvailable)
+async function call<T>(command: string, request?: unknown, arguments_: Record<string, unknown> = {}): Promise<T> { if (!desktopAvailable)
     throw new IpcFailure('desktop_unavailable'); let response: Response<T>; try {
-    response = await invoke(command, request === undefined ? {} : { request });
+    response = await invoke(command, request === undefined ? arguments_ : { request, ...arguments_ });
 }
 catch {
     throw new IpcFailure('ipc_transport_unknown', null, true);
@@ -223,22 +228,30 @@ export const getBootstrap = () => call<Bootstrap>('ds_get_bootstrap');
 export const getSnapshot = (instanceId: string | null = null, offset = 0, limit = 50) => call<RuntimeSnapshot>('ds_get_runtime_snapshot', { instanceId, offset, limit });
 export const getConfiguration = (revisionId: string | null = null, revisionOffset = 0) => call<Configuration>('ds_get_configuration', { revisionId, revisionOffset });
 export const saveConfiguration = (expectedEtag: string, workspace: Workspace, confirmPoints: string[]) => call('ds_save_configuration', operation({ expectedEtag, workspace, confirmPoints }));
-export const previewImport = (payload: unknown) => call<{
+export interface DeclarationRef { inputId: string; declarationIndex: number; }
+export interface DependencyIssue { code: string; path: string; typeName: string; candidates: DeclarationRef[]; }
+export const previewImport = (payload: unknown, analyzeOnly = false) => call<{
     declarations: {
         inputId: string;
         declarationIndex: number;
         name: string;
         db: boolean;
         issues: string[];
+        udtClosure: DeclarationRef[];
+        dependencyIssues: DependencyIssue[];
     }[];
     preview: Preview | null;
     initializerNotice: boolean;
-}>('ds_preview_import', operation(payload));
+}>('ds_preview_import', operation(payload), { analyzeOnly });
 export const previewLayout = (payload: unknown) => call<Preview>('ds_preview_layout', operation(payload));
 export const previewNames = (payload: unknown) => call<Preview>('ds_preview_names', operation(payload));
 export const previewApply = (payload: unknown) => call<Preview>('ds_preview_apply', operation(payload));
 export const confirmPreview = (kind: 'import' | 'layout' | 'names', preview: Preview) => call('ds_confirm_' + kind, operation({ expectedEtag: preview.expectedEtag, token: preview.token, candidateSha256: preview.candidateSha256 }));
 export const applyRevision = (instanceId: string, preview: Preview) => call('ds_apply_revision', operation({ instanceId, expectedEtag: preview.expectedEtag, token: preview.token, candidateSha256: preview.candidateSha256, impactSha256: preview.details.impactSha256 }));
+export const previewPublishRevision = (expectedEtag: string) => call<Preview>('ds_preview_publish_revision', operation({ expectedEtag, revisionId: null }));
+export const previewDeleteRevisions = (expectedEtag: string, revisionIds: string[]) => call<Preview>('ds_preview_delete_revision', operation({ expectedEtag, revisionIds }));
+export const commitVersion = (preview: Preview, releaseRollback = false) => call<{ result: string; revisionId: string | null }>(preview.kind === 'publish_revision' ? 'ds_publish_revision' : 'ds_delete_revisions', operation({ expectedEtag: preview.expectedEtag, token: preview.token, candidateSha256: preview.candidateSha256, releaseRollback }));
+export const cancelPreview = (preview: Preview) => call('ds_cancel_preview', operation({ token: preview.token }));
 export const controlInstance = (payload: unknown) => call('ds_control_instance', operation(payload));
 export const writePoint = (payload: unknown) => call('ds_write_point', operation(payload));
 export const closeConnection = (payload: unknown) => call('ds_close_connection', operation(payload));

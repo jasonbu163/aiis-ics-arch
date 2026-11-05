@@ -211,7 +211,13 @@ fn real_services_selected_reopen_idempotence_and_snapshot_generation_cas() {
             confirm_points: point_ids,
         })
         .unwrap();
-    let revision = saved.revision_id.unwrap();
+    let revision = app
+        .configuration
+        .store
+        .publish(&saved.etag)
+        .unwrap()
+        .revision_id
+        .unwrap();
     let p = apply::preview(
         &app,
         ApplyIntent {
@@ -469,7 +475,13 @@ fn real_selection_install_failure_and_post_install_ack_loss_remain_distinct() {
                 confirm_points: vec![],
             })
             .unwrap();
-        let revision = saved.revision_id.unwrap();
+        let revision = app
+            .configuration
+            .store
+            .publish(&saved.etag)
+            .unwrap()
+            .revision_id
+            .unwrap();
         let preview = apply::preview(
             &app,
             ApplyIntent {
@@ -627,12 +639,17 @@ fn real_sql_and_same_owner_install_execute_retention_changes_and_rollback() {
             .confirm(&p.kind, &p.token, &p.expected_etag, &p.candidate_sha256)
             .unwrap();
         let state = app.configuration.get().unwrap();
-        app.configuration
+        let saved = app
+            .configuration
             .save(SaveIntent {
                 expected_etag: state.etag,
                 workspace: state.workspace,
                 confirm_points: ids,
             })
+            .unwrap();
+        app.configuration
+            .store
+            .publish(&saved.etag)
             .unwrap()
             .revision_id
             .unwrap()

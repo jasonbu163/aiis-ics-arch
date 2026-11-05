@@ -1,0 +1,61 @@
+{
+  "beforeRows": 10,
+  "startupNoDdlOrSeed": true,
+  "openApiOperations": [
+    [
+      "/api/v1/plans",
+      "post"
+    ],
+    [
+      "/api/v1/plans",
+      "get"
+    ],
+    [
+      "/api/v1/plans/{id}",
+      "get"
+    ],
+    [
+      "/health",
+      "get"
+    ]
+  ],
+  "failure": {
+    "type": "AssertionError",
+    "detail": "('duplicate-remark', 200, {'code': 200, 'message': 'success', 'data': {'id': 13, 'coilNo': 'QA1-INPUT', 'grade': 'G', 'spec': 'S', 'weight': '1.2300', 'thickness': '0.123', 'width': '10.00', 'materialStatus': 'special', 'density': '0.00', 'entryLength': '0.00', 'uncoiler1Tension': '0.00', 'exitTension': '0.00', 'process1Tension': '0.00', 'entryLoopTension': '0.00', 'exitLoopTension': '0.00', 'entryUnitTension': '0.0000', 'entryLoopUnitTension': '0.0000', 'processUnitTension': '0.0000', 'exitLoopUnitTension': '0.0000', 'exitUnitTension': '0.0000', 'status': 'planned', 'priority': 5, 'remark': None, 'createdAt': '2026-10-28T14:21:23+08:00', 'updatedAt': '2026-10-28T14:21:23+08:00'}, 'timestamp': 1793168483998})"
+  },
+  "task": "ARCH-BE-008",
+  "revision": "r1",
+  "runId": "500b7e71711c83fdb763a0a3",
+  "processes": [
+    {
+      "name": "formal-ny",
+      "pid": 14010,
+      "TZ": "America/New_York",
+      "argv": [
+        "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+        "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet/bin/Debug/net10.0/AIIS.Backend.Api.dll"
+      ],
+      "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+      "stdout": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-ny.stdout.jsonl",
+      "stderr": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-ny.stderr",
+      "logs": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-ny-logs",
+      "startedUtc": "2026-10-28T06:21:22Z",
+      "exitCode": 0,
+      "stoppedUtc": "2026-10-28T06:21:24Z",
+      "pidAbsent": true,
+      "port18108Rebind": true
+    }
+  ],
+  "totalRecordedHttpCases": 90,
+  "failed": [
+    {
+      "type": "AssertionError",
+      "detail": "('duplicate-remark', 200, {'code': 200, 'message': 'success', 'data': {'id': 13, 'coilNo': 'QA1-INPUT', 'grade': 'G', 'spec': 'S', 'weight': '1.2300', 'thickness': '0.123', 'width': '10.00', 'materialStatus': 'special', 'density': '0.00', 'entryLength': '0.00', 'uncoiler1Tension': '0.00', 'exitTension': '0.00', 'process1Tension': '0.00', 'entryLoopTension': '0.00', 'exitLoopTension': '0.00', 'entryUnitTension': '0.0000', 'entryLoopUnitTension': '0.0000', 'processUnitTension': '0.0000', 'exitLoopUnitTension': '0.0000', 'exitUnitTension': '0.0000', 'status': 'planned', 'priority': 5, 'remark': None, 'createdAt': '2026-10-28T14:21:23+08:00', 'updatedAt': '2026-10-28T14:21:23+08:00'}, 'timestamp': 1793168483998})"
+    }
+  ],
+  "candidateSha256": "20a7474a4f9766bec0f70f081c56a7f5a77922caf1efe64ccad839efe022aad5",
+  "dllSha256": "1ce88a2684f58996200f0d0a2e39493c5bffbd61ecee550e594e4647cc76b1c1",
+  "classification": "qa_helper_input_construction_error",
+  "implementationFailure": false,
+  "explanation": "The base request omitted remark. Appending one remark:null created a legal request rather than duplicate keys. Correct API200 and one synthetic row are retained; no implementation change."
+}

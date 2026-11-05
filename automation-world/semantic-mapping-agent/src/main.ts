@@ -6,6 +6,8 @@
  */
 import { createApp } from "vue";
 import App from "./App.vue";
+import "element-plus/dist/index.css";
+import "@aw-ui-styles";
 import "./styles.css";
 import "./app/styles/shell.css";
 import "./app/styles/shared.css";

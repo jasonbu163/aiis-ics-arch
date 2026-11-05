@@ -1,0 +1,268 @@
+[
+  {
+    "scene": "catalog_compatibility/confirmed",
+    "seconds": 1.7310651670000001,
+    "final_product_exit": 0,
+    "writes": [
+      1,
+      0
+    ],
+    "reads": [
+      18,
+      6
+    ],
+    "max_gap_A_wire_ms": 233.281,
+    "normal_runtime_join_events": 3,
+    "forced_rows": 0,
+    "result": "passed",
+    "report": "scenes/catalog_compatibility/confirmed/report.json"
+  },
+  {
+    "scene": "multi_plc/b_off",
+    "seconds": 8.199066625,
+    "final_product_exit": 1,
+    "writes": [
+      0,
+      0
+    ],
+    "reads": [
+      87,
+      0
+    ],
+    "max_gap_A_wire_ms": 104.326,
+    "normal_runtime_join_events": 0,
+    "forced_rows": 7,
+    "result": "passed",
+    "report": "scenes/multi_plc/b_off/report.json",
+    "expected_fault": "B bootstrap connection failure only",
+    "B_backoff": [
+      {
+        "backoff_ms": 250,
+        "error_key": "forced_driver_stop:ipc_closed",
+        "target_id": "s7_b"
+      },
+      {
+        "backoff_ms": 500,
+        "error_key": "forced_driver_stop:ipc_closed",
+        "target_id": "s7_b"
+      },
+      {
+        "backoff_ms": 1000,
+        "error_key": "forced_driver_stop:ipc_closed",
+        "target_id": "s7_b"
+      },
+      {
+        "backoff_ms": 2000,
+        "error_key": "forced_driver_stop:ipc_closed",
+        "target_id": "s7_b"
+      },
+      {
+        "backoff_ms": 10000,
+        "error_key": "forced_driver_stop:ipc_closed",
+        "target_id": "s7_b"
+      }
+    ],
+    "child_connect_errors": [
+      {
+        "error_key": "plc_connect: TCP : Connection refused",
+        "pid": 31844,
+        "result": "child_error"
+      },
+      {
+        "error_key": "plc_connect: TCP : Connection refused",
+        "pid": 31873,
+        "result": "child_error"
+      },
+      {
+        "error_key": "plc_connect: TCP : Connection refused",
+        "pid": 31874,
+        "result": "child_error"
+      },
+      {
+        "error_key": "plc_connect: TCP : Connection refused",
+        "pid": 32143,
+        "result": "child_error"
+      },
+      {
+        "error_key": "plc_connect: TCP : Connection refused",
+        "pid": 32174,
+        "result": "child_error"
+      }
+    ],
+    "A_normal_reaped": [
+      {
+        "pid": 31843,
+        "result": "normal",
+        "target_id": "s7_a"
+      }
+    ]
+  },
+  {
+    "scene": "multi_plc/dry_run",
+    "seconds": 5.413897208,
+    "final_product_exit": 0,
+    "writes": [
+      0,
+      0
+    ],
+    "reads": [
+      74,
+      24
+    ],
+    "max_gap_A_wire_ms": 215.159,
+    "normal_runtime_join_events": 1,
+    "forced_rows": 0,
+    "result": "passed",
+    "report": "scenes/multi_plc/dry_run/report.json",
+    "post_issue_identical_gets": 10,
+    "original_body_unchanged": true
+  },
+  {
+    "scene": "multi_plc/execute",
+    "seconds": 5.417852917,
+    "final_product_exit": 0,
+    "writes": [
+      1,
+      0
+    ],
+    "reads": [
+      75,
+      25
+    ],
+    "max_gap_A_wire_ms": 211.941,
+    "normal_runtime_join_events": 1,
+    "forced_rows": 0,
+    "result": "passed",
+    "report": "scenes/multi_plc/execute/report.json",
+    "post_issue_identical_gets": 10,
+    "original_body_unchanged": true
+  },
+  {
+    "scene": "multi_plc/parallel_io",
+    "seconds": 5.409703625,
+    "final_product_exit": 0,
+    "writes": [
+      0,
+      0
+    ],
+    "reads": [
+      23,
+      23
+    ],
+    "max_gap_A_wire_ms": 225.939,
+    "normal_runtime_join_events": 1,
+    "forced_rows": 0,
+    "result": "passed",
+    "report": "scenes/multi_plc/parallel_io/report.json"
+  },
+  {
+    "scene": "multi_plc/slow_http",
+    "seconds": 8.335869916,
+    "final_product_exit": 0,
+    "writes": [
+      0,
+      0
+    ],
+    "reads": [
+      78,
+      0
+    ],
+    "max_gap_A_wire_ms": 105.678,
+    "normal_runtime_join_events": 1,
+    "forced_rows": 0,
+    "result": "passed",
+    "report": "scenes/multi_plc/slow_http/report.json"
+  },
+  {
+    "scene": "multi_plc/slow_setup",
+    "seconds": 8.331725375,
+    "final_product_exit": 0,
+    "writes": [
+      0,
+      0
+    ],
+    "reads": [
+      195,
+      39
+    ],
+    "max_gap_A_wire_ms": 104.267,
+    "normal_runtime_join_events": 1,
+    "forced_rows": 0,
+    "result": "passed",
+    "report": "scenes/multi_plc/slow_setup/report.json",
+    "A_complete_sequence": 4,
+    "B_final_setup_sequence": 5
+  },
+  {
+    "scene": "multi_plc/three_readers",
+    "seconds": 5.414261125,
+    "final_product_exit": 0,
+    "writes": [
+      0,
+      0
+    ],
+    "reads": [
+      147,
+      0
+    ],
+    "max_gap_A_wire_ms": 100.982,
+    "normal_runtime_join_events": 1,
+    "forced_rows": 0,
+    "result": "passed",
+    "report": "scenes/multi_plc/three_readers/report.json"
+  },
+  {
+    "scene": "unknown_compatibility/alias",
+    "seconds": 0.569500417,
+    "final_product_exit": 0,
+    "writes": [
+      0,
+      0
+    ],
+    "reads": [
+      3,
+      1
+    ],
+    "max_gap_A_wire_ms": 1.272,
+    "normal_runtime_join_events": 1,
+    "forced_rows": 0,
+    "result": "passed",
+    "report": "scenes/unknown_compatibility/alias/report.json"
+  },
+  {
+    "scene": "unknown_compatibility/same",
+    "seconds": 0.517893084,
+    "final_product_exit": 0,
+    "writes": [
+      0,
+      0
+    ],
+    "reads": [
+      3,
+      1
+    ],
+    "max_gap_A_wire_ms": 1.636,
+    "normal_runtime_join_events": 1,
+    "forced_rows": 0,
+    "result": "passed",
+    "report": "scenes/unknown_compatibility/same/report.json"
+  },
+  {
+    "scene": "unknown_readback/truncated_ack",
+    "seconds": 1.636637917,
+    "final_product_exit": 0,
+    "writes": [
+      1,
+      0
+    ],
+    "reads": [
+      18,
+      6
+    ],
+    "max_gap_A_wire_ms": 454.946,
+    "normal_runtime_join_events": 1,
+    "forced_rows": 0,
+    "result": "passed",
+    "report": "scenes/unknown_readback/truncated_ack/report.json"
+  }
+]

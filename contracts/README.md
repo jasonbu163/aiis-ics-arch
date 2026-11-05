@@ -56,3 +56,11 @@ Each contract should use one of these statuses:
 | [High-risk authorization gate](demands/control-agent/high-risk-authorization-gate.md) | `control-agent` | backend HTTP API | `accepted` |
 | [Control-agent authorization verify API](published/http-api/control-agent-authorization-verify.md) | `control-agent` | backend HTTP API | `implemented` |
 | [Control-agent preflight gate](gates/control-agent-preflight.md) | project delivery | backend + `control-agent` | `proposed` |
+| [AW facts integration](demands/automation-world-facts-integration.md) · [中文](demands/automation-world-facts-integration.zh-CN.md) | DAA / SMA / HTTP consumers | Backend facts + typed business modules | `proposed`; ARCH-AW-008 document scope only |
+
+## PLC facts provider v1
+
+[PLC facts v1](published/http-api/plc-facts-v1/README.md) fixes the anonymous batch/latest/history source contract, strict Decimal JSON, durable outcomes, publication cursors and finite retention. The machine artifacts describe source implementation; database adoption, runtime verification, DAA integration and deployment have separate gates.
+
+
+[Business integration v1](published/http-api/business-integration-v1/README.md) publishes the eight typed anonymous business operations, closed schemas, examples and digest vectors. BE010 r2 source remains unadopted; actual target adoption and database/B require separate approval.

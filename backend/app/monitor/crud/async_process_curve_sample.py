@@ -1,4 +1,6 @@
 """曲线HTTP域、上海日UTC边界和最近limit后升序；无事务提交。"""
+from app.monitor.crud.async_integration import storage_context
+from common.integration.storage import to_storage_time as storage_time
 from datetime import datetime, time, timedelta, timezone
 from zoneinfo import ZoneInfo
 from sqlalchemy import select
@@ -12,6 +14,9 @@ async def add_sample(db, **values):
     return row
 async def list_samples(db, equipment, day, record_id=None, limit=1000):
     start = datetime.combine(day, time(), ZoneInfo("Asia/Shanghai")).astimezone(timezone.utc).replace(tzinfo=None)
+    context=await storage_context(db)
+    if context:
+        start=storage_time(start)
     end = start+timedelta(days=1)
     query = select(Curve).where(Curve.equipment_id == equipment, Curve.sampled_at >= start, Curve.sampled_at < end)
     if record_id is not None:

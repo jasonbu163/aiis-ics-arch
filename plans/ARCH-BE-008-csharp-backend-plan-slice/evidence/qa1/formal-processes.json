@@ -1,0 +1,20 @@
+[
+  {
+    "name": "formal-ny",
+    "pid": 14010,
+    "TZ": "America/New_York",
+    "argv": [
+      "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+      "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet/bin/Debug/net10.0/AIIS.Backend.Api.dll"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "stdout": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-ny.stdout.jsonl",
+    "stderr": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-ny.stderr",
+    "logs": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-ny-logs",
+    "startedUtc": "2026-10-28T06:21:22Z",
+    "exitCode": 0,
+    "stoppedUtc": "2026-10-28T06:21:24Z",
+    "pidAbsent": true,
+    "port18108Rebind": true
+  }
+]

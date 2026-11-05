@@ -17,10 +17,10 @@ test('old TSS storage is ignored and all disabled HTTP entry points reject befor
     assert.equal((await connection.loadAppDefaults()).externalIoEnabled, false);
     await assert.rejects(connection.testBackendOpenApi({ scheme: 'http', host: 'fixture.invalid', port: 9000 }), /SMA_EXTERNAL_IO_DISABLED/);
     await assert.rejects(connection.managementRequest('/never'), /SMA_EXTERNAL_IO_DISABLED/);
-    await assert.rejects(facts.listTargetApiConfigurationsFromBackend(), /SMA_EXTERNAL_IO_DISABLED/);
+    await assert.rejects(facts.listTargetApiConfigurationsFromBackend(), /SMA_LOCAL_CONFIGURATION_TAURI_REQUIRED/);
     assert.equal(requests, 0);
-    connection.saveBackendConnectionProfile({ scheme: 'http', host: 'fixture.invalid', port: 9000 });
-    assert.ok(storage.has('sma.backend-connection.v1'));
+    await assert.rejects(connection.saveBackendConnectionProfile({ scheme: 'http', host: 'fixture.invalid', port: 9000 }), /SMA_CONFIGURATION_NOT_READY/);
+    assert.equal(storage.has('sma.backend-connection.v1'), false);
     assert.equal(JSON.parse(storage.get('tss.backend-connection.v1')).host, 'old-profile.invalid');
   } finally { await server.close(); globalThis.fetch = previousFetch; delete globalThis.window; }
 });

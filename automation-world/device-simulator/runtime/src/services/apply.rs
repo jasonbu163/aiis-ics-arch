@@ -156,6 +156,7 @@ fn snapshot_key(old: Option<&Captured>) -> Value {
     old.map(|o|json!({"epoch":o.epoch.to_string(),"seq":o.seq.to_string(),"generation":o.generation.to_string(),"simulatedNs":o.simulated_ns.to_string(),"valuesSha256":digest(&o.values),"loadedRevision":o.loaded_revision})).unwrap_or(Value::Null)
 }
 pub fn preview(app: &App, intent: ApplyIntent) -> Result<Preview, String> {
+    let _revisions = app.revision_control.lock().unwrap();
     if !["preserve_compatible_hold", "initialize_all"].contains(&intent.retention.as_str()) {
         return Err("retention_mode".into());
     }
@@ -213,6 +214,7 @@ pub fn preview(app: &App, intent: ApplyIntent) -> Result<Preview, String> {
     app.configuration.preview("apply",&intent.expected_etag,workspace,json!({"instanceId":intent.instance_id,"revisionId":intent.revision_id,"retention":intent.retention,"initializeAll":initialize,"rollback":rollback,"expectedSelectionEtag":selected.map(|s|s.selection_etag),"snapshot":key,"impactSha256":impact,"rows":built.rows,"ruleTimeNs":built.simulated_ns.to_string()}))
 }
 pub fn confirm(app: &App, intent: ApplyConfirmation) -> Result<Value, String> {
+    let _revisions = app.revision_control.lock().unwrap();
     let (workspace, details) = app.configuration.pending_candidate(
         "apply",
         &intent.token,

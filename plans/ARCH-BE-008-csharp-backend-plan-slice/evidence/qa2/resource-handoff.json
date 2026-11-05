@@ -1,0 +1,61 @@
+{
+  "task": "ARCH-BE-008",
+  "revision": "r1",
+  "qaRound": "QA2",
+  "runId": "ab0f0fb5409b36026f53281f",
+  "runRoot": "/private/tmp/arch-be008-run-s272kqdk",
+  "qaRoot": "/private/tmp/arch-be008-qa2-gkv496cr",
+  "container": "aiis-arch-be008-mysql",
+  "containerId": "2add411f89f9a093abfa77b393e957e9353710131a77aff7d10bc5fa52658719",
+  "network": "aiis-arch-be008-net",
+  "volume": "aiis-arch-be008-mysql-data",
+  "database": "arch_be008_plan",
+  "mysqlState": "running; only plans and 23 synthetic rows; coordinator cleanup pending",
+  "apiProcessIds": [
+    84291,
+    84332,
+    83216
+  ],
+  "allApiExitCodesZero": true,
+  "allApiPidsAbsent": true,
+  "port18108ActuallyRebinds": true,
+  "aGeneratedRoots": [
+    {
+      "path": "/private/tmp/arch-be008-log-check-2f1700a0aeb44db68afd9e83e8a6f849",
+      "files": 5,
+      "bytes": 46143416,
+      "mode": "0o755",
+      "createdEpoch": 1793171011.1971283,
+      "purpose": "A11 HTTP/disabled process/real log rotation; no running process dependency"
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-beaa92bd0bb8434088a3a0e01f64a7eb",
+      "files": 1,
+      "bytes": 5901,
+      "mode": "0o755",
+      "createdEpoch": 1793171010.23179,
+      "purpose": "A11 HTTP/disabled process/real log rotation; no running process dependency"
+    },
+    {
+      "path": "/private/tmp/arch-be008-disabled-af0b498180554c869c1ccd2a667fd955",
+      "files": 1,
+      "bytes": 1718,
+      "mode": "0o755",
+      "createdEpoch": 1793171010.4765842,
+      "purpose": "A11 HTTP/disabled process/real log rotation; no running process dependency"
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-0bb1bf219a4046e182080e73765a0cf2",
+      "files": 1,
+      "bytes": 11864,
+      "mode": "0o755",
+      "createdEpoch": 1793171009.9165454,
+      "purpose": "A11 HTTP/disabled process/real log rotation; no running process dependency"
+    }
+  ],
+  "sdkRoot": "/private/tmp/arch-be008-sdk-rfSK3RBg",
+  "cleanupOwner": "active lifecycle coordinator; after exact artifact copy and hash proof, ownership/PID/dependency review",
+  "resourceDeletionPerformedByVerification": false,
+  "finalPortAuditInitialSandboxPermissionError": true,
+  "approvedCleanupCommand": "BE008_COORDINATOR_CLEANUP_CONFIRMED=ab0f0fb5409b36026f53281f backend-dotnet/tests/scripts/run-mysql-tests.sh cleanup --run-root /private/tmp/arch-be008-run-s272kqdk"
+}

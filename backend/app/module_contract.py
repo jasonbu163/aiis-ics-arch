@@ -1,6 +1,11 @@
 """后端模块v1公共Python合同；仅静态符号，不导入运行配置或业务实现。"""
 CORE_CONTRACT = "aiis.backend-module/v1"
 PUBLIC_SYMBOLS = {
+    "common.integration.canonical": ("DIGEST_PROFILE", "canonical_bytes", "integration_digests"),
+    "common.integration.envelope": ("CONTRACT_VERSION", "BUSINESS_TIMEZONE", "IntegrationSchema", "IntegrationEnvelope", "Identifier", "SourceTime", "identifier", "source_time", "shanghai_time", "fact_time", "validate_source_clock"),
+    "common.integration.http": ("IntegrationRoute", "IntegrationPayloadError", "strict_json", "MAX_BODY_BYTES", "MAX_DEPTH"),
+    "common.integration.receipt": ("IntegrationReceipt", "IntegrationSuccess", "receipt_response"),
+    "common.integration.storage": ("StorageProbe", "AdoptionContext", "parse_adoption_manifest", "validate_adoption_probe", "to_storage_time", "to_legacy_time"),
     "app.module_registry": ("ModuleManifest",),
     "database": ("Base", "TimestampMixin", "IntPk", "Timestamp", "UpdatedAt", "get_db", "get_db_session", "get_sync_db", "get_sync_db_context", "create_sync_session"),
     "common.schema_base": ("ApiSchema", "to_camel"),

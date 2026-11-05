@@ -1,0 +1,10 @@
+{
+  "task": "ARCH-BE-008",
+  "round": "QA2",
+  "operation": "coordinator exact mechanical archive",
+  "filesCopied": 115,
+  "bytes": 1980437,
+  "manifestSha256": "840f4fff6ea5fadd77f4ab6253b283ffd4b572e5a1969089e61828f7783a30d3",
+  "allHashesMatched": true,
+  "copiedAtUnixMs": 1793172104857
+}

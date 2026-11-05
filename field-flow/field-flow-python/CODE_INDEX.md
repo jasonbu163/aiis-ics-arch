@@ -2,7 +2,7 @@
 
 - [src/field_flow/__init__.py](src/field_flow/__init__.py)：Field Flow Python独立运行时；导入无配置、网络或状态IO。
 - [src/field_flow/__main__.py](src/field_flow/__main__.py)：模块入口仅委托CLI；导入无IO。
-- [src/field_flow/app/__init__.py](src/field_flow/app/__init__.py)：仅注册已批准的手写demo01；无自动发现/DSL。
+- [src/field_flow/app/__init__.py](src/field_flow/app/__init__.py)：无副作用initializer；正式三个kind在runtime显式import/dispatch，无自动发现/DSL。
 - [src/field_flow/app/demo01.py](src/field_flow/app/demo01.py)：单轮GET→严格typed条件→执行服务；无调度、SQL或PLC协议调用。
 - [src/field_flow/cli.py](src/field_flow/cli.py)：双语CLI与组合根；无参/help无配置、状态或网络副作用。
 - [src/field_flow/config.py](src/field_flow/config.py)：无隐式转换的有限YAML配置；所有外部地址须显式提供。
@@ -35,3 +35,11 @@
 ## 使用文档 / Usage documentation
 
 - [USER_GUIDE.md](USER_GUIDE.md) / [中文](USER_GUIDE.zh-CN.md): 独立使用、真实方法与teaching01教程；示例接线仅在教程副本，不是正式已注册源码。
+
+## FF-005 basic examples
+
+- [src/field_flow/app/plc_guard_get_int.py](src/field_flow/app/plc_guard_get_int.py)：单轮条件、原typed解析与Execution。
+- [src/field_flow/app/get_value_guard_int.py](src/field_flow/app/get_value_guard_int.py)：单轮条件、原typed解析与Execution。
+- [tests/test_basic_examples.py](tests/test_basic_examples.py)：自身Fixture/正式CLI有界矩阵，分窗口计数/状态/内存/真实回收。
+- [examples/README.md](examples/README.md) / [中文](examples/README.zh-CN.md)：基础案例与YAML合同。
+- [config/README.md](config/README.md) / [中文](config/README.zh-CN.md)：基础案例与YAML合同。

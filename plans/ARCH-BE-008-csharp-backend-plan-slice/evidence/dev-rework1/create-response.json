@@ -1,0 +1,32 @@
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "id": 13,
+    "coilNo": "RW1-FORMAL-RESTART",
+    "grade": "G",
+    "spec": "S",
+    "weight": "1.2300",
+    "thickness": "0.123",
+    "width": "10.00",
+    "materialStatus": "special",
+    "density": "0.00",
+    "entryLength": "0.00",
+    "uncoiler1Tension": "0.00",
+    "exitTension": "0.00",
+    "process1Tension": "0.00",
+    "entryLoopTension": "0.00",
+    "exitLoopTension": "0.00",
+    "entryUnitTension": "0.0000",
+    "entryLoopUnitTension": "0.0000",
+    "processUnitTension": "0.0000",
+    "exitLoopUnitTension": "0.0000",
+    "exitUnitTension": "0.0000",
+    "status": "planned",
+    "priority": 5,
+    "remark": null,
+    "createdAt": "2026-10-28T14:49:36+08:00",
+    "updatedAt": "2026-10-28T14:49:36+08:00"
+  },
+  "timestamp": 1793170177002
+}

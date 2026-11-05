@@ -1,0 +1,215 @@
+--- qa2/tests/plc_catalog.rs
++++ rework2/tests/plc_catalog.rs
+@@ -438,3 +438,165 @@
+     )
+     .unwrap();
+ }
++
++#[test]
++fn yaml_line_breaks_and_quoted_flow_keys() {
++    use field_flow::config::catalog::parse;
++    let r = root("yaml_line_breaks_and_flow_keys");
++    let mut vectors = Vec::new();
++    let line_breaks = [
++        ("lf", "\n"),
++        ("crlf", "\r\n"),
++        ("cr", "\r"),
++        ("nel", "\u{85}"),
++        ("ls", "\u{2028}"),
++        ("ps", "\u{2029}"),
++    ];
++    // Exercise line state in comments, plain/quoted continuations and both block styles.
++    // Compare each original source with the real parser: LS/PS scalar folding can differ
++    // from LF, so the scanner must not normalize the value passed to deserialization.
++    let literals = [
++        "# comment ' \" & *\nx: http://host/it's:a&b*c!\ny: ok\n",
++        "x: plain\n  continuation ' &literal *literal !\ny: ok\n",
++        "x: 'quoted\n  &literal *literal !'\ny: ok\n",
++        "x: \"quoted\n  &literal *literal !\"\ny: ok\n",
++        "x: |-\n  &literal *literal ' \"\ny: ok\n",
++        "x: >2-\n  &literal *literal ' \"\ny: ok\n",
++        "x: {\"a\":\"literal & * !\", 'b':http://host/it's:a&b*c!}\n",
++    ];
++    for (name, lb) in line_breaks {
++        for source in literals {
++            let source = source.replace('\n', lb);
++            let ast: serde_yaml::Value = serde_yaml::from_str(&source).unwrap();
++            let expected = serde_json::to_value(ast).unwrap();
++            assert_eq!(
++                parse(source.as_bytes(), true).unwrap(),
++                expected,
++                "{name}: {source}"
++            );
++            vectors
++                .push(json!({"family":name,"source":source,"ast":expected,"outcome":"accepted"}));
++        }
++        for prefix in literals.iter().take(6) {
++            let source = format!("{prefix}a: &deps [one]\nb: *deps\n").replace('\n', lb);
++            let ast: serde_yaml::Value = serde_yaml::from_str(&source).unwrap();
++            assert_eq!(ast["a"], ast["b"]);
++            assert_eq!(
++                parse(source.as_bytes(), true).unwrap_err(),
++                "config_yaml_alias",
++                "{name}: {source}"
++            );
++            vectors.push(json!({"family":name,"source":source,"ast":serde_json::to_value(ast).unwrap(),"outcome":"config_yaml_alias"}));
++        }
++    }
++    for (source, literal) in [
++        (
++            "x: {\"a\":&b [one], \"c\":*b}\n",
++            "x: {\"a\":[one], \"c\":[one]}\n",
++        ),
++        ("x: {'a':&b [one], 'c':*b}\n", "x: {'a':[one], 'c':[one]}\n"),
++        (
++            "x: {\"a\": &b [one], \"c\": *b}\n",
++            "x: {\"a\": [one], \"c\": [one]}\n",
++        ),
++        (
++            "\"a\": &b [one]\n\"c\": *b\n",
++            "\"a\": [one]\n\"c\": [one]\n",
++        ),
++    ] {
++        let alias_ast: serde_yaml::Value = serde_yaml::from_str(source).unwrap();
++        let literal_ast: serde_yaml::Value = serde_yaml::from_str(literal).unwrap();
++        assert_eq!(alias_ast, literal_ast);
++        assert_eq!(
++            parse(source.as_bytes(), true).unwrap_err(),
++            "config_yaml_alias"
++        );
++        assert_eq!(
++            parse(literal.as_bytes(), true).unwrap(),
++            serde_json::to_value(literal_ast).unwrap()
++        );
++        vectors.push(json!({"source":source,"literal":literal,"ast":serde_json::to_value(alias_ast).unwrap(),"outcome":"config_yaml_alias"}));
++    }
++    // Full typed configurations prove that legal syntax is retained, not merely scanned.
++    let path = config(&r);
++    let main = std::fs::read_to_string(&path).unwrap();
++    let baseline = serde_json::to_value(Loaded::load(&path).unwrap().config).unwrap();
++    let anchored = main
++        .replacen(
++            "device_ids: [s7_a, s7_b]",
++            "device_ids: &deps [s7_a, s7_b]",
++            1,
++        )
++        .replacen("device_ids: [s7_a]", "device_ids: *deps", 1);
++    let anchored_ast: serde_yaml::Value = serde_yaml::from_str(&anchored).unwrap();
++    let flow_ast = serde_json::to_value(anchored_ast).unwrap();
++    let flow_literal = serde_json::to_string(&flow_ast).unwrap();
++    let flow_alias = flow_literal
++        .replacen(
++            "\"device_ids\":[\"s7_a\",\"s7_b\"]",
++            "\"device_ids\":&deps [s7_a,s7_b]",
++            1,
++        )
++        .replacen(
++            "\"device_ids\":[\"s7_a\",\"s7_b\"]",
++            "\"device_ids\":*deps",
++            1,
++        );
++    assert_eq!(
++        serde_yaml::from_str::<serde_yaml::Value>(&flow_alias).unwrap(),
++        serde_yaml::from_str::<serde_yaml::Value>(&flow_literal).unwrap()
++    );
++    std::fs::write(&path, &flow_literal).unwrap();
++    let flow_baseline = serde_json::to_value(Loaded::load(&path).unwrap().config).unwrap();
++    for (name, lb) in line_breaks {
++        let source = format!("# source comment\n{main}").replace('\n', lb);
++        std::fs::write(&path, &source).unwrap();
++        assert_eq!(
++            serde_json::to_value(Loaded::load(&path).unwrap().config).unwrap(),
++            baseline
++        );
++        let alias = format!("# source comment\n{anchored}").replace('\n', lb);
++        assert_eq!(
++            serde_yaml::from_str::<serde_yaml::Value>(&alias).unwrap(),
++            serde_yaml::from_str::<serde_yaml::Value>(&anchored).unwrap()
++        );
++        std::fs::write(&path, &alias).unwrap();
++        assert_eq!(
++            Loaded::load(&path).unwrap_err(),
++            "config_yaml_alias",
++            "{name}"
++        );
++        vectors.push(json!({"family":name,"full_config":source,"alias_config":alias,"outcome":"typed_equal_and_alias_rejected"}));
++    }
++    std::fs::write(&path, &flow_alias).unwrap();
++    assert_eq!(Loaded::load(&path).unwrap_err(), "config_yaml_alias");
++    let out = cli(&[
++        "run",
++        "--config",
++        path.to_str().unwrap(),
++        "--state-dir",
++        r.join("absent-state").to_str().unwrap(),
++    ]);
++    assert_eq!(out.status.code(), Some(2));
++    assert!(out.stdout.is_empty());
++    assert!(!r.join("absent-state").exists());
++    // Preserve the standard/custom-tag boundary with adjacent quoted flow keys as well.
++    assert_eq!(
++        parse(b"{\"x\":!!str 'literal & * !'}", true).unwrap(),
++        json!({"x":"literal & * !"})
++    );
++    assert_eq!(
++        parse(b"{\"x\":!custom value}", true).unwrap_err(),
++        "config_schema"
++    );
++    std::fs::write(&path, &flow_literal).unwrap();
++    assert_eq!(
++        serde_json::to_value(Loaded::load(&path).unwrap().config).unwrap(),
++        flow_baseline
++    );
++    std::fs::write(
++        r.join("vectors.json"),
++        serde_json::to_vec_pretty(&vectors).unwrap(),
++    )
++    .unwrap();
++}
+--- qa2/src/config/catalog.rs
++++ rework2/src/config/catalog.rs
+@@ -93,7 +93,13 @@
+     let mut node_start = true;
+     let mut parent = 0;
+     let mut last_start = 0;
+-    for line in s.split_inclusive('\n') {
++    let mut quoted_end = false;
++    // Match the locked YAML parser's line boundaries for source scanning only.
++    // Parsing and source hashes still use the original bytes (including scalar line breaks).
++    let lines = s
++        .replace("\r\n", "\n")
++        .replace(['\r', '\u{85}', '\u{2028}', '\u{2029}'], "\n");
++    for line in lines.split_inclusive('\n') {
+         let b = line.as_bytes();
+         let indent = b.iter().take_while(|c| **c == b' ').count();
+         let blank = b[indent..].iter().all(u8::is_ascii_whitespace);
+@@ -123,6 +129,7 @@
+         if matches!(scalar, Scalar::None) && depth == 0 {
+             node_start = true;
+             parent = indent;
++            quoted_end = false;
+         }
+         let mut at = indent;
+         while at < b.len() {
+@@ -143,6 +150,7 @@
+                     }
+                     scalar = Scalar::None;
+                     node_start = false;
++                    quoted_end = true;
+                 }
+                 at += 1;
+                 continue;
+@@ -179,8 +187,12 @@
+                 node_start = true;
+                 continue;
+             }
++            // In flow mappings a quoted key permits JSON-style `"key":value`.
++            // Plain scalars retain their separate colon/separation rule above.
++            let quoted_key_separator = c == b':' && depth > 0 && quoted_end;
++            quoted_end = false;
+             match c {
+-                b':' if separated => {
++                b':' if separated || quoted_key_separator => {
+                     parent = last_start;
+                     node_start = true;
+                 }

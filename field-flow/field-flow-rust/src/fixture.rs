@@ -228,3 +228,5 @@ pub fn native_server() -> Result<()> {
     std::hint::black_box(memory);
     Ok(())
 }
+
+pub mod catalog_demo;

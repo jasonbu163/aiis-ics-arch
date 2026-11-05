@@ -73,6 +73,16 @@ h1,h2,h3,p { margin-top:0; }
 .daa-history-size { width:88px; }
 .daa-history-detail { display:grid; gap:12px; max-height:65vh; overflow:auto; min-width:0; }
 .daa-history-detail h3 { margin:0; }
+.daa-sample-section { display:grid; gap:16px; min-width:0; padding-block:12px; }
+.daa-sample-section + .daa-sample-section { border-top:1px solid var(--agent-border); }
+.daa-sample-heading { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.daa-sample-summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin:0; }
+.daa-sample-summary dt { color:var(--agent-text-muted); font-size:12px; }
+.daa-sample-summary dd { margin:6px 0 0; overflow-wrap:anywhere; }
+.daa-sample-table { width:100%; }
+.daa-sample-table .cell { overflow-wrap:anywhere; }
+.daa-sample-table .muted-cell { margin-top:4px; }
+.daa-sample-json { margin:12px 0 0; padding:12px; max-height:360px; overflow:auto; white-space:pre; font-family:ui-monospace,monospace; font-size:12px; line-height:1.6; background:var(--agent-surface); border:1px solid var(--agent-border); }
 
 /* DAA-005导入局部表格；沿用CU主题与按钮尺寸。 */
 .daa-source-import { min-width: 0; }

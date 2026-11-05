@@ -1,0 +1,14 @@
+{
+  "task": "ARCH-BE-008",
+  "purpose": "coordinator narrow before/after audit",
+  "files": [
+    "PLAN.md",
+    "PLAN.zh-CN.md",
+    "plans/README.md",
+    "plans/README.zh-CN.md",
+    "README.md",
+    "README.zh-CN.md",
+    "CODE_INDEX.md"
+  ],
+  "backend_dotnet_existed": false
+}

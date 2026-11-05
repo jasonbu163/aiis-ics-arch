@@ -8,6 +8,10 @@ Main Features:
 """
 from __future__ import annotations
 
+from app.equipment.crud.sync_integration import storage_context
+from app.equipment.integration_storage import legacy_input
+from common.integration.storage import to_storage_time as storage_time
+
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
@@ -132,6 +136,7 @@ def sync_production_parameters(
     fact: EquipmentProductionParametersFact,
 ) -> EquipmentSyncResult:
     """Synchronize one equipment production-parameter fact without committing it."""
+    context = storage_context(db)
     validate_equipment_provenance(fact)
     if not is_good_quality(fact):
         return EquipmentSyncResult(action="skipped", skipped_reason="source_quality_not_good")
@@ -144,6 +149,10 @@ def sync_production_parameters(
             collected_at=fact.collected_at,
             input_key="entry_time",
         ) if fact.values.get("entry_time") is not None else None
+        if context:
+            timestamp=legacy_input(fact.values.get("timestamp"),fact.collected_at,context[0])
+            if entry_time is not None:
+                entry_time=legacy_input(fact.values.get("entry_time"),fact.collected_at,context[0])
         text_values = _normalize_text_values(fact.values)
         numeric_values = _normalize_numeric_values(fact.values)
     except ValueError as exc:

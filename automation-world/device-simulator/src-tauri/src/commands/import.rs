@@ -4,17 +4,19 @@ use super::*;
 pub async fn ds_preview_import(
     s: State<'_, Desktop>,
     request: dto::Operation<ds_runtime::services::source_import::ImportIntent>,
+    analyze_only: Option<bool>,
 ) -> Result<Reply, String> {
     Ok(operation(
         s.runtime.clone(),
         request,
         false,
         "ds_preview_import",
-        |a, p| {
-            runtime_queries::value(ds_runtime::services::source_import::preview(
-                &a.configuration,
-                p,
-            )?)
+        move |a, p| {
+            runtime_queries::value(if analyze_only.unwrap_or(false) {
+                ds_runtime::services::source_import::analyze(&a.configuration, p)?
+            } else {
+                ds_runtime::services::source_import::preview(&a.configuration, p)?
+            })
         },
     )
     .await)

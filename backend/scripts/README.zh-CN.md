@@ -16,3 +16,6 @@ uv run python scripts/maintenance/ensure_admin_user.py
 ~~~
 
 本目录脚本不会启动 Worker、轮询 PLC、默认执行 migration 或读取项目输入。数据库写入必须使用显式动作并确认单独获批的目标。
+
+
+[business_time_adoption](business_time_adoption/README.zh-CN.md)提供BE010固定业务时间列的有限只读inspect/plan/verify。裸入口只help；目标访问和实际采用须另批，无apply或SQL代理。

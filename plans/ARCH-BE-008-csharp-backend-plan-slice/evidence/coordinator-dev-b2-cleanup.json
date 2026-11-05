@@ -1,0 +1,42 @@
+{
+  "task": "ARCH-BE-008",
+  "runId": "994302d8e23a660144c54943",
+  "resources": [
+    {
+      "kind": "container",
+      "name": "aiis-arch-be008-mysql",
+      "id": "5a5777675e603d8c3947c218108253ebe55ef426210e774f8b1834748f0b2853",
+      "task": "ARCH-BE-008",
+      "runId": "994302d8e23a660144c54943"
+    },
+    {
+      "kind": "network",
+      "name": "aiis-arch-be008-net",
+      "id": "8b934c9f3b0e876dca85a1871cc9a4aa5c1d7be3a582603d6d73cc8fe86ba16d",
+      "task": "ARCH-BE-008",
+      "runId": "994302d8e23a660144c54943"
+    },
+    {
+      "kind": "volume",
+      "name": "aiis-arch-be008-mysql-data",
+      "id": "aiis-arch-be008-mysql-data",
+      "task": "ARCH-BE-008",
+      "runId": "994302d8e23a660144c54943"
+    }
+  ],
+  "evidence": {
+    "dev-b2-manifest.json": "a600a9a5062162af31e07b3d3de4ac127e6602d9bc4a4e0add36732e55f0c7dd",
+    "dev-b2-select-readback.tsv": "cc6316200825a443963aef20641af46feabdd4dbb53df66c83fab446f60dfb77",
+    "dev-b2-smoke-first-summary.json": "294b4d3d1a0ad99f29db3ce7bd1e1343f6b24805e4268654bde897f4fad6f0b9",
+    "dev-b2-smoke-second-summary.json": "364858da0a8140db86934f03ad4da9b6e765e095ca63aba6587d7ba9fe3ed935",
+    "dev-b2-log-lifecycle-summary.json": "541c59243c6d3f3c972a0ff468a220372133bbf50eee1a2d48749abb374d5e21"
+  },
+  "cleanup_exit": 0,
+  "output": "owned_resources_removed\n",
+  "resources_absent": true,
+  "ports_free": [
+    13388,
+    18108
+  ],
+  "run_root_retained": "raw evidence and private files pending final audit"
+}

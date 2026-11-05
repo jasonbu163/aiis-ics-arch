@@ -1,0 +1,302 @@
+{
+  "/Users/jason/Desktop/DreamCode/aiis-ics-arch/plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/before-fix.trx": {
+    "sha256": "c54131602bac4590d1babf5b2026a844a18dd9754351c046a7c80b31b82b404b",
+    "counters": {
+      "total": "1",
+      "executed": "1",
+      "passed": "0",
+      "failed": "1",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "tests": [
+      {
+        "name": "UnsupportedMediaHasUnifiedEnvelopeWithoutChangingRouting",
+        "outcome": "Failed",
+        "messages": [
+          "Assertion failed. \u9884\u671f\u6761\u4ef6\u4e3a true\u3002\n415 must contain the unified error envelope: text/plain\n\nactual: false\n\nAssert.IsTrue(text.Length > 0)"
+        ]
+      }
+    ]
+  },
+  "/Users/jason/Desktop/DreamCode/aiis-ics-arch/plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/after-fix.trx": {
+    "sha256": "a913375629b4bd122f4e88f5f29f5fab3b15318fb04832faba90bb5164341e04",
+    "counters": {
+      "total": "1",
+      "executed": "1",
+      "passed": "0",
+      "failed": "1",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "tests": [
+      {
+        "name": "UnsupportedMediaHasUnifiedEnvelopeWithoutChangingRouting",
+        "outcome": "Failed",
+        "messages": [
+          "Assertion failed. \u9884\u671f\u6761\u4ef6\u4e3a true\u3002\n415 must contain the unified error envelope: \n\nactual: false\n\nAssert.IsTrue(text.Length > 0)"
+        ]
+      }
+    ]
+  },
+  "/Users/jason/Desktop/DreamCode/aiis-ics-arch/plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/after-guard.trx": {
+    "sha256": "b5acf0f1ab5a32d64b9188a4cec6590a9547cb20e80f6e6f6d77b9aa51dd00d0",
+    "counters": {
+      "total": "1",
+      "executed": "1",
+      "passed": "1",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "tests": [
+      {
+        "name": "UnsupportedMediaHasUnifiedEnvelopeWithoutChangingRouting",
+        "outcome": "Passed",
+        "messages": []
+      }
+    ]
+  },
+  "/Users/jason/Desktop/DreamCode/aiis-ics-arch/plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/rework1-a-final.trx": {
+    "sha256": "a79000138a22b98ac7b9ef3b08ed817977997685d07e7518d3cb4a83b9dcd6f2",
+    "counters": {
+      "total": "11",
+      "executed": "11",
+      "passed": "11",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "tests": [
+      {
+        "name": "DisabledModuleHasNoRoutesOrOpenApi",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "DefaultsAndAllRequiredAndNull",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "UnsupportedMediaHasUnifiedEnvelopeWithoutChangingRouting",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "BusinessTimeDoesNotUseProcessTimeZone",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "MissingConnectionFailsWithoutSecretLeak",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "ExactDecimalGrammarAndBounds",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "JsonLinesRotateRetainAndFlush",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "ModuleMetadataRejectsInvalidComposition",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "StrictShapeAndPriority",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "EnabledRoutesAndStrictFailuresDoNotNeedDatabase",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "PythonStripAndUnicodeScalars",
+        "outcome": "Passed",
+        "messages": []
+      }
+    ]
+  },
+  "/Users/jason/Desktop/DreamCode/aiis-ics-arch/plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/mysql/results/mysql-1793169974042550000.trx": {
+    "sha256": "76239e29579d586ef1e16c29f3cba5feebd30e8907e7805fc7297bac9a0266a7",
+    "counters": {
+      "total": "1",
+      "executed": "1",
+      "passed": "1",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "tests": [
+      {
+        "name": "RealMySqlPlanSlice",
+        "outcome": "Passed",
+        "messages": []
+      }
+    ]
+  },
+  "/private/tmp/arch-be008-qa2-gkv496cr/results-a/qa2-a.trx": {
+    "sha256": "3e1de9d4f279814fd72df40001654ac6dd3dd0fcc40a5991205fdb429fdd03c0",
+    "counters": {
+      "total": "11",
+      "executed": "11",
+      "passed": "11",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "tests": [
+      {
+        "name": "StrictShapeAndPriority",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "PythonStripAndUnicodeScalars",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "MissingConnectionFailsWithoutSecretLeak",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "DisabledModuleHasNoRoutesOrOpenApi",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "EnabledRoutesAndStrictFailuresDoNotNeedDatabase",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "UnsupportedMediaHasUnifiedEnvelopeWithoutChangingRouting",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "JsonLinesRotateRetainAndFlush",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "ExactDecimalGrammarAndBounds",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "ModuleMetadataRejectsInvalidComposition",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "DefaultsAndAllRequiredAndNull",
+        "outcome": "Passed",
+        "messages": []
+      },
+      {
+        "name": "BusinessTimeDoesNotUseProcessTimeZone",
+        "outcome": "Passed",
+        "messages": []
+      }
+    ]
+  },
+  "/private/tmp/arch-be008-run-s272kqdk/results/mysql-1793171260283673000.trx": {
+    "sha256": "1e51ccf6b3b06b434a17a78e333bb986614a5a6ca726b148f2d67c85b41d0771",
+    "counters": {
+      "total": "1",
+      "executed": "1",
+      "passed": "1",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "tests": [
+      {
+        "name": "RealMySqlPlanSlice",
+        "outcome": "Passed",
+        "messages": []
+      }
+    ]
+  }
+}

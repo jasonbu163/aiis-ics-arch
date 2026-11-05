@@ -1,0 +1,10 @@
+{
+  "sourceCandidateUnchanged": true,
+  "verifiedArtifactsUnchanged": true,
+  "approvedSpecUnchanged": true,
+  "ownedFilesSecretScan": "no_matches",
+  "markdownLocalTargets": 212,
+  "whitespace": "pass",
+  "rootGovernance": "exit1;320 baseline diagnostics;new0;deleted0",
+  "apiAndDockerResources": "coordinator verified removed"
+}

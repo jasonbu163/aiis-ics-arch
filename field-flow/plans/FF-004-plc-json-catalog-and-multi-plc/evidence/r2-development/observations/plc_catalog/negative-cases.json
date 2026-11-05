@@ -1,0 +1,243 @@
+[
+  {
+    "exit": 2,
+    "label": "unknown",
+    "report": {
+      "files": [],
+      "format_valid": false,
+      "issues": [
+        {
+          "error_key": "config_fields",
+          "path": "$"
+        }
+      ],
+      "issues_truncated": false,
+      "runtime_compatible": false,
+      "scope": "plc_file"
+    }
+  },
+  {
+    "exit": 2,
+    "label": "null_optional",
+    "report": {
+      "files": [],
+      "format_valid": false,
+      "issues": [
+        {
+          "error_key": "config_string",
+          "path": "$"
+        }
+      ],
+      "issues_truncated": false,
+      "runtime_compatible": false,
+      "scope": "plc_file"
+    }
+  },
+  {
+    "exit": 2,
+    "label": "float_integer",
+    "report": {
+      "files": [],
+      "format_valid": false,
+      "issues": [
+        {
+          "error_key": "config_integer",
+          "path": "$"
+        }
+      ],
+      "issues_truncated": false,
+      "runtime_compatible": false,
+      "scope": "plc_file"
+    }
+  },
+  {
+    "exit": 2,
+    "label": "bool_integer",
+    "report": {
+      "files": [],
+      "format_valid": false,
+      "issues": [
+        {
+          "error_key": "config_integer",
+          "path": "$"
+        }
+      ],
+      "issues_truncated": false,
+      "runtime_compatible": false,
+      "scope": "plc_file"
+    }
+  },
+  {
+    "exit": 2,
+    "label": "string_integer",
+    "report": {
+      "files": [],
+      "format_valid": false,
+      "issues": [
+        {
+          "error_key": "config_integer",
+          "path": "$"
+        }
+      ],
+      "issues_truncated": false,
+      "runtime_compatible": false,
+      "scope": "plc_file"
+    }
+  },
+  {
+    "exit": 2,
+    "label": "implicit_enabled",
+    "report": {
+      "files": [],
+      "format_valid": false,
+      "issues": [
+        {
+          "error_key": "config_bool",
+          "path": "$"
+        }
+      ],
+      "issues_truncated": false,
+      "runtime_compatible": false,
+      "scope": "plc_file"
+    }
+  },
+  {
+    "exit": 2,
+    "label": "overlap_disabled",
+    "report": {
+      "files": [],
+      "format_valid": false,
+      "issues": [
+        {
+          "error_key": "config_overlap",
+          "path": "$"
+        }
+      ],
+      "issues_truncated": false,
+      "runtime_compatible": false,
+      "scope": "plc_file"
+    }
+  },
+  {
+    "exit": 2,
+    "label": "duplicate_point",
+    "report": {
+      "files": [],
+      "format_valid": false,
+      "issues": [
+        {
+          "error_key": "config_duplicate_point",
+          "path": "$"
+        }
+      ],
+      "issues_truncated": false,
+      "runtime_compatible": false,
+      "scope": "plc_file"
+    }
+  },
+  {
+    "exit": 2,
+    "label": "non_int",
+    "report": {
+      "files": [],
+      "format_valid": false,
+      "issues": [
+        {
+          "error_key": "config_data_type",
+          "path": "$"
+        }
+      ],
+      "issues_truncated": false,
+      "runtime_compatible": false,
+      "scope": "plc_file"
+    }
+  },
+  {
+    "exit": 2,
+    "label": "bit",
+    "report": {
+      "files": [],
+      "format_valid": false,
+      "issues": [
+        {
+          "error_key": "config_fields",
+          "path": "$"
+        }
+      ],
+      "issues_truncated": false,
+      "runtime_compatible": false,
+      "scope": "plc_file"
+    }
+  },
+  {
+    "exit": 2,
+    "label": "address",
+    "report": {
+      "files": [],
+      "format_valid": false,
+      "issues": [
+        {
+          "error_key": "config_address",
+          "path": "$"
+        }
+      ],
+      "issues_truncated": false,
+      "runtime_compatible": false,
+      "scope": "plc_file"
+    }
+  },
+  {
+    "exit": 2,
+    "label": "foreign_protocol_field",
+    "report": {
+      "files": [],
+      "format_valid": false,
+      "issues": [
+        {
+          "error_key": "config_protocol_fields",
+          "path": "$"
+        }
+      ],
+      "issues_truncated": false,
+      "runtime_compatible": false,
+      "scope": "plc_file"
+    }
+  },
+  {
+    "exit": 2,
+    "label": "host",
+    "report": {
+      "files": [],
+      "format_valid": false,
+      "issues": [
+        {
+          "error_key": "config_host",
+          "path": "$"
+        }
+      ],
+      "issues_truncated": false,
+      "runtime_compatible": false,
+      "scope": "plc_file"
+    }
+  },
+  {
+    "label": "duplicate_key",
+    "rejected": true
+  },
+  {
+    "label": "bom",
+    "rejected": true
+  },
+  {
+    "label": "integer_exponent",
+    "rejected": true
+  },
+  {
+    "label": "depth",
+    "rejected": true
+  },
+  {
+    "label": "size",
+    "rejected": true
+  }
+]

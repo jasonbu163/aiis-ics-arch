@@ -1,0 +1,10 @@
+{
+  "baselinePath": "/private/tmp/arch-be008-coordinator-wkj0jq0q/governance-before.txt",
+  "baselineExit": 1,
+  "currentExit": 1,
+  "baselineLines": 320,
+  "currentLines": 320,
+  "added": [],
+  "removed": [],
+  "checklistCatalogLinksSyncedByCoordinator": true
+}

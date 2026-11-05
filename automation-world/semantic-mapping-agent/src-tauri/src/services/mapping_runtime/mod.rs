@@ -24,7 +24,7 @@ use crate::domain::mapping_runtime::{
     MappingRuntimeDiagnostic, MappingRuntimePoint, OutboundRequest,
 };
 use crate::domain::runtime::{
-    runtime_run_id, utc_now_string, ManagedRuntimeState, RuntimeSnapshot, RuntimeStartRequest,
+    business_now_string, runtime_run_id, ManagedRuntimeState, RuntimeSnapshot, RuntimeStartRequest,
 };
 
 const BACKEND_REQUEST_TIMEOUT_MS: u64 = 5_000;
@@ -261,7 +261,8 @@ struct RuntimeClaimRequest<'a> {
     expected_target_api_row_version: &'a str,
 }
 
-pub async fn run_mapping_manual_once(
+#[doc(hidden)]
+pub async fn legacy_run_mapping_manual_once(
     mapping_id: String,
     expected_row_version: String,
     backend_base_url: String,
@@ -648,7 +649,8 @@ impl MappingSchedule {
     }
 }
 
-pub async fn start_api_first_mapping_runtime(
+#[doc(hidden)]
+pub async fn legacy_start_api_first_mapping_runtime(
     state: &ApiFirstMappingRuntimeState,
     request: ApiFirstMappingRuntimeStartRequest,
 ) -> Result<RuntimeSnapshot, String> {
@@ -677,7 +679,7 @@ pub async fn pause_api_first_mapping_runtime(
     state.0.request_pause()?;
     wait_for_status(&state.0, "paused", "MAPPING_RUNTIME_PAUSE_TIMEOUT").await?;
     state.0.log(
-        utc_now_string(),
+        business_now_string(),
         "api_first_mapping_runtime_paused",
         "success",
         None,
@@ -686,12 +688,13 @@ pub async fn pause_api_first_mapping_runtime(
     Ok(state.0.snapshot())
 }
 
-pub fn resume_api_first_mapping_runtime(
+#[doc(hidden)]
+pub fn legacy_resume_api_first_mapping_runtime(
     state: &ApiFirstMappingRuntimeState,
 ) -> Result<RuntimeSnapshot, String> {
     state.0.resume()?;
     state.0.log(
-        utc_now_string(),
+        business_now_string(),
         "api_first_mapping_runtime_resumed",
         "success",
         None,
@@ -744,7 +747,7 @@ async fn run_continuous_mapping_runtime(
         "fresh-facts-per-mapping-interval",
     );
     state.0.log(
-        utc_now_string(),
+        business_now_string(),
         "api_first_mapping_runtime_started",
         "success",
         None,
@@ -799,7 +802,7 @@ async fn run_continuous_mapping_runtime(
                         .0
                         .record_failure(&error, "Fresh fact read failed; this cycle was not sent");
                     state.0.log(
-                        utc_now_string(),
+                        business_now_string(),
                         "api_first_mapping_runtime_facts_read_failed",
                         "failed",
                         Some(&error),
@@ -812,7 +815,7 @@ async fn run_continuous_mapping_runtime(
                 }) => {
                     state.0.record_success(processed_items, None);
                     state.0.log(
-                        utc_now_string(),
+                        business_now_string(),
                         event,
                         "success",
                         None,
@@ -826,7 +829,7 @@ async fn run_continuous_mapping_runtime(
                     schedule.blocked = true;
                     state.0.record_failure(&error_code, message);
                     state.0.log(
-                        utc_now_string(),
+                        business_now_string(),
                         "api_first_mapping_runtime_mapping_blocked",
                         "failed",
                         Some(&error_code),
@@ -839,7 +842,7 @@ async fn run_continuous_mapping_runtime(
                         .0
                         .record_failure(&error, "Mapping tick stopped without replay");
                     state.0.log(
-                        utc_now_string(),
+                        business_now_string(),
                         "api_first_mapping_runtime_mapping_blocked",
                         "failed",
                         Some(&error),
@@ -1162,7 +1165,7 @@ async fn wait_for_terminal(state: &ManagedRuntimeState) -> Result<RuntimeSnapsho
 fn finish_stopped(state: &ManagedRuntimeState) {
     state.finish("stopped");
     state.log(
-        utc_now_string(),
+        business_now_string(),
         "api_first_mapping_runtime_stopped",
         "success",
         None,
@@ -1173,7 +1176,7 @@ fn finish_stopped(state: &ManagedRuntimeState) {
 fn fail_continuous_runtime(state: &ManagedRuntimeState, error_code: &str) {
     state.record_failure(error_code, "Mapping runtime stopped without replay");
     state.log(
-        utc_now_string(),
+        business_now_string(),
         "api_first_mapping_runtime_failed",
         "failed",
         Some(error_code),
@@ -1184,4 +1187,29 @@ fn fail_continuous_runtime(state: &ManagedRuntimeState, error_code: &str) {
 
 fn map_runtime_error(error: String) -> String {
     error.replace("MAPPING_MANUAL_RUN", "MAPPING_RUNTIME")
+}
+
+/// 本地配置阶段的正常manual服务准入；旧HTTP算法只供兼容fixture直接验证。
+pub async fn run_mapping_manual_once(
+    _mapping_id: String,
+    _expected_row_version: String,
+    _backend_base_url: String,
+) -> Result<MappingManualRunResult, String> {
+    crate::services::local_configuration::reject_execution()?;
+    unreachable!("local configuration execution is unavailable")
+}
+/// 正常持续启动服务：不构造client、不spawn、不加载远端配置。
+pub async fn start_api_first_mapping_runtime(
+    _state: &ApiFirstMappingRuntimeState,
+    _request: ApiFirstMappingRuntimeStartRequest,
+) -> Result<RuntimeSnapshot, String> {
+    crate::services::local_configuration::reject_execution()?;
+    unreachable!("local configuration execution is unavailable")
+}
+/// 正常恢复服务：不恢复旧运行与远端lease。
+pub fn resume_api_first_mapping_runtime(
+    _state: &ApiFirstMappingRuntimeState,
+) -> Result<RuntimeSnapshot, String> {
+    crate::services::local_configuration::reject_execution()?;
+    unreachable!("local configuration execution is unavailable")
 }

@@ -4,6 +4,7 @@
 
 | Task ID | 唯一规格 | 实施记录 | 独立验证 |
 | --- | --- | --- | --- |
+| SMA-001 | [r2 总规格](../semantic-mapping-agent/plans/SMA-001-cu-integration-and-scope-cleanup/spec.md)；draft，子任务归 [SMA 目录](../semantic-mapping-agent/plans/README.zh-CN.md) | 总 tasks 未创建；SMA-002/SMA-003 handoff 保留；SMA-004 rework-1 developer_handoff | 总 checklist 未创建；SMA-002/SMA-003 owner_accepted / qa_passed；SMA-004 返工后 QA2 qa_passed，Owner 及总体验收 pending |
 | ARCH-AW-007 | [r2 spec](../../plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md)；文档范围已批准，完整 r1 保留 | [r2 tasks](../../plans/ARCH-AW-007-general-agent-fleet-roadmap/tasks.md)；developer_handoff，原 DEV 自检及完整 r1 历史保留 | [r2 checklist](../../plans/ARCH-AW-007-general-agent-fleet-roadmap/checklist.md)；2026-10-21 owner_accepted，原独立 AC01–AC14 QA/r1 证据保留，校验归档留存、自有临时资源已清理，未追加测试 |
 | ARCH-AW-006 | [r2 spec](../../plans/ARCH-AW-006-unified-flow-agent-design/spec.md)；owner_approved 设计，完整 r1 保留 | 未创建；文档实施归 007 r2，软件范围/批准另立待定 | 未创建；文档 QA 记录归 007 r2，软件 QA 范围/批准另立待定 |
 | ARCH-AW-001 | [r1 spec](../../plans/ARCH-AW-001-agent-foundation/spec.md) | [tasks](../../plans/ARCH-AW-001-agent-foundation/tasks.md) | [checklist](../../plans/ARCH-AW-001-agent-foundation/checklist.md)；2026-10-14 owner_accepted，保留原qa_passed；本轮未追加测试 |

@@ -6,6 +6,7 @@ Main Features:
   - Shows type-placeholder application/json request templates without sending business requests
 -->
 <script setup lang="ts">
+import { ConsoleCard } from "@aw-ui";
 import type { LocaleMessages } from "../../../locales";
 import type { BackendOpenApiOperation, BackendOpenApiResult } from "../types";
 
@@ -20,16 +21,10 @@ function operationTitle(operation: BackendOpenApiOperation): string {
 </script>
 
 <template>
-  <section class="panel openapi-catalog">
-    <header class="panel-header">
-      <div>
-        <p class="panel-kicker">{{ props.labels.openApiCatalogKicker }}</p>
-        <h2>{{ props.labels.openApiCatalog }}</h2>
-      </div>
-      <span class="openapi-catalog-count">
+  <ConsoleCard class="openapi-catalog" :title="props.labels.openApiCatalog">
+<template #actions><span class="openapi-catalog-count">
         {{ props.result.operationCount }} {{ props.labels.openApiOperations }}
-      </span>
-    </header>
+      </span></template>
 
     <p class="hint">{{ props.labels.openApiCatalogHint }}</p>
 
@@ -50,5 +45,5 @@ function operationTitle(operation: BackendOpenApiOperation): string {
       </details>
     </div>
     <p v-else class="hint">{{ props.labels.openApiNoOperations }}</p>
-  </section>
+  </ConsoleCard>
 </template>

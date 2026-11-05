@@ -11,7 +11,7 @@ cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
 pnpm tauri dev
 ```
 
-来源为 CA 冻结 receipt；[DAA PLAN](PLAN.zh-CN.md) 管实施，[AW PLAN](../PLAN.zh-CN.md) 管跨工程阶段。[DAA-003 r1](plans/DAA-003-sqlite-only-startup/spec.md) 管 SQLite 唯一入口和迁入；[DAA-002 r2](plans/DAA-002-local-acquisition-loop/spec.md) 管既有本地采集基线，其 QA 与 Human Owner 最终验收仍是独立任务事实。这些说明不授权现场切换、发布或部署。
+来源为CA冻结receipt；[DAA PLAN](PLAN.zh-CN.md)管理实施，[AW PLAN](../PLAN.zh-CN.md)管理跨工程阶段。Human Owner于2026-10-30验收DAA-002 r2、DAA-003 r1、DAA-004 r1及[DAA-007 r2](plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2)，确认阶段B在本次受控DS联调范围完成。原QA/失败及已知限制分别保留；本次不启动阶段C、自动启动策略或真实现场验证。
 
 ## 配置权威与启动
 
@@ -52,7 +52,7 @@ DAA-007 r2将已完成的迁入退出普通bootstrap、engine、reload和保存�
 
 ## 隔离验证边界
 
-`pnpm build --config vite.validation.config.ts --outDir <绝对临时dist> --emptyOutDir` 继续隔离 env。非默认 debug `local-validation` 保留原固定fixture、绝对tmp路径/owner marker/继承env拒绝/release编译拒绝；不会自动发现源码根 YAML。原CLI/二进制及必需参数保持，不能真实传输、执行任意SQL或ACK。DAA-003历史原生迁入/保存重开证据使用其自有tmp env/profile和read gate=false；r2已退役普通迁入，browser/fixture不替代它。真实PLC/实际profile和YAML迁入、Backend/SMA/DS、C阶段、生产DB/API、现场来源切换、Docker/Git/发布/部署及跨平台签名另行批准。
+`pnpm build --config vite.validation.config.ts --outDir <绝对临时dist> --emptyOutDir` 继续隔离 env。非默认 debug `local-validation` 保留原固定fixture、绝对tmp路径/owner marker/继承env拒绝/release编译拒绝；不会自动发现源码根 YAML。原CLI/二进制及必需参数保持，不能真实传输、执行任意SQL或ACK。DAA-003历史原生迁入/保存重开证据使用其自有tmp env/profile和read gate=false；r2已退役普通迁入，browser/fixture不替代它。本次受控DS范围之外，真实PLC/实际profile迁移、Backend/SMA、C阶段、自动启动策略、生产DB/API、现场切换、Docker/Git/发布/部署及跨平台签名另行批准。
 
 ## 多 DB 源码编辑与标准偏移
 
@@ -72,13 +72,13 @@ DAA机器身份仍是opaque `point.id`，历史样本字典亦按ID。`name`现�
 
 点位页按稳定ID勾选，跨页保留（10/20/50），预览旧→新和冲突后显式确认；取消零写、保留选择。原编辑器预览有限用户字段patch并与派生名一起保存；原偏移确认同时成名，无第三次确认。token300秒过期并绑定输入/ETag。None/manual在重导、无关地址/类型变化后保名；直接受影响的managed遵循固定profile。旧历史/receipt/active版本原bytes不改，新元数据的旧binary降级需另证。
 
-[共享导入核心](../shared/tia-import-core/README.zh-CN.md)只保留一套纯parser/展开/布局/命名，DAA保留不可变源证明、闭包、ID及SQLite/CAS。没有DDL/第二技术key或YAML运行模式。共享不等于DS已实现或阶段B完成；还需DS独立接受的协议基线、另批DAA–DS读取至SQLite联调后，才整体接受B并推进C。
+[共享导入核心](../shared/tia-import-core/README.zh-CN.md)只保留一套纯parser/展开/布局/命名，DAA保留不可变源证明、闭包、ID及SQLite/CAS。没有DDL/第二技术key或YAML运行模式。共享本身不授予DS产品接受；本次所需DS基线及DAA–DS读取至SQLite闭环已分别接受，阶段B结论归DAA-007。阶段C仍需稳定Backend API合同和独立批准。
 
 普通`pnpm tauri dev`使用本仓package→Tauri beforeDevCommand→Vite15191与`src/main.ts`及本仓`src-tauri`入口。验收不自动复制临时代码或更新安装包。旧`yaml_migration_*`日志仅属于历史迁入；r2普通启动不再产生迁入事件。`runtime_started` stopped和`runtime_stopped` clean描述启动意图和正常关闭，不表示失败。
 
-## 阶段 B 联调操作手册（试行）
+## 阶段 B 联调操作手册（已验收基线）
 
-[试行版手册](JOINT_TEST_GUIDE.zh-CN.md)与[DAA-007 r2 spec](plans/DAA-007-ds-joint-validation-and-time-contract/spec.md)明确本次有限DS采用基线、隔离启动及M01–M09。r2已精确获批，保留r1时间与门禁整改，新增启动/profile与YAML退役增量；DEV定向验证记录见[tasks](plans/DAA-007-ds-joint-validation-and-time-contract/tasks.md)。Owner原生联调、闭库对账、新fresh Verification与最终验收仍分别待发生，阶段C继续另批。
+[联调手册](JOINT_TEST_GUIDE.zh-CN.md)随2026-10-30最终验收在本次受控DS范围定稿。[tasks](plans/DAA-007-ds-joint-validation-and-time-contract/tasks.md)保留实际开发/Owner/闭库事实，[checklist](plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2)记录AC01–AC22独立核验、8590份样本/4295轮完整重开比较与真实Owner决定。历史checkpoint缺失和15:27来源未明继续跟踪；原联调profile及SQLite配置/历史保留，阶段C/自动启动/现场另项。
 
 新版仅初始化新空profile：两库user_version/metadata/schema_migrations=2，time_profile=`asia-shanghai-rfc3339-ms-v1`；样本及manifest=2，配置/context及IPC envelope仍为1。日历时间固定上海毫秒`+08:00`，savedAt为同轮持久化事务内生成时间；stdout保留纳秒、文件日志保留毫秒。旧UTC v1、未知/缺失合同、单库或身份异常在profile锁、RW连接、恢复、迁入及持久日志之前只读拒绝；合格v2/新空才取得锁并复核，漂移拒绝可能已留下锁文件，但未RW业务库。拒绝诊断壳给出`time_profile_unsupported`，业务动作不可用。原配置/历史不迁移、不旁建替代库；旧profile继续使用原兼容版本，迁移与降级另批。
 

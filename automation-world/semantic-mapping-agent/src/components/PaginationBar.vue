@@ -1,9 +1,10 @@
 <!--
 File Path: /automation-world/semantic-mapping-agent/src/components/PaginationBar.vue
-Description: Shared compact pager for TSS data lists.
+Description: Shared compact pager for SMA data lists.
 Main Features: Displays range, page count, page-size selection, and previous/next controls.
 -->
 <script setup lang="ts">
+import { ConsoleActionButton } from "@aw-ui";
 import { computed } from "vue";
 
 import type { LocaleMessages } from "../locales";
@@ -44,9 +45,9 @@ function format(template: string, values: Record<string, number>) {
           <option v-for="option in pageSizeOptions" :key="option" :value="option">{{ option }}</option>
         </select>
       </label>
-      <button class="secondary-action compact-action" type="button" :disabled="busy || page <= 1" @click="emit('update:page', page - 1)">{{ labels.previousPage }}</button>
+      <ConsoleActionButton size="small" :disabled="busy || page <= 1" @click="emit('update:page', page - 1)">{{ labels.previousPage }}</ConsoleActionButton>
       <strong>{{ format(labels.paginationPage, { page, pages: pageCount }) }}</strong>
-      <button class="secondary-action compact-action" type="button" :disabled="busy || page >= pageCount" @click="emit('update:page', page + 1)">{{ labels.nextPage }}</button>
+      <ConsoleActionButton size="small" :disabled="busy || page >= pageCount" @click="emit('update:page', page + 1)">{{ labels.nextPage }}</ConsoleActionButton>
     </div>
   </footer>
 </template>
@@ -60,7 +61,7 @@ function format(template: string, values: Record<string, number>) {
   min-width: 0;
   flex-wrap: wrap;
   margin-top: 12px;
-  color: #52707a;
+  color: var(--agent-text-muted);
   font-size: 12px;
 }
 
@@ -76,9 +77,9 @@ function format(template: string, values: Record<string, number>) {
 .pagination-size select {
   min-width: 64px;
   padding: 6px 8px;
-  color: #172026;
-  background: #fff;
-  border: 1px solid #c7d4d8;
+  color: var(--agent-text);
+  background: var(--agent-surface);
+  border: 1px solid var(--agent-border);
   border-radius: 5px;
 }
 

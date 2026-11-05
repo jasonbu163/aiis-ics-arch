@@ -112,7 +112,10 @@ impl Config {
                 || !valid_id(&f.source_id)
                 || !valid_id(&f.business_name)
                 || !ids.insert(f.id.clone())
-                || f.kind != "demo01"
+                || !matches!(
+                    f.kind.as_str(),
+                    "demo01" | "plc_guard_get_int" | "get_value_guard_int"
+                )
             {
                 return Err("config_flow".into());
             }
@@ -169,3 +172,6 @@ impl Config {
         Ok(())
     }
 }
+
+pub mod catalog;
+pub mod runtime_v2;

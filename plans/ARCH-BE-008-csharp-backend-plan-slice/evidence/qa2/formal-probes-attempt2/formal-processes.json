@@ -1,0 +1,38 @@
+[
+  {
+    "name": "formal-ny",
+    "pid": 84291,
+    "TZ": "America/New_York",
+    "argv": [
+      "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+      "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet/bin/Debug/net10.0/AIIS.Backend.Api.dll"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "stdout": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes-attempt2/formal-ny.stdout.jsonl",
+    "stderr": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes-attempt2/formal-ny.stderr",
+    "logs": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes-attempt2/formal-ny-logs",
+    "startedUtc": "2026-10-28T07:09:46Z",
+    "exitCode": 0,
+    "stoppedUtc": "2026-10-28T07:09:48Z",
+    "pidAbsent": true,
+    "port18108Rebind": true
+  },
+  {
+    "name": "formal-utc",
+    "pid": 84332,
+    "TZ": "UTC",
+    "argv": [
+      "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+      "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet/bin/Debug/net10.0/AIIS.Backend.Api.dll"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "stdout": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes-attempt2/formal-utc.stdout.jsonl",
+    "stderr": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes-attempt2/formal-utc.stderr",
+    "logs": "/private/tmp/arch-be008-qa2-gkv496cr/formal-probes-attempt2/formal-utc-logs",
+    "startedUtc": "2026-10-28T07:09:48Z",
+    "exitCode": 0,
+    "stoppedUtc": "2026-10-28T07:09:49Z",
+    "pidAbsent": true,
+    "port18108Rebind": true
+  }
+]

@@ -1,0 +1,439 @@
+--- qa1/field-flow/field-flow-rust/src/config/catalog.rs
++++ rework1/field-flow/field-flow-rust/src/config/catalog.rs
+@@ -72,47 +72,183 @@
+         Ok(Value::Object(v))
+     }
+ }
++// Source-only gate: serde_yaml still owns YAML syntax and scalar semantics.
++// Quotes start a quoted scalar only at a node boundary, never inside a plain scalar.
++fn reject_yaml_aliases(s: &str) -> Result<()> {
++    #[derive(Clone, Copy)]
++    enum Scalar {
++        None,
++        Plain {
++            parent: usize,
++            start: usize,
++        },
++        Quoted(u8),
++        Block {
++            parent: usize,
++            content: Option<usize>,
++        },
++    }
++    let mut scalar = Scalar::None;
++    let mut depth = 0usize;
++    let mut node_start = true;
++    let mut parent = 0;
++    let mut last_start = 0;
++    for line in s.split_inclusive('\n') {
++        let b = line.as_bytes();
++        let indent = b.iter().take_while(|c| **c == b' ').count();
++        let blank = b[indent..].iter().all(u8::is_ascii_whitespace);
++        if let Scalar::Block {
++            parent: base,
++            content,
++        } = scalar
++        {
++            if blank {
++                continue;
++            }
++            let required = content.unwrap_or(indent.max(base + 1));
++            if indent >= required {
++                scalar = Scalar::Block {
++                    parent: base,
++                    content: Some(required),
++                };
++                continue;
++            }
++            scalar = Scalar::None;
++        }
++        if let Scalar::Plain { parent: base, .. } = scalar {
++            if depth == 0 && !blank && indent <= base {
++                scalar = Scalar::None;
++            }
++        }
++        if matches!(scalar, Scalar::None) && depth == 0 {
++            node_start = true;
++            parent = indent;
++        }
++        let mut at = indent;
++        while at < b.len() {
++            let c = b[at];
++            let next = b.get(at + 1).copied();
++            let separated =
++                next.is_none_or(|n| n.is_ascii_whitespace() || depth > 0 && b"[]{},".contains(&n));
++            let prior_space = at == 0 || b[at - 1].is_ascii_whitespace();
++            if let Scalar::Quoted(q) = scalar {
++                if q == b'"' && c == b'\\' {
++                    at += 2;
++                    continue;
++                }
++                if c == q {
++                    if q == b'\'' && next == Some(q) {
++                        at += 2;
++                        continue;
++                    }
++                    scalar = Scalar::None;
++                    node_start = false;
++                }
++                at += 1;
++                continue;
++            }
++            if let Scalar::Plain { start, .. } = scalar {
++                if c == b'#' && prior_space {
++                    break;
++                }
++                if c == b':' && separated {
++                    scalar = Scalar::None;
++                    last_start = start;
++                } else if depth > 0 && b"[]{},".contains(&c) {
++                    scalar = Scalar::None;
++                } else {
++                    at += 1;
++                    continue;
++                }
++            }
++            if c.is_ascii_whitespace() {
++                at += 1;
++                continue;
++            }
++            if c == b'#' && prior_space {
++                break;
++            }
++            if at == 0 && c == b'%' {
++                break;
++            }
++            if at == 0
++                && (b.starts_with(b"---") || b.starts_with(b"..."))
++                && b.get(3).is_none_or(u8::is_ascii_whitespace)
++            {
++                at += 3;
++                node_start = true;
++                continue;
++            }
++            match c {
++                b':' if separated => {
++                    parent = last_start;
++                    node_start = true;
++                }
++                b'[' | b'{' => {
++                    depth += 1;
++                    node_start = true;
++                }
++                b']' | b'}' => {
++                    depth = depth.saturating_sub(1);
++                    node_start = false;
++                }
++                b',' if depth > 0 => {
++                    node_start = true;
++                }
++                b'-' | b'?' if node_start && next.is_none_or(|n| n.is_ascii_whitespace()) => {
++                    parent = at;
++                }
++                b'!' if node_start => {
++                    at += 1;
++                    if b.get(at) == Some(&b'<') {
++                        while at < b.len() && b[at] != b'>' {
++                            at += 1;
++                        }
++                        at += 1;
++                    } else {
++                        while at < b.len() && !b[at].is_ascii_whitespace() {
++                            at += 1;
++                        }
++                    }
++                    continue;
++                }
++                b'&' | b'*' if node_start => return Err("config_yaml_alias".into()),
++                b'|' | b'>' if node_start && depth == 0 => {
++                    let explicit = b[at + 1..]
++                        .iter()
++                        .take_while(|n| !n.is_ascii_whitespace())
++                        .find(|n| (b'1'..=b'9').contains(n))
++                        .map(|n| parent + (n - b'0') as usize);
++                    scalar = Scalar::Block {
++                        parent,
++                        content: explicit,
++                    };
++                    break;
++                }
++                b'\'' | b'"' if node_start => {
++                    last_start = at;
++                    scalar = Scalar::Quoted(c);
++                    node_start = false;
++                }
++                _ => {
++                    last_start = at;
++                    scalar = Scalar::Plain { parent, start: at };
++                    node_start = false;
++                }
++            }
++            at += 1;
++        }
++    }
++    Ok(())
++}
++
+ pub fn parse(bytes: &[u8], yaml: bool) -> Result<Value> {
+     let s = std::str::from_utf8(bytes).map_err(|_| "config_utf8")?;
+     if s.starts_with('\u{feff}') {
+         return Err("config_bom".into());
+     }
+     if yaml {
+-        // Anchors/aliases are forbidden even when expansion would be structurally valid.
+-        let mut quote = None;
+-        let mut escape = false;
+-        let mut comment = false;
+-        let mut boundary = true;
+-        for c in s.chars() {
+-            if c == '\n' {
+-                comment = false;
+-                boundary = true;
+-                continue;
+-            }
+-            if comment {
+-                continue;
+-            }
+-            if let Some(q) = quote {
+-                if escape {
+-                    escape = false;
+-                    continue;
+-                }
+-                if c == '\\' && q == '"' {
+-                    escape = true;
+-                } else if c == q {
+-                    quote = None;
+-                }
+-                continue;
+-            }
+-            if c == '"' || c == '\'' {
+-                quote = Some(c);
+-            } else if c == '#' && boundary {
+-                comment = true;
+-            } else if matches!(c, '&' | '*') && boundary {
+-                return Err("config_yaml_alias".into());
+-            }
+-            boundary = c.is_whitespace() || matches!(c, '[' | ',' | '{' | ':');
+-        }
++        reject_yaml_aliases(s)?;
+         Strict(0)
+             .deserialize(serde_yaml::Deserializer::from_str(s))
+             .map_err(|_| "config_schema".into())
+--- qa1/field-flow/field-flow-rust/tests/plc_catalog.rs
++++ rework1/field-flow/field-flow-rust/tests/plc_catalog.rs
+@@ -342,3 +342,99 @@
+         field_flow::config::Config::load(Path::new(p)).unwrap();
+     }
+ }
++
++#[test]
++fn yaml_scalar_boundaries_and_semantic_controls() {
++    use field_flow::config::catalog::parse;
++    let r = root("yaml_scalar_boundaries");
++    let good = [
++        "x: http://127.0.0.1:34880/it's\ny: 'http://127.0.0.1:34880/q?x=a & b/* !'\n",
++        "x: http://127.0.0.1:34880/it\"s\ny: \"literal &anchor *alias !\"\n",
++        "x: words with ' and \" inside plain scalars\ny: 'it''s & / * !'\n",
++        "x: plain\n  continuation ' &anchor *alias\ny: ok\n",
++        "x: |-\n  text ' \" &anchor *alias\ny: ok\n",
++        "x: >2-\n  text ' \" &anchor *alias\ny: ok\n",
++        "x: !!str 'literal &anchor *alias !'\ny: ok\n",
++        "x: 'multiline\n  &anchor *alias'\ny: ok # ' \" &anchor *alias\n",
++        "x: [http://host/it's, 'literal & / * !', {q: !!str 'v'}]\n",
++    ];
++    let mut vectors = Vec::new();
++    for s in good {
++        let control: serde_yaml::Value = serde_yaml::from_str(s).unwrap();
++        let expected = serde_json::to_value(control).unwrap();
++        assert_eq!(parse(s.as_bytes(), true).unwrap(), expected, "{s}");
++        let serialized = serde_yaml::to_string(&expected).unwrap();
++        assert_eq!(parse(serialized.as_bytes(), true).unwrap(), expected);
++        vectors.push(json!({"yaml":s,"expected":expected,"outcome":"accepted"}));
++    }
++    let bad = [
++        "x: http://host/it's\ny: &deps [one]\nz: *deps\n",
++        "x: http://host/it\"s\ny: &deps [one]\nz: *deps\n",
++        "x: 'it''s & text'\ny: &deps [one]\nz: *deps\n",
++        "x: \"it\\\"s & text\"\ny: &deps [one]\nz: *deps\n",
++        "x: words with ' and \" in plain\ny: &deps [one]\nz: *deps\n",
++        "x: plain\n  continuation ' *literal\ny: &deps [one]\nz: *deps\n",
++        "x: |-\n  &literal *literal ' \"\ny: &deps [one]\nz: *deps\n",
++        "x: !!str \"literal & text\"\ny: !!seq &deps [one]\nz: *deps\n",
++        "--- &document\nx: one\n",
++        "x: plain # ' \"\ny: &deps [one]\nz: *deps\n",
++    ];
++    for s in bad {
++        assert!(
++            serde_yaml::from_str::<serde_yaml::Value>(s).is_ok(),
++            "invalid test syntax: {s}"
++        );
++        assert_eq!(
++            parse(s.as_bytes(), true).unwrap_err(),
++            "config_yaml_alias",
++            "{s}"
++        );
++        vectors.push(json!({"yaml":s,"outcome":"config_yaml_alias"}));
++    }
++    // Preserve the existing standard/custom tag boundary; no blanket tag ban is introduced.
++    assert_eq!(
++        parse(b"x: !!str value\n", true).unwrap(),
++        json!({"x":"value"})
++    );
++    assert_eq!(
++        parse(b"x: !custom value\n", true).unwrap_err(),
++        "config_schema"
++    );
++    let path = config(&r);
++    let main = std::fs::read_to_string(&path).unwrap();
++    let header = main.split("flows:").next().unwrap();
++    let tail = main.split("\nhttp:").nth(1).unwrap();
++    let flows="flows:\n  - id: first\n    kind: demo01\n    business_name: first\n    interval_ms: 500\n    device_ids: [s7_a]\n    source_id: first_feed\n    get_url: http://127.0.0.1:34880/it's\n    input_max_age_ms: 10000\n    target: {device_id: s7_a, point_id: value}\n  - id: second\n    kind: demo01\n    business_name: second\n    interval_ms: 500\n    device_ids: [s7_a]\n    source_id: second_feed\n    get_url: 'http://127.0.0.1:34880/q?x=a & b/* !'\n    input_max_age_ms: 10000\n    target: {device_id: s7_a, point_id: result}";
++    let valid = format!("{header}{flows}\nhttp:{tail}");
++    std::fs::write(&path, &valid).unwrap();
++    let plain = Loaded::load(&path).unwrap();
++    let quoted = valid.replace(
++        "get_url: http://127.0.0.1:34880/it's",
++        "get_url: \"http://127.0.0.1:34880/it's\"",
++    );
++    std::fs::write(&path, &quoted).unwrap();
++    let equivalent = Loaded::load(&path).unwrap();
++    assert_eq!(
++        serde_json::to_value(plain.config).unwrap(),
++        serde_json::to_value(equivalent.config).unwrap()
++    );
++    let anchored = valid.replacen("device_ids: [s7_a]", "device_ids: &deps [s7_a]", 1);
++    let anchored = anchored.replacen("device_ids: [s7_a]", "device_ids: *deps", 1);
++    std::fs::write(&path, &anchored).unwrap();
++    assert_eq!(Loaded::load(&path).unwrap_err(), "config_yaml_alias");
++    let out = cli(&[
++        "run",
++        "--config",
++        path.to_str().unwrap(),
++        "--state-dir",
++        r.join("absent-state").to_str().unwrap(),
++    ]);
++    assert_eq!(out.status.code(), Some(2));
++    assert!(out.stdout.is_empty());
++    assert!(!r.join("absent-state").exists());
++    std::fs::write(
++        r.join("vectors.json"),
++        serde_json::to_vec_pretty(&vectors).unwrap(),
++    )
++    .unwrap();
++}
+--- qa1/field-flow/field-flow-rust/USER_GUIDE.md
++++ rework1/field-flow/field-flow-rust/USER_GUIDE.md
+@@ -440,7 +440,7 @@
+ ```
+ 
+ 
+-B checks the initial complete [12,1,56,34] round with this bounded, read-only check. Stop and preserve a deadline failure; do not refresh identity or enlarge TTL.
++B checks the initial complete [12,1,56,34] round with this bounded, read-only check. This manual walkthrough demonstrates the first health/state result and normal closure; it does not establish S1's at-least-ten identical post-issue GETs. Stop and preserve a deadline failure; do not refresh identity or enlarge TTL.
+ 
+ ```bash
+ python3 - "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" initial <<'PY_CHECK'
+@@ -485,7 +485,7 @@
+ printf 'fixture exit=%s\n' "$FF_FIXTURE_EXIT"
+ ```
+ 
+-B retains FF_PID and checks the report, stderr, exact PID and ports. Normal runtime and fixture exit0. final_memory is A.DB1=000c0001+12 A5 bytes, A.DB2=0038+14 A5 bytes, B.DB1=0022+14 A5 bytes; writes=[0,0]. Extract both driver PIDs from product.jsonl driver_ready.context (parse the string as JSON) and both native server PIDs from protocol.json.native_pids; run ps -p on each exact positive PID and require absence. Invalid arguments/permission errors are not absence.
++B retains FF_PID and checks the report, stderr, exact PID and ports. Normal runtime and fixture exit0. final_memory is A.DB1=000c0001+12 A5 bytes, A.DB2=0038+14 A5 bytes, B.DB1=0022+14 A5 bytes; writes=[0,0]. Extract both driver PIDs from `$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl` driver_ready.context (parse the string as JSON) and both native server PIDs from `$FF_RUN_ROOT/$FF_SCENE-fixture/protocol.json` native_pids. The bounded check below runs ps -p on each exact positive PID and requires absence. Invalid arguments/permission errors are not absence.
+ 
+ ```bash
+ cat "$FF_RUN_ROOT/$FF_SCENE-fixture/protocol.json"
+@@ -494,6 +494,27 @@
+ lsof -nP -iTCP:34102 -iTCP:34103 -iTCP:34112 -iTCP:34113 -iTCP:34880 -sTCP:LISTEN
+ ```
+ 
++```bash
++python3 - "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" "$FF_RUN_ROOT/$FF_SCENE-fixture/protocol.json" <<'PY_PIDS'
++import json, pathlib, subprocess, sys
++pids = set()
++for line in pathlib.Path(sys.argv[1]).read_text().splitlines():
++    row = json.loads(line)
++    context = row.get("context", {})
++    if isinstance(context, str): context = json.loads(context)
++    if row.get("event") == "driver_ready": pids.add(context["pid"])
++assert len(pids) == 2, pids
++report = json.loads(pathlib.Path(sys.argv[2]).read_text())
++assert len(report["native_pids"]) == 2
++pids.update(report["native_pids"])
++for pid in sorted(pids):
++    assert isinstance(pid, int) and pid > 0
++    check = subprocess.run(["ps", "-p", str(pid), "-o", "pid=,stat=,command="], capture_output=True, text=True)
++    assert check.returncode == 1 and not check.stdout and not check.stderr, (pid, check.stdout, check.stderr)
++print(json.dumps({"absent_driver_and_native_pids": sorted(pids)}))
++PY_PIDS
++```
++
+ 
+ Execute is a separate new scene. A keeps its own variables, rechecks the five free ports, then starts:
+ 
+@@ -513,3 +534,9 @@
+ Repeat initial check, one issue in A, issued check in B, B SIGINT/wait/inspect, A empty-line/exit, B report/PID/port checks. Expect confirmed1, exactly one A WriteVar and zero B writes. Only A.DB1 first INT changes to002a; ready/result/B and all neighboring A5 bytes remain. ACK plus local confirmed is not process completion. Preserve original state/logs/identities; do not reinitialize, change IDs or switch stores to evade unknown. An old confirmed store can use v2 only when all original typed semantics match. Paths/display/source hashes are not the effect hash; actual address/declared-size/business-name changes conflict. Replacing an old PLC id with a DS UUID does not promise seamless state inheritance.
+ 
+ The existing teaching01 exact wiring anchors remain valid for v1 in an independent tutorial copy; delivered source rejects teaching01. The original FF-005 complete hold_ack forced-stop limitation remains. This slice's B-off is the known bootstrap-force/nonzero fault class, not normal closure; ordinary/slow-connect scenes require real join/reap and zero forced stops. No Modbus transport, DS export, POST, real-device, Windows/Linux or deployment proof is claimed.
++
++For quantitative S1 acceptance, first stop both manual scenes and confirm the five ports are free, then run this bounded CLI matrix from FF_PROJECT. It includes S1 dry/execute and the other catalog isolation cases, checks at least ten identical post-issue body GETs within the original input age, and records the expected B-off failure separately. Use a new evidence directory; a first health result or nine GETs is not S1 acceptance.
++
++```bash
++FF004_EVIDENCE_ROOT="$FF_RUN_ROOT/s1-acceptance" cargo test --locked --features test-fixture --target-dir "$FF_RUN_ROOT/acceptance-target" --test multi_plc catalog_cli_matrix -- --nocapture --test-threads=1
++```
+--- qa1/field-flow/field-flow-rust/USER_GUIDE.zh-CN.md
++++ rework1/field-flow/field-flow-rust/USER_GUIDE.zh-CN.md
+@@ -440,7 +440,7 @@
+ ```
+ 
+ 
+-B用下面有截止、只读检查核对初始完整[12,1,56,34]。超时保留失败并停止，不刷新身份/放大TTL。
++B用下面有截止、只读检查核对初始完整[12,1,56,34]。此人工路径演示首个health/状态结果及正常关闭，不证明S1要求的issue后至少十次相同body GET。超时保留失败并停止，不刷新身份/放大TTL。
+ 
+ ```bash
+ python3 - "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" initial <<'PY_CHECK'
+@@ -485,7 +485,7 @@
+ printf 'fixture exit=%s\n' "$FF_FIXTURE_EXIT"
+ ```
+ 
+-B保留FF_PID，核报告、stderr、确切PID及端口。runtime和fixture正常exit0。final_memory为A.DB1=000c0001+12字节A5、A.DB2=0038+14字节A5、B.DB1=0022+14字节A5；writes=[0,0]。从product.jsonl的driver_ready.context提取两个driver PID（字符串再解JSON），从protocol.json.native_pids取两个native server PID；对每个确切正整数另跑ps -p确认不存在。参数错误/权限诊断不是PID消失。
++B保留FF_PID，核报告、stderr、确切PID及端口。runtime和fixture正常exit0。final_memory为A.DB1=000c0001+12字节A5、A.DB2=0038+14字节A5、B.DB1=0022+14字节A5；writes=[0,0]。从`$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl`的driver_ready.context提取两个driver PID（字符串再解JSON），从`$FF_RUN_ROOT/$FF_SCENE-fixture/protocol.json`的native_pids取两个native server PID；下面有界检查对每个确切正整数跑ps -p确认不存在。参数错误/权限诊断不是PID消失。
+ 
+ ```bash
+ cat "$FF_RUN_ROOT/$FF_SCENE-fixture/protocol.json"
+@@ -494,6 +494,27 @@
+ lsof -nP -iTCP:34102 -iTCP:34103 -iTCP:34112 -iTCP:34113 -iTCP:34880 -sTCP:LISTEN
+ ```
+ 
++```bash
++python3 - "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" "$FF_RUN_ROOT/$FF_SCENE-fixture/protocol.json" <<'PY_PIDS'
++import json, pathlib, subprocess, sys
++pids = set()
++for line in pathlib.Path(sys.argv[1]).read_text().splitlines():
++    row = json.loads(line)
++    context = row.get("context", {})
++    if isinstance(context, str): context = json.loads(context)
++    if row.get("event") == "driver_ready": pids.add(context["pid"])
++assert len(pids) == 2, pids
++report = json.loads(pathlib.Path(sys.argv[2]).read_text())
++assert len(report["native_pids"]) == 2
++pids.update(report["native_pids"])
++for pid in sorted(pids):
++    assert isinstance(pid, int) and pid > 0
++    check = subprocess.run(["ps", "-p", str(pid), "-o", "pid=,stat=,command="], capture_output=True, text=True)
++    assert check.returncode == 1 and not check.stdout and not check.stderr, (pid, check.stdout, check.stderr)
++print(json.dumps({"absent_driver_and_native_pids": sorted(pids)}))
++PY_PIDS
++```
++
+ 
+ execute为全新独立场景。A保持自身变量，重新检查五口空闲后启动：
+ 
+@@ -513,3 +534,9 @@
+ 重复initial检查、A一次issue、B issued检查、B SIGINT/wait/inspect、A空行/退出、B报告/PID/端口核对。预期confirmed1，A WriteVar恰1且B0；仅A.DB1首INT改002a，ready/result/B和全部邻A5保持。ACK+本地confirmed不是工艺完成。保留原状态/日志/身份，不重新init/更名/换库绕unknown。只有原typed语义逐项一致的confirmed库才可接v2。路径/显示/source hash不是效果hash；实际地址/声明大小/业务名变化会冲突。DS UUID替换旧PLC id不承诺无缝状态继承。
+ 
+ 原teaching01精确接线锚点仍用于独立教程副本的v1；正式源码拒绝teaching01。FF-005原完整hold_ack强收限制保留。本切片B-off为已知bootstrap force/非零故障分类，不是正常关闭；普通/慢连接场景必须真实join/reap且零forced。无Modbus通信、DS导出、POST、真实设备、Windows/Linux或部署证明。
++
++两个人工场景均停止并确认五口空闲后，从FF_PROJECT运行下面有界CLI矩阵来验收定量S1。它包含S1两模式及其他catalog隔离场景，核对原input age内至少十次相同的issue后body GET，并单列预期B-off故障。使用新证据目录；首个health结果或九次GET不算S1验收。
++
++```bash
++FF004_EVIDENCE_ROOT="$FF_RUN_ROOT/s1-acceptance" cargo test --locked --features test-fixture --target-dir "$FF_RUN_ROOT/acceptance-target" --test multi_plc catalog_cli_matrix -- --nocapture --test-threads=1
++```

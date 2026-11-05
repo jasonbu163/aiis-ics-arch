@@ -1,14 +1,16 @@
-# DAA–DS 阶段 B 联调操作手册（试行 r2）
+# DAA–DS 阶段 B 联调操作手册（已验收基线 r2）
 
 [English](JOINT_TEST_GUIDE.md) · [DAA-007 r2 spec](plans/DAA-007-ds-joint-validation-and-time-contract/spec.md) · [DAA](README.zh-CN.md) · [DS操作手册](../device-simulator/USER_GUIDE.zh-CN.md)
 
-**r2已精确批准；供P2冻结后的Owner操作，M01–M09全部not_run。** r1时间/存储整改保留，r2增量为源码.env/profile、普通UI显式读取准入、标准Tauri入口和YAML常驻链退役。实际自检/候选见[tasks](plans/DAA-007-ds-joint-validation-and-time-contract/tasks.md)，只有coordinator确认P2 freeze并交付手册后才操作原生窗口。预期不是测试结果，Owner观察、闭库RO对账、fresh Verification及最终验收分别记录。
+**本手册已于2026-10-30随DAA-007 r2在本次受控DS联调范围定稿并获Owner最终验收。** [tasks](plans/DAA-007-ds-joint-validation-and-time-contract/tasks.md)保留实际开发/Owner报告/原账，[checklist](plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2)记录AC01–AC22独立核验、完整8590份样本/4295轮重开比较及阶段B接受。早期checkpoint缺失、15:27来源未明仍是历史限制。本批次已有配置与历史，不按空白模板重建或清库；步骤供后续明确选定的试验参考，不要求重复已完成工作。
 
 **升级限制。** 新版仅对真正新空profile初始化上海时间双库v2。旧UTC v1、缺失/未知合同写前只读拒绝，原配置/历史/raw/SHA保留，不自动迁移或旁建。原profile须用原兼容版本，迁移/降级另批。local-acquisition-v1只是目录定位。本轮只沿用原Owner合成profile，不用默认目录，不创建第三套profile，不复制DEV fixture/测试库。
 
 ## P00｜一次性配置与运行前核对
 
-正式源码 `/Users/jason/Desktop/DreamCode/aiis-ics-arch`，HEAD=`1fa1ce50a521ebd51c2c43389db011a76f2d74bf`（dirty，本任务增量独立记录），r2候选以tasks freeze清单为准；运行中无热改。原RUN_ROOT=`/private/tmp/daa-007-r1-exec-e6s14xue/owner-joint-run`。B0仅确认两个原profile仍为空、非symlink且未开库。Owner启动前再次确认归属/状态和15191/15194/30102/30103端口；冲突停步，不kill未知进程、不改端口求过。
+2026-10-28另批DIRECT增量已更新M02：DS自动关联唯一UDT依赖，重名时选择来源，缺失时给出字段/类型提示，并区分业务错误与IPC状态。此增量位于r2冻结之后，原清单保持历史事实；接续使用含此修复的正式源码及单独记录的增量清单/自检，不把它倒记为原r2检查，也不替代原生联调、同库对账与独立核验。
+
+正式源码 `/Users/jason/Desktop/DreamCode/aiis-ics-arch`；原r2冻结HEAD=`1fa1ce50a521ebd51c2c43389db011a76f2d74bf`，2026-10-30对账HEAD=`8030dbb3401ac6d1cf8bea46c81cfeff9e8e073b`（dirty，精确增量及当前SHA见tasks）。原冻结检查与后续DIRECT增量分开，运行中无热改。原RUN_ROOT=`/private/tmp/daa-007-r1-exec-e6s14xue/owner-joint-run`。B0当时只确认两个原profile为空、非symlink且未开库；现已保存Owner运行数据，须保留。另有明确启动指示时，Owner先再次确认归属/状态和15191/15194/30102/30103端口；冲突停步，不kill未知进程、不改端口求过。
 
 DS当前版本、DS-001 r1及ARCH-AW-005 r5已于2026-10-27被Owner接受，见[既有接受记录](../device-simulator/plans/DS-001-policy-table-and-usability/spec.md#owner-acceptance-ds001)。旧QA4/DS-001/DIRECT与本r2 DS bootstrap增量分别保留，DS独立QA例外不转移至本任务。r1规划227 DS/158 DAA/12 core的漂移与只读归因见tasks历史；本r2按新before/51实现清单/保护审计固定候选，不用旧pass代替新delta。
 
@@ -32,13 +34,13 @@ DS_PROFILE_DIR=/private/tmp/daa-007-r1-exec-e6s14xue/owner-joint-run/ds-profile
 
 普通native无需.env读授权。Owner可从自有.env一次删除旧DAA_PLC_READ_ALLOWED或理解其true/false均忽略。高级同名**进程**键确实缺失才默认允许后续UI动作；合法true不额外禁止，false/空/非法/不可解码均拒绝读，文件true不能覆盖deny。此次普通联调要求记录进程读键未设置；如有无意继承覆盖，Owner按需一次 `unset DAA_PLC_READ_ALLOWED`，不以文件true修复，不每次带长命令。保留停止初态与启用/地址/激活/容量/日志/时间保护。
 
-| 运行前记录 | 待Owner实际确认 |
-| --- | --- |
-| 版本/驱动 | 新freeze候选；DAA Tauri build.features=[rust-snap7-driver]、local-validation关；DS native-s7、test-automation关 |
-| 配置来源 | 两个根.env实际profile解析路径及来源，普通进程读键未设置；无默认/旧库误选 |
-| 归属/端口 | 原Owner两个profile仍符合P00前置，15191/15194/30102/30103无冲突 |
-| 初态 | DS/DAA无连接、无运行/启采；空DAA无PLC_1，无新迁入receipt |
-| 数据保护 | 真实现场/默认库不操作；旧UTC门禁与v2/上海时间证据见tasks，不让Owner试开旧库 |
+| 运行前核对模板 | 实际运行记录归tasks                                                                                          |
+| ---------- | --------------------------------------------------------------------------------------------------------------- |
+| 版本/驱动  | 新freeze候选；DAA Tauri build.features=[rust-snap7-driver]、local-validation关；DS native-s7、test-automation关 |
+| 配置来源   | 两个根.env实际profile解析路径及来源，普通进程读键未设置；无默认/旧库误选                                        |
+| 归属/端口  | 原Owner两个profile仍符合P00前置，15191/15194/30102/30103无冲突                                                  |
+| 初态       | DS/DAA无连接、无运行/启采；空DAA无PLC_1，无新迁入receipt                                                        |
+| 数据保护   | 真实现场/默认库不操作；旧UTC门禁与v2/上海时间证据见tasks，不让Owner试开旧库                                     |
 
 ## M01｜正常短命令启动两个桌面程序
 
@@ -64,24 +66,24 @@ DAA的Tauri配置统一携带已有rust-snap7-driver（Snap7为S7通信编译实
 
 先完成 A 的配置及静态核对，B 可在 M06 时再建立，避免第一次同时操作两台。
 
-1. DS“配置中心 → 实例”：新建 `B007-A`，端点 `127.0.0.1:30102`；rack `0`、slot `1`、Calling TSAP 十进制 `256`（0x0100），对应 Called TSAP `257`（0x0101），连接/握手上限保持 `16/4`。**保留编辑 → 保存候选**。
+1. DS“配置中心 → 实例”：新建 `B007-A`，端点 `127.0.0.1:30102`；rack `0`、slot `1`、Calling TSAP 十进制 `256`（0x0100），对应 Called TSAP `257`（0x0101），连接/握手上限保持 `16/4`。**完成编辑 → 保存草稿**。
 2. “DB 点位”选择该实例，按 [DS 手册 §3](../device-simulator/USER_GUIDE.zh-CN.md#3-多-db--udt-只读导入)同时选下列只读来源，扫描后只勾 `Alpha` 和 `Beta`：
    - `automation-world/data-acquisition-agent/src-tauri/tests/fixtures/source-import-multi-db/multi.db`
-   - 同目录 `types.udt`；Alpha 不依赖 UDT，Beta 的闭包仅选择 `Measure`。
+   - 同目录 `types.udt`；扫描会自动关联依赖：Alpha 无需 UDT，Beta 应已选中 `Measure`。首次导入无需先创建DB；同名定义冲突时才选择来源，缺少定义时按行内字段/类型提示补选文件。
 3. Alpha 填 DB `71`，Beta 填 DB `88`；预览并确认导入。每 DB 分别“预览标准地址 → 确认”，再核命名。不要选择 Gamma/Delta/Epsilon/Zeta，不修改来源文件。
-4. 在策略页逐点设置下表，点启用、客户端读取全部允许；未写明的写入禁止。DS 初值必须显式设置，`count := 7` 及 `BEGIN` 不作为导入初值。保存并确认所选初值/策略。表内技术名为预期候选，两端按地址核对，不要求 UUID 相同。
+4. 在策略页逐点设置下表，点启用、客户端读取全部允许；未写明的写入禁止。DS 初值必须显式设置，`count := 7` 及 `BEGIN` 不作为导入初值。保存草稿并确认所选初值/策略。表内技术名为预期候选，两端按地址核对，不要求 UUID 相同。
 
-| DB / 长度 | 原路径 / 类型 / 地址 | 技术名 | A 的 DS 初值 | B 的 DS 初值 | 策略 |
-| --- | --- | --- | --- | --- | --- |
-| 71 / 4 B | ready / BOOL / 0.0 | DB71_ready_Bool | false | false | 布尔翻转、owner规则；翻转半周期1000ms（完整周期2000ms），通用periodMs填2000、phase=0；三类写入禁止 |
-| 71 / 4 B | count / INT / 2 | DB71_count_Int | 101 | 202 | 保持、owner界面、界面普通写允许 |
-| 88 / 8 B | unit.running / BOOL / 0.0 | DB88_unit_running_Bool | false | true | 保持、owner无、三类写入禁止 |
-| 88 / 8 B | unit.value / REAL / 2 | DB88_unit_value_Real | 12.5 | 25.0 | 保持、owner界面、界面普通写允许 |
-| 88 / 8 B | bytes[3] / BYTE / 6 | DB88_B6_Byte | 18 | 86 | 保持、owner无、三类写入禁止 |
-| 88 / 8 B | bytes[4] / BYTE / 7 | DB88_B7_Byte | 52 | 120 | 保持、owner无、三类写入禁止 |
+| DB / 长度 | 原路径 / 类型 / 地址      | 技术名                 | A 的 DS 初值 | B 的 DS 初值 | 策略                                                                                               |
+| --------- | ------------------------- | ---------------------- | ------------ | ------------ | -------------------------------------------------------------------------------------------------- |
+| 71 / 4 B  | ready / BOOL / 0.0        | DB71_ready_Bool        | false        | false        | 布尔翻转、owner规则；翻转半周期1000ms（完整周期2000ms），通用periodMs填2000、phase=0；三类写入禁止 |
+| 71 / 4 B  | count / INT / 2           | DB71_count_Int         | 101          | 202          | 保持、owner界面、界面普通写允许                                                                    |
+| 88 / 8 B  | unit.running / BOOL / 0.0 | DB88_unit_running_Bool | false        | true         | 保持、owner无、三类写入禁止                                                                        |
+| 88 / 8 B  | unit.value / REAL / 2     | DB88_unit_value_Real   | 12.5         | 25.0         | 保持、owner界面、界面普通写允许                                                                    |
+| 88 / 8 B  | bytes[3] / BYTE / 6       | DB88_B6_Byte           | 18           | 86           | 保持、owner无、三类写入禁止                                                                        |
+| 88 / 8 B  | bytes[4] / BYTE / 7       | DB88_B7_Byte           | 52           | 120          | 保持、owner无、三类写入禁止                                                                        |
 
-5. toggle按`halfPeriodMs`每半周期翻转，界面没有`base`字段；false是初始化值，不是持续规则参数。其余规则字段保留既定合法默认值。DS“实例”：选最新保存版本 → 预览加载与保值 → 核对六点/DB号/长度/初值 → 确认加载并保持停止。到“工作台”显式启动 A；随后**暂停规则**，保持 S7 服务可读。
-6. “在线值”核六点。count/REAL/BYTE 应等于本次加载的表中值；ready 启动后可能已翻转，以暂停后的实际快照为准。记录 loaded 版本，保存候选不等于已加载。
+5. toggle按`halfPeriodMs`每半周期翻转，界面没有`base`字段；false是初始化值，不是持续规则参数。其余规则字段保留既定合法默认值。DS先点“保存草稿 → 保存为版本”，核对将生成的版本号及待清理清单后明确确认（取消不发布/清理，内容相同不新增）。再到“实例 → 配置版本与加载”，目标选A，在对应版本行点“预览加载” → 核对六点/DB号/长度/初值 → 确认加载并保持停止。到“工作台”显式启动 A；随后**暂停规则**，保持 S7 服务可读。
+6. “在线值”核六点。count/REAL/BYTE 应等于本次加载的表中值；ready 启动后可能已翻转，以暂停后的实际快照为准。记录 loaded 版本；保存草稿、保存为版本、加载及启动各自独立。版本是整个DS工作区快照，默认保留最近5份加全部受保护旧版；现有v14等不会在启动或此次开发中被裁剪。
 
 失败时保留错误：地址/命名未确认先回相应步骤；策略未确认先核所选点；读被拒绝先核客户端读取和启用，不开放无关写权限。
 
@@ -139,32 +141,32 @@ DAA的Tauri配置统一携带已有rust-snap7-driver（Snap7为S7通信编译实
 1. DAA 两台都暂停采集、断开；等 DS 两台 DAA 会话释放。确认没有未保存编辑，前置 DAA 窗口，Cmd+Q 正常退出一次；不要强杀。回复“**M09首次退出完成**”，先保持DAA关闭；协调者只读记录首次闭库基线后会通知可重开，用于证明下一步未改旧样本，不要求你重做采集。
 2. 收到首次对账已记录的通知后，用 M01 **相同.env和原Owner profile** 重开 DAA，不重新生成 env 或profile。预期两台配置、六点各自分组、历史及所记 sampleId/SHA 保留；两台均未连接、未启采。历史表列宽记忆仍在，恢复默认后正常。
 3. 查询历史、打开所记两份样本，随后再正常退出 DAA，供协调者对隔离双库、日志和原字节做只读对账。DS 两台停止后正常退出；不要求反复三轮关窗。
-4. 保留本批次数据直到问题核对及最终验收。协调者先归档必要证据，确认无运行/后续依赖后，只清本任务自有数据；不删默认目录、不清共享target、不删除原DB/UDT。
+4. 保留本批次数据直到问题核对及最终验收。协调者先归档必要证据，仅回收确认无运行/后续/证据依赖的临时构建与辅助资源；本批次Owner profile和SQLite配置/历史保留，不删默认目录、不清共享target、不删除原DB/UDT。
 
 M09另记录实际解析profile/来源、相同r2候选/features、普通进程读键未设置及停止初态。首次退出后等待DEV只读checkpoint通知，再同profile一次重开；不重复M02–M08。
 
 ## 常见阻断
 
-| 现象 | 先核对 |
-| --- | --- |
-| `driver_unavailable` | 核对普通pnpm tauri dev所用正式候选及Tauri build.features，local-validation关闭 |
-| 连接失败/持续重连 | DS是否已加载并启动，所选PLC、端口、rack/slot和TSAP是否一致；保存候选本身不启动监听 |
-| `bad_read` / 值为null | 同号DB是否实际存在，地址和长度、点启用及客户端读取权限；先暂停规则对照实际loaded配置 |
-| 激活按钮不可用 | 当前弹窗、未保存草稿、点位组、pending技术名、地址确认及错误提示；表头勾选不是启采 |
-| 旧时间合同/未知schema提示 | 保留原库，停止使用该profile做新版联调，回P00核新目录；不清库、不改时间、不改schema |
+| 现象                      | 先核对                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------ |
+| `driver_unavailable`    | 核对普通pnpm tauri dev所用正式候选及Tauri build.features，local-validation关闭       |
+| 连接失败/持续重连         | DS是否已加载并启动，所选PLC、端口、rack/slot和TSAP是否一致；保存草稿/保存为版本均不启动监听   |
+| `bad_read` / 值为null   | 同号DB是否实际存在，地址和长度、点启用及客户端读取权限；先暂停规则对照实际loaded配置 |
+| 激活按钮不可用            | 当前弹窗、未保存草稿、点位组、pending技术名、地址确认及错误提示；表头勾选不是启采    |
+| 旧时间合同/未知schema提示 | 保留原库，停止使用该profile做新版联调，回P00核新目录；不清库、不改时间、不改schema   |
 
 ## 反馈记录与定稿
 
-填写实际结果；未操作写 `not_run`，受阻写 `blocked`，记录阶段编号、页面、按钮、原输入、实际提示及大致时间。可反馈文字，截图按需要提供，不要求替工具编造结果。
+填写实际结果；未操作写 `not_run`，受阻写 `blocked`，记录阶段编号、页面、按钮、原输入、实际提示及大致时间。可反馈文字，截图按需要提供，不要求替工具编造结果。下表是可复用的空白模板，初始值不代表2026-10-30已登记运行的当前状态；实际权威事实仍归tasks。
 
-| 阶段 | 操作人/批次 | 实际结果（初始 not_run） | 问题/复核范围 |
-| --- | --- | --- | --- |
-| P00 | 待填 | not_run | 版本、DS基线、路径及端口 |
-| M01–M03 | 待填 | not_run | 启动、DS配置、DAA配置 |
-| M04–M05 | 待填 | not_run | 静态/动态值、周期 |
-| M06–M07 | 待填 | not_run | 多PLC、连接与恢复 |
-| M08–M09 | 待填 | not_run | 时间、历史、正常重开 |
+| 阶段     | 操作人/批次 | 实际结果（初始 not_run） | 问题/复核范围            |
+| -------- | ----------- | ------------------------ | ------------------------ |
+| P00      | 待填        | not_run                  | 版本、DS基线、路径及端口 |
+| M01–M03 | 待填        | not_run                  | 启动、DS配置、DAA配置    |
+| M04–M05 | 待填        | not_run                  | 静态/动态值、周期        |
+| M06–M07 | 待填        | not_run                  | 多PLC、连接与恢复        |
+| M08–M09 | 待填        | not_run                  | 时间、历史、正常重开     |
 
-先以试行版走一次，问题只修受影响项并补录复核。Development 自检、Owner 原生观察、退出后只读对账、新 fresh-context Verification 和 Owner 最终接受分别记录；独立核验不伪称由工具操作了窗口，也不重复整套 DS/DAA 压测。手册步骤实测可用并经 Owner 确认后才定稿。
+本次必要受影响步骤已实测并获Owner最终确认，手册在上述受控范围定稿。Development自检、Owner原生观察、只读原账、fresh Verification及最终接受分别保留，不互相代替。空白结果表仅用于将来明确选定的批次，不覆盖本次实际记录。
 
-DAA-007 接受不自动代验 DS-001 或旧 DAA 任务；阶段 B 汇总关闭需相应有限基线与本闭环证据、Owner明确接受。阶段 C 可靠上报、后端/SMA、真实 PLC、生产数据库/API和现场切换继续另立范围。
+Human Owner本次已分别验收DAA-002 r2、DAA-003 r1、DAA-004 r1与DAA-007 r2，并确认阶段B在本次受控DS范围完成；不是由某一任务代验其它任务，原DS接受保持独立。已有SQLite配置、历史和原联调profile保留；阶段C、自动启动策略、后端/SMA、真实PLC及生产现场另行推进，本次不启动。

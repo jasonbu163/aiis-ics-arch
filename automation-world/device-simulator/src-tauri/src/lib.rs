@@ -1,4 +1,4 @@
-//! 原生薄壳：正常DS profile+16白名单IPC；dirty确认后走真实Window.close与有界shutdown。
+//! 原生薄壳：正常DS profile与白名单IPC；dirty确认后走真实Window.close与有界shutdown。
 mod app;
 mod commands;
 mod config;
@@ -87,6 +87,11 @@ pub fn run() {
             commands::runtime::ds_get_runtime_snapshot,
             commands::configuration::ds_get_configuration,
             commands::configuration::ds_save_configuration,
+            commands::configuration::ds_preview_publish_revision,
+            commands::configuration::ds_publish_revision,
+            commands::configuration::ds_preview_delete_revision,
+            commands::configuration::ds_delete_revisions,
+            commands::configuration::ds_cancel_preview,
             commands::import::ds_preview_import,
             commands::import::ds_confirm_import,
             commands::import::ds_preview_layout,

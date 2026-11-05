@@ -1,0 +1,5 @@
+Usage: run-mysql-tests.sh prepare|test|cleanup --run-root /private/tmp/arch-be008-run-<nonce>
+prepare: requires a new, empty, user-owned 0700 directory. Creates only the approved resources.
+test: requires matching manifest/resource labels, BE008_TOOL_ROOT and BE008_DOTNET.
+cleanup: coordinator only, after evidence persistence and explicit resource ownership review.
+Uses fixed project/container/network/volume, loopback:13388, database arch_be008_plan.

@@ -59,6 +59,10 @@ def _business_error(
     return BusinessException(error_code, code=code)
 
 
+from app.performance.crud.async_integration import storage_context
+from common.integration.storage import to_storage_time as storage_time
+
+
 class PerformanceLineageService:
     """实绩 transform / lineage 服务。"""
 
@@ -67,6 +71,7 @@ class PerformanceLineageService:
         db: AsyncSession,
         performance_id: int,
     ) -> Performance:
+        context=await storage_context(db)
         result = await db.execute(
             select(Performance)
             .where(Performance.id == performance_id)
@@ -82,6 +87,7 @@ class PerformanceLineageService:
         db: AsyncSession,
         performance_id: int,
     ) -> Performance:
+        context=await storage_context(db)
         result = await db.execute(select(Performance).where(Performance.id == performance_id))
         performance = result.scalar_one_or_none()
         if performance is None:
@@ -93,6 +99,7 @@ class PerformanceLineageService:
         db: AsyncSession,
         performance_id: int,
     ) -> Decimal:
+        context=await storage_context(db)
         committed, _, _ = await PerformanceLineageService._source_consumption(db, performance_id)
         return committed
 
@@ -101,6 +108,7 @@ class PerformanceLineageService:
         db: AsyncSession,
         performance_id: int,
     ) -> tuple[Decimal, int | None, str | None]:
+        context=await storage_context(db)
         result = await db.execute(
             select(
                 PerformanceLineage.allocated_weight,
@@ -130,6 +138,7 @@ class PerformanceLineageService:
         db: AsyncSession,
         performance: Performance,
     ) -> tuple[Decimal, Decimal]:
+        context=await storage_context(db)
         if performance.effective_weight is None:
             raise _business_error(PerformanceLineageErrorCode.PERFORMANCE_EFFECTIVE_WEIGHT_REQUIRED)
         effective = _quantize(performance.effective_weight)
@@ -184,6 +193,7 @@ class PerformanceLineageService:
         db: AsyncSession,
         transform_id: int,
     ) -> PerformanceTransform:
+        context=await storage_context(db)
         result = await db.execute(
             select(PerformanceTransform)
             .options(selectinload(PerformanceTransform.lineage_entries))
@@ -199,6 +209,7 @@ class PerformanceLineageService:
 
     @staticmethod
     async def _lineage_graph(db: AsyncSession) -> dict[int, set[int]]:
+        context=await storage_context(db)
         result = await db.execute(
             select(
                 PerformanceLineage.transform_id,
@@ -243,6 +254,7 @@ class PerformanceLineageService:
         source_ids: set[int],
         target_ids: set[int],
     ) -> None:
+        context=await storage_context(db)
         if not target_ids:
             return
         if source_ids & target_ids:
@@ -260,6 +272,7 @@ class PerformanceLineageService:
         data: SplitTransformCreateIn,
         operator_id: int | None,
     ) -> PerformanceTransform:
+        context=await storage_context(db)
         try:
             if len(data.targets) < 2:
                 raise _business_error(PerformanceLineageErrorCode.PERFORMANCE_TRANSFORM_INVALID_CARDINALITY)
@@ -335,6 +348,9 @@ class PerformanceLineageService:
                     remark=_clean_text(target_data.remark),
                     record_source=PerformanceRecordSource.SPLIT_GENERATED.value,
                 )
+                if context:
+                    target.created_at=storage_time(context[1])
+                    target.updated_at=storage_time(context[1])
                 db.add(target)
                 await db.flush()
                 db.add(
@@ -357,6 +373,7 @@ class PerformanceLineageService:
         data: MergeTransformCreateIn,
         operator_id: int | None,
     ) -> PerformanceTransform:
+        context=await storage_context(db)
         try:
             source_ids = [source.performance_id for source in data.sources]
             if len(source_ids) < 2:
@@ -444,6 +461,9 @@ class PerformanceLineageService:
                 remark=_clean_text(data.target.remark),
                 record_source=PerformanceRecordSource.MERGE_GENERATED.value,
             )
+            if context:
+                target.created_at=storage_time(context[1])
+                target.updated_at=storage_time(context[1])
             db.add(target)
             await db.flush()
             db.add(
@@ -467,6 +487,7 @@ class PerformanceLineageService:
         data: EffectiveWeightOverrideIn,
         operator_id: int | None,
     ) -> Performance:
+        context=await storage_context(db)
         try:
             performance = await PerformanceLineageService._get_performance_for_update(
                 db,
@@ -477,7 +498,9 @@ class PerformanceLineageService:
             performance.effective_weight = effective_weight
             performance.effective_weight_source = PerformanceEffectiveWeightSource.MANUAL_OVERRIDE_WEIGHT.value
             performance.manual_override_by_id = operator_id
-            performance.manual_override_at = datetime.now()
+            performance.manual_override_at = storage_time(context[1]) if context else datetime.now()
+            if context:
+                performance.updated_at=storage_time(context[1])
             performance.manual_override_reason = _clean_text(data.reason)
             performance.weight = effective_weight
             await db.commit()
@@ -492,6 +515,7 @@ class PerformanceLineageService:
         db: AsyncSession,
         transform_id: int,
     ) -> PerformanceTransform:
+        context=await storage_context(db)
         return await PerformanceLineageService._load_transform(db, transform_id)
 
     @staticmethod
@@ -499,6 +523,7 @@ class PerformanceLineageService:
         db: AsyncSession,
         performance_id: int,
     ) -> dict[str, Decimal | int | bool | None | str]:
+        context=await storage_context(db)
         performance = await PerformanceLineageService._get_performance(
             db,
             performance_id,

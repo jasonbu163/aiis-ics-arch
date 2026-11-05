@@ -1,0 +1,71 @@
+{
+  "scope": "completed rework2 raw outputs; source guide snippets excluded",
+  "self_stdout_redirected": false,
+  "files": [
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/copy-fixture-build.txt",
+      "bytes": 514,
+      "sha256": "88309c9d8e7ea2a5b58628d3ae65a8d964dba6755e1f57ce25cd81b1c7d61e66"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/copy-product-build.txt",
+      "bytes": 514,
+      "sha256": "88309c9d8e7ea2a5b58628d3ae65a8d964dba6755e1f57ce25cd81b1c7d61e66"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/copy-tests.txt",
+      "bytes": 14778,
+      "sha256": "e7ba375a10887c69fb6649af233dbfa94e65942842cd122fa8aba777970a733d"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/fixture-build.txt",
+      "bytes": 539,
+      "sha256": "d497e6a9db543740793a35b11c3fed569a861f6430d84f5db3c6b9b83179156f"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/full.txt",
+      "bytes": 557674,
+      "sha256": "b907c5add45ce6fda03aa2cf63a6987c23c850acd7ddd60b1da3fc4066912052"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/manual-copy.txt",
+      "bytes": 186,
+      "sha256": "22342b9226707282cb74a05983ad66de14ecc0945253910bca14526eab1d1f70"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/manual-formal.txt",
+      "bytes": 187,
+      "sha256": "32a665e19934e5f36f8bd4b6a59e355ec7d40d40b4683d3218a7cdfa22736f51"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/manuals.txt",
+      "bytes": 922,
+      "sha256": "9c7ec7b9e080f3d6412a0418cd4ec861ac8877bcfd2f91ac30f2ea5f3be7eb86"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/product-build.txt",
+      "bytes": 539,
+      "sha256": "d497e6a9db543740793a35b11c3fed569a861f6430d84f5db3c6b9b83179156f"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/repro-after.txt",
+      "bytes": 55,
+      "sha256": "89f8d4e6db7f3b6608d2fb3f21bb5b60b41f376278c749c2e140b2e429a09f2d"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/targeted.txt",
+      "bytes": 109,
+      "sha256": "6ca75bd4b6f1baf44003f4172c062dd8134f5e1cfb743802abfaa41dbb61d95e"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/targeted2.txt",
+      "bytes": 15338,
+      "sha256": "c6a9ea23125e2b93fe5f023d413e84618d143fe4192e31250df2a432f2e52625"
+    },
+    {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/targeted3.txt",
+      "bytes": 14804,
+      "sha256": "305d5360b42d0eb9c8f58e5a30e45d092c6c89a3c56952169e6a7cf762ebceea"
+    }
+  ]
+}

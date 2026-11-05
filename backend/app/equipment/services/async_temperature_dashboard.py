@@ -1,8 +1,13 @@
 """BE003完整样本只读dashboard窄adapter；不改原GET/POST。"""
+from app.equipment.crud.async_integration import storage_context
+from app.equipment.integration_storage import legacy_view
 from app.equipment.crud.async_temperature_sample import list_samples
 from app.equipment.temperature_sample_domain import utc_milliseconds, json_number
 async def read_dashboard(db, equipment_id, record_id=None, limit=100):
+    context=await storage_context(db)
     records = await list_samples(db, equipment_id, record_id, limit)
+    if context:
+        records=[legacy_view(row,context[0]) for row in records]
     zones = [dict(set_temp=json_number(getattr(records[0], f"zone{i}_set")), actual_temp=json_number(getattr(records[0], f"zone{i}_act"))) for i in range(1,6)] if records else []
     history = [dict(record_id=r.id, sampled_at=utc_milliseconds(r.sampled_at), time=utc_milliseconds(r.sampled_at),
         **{f"zone{i}":json_number(getattr(r, f"zone{i}_act")) for i in range(1,6)}) for r in reversed(records)]

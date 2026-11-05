@@ -1,0 +1,26 @@
+{
+  "formal-product": {
+    "binary": "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+    "sha256": "06210b74b6b76e127b86b5beb1aebd9420f2e7c922c79c17141b50eff48bd412",
+    "source": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "test_fixture_feature": false
+  },
+  "formal-fixture": {
+    "binary": "/private/tmp/ff-004-r2-dev-IVyzcc/fixture/release/ff-fixture",
+    "sha256": "af813f0d5e136f912bcc7717b0cc63fc82000e543d7c4e258e8b000711992c36",
+    "source": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+    "test_fixture_feature": true
+  },
+  "copy-product": {
+    "binary": "/private/tmp/ff-004-r2-dev-IVyzcc/copy-product/release/field-flow",
+    "sha256": "0d6506e892f5d5ac3b21e5d83f7d8fb279df3ced42dbea60b1874b083cca69ea",
+    "source": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/copy",
+    "test_fixture_feature": false
+  },
+  "copy-fixture": {
+    "binary": "/private/tmp/ff-004-r2-dev-IVyzcc/copy-fixture/release/ff-fixture",
+    "sha256": "af813f0d5e136f912bcc7717b0cc63fc82000e543d7c4e258e8b000711992c36",
+    "source": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/copy",
+    "test_fixture_feature": true
+  }
+}

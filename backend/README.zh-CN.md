@@ -153,7 +153,7 @@ Bootstrap 继续是显式账号维护动作：数组不会创建/删除账号或
 
 ## 配置逐项说明
 
-以下表格覆盖三份公开 env 示例的相同 69 个活动 key。源码缺省来自 Settings；“必填”表示缺失会在配置加载时失败。模板列列出 host/dev/prod 的公开值差异（相同值合并），口令/秘密只标为 placeholder；公开模板不是本机实际配置。bool 使用 True/False，字符串可单/双引号包裹；JSON 数组用外层单引号、内部双引号。
+以下表格描述历史BE003的69项配置面。当前公开example共91项：原69+BE006映射scope3+A0集成配置12+BE009事实配置4+r2采用路径3（逐项采用路径说明见下文）。源码缺省来自 Settings；“必填”表示缺失会在配置加载时失败。模板列列出 host/dev/prod 的公开值差异（相同值合并），口令/秘密只标为 placeholder；公开模板不是本机实际配置。bool 使用 True/False，字符串可单/双引号包裹；JSON 数组用外层单引号、内部双引号。
 
 ### 应用/API
 
@@ -309,7 +309,7 @@ GET `/monitor/realtime/latest`，operator 获得的是这两个事实查询。`s
 | --- | --- | --- | --- |
 | `EQUIPMENT_TEMPERATURE_PILOT_ID` | 新样本API唯一精确业务设备key；空/非法值拒绝所有caller含admin。模块本地BaseSettings，重启采用。 (str) | `''` | `''` |
 
-新增后每公开env example共69项，原十一组英文标题及全部旧值/grants保留。合成文档使用temperature-pilot-01。源码/冻结/Docker dotenv路径沿既有公开helper；process覆盖dotenv、显式注入覆盖process。该key不授予permission、不改旧GET。[独立MySQL入口](tests_mysql/test_equipment_temperature.py)只准备另批可丢弃验证，不使用共享破坏性conftest。
+BE003历史检查点新增后每公开env example共69项；当前91项分组见下文，原十一组英文标题及全部旧值/grants保留。合成文档使用temperature-pilot-01。源码/冻结/Docker dotenv路径沿既有公开helper；process覆盖dotenv、显式注入覆盖process。该key不授予permission、不改旧GET。[独立MySQL入口](tests_mysql/test_equipment_temperature.py)只准备另批可丢弃验证，不使用共享破坏性conftest。
 
 
 ## HTTP映射业务观测
@@ -330,3 +330,26 @@ downgrade遇到HTTP数据、旧非空指标的NULL或不能无损恢复的非零
 HTTP采用带时区的UTC毫秒来源时间、严格camelCase JSON和稳定sampleId。省略观测保存NULL，显式null拒绝。
 Numeric保持声明的小数位；FLOAT采用有界binary32规范化，相对误差≤1e-6、绝对误差≤max(1e-6,abs(input)×1e-6)，非零下溢拒绝。
 回执与业务同事务提交，仅命名unique竞争有界恢复；提交未知返回可重试失败，客户端保持同sampleId。不伪造PLC来源。
+
+
+## 匿名业务集成源码
+
+[ARCH-BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/spec.md)把八路typed匿名POST接入owner本地async Service/CRUD及既有业务表。[闭合provider](../contracts/published/http-api/business-integration-v1/README.zh-CN.md)定义严格JSON number、typed成功/错误壳、双摘要、存在集合/单位与永久最小回执。旧JWT/admin/permission/scope及Projection事务/cursor/audit边界保留。producer/source只是准入声明，不是身份认证。
+
+三个开关默认关闭、设备/producer列表默认空、storage profile默认unadopted。默认旧入口直接使用原时间路径，不读取凭据或探库；新入口通过scope后仍在数据库依赖前503。shanghai-v1同时要求显式外部adopted凭据及每事务匹配UUID/schema/revision/时钟。未知profile、unadopted残留非空路径、缺失/非法凭据、错目标均拒绝写入，单改profile不能就绪。
+
+| Key | 用途/类型 | 源码默认 | 公开example |
+| --- | --- | --- | --- |
+| EQUIPMENT_INTEGRATION_ADOPTION_FILE | equipment业务时间凭据的外部绝对路径；空表示未采用。str | 空 | `""` |
+| PERFORMANCE_INTEGRATION_ADOPTION_FILE | 生产/过程采用凭据外部绝对路径，包含人工时间basis。str | 空 | `""` |
+| MONITOR_INTEGRATION_ADOPTION_FILE | 业务曲线采用凭据外部绝对路径，与事实/raw/latest独立。str | 空 | `""` |
+
+固定兼容面为13张旧表41个日历时间列；aware保留同瞬间，naive需要明确有限basis证据。DATE/耗时、旧UTC wire/摘要/JSON结果和人工0优先级保持。四张新表仅使用显式上海DATETIME(3)，无自动UTC默认。唯一迁移源码链为f6→BE009 0a2c4e6f8b10（71应用表）→BE010 1b3d5f7a9c20（75）。源码不等于真实库已迁移/采用；非空新表禁止破坏性downgrade。
+
+[有限只读工具](scripts/business_time_adoption/README.zh-CN.md)仅输出candidate。真实历史调查/转换、writer隔离、备份/回退、目标采用、数据库/Docker/B和部署仍须具体批准；unknown或无法按来源判定的混合历史继续阻止G-T解除。本源码状态不证明真实目标已保存业务行。
+
+## 有界PLC事实源码
+
+[plc_facts](app/plc_facts/README.zh-CN.md)拥有三路匿名集成入口和七张独立事实表。模块本地`PLC_FACTS_ENABLED=False`关闭准入；`PLC_FACTS_PLC_IDS_JSON='[]'`拒绝全部PLC；`PLC_FACTS_STORAGE_PROFILE=unadopted`保持未采用；`PLC_FACTS_CURSOR_HMAC_KEY=''`没有游标签名key。这四项独立于登录、权限和业务集成，填写profile不能绕过schema/source/时间采用。
+
+显式`0a2c4e6f8b10`接`f6a8c0e2b4d6`只增加七张事实表（已迁移应用71表，不计`alembic_version`）；完整源码metadata另含BE010四表，共75。命名`BE009-A`/`BE009-B`不同于上文冻结历史fixture和配置计数。[维护CLI](scripts/plc_facts_maintenance/README.zh-CN.md)显式有界且无调度器。源码检查不授权迁移、采用或数据库访问。

@@ -1,5 +1,8 @@
 """完整样本接收与持久幂等；Service拥有完整commit/rollback及有界竞争恢复。"""
 import re
+from app.equipment.crud.async_integration import storage_context
+from app.equipment.integration_storage import storage_sample, legacy_view
+from common.integration.storage import to_storage_time as storage_time, to_legacy_time as legacy_time
 from sqlalchemy.exc import DBAPIError, IntegrityError
 from app.equipment.crud import async_temperature_sample as crud
 from app.equipment.error_codes import TemperatureError
@@ -26,15 +29,19 @@ def _unique_race(exc):
 
 async def receive_sample(db, sample, actor_user_id):
     digest = fingerprint(sample)
+    original_sample = sample
     for attempt in range(3):
         committing = False
         try:
+            context = await storage_context(db)
+            adoption = context[0] if context else None
+            sample = storage_sample(original_sample, adoption)
             receipt = await crud.get_receipt(db, actor_user_id, sample.equipment_id, sample.sample_id)
             if receipt is not None:
                 if receipt.fingerprint != digest:
                     raise BusinessException(TemperatureError.SAMPLE_ID_CONFLICT, code=409)
                 result = TemperatureSampleResult(record_id=receipt.sample_record_id, equipment_id=receipt.equipment_id,
-                    sample_id=sample.sample_id, sampled_at=receipt.sampled_at, outcome="duplicate")
+                    sample_id=sample.sample_id, sampled_at=legacy_time(receipt.sampled_at) if adoption else receipt.sampled_at, outcome="duplicate")
             else:
                 record = await crud.get_sample(db, sample.equipment_id, sample.sampled_at)
                 outcome = "duplicate"
@@ -43,13 +50,15 @@ async def receive_sample(db, sample, actor_user_id):
                 if record is None:
                     record = await crud.add_sample(db, equipment_id=sample.equipment_id,
                         sampled_at=sample.sampled_at, quality=sample.quality, fingerprint=digest,
+                        **(dict(created_at=storage_time(context[1]), updated_at=storage_time(context[1])) if context else {}),
                         **{key: getattr(sample, key) for key in TEMPERATURE_FIELDS})
                     outcome = "created"
                 await crud.add_receipt(db, actor_user_id=actor_user_id, equipment_id=sample.equipment_id,
                     sample_id=sample.sample_id, fingerprint=digest, sample_record_id=record.id,
-                    sampled_at=sample.sampled_at, outcome=outcome)
+                    sampled_at=sample.sampled_at, outcome=outcome,
+                    **(dict(created_at=storage_time(context[1]),updated_at=storage_time(context[1])) if context else {}))
                 result = TemperatureSampleResult(record_id=record.id, equipment_id=sample.equipment_id,
-                    sample_id=sample.sample_id, sampled_at=sample.sampled_at, outcome=outcome)
+                    sample_id=sample.sample_id, sampled_at=original_sample.sampled_at, outcome=outcome)
             committing = True
             await db.commit()
         except BusinessException as exc:
@@ -81,7 +90,10 @@ async def receive_sample(db, sample, actor_user_id):
 
 
 async def read_samples(db, equipment_id, record_id=None, limit=100):
+    context=await storage_context(db)
     records = await crud.list_samples(db, equipment_id, record_id, limit)
+    if context:
+        records=[legacy_view(row,context[0]) for row in records]
     return TemperatureSamplesOut(equipment_id=equipment_id, items=[TemperatureSampleOut(
         record_id=record.id, equipment_id=record.equipment_id, sampled_at=record.sampled_at,
         quality=record.quality, created_at=record.created_at,

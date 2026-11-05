@@ -56,3 +56,11 @@
 | [高危授权门禁](demands/control-agent/high-risk-authorization-gate.zh-CN.md) | `control-agent` | 后端 HTTP API | `accepted` |
 | [control-agent 授权校验 API](published/http-api/control-agent-authorization-verify.zh-CN.md) | `control-agent` | 后端 HTTP API | `implemented` |
 | [control-agent 前置门禁](gates/control-agent-preflight.zh-CN.md) | 项目交付 | 后端 + `control-agent` | `proposed` |
+| [AW事实集成](demands/automation-world-facts-integration.zh-CN.md) · [English](demands/automation-world-facts-integration.md) | DAA／SMA／HTTP消费者 | Backend事实与typed业务模块 | `proposed`；仅ARCH-AW-008文档范围 |
+
+## PLC事实provider v1
+
+[PLC facts v1](published/http-api/plc-facts-v1/README.zh-CN.md)固定匿名batch/latest/history、严格Decimal JSON、可靠结果、安全发布游标及有限保留。机器产物描述源码合同；数据库采用、真实运行验证、DAA联调和部署分别另设gate。
+
+
+[业务集成v1](published/http-api/business-integration-v1/README.zh-CN.md)发布八路typed匿名业务入口、闭合schema、样例和摘要向量。BE010 r2源码仍未采用，真实目标采用及数据库/B需另批。

@@ -1,0 +1,109 @@
+{
+  "method": "QA1-after to QA2-before snapshot difference, exact GUID output prefixes from frozen tests, and creation within actual rework TRX execution intervals",
+  "roots": [
+    {
+      "path": "/private/tmp/arch-be008-disabled-245599bbe6df49fe88333ea9ff1ced4b",
+      "createdEpoch": 1793169707.036655,
+      "matchingDevReworkTrx": [
+        "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/rework1-a.trx"
+      ]
+    },
+    {
+      "path": "/private/tmp/arch-be008-disabled-7b5ed7c0986a4b3bac04dfa3028969f6",
+      "createdEpoch": 1793169884.388867,
+      "matchingDevReworkTrx": [
+        "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/rework1-a-final.trx"
+      ]
+    },
+    {
+      "path": "/private/tmp/arch-be008-log-check-943dc2392b93471680f38af1c0e434b1",
+      "createdEpoch": 1793169707.3248558,
+      "matchingDevReworkTrx": [
+        "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/rework1-a.trx"
+      ]
+    },
+    {
+      "path": "/private/tmp/arch-be008-log-check-c8e9d7f6a329460db42c571a59c77988",
+      "createdEpoch": 1793169884.6723359,
+      "matchingDevReworkTrx": [
+        "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/rework1-a-final.trx"
+      ]
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-024049ae95ec47ada0aabf92c9d03cf9",
+      "createdEpoch": 1793169633.8165185,
+      "matchingDevReworkTrx": [
+        "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/before-fix.trx"
+      ]
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-31450c0574a34aa583bc1cc73a933444",
+      "createdEpoch": 1793169833.2130804,
+      "matchingDevReworkTrx": [
+        "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/after-guard.trx"
+      ]
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-45047c55af0742cd860022a126ed9052",
+      "createdEpoch": 1793169706.6208055,
+      "matchingDevReworkTrx": [
+        "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/rework1-a.trx"
+      ]
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-4f53f476c38a43e3a71ed92afd21c2b0",
+      "createdEpoch": 1793169883.9245925,
+      "matchingDevReworkTrx": [
+        "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/rework1-a-final.trx"
+      ]
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-5a7d1f677e11423091d21fe5a2b6210f",
+      "createdEpoch": 1793169673.422913,
+      "matchingDevReworkTrx": [
+        "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/after-fix.trx"
+      ]
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-5a9f182175544700b4e82d8f4a4175ba",
+      "createdEpoch": 1793169883.5580382,
+      "matchingDevReworkTrx": [
+        "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/rework1-a-final.trx"
+      ]
+    },
+    {
+      "path": "/private/tmp/arch-be008-test-logs-a5b84565f9074a09a2a8aeaf862dc0ee",
+      "createdEpoch": 1793169706.3062272,
+      "matchingDevReworkTrx": [
+        "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/rework1-a.trx"
+      ]
+    }
+  ],
+  "intervals": [
+    {
+      "evidence": "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/rework1-a.trx",
+      "start": 1793169705.623506,
+      "finish": 1793169708.075646
+    },
+    {
+      "evidence": "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/after-fix.trx",
+      "start": 1793169672.800099,
+      "finish": 1793169673.65765
+    },
+    {
+      "evidence": "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/rework1-a-final.trx",
+      "start": 1793169882.842661,
+      "finish": 1793169885.278271
+    },
+    {
+      "evidence": "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/after-guard.trx",
+      "start": 1793169832.549755,
+      "finish": 1793169833.450381
+    },
+    {
+      "evidence": "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/dev-rework1/results-a/before-fix.trx",
+      "start": 1793169633.171359,
+      "finish": 1793169634.034426
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "exitCode": 1,
+  "classification": "qa_helper_assertion",
+  "reason": "Case-sensitive absence diagnostic check rejected Docker lower-case no such volume response. No B root/resource created.",
+  "actualError": "Error response from daemon: get aiis-arch-be008-mysql-data: no such volume"
+}

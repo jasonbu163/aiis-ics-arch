@@ -1,4 +1,4 @@
-<!-- 多文件导入沿DAA预览/显式选择范式；文件原字节与声明/UDT闭包均送真实DS服务。 -->
+<!-- 多文件导入复用Rust依赖计划：自动关联UDT、显式解决重名，文件原字节与确认仍归真实DS服务。 -->
 <template>
   <ConsoleCard title-key="simulator.importSources">
     <div class="console-stack" data-testid="source-import">
@@ -7,12 +7,13 @@
       <p>{{ t('simulator.sourceBounds') }}</p>
       <div v-for="file in files" :key="file.inputId" class="ds-inline" data-testid="source-file-row" :data-input-id="file.inputId">
         <span data-testid="source-file-label">{{ fileLabel(file) }}</span>
-        <el-select v-model="file.lineageId" :placeholder="t('simulator.sourceLineage')" clearable>
+        <el-select v-model="file.lineageId" :placeholder="t('simulator.newSource')" clearable :disabled="local.busy">
           <el-option :value="''" :label="t('simulator.newSource')" />
           <el-option v-for="source in lineages" :key="source.lineageId" :value="source.lineageId" :label="source.logicalName+' · '+source.lineageId.slice(0,8)" />
         </el-select>
       </div>
       <ConsoleActionButton label-key="simulator.scan" data-testid="source-scan" :disabled="local.dirty||!files.length||local.busy" @click="scan" />
+      <p v-if="declarations.length" class="ds-import-note">{{ t('simulator.importDependency.hint') }}</p>
       <ConsoleDataTable table-id="import.declarations" v-if="declarations.length" :data="dbDeclarations">
         <el-table-column column-key="selection" width="64" :resizable="false" :show-overflow-tooltip="false" fixed="left" :label="t('simulator.select')">
           <template #default="{row}">
@@ -37,13 +38,18 @@
         </el-table-column>
         <el-table-column column-key="udtClosure" min-width="280" :show-overflow-tooltip="false" class-name="ds-cell-wrap" :label="t('simulator.udtClosure')">
           <template #default="{row}">
-            <el-select v-model="row.closure" multiple :data-testid="'import-closure-'+row.name">
+            <el-select v-if="row.chooseSources" v-model="row.closure" multiple collapse-tags collapse-tags-tooltip :disabled="local.busy" :placeholder="t('simulator.importDependency.choose')" :data-testid="'import-closure-'+row.name" @change="resolveDependencies">
               <el-option v-for="udt in udtDeclarations" :key="key(udt)" :value="key(udt)" :label="declarationLabel(udt)" />
             </el-select>
+            <small v-for="issue in row.dependencyIssues" :key="issue.code+issue.path+issue.typeName" class="ds-import-note ds-policy-error" data-testid="import-dependency-issue">{{ dependencyLabel(issue) }}</small>
+            <template v-if="!row.chooseSources">
+              <span v-for="id in row.closure" :key="id" class="ds-import-note">{{ closureLabel(id) }}</span>
+              <span v-if="!row.closure.length && !row.dependencyIssues.length">{{ t('simulator.importDependency.none') }}</span>
+            </template>
           </template>
         </el-table-column>
       </ConsoleDataTable>
-      <ConsoleActionButton v-if="declarations.length" label-key="simulator.previewImport" data-testid="source-preview" :disabled="local.busy||!dbDeclarations.some(d=>d.selected)" @click="preview" />
+      <ConsoleActionButton v-if="declarations.length" label-key="simulator.previewImport" data-testid="source-preview" :disabled="local.busy||!dbDeclarations.some(d=>d.selected)||dbDeclarations.some(d=>d.selected&&d.dependencyIssues.length)" @click="preview" />
       <el-dialog :model-value="!!candidate" :title="t('simulator.importPreview')" :append-to-body="false" width="min(1000px, calc(100vw - 32px))" @close="candidate=null">
         <div v-if="candidate" class="console-stack">
           <el-alert :title="t('simulator.tiaInitializersIgnored')" type="warning" :closable="false" />
@@ -83,7 +89,7 @@ import * as ipc from '../../../services/deviceSimulator';
 import { simulatorKey } from '../../../console/composables/useDeviceSimulator';
 import ConsoleCard from '../../../components/console/ConsoleCard.vue';
 import ConsoleActionButton from '../../../components/console/ConsoleActionButton.vue';
-const local = inject(simulatorKey)!, { t } = useI18n();
+const local = inject(simulatorKey)!, { t, te } = useI18n();
 interface FileInput {
     inputId: string;
     name: string;
@@ -99,6 +105,8 @@ interface Declaration {
     dbId: string;
     number: number;
     closure: string[];
+    dependencyIssues: ipc.DependencyIssue[];
+    chooseSources: boolean;
 }
 const files = ref<FileInput[]>([]), declarations = ref<Declaration[]>([]), candidate = ref<ipc.Preview | null>(null);
 const dbDeclarations = computed(() => declarations.value.filter(d => d.db)), udtDeclarations = computed(() => declarations.value.filter(d => !d.db)), changes = computed(() => Array.isArray(candidate.value?.details.changes) ? candidate.value!.details.changes as Record<string, ipc.Json>[] : []);
@@ -109,6 +117,16 @@ function fileLabel(file: FileInput) {
 function declarationLabel(d: Declaration) {
     const file = files.value.find(f => f.inputId === d.inputId);
     return d.name + ' · ' + (file ? fileLabel(file) : d.inputId) + ' · #' + (d.declarationIndex + 1);
+}
+function closureLabel(id: string) {
+    const declaration = udtDeclarations.value.find(d => key(d) === id);
+    return declaration ? declarationLabel(declaration) : id;
+}
+function dependencyLabel(issue: ipc.DependencyIssue) {
+    const label = { udt_missing: 'missing', udt_ambiguous: 'ambiguous', udt_cycle: 'cycle' }[issue.code as 'udt_missing' | 'udt_ambiguous' | 'udt_cycle'];
+    if (label) return t('simulator.importDependency.' + label, { path: issue.path, name: issue.typeName });
+    const message = 'simulator.errors.' + issue.code;
+    return te(message) ? t(message) : t('simulator.operationFailedWithCode', { code: issue.code });
 }
 function chooseDb(row: Declaration) { const db = local.selected?.dbs.find(d => d.id === row.dbId); if (db)
     row.number = db.number; }
@@ -122,10 +140,29 @@ async function filesChanged(event: Event) { const chosen = Array.from((event.tar
     return;
 } files.value = await Promise.all(chosen.map(async (f) => ({ inputId: crypto.randomUUID(), name: f.name, bytes: Array.from(new Uint8Array(await f.arrayBuffer())), lineageId: '' }))); declarations.value = []; candidate.value = null; }
 function intent(bindings: unknown[]) { return { expectedEtag: local.configuration!.etag, instanceId: local.instanceId, files: files.value.map(f => ({ ...f, lineageId: f.lineageId || null })), bindings }; }
-async function scan() { const result = await local.action(() => ipc.previewImport(intent([]))); if (result)
-    declarations.value = result.declarations.map(d => ({ ...d, selected: false, dbId: '', number: 1, closure: [] })); }
-async function preview() { const bindings = dbDeclarations.value.filter(d => d.selected).map(d => ({ dbId: d.dbId || null, number: d.number, declaration: { inputId: d.inputId, declarationIndex: d.declarationIndex }, udtClosure: d.closure.map(id => { const u = udtDeclarations.value.find(u => key(u) === id)!; return { inputId: u.inputId, declarationIndex: u.declarationIndex }; }) })); const result = await local.action(() => ipc.previewImport(intent(bindings))); if (result?.preview)
-    candidate.value = result.preview; }
+function applyAnalysis(rows: Awaited<ReturnType<typeof ipc.previewImport>>['declarations'], reset = false) {
+    declarations.value = rows.map(d => {
+        const previous = reset ? undefined : declarations.value.find(old => key(old) === key(d));
+        return { ...d, selected: previous?.selected || false, dbId: previous?.dbId || '', number: previous?.number || 1, closure: d.udtClosure.map(key), dependencyIssues: d.dependencyIssues, chooseSources: previous?.chooseSources || d.dependencyIssues.some(issue => issue.code === 'udt_ambiguous' || issue.code === 'duplicate_udt') };
+    });
+}
+function bindings(rows = dbDeclarations.value.filter(d => d.selected)) {
+    return rows.map(d => ({ dbId: d.dbId || null, number: d.number, declaration: { inputId: d.inputId, declarationIndex: d.declarationIndex }, udtClosure: d.closure.map(id => { const u = udtDeclarations.value.find(u => key(u) === id)!; return { inputId: u.inputId, declarationIndex: u.declarationIndex }; }) }));
+}
+async function scan() {
+    candidate.value = null;
+    const result = await local.action(() => ipc.previewImport(intent([]), true));
+    if (result) applyAnalysis(result.declarations, true);
+}
+async function resolveDependencies() {
+    candidate.value = null;
+    const result = await local.action(() => ipc.previewImport(intent(bindings(dbDeclarations.value)), true));
+    if (result) applyAnalysis(result.declarations);
+}
+async function preview() {
+    const result = await local.action(() => ipc.previewImport(intent(bindings())));
+    if (result?.preview) { applyAnalysis(result.declarations); candidate.value = result.preview; }
+}
 async function confirm() { if (!candidate.value)
     return; const result = await local.action(() => ipc.confirmPreview('import', candidate.value!), true); if (result !== undefined) {
     candidate.value = null;

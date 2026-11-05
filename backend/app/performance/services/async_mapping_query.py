@@ -1,4 +1,6 @@
 """HTTP实绩及过程只读adapter，记录身份/来源/有效重量时间可核对。"""
+from app.performance.crud.async_integration import storage_context
+from app.performance.integration_storage import legacy_view
 from common.exceptions import BusinessException
 from app.performance.mapping_error_codes import MappingError
 from app.performance.mapping_domain import utc_time, json_number
@@ -24,21 +26,28 @@ def record_out(record):
     return result
 
 async def read_record(db, equipment, record_id):
+    context=await storage_context(db)
     record = await parents.by_id(db, equipment, record_id)
     if record is None:
         raise BusinessException(MappingError.PARENT_NOT_FOUND, code=404)
-    return record_out(record)
+    return record_out(legacy_view(record,context[0]) if context else record)
 
 async def read_records(db, query):
+    context=await storage_context(db)
     rows, total = await parents.list_records(db, query)
+    if context:
+        rows=[legacy_view(row,context[0]) for row in rows]
     return dict(equipment_id=query.equipment_id, items=[record_out(r) for r in rows], total=total,
                 page=query.page, page_size=query.page_size, total_pages=(total+query.page_size-1)//query.page_size)
 
 async def read_process_data(db, equipment, parent_id):
     await read_record(db,equipment,parent_id)
+    context=await storage_context(db)
     result = {}
     for kind in FIELDS:
         rows = await processes.list_records(db,kind,parent_id,equipment)
+        if context:
+            rows=[legacy_view(row,context[0]) for row in rows]
         result[kind] = [dict(id=r.id, record_id=r.id, equipment_id=r.equipment_id, performance_id=r.performance_id,
             zone=r.zone, record_time=utc_time(r.record_time), **{f:json_number(getattr(r,f)) for f in FIELDS[kind]}) for r in rows]
     return result

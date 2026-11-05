@@ -1,0 +1,10 @@
+{
+  "jsonLinesParsed": 80,
+  "createdEvents": 11,
+  "requestIdPlanIdPresent": true,
+  "credentialLeakScan": false,
+  "bothApiExits": 0,
+  "ownedPidsAbsent": true,
+  "port18108Bindable": true,
+  "root": "/private/tmp/arch-be008-run-GyiTC6VL"
+}

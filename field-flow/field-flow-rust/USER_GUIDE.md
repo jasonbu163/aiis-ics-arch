@@ -48,7 +48,7 @@ See this project’s [BUILD](BUILD.md) for native dependencies and platform gate
 
 The fixture parent owns HTTP/proxy threads and starts a native server child using its own executable. The runtime is a separate process; each PLC owner starts one persistent driver child/session. Two proxy TCP legs do not mean two business PLC clients. This bounded protocol fixture is not the Device Simulator (DS) product; DS, Backend, Docker and the other language are unnecessary.
 
-The Rust CLI emits no fixture_ready line: confirm that it stays alive and all three listeners belong to this exercise. It supplies source demo01-feed, cmd-001 and value 42. Command timestamps are generated once (expiry = issuance + 60000 ms). Repeated GET never refreshes them. The default input_max_age_ms=10000 gives only 10 seconds to start the runtime after fixture startup, even though expiry is 60 seconds. Prepare Terminal B’s command before starting Terminal A’s fixture. Stale input is expected once age exceeds 10 seconds.
+The legacy YAML v1 fixture CLI emits no fixture_ready line: confirm that it stays alive and all three listeners belong to this exercise. It supplies source demo01-feed, cmd-001 and value 42. Command timestamps are generated once (expiry = issuance + 60000 ms). Repeated GET never refreshes them. The default input_max_age_ms=10000 gives only 10 seconds to start the runtime after fixture startup, even though expiry is 60 seconds. Prepare Terminal B’s command before starting Terminal A’s fixture. Stale input is expected once age exceeds 10 seconds.
 
 Automated tests can mutate feed/faults internally; the manual CLI has no control panel, management API, continuous command generator, arbitrary point table or interactive fault editing. This guide uses DB1 size16 offset0; this native fixture does not derive arbitrary feed/DB layout from config. Use only the published loopback sample here; configurable DB/address ranges do not enlarge fixture capabilities. The native server fixture does not prove real PLC write protection or actual field block size.
 
@@ -149,7 +149,7 @@ Only this brand-new synthetic lesson starts with fresh directories; this is not 
 
 ## 4. Configuration and input contract
 
-config/loopback.yaml is the complete runnable sample. Objects are Config → Plc[], Flow[] → Target, Http. Unknown/missing fields and implicit string/boolean-to-integer conversions are rejected. IDs use ASCII A–Z/a–z/0–9/_/- with length 1–64. flow.id selects identity; kind selects explicit app dispatch; business_name describes the rule; source_id must match the feed. They are different roles.
+config/loopback.yaml is the complete YAML v1 runnable sample. Objects are Config → Plc[], Flow[] → Target, Http. Unknown/missing fields and implicit string/boolean-to-integer conversions are rejected. IDs use ASCII A–Z/a–z/0–9/_/- with length 1–64. flow.id selects identity; kind selects explicit app dispatch; business_name describes the rule; source_id must match the feed. They are different roles.
 
 | Field | Accepted value / relation |
 | --- | --- |
@@ -158,7 +158,7 @@ config/loopback.yaml is the complete runnable sample. Objects are Config → Plc
 | `plc.host / port / rack / slot` | literal IPv4 / 1–65535 / 0–7 / 0–31 |
 | `connect_timeout_ms / io_timeout_ms` | PLC: 500–3000 / 500–5000 |
 | `queue_capacity / queue_wait_ms / ready_wait_ms` | 1–16 / 100–5000 / 100–5000 |
-| `flow.kind / interval_ms / input_max_age_ms` | demo01 only before tutorial / 100–10000 / 1–60000 |
+| `flow.kind / interval_ms / input_max_age_ms` | demo01 / plc_guard_get_int / get_value_guard_int / 100–10000 / 1–60000 |
 | `get_url` | http(s), host, no credentials/fragment; no proxy/redirect/retry |
 | `target.plc_id / db_number` | existing PLC / 1–65535 |
 | `db_size_bytes / byte_offset / type` | 2–65536 / 0–65534 / INT; offset+2 ≤ size |
@@ -221,7 +221,7 @@ Read example inside a bounded app iteration (use a distinct flow request label):
 let sample = owner.read("teaching-read", f.target.db_number, f.target.byte_offset).await?;
 let value: i16 = sample.value;
 ```
-This does not add a registered read flow. Read quality good means a validated protocol sample at sampled_at_ms, not physical completion.
+This legacy snippet does not register a flow; see the YAML v2 read_points entry below. Read quality good means a validated protocol sample at sampled_at_ms, not physical completion.
 
 Composition/lifecycle only: Config::load/validate, Runtime::start/launch_flows/health/shutdown, State::open/finalize and StateTask::join. State.admit/dispatch/finish and Owner.write are infrastructure used by Execution; do not call them to bypass durable execution. Driver.spawn/call/close, raw iso_exchange, S7 codec, gate/lock, SQL and fixture mutation hooks are internal/test surfaces. No public method for HTTP POST/auth, BOOL/REAL or automatic case discovery exists. The full demo01 code in section7 shows the shortest supported write route.
 
@@ -288,13 +288,13 @@ assert "pub mod teaching01;" not in s
 p.write_text(s + "\npub mod teaching01;\n")
 p = Path("src/config.rs")
 s = p.read_text()
-old = 'f.kind != "demo01"'
+old = '"demo01" | "plc_guard_get_int" | "get_value_guard_int"'
 assert s.count(old) == 1
-p.write_text(s.replace(old, '!matches!(f.kind.as_str(), "demo01" | "teaching01")'))
+p.write_text(s.replace(old, old + ' | "teaching01"'))
 p = Path("src/runtime.rs")
 s = p.read_text()
-old = 'crate::app::demo01::iteration(&f,&plc,&http,&owner,&state,&stop,&mut clock).await'
-new = 'match f.kind.as_str() { "demo01" => crate::app::demo01::iteration(&f,&plc,&http,&owner,&state,&stop,&mut clock).await, "teaching01" => crate::app::teaching01::iteration(&f,&plc,&http,&owner,&state,&stop,&mut clock).await, _ => Err("config_flow".into()) }'
+old = '"demo01"=>crate::app::demo01::iteration(&f,&plc,&http,&owner,&state,&stop,&mut clock).await,'
+new = old + '"teaching01"=>crate::app::teaching01::iteration(&f,&plc,&http,&owner,&state,&stop,&mut clock).await,'
 assert s.count(old) == 1
 p.write_text(s.replace(old, new))
 PY
@@ -388,3 +388,155 @@ Expect simulated1/write0 in dry-run, confirmed1/write1 in execute, and inspect m
 The bounded FF-002 rehearsal uses the actual product CLI in independent macOS arm64 copies, separate new synthetic dry/execute scenes and both wired tutorial cases; evidence and failures belong to the FF-002 tasks bundle. It is Development self-check until fresh Verification records its own verdict. No FF-001 full fault matrix rerun, real endpoint/PLC, DS joint validation, production hosting, platform port, long soak or distribution compliance is claimed. Preserve report/PID/exit/port evidence before any eventual task-owned resource cleanup.
 
 Local navigation: [README](README.md), [CODE_INDEX](CODE_INDEX.md), [notices](THIRD_PARTY_NOTICES.md).
+
+## Basic examples
+
+Three registered cases and complete commands: [examples](examples/README.md); YAML contracts: [config](config/README.md). teaching01 remains a tutorial-copy exercise.
+
+<a id="catalog-v2"></a>
+
+## Rust catalog configuration v2
+
+YAML v1 preserves demo01/plc_guard_get_int/get_value_guard_int and the three original YAML files. Rust YAML v2 supports demo01/read_points only, loading one ff.plc JSON v1 per PLC from the explicit plc_files list. Paths resolve from the main file directory; no scanning/hot reload. Modbus supports structural validate only; run rejects the whole group before state/log/network IO, including unreferenced or disabled Modbus. Python/C# loading and DS export are not implemented.
+
+The read-only source API is devices.get(device_id)?.read(point_id).await. Composition binds flow_id and injects only the device_ids subset and enabled points; the app receives no raw addresses/writer/SQL/owner map. A sample retains request_id/flow_id/generation, typed int16/quality and local response-completion received_at(+08:00), not device event time. Each read_points iteration awaits reads in order and ends at the first error, leaving later items not_attempted without a sample/value. New rounds clear the previous items. Owners/queues/sessions are reused; independent flows perform independent samples, without deduplication or atomic snapshots.
+
+points_health uses the existing five-second cadence. Only the latest round is held: at most16 items/flow and128 total. Chunks have at most4 items and JSONL lines at most4096 bytes including the audit envelope/escaped context. round_id/chunk_index/chunk_count identify chunks, without an atomic cross-chunk snapshot. in_progress can contain partial success; completed_rounds/successful_reads/errors are saturating counters. New observed_at/received_at use +08; original UTC log envelopes/state producers are unchanged.
+
+Terminal A: finish all builds and both initializations before any fixture. Give B both printed absolute paths, one pasted per line. An occupied port stops the exercise: do not kill occupants or change ports. Empty lsof exit1 only means no matching listener.
+
+```bash
+cd /Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust
+FF_PROJECT=$(pwd -P)
+FF_RUN_ROOT=$(mktemp -d /private/tmp/ff-004-r2-manual-XXXXXX)
+printf '%s\n' "$FF_PROJECT" "$FF_RUN_ROOT"
+cargo build --locked --release --no-default-features --bin field-flow --target-dir "$FF_RUN_ROOT/product"
+cargo build --locked --release --features test-fixture --bin ff-fixture --target-dir "$FF_RUN_ROOT/fixture"
+"$FF_RUN_ROOT/product/release/field-flow" config validate --config "$FF_PROJECT/config/catalog-demo.yaml"
+"$FF_RUN_ROOT/product/release/field-flow" config validate --plc-file "$FF_PROJECT/config/plcs/modbus-example.json"
+"$FF_RUN_ROOT/product/release/field-flow" state init --synthetic --mode dry_run --state-dir "$FF_RUN_ROOT/dry-state" --instance-id ff-rust-catalog-demo
+"$FF_RUN_ROOT/product/release/field-flow" state init --synthetic --mode execute --state-dir "$FF_RUN_ROOT/execute-state" --instance-id ff-rust-catalog-demo
+lsof -nP -iTCP:34102 -iTCP:34103 -iTCP:34112 -iTCP:34113 -iTCP:34880 -sTCP:LISTEN
+```
+
+
+A starts a new dry fixture and waits for fixture_ready, which is still idle:
+
+```bash
+"$FF_RUN_ROOT/fixture/release/ff-fixture" --catalog-demo --evidence-dir "$FF_RUN_ROOT/dry-fixture"
+```
+
+B sets its own variables in its own shell, then starts the product:
+
+```bash
+read -r FF_PROJECT
+read -r FF_RUN_ROOT
+cd "$FF_PROJECT"
+FF_BIN="$FF_RUN_ROOT/product/release/field-flow"
+FF_SCENE=dry
+"$FF_BIN" run --config "$FF_PROJECT/config/catalog-demo.yaml" --state-dir "$FF_RUN_ROOT/dry-state" > "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" 2> "$FF_RUN_ROOT/$FF_SCENE.stderr" &
+FF_PID=$!
+printf 'runtime PID=%s\n' "$FF_PID"
+```
+
+
+B checks the initial complete [12,1,56,34] round with this bounded, read-only check. This manual walkthrough demonstrates the first health/state result and normal closure; it does not establish S1's at-least-ten identical post-issue GETs. Stop and preserve a deadline failure; do not refresh identity or enlarge TTL.
+
+```bash
+python3 - "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" initial <<'PY_CHECK'
+import json, pathlib, sys, time
+p, stage = pathlib.Path(sys.argv[1]), sys.argv[2]
+end = time.monotonic() + (15 if stage == "initial" else 8)
+while time.monotonic() < end:
+    for line in p.read_text().splitlines():
+        try:
+            v = json.loads(line)
+            c = v.get("context", {})
+            if isinstance(c, str): c = json.loads(c)
+        except ValueError:
+            continue
+        if stage == "initial":
+            ok = v.get("event") == "points_health" and c.get("flow_id") == "read_pair" and c.get("status") == "complete" and [i.get("sample", {}).get("value") for i in c.get("items", [])] == [12, 1, 56, 34]
+        else:
+            ok = v.get("event") == "health" and any(c.get("store", {}).get("commands", {}).get(k) == 1 for k in ["simulated", "confirmed"])
+        if ok:
+            print(json.dumps(c, ensure_ascii=False)); sys.exit(0)
+    time.sleep(0.05)
+raise SystemExit("observation deadline")
+PY_CHECK
+```
+
+
+Before issue, HTTP is strict seven-key idle, command0 and writes=[0,0]. A now types `issue` once into the fixture stdin and presses ENTER. It freezes that scene's original body/identity/time; a second issue or invalid input is rejected without mutation. B immediately reruns the check above, replacing its single `initial` argument with `issued`. Expect simulated1 within8 seconds; original input_max_age remains10 seconds. After success, B signals only its recorded product PID and actually waits:
+
+```bash
+kill -INT "$FF_PID"
+wait "$FF_PID"
+FF_EXIT=$?
+printf 'runtime exit=%s\n' "$FF_EXIT"
+"$FF_BIN" state inspect --state-dir "$FF_RUN_ROOT/$FF_SCENE-state"
+```
+
+
+A enters an empty line to stop its foreground fixture. Immediately after return, A records its own exit:
+
+```bash
+FF_FIXTURE_EXIT=$?
+printf 'fixture exit=%s\n' "$FF_FIXTURE_EXIT"
+```
+
+B retains FF_PID and checks the report, stderr, exact PID and ports. Normal runtime and fixture exit0. final_memory is A.DB1=000c0001+12 A5 bytes, A.DB2=0038+14 A5 bytes, B.DB1=0022+14 A5 bytes; writes=[0,0]. Extract both driver PIDs from `$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl` driver_ready.context (parse the string as JSON) and both native server PIDs from `$FF_RUN_ROOT/$FF_SCENE-fixture/protocol.json` native_pids. The bounded check below runs ps -p on each exact positive PID and requires absence. Invalid arguments/permission errors are not absence.
+
+```bash
+cat "$FF_RUN_ROOT/$FF_SCENE-fixture/protocol.json"
+cat "$FF_RUN_ROOT/$FF_SCENE.stderr"
+ps -p "$FF_PID" -o pid=,stat=,command=
+lsof -nP -iTCP:34102 -iTCP:34103 -iTCP:34112 -iTCP:34113 -iTCP:34880 -sTCP:LISTEN
+```
+
+```bash
+python3 - "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" "$FF_RUN_ROOT/$FF_SCENE-fixture/protocol.json" <<'PY_PIDS'
+import json, pathlib, subprocess, sys
+pids = set()
+for line in pathlib.Path(sys.argv[1]).read_text().splitlines():
+    row = json.loads(line)
+    context = row.get("context", {})
+    if isinstance(context, str): context = json.loads(context)
+    if row.get("event") == "driver_ready": pids.add(context["pid"])
+assert len(pids) == 2, pids
+report = json.loads(pathlib.Path(sys.argv[2]).read_text())
+assert len(report["native_pids"]) == 2
+pids.update(report["native_pids"])
+for pid in sorted(pids):
+    assert isinstance(pid, int) and pid > 0
+    check = subprocess.run(["ps", "-p", str(pid), "-o", "pid=,stat=,command="], capture_output=True, text=True)
+    assert check.returncode == 1 and not check.stdout and not check.stderr, (pid, check.stdout, check.stderr)
+print(json.dumps({"absent_driver_and_native_pids": sorted(pids)}))
+PY_PIDS
+```
+
+
+Execute is a separate new scene. A keeps its own variables, rechecks the five free ports, then starts:
+
+```bash
+"$FF_RUN_ROOT/fixture/release/ff-fixture" --catalog-demo --evidence-dir "$FF_RUN_ROOT/execute-fixture"
+```
+
+B keeps the same shell and starts explicitly:
+
+```bash
+FF_SCENE=execute
+"$FF_BIN" run --config "$FF_PROJECT/config/catalog-demo.yaml" --state-dir "$FF_RUN_ROOT/execute-state" --execute > "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" 2> "$FF_RUN_ROOT/$FF_SCENE.stderr" &
+FF_PID=$!
+printf 'runtime PID=%s\n' "$FF_PID"
+```
+
+Repeat initial check, one issue in A, issued check in B, B SIGINT/wait/inspect, A empty-line/exit, B report/PID/port checks. Expect confirmed1, exactly one A WriteVar and zero B writes. Only A.DB1 first INT changes to002a; ready/result/B and all neighboring A5 bytes remain. ACK plus local confirmed is not process completion. Preserve original state/logs/identities; do not reinitialize, change IDs or switch stores to evade unknown. An old confirmed store can use v2 only when all original typed semantics match. Paths/display/source hashes are not the effect hash; actual address/declared-size/business-name changes conflict. Replacing an old PLC id with a DS UUID does not promise seamless state inheritance.
+
+The existing teaching01 exact wiring anchors remain valid for v1 in an independent tutorial copy; delivered source rejects teaching01. The original FF-005 complete hold_ack forced-stop limitation remains. This slice's B-off is the known bootstrap-force/nonzero fault class, not normal closure; ordinary/slow-connect scenes require real join/reap and zero forced stops. No Modbus transport, DS export, POST, real-device, Windows/Linux or deployment proof is claimed.
+
+For quantitative S1 acceptance, first stop both manual scenes and confirm the five ports are free, then run this bounded CLI matrix from FF_PROJECT. It includes S1 dry/execute and the other catalog isolation cases, checks at least ten identical post-issue body GETs within the original input age, and records the expected B-off failure separately. Use a new evidence directory; a first health result or nine GETs is not S1 acceptance.
+
+```bash
+FF004_EVIDENCE_ROOT="$FF_RUN_ROOT/s1-acceptance" cargo test --locked --features test-fixture --target-dir "$FF_RUN_ROOT/acceptance-target" --test multi_plc catalog_cli_matrix -- --nocapture --test-threads=1
+```

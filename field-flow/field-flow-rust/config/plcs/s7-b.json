@@ -1,0 +1,9 @@
+{
+  "format": "ff.plc",
+  "schema_version": 1,
+  "id": "s7_b",
+  "protocol": "s7",
+  "source": {"kind": "manual"},
+  "connection": {"host": "127.0.0.1", "port": 34112, "rack": 0, "slot": 1},
+  "dbs": [{"number": 1, "size_bytes": 16, "points": [{"id": "value", "data_type": "int16", "byte_offset": 0}]}]
+}

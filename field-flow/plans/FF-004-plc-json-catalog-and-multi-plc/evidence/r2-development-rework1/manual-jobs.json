@@ -1,0 +1,44 @@
+[
+  {
+    "label": "formal",
+    "argv": [
+      "python3",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/manual_replay.py",
+      "catalog",
+      "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/fixture/release/ff-fixture",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/manual-formal"
+    ],
+    "exit": 0,
+    "seconds": 21.393352959
+  },
+  {
+    "label": "copy",
+    "argv": [
+      "python3",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/manual_replay.py",
+      "catalog",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/copy",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/copy-product/release/field-flow",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/copy-fixture/release/ff-fixture",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/manual-copy"
+    ],
+    "exit": 0,
+    "seconds": 16.712000832999998
+  },
+  {
+    "label": "teaching",
+    "argv": [
+      "python3",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/manual_replay.py",
+      "teaching",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/teaching",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/teaching-product/release/field-flow",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/teaching-fixture/release/ff-fixture",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/rework1/manual-teaching"
+    ],
+    "exit": 0,
+    "seconds": 5.505856125000001
+  }
+]

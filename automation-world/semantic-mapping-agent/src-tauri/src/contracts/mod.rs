@@ -1,6 +1,2 @@
-//! File Path: /automation-world/semantic-mapping-agent/src-tauri/src/contracts/mod.rs
-//! Description: External TSS collection-fact contract registry.
-//! Main Features:
-//!   - Exposes strict collection_facts.json parsing
-
-pub mod collection_facts;
+//! SMA合同注册保留入口；事实定义生产及其解析器已退役。
+pub mod local_configuration;

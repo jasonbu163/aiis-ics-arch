@@ -1,47 +1,72 @@
-<!-- SMA root assembles the inherited HTTP workspaces and isolated local startup state. -->
+<!-- SMA消费CU公共壳层；主题、语言、导航与业务状态由本应用持有。 -->
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { ElConfigProvider } from "element-plus";
+import zhCn from "element-plus/es/locale/lang/zh-cn";
+import en from "element-plus/es/locale/lang/en";
+import { AgentLayout, AgentSidebar, AgentTopbar, ThemeToggle, LanguageSwitch, StatusCapsule, type NavigationItem } from "@aw-ui";
 import { ConnectionModuleView, loadAppDefaults } from "./app/connection";
+import { loadLocalConfiguration } from "./app/twin-facts/api/localConfiguration";
 import { externalIoEnabled } from "./app/connection/api";
-import HelpCenterView from "./app/help/HelpCenterView.vue";
-import { pageManifests, workspaceManifests } from "./app/registry";
 import type { AppPage } from "./app/navigation";
 import { isTauriRuntime } from "./app/tauri";
 import { TwinFactsModuleView } from "./app/twin-facts";
 import BackToTopButton from "./components/BackToTopButton.vue";
-import { DEFAULT_LOCALE, getMessages } from "./locales";
-import type { LocaleKey } from "./locales";
-const locale = ref<LocaleKey>(DEFAULT_LOCALE);
+import { getMessages } from "./locales";
+import { useUiPreferences } from "./console/uiPreferences";
+const { theme, locale, sidebarHidden } = useUiPreferences();
 const labels = computed(() => getMessages(locale.value));
 const activePage = ref<AppPage>("backendConnection");
-const activeView = ref("contract");
+const activeView = ref("");
 const ready = ref(false);
+const configurationError = ref("");
 const ioEnabled = ref(false);
-const sidebarCollapsed = ref(false);
-const page = computed(() => pageManifests.find(p => p.id === activePage.value));
 const resolve = (key: string) => (labels.value as unknown as Record<string, string>)[key] ?? key;
-function select(id: AppPage) { activePage.value = id; activeView.value = page.value?.views?.[0]?.id ?? ""; }
-onMounted(async () => { await loadAppDefaults(); ioEnabled.value = externalIoEnabled(); ready.value = true; });
+const leaves = [
+  { id: "connection", page: "backendConnection", view: "", label: "navBackendConnection" },
+  { id: "source-facts", page: "twinFacts", view: "contract", label: "factsTableTitle" },
+  { id: "api-materials", page: "mappingIdentity", view: "apiMaterials", label: "apiMaterialsTitle" },
+  { id: "target-apis", page: "mappingIdentity", view: "targetApis", label: "targetApiConfigurationTitle" },
+  { id: "value-rules", page: "mappingIdentity", view: "valueRules", label: "mappingValueRulesTitle" },
+  { id: "mappings", page: "mappingIdentity", view: "mappings", label: "mappingConfigurationsTitle" },
+  { id: "runtime", page: "mappingRuntime", view: "execution", label: "mappingExecutionTitle" },
+] as const;
+const activeId = computed(() => leaves.find(item => item.page === activePage.value && item.view === activeView.value)?.id ?? "connection");
+const groups = [
+  { id: "connection-group", label: "navConnectionGroup", ids: ["connection"] },
+  { id: "facts-group", label: "sourceFactsWorkspace", ids: ["source-facts"] },
+  { id: "interfaces-group", label: "navInterfacesGroup", ids: ["api-materials", "target-apis"] },
+  { id: "mappings-group", label: "navMappingGroup", ids: ["value-rules", "mappings"] },
+  { id: "runtime-group", label: "mappingRuntimeWorkspace", ids: ["runtime"] },
+];
+const navigation = computed<NavigationItem[]>(() => groups.map(group => ({ id: group.id, label: resolve(group.label), children: leaves.filter(leaf => group.ids.includes(leaf.id)).map(leaf => ({ id: leaf.id, label: resolve(leaf.label) })) })));
+const title = computed(() => resolve(leaves.find(item => item.id === activeId.value)!.label));
+function select(id: string) { const leaf = leaves.find(item => item.id === id); if (leaf) { activePage.value = leaf.page; activeView.value = leaf.view; } }
+onMounted(async () => { try { await loadAppDefaults(); ioEnabled.value = externalIoEnabled(); if (isTauriRuntime()) await loadLocalConfiguration(); } catch (error) { configurationError.value = String(error); } finally { ready.value = true; } });
 </script>
 <template>
- <main class="app-shell" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
-  <aside v-if="!sidebarCollapsed" class="sidebar">
-   <div class="brand-block"><p class="eyebrow">{{ labels.eyebrow }}</p><h1>{{ labels.appTitle }}</h1><p class="subtitle">{{ labels.subtitle }}</p></div>
-   <nav class="sidebar-nav" :aria-label="labels.navigation">
-    <div v-for="workspace in workspaceManifests" :key="workspace.id" class="nav-group"><p class="nav-item">{{ resolve(workspace.labelKey) }}</p><div class="nav-submenu"><button v-for="item in workspace.pages" :key="item.id" class="nav-subitem" :class="{ active: activePage === item.id }" @click="select(item.id)">{{ resolve(item.labelKey) }}</button></div></div>
-   </nav>
-   <div class="sidebar-footer"><span class="status-dot" />{{ labels.scaffoldStatus }}</div>
-  </aside>
-  <section class="main-surface">
-   <header class="content-topbar"><div class="title-group"><button class="sidebar-toggle" :aria-label="labels.collapseSidebar" @click="sidebarCollapsed = !sidebarCollapsed">☰</button><h2>{{ page ? resolve(page.labelKey) : labels.helpCenterNav }}</h2></div><button class="icon-action" :aria-label="labels.languageToggle" @click="locale = locale === 'zh-CN' ? 'en-US' : 'zh-CN'">{{ locale === 'zh-CN' ? 'EN' : '中' }}</button></header>
-   <section class="workspace">
-    <p v-if="!ioEnabled" class="hint" role="status">{{ labels.externalIoDisabled }}</p>
-    <ConnectionModuleView v-if="ready && activePage === 'backendConnection'" :labels="labels" />
-    <HelpCenterView v-if="activePage === 'helpQuickStart'" :labels="labels" />
-    <nav v-if="page?.views?.length" class="workspace-segmented"><button v-for="view in page.views" :key="view.id" :class="{ active: activeView === view.id }" @click="activeView = view.id">{{ resolve(view.labelKey) }}</button></nav>
-    <div v-if="ready" v-show="!['backendConnection', 'helpQuickStart'].includes(activePage)"><TwinFactsModuleView :labels="labels" :enabled="isTauriRuntime()" :page="activePage" :view="activeView" /></div>
-   </section>
-  </section>
-  <BackToTopButton :label="labels.backToTop" />
- </main>
+  <ElConfigProvider :locale="locale === 'zh-CN' ? zhCn : en">
+    <div id="sma-overlays" class="aw-ui sma-overlays" :data-aw-theme="theme" />
+    <AgentLayout :theme="theme" :sidebar-hidden="sidebarHidden">
+      <template #sidebar><AgentSidebar :items="navigation" :active-id="activeId" :brand="labels.appTitle" :detail="labels.subtitle" @select="select" /></template>
+      <template #topbar>
+        <AgentTopbar :title="title" :subtitle="labels.eyebrow" :sidebar-hidden="sidebarHidden" :sidebar-label="sidebarHidden ? labels.expandSidebar : labels.collapseSidebar" @toggle-sidebar="sidebarHidden = !sidebarHidden">
+          <template #actions>
+            <StatusCapsule :label="ioEnabled ? labels.httpEnabled : labels.httpDisabled" :tone="ioEnabled ? 'warning' : 'neutral'" />
+            <ThemeToggle :theme="theme" :label="theme === 'light' ? labels.switchToDark : labels.switchToLight" @toggle="theme = theme === 'light' ? 'dark' : 'light'" />
+            <LanguageSwitch :locale="locale" :zh-label="labels.languageChineseShort" :en-label="labels.languageEnglishShort" :label="labels.languageToggle" @toggle="locale = locale === 'zh-CN' ? 'en-US' : 'zh-CN'" />
+          </template>
+        </AgentTopbar>
+      </template>
+      <section class="sma-content workspace">
+        <p class="hint io-notice" role="status">{{ labels.localConfigurationOnly }}</p>
+        <p v-if="configurationError" class="warning" role="alert">{{ labels.localConfigurationFailed }} {{ configurationError }}</p>
+        <p v-if="!ioEnabled" class="hint io-notice" role="status">{{ labels.externalIoDisabled }}</p>
+        <p v-if="!ready" role="status">{{ labels.loading }}</p>
+        <div v-if="ready" v-show="activePage === 'backendConnection'"><ConnectionModuleView :labels="labels" /></div>
+        <div v-if="ready" v-show="activePage !== 'backendConnection'"><TwinFactsModuleView :labels="labels" :enabled="isTauriRuntime()" :page="activePage" :view="activeView" /></div>
+      </section>
+      <BackToTopButton :label="labels.backToTop" />
+    </AgentLayout>
+  </ElConfigProvider>
 </template>

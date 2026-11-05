@@ -1,5 +1,8 @@
 """不可变HTTP曲线事务及现有四图窄adapter，保留全部33观测。"""
 import re
+from app.monitor.crud.async_integration import storage_context
+from app.monitor.integration_storage import storage_sample, legacy_view
+from common.integration.storage import to_storage_time as storage_time, to_legacy_time as legacy_time
 from sqlalchemy.exc import DBAPIError, IntegrityError
 from common.exceptions import BusinessException
 from common.log import log_event
@@ -23,6 +26,7 @@ async def delivery_after_rejection(db, actor, equipment, sample_id, digest):
     """业务拒绝回滚后，在新一致性视图恢复已提交投递的优先级；不锁缺失回执。"""
     committing = False
     try:
+        await storage_context(db)
         receipt = await receipts.get_receipt(db, actor, equipment, sample_id)
         if receipt is None:
             await rollback(db)
@@ -45,9 +49,13 @@ async def delivery_after_rejection(db, actor, equipment, sample_id, digest):
 
 async def receive_sample(db, sample, actor):
     digest = fingerprint(sample,"process_curve")
+    original_sample = sample
     for attempt in range(3):
         committing = False
         try:
+            context = await storage_context(db)
+            adoption = context[0] if context else None
+            sample = storage_sample(original_sample, adoption)
             receipt = await receipts.get_receipt(db,actor,sample.equipment_id,sample.sample_id)
             if receipt is not None:
                 if receipt.fingerprint != digest:
@@ -60,7 +68,7 @@ async def receive_sample(db, sample, actor):
                     raise BusinessException(MappingError.SAMPLE_TIME_CONFLICT, code=409)
                 if row is None:
                     row = await crud.add_sample(db,equipment_id=sample.equipment_id,sampled_at=sample.sampled_at,
-                        fingerprint=digest,device_id=None,coil_number=sample.coil_number,**{f:getattr(sample,f) for f in FIELDS})
+                        fingerprint=digest,**(dict(created_at=storage_time(context[1])) if context else {}),device_id=None,coil_number=sample.coil_number,**{f:getattr(sample,f) for f in FIELDS})
                     await db.refresh(row)
                     for field in FIELDS:
                         value, stored = getattr(sample,field),getattr(row,field)
@@ -68,9 +76,10 @@ async def receive_sample(db, sample, actor):
                             raise BusinessException(MappingError.INVALID_SAMPLE, code=422)
                     outcome = "created"
                 result = dict(record_id=row.id,equipment_id=sample.equipment_id,sample_id=sample.sample_id,
-                    sampled_at=utc_time(sample.sampled_at),outcome=outcome)
+                    sampled_at=utc_time(original_sample.sampled_at),outcome=outcome)
                 await receipts.add_receipt(db,actor_user_id=actor,equipment_id=sample.equipment_id,sample_id=sample.sample_id,
-                    fingerprint=digest,sampled_at=sample.sampled_at,outcome=outcome,result=result,curve_record_id=row.id)
+                    fingerprint=digest,sampled_at=sample.sampled_at,outcome=outcome,result=result,curve_record_id=row.id,
+                    **(dict(created_at=storage_time(context[1]),updated_at=storage_time(context[1])) if context else {}))
             committing = True
             await db.commit()
         except BusinessException as exc:
@@ -97,7 +106,10 @@ async def receive_sample(db, sample, actor):
         return result
 
 async def read_samples(db,equipment,day,record_id=None,limit=1000):
+    context=await storage_context(db)
     records = await crud.list_samples(db,equipment,day,record_id,limit)
+    if context:
+        records=[legacy_view(row,context[0]) for row in records]
     items = [dict(record_id=r.id,equipment_id=r.equipment_id,sampled_at=utc_time(r.sampled_at),coil_number=r.coil_number,
                   **{f:getattr(r,f) for f in FIELDS}) for r in records]
     trends = []

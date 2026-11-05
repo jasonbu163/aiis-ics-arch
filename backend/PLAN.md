@@ -4,6 +4,10 @@ Chinese version: [PLAN.zh-CN.md](PLAN.zh-CN.md)
 
 ## Current baseline
 
+- [ARCH-BE-009 r1](../plans/ARCH-BE-009-backend-facts-integration/spec.md): B `qa_passed`; 9 formal MySQL cases and 42 expanded Dev scenarios; fresh QA independently passed 9 formal, 47 named expanded scenarios, 181 focused and 44 legacy tests (9 deselected) passed; A/failure histories retained. Two containers/volumes/networks, eight dedicated schemas and 27 temporary credential/config files were cleaned and independently observed absent. Owner acceptance, live adoption, DAA and production SLA remain separate; existing databases/history were not operated on.
+
+- [ARCH-BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/spec.md): B `qa_passed`; both real MySQL/ASGI/time/concurrency/disconnect rounds, 161 affected source regressions in each, and permanent business receipts after facts cleanup passed; A/failure histories retained. Two containers/volumes/networks, eight dedicated schemas and 27 temporary credential/config files were cleaned and independently observed absent. Owner acceptance, live adoption, DAA and production SLA remain separate; existing databases/history were not operated on.
+
 - [ARCH-BE-005 r3](../plans/ARCH-BE-005-backend-business-module-reintegration/spec.md): `owner_accepted`; Human Owner accepted on 2026-10-16 after independent A and two isolated MySQL rounds, all five scenarios in each round and dedicated resource cleanup; prior histories are preserved.
 
 - [ARCH-BE-006 r1](../plans/ARCH-BE-006-mapping-business-api-expansion/spec.md): `qa_passed`; A+B independently passed, both dedicated MySQL rounds and five-page browser checks completed, resources and test secrets cleaned; 155 related tests passed, four historical frozen-profile failures retained; Human Owner final acceptance pending.

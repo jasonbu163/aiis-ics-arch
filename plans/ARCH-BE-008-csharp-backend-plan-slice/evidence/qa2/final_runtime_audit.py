@@ -1,0 +1,36 @@
+from pathlib import Path
+import subprocess,json,hashlib,re,os,socket,collections
+q=Path(__file__).parent;run=Path((q/'b-run-root.path').read_text().strip());formal=q/'formal-probes-attempt2';summary=json.loads((formal/'formal-http-summary.json').read_text());records=[json.loads(line) for line in (formal/'formal-http-cases.jsonl').read_text().splitlines()];m=json.loads((run/'manifest.json').read_text())
+paths=list(run.glob('*-logs/*.jsonl'))+list(q.glob('formal-probes*/*-logs/*.jsonl'))+list(q.glob('formal-probes*/*.stdout.jsonl'))
+logs=[];logfiles=[]
+for p in paths:
+ lines=[json.loads(line) for line in p.read_text().splitlines() if line];assert all(isinstance(row,dict) for row in lines);logs.extend(lines);logfiles.append({'path':str(p),'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size,'parsedLines':len(lines)})
+media=[r for r in records if r['case'].startswith('media-')];assert len(media)==7;mediaresult=[]
+for r in media:
+ events=[e for e in logs if e.get('requestId')==r['requestId']];assert any(e.get('event')=='plan_request_failed' and e.get('errorCode')=='plan_invalid_request' and e.get('result')=='failure' for e in events);assert any(e.get('event')=='plan_request_finished' and e.get('result')==415 for e in events)
+ assert r['actualStatus']==415 and r['body']['code']==415 and r['body']['message']==r['body']['errorCode']=='plan_invalid_request' and r['body']['data'] is None and r['bodyBytes']>0
+ mediaresult.append({'case':r['case'],'contentType':r['requestHeaders'].get('Content-Type'),'requestId':r['requestId'],'status':r['actualStatus'],'responseContentType':r['responseHeaders']['Content-Type'],'bodyBytes':r['bodyBytes'],'body':r['body'],'stableErrorAndAccessLogMatched':True})
+unique=[e for e in logs if e.get('event')=='plan_unique_conflict'];rollbacks=[e for e in logs if e.get('event')=='plan_transaction_rolled_back'];uniqueids=sorted(set(e['requestId'] for e in unique));assert uniqueids and all(any(e.get('requestId')==i and e.get('errorCode')=='plan_coil_already_exists' for e in rollbacks) for i in uniqueids)
+created=[e for e in logs if e.get('event')=='plan_created'];assert created and all(e.get('requestId') and isinstance(e.get('planId'),int) for e in created);assert any(e['planId']==summary['minimalPlan']['id'] for e in created)
+secrets=[(run/name).read_text() for name in ['root-password','app-password','fixture-password','app-connection','fixture-connection']];assert all(secret not in json.dumps(logs+records,ensure_ascii=False) for secret in secrets)
+rotation=[]
+for info in json.loads((q/'a-owned-temporary-resources.json').read_text()):
+ p=Path(info['path'])
+ if p.name.startswith('arch-be008-log-check-'):
+  files=list(p.glob('*.jsonl'));assert len(files)==5
+  for file in files:
+   lines=file.read_text().splitlines();assert all(json.loads(line)['event']=='rotation_probe' for line in lines);assert file.stat().st_size<12*1024*1024
+   rotation.append({'path':str(file),'bytes':file.stat().st_size,'sha256':hashlib.sha256(file.read_bytes()).hexdigest(),'parsedLines':len(lines)})
+def sql(query):
+ p=subprocess.run(['docker','exec','-i',m['container'],'mysql','--defaults-extra-file=/run/secrets/root_client','--default-character-set=utf8mb4','--batch','--skip-column-names',m['database']],input=query,text=True,capture_output=True);assert p.returncode==0;return p.stdout
+full=next(r['body']['data'] for r in records if r['case']=='all-fields-max-create');decimalkeys={k:len(v.split('.')[1]) for k,v in full.items() if isinstance(v,str) and re.fullmatch(r'[0-9]+\.[0-9]+',v)};assert len(decimalkeys)==15
+def snake(k):return re.sub(r'(?<!^)(?=[A-Z])','_',k).lower()
+row=sql('SELECT '+','.join('CAST(`'+snake(k)+'` AS CHAR)' for k in decimalkeys)+',HEX(coil_no),CAST(created_at AS CHAR),CAST(updated_at AS CHAR) FROM plans WHERE id='+str(full['id'])+';').strip().split('\t');assert row[:15]==[full[k] for k in decimalkeys];assert row[15]==full['coilNo'].encode().hex().upper();assert row[16]==full['createdAt'][:19].replace('T',' ')==row[17]
+(q/'independent-decimal-full-select.tsv').write_text('\t'.join(list(decimalkeys)+['coilHex','createdAt','updatedAt'])+'\n'+'\t'.join(row)+'\n')
+minimum=summary['minimalPlan'];raw=sql('SELECT HEX(coil_no),CAST(created_at AS CHAR),CAST(updated_at AS CHAR) FROM plans WHERE id='+str(minimum['id'])+';').strip().split('\t');assert raw[0]==minimum['coilNo'].encode().hex().upper() and raw[1]==raw[2]==minimum['createdAt'][:19].replace('T',' ')
+for p in summary['processes']+json.loads((q/'formal-probes/formal-processes.json').read_text()):
+ try:os.kill(p['pid'],0)
+ except ProcessLookupError:pass
+ else:raise AssertionError('owned api PID still present')
+with socket.socket() as s:s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1);s.bind(('127.0.0.1',18108))
+result={'task':'ARCH-BE-008','revision':'r1','candidate':summary['candidateSha256'],'finding':'F-QA1-001','findingClosureEvidence':mediaresult,'runtimeLogFiles':logfiles,'parsedRuntimeLines':len(logs),'allRuntimeJsonObject':True,'uniqueConflictRequestIdsWithConfirmedRollback':uniqueids,'createdEventsWithRequestIdAndPlanId':len(created),'rotation5Files':rotation,'secretComparison':'no_matches','all15DecimalsExactDirectSelect':True,'rawCoilHexAndBothTimesExact':True,'apiPidsAbsent':True,'port18108ActualRebind':True};(q/'runtime-independent-summary.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps({k:result[k] for k in ['finding','parsedRuntimeLines','uniqueConflictRequestIdsWithConfirmedRollback','createdEventsWithRequestIdAndPlanId','secretComparison','all15DecimalsExactDirectSelect','rawCoilHexAndBothTimesExact','apiPidsAbsent','port18108ActualRebind']}))

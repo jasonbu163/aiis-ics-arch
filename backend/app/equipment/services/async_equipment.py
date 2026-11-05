@@ -15,13 +15,20 @@ from app.equipment.crud.async_equipment import equipment_crud
 from settings import settings
 
 
+from app.equipment.crud.async_integration import storage_context
+from app.equipment.integration_storage import legacy_view
+from common.integration.storage import to_storage_time as storage_time
+
 class EquipmentService:
     """设备看板业务编排层。"""
 
     async def get_drive_dashboard_data(self, db: AsyncSession) -> Dict[str, Any]:
         if settings.BACKEND_MOCK_ENABLED:
             await self.ensure_drive_sample_data(db)
+        context=await storage_context(db)
         record = await equipment_crud.get_latest_drive(db)
+        if context:
+            record=legacy_view(record,context[0],"legacy")
         if not record:
             return {
                 "process_params": {},
@@ -150,7 +157,10 @@ class EquipmentService:
     async def get_production_parameters_dashboard_data(self, db: AsyncSession) -> Dict[str, Any]:
         if settings.BACKEND_MOCK_ENABLED:
             await self.ensure_production_parameters_sample_data(db)
+        context=await storage_context(db)
         record = await equipment_crud.get_latest_production_parameters(db)
+        if context:
+            record=legacy_view(record,context[0],"legacy")
         if not record:
             return {"production_parameters": {}, "process_steps": []}
 
@@ -174,11 +184,15 @@ class EquipmentService:
 
     async def ensure_production_parameters_sample_data(self, db: AsyncSession) -> None:
         """生产参数表无数据时，生成一条后端测试数据。"""
+        context=await storage_context(db)
         record = await equipment_crud.get_latest_production_parameters(db)
+        if context:
+            record=legacy_view(record,context[0],"legacy")
         if record:
             return
 
-        now = datetime.now()
+        context=await storage_context(db)
+        now = storage_time(context[1]) if context else datetime.now()
         db.add(EquipmentProductionParameters(
             coil_no="COIL000001",
             grade="TA1",
@@ -202,11 +216,15 @@ class EquipmentService:
 
     async def ensure_drive_sample_data(self, db: AsyncSession) -> None:
         """传动参数表无数据时，生成一组后端测试数据。"""
+        context=await storage_context(db)
         record = await equipment_crud.get_latest_drive(db)
+        if context:
+            record=legacy_view(record,context[0],"legacy")
         if record:
             return
 
-        now = datetime.now()
+        context=await storage_context(db)
+        now = storage_time(context[1]) if context else datetime.now()
         for index in range(6):
             wave = index - 2
             db.add(EquipmentDrive(

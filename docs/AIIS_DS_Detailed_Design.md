@@ -595,16 +595,22 @@ DS 自有 ConsoleCard 为内容提供统一 token 间距，选择栏采用自适
 
 当前步骤见[中文纯文字手册](../automation-world/device-simulator/USER_GUIDE.zh-CN.md)和[English text guide](../automation-world/device-simulator/USER_GUIDE.md)。本节依据本地[DS-001 r1 spec](../automation-world/device-simulator/plans/DS-001-policy-table-and-usability/spec.md)同步操作入口；实施、自检和Owner反馈归[DS-001 tasks](../automation-world/device-simulator/plans/DS-001-policy-table-and-usability/tasks.md)。不改变004/005历史设计或原技术验证；本任务独立QA由Owner明确豁免，前端编译/纯函数不能替代真人输入和运行核对。
 
+2026-10-30文档补充：先看手册开头的[七步快速流程](../automation-world/device-simulator/USER_GUIDE.zh-CN.md#quick-start)，首次操作再按[创建至保存、加载和启动](../automation-world/device-simulator/USER_GUIDE.zh-CN.md#manual-create)逐项填写；已有配置直接看[版本切换与回退](../automation-world/device-simulator/USER_GUIDE.zh-CN.md#switch-version)和[版本管理](../automation-world/device-simulator/USER_GUIDE.zh-CN.md#version-management)。这些是当前会话DIRECT操作文档，不回填旧DS-001开发记录或追认新的验收。
+
 | 顺序/页面 | 操作与预期结果 |
 | --- | --- |
-| 源码启动 | pnpm tauri dev、独立合成profile；浏览器pnpm dev没有桌面bridge。按手册核store/端口，不操作未知用户库。 |
+| 源码启动 | 在DS工程目录执行pnpm tauri dev，沿用现有profile，未配置覆盖时使用默认目录；不要求为教程另建数据目录。浏览器pnpm dev没有桌面bridge。按手册核store/端口，不操作未知用户库。 |
 | 实例/手工DB | PLC_Test回环30102；DB31长度8，BOOL0.0、INT2、REAL4，逐点理由。保存后完整人工预览显示目标DB/长度/三行地址，再确认真实命名行。 |
 | 草稿策略表 | 先PLC再多选DB；未筛DB显示本PLC全部点。模式/初值/owner/规则摘要为主列，逐属性权限/来源按行展开。表头选择全部筛选页，翻页保留，换PLC/DB筛选清零。 |
 | 副本及三态批量 | 单点先编辑副本；批量默认不修改，可统一设置或恢复继承，显示逐点前后值和来源/必要联动，全量预校验后一次性保留草稿。混合类型任一点失败整批不改，基线过期拒交。 |
 | 初值与fixed | 独立文本缓冲处理input更新，合法非零7/20.5/fixed12及false/0可提交；非法/未完成文本保留并阻断。普通键入/失焦/保存重选按手册操作；Owner已接受当前版本，不补造逐项执行原件。 |
-| 保存/版本/加载 | 保存只产生不可变候选。未手选旧版时待加载选择跟最新；手选历史后保留并提示，显式选最新恢复跟随。核实际revision后停机预览/确认加载，另行启动。 |
+| 保存/版本/加载 | 2026-10-29 DIRECT增量：完成编辑→保存同一份持久草稿→明确保存为版本→实例页版本列表按行停机预览/确认加载→另行启动。内容与最新版本一致不重复生成；导入/地址/命名/初值策略确认及保存关闭不隐式生成版本。 |
+| 切换与回退 | 保存要保留的编辑→工作台停止目标、释放连接→实例页选目标实例→目标版本行预览→核保留/初始化/移除清单→确认加载并保持停止→核实际已加载版本→按需启动。加载更新版本按兼容清单保值；回旧版强制全初始化、规则时间归零。版本不是运行现场备份，切换也不回填当前草稿。 |
+| 历史管理与异常 | 使用状态同时核全部实例；最新、已选/实际已加载、有效预览保护，回退保留须明确放弃才能删除。单个/当前页批量共用清单，取消不删版本或回退记录。历史版本预览若被校验拒绝，当前已加载版本保持；界面通用错误不列历史逐项原因，不能算作成功打开后取消。详细操作以手册为准。 |
 | 只读导入 | 固定multi.db/types.udt仅Alpha→DB71（无UDT）、Beta→DB88（仅Measure闭包）；不改源。各DB地址/命名/DS初值策略确认后选最新版停机加载。:=/BEGIN初值不导入、RETAIN不代表DS保值。 |
 
 共享标准word布局示例仍为Alpha长度4（ready0.0/count2），Beta长度8（unit.running0.0/unit.value2/bytes[3]6/bytes[4]7）；REAL不强制4字节对齐。DS初值是主动配置或类型默认，运行值按既有加载/重置/保留合同处理。手册提供混合类型失败、继承恢复、保存旧版选择和正常重开步骤；当前版本已获Owner最终接受；本节仍是操作说明，不新增逐项执行、协议或容量证据。
 
 2026-10-22真实键入后回退问题及旧同步input/change驱动的证据边界保留在[005 tasks](../plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md)，旧[owning checklist](../plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md)保持原时间与候选身份。本次前端实现修复事件绑定并补缓冲，开发自检和手册不追认旧真人输入通过；2026-10-27真实Owner最终接受见[DS-001记录](../automation-world/device-simulator/plans/DS-001-policy-table-and-usability/spec.md#owner-acceptance-ds001)及[005记录](../plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md#owner-acceptance-r5)。[七张旧原生图及来源](../automation-world/device-simulator/docs/user-guide/images/README.zh-CN.md)保留为历史，不要求新增截图；DAA–DS读取至SQLite联调另批，阶段C暂不开展。
+
+2026-10-29当前操作增量：实例页“配置版本与加载”维护整个DS工作区快照，服务端检查全部实例selected/实际loaded/previous及pending apply，最新版本始终保护。单个/当前页批量删除共用清单：使用保护项不可选；仅作回退保留的项需列出全部实例并明确勾选放弃，才同一事务CAS清除这些previous标记并删除版本，当前已选/已加载/运行值不变。任何引用变化或失败整批不执行，未知回执重读而不重试。当前selected与实际loaded均为同版且配置一致时，重复确认不重新安装、不重置值或代次，previous保持；真正换版才更新回退记录。取消/离开预览释放票据，刷新版本事实不覆盖草稿。新发布默认保留最近5份加使用保护及回退保留旧版，自动清理不替用户放弃回退，启动、保存草稿和此次开发不裁剪既有库。沿用SQLite v1表结构，不迁移真实库。此DIRECT增量仅记录DEV交付/手册§2.7/2.8步骤，待Owner手工确认；不回写旧004/005/DS-001验收或DAA-007阶段结论。

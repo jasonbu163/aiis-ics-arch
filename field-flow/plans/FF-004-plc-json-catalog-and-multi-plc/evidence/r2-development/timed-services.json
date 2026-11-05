@@ -1,0 +1,14 @@
+[
+  {
+    "name": "bounded_service_identities_and_connecting_state",
+    "executable": "/private/tmp/ff-004-r2-dev-IVyzcc/test/debug/deps/multi_plc-881dd23a1b5c49da",
+    "exit": 0,
+    "seconds": 2.334042542
+  },
+  {
+    "name": "failed_round_has_no_stale_or_fabricated_samples",
+    "executable": "/private/tmp/ff-004-r2-dev-IVyzcc/test/debug/deps/multi_plc-881dd23a1b5c49da",
+    "exit": 0,
+    "seconds": 3.2343395000000004
+  }
+]

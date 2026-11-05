@@ -1,0 +1,45 @@
+{
+  "changedScopedDocuments": [
+    "backend-dotnet/PLAN.zh-CN.md",
+    "backend-dotnet/PLAN.md",
+    "backend-dotnet/plans/README.md",
+    "backend-dotnet/plans/README.zh-CN.md",
+    "PLAN.md",
+    "PLAN.zh-CN.md",
+    "plans/README.md",
+    "plans/README.zh-CN.md",
+    "plans/ARCH-BE-008-csharp-backend-plan-slice/checklist.md"
+  ],
+  "onlyAllowed9DocumentsChanged": true,
+  "mechanicalIndexRows": {
+    "PLAN.md": "| C# backend first Plan slice | `qa_passed` (ARCH-BE-008 r1, QA2) | [ARCH-BE-008 r1 spec](plans/ARCH-BE-008-csharp-backend-plan-slice/spec.md) | New fresh QA2 passed independent A11, disposable-MySQL B and 291 formal HTTP checks; F-QA1-001 is closed with QA1 failure history retained. Root backend-dotnet implements Plan create/detail/list without login authentication. Human Owner final acceptance remains pending; no production adoption. |",
+    "PLAN.zh-CN.md": "| C# \u540e\u7aef\u9996\u671f Plan \u5207\u7247 | `qa_passed`\uff08ARCH-BE-008 r1\uff0cQA2\uff09 | [ARCH-BE-008 r1 spec](plans/ARCH-BE-008-csharp-backend-plan-slice/spec.md) | \u65b0 fresh QA2 \u72ec\u7acb A11\u3001\u53ef\u4e22\u5f03 MySQL B \u53ca 291 \u6b63\u5f0f HTTP \u68c0\u67e5\u901a\u8fc7\uff0cF-QA1-001 \u5df2\u5173\u95ed\uff0cQA1 \u5931\u8d25\u5386\u53f2\u4fdd\u7559\u3002\u6839 backend-dotnet \u5df2\u5b9e\u73b0\u8ba1\u5212\u521b\u5efa/\u8be6\u60c5/\u5217\u8868\uff0c\u65e0\u767b\u5f55\u8ba4\u8bc1\uff1b\u5f85 Human Owner \u6700\u7ec8\u9a8c\u6536\uff0c\u672a\u8fdb\u5165\u751f\u4ea7\u91c7\u7528\u3002 |",
+    "plans/README.md": "| ARCH-BE-008 C# Backend First Plan Slice | `qa_passed` (r1, QA2) | [r1 spec](ARCH-BE-008-csharp-backend-plan-slice/spec.md); exact A+B approved on 2026-10-28 | [tasks.md](ARCH-BE-008-csharp-backend-plan-slice/tasks.md); exact rework1 candidate and DEV evidence, prior handoff retained | [checklist.md](ARCH-BE-008-csharp-backend-plan-slice/checklist.md); new fresh QA2 passed A11/new-MySQL/291 formal HTTP checks and closed F-QA1-001; QA1 retained, final acceptance pending |",
+    "plans/README.zh-CN.md": "| ARCH-BE-008 C# \u540e\u7aef\u9996\u671f Plan \u5207\u7247 | `qa_passed`\uff08r1\uff0cQA2\uff09 | [r1 spec](ARCH-BE-008-csharp-backend-plan-slice/spec.md)\uff1bHuman Owner \u4e8e 2026-10-28 \u7cbe\u786e\u6279\u51c6 A+B | [tasks.md](ARCH-BE-008-csharp-backend-plan-slice/tasks.md)\uff1b\u7cbe\u786e rework1 \u5019\u9009\u4e0e DEV \u8bc1\u636e\uff0c\u9996\u6b21\u4ea4\u63a5\u4fdd\u7559 | [checklist.md](ARCH-BE-008-csharp-backend-plan-slice/checklist.md)\uff1b\u65b0 fresh QA2 \u72ec\u7acb A11/\u65b0\u7a7a MySQL/291 \u6b63\u5f0f HTTP \u901a\u8fc7\uff0cF-QA1-001 \u5df2\u5173\u95ed\uff1bQA1 \u4fdd\u7559\uff0c\u6700\u7ec8\u9a8c\u6536\u5f85\u5b9a |",
+    "backend-dotnet/PLAN.md": "| [ARCH-BE-008 r1](../plans/ARCH-BE-008-csharp-backend-plan-slice/spec.md) | qa_passed | New fresh QA2 passed A11, dedicated MySQL and 291 formal HTTP checks; F-QA1-001 closed, QA1 history retained. Human Owner final acceptance pending; no authentication or production adoption. |",
+    "backend-dotnet/PLAN.zh-CN.md": "| [ARCH-BE-008 r1](../plans/ARCH-BE-008-csharp-backend-plan-slice/spec.md) | qa_passed | \u65b0 fresh QA2 \u72ec\u7acb A11\u3001\u4e13\u5c5e MySQL \u53ca 291 \u6b63\u5f0f HTTP \u68c0\u67e5\u901a\u8fc7\uff0cF-QA1-001 \u5173\u95ed\u3001QA1 \u5386\u53f2\u4fdd\u7559\u3002\u5f85 Human Owner \u6700\u7ec8\u9a8c\u6536\uff1b\u65e0\u8ba4\u8bc1\uff0c\u672a\u8fdb\u5165\u751f\u4ea7\u91c7\u7528\u3002 |",
+    "backend-dotnet/plans/README.md": "| ARCH-BE-008 r1 | [Approved A+B](../../plans/ARCH-BE-008-csharp-backend-plan-slice/spec.md) | [Tasks](../../plans/ARCH-BE-008-csharp-backend-plan-slice/tasks.md); rework1 handoff | [QA2 passed](../../plans/ARCH-BE-008-csharp-backend-plan-slice/checklist.md); F-QA1-001 closed, QA1 retained; Human Owner final acceptance pending |",
+    "backend-dotnet/plans/README.zh-CN.md": "| ARCH-BE-008 r1 | [\u5df2\u6279\u51c6A+B](../../plans/ARCH-BE-008-csharp-backend-plan-slice/spec.md) | [Tasks](../../plans/ARCH-BE-008-csharp-backend-plan-slice/tasks.md)\uff1brework1 \u4ea4\u63a5 | [QA2\u901a\u8fc7](../../plans/ARCH-BE-008-csharp-backend-plan-slice/checklist.md)\uff1bF-QA1-001 \u5173\u95ed\uff0cQA1 \u5386\u53f2\u4fdd\u7559\uff0c\u5f85 Human Owner \u6700\u7ec8\u9a8c\u6536 |"
+  },
+  "rootNon007008RowsEqualHEAD": true,
+  "candidate44And4ArtifactsUnchanged": true,
+  "specTasksAnd8PythonReferencesUnchanged": true,
+  "qa1BodyPreservedByteForByte": true,
+  "markdownFiles": 18,
+  "localTargetsChecked": 577,
+  "brokenLinks": [],
+  "diffCheckExit": 0,
+  "governance": {
+    "argv": [
+      "bash",
+      "/Users/jason/Desktop/DreamCode/AI/AIIS/skills/project-governance/scripts/check-governance-bundle.sh",
+      "/Users/jason/Desktop/DreamCode/aiis-ics-arch"
+    ],
+    "exitCode": 1,
+    "baselineLines": 320,
+    "currentLines": 320,
+    "added": [],
+    "removed": [],
+    "baselineSHA256": "c00b4c44f0e7467b8d098fec21fea3e7678e6c87eec6240e6335515f2d8b1256"
+  }
+}

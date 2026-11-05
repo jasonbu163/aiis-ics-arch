@@ -161,7 +161,7 @@ config/loopback.yaml 是完整可跑样例。对象为 Config → Plc[]、Flow[]
 | `plc.host / port / rack / slot` | IPv4 字面量 / 1–65535 / 0–7 / 0–31 |
 | `connect_timeout_ms / io_timeout_ms` | PLC：500–3000 / 500–5000 |
 | `queue_capacity / queue_wait_ms / ready_wait_ms` | 1–16 / 100–5000 / 100–5000 |
-| `flow.kind / interval_ms / input_max_age_ms` | 教程接线前仅 demo01 / 100–10000 / 1–60000 |
+| `flow.kind / interval_ms / input_max_age_ms` | demo01 / plc_guard_get_int / get_value_guard_int / 100–10000 / 1–60000 |
 | `get_url` | http(s)、host，无凭据/fragment；不走环境代理/重定向/业务重试 |
 | `target.plc_id / db_number` | 已存在 PLC / 1–65535 |
 | `db_size_bytes / byte_offset / type` | 2–65536 / 0–65534 / INT；offset+2 ≤ size |
@@ -268,15 +268,15 @@ python3 - <<'PY'
 from pathlib import Path
 p = Path("src/field_flow/config.py")
 s = p.read_text()
-old = 'f.kind == "demo01"'
+old = 'f.kind in ("demo01", "plc_guard_get_int", "get_value_guard_int")'
 assert s.count(old) == 1
-p.write_text(s.replace(old, 'f.kind in ("demo01", "teaching01")'))
+p.write_text(s.replace(old, 'f.kind in ("demo01", "plc_guard_get_int", "get_value_guard_int", "teaching01")'))
 p = Path("src/field_flow/runtime.py")
 s = p.read_text()
 assert s.count('from field_flow.app import demo01') == 1
-s = s.replace('from field_flow.app import demo01', 'from field_flow.app import demo01, teaching01')
-old = 'result = await demo01.once(self.http, flow, plc, execution)'
-new = 'case = {"demo01": demo01.once, "teaching01": teaching01.once}[flow.kind]\n                result = await case(self.http, flow, plc, execution)'
+s = s.replace('from field_flow.app import demo01, plc_guard_get_int, get_value_guard_int', 'from field_flow.app import demo01, plc_guard_get_int, get_value_guard_int, teaching01')
+old = '{"demo01": demo01.once, "get_value_guard_int": get_value_guard_int.once}'
+new = '{"demo01": demo01.once, "get_value_guard_int": get_value_guard_int.once, "teaching01": teaching01.once}'
 assert s.count(old) == 1
 p.write_text(s.replace(old, new))
 PY
@@ -371,3 +371,7 @@ A按Ctrl-C关闭夹具，返回后立即按第3节在A记录FF_FIXTURE_EXIT；�
 FF-002有限演练使用独立macOS arm64副本、真实产品CLI、各自新synthetic dry/execute场景和已接线教程案例；真实证据与失败归FF-002 tasks。fresh Verification给出自身verdict前仅为DEV自检。不宣称重跑FF-001全部故障矩阵、真实endpoint/PLC、DS联调、生产托管、跨平台移植、长稳或分发合规。后续资源回收前先保留报告/PID/退出码/端口证据。
 
 本地导航：[README](README.zh-CN.md)、[CODE_INDEX](CODE_INDEX.md)、[组件声明](THIRD_PARTY_NOTICES.zh-CN.md)。
+
+## 基础案例
+
+三个正式案例及完整运行命令见[案例目录](examples/README.zh-CN.md)，YAML合同见[配置说明](config/README.zh-CN.md)。teaching01仍只在教程副本接线。

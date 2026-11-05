@@ -1,0 +1,40 @@
+{
+  "archiveSHA512": "5893c66b48ea3674c7da18501059d606e96f3672fabe4d5e41762e692c7c83df3ee0b2b9dc5a0786191da2dc413d7335158101c14c935ab217f31ac2529770f3",
+  "metadataMatched": true,
+  "officialSdkEntry": {
+    "name": "dotnet-sdk-osx-arm64.tar.gz",
+    "rid": "osx-arm64",
+    "url": "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.403/dotnet-sdk-10.0.403-osx-arm64.tar.gz",
+    "hash": "5893c66b48ea3674c7da18501059d606e96f3672fabe4d5e41762e692c7c83df3ee0b2b9dc5a0786191da2dc413d7335158101c14c935ab217f31ac2529770f3"
+  },
+  "directAndLockedGraphs": {
+    "backend-dotnet/packages.lock.json": {
+      "direct": {
+        "FastEndpoints": "8.3.0",
+        "FastEndpoints.OpenApi": "8.3.0",
+        "FluentValidation": "12.1.1",
+        "Microsoft.AspNetCore.OpenApi": "10.0.14",
+        "Microsoft.EntityFrameworkCore": "10.0.14",
+        "Microsoft.EntityFrameworkCore.Relational": "10.0.14",
+        "MySql.Data": "26.10.0",
+        "MySql.EntityFrameworkCore": "10.0.12",
+        "Serilog.AspNetCore": "10.0.0",
+        "Serilog.Formatting.Compact": "3.0.0",
+        "Serilog.Sinks.File": "7.0.0"
+      },
+      "graphCount": 36,
+      "sha256": "2020c500652154081b9944687397b8012286ccab3a3aefc57a62b051cb2ba0ce"
+    },
+    "backend-dotnet/tests/AIIS.Backend.Tests/packages.lock.json": {
+      "direct": {
+        "Microsoft.AspNetCore.Mvc.Testing": "10.0.14",
+        "Microsoft.NET.Test.Sdk": "18.11.0",
+        "MSTest.TestAdapter": "4.5.2",
+        "MSTest.TestFramework": "4.5.2"
+      },
+      "graphCount": 81,
+      "sha256": "1d6cab6be94310b1767f4894553f320484b700506b2f55c4061ed57ed3701bc9"
+    }
+  },
+  "roleRegularFileByteMatchesCanonical": true
+}

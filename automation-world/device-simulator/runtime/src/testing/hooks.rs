@@ -186,7 +186,12 @@ pub fn prepare_workspace(app: &App, workspace: Workspace) -> Result<(), String> 
         workspace: state.workspace,
         confirm_points: ids,
     })?;
-    let revision = saved.revision_id.ok_or("test_revision_missing")?;
+    let revision = app
+        .configuration
+        .store
+        .publish(&saved.etag)?
+        .revision_id
+        .ok_or("test_revision_missing")?;
     for instance in instances {
         apply_revision(app, &instance.id, &revision)?;
     }
@@ -245,7 +250,15 @@ pub fn maintenance(app: &App, id: &str, enabled: bool) -> Result<(), String> {
         workspace: state.workspace,
         confirm_points: vec![point_id],
     })?;
-    apply_revision(app, id, &saved.revision_id.ok_or("test_revision_missing")?)
+    apply_revision(
+        app,
+        id,
+        &app.configuration
+            .store
+            .publish(&saved.etag)?
+            .revision_id
+            .ok_or("test_revision_missing")?,
+    )
 }
 
 /// 固定产品拓扑回归动作：真实保存新revision并停机apply，不接受任意配置或SQL。
@@ -263,5 +276,13 @@ pub fn reconfigure(app: &App, id: &str) -> Result<(), String> {
         workspace: state.workspace,
         confirm_points: vec![],
     })?;
-    apply_revision(app, id, &saved.revision_id.ok_or("test_revision_missing")?)
+    apply_revision(
+        app,
+        id,
+        &app.configuration
+            .store
+            .publish(&saved.etag)?
+            .revision_id
+            .ok_or("test_revision_missing")?,
+    )
 }

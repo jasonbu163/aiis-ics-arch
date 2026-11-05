@@ -7,6 +7,9 @@
     - Retains r1 batch exchange and protected deletion for saved records only
 -->
 <script setup lang="ts">
+import { ElDialog } from "element-plus";
+import { useTableWidths, vTableWidths } from "../../../console/tableWidths";
+import { ConsoleCard, ConsoleActionButton, StatusCapsule } from "@aw-ui";
 import { computed, ref, watch } from "vue";
 
 import type { LocaleMessages } from "../../../locales";
@@ -60,7 +63,8 @@ const fileError = ref("");
 const displayedError = computed(() => {
   if (!props.error) return "";
   if (props.error.includes("tss_mapping_value_rule_in_use")) return props.labels.mappingValueRuleInUse;
-  return props.labels.mappingValueRuleOperationFailed;
+  if (/CONFLICT|PREVIEW_CHANGED/.test(props.error)) return props.labels.localConfigurationConflict;
+  return `${props.labels.mappingValueRuleOperationFailed} ${props.error}`;
 });
 const isOriginDraft = computed(() => props.selectedOriginKey !== null);
 
@@ -205,45 +209,46 @@ function presetState(rule: MappingValueRuleDraft | MappingValueRuleConfiguration
 function draftState() {
   return props.labels.mappingValueRuleDraft;
 }
+
+const rulesTable = useTableWidths("value-rules", [{ id: "select", width: 64, min: 64, fixed: true }, { id: "state", width: 140 }, { id: "key", width: 180 }, { id: "name", width: 220 }, { id: "origin", width: 240 }, { id: "dataType", width: 130 }, { id: "values", width: 260 }, { id: "enabled", width: 140 }, { id: "actions", width: 230, min: 230, fixed: true }]);
 </script>
 
 <template>
   <div class="mapping-page-stack mapping-value-rules-stack">
-    <section class="panel">
-      <header class="panel-header"><div><p class="panel-kicker">{{ labels.mappingBackendConfiguration }}</p><h2>{{ labels.mappingValueRulesTitle }}</h2></div><span class="status-pill">{{ labels.mappingValueRulePreset }}</span></header>
+    <ConsoleCard :title="labels.mappingValueRulesTitle">
+    <p v-if="busy" class="hint" role="status">{{ labels.loading }}</p>
+<template #actions><StatusCapsule :label="labels.mappingValueRulePreset" /></template>
       <p>{{ labels.mappingValueRulesHint }}</p>
       <div class="action-row">
-        <button class="secondary-action" type="button" :disabled="!enabled || busy" @click="emit('load-saved-facts')">{{ labels.mappingValueRulesLoadSavedFacts }}</button>
-        <button class="danger-action" type="button" :disabled="!enabled || busy || !selectedDraftKeys.length" @click="requestSelectedDraftRemoval">{{ labels.mappingValueRuleRemoveSelectedDrafts.replace('{count}', String(selectedDraftKeys.length)) }}</button>
-        <button class="secondary-action" type="button" :disabled="!enabled || busy" @click="batchOpen = true">{{ labels.mappingBatchOperations }}</button>
-        <button class="primary-action" type="button" :disabled="!enabled || busy" @click="startCreate">{{ labels.mappingValueRuleNewGeneric }}</button>
+        <ConsoleActionButton tone="secondary" native-type="button" :disabled="!enabled || busy" @click="emit('load-saved-facts')">{{ labels.mappingValueRulesLoadSavedFacts }}</ConsoleActionButton>
+        <ConsoleActionButton tone="danger" native-type="button" :disabled="!enabled || busy || !selectedDraftKeys.length" @click="requestSelectedDraftRemoval">{{ labels.mappingValueRuleRemoveSelectedDrafts.replace('{count}', String(selectedDraftKeys.length)) }}</ConsoleActionButton>
+        <ConsoleActionButton tone="secondary" native-type="button" :disabled="!enabled || busy" @click="batchOpen = true">{{ labels.mappingBatchOperations }}</ConsoleActionButton>
+        <ConsoleActionButton tone="primary" native-type="button" :disabled="!enabled || busy" @click="startCreate">{{ labels.mappingValueRuleNewGeneric }}</ConsoleActionButton>
       </div>
-      <p v-if="displayedError" class="warning">{{ displayedError }}</p>
+      <p v-if="displayedError" class="warning" role="alert">{{ displayedError }}</p>
       <p v-if="status === 'saved'" class="notice">{{ labels.mappingValueRuleSaved }}</p>
-    </section>
+    </ConsoleCard>
 
-    <section class="panel">
-      <header class="panel-header"><div><p class="panel-kicker">{{ labels.mappingBackendConfiguration }}</p><h2>{{ labels.mappingValueRulesListTitle }}</h2></div></header>
-      <div class="table-scroll mapping-list-scroll" tabindex="0"><table class="mapping-list-table mapping-value-rules-table"><thead><tr><th><input :aria-label="labels.mappingValueRuleSelectAll" :checked="allDraftsSelected" :disabled="!enabled || busy || !factOriginDrafts.length" :indeterminate="draftSelectionIndeterminate" type="checkbox" @change="toggleAllDrafts(($event.target as HTMLInputElement).checked)" /></th><th>{{ labels.mappingValueRuleState }}</th><th>{{ labels.mappingValueRuleKey }}</th><th>{{ labels.targetApiName }}</th><th>{{ labels.mappingValueRuleOrigin }}</th><th>{{ labels.collectionFactsDataType }}</th><th>{{ labels.mappingValueRuleValues }}</th><th>{{ labels.targetApiState }}</th><th>{{ labels.targetApiActions }}</th></tr></thead>
+    <ConsoleCard :title="labels.mappingValueRulesListTitle">
+      <div class="table-scroll mapping-list-scroll" tabindex="0"><ConsoleActionButton size="small" @click="rulesTable.reset">{{ labels.resetTableWidths }}</ConsoleActionButton>
+<table v-table-widths="[rulesTable, labels.resizeTableColumn]" class="mapping-list-table mapping-value-rules-table"><thead><tr><th><input :aria-label="labels.mappingValueRuleSelectAll" :checked="allDraftsSelected" :disabled="!enabled || busy || !factOriginDrafts.length" :indeterminate="draftSelectionIndeterminate" type="checkbox" @change="toggleAllDrafts(($event.target as HTMLInputElement).checked)" /></th><th>{{ labels.mappingValueRuleState }}</th><th>{{ labels.mappingValueRuleKey }}</th><th>{{ labels.targetApiName }}</th><th>{{ labels.mappingValueRuleOrigin }}</th><th>{{ labels.collectionFactsDataType }}</th><th>{{ labels.mappingValueRuleValues }}</th><th>{{ labels.targetApiState }}</th><th>{{ labels.targetApiActions }}</th></tr></thead>
         <tbody>
-          <tr v-for="pending in factOriginDrafts" :key="`${pending.originSourceKey}/${pending.originFactName}`"><td><input type="checkbox" :checked="isDraftSelected(pending)" :disabled="!enabled || busy" @change="toggleDraft(pending, ($event.target as HTMLInputElement).checked)" /></td><td>{{ draftState() }}</td><td>—</td><td>{{ pending.name }}</td><td><code>{{ originLabel(pending) }}</code></td><td>{{ pending.dataType }}</td><td><code>{{ pending.valuesJson }}</code></td><td>{{ presetState(pending) }}</td><td><div class="mapping-list-row-actions"><button class="secondary-action" type="button" :disabled="!enabled || busy" @click="openOriginDraft(pending)">{{ labels.mappingValueRuleConfigure }}</button><button class="danger-action" type="button" :disabled="!enabled || busy" @click="requestSingleDraftRemoval(pending)">{{ labels.mappingValueRuleRemoveDraft }}</button></div></td></tr>
-          <tr v-for="rule in configurations" :key="rule.id"><td>—</td><td>{{ presetState(rule) }}</td><td><code>{{ rule.valueRuleKey }}</code></td><td>{{ rule.name }}</td><td><code>{{ originLabel(rule) }}</code></td><td>{{ rule.dataType }}</td><td><code>{{ JSON.stringify(rule.values) }}</code></td><td>{{ rule.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td><div class="mapping-list-row-actions"><button class="secondary-action" type="button" :disabled="!enabled || busy" @click="openEditor(rule.id)">{{ labels.targetApiEdit }}</button><button class="danger-action" type="button" :disabled="!enabled || busy" @click="remove(rule)">{{ labels.targetApiDelete }}</button></div></td></tr>
+          <tr v-for="pending in factOriginDrafts" :key="`${pending.originSourceKey}/${pending.originFactName}`"><td><input type="checkbox" :checked="isDraftSelected(pending)" :disabled="!enabled || busy" @change="toggleDraft(pending, ($event.target as HTMLInputElement).checked)" /></td><td>{{ draftState() }}</td><td>—</td><td>{{ pending.name }}</td><td><code>{{ originLabel(pending) }}</code></td><td>{{ pending.dataType }}</td><td><code>{{ pending.valuesJson }}</code></td><td>{{ presetState(pending) }}</td><td><div class="mapping-list-row-actions"><ConsoleActionButton size="small" tone="secondary" native-type="button" :disabled="!enabled || busy" @click="openOriginDraft(pending)">{{ labels.mappingValueRuleConfigure }}</ConsoleActionButton><ConsoleActionButton size="small" tone="danger" native-type="button" :disabled="!enabled || busy" @click="requestSingleDraftRemoval(pending)">{{ labels.mappingValueRuleRemoveDraft }}</ConsoleActionButton></div></td></tr>
+          <tr v-for="rule in configurations" :key="rule.id"><td>—</td><td>{{ presetState(rule) }}</td><td><code>{{ rule.valueRuleKey }}</code></td><td>{{ rule.name }}</td><td><code>{{ originLabel(rule) }}</code></td><td>{{ rule.dataType }}</td><td><code>{{ JSON.stringify(rule.values) }}</code></td><td>{{ rule.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td><div class="mapping-list-row-actions"><ConsoleActionButton size="small" tone="secondary" native-type="button" :disabled="!enabled || busy" @click="openEditor(rule.id)">{{ labels.targetApiEdit }}</ConsoleActionButton><ConsoleActionButton size="small" tone="danger" native-type="button" :disabled="!enabled || busy" @click="remove(rule)">{{ labels.targetApiDelete }}</ConsoleActionButton></div></td></tr>
         </tbody>
       </table></div>
       <p v-if="!configurations.length && !factOriginDrafts.length" class="empty-state">{{ labels.mappingValueRulesEmpty }}</p>
-    </section>
+    </ConsoleCard>
 
-    <div v-if="pendingDraftRemovals.length" class="facts-dialog-backdrop" @click.self="pendingDraftRemovals = []">
-      <section class="panel facts-dialog mapping-value-rule-delete-dialog" role="alertdialog" aria-modal="true" aria-labelledby="mapping-value-rule-draft-remove-confirm-title">
-        <header class="panel-header facts-dialog-header"><div><p class="panel-kicker">{{ labels.mappingValueRulePreset }}</p><h2 id="mapping-value-rule-draft-remove-confirm-title">{{ labels.mappingValueRuleRemoveDraftConfirmTitle }}</h2></div></header>
+    <Teleport to="#sma-overlays"><ElDialog :model-value="Boolean(pendingDraftRemovals.length)" :append-to-body="false" :title="labels.mappingValueRuleRemoveDraftConfirmTitle" class="sma-dialog mapping-value-rule-delete-dialog" @close="pendingDraftRemovals = []">
+<template #header><div class="panel-header facts-dialog-header"><div><p class="panel-kicker">{{ labels.mappingValueRulePreset }}</p><h2 id="mapping-value-rule-draft-remove-confirm-title">{{ labels.mappingValueRuleRemoveDraftConfirmTitle }}</h2></div></div></template>
         <p>{{ labels.mappingValueRuleRemoveDraftConfirm.replace('{count}', String(pendingDraftRemovals.length)) }}</p>
-        <div class="action-row facts-editor-actions"><button class="secondary-action" type="button" :disabled="busy" @click="pendingDraftRemovals = []">{{ labels.collectionFactsCancel }}</button><button class="danger-action" type="button" :disabled="!enabled || busy" @click="confirmDraftRemoval">{{ labels.mappingValueRuleRemoveDraft }}</button></div>
-      </section>
-    </div>
+        <div class="action-row facts-editor-actions"><ConsoleActionButton tone="secondary" native-type="button" :disabled="busy" @click="pendingDraftRemovals = []">{{ labels.collectionFactsCancel }}</ConsoleActionButton><ConsoleActionButton tone="danger" native-type="button" :disabled="!enabled || busy" @click="confirmDraftRemoval">{{ labels.mappingValueRuleRemoveDraft }}</ConsoleActionButton></div>
 
-    <div v-if="editorOpen" class="facts-dialog-backdrop" @click.self="editorOpen = false">
-      <section class="panel facts-dialog mapping-value-rule-dialog" role="dialog" aria-modal="true">
-        <header class="panel-header facts-dialog-header"><div><p class="panel-kicker">{{ labels.mappingValueRulePreset }}</p><h2>{{ selectedId || isOriginDraft ? labels.mappingValueRuleEdit : labels.mappingValueRuleNewGeneric }}</h2></div></header>
+</ElDialog></Teleport>
+
+    <Teleport to="#sma-overlays"><ElDialog :model-value="Boolean(editorOpen)" :append-to-body="false" :title="selectedId || isOriginDraft ? labels.mappingValueRuleEdit : labels.mappingValueRuleNewGeneric" class="sma-dialog mapping-value-rule-dialog" @close="editorOpen = false">
+<template #header><div class="panel-header facts-dialog-header"><div><p class="panel-kicker">{{ labels.mappingValueRulePreset }}</p><h2>{{ selectedId || isOriginDraft ? labels.mappingValueRuleEdit : labels.mappingValueRuleNewGeneric }}</h2></div></div></template>
         <form class="mapping-value-rule-form" @submit.prevent="emit('save')">
           <div class="form-grid">
             <label class="field"><span>{{ labels.mappingValueRuleKey }}</span><input :value="draft.valueRuleKey ?? labels.mappingValueRuleGeneratedKey" :readonly="Boolean(selectedId) || isOriginDraft" :disabled="!enabled || busy || isOriginDraft" @input="emit('update-draft', { valueRuleKey: ($event.target as HTMLInputElement).value })" /></label>
@@ -254,10 +259,10 @@ function draftState() {
           <p v-if="draft.originSourceKey && draft.originFactName" class="hint">{{ labels.mappingValueRuleOrigin }}: <code>{{ draft.originSourceKey }} / {{ draft.originFactName }}</code></p>
           <label class="field"><span>{{ labels.mappingValueRuleValues }}</span><textarea :value="draft.valuesJson" rows="8" spellcheck="false" :disabled="!enabled || busy" @input="emit('update-draft', { valuesJson: ($event.target as HTMLTextAreaElement).value })" /></label>
           <p class="hint">{{ labels.mappingValueRuleEmptyValuesHint }}</p>
-          <div class="action-row facts-editor-actions"><button class="secondary-action" type="button" :disabled="busy" @click="editorOpen = false">{{ labels.collectionFactsCancel }}</button><button class="primary-action" type="submit" :disabled="!enabled || busy">{{ labels.targetApiSave }}</button></div>
+          <div class="action-row facts-editor-actions"><ConsoleActionButton tone="secondary" native-type="button" :disabled="busy" @click="editorOpen = false">{{ labels.collectionFactsCancel }}</ConsoleActionButton><ConsoleActionButton tone="primary" native-type="submit" :disabled="!enabled || busy">{{ labels.targetApiSave }}</ConsoleActionButton></div>
         </form>
-      </section>
-    </div>
+
+</ElDialog></Teleport>
 
     <MappingBatchOperationsDialog v-if="batchOpen" :labels="labels" :title="labels.mappingValueRulesBatchTitle" :busy="busy" :saving-file="savingFile" :preview="importPreview" :error="fileError || error" :enabled="enabled" @close="closeBatch" @download-template="downloadTemplate" @export="exportRules" @import="importFile" @apply="emit('apply-import')" />
   </div>

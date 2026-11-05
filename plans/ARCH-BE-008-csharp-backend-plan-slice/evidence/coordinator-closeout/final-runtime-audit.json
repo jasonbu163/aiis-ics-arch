@@ -1,0 +1,32 @@
+{
+  "task": "ARCH-BE-008",
+  "ownedSdkProcesses": [],
+  "buildServerShutdownExecuted": false,
+  "dockerResources": [
+    {
+      "kind": "container",
+      "name": "aiis-arch-be008-mysql",
+      "absent": true
+    },
+    {
+      "kind": "network",
+      "name": "aiis-arch-be008-net",
+      "absent": true
+    },
+    {
+      "kind": "volume",
+      "name": "aiis-arch-be008-mysql-data",
+      "absent": true
+    }
+  ],
+  "portsRebindableWithSO_REUSEADDR": [
+    13388,
+    18108
+  ],
+  "sourceImplementationChanged": false,
+  "checkedAtUnixMs": 1793172880259,
+  "auxiliaryHistory": [
+    "Initial default-sandbox ps check raised PermissionError; escalated read-only check succeeded.",
+    "First absence assertion accepted no such only; Docker network uses not found; corrected read-only assertion and reran, with Docker daemon reachability independently confirmed."
+  ]
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "old_record_unchanged": {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/seal-evidence.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "actual_completed_file": {
+      "path": "/private/tmp/ff-004-r2-dev-IVyzcc/seal-evidence.txt",
+      "bytes": 736,
+      "sha256": "8f3015b63f4bb099078e9dd0d446b154f70655f13c0e872640b7966da4e0c069"
+    }
+  }
+]

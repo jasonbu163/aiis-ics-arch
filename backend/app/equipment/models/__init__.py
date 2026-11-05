@@ -13,3 +13,5 @@ from app.equipment.models.temperature_sample import EquipmentTemperatureSample, 
 __all__ += ["EquipmentTemperatureSample", "EquipmentTemperatureSampleReceipt"]
 
 from app.equipment.models.mapping_ingest import EquipmentMappingReceipt
+
+from app.equipment.models.integration import EquipmentIntegrationReceipt  # noqa: F401

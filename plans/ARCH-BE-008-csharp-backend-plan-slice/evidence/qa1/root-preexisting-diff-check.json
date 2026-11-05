@@ -1,0 +1,36 @@
+{
+  "PLAN.md": {
+    "unrelatedContentPreserved": true
+  },
+  "PLAN.zh-CN.md": {
+    "unrelatedContentPreserved": true
+  },
+  "plans/README.md": {
+    "unrelatedContentPreserved": true
+  },
+  "plans/README.zh-CN.md": {
+    "unrelatedContentPreserved": true
+  },
+  "README.md": {
+    "removedLines": [],
+    "addedLines": [
+      "\u251c\u2500\u2500 backend-dotnet/ # Independent C# Plan learning slice (no login)\n",
+      "\n",
+      "See [C# Plan learning slice](backend-dotnet/README.md) for the independent, direct-MySQL three-API prototype. It has no login and does not replace Python; actual checks and the pending fresh Verification gate belong to [ARCH-BE-008](plans/ARCH-BE-008-csharp-backend-plan-slice/tasks.md).\n"
+    ]
+  },
+  "README.zh-CN.md": {
+    "removedLines": [],
+    "addedLines": [
+      "\u251c\u2500\u2500 backend-dotnet/ # \u72ec\u7acb C# Plan \u9996\u671f\u5b66\u4e60\u5207\u7247\uff08\u65e0\u767b\u5f55\uff09\n",
+      "\n",
+      "\u72ec\u7acb\u7684 [C# Plan \u9996\u671f\u5b66\u4e60\u5207\u7247](backend-dotnet/README.zh-CN.md)\u76f4\u63a5\u5199 MySQL\uff0c\u4ec5\u4e09\u4e2a API\u3001\u65e0\u767b\u5f55\uff0c\u4e0d\u66ff\u4ee3 Python\uff1b\u5b9e\u9645\u68c0\u67e5\u4e0e\u5f85 fresh Verification \u7684\u72b6\u6001\u5f52 [ARCH-BE-008](plans/ARCH-BE-008-csharp-backend-plan-slice/tasks.md)\u3002\n"
+    ]
+  },
+  "CODE_INDEX.md": {
+    "removedLines": [],
+    "addedLines": [
+      "- `backend-dotnet/` \u2014 independent C# Plan learning slice; three direct-MySQL APIs, no login; [local source index](backend-dotnet/CODE_INDEX.md).\n"
+    ]
+  }
+}

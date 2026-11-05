@@ -99,6 +99,7 @@ export async function parseMappingConfigurationFile(
   resource: MappingConfigurationResource,
   file: File,
 ): Promise<unknown[]> {
+  if (file.size > 10 * 1024 * 1024) throw new Error("SMA_CONFIGURATION_LIMIT_EXCEEDED");
   const extension = file.name.toLowerCase().split(".").pop();
   if (extension === "json") {
     const payload = JSON.parse(await file.text()) as unknown;
@@ -106,7 +107,7 @@ export async function parseMappingConfigurationFile(
     return payload[resource];
   }
   if (extension !== "xlsx") throw new Error("MAPPING_FILE_TYPE_INVALID");
-  const workbook = XLSX.read(await file.arrayBuffer(), { type: "array", raw: false });
+  const workbook = XLSX.read(await file.arrayBuffer(), { type: "array", raw: false, bookVBA: true });
   if (workbook.vbaraw || workbook.SheetNames.length !== 1 || workbook.SheetNames[0] !== resource) {
     throw new Error("MAPPING_FILE_WORKBOOK_INVALID");
   }

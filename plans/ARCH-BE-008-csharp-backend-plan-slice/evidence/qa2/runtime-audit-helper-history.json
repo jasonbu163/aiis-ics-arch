@@ -1,0 +1,9 @@
+{
+  "attempt1": {
+    "compileExit": 1,
+    "executionExit": 1,
+    "error": "SyntaxError from single quote nesting in private helper SQL string; neither parse entered any runtime audit nor sent SQL",
+    "productFailure": false,
+    "fix": "use equivalent CAST(datetime AS CHAR) for read-only direct SELECT; compile checked before rerun"
+  }
+}

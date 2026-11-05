@@ -4,6 +4,10 @@ English version: [PLAN.md](PLAN.md)
 
 ## 当前基线
 
+- [ARCH-BE-009 r1](../plans/ARCH-BE-009-backend-facts-integration/spec.md)：B `qa_passed`；Development 9项正式MySQL及42项扩展；fresh QA独立通过9项正式、47项具名扩展、181项聚焦和44项旧测试（9项未选）通过；A与全部失败史保留。2容器/2卷/2网及8专用库、27份临时口令/操作配置已清理且独立核验。Owner终验、真实采用、DAA及生产长期SLA仍为独立gate；现有库/真实历史未操作。
+
+- [ARCH-BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/spec.md)：B `qa_passed`；两轮真实MySQL/ASGI/时间/并发/断线、各161项受影响源码回归及事实清理后永久业务回执通过；A与全部失败史保留。2容器/2卷/2网及8专用库、27份临时口令/操作配置已清理且独立核验。Owner终验、真实采用、DAA及生产长期SLA仍为独立gate；现有库/真实历史未操作。
+
 - [ARCH-BE-005 r3](../plans/ARCH-BE-005-backend-business-module-reintegration/spec.md)：`owner_accepted`；独立 A 及两轮隔离 MySQL 各五场景、专用资源清理完成，Human Owner 于 2026-10-16 最终验收；保留全部历史。
 
 - [ARCH-BE-006 r1](../plans/ARCH-BE-006-mapping-business-api-expansion/spec.md)：`qa_passed`；A+B 独立验证通过，两轮专用 MySQL 及五页浏览器检查完成，资源与测试秘密已清理；155 项相关测试通过，四项历史冻结 profile 失败保留；Human Owner 最终验收 pending。

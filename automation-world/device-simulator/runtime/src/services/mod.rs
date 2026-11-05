@@ -8,3 +8,4 @@ pub mod owner;
 pub mod queries;
 pub mod scheduler;
 pub mod source_import;
+pub mod versions;

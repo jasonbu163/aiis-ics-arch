@@ -61,3 +61,7 @@ otool -L "$FF_BUILD/product/release/field-flow"
 源码/config是可审查候选，target是可重建产物；新synthetic教学状态只在证据/归属核对后可回收。既有execute库是执行历史，不能删库重来。替换executable或迁机前：正常停writer、实际wait/reap子进程、核对端口/PID、inspect schema/implementation/mode/instance及未决命令，保留原状态/日志。不随意复制运行中SQLite/journal/lock/gate，不切语言共用可写库或生成新身份重放。本轮无可交付的backup/restore、schema兼容迁移或跨主机fencing流程，须另立范围。换binary不授权schema/数据变更或unknown处置。
 
 本轮不安装服务、不部署、不操作真实PLC/HTTP、不Git发布、不签名或授予许可合规结论。[本机runtime手册](USER_GUIDE.zh-CN.md)含有限loopback步骤和正常释放证据。
+
+## FF-004目录配置
+
+产品仍以无feature release构建；catalog夹具单独用test-fixture构建，不是部署依赖。运行v2时携带主YAML和其plc_files显式列出的JSON，保持相对结构；locale编入自身二进制。先停止编辑，再启动一次完整冻结加载，无热重读。validate只读且不打开库/日志/网络。主YAML/JSON/DS来源hash不是原效果hash；v2 demo01规范化为原Flow/Target后沿用原Execution与schema1。切换writer先停旧端并保全原库/unknown，不能清库换ID。平台门槛和原UTC历史限制不因本切片改变。

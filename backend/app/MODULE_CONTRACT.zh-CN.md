@@ -97,3 +97,32 @@ Docker、数据库动作、部署、真实设备与发布分别经过后续gate�
 获批equipment scope归其本地BaseSettings及懒依赖。显式参数优先process env、process优先选定dotenv；测试明确合成文件或_env_file=None，不建立跨应用缓存或import时配置实例。helper不是设备目录、授权或新配置平台。真实env采用/重启及MySQL验证仍经独立运行gate。
 
 BE003调用generate_full_profile须显式传profile_name="BE003", expected_table_count=60, target_revision="e4f6a8b0c2d4"；新全树副本不能冒称冻结BE005 F/58。C2/E原14/15/16保证和断言保持。
+
+
+## 匿名集成原语
+
+A0只公开 `module_contract.PUBLIC_SYMBOLS` 中有限的 `common.integration` 符号。业务字段、模块StrEnum错误、SQL及生命周期仍归模块。版本常量为 `CONTRACT_VERSION="aiis.business-integration/v1"`、`DIGEST_PROFILE="bi-json/v1"`。
+
+| 入口 | 公共签名 / 行为 |
+| --- | --- |
+| `envelope` | `IntegrationSchema`、`IntegrationEnvelope[DataT]`、`Identifier`、`SourceTime`、`BUSINESS_TIMEZONE`；严格camelCase、禁止未知字段，来源引用为有限判别类型。 |
+| `envelope` | `identifier(value, maximum=128)`、`source_time(value)`、`shanghai_time(value)`、`fact_time(value)`、`validate_source_clock(value, database_now)`；上海业务毫秒，引用保留必要小数秒精度，DB时钟必须显式注入。 |
+| `canonical` | `canonical_bytes(value) -> bytes`；精确JSON number、UTF-8字节排序，不改键。格式化前限制256位有效数字/绝对指数1000以拒绝极端值；DTO继续收窄实际存储域。 |
+| `canonical` | `integration_digests(envelope, resource, parent_record_id=None) -> (requestDigest, businessDigest)`；data键集表达字段存在，业务对象为 `{resource,parentRecordId,data}`。引用按规范字节排序；非过程父为null。FLOAT32采用实际binary32的精确十进制，不依赖默认float打印。 |
+| `http` | `strict_json(body) -> dict`、`IntegrationPayloadError(status,suffix)`、`IntegrationRoute`、`MAX_BODY_BYTES=65536`、`MAX_DEPTH=12`；原文Decimal、重复键拒绝、有界流读取及局部脱敏HTTP错误壳。模块子类声明owner/error enum；响应前完整退出yield依赖。 |
+| `receipt` | `IntegrationReceipt`、`receipt_response(receipt, replay=False) -> bytes`；显式稳定字段、保留首次结果，重放仅改变outcome为duplicate。须在可靠commit后调用并使用显式JSON响应；纯函数本身不能证明数据库提交。 |
+
+子模块其他导入/helper均私有。原语不导入业务表，不实现动态handler/通用CRUD平台，旧 `serialize_api_data` 不变。新接口实施前须定义typed data、存在/单位/时间、业务/投递键、两摘要、原子事务、稳定ACK/恢复、保留和认证/准入；破坏语义变更需新主版本。规范例子及向量见 [ARCH-BE-010](../../plans/ARCH-BE-010-anonymous-business-integration/spec.md)与[开发记录](../../plans/ARCH-BE-010-anonymous-business-integration/tasks.md)。
+
+各owner使用本地 `{EQUIPMENT,PERFORMANCE,MONITOR}_INTEGRATION_{ENABLED,EQUIPMENT_IDS_JSON,PRODUCER_IDS_JSON,STORAGE_PROFILE}`，默认False / `[]` / `[]` / `unadopted`；设备scope最多256个精确标识。显式构造优先process env，再选定dotenv，再默认；每应用懒固定独立配置。A0始终在DB访问前对合格准入返回模块 `integration_not_ready`，配置字符串不证明G-T。没有获批migration的Model只是准备，不能把本切片部署成已启用业务provider。
+
+独立命名的 `BE010-A0` 公开fixture有68张metadata表、84项公开示例配置（原72项完整原文前缀加12项默认关闭配置）。`target_revision=null` 与 `schema_state=models_only_unadopted_no_migration` 明确尚未实现新migration。冻结C2/E/F/BE003/BE006 fixture及断言保持，不以其历史固定数量冒充本profile。
+
+
+## 有界业务时间源码接面（BE010 r2）
+
+`common.integration.storage` 精确公开 `StorageProbe`、`AdoptionContext`、`parse_adoption_manifest(value,module)`、`validate_adoption_probe(manifest,probe)`、`to_storage_time(value,basis)`、`to_legacy_time(value,basis)`。均为纯函数/值，不访问配置、文件、SQL、Session或目标。各owner仅通过自身manifest为只读维护工具export `integration_storage:BUSINESS_TIME_COLUMN_PROFILE` 与 `crud.sync_integration:probe_storage(db)`；async探针不跨模块公开。探针使用传入会话固定读取UUID/schema/revision/UTC时钟，不创建/提交会话，revision采用共享锁current read。
+
+`IntegrationSuccess[ReceiptT]` 提供typed code/message/data信封。八路请求、具体回执、有限HTTP错误类型仍归owner。新模块自选data及状态规则，不必复制这八类资源或固定时间列。
+
+历史A0 fixture继续标识为 `BE010-A0`（68 metadata/84项/models-only），重建其配置/schema面时排除BE009及新迁移；运行实现源码仍来自当前树。当前源码命名 `BE010-r2-A`：应用表按71→75接链，公开example共91项（旧69+BE006 3+A0 12+BE009 4+采用路径3）。`source_ready_unadopted`只表示源码状态；真实目标采用、schema迁移、数据库/Docker/B及Owner接受仍是独立gate。

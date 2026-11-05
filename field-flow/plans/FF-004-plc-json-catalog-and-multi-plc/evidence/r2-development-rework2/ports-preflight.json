@@ -1,0 +1,42 @@
+[
+  {
+    "port": 31102,
+    "lsof_exit": 1,
+    "bound_closed": true
+  },
+  {
+    "port": 31103,
+    "lsof_exit": 1,
+    "bound_closed": true
+  },
+  {
+    "port": 31880,
+    "lsof_exit": 1,
+    "bound_closed": true
+  },
+  {
+    "port": 34102,
+    "lsof_exit": 1,
+    "bound_closed": true
+  },
+  {
+    "port": 34103,
+    "lsof_exit": 1,
+    "bound_closed": true
+  },
+  {
+    "port": 34112,
+    "lsof_exit": 1,
+    "bound_closed": true
+  },
+  {
+    "port": 34113,
+    "lsof_exit": 1,
+    "bound_closed": true
+  },
+  {
+    "port": 34880,
+    "lsof_exit": 1,
+    "bound_closed": true
+  }
+]

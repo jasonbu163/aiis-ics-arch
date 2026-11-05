@@ -1,0 +1,52 @@
+{
+  "task": "ARCH-BE-008",
+  "revision": "r1",
+  "finding": "F-QA1-001",
+  "httpCases": 18,
+  "nonJsonMediaCases": 7,
+  "each415FullEnvelopeAndStableErrorLog": true,
+  "nonJsonRequestIds": [
+    "0HNPKNUGNCL68:00000001",
+    "0HNPKNUGNCL69:00000001",
+    "0HNPKNUGNCL6A:00000001",
+    "0HNPKNUGNCL6B:00000001",
+    "0HNPKNUGNCL6C:00000001",
+    "0HNPKNUGNCL6D:00000001",
+    "0HNPKNUGNCL6E:00000001"
+  ],
+  "rejectedRowsFingerprintUnchanged": true,
+  "422404405Preserved": true,
+  "rowsBeforeFirstStartup": 10,
+  "processes": [
+    {
+      "phase": "first",
+      "pid": 59837,
+      "processTZ": "America/New_York",
+      "planId": 13,
+      "createdAt": "2026-10-28T14:49:36+08:00",
+      "updatedAt": "2026-10-28T14:49:36+08:00",
+      "rows": 11,
+      "createGetRestartSame25Fields": true,
+      "schemaOnlyPlansUnchanged": true
+    },
+    {
+      "phase": "second",
+      "pid": 59873,
+      "processTZ": "UTC",
+      "planId": 13,
+      "createdAt": "2026-10-28T14:49:36+08:00",
+      "updatedAt": "2026-10-28T14:49:36+08:00",
+      "rows": 11,
+      "createGetRestartSame25Fields": true,
+      "schemaOnlyPlansUnchanged": true
+    }
+  ],
+  "apiExitCodes": [
+    0,
+    0
+  ],
+  "pidsAbsent": true,
+  "port18108RebindWithReuseAddr": true,
+  "parsedLogLines": 74,
+  "secretScan": "no_matches"
+}

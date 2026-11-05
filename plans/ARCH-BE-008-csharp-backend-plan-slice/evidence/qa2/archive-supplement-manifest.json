@@ -1,0 +1,49 @@
+{
+  "task": "ARCH-BE-008",
+  "revision": "r1",
+  "qaRound": "QA2",
+  "supplementOfManifestSHA256": "840f4fff6ea5fadd77f4ab6253b283ffd4b572e5a1969089e61828f7783a30d3",
+  "destinationRoot": "plans/ARCH-BE-008-csharp-backend-plan-slice/evidence/qa2",
+  "files": [
+    {
+      "source": "/private/tmp/arch-be008-qa2-gkv496cr/qa1-history-preservation.json",
+      "relativeDestination": "qa1-history-preservation.json",
+      "sha256": "0298ffe20ea843541ec771e8ed14d0992fa704f97378ee9b0614fc256d99c4fb",
+      "bytes": 294
+    },
+    {
+      "source": "/private/tmp/arch-be008-qa2-gkv496cr/final-document-candidate-audit.json",
+      "relativeDestination": "final-document-candidate-audit.json",
+      "sha256": "b0dd6d956f2ec8758ee1e076860c22b0ee3b6f221911298844b4d6b2854892d2",
+      "bytes": 4929
+    },
+    {
+      "source": "/private/tmp/arch-be008-qa2-gkv496cr/final-document-helper-history.json",
+      "relativeDestination": "final-document-helper-history.json",
+      "sha256": "473ce7375d468325ae473a78668b38bab586fd69ab11badc750922a6fe9c40c5",
+      "bytes": 296
+    },
+    {
+      "source": "/private/tmp/arch-be008-qa2-gkv496cr/governance-final.stdout",
+      "relativeDestination": "governance-final.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "source": "/private/tmp/arch-be008-qa2-gkv496cr/governance-final.stderr",
+      "relativeDestination": "governance-final.stderr",
+      "sha256": "c00b4c44f0e7467b8d098fec21fea3e7678e6c87eec6240e6335515f2d8b1256",
+      "bytes": 50974
+    },
+    {
+      "source": "/private/tmp/arch-be008-qa2-gkv496cr/final-archive-resource-audit.json",
+      "relativeDestination": "final-archive-resource-audit.json",
+      "sha256": "fa3b46bec157e90f39ec1e05fd13441772f8f1360363f4646242b0909483a13e",
+      "bytes": 757
+    }
+  ],
+  "fileCount": 6,
+  "totalBytes": 57250,
+  "secretComparison": "five actual secret/full connection byte strings no matches",
+  "timestamp": "2026-10-28T07:24:15.456944+00:00"
+}

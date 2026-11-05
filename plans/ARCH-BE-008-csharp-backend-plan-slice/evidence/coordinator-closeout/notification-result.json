@@ -1,0 +1,17 @@
+{
+  "task": "ARCH-BE-008",
+  "revision": "r1",
+  "executionId": "f84fa616445449e485c95705a0ab0882",
+  "executionStatus": "needs_input",
+  "elapsedSeconds": 7312.652977228165,
+  "nextGate": "Human Owner final acceptance",
+  "notificationStatus": "notification_failed",
+  "notificationSent": false,
+  "attempt": "one reserved self-notification to me via connected Gmail",
+  "rejectionSource": "automatic approval review",
+  "reason": "Gmail destination account ownership and authorization to send repository path, verification results and task status were not confirmed.",
+  "bypassOrRetryPerformed": false,
+  "taskVerdictUnchanged": "qa_passed; Human Owner final acceptance pending",
+  "reviewRequiredForFutureRetry": "Human Owner confirms connected Gmail ownership and explicitly authorizes the concrete notification payload.",
+  "recordedAtUnixMs": 1793173163970
+}

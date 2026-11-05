@@ -1,0 +1,3 @@
+{"@t":"2026-10-28T06:49:37.3257370Z","@mt":"Registered {total} endpoints in {time} milliseconds.","total":3,"time":"84","EventId":{"Id":1,"Name":"EndpointsRegistered"},"SourceContext":"FastEndpoints.StartupTimer"}
+{"@t":"2026-10-28T06:49:37.3438310Z","@mt":"{event}","event":"backend_started","SourceContext":"AIIS.Backend.Api"}
+{"@t":"2026-10-28T06:49:37.9859930Z","@mt":"{event}","event":"backend_stopped","SourceContext":"AIIS.Backend.Api"}

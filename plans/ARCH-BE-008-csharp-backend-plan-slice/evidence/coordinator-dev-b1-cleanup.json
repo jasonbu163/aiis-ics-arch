@@ -1,0 +1,38 @@
+{
+  "task": "ARCH-BE-008",
+  "runId": "e0f8250b0e34faf81d88dac5",
+  "resources": [
+    {
+      "kind": "container",
+      "name": "aiis-arch-be008-mysql",
+      "task": "ARCH-BE-008",
+      "runId": "e0f8250b0e34faf81d88dac5",
+      "id": "b551f2525a513695de8fbe8e10d69d0fdef1386303ab0ee5cf83b1f6586e0c7f"
+    },
+    {
+      "kind": "network",
+      "name": "aiis-arch-be008-net",
+      "task": "ARCH-BE-008",
+      "runId": "e0f8250b0e34faf81d88dac5",
+      "id": "3bcaf4888691d706f47252a6b448179ce217063d3bc61055104c34a029107e4e"
+    },
+    {
+      "kind": "volume",
+      "name": "aiis-arch-be008-mysql-data",
+      "task": "ARCH-BE-008",
+      "runId": "e0f8250b0e34faf81d88dac5",
+      "id": "aiis-arch-be008-mysql-data"
+    }
+  ],
+  "evidence": {
+    "dev-b1-prepare.json": "e1a42401832db532396193c22e92c3ae4f08a98e944e8d71d89af661128c701c",
+    "dev-b-provider-diagnosis.trx": "419b4812292b4b680af686001c46e1783d60c42cb64e110211792e519724da27",
+    "dev-b1-outage-harness-failure.trx": "e07646adfed546828ccb0934193873e5fd82ef53e6253c339d02be73546745db",
+    "dev-b1-select-readback.tsv": "f157f95c551c8f93d0ef473294d79c11677de289882cbcf371218fd8803bc187"
+  },
+  "cleanup_exit": 0,
+  "cleanup_output": "owned_resources_removed\n",
+  "resources_absent": true,
+  "13388_bind": "free",
+  "run_root_retained": "raw failure logs and private files pending final audit"
+}

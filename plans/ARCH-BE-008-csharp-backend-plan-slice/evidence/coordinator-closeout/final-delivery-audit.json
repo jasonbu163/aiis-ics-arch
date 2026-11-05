@@ -1,0 +1,17 @@
+{
+  "task": "ARCH-BE-008",
+  "candidateSha256": "a9afc3bb5a75a610f25e6a42cbc694e019e0e66247c8c60926ca03cff78819f6",
+  "candidateFilesMatched": 44,
+  "artifactsMatched": 4,
+  "pythonReferencesMatched": 8,
+  "scopeMarkdownFiles": 17,
+  "localLinksExisting": 579,
+  "scopedWhitespaceAndDiffCheckExit": 0,
+  "rootIndexOtherRowsUnchanged": true,
+  "governanceExit": 1,
+  "governanceLines": 320,
+  "governanceAdded": [],
+  "governanceRemoved": [],
+  "sourceImplementationChanged": false,
+  "checkedAtUnixMs": 1793172857183
+}

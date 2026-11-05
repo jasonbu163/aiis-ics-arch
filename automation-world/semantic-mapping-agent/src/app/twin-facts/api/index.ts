@@ -1,25 +1,14 @@
-/**
- * File Path: /automation-world/semantic-mapping-agent/src/app/twin-facts/api/index.ts
- * Description: Collection Facts, API-first Mapping configuration, and Runtime IPC facade.
- * Main Features: Keeps API Materials, Mapping configuration, and Simulation settings Backend-owned while Tauri owns Mapping delivery and local runtime startup preferences.
- */
+/** 本地配置IPC、显式门禁只读事实、已关闭正常投递入口。 */
+import { localConfiguration, listLocalResource, saveLocalResource, deleteLocalResource, previewResourceImport, applyResourceImport, changeConfiguration } from "./localConfiguration";
 import { invokeCommand, isTauriRuntime } from "../../tauri";
 import { formatBackendBaseUrl, loadBackendConnectionProfile, requireExternalIo } from "../../connection/api";
 import type {
   BackendCollectionFactListQuery,
   BackendCollectionFactPage,
-  ApiMaterialConfiguration,
   ApiMaterialSelectionResult,
   CollectionFactContract,
-  CollectionFactContractPreview,
-  CollectionFactValueUpdate,
-  CollectionFactValueUpdateResponse,
-  ConfigurationImportPreview,
   ApiFirstMappingRuntimeStartRequest,
-  CollectionSimulationStartRequest,
   RuntimeStartupPreferences,
-  SimulationRuleConfiguration,
-  SimulationRuleConfigurationInput,
   MappingConfiguration,
   MappingConfigurationInput,
   MappingManualRunRecord,
@@ -37,11 +26,6 @@ import {
 } from "../utils/collectionFactFiles";
 
 const COLLECTION_FACTS_API_PATH = "/api/integration/v1/collection-facts";
-const TSS_TARGET_APIS_API_PATH = "/api/tss/v1/target-apis";
-const TSS_API_MATERIALS_API_PATH = "/api/tss/v1/api-materials";
-const TSS_MAPPING_VALUE_RULES_API_PATH = "/api/tss/v1/mapping-value-rules";
-const TSS_MAPPINGS_API_PATH = "/api/tss/v1/mappings";
-const TSS_SIMULATION_RULES_API_PATH = "/api/tss/v1/simulation-rules";
 const BACKEND_REQUEST_TIMEOUT_MS = 5000;
 
 interface BackendEnvelope<T> {
@@ -69,27 +53,6 @@ export function readCollectionFactsContractFromBackend(
   return requestBackendData(`${COLLECTION_FACTS_API_PATH}/contracts/${encodeURIComponent(sourceKey)}`);
 }
 
-export function previewCollectionFactsContractFromBackend(
-  contract: CollectionFactContract,
-): Promise<CollectionFactContractPreview> {
-  return requestBackendData(`${COLLECTION_FACTS_API_PATH}/contracts/preview`, {
-    method: "POST",
-    body: JSON.stringify(contract),
-  });
-}
-
-export function applyCollectionFactsContractToBackend(
-  contract: CollectionFactContract,
-): Promise<CollectionFactContractPreview> {
-  return requestBackendData(
-    `${COLLECTION_FACTS_API_PATH}/contracts/${encodeURIComponent(contract.sourceKey)}`,
-    {
-      method: "PUT",
-      body: JSON.stringify(contract),
-    },
-  );
-}
-
 export function listCollectionFactsFromBackend(
   query: BackendCollectionFactListQuery,
 ): Promise<BackendCollectionFactPage> {
@@ -104,248 +67,47 @@ export function listCollectionFactsFromBackend(
   return requestBackendData(`${COLLECTION_FACTS_API_PATH}${suffix}`);
 }
 
-export function updateCollectionFactValuesInBackend(
-  sourceKey: string,
-  update: CollectionFactValueUpdate,
-): Promise<CollectionFactValueUpdateResponse> {
-  return requestBackendData(`${COLLECTION_FACTS_API_PATH}/${encodeURIComponent(sourceKey)}/values`, {
-    method: "PUT",
-    body: JSON.stringify(update),
-  });
-}
-
-export function listSimulationRulesFromBackend(): Promise<SimulationRuleConfiguration[]> {
-  return requestBackendData(TSS_SIMULATION_RULES_API_PATH);
-}
-
-export function createSimulationRuleInBackend(
-  input: SimulationRuleConfigurationInput,
-): Promise<SimulationRuleConfiguration> {
-  return requestBackendData(TSS_SIMULATION_RULES_API_PATH, {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
-}
-
-export function updateSimulationRuleInBackend(
-  simulationRuleId: string,
-  input: SimulationRuleConfigurationInput,
-): Promise<SimulationRuleConfiguration> {
-  return requestBackendData(`${TSS_SIMULATION_RULES_API_PATH}/${encodeURIComponent(simulationRuleId)}`, {
-    method: "PUT",
-    body: JSON.stringify(input),
-  });
-}
-
 export function savedBackendBaseUrl(): string {
   return formatBackendBaseUrl(loadBackendConnectionProfile());
 }
 
-export function deleteSimulationRuleInBackend(ruleId: string): Promise<unknown> {
-  return requestBackendData(`${TSS_SIMULATION_RULES_API_PATH}/${encodeURIComponent(ruleId)}`, {
-    method: "DELETE",
-  });
+// Historical facade names are retained for callers; every business configuration operation is local IPC.
+export function listTargetApiConfigurationsFromBackend() { return listLocalResource("targetApis"); }
+export function listApiMaterialsFromBackend(_sourceLocator = "") { return listLocalResource("materials"); }
+export async function syncApiMaterialSelectionInBackend(input: unknown, revision?: number): Promise<ApiMaterialSelectionResult> {
+  const before = localConfiguration.value?.document.materials ?? [];
+  const data = input as { operations: { selected: boolean; httpMethod: string; path: string }[] };
+  const snapshot = await changeConfiguration({ kind: "selection", resource: "materials", id: null, payload: data.operations.filter(o => o.selected).map(o => `${o.httpMethod} ${o.path}`) }, revision);
+  const after = snapshot.document.materials;
+  return { created: after.filter(m => !before.some(b => b.id === m.id)).length, updated: after.filter(m => before.some(b => b.id === m.id && b.updatedAt !== m.updatedAt)).length, unchanged: after.filter(m => before.some(b => b.id === m.id && b.updatedAt === m.updatedAt)).length, removed: before.filter(b => !after.some(m => m.id === b.id)).length, materials: after };
 }
-
-export function listTargetApiConfigurationsFromBackend(): Promise<TargetApiConfiguration[]> {
-  return requestBackendData(TSS_TARGET_APIS_API_PATH);
+export async function loadTargetApisFromMaterialsInBackend(materialKeys: string[], revision?: number): Promise<TargetApiMaterialLoadResult> {
+  const before = localConfiguration.value?.document.targetApis ?? [];
+  const snapshot = await changeConfiguration({ kind: "loadMaterials", resource: "targetApis", id: null, payload: materialKeys }, revision);
+  return { created: snapshot.document.targetApis.filter(t => !before.some(b => b.id === t.id)).map(t => t.apiKey), skipped: [], requiresConfiguration: [], targetApis: snapshot.document.targetApis };
 }
-
-export function listApiMaterialsFromBackend(
-  sourceLocator: string,
-): Promise<ApiMaterialConfiguration[]> {
-  const query = new URLSearchParams({ sourceLocator });
-  return requestBackendData(`${TSS_API_MATERIALS_API_PATH}?${query.toString()}`);
+export async function getTargetApiConfigurationFromBackend(id: string) { const item = (await listLocalResource("targetApis")).find(t => t.id === id); if (!item) throw new Error("SMA_CONFIGURATION_NOT_FOUND"); return item; }
+export function createTargetApiConfigurationInBackend(input: TargetApiConfigurationInput, revision?: number) { return saveLocalResource<TargetApiConfiguration>("targetApis", input, null, revision); }
+export function updateTargetApiConfigurationInBackend(id: string, input: TargetApiConfigurationInput, revision?: number) { return saveLocalResource<TargetApiConfiguration>("targetApis", input, id, revision); }
+export function deleteTargetApiConfigurationInBackend(id: string, revision?: number) { return deleteLocalResource("targetApis", id, revision); }
+export function previewTargetApiImportInBackend(items: unknown[]) { return previewResourceImport("targetApis", items); }
+export function applyTargetApiImportInBackend(items: unknown[]) { return applyResourceImport("targetApis", items); }
+export function listMappingValueRulesFromBackend() { return listLocalResource("mappingValueRules"); }
+export function createMappingValueRuleInBackend(input: MappingValueRuleConfigurationInput, revision?: number) { return saveLocalResource<MappingValueRuleConfiguration>("mappingValueRules", input, null, revision); }
+export function updateMappingValueRuleInBackend(id: string, input: MappingValueRuleConfigurationInput, revision?: number) { return saveLocalResource<MappingValueRuleConfiguration>("mappingValueRules", input, id, revision); }
+export function deleteMappingValueRuleInBackend(id: string, revision?: number) { return deleteLocalResource("mappingValueRules", id, revision); }
+export function previewMappingValueRuleImportInBackend(items: unknown[]) { return previewResourceImport("mappingValueRules", items); }
+export function applyMappingValueRuleImportInBackend(items: unknown[]) { return applyResourceImport("mappingValueRules", items); }
+export function listMappingConfigurationsFromBackend() { return listLocalResource("mappings"); }
+export function listMappingManualRunsFromBackend(_mappingId: string): Promise<MappingManualRunRecord[]> { return Promise.resolve([]); }
+export function runMappingManualOnce(mappingId: string, expectedRowVersion: string): Promise<MappingManualRunResult> {
+  return invokeCommand("run_mapping_manual_once", { mappingId, expectedRowVersion, backendBaseUrl: "" });
 }
-
-export function syncApiMaterialSelectionInBackend(input: unknown): Promise<ApiMaterialSelectionResult> {
-  return requestBackendData(`${TSS_API_MATERIALS_API_PATH}/selection`, {
-    method: "PUT",
-    body: JSON.stringify(input),
-  });
-}
-
-export function loadTargetApisFromMaterialsInBackend(
-  materialKeys: string[],
-): Promise<TargetApiMaterialLoadResult> {
-  return requestBackendData(`${TSS_TARGET_APIS_API_PATH}/load-materials`, {
-    method: "POST",
-    body: JSON.stringify({ materialKeys }),
-  });
-}
-
-export function getTargetApiConfigurationFromBackend(
-  targetApiId: string,
-): Promise<TargetApiConfiguration> {
-  return requestBackendData(`${TSS_TARGET_APIS_API_PATH}/${encodeURIComponent(targetApiId)}`);
-}
-
-export function createTargetApiConfigurationInBackend(
-  input: TargetApiConfigurationInput,
-): Promise<TargetApiConfiguration> {
-  return requestBackendData(TSS_TARGET_APIS_API_PATH, {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
-}
-
-export function updateTargetApiConfigurationInBackend(
-  targetApiId: string,
-  input: TargetApiConfigurationInput,
-): Promise<TargetApiConfiguration> {
-  const { apiKey: _apiKey, ...update } = input;
-  return requestBackendData(`${TSS_TARGET_APIS_API_PATH}/${encodeURIComponent(targetApiId)}`, {
-    method: "PUT",
-    body: JSON.stringify(update),
-  });
-}
-
-export function previewTargetApiImportInBackend(
-  items: unknown[],
-): Promise<ConfigurationImportPreview> {
-  return requestBackendData(`${TSS_TARGET_APIS_API_PATH}/import-preview`, {
-    method: "POST",
-    body: JSON.stringify({ items }),
-  });
-}
-
-export function applyTargetApiImportInBackend(
-  items: unknown[],
-): Promise<ConfigurationImportPreview> {
-  return requestBackendData(`${TSS_TARGET_APIS_API_PATH}/import-apply`, {
-    method: "POST",
-    body: JSON.stringify({ items }),
-  });
-}
-
-export function deleteTargetApiConfigurationInBackend(
-  targetApiId: string,
-): Promise<{ id: string }> {
-  return requestBackendData(`${TSS_TARGET_APIS_API_PATH}/${encodeURIComponent(targetApiId)}`, {
-    method: "DELETE",
-  });
-}
-
-export function listMappingValueRulesFromBackend(): Promise<MappingValueRuleConfiguration[]> {
-  return requestBackendData(TSS_MAPPING_VALUE_RULES_API_PATH);
-}
-
-export function createMappingValueRuleInBackend(
-  input: MappingValueRuleConfigurationInput,
-): Promise<MappingValueRuleConfiguration> {
-  return requestBackendData(TSS_MAPPING_VALUE_RULES_API_PATH, {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
-}
-
-export function updateMappingValueRuleInBackend(
-  valueRuleId: string,
-  input: MappingValueRuleConfigurationInput,
-): Promise<MappingValueRuleConfiguration> {
-  const {
-    valueRuleKey: _valueRuleKey,
-    originSourceKey: _originSourceKey,
-    originFactName: _originFactName,
-    ...update
-  } = input;
-  return requestBackendData(`${TSS_MAPPING_VALUE_RULES_API_PATH}/${encodeURIComponent(valueRuleId)}`, {
-    method: "PUT",
-    body: JSON.stringify(update),
-  });
-}
-
-export function deleteMappingValueRuleInBackend(valueRuleId: string): Promise<{ id: string }> {
-  return requestBackendData(`${TSS_MAPPING_VALUE_RULES_API_PATH}/${encodeURIComponent(valueRuleId)}`, {
-    method: "DELETE",
-  });
-}
-
-export function previewMappingValueRuleImportInBackend(
-  items: unknown[],
-): Promise<ConfigurationImportPreview> {
-  return requestBackendData(`${TSS_MAPPING_VALUE_RULES_API_PATH}/import-preview`, {
-    method: "POST",
-    body: JSON.stringify({ items }),
-  });
-}
-
-export function applyMappingValueRuleImportInBackend(
-  items: unknown[],
-): Promise<ConfigurationImportPreview> {
-  return requestBackendData(`${TSS_MAPPING_VALUE_RULES_API_PATH}/import-apply`, {
-    method: "POST",
-    body: JSON.stringify({ items }),
-  });
-}
-
-export function listMappingConfigurationsFromBackend(): Promise<MappingConfiguration[]> {
-  return requestBackendData(TSS_MAPPINGS_API_PATH);
-}
-
-export function listMappingManualRunsFromBackend(
-  mappingId: string,
-): Promise<MappingManualRunRecord[]> {
-  return requestBackendData(
-    `${TSS_MAPPINGS_API_PATH}/${encodeURIComponent(mappingId)}/manual-runs`,
-  );
-}
-
-export function runMappingManualOnce(
-  mappingId: string,
-  expectedRowVersion: string,
-): Promise<MappingManualRunResult> {
-  if (!isTauriRuntime()) return Promise.reject(new Error("MAPPING_MANUAL_RUN_TAURI_REQUIRED"));
-  return invokeCommand("run_mapping_manual_once", {
-    mappingId,
-    expectedRowVersion,
-    backendBaseUrl: savedBackendBaseUrl(),
-  });
-}
-
-export function createMappingConfigurationInBackend(
-  input: MappingConfigurationInput,
-): Promise<MappingConfiguration> {
-  return requestBackendData(TSS_MAPPINGS_API_PATH, {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
-}
-
-export function updateMappingConfigurationInBackend(
-  mappingId: string,
-  input: MappingConfigurationInput,
-): Promise<MappingConfiguration> {
-  const { mappingKey: _mappingKey, ...update } = input;
-  return requestBackendData(`${TSS_MAPPINGS_API_PATH}/${encodeURIComponent(mappingId)}`, {
-    method: "PUT",
-    body: JSON.stringify(update),
-  });
-}
-
-export function deleteMappingConfigurationInBackend(mappingId: string): Promise<{ id: string }> {
-  return requestBackendData(`${TSS_MAPPINGS_API_PATH}/${encodeURIComponent(mappingId)}`, {
-    method: "DELETE",
-  });
-}
-
-export function previewMappingConfigurationImportInBackend(
-  items: unknown[],
-): Promise<ConfigurationImportPreview> {
-  return requestBackendData(`${TSS_MAPPINGS_API_PATH}/import-preview`, {
-    method: "POST",
-    body: JSON.stringify({ items }),
-  });
-}
-
-export function applyMappingConfigurationImportInBackend(
-  items: unknown[],
-): Promise<ConfigurationImportPreview> {
-  return requestBackendData(`${TSS_MAPPINGS_API_PATH}/import-apply`, {
-    method: "POST",
-    body: JSON.stringify({ items }),
-  });
-}
+export function createMappingConfigurationInBackend(input: MappingConfigurationInput, revision?: number) { return saveLocalResource<MappingConfiguration>("mappings", input, null, revision); }
+export function updateMappingConfigurationInBackend(id: string, input: MappingConfigurationInput, revision?: number) { return saveLocalResource<MappingConfiguration>("mappings", input, id, revision); }
+export function deleteMappingConfigurationInBackend(id: string, revision?: number) { return deleteLocalResource("mappings", id, revision); }
+export function previewMappingConfigurationImportInBackend(items: unknown[]) { return previewResourceImport("mappings", items); }
+export function applyMappingConfigurationImportInBackend(items: unknown[]) { return applyResourceImport("mappings", items); }
 
 async function requestBackendData<T>(
   path: string,
@@ -395,28 +157,6 @@ function backendError(envelope: BackendEnvelope<unknown>, status: number): strin
   if (typeof envelope.errorCode === "string") return envelope.errorCode;
   if (typeof envelope.message === "string" && envelope.message) return envelope.message;
   return `BACKEND_REQUEST_FAILED:${status}`;
-}
-
-export function startCollectionFactSimulationRuntime(
-  request: CollectionSimulationStartRequest,
-): Promise<TwinRuntimeSnapshot> {
-  return invokeCommand("start_collection_fact_simulation_runtime", { request });
-}
-
-export function pauseCollectionFactSimulationRuntime(): Promise<TwinRuntimeSnapshot> {
-  return invokeCommand("pause_collection_fact_simulation_runtime");
-}
-
-export function resumeCollectionFactSimulationRuntime(): Promise<TwinRuntimeSnapshot> {
-  return invokeCommand("resume_collection_fact_simulation_runtime");
-}
-
-export function stopCollectionFactSimulationRuntime(): Promise<TwinRuntimeSnapshot> {
-  return invokeCommand("stop_collection_fact_simulation_runtime");
-}
-
-export function getCollectionFactSimulationRuntime(): Promise<TwinRuntimeSnapshot> {
-  return invokeCommand("get_collection_fact_simulation_runtime");
 }
 
 export function startApiFirstMappingRuntime(

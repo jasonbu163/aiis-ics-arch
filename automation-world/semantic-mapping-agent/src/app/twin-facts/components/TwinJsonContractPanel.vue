@@ -1,29 +1,30 @@
 <!--
 File Path: /automation-world/semantic-mapping-agent/src/app/twin-facts/components/TwinJsonContractPanel.vue
-Description: Data Workspace composition for Fact Table, Simulation, API-first Mapping configuration, and three runtime surfaces.
+Description: Data Workspace composition for read-only source facts, API-first Mapping configuration, and HTTP runtime.
 Main Features: Coordinates app-open runtime preferences after defaults/profile readiness while keeping facts and saved configuration backend-first.
 -->
 <script setup lang="ts">
-import { onMounted, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 import type { LocaleMessages } from "../../../locales";
 import type { AppPage } from "../../navigation";
-import type { CollectionFactFileFormat, CollectionFactValueInput } from "../types";
+import type { CollectionFactFileFormat } from "../types";
 import { useCollectionFactsStore } from "../store/collectionFacts";
 import { useApiMaterialsStore } from "../store/apiMaterials";
 import { useMappingConfigurationsStore } from "../store/mappingConfigurations";
 import { useMappingValueRulesStore } from "../store/mappingValueRules";
 import { useApiFirstMappingRuntimeStore } from "../store/apiFirstMappingRuntime";
-import { useSingleFactRuntimeStore } from "../store/singleFactRuntime";
+import { useMappingStartupStore } from "../store/mappingStartup";
 import { useTargetApiConfigurationStore } from "../store/targetApiConfiguration";
-import { externalIoEnabled } from "../../connection/api";
+import { ConsoleCard, ConsoleActionButton } from "@aw-ui";
+import { localConfiguration, previewConfiguration, applyConfiguration, exportConfiguration, type LocalImportPreview, type ChangeIntent } from "../api/localConfiguration";
+import { formatBusinessTime } from "../../../console/time";
 import { saveCollectionFactFile } from "../api";
 import ApiMaterialsPanel from "./ApiMaterialsPanel.vue";
 import ApiFirstMappingRuntimePanel from "./ApiFirstMappingRuntimePanel.vue";
 import FactsTablePanel from "./FactsTablePanel.vue";
 import MappingConfigurationsPanel from "./MappingConfigurationsPanel.vue";
 import MappingValueRulesPanel from "./MappingValueRulesPanel.vue";
-import SingleFactRuntimePanel from "./SingleFactRuntimePanel.vue";
 import TargetApiConfigurationPanel from "./TargetApiConfigurationPanel.vue";
 import { createValueExportFile } from "../utils/collectionFactFiles";
 
@@ -32,7 +33,7 @@ const collection = useCollectionFactsStore();
 const apiMaterials = useApiMaterialsStore();
 const mappingConfigurations = useMappingConfigurationsStore();
 const mappingValueRules = useMappingValueRulesStore();
-const runtime = useSingleFactRuntimeStore(() => collection.sourceKey.value);
+const runtime = useMappingStartupStore();
 const apiFirstMappingRuntime = useApiFirstMappingRuntimeStore();
 const targetApis = useTargetApiConfigurationStore();
 
@@ -44,23 +45,9 @@ async function run(operation: () => Promise<void>) {
   }
 }
 
-async function refreshSimulationPoints() {
-  await runtime.loadSimulationPoints();
-}
-
 async function loadSource(sourceKey: string) {
   collection.setSourceKey(sourceKey);
   await collection.load();
-  await refreshSimulationPoints();
-}
-
-async function applyContract() {
-  await collection.applyPendingContract();
-  await refreshSimulationPoints();
-}
-
-async function updateValues(values: CollectionFactValueInput[]) {
-  await collection.updateValues(values);
 }
 
 async function exportValues(format: CollectionFactFileFormat, complete: (failed: boolean) => void) {
@@ -82,102 +69,87 @@ watch(
   { immediate: true },
 );
 
+const backupError = ref("");
+const backupBusy = ref(false);
+const restorePreview = ref<LocalImportPreview | null>(null);
+const restoreFileInput = ref<HTMLInputElement | null>(null);
+const restoreFileName = ref("");
+const restoreConfirmed = ref(false);
+let restoreIntent: ChangeIntent | null = null;
+const configurationTime = computed(() => formatBusinessTime(localConfiguration.value?.updatedAt));
+async function exportBackup() {
+  backupBusy.value = true; backupError.value = "";
+  try { const json = await exportConfiguration(); await saveCollectionFactFile({ fileName: "sma-configuration.json", mimeType: "application/json;charset=utf-8", contents: new TextEncoder().encode(json) }); }
+  catch (error) { backupError.value = String(error); } finally { backupBusy.value = false; }
+}
+function chooseRestoreFile() { restoreFileInput.value?.click(); }
+async function previewRestore(event: Event) {
+  const input = event.target as HTMLInputElement; const file = input.files?.[0]; input.value = "";
+  restorePreview.value = null; restoreIntent = null; restoreConfirmed.value = false;
+  restoreFileName.value = file?.name ?? "";
+  if (!file) return;
+  backupBusy.value = true; backupError.value = "";
+  try { if (file.size > 10 * 1024 * 1024) throw new Error("SMA_CONFIGURATION_LIMIT_EXCEEDED"); restoreIntent = { kind: "restore", resource: "configuration", id: null, payload: JSON.parse(await file.text()) }; restorePreview.value = await previewConfiguration(restoreIntent); }
+  catch (error) { backupError.value = String(error); } finally { backupBusy.value = false; }
+}
+async function applyRestore() {
+  if (!restoreIntent || !restorePreview.value || !restoreConfirmed.value) return;
+  backupBusy.value = true; backupError.value = "";
+  try { await applyConfiguration(restoreIntent, restorePreview.value, restoreConfirmed.value); restorePreview.value = null; restoreIntent = null; restoreConfirmed.value = false; await Promise.all([apiMaterials.load(), targetApis.load(), mappingValueRules.load(), mappingConfigurations.load()]); }
+  catch (error) { backupError.value = String(error); } finally { backupBusy.value = false; }
+}
+watch(() => [props.enabled, props.page, props.view] as const, ([enabled, page, view]) => {
+  if (!enabled || page !== "mappingIdentity") return;
+  if (view === "apiMaterials") void run(apiMaterials.load);
+  if (view === "targetApis") void run(targetApis.load);
+  if (view === "valueRules") void run(mappingValueRules.load);
+}, { immediate: true });
 onMounted(() => {
   if (!props.enabled) return;
-  if (!externalIoEnabled()) {
-    runtime.startPolling();
-    apiFirstMappingRuntime.startPolling();
-    void runtime.loadStartupPreferences().catch(() => {});
-    return;
-  }
-  void run(async () => {
-    await Promise.all([
-      collection.load(),
-      targetApis.load(),
-      mappingValueRules.load(),
-    ]);
-    await refreshSimulationPoints();
-    runtime.startPolling();
-    apiFirstMappingRuntime.startPolling();
-    try {
-      await runtime.loadStartupPreferences();
-    } catch {
-      // Preference failure remains visible without preventing independent manual runtimes.
-    }
-    const simulationSourceKey = runtime.autoStartSimulationSourceKey();
-    if (simulationSourceKey && simulationSourceKey !== collection.sourceKey.value) {
-      try {
-        await loadSource(simulationSourceKey);
-      } catch {
-        // Simulation start will show its own source/configuration error below.
-      }
-    }
-    await Promise.allSettled([
-      runtime.autoStartSimulationIfEnabled(),
-      apiFirstMappingRuntime.autoStartIfEnabled(
-        runtime.runtimeStartupPreferences.value.runtimeAutoStart.apiMappingRuntime.enabled,
-      ),
-    ]);
-  });
+  apiFirstMappingRuntime.startPolling();
+  void run(async () => { await runtime.loadStartupPreferences(); await apiFirstMappingRuntime.autoStartIfEnabled(runtime.runtimeStartupPreferences.value.runtimeAutoStart.apiMappingRuntime.enabled); });
 });
+
 </script>
 
 <template>
   <div v-show="page === 'twinFacts'" class="single-fact-workspace-stack">
-    <!-- TSS-012 replaces CollectionFactsContractEditor and CollectionFactInspector with the table-first workspace. -->
     <FactsTablePanel
       v-show="view === 'contract'"
       :labels="labels"
       :source-key="collection.sourceKey.value"
       :contract="collection.contract.value"
-      :pending-preview="collection.pendingPreview.value"
-      :preview-needs-confirmation="collection.previewNeedsConfirmation.value"
       :query="collection.query.value"
       :result="collection.factPage.value"
       :contract-busy="collection.contractBusy.value"
       :table-busy="collection.inspectorBusy.value"
-      :values-busy="collection.valuesBusy.value"
-      :status="collection.status.value"
       :error="collection.error.value"
       :enabled="enabled"
       @load-source="run(() => loadSource($event))"
       @query="run(() => collection.updateQuery($event))"
-      @preview-contract="run(() => collection.previewContract($event))"
-      @apply-contract="run(applyContract)"
-      @discard-preview="collection.discardPendingContract"
-      @update-values="run(() => updateValues($event))"
       @export-values="exportValues"
     />
-    <SingleFactRuntimePanel
-      v-show="view === 'inspector'"
-      :labels="labels"
-      :source-key="collection.sourceKey.value"
-      :points="runtime.simulationPoints.value"
-      :enabled-point-count="runtime.enabledPointCount.value"
-      :points-valid="runtime.pointsValid.value"
-      :points-busy="runtime.pointsBusy.value"
-      :simulation="runtime.simulation.value"
-      :simulation-busy="runtime.simulationBusy.value"
-      :simulation-settings-busy="runtime.simulationSettingsBusy.value"
-      :simulation-settings-dirty="runtime.simulationSettingsDirty.value"
-      :simulation-auto-start-enabled="runtime.runtimeStartupPreferences.value.runtimeAutoStart.collectionFactSimulation.enabled"
-      :runtime-startup-busy="runtime.runtimeStartupBusy.value"
-      :enabled="enabled"
-      view="simulation"
-      @update:point-values="runtime.updatePointValues"
-      @update:point-interval="runtime.updatePointInterval"
-      @update:point-current-time="runtime.updatePointCurrentTime"
-      @save-simulation-settings="run(runtime.saveSimulationSettings)"
-      @update:simulation-auto-start="run(() => runtime.setSimulationAutoStart($event))"
-      @simulation-action="run(() => runtime.simulationAction($event))"
-    />
-    <p v-if="view === 'inspector' && runtime.simulationError.value" class="warning">{{ runtime.simulationError.value }}</p>
-    <p v-if="view === 'inspector' && runtime.runtimeStartupError.value" class="warning">{{ runtime.runtimeStartupError.value }}</p>
   </div>
 
   <div v-show="page === 'mappingIdentity'">
+    <ConsoleCard :title="labels.localConfigurationTitle">
+      <p>{{ labels.localConfigurationOnly }}</p>
+      <p>{{ labels.localConfigurationRevision }} {{ localConfiguration?.revision ?? "—" }} · {{ labels.localConfigurationUpdatedAt }} {{ configurationTime }}</p>
+      <div class="action-row"><ConsoleActionButton :disabled="!enabled || backupBusy" @click="exportBackup">{{ labels.localConfigurationBackup }}</ConsoleActionButton><ConsoleActionButton tone="secondary" :disabled="!enabled || backupBusy" @click="chooseRestoreFile">{{ labels.localConfigurationRestore }}</ConsoleActionButton><span class="configuration-file-name" role="status">{{ restoreFileName || labels.localConfigurationNoFileSelected }}</span><input ref="restoreFileInput" class="facts-file-input" type="file" accept=".json,application/json" :disabled="!enabled || backupBusy" @change="previewRestore" /></div>
+      <p v-if="backupError" class="warning" role="alert">{{ labels.localConfigurationFailed }} {{ /CONFLICT|PREVIEW_CHANGED/.test(backupError) ? labels.localConfigurationConflict : backupError }}</p>
+      <section v-if="restorePreview">
+        <p>{{ labels.localConfigurationReplaceWarning }}</p>
+        <p>{{ labels.mappingBatchCreated }}: {{ restorePreview.createdKeys.join(', ') || '—' }}</p>
+        <p>{{ labels.mappingBatchUpdated }}: {{ restorePreview.updatedKeys.join(', ') || '—' }}</p>
+        <p>{{ labels.localConfigurationDeleted }}: {{ restorePreview.deletedKeys.join(', ') || '—' }}</p>
+        <p v-for="item in restorePreview.errors" :key="item.errorCode" class="warning">{{ item.key }}: {{ item.errorCode }}</p>
+        <label><input v-model="restoreConfirmed" type="checkbox" />{{ labels.localConfigurationRestoreConfirm }}</label>
+        <ConsoleActionButton :disabled="!restoreConfirmed || backupBusy || restorePreview.errors.length > 0" @click="applyRestore">{{ labels.mappingBatchApply }}</ConsoleActionButton>
+        <ConsoleActionButton tone="secondary" @click="restorePreview = null; restoreConfirmed = false">{{ labels.collectionFactsCancel }}</ConsoleActionButton>
+      </section>
+    </ConsoleCard>
+    <div v-show="view === 'apiMaterials'">
     <ApiMaterialsPanel
-      v-show="view === 'apiMaterials'"
       :labels="labels"
       :operations="apiMaterials.operations.value"
       :saved-materials="apiMaterials.savedMaterials.value"
@@ -188,12 +160,17 @@ onMounted(() => {
       :result="apiMaterials.result.value"
       :error="apiMaterials.error.value"
       :enabled="enabled"
-      @reload="run(apiMaterials.load)"
+      @reload="run(() => apiMaterials.previewCatalog())"
+      :catalog-preview="apiMaterials.catalogPreview.value"
+      :catalog-candidates="apiMaterials.catalogCandidates.value"
+      @import-open-api="file => run(() => apiMaterials.previewCatalog(file))"
+      @apply-catalog="run(apiMaterials.applyCatalog)"
       @save="run(apiMaterials.save)"
       @toggle="apiMaterials.toggle"
     />
+    </div>
+    <div v-show="view === 'targetApis'">
     <TargetApiConfigurationPanel
-      v-show="view === 'targetApis'"
       :labels="labels"
       :configurations="targetApis.configurations.value"
       :draft="targetApis.draft.value"
@@ -224,8 +201,9 @@ onMounted(() => {
       @apply-import="run(targetApis.applyImport)"
       @clear-import="targetApis.clearImport"
     />
+    </div>
+    <div v-show="view === 'valueRules'">
     <MappingValueRulesPanel
-      v-show="view === 'valueRules'"
       :labels="labels"
       :configurations="mappingValueRules.configurations.value"
       :fact-origin-drafts="mappingValueRules.factOriginDrafts.value"
@@ -251,8 +229,9 @@ onMounted(() => {
       @apply-import="run(mappingValueRules.applyImport)"
       @clear-import="mappingValueRules.clearImport"
     />
+    </div>
+    <div v-show="view === 'mappings'">
     <MappingConfigurationsPanel
-      v-show="view === 'mappings'"
       :labels="labels"
       :configurations="mappingConfigurations.configurations.value"
       :local-drafts="mappingConfigurations.localDrafts.value"
@@ -265,6 +244,8 @@ onMounted(() => {
       :selected-target-api="mappingConfigurations.selectedTargetApi.value"
       :selected-target-api-locked="mappingConfigurations.selectedTargetApiLocked.value"
       :request-preview="mappingConfigurations.requestPreview.value"
+      :saved-preview="mappingConfigurations.savedPreview.value"
+      @preview-saved="id => run(() => mappingConfigurations.previewSaved(id))"
       :manual-runs="mappingConfigurations.manualRuns.value"
       :manual-run-busy-ids="mappingConfigurations.manualRunBusyIds.value"
       :busy="mappingConfigurations.busy.value"
@@ -290,9 +271,10 @@ onMounted(() => {
       @apply-import="run(mappingConfigurations.applyImport)"
       @clear-import="mappingConfigurations.clearImport"
     />
+    </div>
   </div>
 
-  <div v-show="page === 'simulationRuntime'">
+  <div v-show="page === 'mappingRuntime'">
     <ApiFirstMappingRuntimePanel
       :labels="labels"
       :runtime="apiFirstMappingRuntime.runtime.value"
@@ -309,5 +291,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.configuration-file-name { min-width: 0; overflow-wrap: anywhere; }
 .single-fact-workspace-stack { display: grid; gap: 16px; }
 </style>

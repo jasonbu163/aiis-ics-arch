@@ -1,6 +1,6 @@
 <!--
 File Path: /automation-world/semantic-mapping-agent/src/components/BackToTopButton.vue
-Description: Shared floating control for returning long TSS pages to the top.
+Description: Shared floating control for returning long SMA pages to the top.
 Main Features: Appears after scrolling and respects reduced-motion preferences.
 -->
 <script setup lang="ts">
@@ -10,19 +10,20 @@ defineProps<{ label: string }>();
 const visible = ref(false);
 
 function updateVisibility() {
-  visible.value = window.scrollY >= 160;
+  visible.value = Math.max(window.scrollY, document.querySelector(".agent-workspace")?.scrollTop ?? 0) >= 160;
 }
 
 function scrollToTop() {
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
+  const target = document.querySelector(".agent-workspace");
+  (target && target.scrollHeight > target.clientHeight ? target : window).scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
 }
 
 onMounted(() => {
   updateVisibility();
-  window.addEventListener("scroll", updateVisibility, { passive: true });
+  window.addEventListener("scroll", updateVisibility, { passive: true, capture: true });
 });
-onBeforeUnmount(() => window.removeEventListener("scroll", updateVisibility));
+onBeforeUnmount(() => window.removeEventListener("scroll", updateVisibility, true));
 </script>
 
 <template>
@@ -48,11 +49,11 @@ onBeforeUnmount(() => window.removeEventListener("scroll", updateVisibility));
   place-items: center;
   width: 42px;
   height: 42px;
-  color: #fff;
-  background: #23675c;
-  border: 1px solid #174d45;
+  color: var(--agent-on-accent);
+  background: var(--agent-accent);
+  border: 1px solid var(--agent-border);
   border-radius: 50%;
-  box-shadow: 0 6px 18px rgb(17 24 29 / 18%);
+  box-shadow: var(--agent-shadow);
   font: inherit;
   font-size: 20px;
   cursor: pointer;
@@ -60,11 +61,11 @@ onBeforeUnmount(() => window.removeEventListener("scroll", updateVisibility));
 
 .back-to-top:hover,
 .back-to-top:focus-visible {
-  background: #174d45;
+  background: var(--agent-accent);
 }
 
 .back-to-top:focus-visible {
-  outline: 3px solid #75a79c;
+  outline: 3px solid var(--agent-accent-strong);
   outline-offset: 2px;
 }
 

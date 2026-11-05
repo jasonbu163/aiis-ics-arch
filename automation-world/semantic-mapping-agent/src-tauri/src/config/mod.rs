@@ -72,3 +72,20 @@ pub fn profile_override() -> Option<PathBuf> {
         .map(PathBuf::from)
         .filter(|p| p.is_absolute())
 }
+
+pub fn configuration_profile(app: &tauri::AppHandle) -> Result<PathBuf, String> {
+    use tauri::Manager;
+    match std::env::var_os("SMA_PROFILE_DIR") {
+        Some(value) => {
+            let path = PathBuf::from(value);
+            if !path.is_absolute() {
+                return Err("SMA_CONFIGURATION_PROFILE_INVALID".into());
+            }
+            Ok(path)
+        }
+        None => app
+            .path()
+            .app_data_dir()
+            .map_err(|_| "SMA_CONFIGURATION_PROFILE_UNAVAILABLE".into()),
+    }
+}

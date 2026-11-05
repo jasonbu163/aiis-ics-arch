@@ -31,6 +31,107 @@ fn binding(id: Option<String>, index: usize, number: u16) -> BindingIntent {
     }
 }
 #[test]
+fn automatic_udt_scan_and_import_preserve_configuration_until_explicit_confirmation() {
+    let root = PathBuf::from(std::env::var_os("DS_TEST_RUN_ROOT").expect("owned root"))
+        .join(configuration::uuid());
+    let service = Configuration::new(Arc::new(Store::open(&root).unwrap()));
+    let initial = service.get().unwrap();
+    let mut workspace = initial.workspace;
+    let id = configuration::uuid();
+    workspace.instances.push(
+        serde_json::from_value(json!({"id":id,"name":"Automatic dependencies","port":30102}))
+            .unwrap(),
+    );
+    service
+        .save(SaveIntent {
+            expected_etag: initial.etag,
+            workspace,
+            confirm_points: vec![],
+        })
+        .unwrap();
+    let before = service.get().unwrap();
+    let files=vec![ImportFile { input_id:"main".into(),name:"multi.db".into(),bytes:include_bytes!("../../../data-acquisition-agent/src-tauri/tests/fixtures/source-import-multi-db/multi.db").to_vec(),lineage_id:None },ImportFile { input_id:"types".into(),name:"types.udt".into(),bytes:include_bytes!("../../../data-acquisition-agent/src-tauri/tests/fixtures/source-import-multi-db/types.udt").to_vec(),lineage_id:None }];
+    let request = |files, bindings| ImportIntent {
+        expected_etag: before.etag.clone(),
+        instance_id: id.clone(),
+        files,
+        bindings,
+    };
+    let missing =
+        source_import::analyze(&service, request(vec![files[0].clone()], vec![])).unwrap();
+    let beta = missing
+        .declarations
+        .iter()
+        .find(|d| d["name"] == "Beta")
+        .unwrap();
+    assert_eq!(beta["dependencyIssues"][0]["code"], "udt_missing");
+    assert_eq!(beta["dependencyIssues"][0]["typeName"], "Measure");
+    assert_eq!(beta["dependencyIssues"][0]["path"], "unit");
+    let scan = source_import::analyze(&service, request(files.clone(), vec![])).unwrap();
+    assert!(scan.preview.is_none());
+    let beta = scan
+        .declarations
+        .iter()
+        .find(|d| d["name"] == "Beta")
+        .unwrap();
+    assert_eq!(
+        beta["udtClosure"],
+        json!([{"inputId":"types","declarationIndex":0}])
+    );
+    assert_eq!(beta["dependencyIssues"], json!([]));
+    let alpha = scan
+        .declarations
+        .iter()
+        .find(|d| d["name"] == "Alpha")
+        .unwrap();
+    assert_eq!(alpha["udtClosure"], json!([]));
+    assert_eq!(service.get().unwrap().workspace, before.workspace);
+    let bindings = [(0, 71), (1, 88)]
+        .into_iter()
+        .map(|(index, number)| BindingIntent {
+            db_id: None,
+            number,
+            declaration: Declaration {
+                input_id: "main".into(),
+                declaration_index: index,
+            },
+            udt_closure: vec![],
+        })
+        .collect();
+    let preview = source_import::preview(&service, request(files, bindings))
+        .unwrap()
+        .preview
+        .unwrap();
+    let dbs = &preview.workspace.instances[0].dbs;
+    assert_eq!(
+        dbs.iter().map(|d| d.points.len()).collect::<Vec<_>>(),
+        vec![2, 4]
+    );
+    assert_eq!(dbs[1].binding.as_ref().unwrap().udt_closure.len(), 1);
+    assert_eq!(service.get().unwrap().etag, before.etag);
+    service
+        .confirm(
+            "import",
+            &preview.token,
+            &preview.expected_etag,
+            &preview.candidate_sha256,
+        )
+        .unwrap();
+    let saved = service.get().unwrap();
+    assert_eq!(
+        saved.workspace.instances[0].dbs[1].points[1].source_path,
+        "unit.value"
+    );
+    // 重开前等真实SQL worker关闭和profile锁释放；不能以drop后的调度时机代替join。
+    service.store.shutdown().unwrap();
+    drop(service);
+    let reopened_store = Store::open(&root).unwrap();
+    let reopened = reopened_store.load().unwrap();
+    assert_eq!(reopened.workspace, saved.workspace);
+    assert_eq!(reopened.etag, saved.etag);
+    reopened_store.shutdown().unwrap();
+}
+#[test]
 fn explicit_reimport_preserves_unselected_identity_and_immutable_old_closure() {
     let p = PathBuf::from(std::env::var_os("DS_TEST_RUN_ROOT").expect("owned root"))
         .join(configuration::uuid());
@@ -480,10 +581,11 @@ fn physical_reimport_requires_new_point_confirmation_before_real_apply() {
     }
     fn apply_intent(app: &App, id: &str) -> ApplyIntent {
         let s = app.configuration.get().unwrap();
+        let published = app.configuration.store.publish(&s.etag).unwrap();
         ApplyIntent {
             expected_etag: s.etag,
             instance_id: id.into(),
-            revision_id: s.latest_revision.unwrap(),
+            revision_id: published.revision_id.unwrap(),
             retention: "preserve_compatible_hold".into(),
         }
     }

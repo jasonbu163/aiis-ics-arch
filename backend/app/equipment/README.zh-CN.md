@@ -45,3 +45,15 @@ items与dashboard来自同一选中来源行；缺测不产生零偏差或normal
 新增GET `/equipment/temperature-sample-dashboard`只读BE003完整样本，保持独立温控read/scope，原POST/GET不变。
 历史保留recordId与完整来源时间。设备三页在URL保存`dataSource=legacy|http`与`equipmentId`，默认旧表来源；外部上报须设备键，
 不fallback到旧表/mock。切换清空前来源数据并忽略晚响应；不能借PLC身份猜旧数据设备。TV/KM单位仍未定义，set仅为观测，不是控制命令。
+
+
+## 匿名业务集成准备
+
+[ARCH-BE-010 r1 A0](../../../plans/ARCH-BE-010-anonymous-business-integration/spec.md)新增 `/integration/` 下八条 typed 匿名 POST 准备及有限[公共原语](../MODULE_CONTRACT.zh-CN.md#匿名集成原语)。旧认证接口和权限保持。三个模块开关默认关闭、设备和 producer scope 默认空、storage profile 默认 `unadopted`。关闭/越界请求403；A0准入合格仍在数据库依赖或业务访问前503。任何profile值均不能在本准备阶段接通业务写入。模块 `enabled=False` 经重组统一移除新旧整组路由。
+
+四个新Model声明描述三张模块永久最小回执和生产观察事件索引，不执行DDL、不代表结构已迁移。共享表上海时间采用、精确Alembic接链、业务接线和可丢弃MySQL验证仍分别有gate。匿名producer/来源声明可被冒用，scope仅数据准入而非认证。[任务记录](../../../plans/ARCH-BE-010-anonymous-business-integration/tasks.md)保存待确认的源码时区/迁移提案。
+
+
+## 有界业务集成（r2）
+
+匿名integration Service/CRUD接入本owner既有业务表，连同永久最小回执及typed [provider](../../../contracts/published/http-api/business-integration-v1/README.zh-CN.md)。默认关闭/空scope/未采用；有效外部凭据及事务内UUID/schema/revision/DB时钟匹配缺一不可。显式schema后继为BE009 0a2后的BE010 1b3。旧HTTP/Projection时间适配局限owner固定列，unadopted走原路径。真实历史转换/目标采用及数据库/Docker/B仍需另批，不改变raw/latest保留或PLC writer。

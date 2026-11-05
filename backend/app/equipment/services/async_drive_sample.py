@@ -1,5 +1,8 @@
 """equipment受限补缺事务与传动读adapter；不调用旧sync Service。"""
 import re
+from app.equipment.crud.async_integration import storage_context
+from app.equipment.integration_storage import storage_sample, legacy_view
+from common.integration.storage import to_storage_time as storage_time, to_legacy_time as legacy_time
 from sqlalchemy.exc import DBAPIError, IntegrityError
 from common.exceptions import BusinessException
 from common.log import log_event
@@ -26,6 +29,7 @@ async def delivery_after_rejection(db, actor, equipment, stream, sample_id, dige
     """业务拒绝回滚后，在新一致性视图恢复已提交投递的优先级；不锁缺失回执。"""
     committing = False
     try:
+        await storage_context(db)
         receipt = await receipts.get_receipt(db, actor, equipment, stream, sample_id)
         if receipt is None:
             await rollback(db)
@@ -48,9 +52,13 @@ async def delivery_after_rejection(db, actor, equipment, stream, sample_id, dige
 
 async def receive_partial(db, sample, actor, stream, access, fields, new_values):
     digest = fingerprint(sample, stream)
+    original_sample = sample
     for attempt in range(3):
         committing = False
         try:
+            context = await storage_context(db)
+            adoption = context[0] if context else None
+            sample = storage_sample(original_sample, adoption)
             receipt = await receipts.get_receipt(db, actor, sample.equipment_id, stream, sample.sample_id)
             if receipt is not None:
                 if receipt.fingerprint != digest:
@@ -84,11 +92,12 @@ async def receive_partial(db, sample, actor, stream, access, fields, new_values)
                     if isinstance(value, float) and (stored is None or (value != 0 and stored == 0) or abs(stored-value) > max(1e-6, abs(value)*1e-6)):
                         raise BusinessException(MappingError.INVALID_SAMPLE, code=422)
                 result = dict(record_id=record.id, equipment_id=sample.equipment_id, sample_id=sample.sample_id,
-                              sampled_at=utc_time(sample.sampled_at), outcome=outcome)
+                              sampled_at=utc_time(original_sample.sampled_at), outcome=outcome)
                 target = {"drive_record_id": record.id} if stream == "drive" else {"parameter_record_id": record.id}
                 await receipts.add_receipt(db, actor_user_id=actor, equipment_id=sample.equipment_id, stream=stream,
                     sample_id=sample.sample_id, fingerprint=digest, sampled_at=sample.sampled_at,
-                    outcome=outcome, result=result, **target)
+                    outcome=outcome, result=result, **target,
+                    **(dict(created_at=storage_time(context[1]),updated_at=storage_time(context[1])) if context else {}))
             committing = True
             await db.commit()
         except BusinessException as exc:
@@ -136,7 +145,10 @@ def drive_dashboard(record):
                 tension_params={field:getattr(record,field) for field in DRIVE_FIELDS[10:]}, process_items=process, tension_items=tensions)
 
 async def read_samples(db, equipment_id, record_id=None, limit=100):
+    context=await storage_context(db)
     records = await crud.list_records(db, equipment_id, record_id, limit)
+    if context:
+        records=[legacy_view(row,context[0]) for row in records]
     return dict(equipment_id=equipment_id, items=[dict(record_id=r.id, equipment_id=r.equipment_id,
         sampled_at=utc_time(r.timestamp), **{f:getattr(r,f) for f in DRIVE_FIELDS}) for r in records],
         dashboard=drive_dashboard(records[0] if records else None))

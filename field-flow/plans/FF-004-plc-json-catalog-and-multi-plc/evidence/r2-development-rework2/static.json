@@ -1,0 +1,132 @@
+{
+  "checks": [
+    {
+      "argv": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--check",
+        "src/config/catalog.rs",
+        "tests/plc_catalog.rs"
+      ],
+      "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "src/config/catalog.rs",
+        "tests/plc_catalog.rs"
+      ],
+      "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "versions": {
+    "rustc --version": {
+      "exit": 0,
+      "stdout": "rustc 1.89.0 (29483883e 2025-08-04)\n",
+      "stderr": ""
+    },
+    "cargo --version": {
+      "exit": 0,
+      "stdout": "cargo 1.89.0 (c24e10642 2025-06-23)\n",
+      "stderr": ""
+    },
+    "clang --version": {
+      "exit": 0,
+      "stdout": "Apple clang version 17.0.0 (clang-1700.4.4.1)\nTarget: arm64-apple-darwin24.6.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n",
+      "stderr": ""
+    },
+    "uname -a": {
+      "exit": 0,
+      "stdout": "Darwin Jason-MacBook.local 24.6.0 Darwin Kernel Version 24.6.0: Tue Apr 21 20:18:13 PDT 2026; root:xnu-11417.140.69.710.16~1/RELEASE_ARM64_T8132 arm64\n",
+      "stderr": ""
+    }
+  },
+  "protected_files": {
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/spec.md": "a7418cfe8f34515719beb50d9d901f42d7a283e2b33c61a2a57b129104a7870e",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/checklist.md": "ed3468e0bb68ed9da056d1553a3f1c2468a77a3a57c2fcf3e06b868ec00f01a7",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/artifacts.json": "3a5963db28a6864d258d139bc64ce9dc4c3d3cb2495cbfc35e8ea7176ad43cb5",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/candidate-manifest.json": "8de682e0be25209e9ca98995e500a5573ef86f96be3897857e1de044ab9d5994",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/copy-source-manifest.json": "ace817921fbd1f83cd032c3998b07c4f825648367f423d69ffd93c0c706e08c8",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/evidence-files.json": "432f9993fa460abc172734e9e5233fef7abce521540c5d1f4eba043d92faf966",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/final-scenes.json": "423b81c1b11529eab3a58b7b599c6855d47b0d206f687dba07b0a177a844ece6",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/handoff.json": "4bac72e042dad24053be8b1a6c0b22e1aab1d5faf41093fb7b825309a2721335",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/implementation-diff.patch": "613886aba5244cdc136a3f29d730fdb8790445c0ad85a7fe2a583045ddc9ec09",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/implementation-manifest.json": "7de1ebec3add4789dbcd57c8320b68c38328e594b928ffba18197e84185c20e0",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/manual-sealed-copy.json": "74b5362a2346da9df00d47a9b1807b3974ec86c2170a052132f40b267fcf4ea5",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/manual-sealed-formal.json": "26da0df672440a88f5a8b157ac0318006e43335587e8f4a73bdb000db078d1db",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/manual-sealed-teaching.json": "354b29b7dd61baa6fe7ee240c39268246234ebe6b5f6ff1a33bbf78c04cc2319",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/observations/failed_round/failure.json": "21d4c5549cbc38ec8bacc93933884740e21444dac41302b14990aa9f554ea644",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/observations/modbus_catalog/preflight.json": "adaed4ab582e71f32e28745ac2ce4f75f58368de093c72437938389c80f37318",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/observations/plc_catalog/negative-cases.json": "b36005da2602e2d7c221236366fc3368b612e52b23decc0ae8c6467ace0a0d4a",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/observations/service_identities/identities.json": "3f09d0cc0adc9495015ab11c967ba18853a212c50cea6648b3dfcbe408369b6e",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/protected-audit.json": "329e6513ee3e7f7a4b856f7a684ab2b89c341a22a30d7bd2d2f2b98fb62d6271",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/raw-output-index.json": "df8d5f7e333d991df84b02a2fbea50a27d55b50ab99c9ce5eb7a098252dc8965",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/resources-final.json": "dbef0c25cf6c960268e121e1c28d40b7dba02d46b5272e4f3dbbb8f7754b14ed",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/scenes/catalog_compatibility/confirmed/report.json": "edf935c9fdbd3e076e900d080c7dec02419c513e374d2cfcd22c71175b1a6fb8",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/scenes/multi_plc/b_off/report.json": "26946a4a2577343e93511b10ce5f35033299d14214efb358b52cc9f0ae8a0cc5",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/scenes/multi_plc/dry_run/report.json": "3483ff422123df1e81ea236a4f99438bed1f3deab3be51c3400b49d6ea0889ae",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/scenes/multi_plc/execute/report.json": "cde74ae5dcc0d4be61b168be4803f1e7b4289341381f12a396ee8fcca9da1aea",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/scenes/multi_plc/parallel_io/report.json": "5073ea49292b84f680963ee2a7a32f508fd0632b61fc1962f8ea69bcb0aa4355",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/scenes/multi_plc/slow_http/report.json": "7466c43b4e3b42e183a04e2a86841f6b18977683138594d88f06524c1155dcdb",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/scenes/multi_plc/slow_setup/report.json": "29cd9e13d59f13fa3ebddba429cfe26f0a8debe149fa569abcd4794708a740c5",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/scenes/multi_plc/three_readers/report.json": "aac79a6bdf96a7544c361b496f44aa14339f6b2aead12cd0989564d346093bc4",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/scenes/unknown_compatibility/alias/report.json": "9f72ee34cb30cc5d7a815eec4b77c682395cc12fa511ecb63c4c209528e6c82d",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/scenes/unknown_compatibility/same/report.json": "9344cf583cfd7221873dc3fb048a3e8b8bbb2d9dce2ed0c2ad8e7b79c60b5252",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/scenes/unknown_readback/truncated_ack/report.json": "cf820c1aedc0e3e46f6595dfbbdf7bb7fa706fac03e80a8217e5be862c5249c6",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/sealed-manual-jobs.json": "05511000524040dc7e071de958ba0d086c61cb78d522c80d266c443f27143950",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/static.json": "7bdf4c0bbf293c32a1d4273e8b318b623d923ff56692d2a29909c342e078b670",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/test-summary.json": "f239fdd42e9725c4394cb6e5917ae08d685294c98cc4844ba8bbc91636ccc51c",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development/timed-services.json": "d01aefda515acfae30360ec9fb48c21e30aa84aefd12f30793a8ca8594317b7e",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/artifacts.json": "08254f8d5d1d9cd224b1b9491ab6c2fb6c508676f365a34ad7f7bd1afe2504d1",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/candidate-manifest.json": "16eba0b414ce53da09910b3336cd22dacc8a673a844052b7c7406e22efd0e313",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/copy-manifest.json": "df0ebdfb0199ff71c34cc2a016c5bdb0e4c37f01fc6d8ea8679327b7bb35b589",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/evidence-files.json": "769c9c8be492e92ca1c94a6da1c5cfefb64a4d360f95a51a034dc6141913b7f8",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/handoff.json": "f10dccbf30ec9acb90e437ece5dc15847635acc67d62b0e326710c6d83f06e09",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/implementation-manifest.json": "7e9574a0d3da0bc08c2d6f803abb73b19b88c3fa6870e6d58ea82f89fdfa60cf",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/manual-copy.json": "925bd68e4dea311e0326cffe436ac02d165d5a0385df7ee44bbec72a55b4d611",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/manual-formal.json": "74d1dfde383523753064ab42af0e6d9205b4a28fa8d9b60e3c2c8ea658432fde",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/manual-jobs.json": "ed25db86798ccc1ca5d16c9d0143868f14c16b4e1eb1d9cd800e018a45d86e0f",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/manual-teaching.json": "3c6514bc8057514c34a28e309597f0b1c65b4efa4335c340f6452e5a4a817194",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/protection.json": "90148a668ed0e6000deabffb41866abe90d387749277b7b6bfa8c7f6eeb13a31",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/qa1-raw-index-correction.json": "6bc6a0cdc2362352ae48842424fd8f2bcbbb9a150589e51b071160864c408b58",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/raw-index-verification.json": "dc456c942555d3c28de7ea5e6989a54248cc715e15fa189f95114473d5d5d258",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/raw-output-index.json": "76061a6cb0299aab3810cc5afe3f367e14dba3442df00362550e72e6b21f02fd",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/repro/control_no_apostrophe.yaml": "742fc7cd69b83ee1e70ccb4fe5127f0ff1d5ff88bcf5719e7141f824ad30f467",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/repro/plain_apostrophe.yaml": "999018454e4b433910ada55c1dac22a22bf6717e442b7e494d9d29b6ab6d56bb",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/repro/quoted_apostrophe.yaml": "c6040b3948c39ad400c40e900078ca11a0c11fd2731d5a4f07f4748e52229079",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/repro/valid_plain_apostrophe.yaml": "5de4ed4dcb31d35ff068c2fc1fcd6ea6532114757a02c11846eaf43f427636f4",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/repro/valid_quoted_apostrophe.yaml": "de8e8f5c38da7ba9b854fe138916b0b296dee690bdcec0ca2ab074e06f6fb473",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/repro-after.json": "ca08d995e593e396a110171599fdde89d167aca3affffec068f035aecf2467ee",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/repro-before.json": "7ae279c5d3f2fc5ee2f8c9be22720b0bff4445731d9fce1282f3e0ec4601c770",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/resources-final.json": "1ef344dd34eb15757f2c9215d3e5c7e93a2b0eeb6b27876085c2930dab1989e9",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/rework1-diff.patch": "cb3b966889b60c2fd49ce1b2fb7ad637f220659bbe2a7a0c5ba66a8a3354416e",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/scenes.json": "6bc597fd7a9c184f2bb3a07b77bd1c0d0e4bae7c6246020418bcddac58f73e70",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/static.json": "975d9af09f297e22d55aacc5251a49e6efb5efd5499fdcdb559efe576e45b5de",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/test-summary.json": "8a18e13cfb50c3d20bbe8df8322ee1df427841f4e4bf08492085b210b976dbaf",
+    "field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework1/yaml-source-vectors.json": "de04074267e0b257d2668e5a1e5959f06d16fdd79aa46d1165ba205d8f85ea0f"
+  },
+  "protected_equal": true,
+  "implementation_delta_since_QA2": [
+    "src/config/catalog.rs",
+    "tests/plc_catalog.rs"
+  ],
+  "unchanged_guides_teaching_anchors_runtime": "QA2 exact byte comparison; additional manual/teaching scenes not rerun this rework; QA2 actual evidence remains historical",
+  "changed_with_coordinator_navigation": [
+    "PLAN.zh-CN.md",
+    "PLAN.md",
+    "plans/README.md",
+    "plans/README.zh-CN.md",
+    "tests/plc_catalog.rs",
+    "src/config/catalog.rs"
+  ]
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "path": "/private/tmp/arch-be008-disabled-93b58f401cc74024a6d20fb8027dfc2e",
+    "purpose": "this QA A test logs/disabled/rotation output",
+    "files": 1,
+    "bytes": 1717,
+    "retention": "after evidence archive, coordinator may remove; no runtime dependency"
+  },
+  {
+    "path": "/private/tmp/arch-be008-log-check-c475e9567e7049f68ffd2cc88aabcc2f",
+    "purpose": "this QA A test logs/disabled/rotation output",
+    "files": 5,
+    "bytes": 46143416,
+    "retention": "after evidence archive, coordinator may remove; no runtime dependency"
+  },
+  {
+    "path": "/private/tmp/arch-be008-test-logs-bd4e1b609aba4a609ed53539f80bd9b0",
+    "purpose": "this QA A test logs/disabled/rotation output",
+    "files": 1,
+    "bytes": 12236,
+    "retention": "after evidence archive, coordinator may remove; no runtime dependency"
+  }
+]

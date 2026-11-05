@@ -1,0 +1,48 @@
+{
+  "candidateAnd4ArtifactsStillExact": true,
+  "specAndTasksUnchanged": true,
+  "python8Unchanged": true,
+  "scopeDocumentsUnchangedSinceQA2Start": true,
+  "markdownFiles": 18,
+  "localLinkTargetsChecked": 577,
+  "brokenLinks": [],
+  "chineseCSharpHeadsAndLocalCodeIndex": 32,
+  "rootReadmeAndIndexOnlyAdditions": true,
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "README.md",
+        "README.zh-CN.md",
+        "CODE_INDEX.md",
+        "PLAN.md",
+        "PLAN.zh-CN.md",
+        "plans/README.md",
+        "plans/README.zh-CN.md",
+        "plans/ARCH-BE-008-csharp-backend-plan-slice",
+        "backend-dotnet"
+      ],
+      "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "bash",
+        "-n",
+        "backend-dotnet/tests/scripts/run-mysql-tests.sh"
+      ],
+      "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+      "exitCode": 0
+    },
+    {
+      "argv": [
+        "backend-dotnet/tests/scripts/run-mysql-tests.sh"
+      ],
+      "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+      "exitCode": 0
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+[
+  {
+    "label": "service-timings",
+    "argv": [
+      "python3",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/time_services.py"
+    ],
+    "exit": 0,
+    "seconds": 5.643543458
+  },
+  {
+    "label": "sealed-formal",
+    "argv": [
+      "python3",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/manual_replay.py",
+      "catalog",
+      "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/product/release/field-flow",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/fixture/release/ff-fixture",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/manual-sealed-formal"
+    ],
+    "exit": 0,
+    "seconds": 16.678834292
+  },
+  {
+    "label": "sealed-copy",
+    "argv": [
+      "python3",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/manual_replay.py",
+      "catalog",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/copy",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/copy-product/release/field-flow",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/copy-fixture/release/ff-fixture",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/manual-sealed-copy"
+    ],
+    "exit": 0,
+    "seconds": 21.198794666
+  },
+  {
+    "label": "sealed-teaching",
+    "argv": [
+      "python3",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/manual_replay.py",
+      "teaching",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/teaching",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/teaching-product/release/field-flow",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/teaching-fixture/release/ff-fixture",
+      "/private/tmp/ff-004-r2-dev-IVyzcc/manual-sealed-teaching"
+    ],
+    "exit": 0,
+    "seconds": 5.043587250000002
+  }
+]

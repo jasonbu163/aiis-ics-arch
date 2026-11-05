@@ -77,7 +77,10 @@ def test_69_original_public_assignments_preserved_plus_three_empty_scopes():
         data=(root/name).read_bytes()
         assert hashlib.sha256(data[:length]).hexdigest()==digest
         assignments={line.split('=',1)[0]:line.split('=',1)[1] for line in data.decode().splitlines() if line and not line.startswith('#') and '=' in line}
-        assert len(assignments)==72
+        historical={key:value for key,value in assignments.items() if "_INTEGRATION_" not in key and not key.startswith("PLC_FACTS_")}
+        assert len(historical)==72
+        assert len(assignments)==91
+        assert len(set(assignments)-set(historical))==19
         assert all(assignments[key]=='' for key in scopes)
 
 

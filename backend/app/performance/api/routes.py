@@ -37,6 +37,8 @@ from database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.user.models.user import User
 
+from app.performance.services.async_performance import legacy_output
+
 router = APIRouter(prefix="/performances", tags=["Performance"], route_class=PerformanceLegacyRoute)
 
 
@@ -70,7 +72,7 @@ async def get_performance_list(
     
     items = []
     for item in result["items"]:
-        item_dict = PerformanceResponse.model_validate(item).model_dump(by_alias=True)
+        item_dict = PerformanceResponse.model_validate(await legacy_output(db, item)).model_dump(by_alias=True)
         
         if item.parent_coil_no == item.coil_no:
             split_count_result = await db.execute(
@@ -104,7 +106,7 @@ async def create_performance(
         performance = await async_performance_service.create(db, performance_data)
         return SuccessResponse(
             message="创建成功",
-            data=PerformanceResponse.model_validate(performance).model_dump(by_alias=True)
+            data=PerformanceResponse.model_validate(await legacy_output(db, performance)).model_dump(by_alias=True)
         )
     except BusinessException:
         raise
@@ -124,7 +126,7 @@ async def get_performance(
         raise HTTPException(status_code=404, detail="实绩不存在")
     
     return SuccessResponse(
-        data=PerformanceResponse.model_validate(performance).model_dump(by_alias=True)
+        data=PerformanceResponse.model_validate(await legacy_output(db, performance)).model_dump(by_alias=True)
     )
 
 
@@ -148,7 +150,7 @@ async def update_performance(
         
         return SuccessResponse(
             message="更新成功",
-            data=PerformanceResponse.model_validate(performance).model_dump(by_alias=True)
+            data=PerformanceResponse.model_validate(await legacy_output(db, performance)).model_dump(by_alias=True)
         )
     except BusinessException:
         raise
@@ -193,15 +195,15 @@ async def get_process_data(
     
     return SuccessResponse(data={
         "temperature": [
-            ProcessTemperatureResponse.model_validate(t).model_dump(by_alias=True)
+            ProcessTemperatureResponse.model_validate(await legacy_output(db, t)).model_dump(by_alias=True)
             for t in process_data["temperature"]
         ],
         "tension": [
-            ProcessTensionResponse.model_validate(t).model_dump(by_alias=True)
+            ProcessTensionResponse.model_validate(await legacy_output(db, t)).model_dump(by_alias=True)
             for t in process_data["tension"]
         ],
         "speed": [
-            ProcessSpeedResponse.model_validate(s).model_dump(by_alias=True)
+            ProcessSpeedResponse.model_validate(await legacy_output(db, s)).model_dump(by_alias=True)
             for s in process_data["speed"]
         ]
     })

@@ -1,0 +1,4093 @@
+--- baseline/field-flow/field-flow-rust/src/config.rs
++++ candidate/field-flow/field-flow-rust/src/config.rs
+@@ -172,3 +172,6 @@
+         Ok(())
+     }
+ }
++
++pub mod catalog;
++pub mod runtime_v2;
+--- baseline/field-flow/field-flow-rust/src/commands.rs
++++ candidate/field-flow/field-flow-rust/src/commands.rs
+@@ -1,5 +1,5 @@
+ //! 文件：src/commands.rs；双语CLI解析与装配；无参/help无配置读取及状态IO。
+-use crate::{config::Config, domain::id, infrastructure::state, Result};
++use crate::{config::runtime_v2::Loaded, domain::id, infrastructure::state, Result};
+ use serde_json::Value;
+ use std::{collections::HashMap, path::PathBuf};
+ fn locale(lang: &str) -> Value {
+@@ -74,12 +74,16 @@
+         println!("{}", text["help"].as_str().unwrap());
+         return 0;
+     }
++    if args.get(0).is_some_and(|s|s=="config") && args.get(1).is_some_and(|s|s=="validate") {
++        let result=(||->Result<_>{let f=flags(&args[2..],&["--config","--plc-file"],&[])?;if f.len()!=1{return Err("cli_arguments".into());}let single=f.contains_key("--plc-file");let p=PathBuf::from(required(&f,if single{"--plc-file"}else{"--config"})?);Ok(crate::config::runtime_v2::validate(&p,single))})();
++        match result{Ok((v,code))=>{println!("{v}");return code;},Err(e)=>{eprintln!("{}: {e}",text["error"].as_str().unwrap());return 2;}}
++    }
+     let result:Result<()>=async{
+   match args[0].as_str(){
+    "state" if args.get(1).is_some_and(|s|s=="init")=>{let f=flags(&args[2..],&["--mode","--state-dir","--instance-id"],&["--synthetic"])?;if !f.contains_key("--synthetic"){return Err("synthetic_required".into())}let dir=PathBuf::from(required(&f,"--state-dir")?);let instance=required(&f,"--instance-id")?;state::init(&dir,&required(&f,"--mode")?,&instance)?;let mut audit=crate::infrastructure::audit::Audit::open(&dir,&id(),&instance)?;audit.emit("state_init",serde_json::json!({"result":"ok"}))?;Ok(())},
+    "state" if args.get(1).is_some_and(|s|s=="inspect")=>{let f=flags(&args[2..],&["--state-dir"],&[])?;let v=state::inspect(&PathBuf::from(required(&f,"--state-dir")?))?;println!("{v}");Ok(())},
+-   "run"=>{let f=flags(&args[1..],&["--config","--state-dir"],&["--execute"])?;let c=Config::load(&PathBuf::from(required(&f,"--config")?))?;let dir=PathBuf::from(required(&f,"--state-dir")?);let mode=if f.contains_key("--execute"){"execute"}else{"dry_run"};let(state,state_task)=state::State::open(&dir,mode,&c.instance_id,&id())?;
+-    let mut runtime=crate::runtime::Runtime::start(&c,&dir,&std::env::current_exe().map_err(|_|"runtime_executable")?,state.clone())?;runtime.launch_flows(&c)?;
++   "run"=>{let f=flags(&args[1..],&["--config","--state-dir"],&["--execute"])?;let loaded=Loaded::load(&PathBuf::from(required(&f,"--config")?))?;loaded.capability()?;let c=&loaded.config;let dir=PathBuf::from(required(&f,"--state-dir")?);let mode=if f.contains_key("--execute"){"execute"}else{"dry_run"};let(state,state_task)=state::State::open(&dir,mode,&c.instance_id,&id())?;
++    let mut runtime=crate::runtime::Runtime::start(&c,&dir,&std::env::current_exe().map_err(|_|"runtime_executable")?,state.clone())?;runtime.launch_catalog(&loaded).await?;
+     let mut terminate=tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate()).map_err(|_|"signal_setup")?;let mut tick=tokio::time::interval(std::time::Duration::from_secs(5));
+     loop{tokio::select!{_=tokio::signal::ctrl_c()=>break,_=terminate.recv()=>break,_=tick.tick()=>{let _=runtime.health().await;}}}
+     let end=tokio::time::Instant::now()+std::time::Duration::from_millis(c.shutdown_timeout_ms);
+@@ -98,7 +102,7 @@
+             if e.starts_with("config_")
+                 || e.starts_with("state_")
+                 || e.starts_with("cli_")
+-                || e == "synthetic_required"
++                || matches!(e.as_str(),"synthetic_required"|"unsupported_protocol"|"unsupported_connection"|"shared_transport_unsupported")
+             {
+                 2
+             } else {
+--- baseline/field-flow/field-flow-rust/src/runtime.rs
++++ candidate/field-flow/field-flow-rust/src/runtime.rs
+@@ -529,7 +529,10 @@
+     pub iterations: u64,
+     pub in_flight: u8,
+ }
++pub mod catalog;
++
+ pub struct Runtime {
++    points: HashMap<String, crate::app::read_points::Snapshot>,
+     pub stop: Stop,
+     pub owners: HashMap<String, Owner>,
+     owner_tasks: Vec<OwnerTask>,
+@@ -577,6 +580,7 @@
+             flow_tasks: Vec::new(),
+             state,
+             gates: paths,
++            points: HashMap::new(),
+         })
+     }
+     pub fn launch_flows(&mut self, config: &Config) -> Result<()> {
+@@ -617,6 +621,7 @@
+         let flows = self.flows.lock().unwrap().clone();
+         let owners: HashMap<_, _> = self.owners.iter().map(|(k, o)| (k, o.health())).collect();
+         let store = self.state.snapshot().await?;
++        self.points_health().await?;
+         self.state.log("health",json!({"flows":flows,"owners":owners,"store":store,"had_forced_driver_stop":self.forced.load(Ordering::Acquire)})).await
+     }
+     pub async fn shutdown(mut self, budget: u64) -> Result<()> {
+--- baseline/field-flow/field-flow-rust/src/services/mod.rs
++++ candidate/field-flow/field-flow-rust/src/services/mod.rs
+@@ -1,3 +1,5 @@
+ //! 文件：src/services/mod.rs；执行用例入口，HTTP协议封装归基础设施。
+ pub mod execution;
+ pub use crate::infrastructure::http::Http;
++
++pub mod devices;
+--- baseline/field-flow/field-flow-rust/src/app/mod.rs
++++ candidate/field-flow/field-flow-rust/src/app/mod.rs
+@@ -2,3 +2,5 @@
+ pub mod demo01;
+ pub mod get_value_guard_int;
+ pub mod plc_guard_get_int;
++
++pub mod read_points;
+--- baseline/field-flow/field-flow-rust/src/config/catalog.rs
++++ candidate/field-flow/field-flow-rust/src/config/catalog.rs
+@@ -0,0 +1,610 @@
++//! 文件：src/config/catalog.rs；冻结单PLC原字节、严格JSON及协议声明校验，不执行网络或状态IO。
++use crate::{domain::valid_id, Result};
++use serde::de::{self, DeserializeSeed, MapAccess, SeqAccess, Visitor};
++use serde_json::{Map, Value};
++use sha2::{Digest, Sha256};
++use std::{
++    collections::{HashMap, HashSet},
++    fmt, fs,
++    io::Read,
++    net::Ipv4Addr,
++    path::{Component, Path, PathBuf},
++};
++
++// Value的默认反序列化会覆盖重复键；这里在每层构造前拒绝，且限制嵌套。
++struct Strict(u8);
++impl<'de> DeserializeSeed<'de> for Strict {
++    type Value = Value;
++    fn deserialize<D: de::Deserializer<'de>>(self, d: D) -> std::result::Result<Value, D::Error> {
++        if self.0 > 16 {
++            return Err(de::Error::custom("depth"));
++        }
++        d.deserialize_any(self)
++    }
++}
++impl<'de> Visitor<'de> for Strict {
++    type Value = Value;
++    fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
++        f.write_str("strict value")
++    }
++    fn visit_bool<E: de::Error>(self, v: bool) -> std::result::Result<Value, E> {
++        Ok(v.into())
++    }
++    fn visit_i64<E: de::Error>(self, v: i64) -> std::result::Result<Value, E> {
++        Ok(v.into())
++    }
++    fn visit_u64<E: de::Error>(self, v: u64) -> std::result::Result<Value, E> {
++        Ok(v.into())
++    }
++    fn visit_f64<E: de::Error>(self, v: f64) -> std::result::Result<Value, E> {
++        serde_json::Number::from_f64(v)
++            .map(Value::Number)
++            .ok_or_else(|| E::custom("finite"))
++    }
++    fn visit_str<E: de::Error>(self, v: &str) -> std::result::Result<Value, E> {
++        Ok(v.into())
++    }
++    fn visit_string<E: de::Error>(self, v: String) -> std::result::Result<Value, E> {
++        Ok(v.into())
++    }
++    fn visit_unit<E: de::Error>(self) -> std::result::Result<Value, E> {
++        Ok(Value::Null)
++    }
++    fn visit_none<E: de::Error>(self) -> std::result::Result<Value, E> {
++        Ok(Value::Null)
++    }
++    fn visit_seq<A: SeqAccess<'de>>(self, mut a: A) -> std::result::Result<Value, A::Error> {
++        let mut v = Vec::new();
++        while let Some(x) = a.next_element_seed(Strict(self.0 + 1))? {
++            v.push(x);
++        }
++        Ok(Value::Array(v))
++    }
++    fn visit_map<A: MapAccess<'de>>(self, mut a: A) -> std::result::Result<Value, A::Error> {
++        let mut v = Map::new();
++        while let Some(k) = a.next_key::<String>()? {
++            if v.contains_key(&k) {
++                return Err(de::Error::custom("duplicate_key"));
++            }
++            let x = a.next_value_seed(Strict(self.0 + 1))?;
++            v.insert(k, x);
++        }
++        Ok(Value::Object(v))
++    }
++}
++pub fn parse(bytes: &[u8], yaml: bool) -> Result<Value> {
++    let s = std::str::from_utf8(bytes).map_err(|_| "config_utf8")?;
++    if s.starts_with('\u{feff}') {
++        return Err("config_bom".into());
++    }
++    if yaml {
++        // Anchors/aliases are forbidden even when expansion would be structurally valid.
++        let mut quote = None;
++        let mut escape = false;
++        let mut comment = false;
++        let mut boundary = true;
++        for c in s.chars() {
++            if c == '\n' {
++                comment = false;
++                boundary = true;
++                continue;
++            }
++            if comment {
++                continue;
++            }
++            if let Some(q) = quote {
++                if escape {
++                    escape = false;
++                    continue;
++                }
++                if c == '\\' && q == '"' {
++                    escape = true;
++                } else if c == q {
++                    quote = None;
++                }
++                continue;
++            }
++            if c == '"' || c == '\'' {
++                quote = Some(c);
++            } else if c == '#' && boundary {
++                comment = true;
++            } else if matches!(c, '&' | '*') && boundary {
++                return Err("config_yaml_alias".into());
++            }
++            boundary = c.is_whitespace() || matches!(c, '[' | ',' | '{' | ':');
++        }
++        Strict(0)
++            .deserialize(serde_yaml::Deserializer::from_str(s))
++            .map_err(|_| "config_schema".into())
++    } else {
++        let mut d = serde_json::Deserializer::from_slice(bytes);
++        let v = Strict(0).deserialize(&mut d).map_err(|_| "config_schema")?;
++        d.end().map_err(|_| "config_schema")?;
++        Ok(v)
++    }
++}
++pub fn check_path(path: &Path) -> Result<()> {
++    let absolute = if path.is_absolute() {
++        path.to_owned()
++    } else {
++        std::env::current_dir()
++            .map_err(|_| "config_path")?
++            .join(path)
++    };
++    let mut walked = PathBuf::new();
++    for c in absolute.components() {
++        walked.push(c);
++        if fs::symlink_metadata(&walked)
++            .map_err(|_| "config_read")?
++            .file_type()
++            .is_symlink()
++        {
++            return Err("config_symlink".into());
++        }
++    }
++    Ok(())
++}
++pub fn read_file(path: &Path, max: u64) -> Result<Vec<u8>> {
++    check_path(path)?;
++    let meta = fs::metadata(path).map_err(|_| "config_read")?;
++    if !meta.is_file() {
++        return Err("config_file".into());
++    }
++    if meta.len() > max {
++        return Err("config_size".into());
++    }
++    let f = fs::File::open(path).map_err(|_| "config_read")?;
++    let m = f.metadata().map_err(|_| "config_read")?;
++    if !m.is_file() {
++        return Err("config_file".into());
++    }
++    if m.len() > max {
++        return Err("config_size".into());
++    }
++    let mut b = Vec::new();
++    f.take(max + 1)
++        .read_to_end(&mut b)
++        .map_err(|_| "config_read")?;
++    if b.len() as u64 > max {
++        return Err("config_size".into());
++    }
++    Ok(b)
++}
++pub fn relative(base: &Path, s: &str) -> Result<PathBuf> {
++    if s.is_empty()
++        || s.len() > 255
++        || s.contains(['\\', ':', '*', '?', '$', '~', '[', ']'])
++        || s.split('/').any(|s| s.is_empty() || s == "." || s == "..")
++        || Path::new(s)
++            .components()
++            .any(|c| !matches!(c, Component::Normal(_)))
++    {
++        return Err("config_path".into());
++    }
++    Ok(base.join(s))
++}
++pub fn object<'a>(
++    v: &'a Value,
++    required: &[&str],
++    optional: &[&str],
++) -> Result<&'a Map<String, Value>> {
++    let m = v.as_object().ok_or("config_object")?;
++    if required.iter().any(|k| !m.contains_key(*k))
++        || m.keys()
++            .any(|k| !required.contains(&k.as_str()) && !optional.contains(&k.as_str()))
++    {
++        return Err("config_fields".into());
++    }
++    Ok(m)
++}
++pub fn text(v: &Value, max: usize) -> Result<&str> {
++    let s = v.as_str().ok_or("config_string")?;
++    if s.is_empty() || s.len() > max {
++        return Err("config_string".into());
++    }
++    Ok(s)
++}
++pub fn identifier(v: &Value) -> Result<&str> {
++    let s = text(v, 64)?;
++    if !valid_id(s) {
++        return Err("config_id".into());
++    }
++    Ok(s)
++}
++pub fn integer(v: &Value, lo: u64, hi: u64) -> Result<u64> {
++    let n = v.as_u64().ok_or("config_integer")?;
++    if n < lo || n > hi {
++        return Err("config_range".into());
++    }
++    Ok(n)
++}
++pub fn array(v: &Value, lo: usize, hi: usize) -> Result<&Vec<Value>> {
++    let a = v.as_array().ok_or("config_array")?;
++    if a.len() < lo || a.len() > hi {
++        return Err("config_capacity".into());
++    }
++    Ok(a)
++}
++fn enabled(m: &Map<String, Value>) -> Result<bool> {
++    m.get("enabled")
++        .map(|v| v.as_bool().ok_or("config_bool".into()))
++        .unwrap_or(Ok(true))
++}
++fn descriptions(m: &Map<String, Value>, fields: &[(&str, usize)]) -> Result<()> {
++    for (k, n) in fields {
++        if let Some(v) = m.get(*k) {
++            text(v, *n)?;
++        }
++    }
++    Ok(())
++}
++fn time(v: &Value) -> Result<()> {
++    let s = text(v, 64)?;
++    let t = chrono::DateTime::parse_from_rfc3339(s).map_err(|_| "config_time")?;
++    if !s.ends_with("+08:00") || t.offset().local_minus_utc() != 28800 {
++        return Err("config_time".into());
++    }
++    Ok(())
++}
++fn revision(v: &Value) -> Result<()> {
++    let m = object(v, &["id", "saved_seq", "payload_sha256"], &[])?;
++    let s = text(&m["id"], 36)?;
++    if s.len() != 36
++        || s.bytes().enumerate().any(|(i, c)| {
++            if [8, 13, 18, 23].contains(&i) {
++                c != b'-'
++            } else {
++                !c.is_ascii_digit() && !(b'a'..=b'f').contains(&c)
++            }
++        })
++    {
++        return Err("config_revision".into());
++    }
++    integer(&m["saved_seq"], 1, 9007199254740991)?;
++    let s = text(&m["payload_sha256"], 64)?;
++    if s.len() != 64
++        || !s
++            .bytes()
++            .all(|c| c.is_ascii_digit() || (b'a'..=b'f').contains(&c))
++    {
++        return Err("config_sha256".into());
++    }
++    Ok(())
++}
++fn source(v: &Value, id: &str) -> Result<()> {
++    match v["kind"].as_str() {
++        Some("manual") => {
++            let m = object(v, &["kind"], &["note"])?;
++            descriptions(m, &[("note", 512)])?;
++        }
++        Some("device_simulator") => {
++            let m = object(
++                v,
++                &[
++                    "kind",
++                    "export_mode",
++                    "instance_id",
++                    "revision",
++                    "exporter_version",
++                    "generated_at",
++                ],
++                &["runtime_observation"],
++            )?;
++            if m["export_mode"] != "saved_revision" || identifier(&m["instance_id"])? != id {
++                return Err("config_source".into());
++            }
++            revision(&m["revision"])?;
++            text(&m["exporter_version"], 64)?;
++            time(&m["generated_at"])?;
++            if let Some(o) = m.get("runtime_observation") {
++                let o = object(
++                    o,
++                    &["observed_at", "selected_revision", "loaded_revision"],
++                    &[],
++                )?;
++                time(&o["observed_at"])?;
++                for k in ["selected_revision", "loaded_revision"] {
++                    if !o[k].is_null() {
++                        revision(&o[k])?;
++                    }
++                }
++            }
++        }
++        _ => return Err("config_source".into()),
++    }
++    Ok(())
++}
++#[derive(Debug, Clone)]
++pub struct Point {
++    pub id: String,
++    pub db: u16,
++    pub size: u32,
++    pub offset: u32,
++    pub enabled: bool,
++}
++#[derive(Debug, Clone)]
++pub struct Catalog {
++    pub path: PathBuf,
++    pub sha256: String,
++    pub id: String,
++    pub protocol: String,
++    pub host: String,
++    pub port: u16,
++    pub rack: u16,
++    pub slot: u16,
++    pub compatible: bool,
++    pub points: Vec<Point>,
++    pub declared: HashMap<String, bool>,
++}
++impl Catalog {
++    pub fn load(path: &Path) -> Result<Self> {
++        let b = read_file(path, 1048576)?;
++        Self::from_bytes(path, &b)
++    }
++    pub fn from_bytes(path: &Path, b: &[u8]) -> Result<Self> {
++        if b.len() > 1048576 {
++            return Err("config_size".into());
++        }
++        let v = parse(b, false)?;
++        let m = object(
++            &v,
++            &[
++                "format",
++                "schema_version",
++                "id",
++                "protocol",
++                "source",
++                "connection",
++            ],
++            &[
++                "name",
++                "display_name",
++                "description",
++                "metadata",
++                "dbs",
++                "tables",
++            ],
++        )?;
++        if m["format"] != "ff.plc" || integer(&m["schema_version"], 1, 1)? != 1 {
++            return Err("config_format".into());
++        }
++        let id = identifier(&m["id"])?;
++        source(&m["source"], id)?;
++        descriptions(
++            m,
++            &[("name", 128), ("display_name", 256), ("description", 1024)],
++        )?;
++        if let Some(v) = m.get("metadata") {
++            let m = object(v, &[], &["brand", "model", "firmware"])?;
++            descriptions(m, &[("brand", 128), ("model", 128), ("firmware", 128)])?;
++        }
++        let protocol = text(&m["protocol"], 16)?;
++        let conn = &m["connection"];
++        let c = match protocol {
++            "s7" => object(
++                conn,
++                &["host", "port", "rack", "slot"],
++                &["local_tsap", "remote_tsap"],
++            ),
++            "modbus_tcp" => object(conn, &["host", "port", "unit_id"], &[]),
++            _ => Err("config_protocol".into()),
++        }?;
++        let host = text(&c["host"], 15)?;
++        let ip = host.parse::<Ipv4Addr>().map_err(|_| "config_host")?;
++        if ip.to_string() != host
++            || ip.is_unspecified()
++            || ip.is_broadcast()
++            || ip.is_multicast()
++            || ip.octets()[0] == 0
++            || ip.octets()[0] >= 240
++        {
++            return Err("config_host".into());
++        }
++        let port = integer(&c["port"], 1, 65535)? as u16;
++        let (mut rack, mut slot, mut compatible) = (0, 0, protocol == "s7");
++        let mut points = Vec::new();
++        let mut declared = HashMap::new();
++        let mut ids = HashSet::new();
++        let mut groups = HashSet::new();
++        let info = [
++            ("name", 128),
++            ("display_name", 256),
++            ("source_name", 256),
++            ("source_path", 1024),
++            ("source_native_type", 32),
++        ];
++        let common = [
++            "enabled",
++            "name",
++            "display_name",
++            "source_name",
++            "source_path",
++            "source_native_type",
++        ];
++        if protocol == "s7" {
++            if m.contains_key("tables") {
++                return Err("config_protocol_fields".into());
++            }
++            rack = integer(&c["rack"], 0, 7)? as u16;
++            slot = integer(&c["slot"], 0, 31)? as u16;
++            for (k, default) in [
++                ("local_tsap", 256),
++                ("remote_tsap", 256 + rack as u64 * 32 + slot as u64),
++            ] {
++                if let Some(v) = c.get(k) {
++                    compatible &= integer(v, 1, 65535)? == default;
++                }
++            }
++            for db in array(m.get("dbs").ok_or("config_fields")?, 1, 64)? {
++                let d = object(db, &["number", "size_bytes", "points"], &["enabled"])?;
++                let n = integer(&d["number"], 1, 65535)? as u16;
++                let size = integer(&d["size_bytes"], 2, 65536)? as u32;
++                let on = enabled(d)?;
++                if !groups.insert(n) {
++                    return Err("config_duplicate_db".into());
++                }
++                let mut occupied = Vec::new();
++                for p in array(&d["points"], 1, 4096)? {
++                    let p = object(p, &["id", "data_type", "byte_offset"], &common)?;
++                    let pid = identifier(&p["id"])?;
++                    if !ids.insert(pid.to_string()) {
++                        return Err("config_duplicate_point".into());
++                    }
++                    descriptions(p, &info)?;
++                    if p["data_type"] != "int16" {
++                        return Err("config_data_type".into());
++                    }
++                    let o = integer(&p["byte_offset"], 0, 65534)? as u32;
++                    if o + 2 > size {
++                        return Err("config_address".into());
++                    }
++                    if occupied.iter().any(|x: &u32| o < *x + 2 && *x < o + 2) {
++                        return Err("config_overlap".into());
++                    }
++                    declared.insert(pid.to_string(), on && enabled(p)?);
++                    occupied.push(o);
++                    points.push(Point {
++                        id: pid.into(),
++                        db: n,
++                        size,
++                        offset: o,
++                        enabled: on && enabled(p)?,
++                    });
++                }
++            }
++        } else {
++            if m.contains_key("dbs") {
++                return Err("config_protocol_fields".into());
++            }
++            integer(&c["unit_id"], 1, 255)?;
++            let mut tables = HashSet::new();
++            for t in array(m.get("tables").ok_or("config_fields")?, 1, 4)? {
++                let t = object(t, &["table", "points"], &["enabled"])?;
++                let table_on = enabled(t)?;
++                let name = text(&t["table"], 32)?;
++                let read = match name {
++                    "coils" => 1,
++                    "discrete_inputs" => 2,
++                    "holding_registers" => 3,
++                    "input_registers" => 4,
++                    _ => return Err("config_table".into()),
++                };
++                if !tables.insert(name) {
++                    return Err("config_duplicate_table".into());
++                }
++                let mut occupied = Vec::new();
++                for p in array(&t["points"], 1, 4096)? {
++                    let mut opt = common.to_vec();
++                    opt.extend(["word_order", "scale"]);
++                    let p = object(p, &["id", "pdu_address", "data_type", "functions"], &opt)?;
++                    let pid = identifier(&p["id"])?;
++                    if !ids.insert(pid.to_string()) {
++                        return Err("config_duplicate_point".into());
++                    }
++                    enabled(p)?;
++                    descriptions(p, &info)?;
++                    let ty = text(&p["data_type"], 16)?;
++                    let boolean = read <= 2;
++                    let width = if boolean {
++                        if ty != "bool" {
++                            return Err("config_data_type".into());
++                        }
++                        1
++                    } else {
++                        match ty {
++                            "int16" | "uint16" => 1,
++                            "int32" | "uint32" | "float32" => 2,
++                            _ => return Err("config_data_type".into()),
++                        }
++                    };
++                    if width == 2 {
++                        if !matches!(
++                            p.get("word_order").and_then(Value::as_str),
++                            Some("high_word_first" | "low_word_first")
++                        ) {
++                            return Err("config_word_order".into());
++                        }
++                    } else if p.contains_key("word_order") {
++                        return Err("config_word_order".into());
++                    }
++                    if let Some(s) = p.get("scale") {
++                        if boolean {
++                            return Err("config_scale".into());
++                        }
++                        let s = object(s, &["factor", "offset"], &[])?;
++                        for k in ["factor", "offset"] {
++                            let n = s[k].as_f64().ok_or("config_scale")?;
++                            if !n.is_finite() || n.abs() > 1e9 || k == "factor" && n == 0.0 {
++                                return Err("config_scale".into());
++                            }
++                        }
++                    }
++                    let f = object(&p["functions"], &["read", "write"], &[])?;
++                    integer(&f["read"], read, read)?;
++                    if !f["write"].is_null() {
++                        let w = if read == 1 {
++                            5
++                        } else if read == 3 && width == 1 {
++                            6
++                        } else {
++                            return Err("config_functions".into());
++                        };
++                        integer(&f["write"], w, w)?;
++                    }
++                    let o = integer(&p["pdu_address"], 0, 65535)?;
++                    if o + width > 65536 {
++                        return Err("config_address".into());
++                    }
++                    if occupied
++                        .iter()
++                        .any(|(a, w): &(u64, u64)| o < *a + *w && *a < o + width)
++                    {
++                        return Err("config_overlap".into());
++                    }
++                    declared.insert(pid.to_string(), table_on && enabled(p)?);
++                    occupied.push((o, width));
++                }
++            }
++        }
++        if ids.len() > 4096 {
++            return Err("config_capacity".into());
++        }
++        Ok(Self {
++            path: if path.is_absolute() {
++                path.to_owned()
++            } else {
++                std::env::current_dir()
++                    .map_err(|_| "config_path")?
++                    .join(path)
++            },
++            sha256: format!("{:x}", Sha256::digest(b)),
++            id: id.into(),
++            protocol: protocol.into(),
++            host: host.into(),
++            port,
++            rack,
++            slot,
++            compatible,
++            points,
++            declared,
++        })
++    }
++    pub fn point(&self, id: &str) -> Result<&Point> {
++        self.points
++            .iter()
++            .find(|p| p.id == id && p.enabled)
++            .ok_or("config_point".into())
++    }
++    pub fn file_summary(&self) -> Value {
++        serde_json::json!({"path":self.path,"id":self.id,"protocol":self.protocol,"sha256":self.sha256})
++    }
++    pub fn capability(&self) -> Result<()> {
++        if self.protocol != "s7" {
++            Err("unsupported_protocol".into())
++        } else if !self.compatible {
++            Err("unsupported_connection".into())
++        } else {
++            Ok(())
++        }
++    }
++}
+--- baseline/field-flow/field-flow-rust/src/config/runtime_v2.rs
++++ candidate/field-flow/field-flow-rust/src/config/runtime_v2.rs
+@@ -0,0 +1,344 @@
++//! 文件：src/config/runtime_v2.rs；版本分派、v2闭合结构和只读点引用规范化；不更改旧typed身份。
++use super::{
++    catalog::{self, Catalog},
++    Config, Flow, Http, Plc, Target,
++};
++use crate::Result;
++use serde_json::{json, Value};
++use std::{collections::HashSet, path::Path};
++#[derive(Debug, Clone, serde::Serialize, PartialEq, Eq, Hash)]
++pub struct PointRef {
++    pub device_id: String,
++    pub point_id: String,
++}
++#[derive(Debug, Clone)]
++pub struct ReadFlow {
++    pub id: String,
++    pub business_name: String,
++    pub interval_ms: u64,
++    pub device_ids: Vec<String>,
++    pub reads: Vec<PointRef>,
++}
++#[derive(Debug, Clone)]
++pub struct Loaded {
++    pub config: Config,
++    pub catalogs: Vec<Catalog>,
++    pub reads: Vec<ReadFlow>,
++}
++fn reference(v: &Value) -> Result<PointRef> {
++    let m = catalog::object(v, &["device_id", "point_id"], &[])?;
++    Ok(PointRef {
++        device_id: catalog::identifier(&m["device_id"])?.into(),
++        point_id: catalog::identifier(&m["point_id"])?.into(),
++    })
++}
++impl Loaded {
++    pub fn load(path: &Path) -> Result<Self> {
++        let meta = std::fs::metadata(path).map_err(|_| "config_read")?;
++        if !meta.is_file() {
++            return Err("config_file".into());
++        }
++        if meta.len() > 65536 {
++            return Err("config_size".into());
++        }
++        let file = std::fs::File::open(path).map_err(|_| "config_read")?;
++        if file.metadata().map_err(|_| "config_read")?.len() > 65536 {
++            return Err("config_size".into());
++        }
++        let mut bytes = Vec::new();
++        use std::io::Read;
++        file.take(65537)
++            .read_to_end(&mut bytes)
++            .map_err(|_| "config_read")?;
++        if bytes.len() > 65536 {
++            return Err("config_size".into());
++        }
++        #[derive(serde::Deserialize)]
++        struct Version {
++            schema_version: u64,
++        }
++        let version: Version = serde_yaml::from_slice(&bytes).map_err(|_| "config_schema")?;
++        match Some(version.schema_version) {
++            Some(1) => Ok(Self {
++                config: Config::load(path)?,
++                catalogs: vec![],
++                reads: vec![],
++            }),
++            Some(2) => {
++                catalog::check_path(path)?;
++                Self::v2(path, &bytes)
++            }
++            _ => Err("config_version".into()),
++        }
++    }
++    fn v2(path: &Path, b: &[u8]) -> Result<Self> {
++        let v = catalog::parse(b, true)?;
++        let m = catalog::object(
++            &v,
++            &[
++                "schema_version",
++                "instance_id",
++                "plc_files",
++                "plc_runtime",
++                "flows",
++                "http",
++                "shutdown_timeout_ms",
++            ],
++            &[],
++        )?;
++        catalog::integer(&m["schema_version"], 2, 2)?;
++        let instance_id = catalog::identifier(&m["instance_id"])?.to_string();
++        let base = path.parent().unwrap_or(Path::new("."));
++        let mut catalogs = Vec::new();
++        let mut paths = HashSet::new();
++        let mut ids = HashSet::new();
++        let mut endpoints = std::collections::HashMap::new();
++        let mut total = 0;
++        for file in catalog::array(&m["plc_files"], 1, 4)? {
++            let path = catalog::relative(base, catalog::text(file, 255)?)?;
++            if !paths.insert(path.clone()) {
++                return Err("config_duplicate_path".into());
++            }
++            let bytes = catalog::read_file(&path, 1048576)?;
++            total += bytes.len();
++            if total > 4194304 {
++                return Err("config_size".into());
++            }
++            let c = Catalog::from_bytes(&path, &bytes)?;
++            if !ids.insert(c.id.clone()) {
++                return Err("config_duplicate_device".into());
++            }
++            if let Some(protocol) = endpoints.insert((c.host.clone(), c.port), c.protocol.clone()) {
++                return Err(if protocol == "modbus_tcp" && c.protocol == "modbus_tcp" {
++                    "shared_transport_unsupported"
++                } else {
++                    "config_duplicate_endpoint"
++                }
++                .into());
++            }
++            catalogs.push(c);
++        }
++        let mut plcs = Vec::new();
++        let mut budgets = HashSet::new();
++        let mut largest = 0;
++        for p in catalog::array(&m["plc_runtime"], 1, 4)? {
++            let p = catalog::object(
++                p,
++                &[
++                    "device_id",
++                    "connect_timeout_ms",
++                    "io_timeout_ms",
++                    "queue_capacity",
++                    "queue_wait_ms",
++                    "ready_wait_ms",
++                ],
++                &[],
++            )?;
++            let id = catalog::identifier(&p["device_id"])?;
++            let c = catalogs
++                .iter()
++                .find(|c| c.id == id)
++                .ok_or("config_device")?;
++            if !budgets.insert(id.to_string()) {
++                return Err("config_duplicate_device".into());
++            }
++            let connect = catalog::integer(&p["connect_timeout_ms"], 500, 3000)?;
++            let io = catalog::integer(&p["io_timeout_ms"], 500, 5000)?;
++            largest = largest.max(connect).max(io);
++            plcs.push(Plc {
++                id: id.into(),
++                host: c.host.clone(),
++                port: c.port,
++                rack: c.rack,
++                slot: c.slot,
++                connect_timeout_ms: connect,
++                io_timeout_ms: io,
++                queue_capacity: catalog::integer(&p["queue_capacity"], 1, 16)? as usize,
++                queue_wait_ms: catalog::integer(&p["queue_wait_ms"], 100, 5000)?,
++                ready_wait_ms: catalog::integer(&p["ready_wait_ms"], 100, 5000)?,
++            });
++        }
++        if budgets != ids {
++            return Err("config_device".into());
++        }
++        let h = catalog::object(
++            &m["http"],
++            &[
++                "connect_timeout_ms",
++                "total_timeout_ms",
++                "pool_wait_ms",
++                "max_connections",
++                "max_body_bytes",
++            ],
++            &[],
++        )?;
++        let http = Http {
++            connect_timeout_ms: catalog::integer(&h["connect_timeout_ms"], 100, 1500)?,
++            total_timeout_ms: catalog::integer(&h["total_timeout_ms"], 100, 5000)?,
++            pool_wait_ms: catalog::integer(&h["pool_wait_ms"], 100, 1500)?,
++            max_connections: catalog::integer(&h["max_connections"], 1, 8)? as usize,
++            max_body_bytes: catalog::integer(&h["max_body_bytes"], 1, 4096)? as usize,
++        };
++        if http.connect_timeout_ms > http.total_timeout_ms
++            || http.pool_wait_ms > http.total_timeout_ms
++        {
++            return Err("config_http".into());
++        }
++        let shutdown = catalog::integer(&m["shutdown_timeout_ms"], 5000, 20000)?;
++        if shutdown < largest.max(http.total_timeout_ms) + 5500 {
++            return Err("config_shutdown".into());
++        }
++        let mut flows = Vec::new();
++        let mut reads = Vec::new();
++        let mut flow_ids = HashSet::new();
++        let mut targets = Vec::new();
++        for f in catalog::array(&m["flows"], 1, 8)? {
++            let kind = f["kind"].as_str().ok_or("config_flow_kind_unsupported")?;
++            let common = ["id", "kind", "business_name", "interval_ms", "device_ids"];
++            let mut required = common.to_vec();
++            match kind {
++                "demo01" => required.extend(["source_id", "get_url", "input_max_age_ms", "target"]),
++                "read_points" => required.push("reads"),
++                _ => return Err("config_flow_kind_unsupported".into()),
++            }
++            let f = catalog::object(f, &required, &[])?;
++            let id = catalog::identifier(&f["id"])?.to_string();
++            if !flow_ids.insert(id.clone()) {
++                return Err("config_duplicate_flow".into());
++            }
++            let business = catalog::identifier(&f["business_name"])?.to_string();
++            let interval = catalog::integer(&f["interval_ms"], 100, 10000)?;
++            let mut deps = Vec::new();
++            for d in catalog::array(&f["device_ids"], 1, 4)? {
++                let id = catalog::identifier(d)?.to_string();
++                if !ids.contains(&id) || deps.contains(&id) {
++                    return Err("config_device".into());
++                }
++                deps.push(id);
++            }
++            let resolve = |r: &PointRef| -> Result<()> {
++                if !deps.contains(&r.device_id) {
++                    return Err("config_dependency".into());
++                }
++                let c = catalogs
++                    .iter()
++                    .find(|c| c.id == r.device_id)
++                    .ok_or("config_device")?;
++                if c.declared.get(&r.point_id) != Some(&true) {
++                    return Err("config_point".into());
++                }
++                Ok(())
++            };
++            if kind == "read_points" {
++                let mut refs = Vec::new();
++                for r in catalog::array(&f["reads"], 1, 16)? {
++                    let r = reference(r)?;
++                    resolve(&r)?;
++                    if refs.contains(&r) {
++                        return Err("config_duplicate_read".into());
++                    }
++                    refs.push(r);
++                }
++                reads.push(ReadFlow {
++                    id,
++                    business_name: business,
++                    interval_ms: interval,
++                    device_ids: deps,
++                    reads: refs,
++                });
++            } else {
++                let r = reference(&f["target"])?;
++                resolve(&r)?;
++                let c = catalogs.iter().find(|c| c.id == r.device_id).unwrap();
++                if c.protocol != "s7" {
++                    return Err("config_point_protocol".into());
++                }
++                let p = c.point(&r.point_id)?;
++                let source = catalog::identifier(&f["source_id"])?.to_string();
++                let url = catalog::text(&f["get_url"], 65536)?.to_string();
++                let u = reqwest::Url::parse(&url).map_err(|_| "config_url")?;
++                if !matches!(u.scheme(), "http" | "https")
++                    || u.host_str().is_none()
++                    || !u.username().is_empty()
++                    || u.password().is_some()
++                    || u.fragment().is_some()
++                {
++                    return Err("config_url".into());
++                }
++                let key = (c.host.clone(), c.port, c.rack, c.slot, p.db);
++                if targets
++                    .iter()
++                    .any(|(k, o): &((String, u16, u16, u16, u16), u32)| {
++                        *k == key && p.offset < *o + 2 && *o < p.offset + 2
++                    })
++                {
++                    return Err("config_overlap".into());
++                }
++                targets.push((key, p.offset));
++                flows.push(Flow {
++                    id,
++                    kind: kind.into(),
++                    business_name: business,
++                    interval_ms: interval,
++                    source_id: source,
++                    get_url: url,
++                    input_max_age_ms: catalog::integer(&f["input_max_age_ms"], 1, 60000)?,
++                    target: Target {
++                        plc_id: c.id.clone(),
++                        db_number: p.db,
++                        db_size_bytes: p.size,
++                        byte_offset: p.offset,
++                        data_type: "INT".into(),
++                    },
++                });
++            }
++        }
++        Ok(Self {
++            config: Config {
++                schema_version: 1,
++                instance_id,
++                plcs,
++                flows,
++                http,
++                shutdown_timeout_ms: shutdown,
++            },
++            catalogs,
++            reads,
++        })
++    }
++    pub fn capability(&self) -> Result<()> {
++        if self.catalogs.iter().any(|c| c.protocol == "modbus_tcp") {
++            return Err("unsupported_protocol".into());
++        }
++        for c in &self.catalogs {
++            c.capability()?;
++        }
++        Ok(())
++    }
++    pub fn report(&self) -> Value {
++        let issues: Vec<_> = self
++            .catalogs
++            .iter()
++            .filter_map(|c| {
++                c.capability()
++                    .err()
++                    .map(|e| json!({"error_key":e,"path":c.path}))
++            })
++            .collect();
++        json!({"scope":if self.catalogs.is_empty(){"legacy_main"}else{"main"},"format_valid":true,"runtime_compatible":issues.is_empty(),"files":self.catalogs.iter().map(Catalog::file_summary).collect::<Vec<_>>(),"issues":issues,"issues_truncated":false})
++    }
++}
++pub fn validate(path: &Path, single: bool) -> (Value, i32) {
++    let result = if single {
++        Catalog::load(path).map(|c|{let issues=c.capability().err().map(|e|vec![json!({"error_key":e,"path":"$.connection"})]).unwrap_or_default();json!({"scope":"plc_file","format_valid":true,"runtime_compatible":issues.is_empty(),"files":[c.file_summary()],"issues":issues,"issues_truncated":false})})
++    } else {
++        Loaded::load(path).map(|c| c.report())
++    };
++    match result {
++        Ok(v) => (v, 0),
++        Err(e) => (
++            json!({"scope":if single{"plc_file"}else{"main"},"format_valid":false,"runtime_compatible":false,"files":[],"issues":[{"error_key":e,"path":"$"}],"issues_truncated":false}),
++            2,
++        ),
++    }
++}
+--- baseline/field-flow/field-flow-rust/src/services/devices.rs
++++ candidate/field-flow/field-flow-rust/src/services/devices.rs
+@@ -0,0 +1,93 @@
++//! 文件：src/services/devices.rs；flow绑定的只读设备子集，复用原Owner队列，不暴露物理地址或writer。
++use crate::{
++    config::{catalog::Catalog, runtime_v2::ReadFlow},
++    runtime::Owner,
++    Result,
++};
++use std::collections::HashMap;
++#[derive(Clone)]
++pub struct Devices {
++    devices: HashMap<String, Device>,
++}
++#[derive(Clone)]
++pub struct Device {
++    device_id: String,
++    flow_id: String,
++    owner: Owner,
++    points: HashMap<String, (u16, u32)>,
++}
++#[derive(Debug, Clone, serde::Serialize)]
++pub struct PointSample {
++    pub device_id: String,
++    pub point_id: String,
++    pub flow_id: String,
++    pub request_id: String,
++    pub generation: u64,
++    pub value: i16,
++    pub quality: String,
++    pub received_at: String,
++}
++fn shanghai_offset() -> chrono::FixedOffset {
++    chrono::FixedOffset::east_opt(28800).unwrap()
++}
++pub fn local_time() -> String {
++    chrono::Utc::now()
++        .with_timezone(&shanghai_offset())
++        .to_rfc3339_opts(chrono::SecondsFormat::Millis, false)
++}
++impl Devices {
++    pub(crate) fn bind(
++        f: &ReadFlow,
++        catalogs: &[Catalog],
++        owners: &HashMap<String, Owner>,
++    ) -> Result<Self> {
++        let mut devices = HashMap::new();
++        for id in &f.device_ids {
++            let c = catalogs
++                .iter()
++                .find(|c| &c.id == id)
++                .ok_or("config_device")?;
++            let owner = owners.get(id).ok_or("config_device")?.clone();
++            devices.insert(
++                id.clone(),
++                Device {
++                    device_id: id.clone(),
++                    flow_id: f.id.clone(),
++                    owner,
++                    points: c
++                        .points
++                        .iter()
++                        .filter(|p| p.enabled)
++                        .map(|p| (p.id.clone(), (p.db, p.offset)))
++                        .collect(),
++                },
++            );
++        }
++        Ok(Self { devices })
++    }
++    pub fn get(&self, id: &str) -> Result<&Device> {
++        self.devices.get(id).ok_or("device_not_allowed".into())
++    }
++}
++impl Device {
++    pub async fn read(&self, point_id: &str) -> Result<PointSample> {
++        let (db, offset) = self.points.get(point_id).ok_or("point_not_allowed")?;
++        let s = self.owner.read(&self.flow_id, *db, *offset).await?;
++        Ok(PointSample {
++            device_id: self.owner_id(),
++            point_id: point_id.into(),
++            flow_id: s.flow_id,
++            request_id: s.request_id,
++            generation: s.generation,
++            value: s.value,
++            quality: s.quality,
++            received_at: chrono::DateTime::from_timestamp_millis(s.sampled_at_ms)
++                .ok_or("sample_time")?
++                .with_timezone(&shanghai_offset())
++                .to_rfc3339_opts(chrono::SecondsFormat::Millis, false),
++        })
++    }
++    fn owner_id(&self) -> String {
++        self.device_id.clone()
++    }
++}
+--- baseline/field-flow/field-flow-rust/src/app/read_points.rs
++++ candidate/field-flow/field-flow-rust/src/app/read_points.rs
+@@ -0,0 +1,81 @@
++//! 文件：src/app/read_points.rs；按引用顺序执行单轮只读；首错结束，未读项不拼接旧样本。
++use crate::{
++    config::runtime_v2::ReadFlow,
++    domain::id,
++    services::devices::{Devices, PointSample},
++    Result,
++};
++use std::sync::{Arc, Mutex};
++#[derive(Debug, Clone, serde::Serialize)]
++pub struct Item {
++    pub device_id: String,
++    pub point_id: String,
++    pub status: String,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    pub sample: Option<PointSample>,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    pub error_key: Option<String>,
++}
++#[derive(Debug, Clone, Default, serde::Serialize)]
++pub struct Observation {
++    pub round_id: String,
++    pub status: String,
++    pub items: Vec<Item>,
++    pub completed_rounds: u64,
++    pub successful_reads: u64,
++    pub errors: u64,
++}
++pub type Snapshot = Arc<Mutex<Observation>>;
++pub async fn iteration(f: &ReadFlow, devices: &Devices, snapshot: &Snapshot) -> Result<()> {
++    {
++        let mut s = snapshot.lock().unwrap();
++        s.round_id = id();
++        s.status = "in_progress".into();
++        s.items = f
++            .reads
++            .iter()
++            .map(|r| Item {
++                device_id: r.device_id.clone(),
++                point_id: r.point_id.clone(),
++                status: "not_attempted".into(),
++                sample: None,
++                error_key: None,
++            })
++            .collect();
++    }
++    for (at, r) in f.reads.iter().enumerate() {
++        let result = match devices.get(&r.device_id) {
++            Ok(d) => d.read(&r.point_id).await,
++            Err(e) => Err(e),
++        };
++        let mut s = snapshot.lock().unwrap();
++        match result {
++            Ok(sample) => {
++                s.successful_reads = s.successful_reads.saturating_add(1);
++                s.items[at].status = "success".into();
++                s.items[at].sample = Some(sample);
++            }
++            Err(e) => {
++                s.status = if e == "canceled" {
++                    "canceled"
++                } else {
++                    "failed"
++                }
++                .into();
++                s.errors = s.errors.saturating_add(1);
++                s.items[at].status = "error".into();
++                s.items[at].error_key = Some(
++                    e.chars()
++                        .filter(|c| c.is_ascii_alphanumeric() || *c == '_')
++                        .take(64)
++                        .collect(),
++                );
++                return Err(e);
++            }
++        }
++    }
++    let mut s = snapshot.lock().unwrap();
++    s.status = "complete".into();
++    s.completed_rounds = s.completed_rounds.saturating_add(1);
++    Ok(())
++}
+--- baseline/field-flow/field-flow-rust/src/runtime/catalog.rs
++++ candidate/field-flow/field-flow-rust/src/runtime/catalog.rs
+@@ -0,0 +1,73 @@
++//! 文件：src/runtime/catalog.rs；v2只读流装配及5秒分块观察，生命周期复用原Runtime。
++use super::{FlowHealth, Runtime};
++use crate::{
++    app::read_points::{self, Observation, Snapshot},
++    config::runtime_v2::Loaded,
++    domain::now_ms,
++    services::devices::{local_time, Devices},
++    Result,
++};
++use serde_json::{json, Value};
++use std::{
++    sync::{atomic::Ordering, Arc, Mutex},
++    time::Duration,
++};
++impl Runtime {
++    pub async fn launch_catalog(&mut self, loaded: &Loaded) -> Result<()> {
++        self.launch_flows(&loaded.config)?;
++        for c in &loaded.catalogs {
++            self.state
++                .log("plc_catalog_loaded", c.file_summary())
++                .await?;
++        }
++        for f in loaded.reads.clone() {
++            let devices = Devices::bind(&f, &loaded.catalogs, &self.owners)?;
++            let snapshot: Snapshot = Arc::new(Mutex::new(Observation::default()));
++            self.points.insert(f.id.clone(), snapshot.clone());
++            let stop = self.stop.clone();
++            let health = self.flows.clone();
++            let state = self.state.clone();
++            health.lock().unwrap().insert(
++                f.id.clone(),
++                FlowHealth {
++                    state: "starting".into(),
++                    last_iteration_ms: None,
++                    last_success_ms: None,
++                    consecutive_errors: 0,
++                    iterations: 0,
++                    in_flight: 0,
++                },
++            );
++            self.flow_tasks.push(tokio::spawn(async move {
++                loop {if stop.stopped.load(Ordering::Acquire){break;}
++                    {let mut h=health.lock().unwrap();let h=h.get_mut(&f.id).unwrap();h.in_flight=1;h.last_iteration_ms=Some(now_ms());h.iterations=h.iterations.saturating_add(1);}
++                    let result=read_points::iteration(&f,&devices,&snapshot).await;let mut event=None;
++                    {let mut h=health.lock().unwrap();let h=h.get_mut(&f.id).unwrap();h.in_flight=0;match result{Ok(())=>{h.state="running".into();h.last_success_ms=Some(now_ms());h.consecutive_errors=0;},Err(e)=>{h.state="recovering".into();h.consecutive_errors=h.consecutive_errors.saturating_add(1);if h.consecutive_errors==1{event=Some(e);}}}}
++                    if let Some(e)=event{let _=state.log("flow_health",json!({"flow_id":f.id,"error_key":e,"state":"recovering"})).await;}
++                    tokio::select!{_=stop.wait()=>break,_=tokio::time::sleep(Duration::from_millis(f.interval_ms))=>{}}
++                }
++                let mut s=snapshot.lock().unwrap();if s.status=="in_progress"{s.status="canceled".into();}drop(s);health.lock().unwrap().get_mut(&f.id).unwrap().state="stopped".into();
++            }));
++        }
++        Ok(())
++    }
++    pub fn points_snapshot(&self, flow: &str) -> Option<Observation> {
++        self.points.get(flow).map(|s| s.lock().unwrap().clone())
++    }
++    pub async fn points_health(&self) -> Result<()> {
++        for (flow, s) in &self.points {
++            let s = s.lock().unwrap().clone();
++            for context in chunks(flow, &s) {
++                self.state.log("points_health", context).await?;
++            }
++        }
++        Ok(())
++    }
++}
++pub fn chunks(flow: &str, s: &Observation) -> Vec<Value> {
++    if s.round_id.is_empty() {
++        return Vec::new();
++    }
++    let count = s.items.len().div_ceil(4).max(1);
++    (0..count).map(|i|json!({"flow_id":flow,"round_id":s.round_id,"status":s.status,"observed_at":local_time(),"chunk_index":i,"chunk_count":count,"completed_rounds":s.completed_rounds,"successful_reads":s.successful_reads,"errors":s.errors,"items":s.items.iter().skip(i*4).take(4).collect::<Vec<_>>()})).collect()
++}
+--- baseline/field-flow/field-flow-rust/src/bin/ff-fixture.rs
++++ candidate/field-flow/field-flow-rust/src/bin/ff-fixture.rs
+@@ -1,6 +1,12 @@
+ //! 文件：src/bin/ff-fixture.rs；独立本机合成夹具入口，无参仅帮助。
+ fn main() {
+     let args: Vec<_> = std::env::args().skip(1).collect();
++    if args.len()==2 && args[0]=="__catalog_native" {
++        std::process::exit(match field_flow::fixture::catalog_demo::native(&args[1]){Ok(())=>0,Err(e)=>{eprintln!("{e}");1}});
++    }
++    if args.len()==3 && args[0]=="--catalog-demo" && args[1]=="--evidence-dir" {
++        std::process::exit(match field_flow::fixture::catalog_demo::manual(std::path::Path::new(&args[2])){Ok(())=>0,Err(e)=>{eprintln!("{e}");1}});
++    }
+     if args == ["__native_fixture"] {
+         std::process::exit(if field_flow::fixture::native_server().is_ok() {
+             0
+@@ -9,7 +15,8 @@
+         })
+     }
+     if args.is_empty() || args == ["--help"] {
+-        println!("ff-fixture --config config/loopback.yaml --evidence-dir NEW_DIRECTORY\nStop with ENTER.");
++        let lang=if std::env::var("LANG").unwrap_or_default().starts_with("zh"){include_str!("../../locales/zh-CN.json")}else{include_str!("../../locales/en-US.json")};
++        let text:serde_json::Value=serde_json::from_str(lang).unwrap();println!("{}",text["fixture_help"].as_str().unwrap());
+         return;
+     }
+     if args.len() != 4 || args[0] != "--config" || args[2] != "--evidence-dir" {
+--- baseline/field-flow/field-flow-rust/src/fixture.rs
++++ candidate/field-flow/field-flow-rust/src/fixture.rs
+@@ -228,3 +228,5 @@
+     std::hint::black_box(memory);
+     Ok(())
+ }
++
++pub mod catalog_demo;
+--- baseline/field-flow/field-flow-rust/src/fixture/catalog_demo.rs
++++ candidate/field-flow/field-flow-rust/src/fixture/catalog_demo.rs
+@@ -0,0 +1,510 @@
++//! 文件：src/fixture/catalog_demo.rs；固定双S7/HTTP合成夹具，原始TPKT观察、一次发布及真实join/wait。
++use crate::{
++    domain::{id, now_ms},
++    Result,
++};
++use serde_json::{json, Value};
++use std::{
++    fs,
++    io::{BufRead, BufReader, Read, Write},
++    net::{Shutdown, TcpListener, TcpStream},
++    path::Path,
++    process::{Child, Command, Stdio},
++    sync::{
++        atomic::{AtomicBool, AtomicU64, Ordering},
++        Arc, Condvar, Mutex,
++    },
++    thread::{self, JoinHandle},
++    time::{Duration, Instant},
++};
++#[derive(Clone, Default)]
++pub struct Options {
++    pub b_off: bool,
++    pub slow_setup: bool,
++    pub io_delay_ms: u64,
++    pub http_delay_ms: u64,
++    pub short_write_ack_once: bool,
++}
++struct Trace {
++    rows: [Vec<Value>; 2],
++    bytes: usize,
++    truncated: bool,
++}
++struct Shared {
++    start: Instant,
++    seq: AtomicU64,
++    trace: Mutex<Trace>,
++    body: Mutex<Value>,
++    issued: AtomicBool,
++    short_ack_used: AtomicBool,
++    gets: AtomicU64,
++    reads: [AtomicU64; 2],
++    writes: [AtomicU64; 2],
++    sessions: [AtomicU64; 2],
++    stop: AtomicBool,
++    sockets: Mutex<Vec<TcpStream>>,
++    a_complete: (Mutex<bool>, Condvar),
++    options: Options,
++    b_observer: Mutex<Option<std::sync::Weak<crate::runtime::Owner>>>,
++}
++impl Shared {
++    fn record(&self, plc: usize, mut v: Value) {
++        v["sequence"] = json!(self.seq.fetch_add(1, Ordering::SeqCst));
++        v["elapsed_us"] = json!(self.start.elapsed().as_micros() as u64);
++        let size = serde_json::to_vec(&v).unwrap().len();
++        let mut t = self.trace.lock().unwrap();
++        if t.rows[plc].len() >= 2000 || t.bytes + size > 4194304 {
++            t.truncated = true;
++        } else {
++            t.bytes += size;
++            t.rows[plc].push(v);
++        }
++    }
++    fn socket(&self, s: &TcpStream) {
++        self.sockets.lock().unwrap().push(s.try_clone().unwrap());
++    }
++    fn pause(&self, ms: u64) -> bool {
++        let end = Instant::now() + Duration::from_millis(ms);
++        while Instant::now() < end {
++            if self.stop.load(Ordering::Acquire) {
++                return false;
++            }
++            thread::sleep(Duration::from_millis(2));
++        }
++        true
++    }
++}
++struct Native {
++    child: Child,
++    output: BufReader<std::process::ChildStdout>,
++    index: usize,
++}
++pub struct CatalogFixture {
++    shared: Arc<Shared>,
++    threads: Vec<JoinHandle<Result<()>>>,
++    children: Vec<Native>,
++    pids: Vec<u32>,
++    final_memory: Vec<Value>,
++    closed: bool,
++    close_result: Option<Result<()>>,
++}
++fn hex(b: &[u8]) -> String {
++    b.iter().map(|b| format!("{b:02x}")).collect()
++}
++fn frame(s: &mut TcpStream) -> std::io::Result<Vec<u8>> {
++    let mut h = [0; 4];
++    s.read_exact(&mut h)?;
++    let n = u16::from_be_bytes([h[2], h[3]]) as usize;
++    if h[..2] != [3, 0] || !(4..=4096).contains(&n) {
++        return Err(std::io::ErrorKind::InvalidData.into());
++    }
++    let mut b = vec![0; n];
++    b[..4].copy_from_slice(&h);
++    s.read_exact(&mut b[4..])?;
++    Ok(b)
++}
++fn configured(listener: &TcpListener) -> Result<()> {
++    listener
++        .set_nonblocking(true)
++        .map_err(|_| "fixture_listener".into())
++}
++impl CatalogFixture {
++    pub fn start(executable: &Path) -> Result<Self> {
++        Self::start_with(executable, Options::default())
++    }
++    pub fn start_with(executable: &Path, options: Options) -> Result<Self> {
++        if options.io_delay_ms > 300 || options.http_delay_ms > 1200 {
++            return Err("fixture_budget".into());
++        }
++        // Reserve all five ports before creating any child. Conflict is never resolved by killing/renumbering.
++        let mut listeners = Vec::new();
++        for p in [34102, 34103, 34112, 34113, 34880] {
++            listeners
++                .push(TcpListener::bind(("127.0.0.1", p)).map_err(|_| "fixture_port_conflict")?);
++        }
++        let http = listeners.pop().unwrap();
++        let bnative = listeners.pop().unwrap();
++        let bproxy = listeners.pop().unwrap();
++        let anative = listeners.pop().unwrap();
++        let aproxy = listeners.pop().unwrap();
++        drop(anative);
++        drop(bnative);
++        let shared = Arc::new(Shared {
++            start: Instant::now(),
++            seq: AtomicU64::new(0),
++            trace: Mutex::new(Trace {
++                rows: [Vec::new(), Vec::new()],
++                bytes: 0,
++                truncated: false,
++            }),
++            body: Mutex::new(
++                json!({"schema_version":1,"source_id":"demo01-feed","ready":false,"command_id":null,"value":null,"issued_at_ms":null,"expires_at_ms":null}),
++            ),
++            issued: AtomicBool::new(false),
++            short_ack_used: AtomicBool::new(false),
++            gets: AtomicU64::new(0),
++            reads: [AtomicU64::new(0), AtomicU64::new(0)],
++            writes: [AtomicU64::new(0), AtomicU64::new(0)],
++            sessions: [AtomicU64::new(0), AtomicU64::new(0)],
++            stop: AtomicBool::new(false),
++            sockets: Mutex::new(Vec::new()),
++            a_complete: (Mutex::new(false), Condvar::new()),
++            options,
++            b_observer: Mutex::new(None),
++        });
++        let mut f = Self {
++            shared,
++            threads: Vec::new(),
++            children: Vec::new(),
++            pids: Vec::new(),
++            final_memory: Vec::new(),
++            closed: false,
++            close_result: None,
++        };
++        for i in 0..if f.shared.options.b_off { 1 } else { 2 } {
++            let mut child = Command::new(executable)
++                .args(["__catalog_native", if i == 0 { "a" } else { "b" }])
++                .stdin(Stdio::piped())
++                .stdout(Stdio::piped())
++                .spawn()
++                .map_err(|_| "fixture_spawn")?;
++            let pid = child.id();
++            f.pids.push(pid);
++            let output = BufReader::new(child.stdout.take().ok_or("fixture_output")?);
++            f.children.push(Native {
++                child,
++                output,
++                index: i,
++            });
++            let n = f.children.last_mut().unwrap();
++            use std::os::fd::AsRawFd;
++            let fd = n.output.get_ref().as_raw_fd();
++            let flags = unsafe { libc::fcntl(fd, libc::F_GETFL) };
++            if flags < 0 || unsafe { libc::fcntl(fd, libc::F_SETFL, flags | libc::O_NONBLOCK) } < 0
++            {
++                return Err("fixture_output".into());
++            }
++            let end = Instant::now() + Duration::from_secs(3);
++            let mut line = String::new();
++            loop {
++                match n.output.read_line(&mut line) {
++                    Ok(_) => {}
++                    Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {}
++                    Err(_) => return Err("fixture_ready".into()),
++                }
++                if line.ends_with('\n') {
++                    break;
++                }
++                if n.child.try_wait().map_err(|_| "fixture_wait")?.is_some()
++                    || Instant::now() >= end
++                {
++                    return Err("fixture_ready_deadline".into());
++                }
++                thread::sleep(Duration::from_millis(2));
++            }
++            if unsafe { libc::fcntl(fd, libc::F_SETFL, flags) } < 0 || line.trim() != "ready" {
++                return Err("fixture_ready".into());
++            }
++        }
++        for (i, listener) in [(0, aproxy), (1, bproxy)] {
++            if i == 1 && f.shared.options.b_off {
++                drop(listener);
++                continue;
++            }
++            configured(&listener)?;
++            let s = f.shared.clone();
++            f.threads.push(thread::spawn(move || {
++                let mut clients = Vec::new();
++                while !s.stop.load(Ordering::Acquire) {
++                    match listener.accept() {
++                        Ok((front, _)) => {
++                            let s = s.clone();
++                            clients.push(thread::spawn(move || proxy(front, i, s)));
++                        }
++                        Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
++                            thread::sleep(Duration::from_millis(2))
++                        }
++                        Err(_) => return Err("fixture_accept".into()),
++                    }
++                }
++                for t in clients {
++                    t.join().map_err(|_| "fixture_join")??;
++                }
++                Ok(())
++            }));
++        }
++        configured(&http)?;
++        let s = f.shared.clone();
++        f.threads.push(thread::spawn(move||{let mut clients=Vec::new();while !s.stop.load(Ordering::Acquire){match http.accept(){Ok((mut front,_))=>{let s=s.clone();s.socket(&front);front.set_nonblocking(false).map_err(|_|"fixture_socket")?;front.set_read_timeout(Some(Duration::from_secs(10))).map_err(|_|"fixture_socket")?;front.set_write_timeout(Some(Duration::from_secs(1))).map_err(|_|"fixture_socket")?;clients.push(thread::spawn(move||{let mut buf=Vec::new();let mut one=[0];while buf.len()<4096&&front.read_exact(&mut one).is_ok(){buf.push(one[0]);if buf.ends_with(b"\r\n\r\n"){break;}}
++            let body=s.body.lock().unwrap().clone();s.gets.fetch_add(1,Ordering::SeqCst);s.record(0,json!({"event":"http_enter","ready":body["ready"]}));if s.pause(s.options.http_delay_ms){let b=serde_json::to_vec(&body).unwrap();let header=format!("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",b.len());let sent=front.write_all(header.as_bytes()).and_then(|_|front.write_all(&b)).is_ok();s.record(0,json!({"event":"http_complete","sent":sent,"body":body}));}}));},Err(e)if e.kind()==std::io::ErrorKind::WouldBlock=>thread::sleep(Duration::from_millis(2)),Err(_)=>return Err("fixture_accept".into())}}for t in clients{t.join().map_err(|_|"fixture_join")?;}Ok(())}));
++        Ok(f)
++    }
++    pub fn observe_b(&self, owner: &Arc<crate::runtime::Owner>) {
++        *self.shared.b_observer.lock().unwrap() = Some(Arc::downgrade(owner));
++    }
++    pub fn issue_once(&self) -> Result<Value> {
++        if self.shared.issued.swap(true, Ordering::SeqCst) {
++            return Err("fixture_already_issued".into());
++        }
++        let now = now_ms();
++        let body = json!({"schema_version":1,"source_id":"demo01-feed","ready":true,"command_id":format!("catalog-{}",id()),"value":42,"issued_at_ms":now,"expires_at_ms":now+60000});
++        *self.shared.body.lock().unwrap() = body.clone();
++        self.shared.record(0, json!({"event":"issue","body":body}));
++        Ok(body)
++    }
++    pub fn snapshot(&self) -> Value {
++        let t = self.shared.trace.lock().unwrap();
++        json!({"gets":self.shared.gets.load(Ordering::SeqCst),"reads":self.shared.reads.iter().map(|x|x.load(Ordering::SeqCst)).collect::<Vec<_>>(),"writes":self.shared.writes.iter().map(|x|x.load(Ordering::SeqCst)).collect::<Vec<_>>(),"sessions":self.shared.sessions.iter().map(|x|x.load(Ordering::SeqCst)).collect::<Vec<_>>(),"trace":t.rows,"trace_bytes":t.bytes,"trace_truncated":t.truncated,"native_pids":self.pids,"final_memory":self.final_memory,"closed":self.closed,"close_result":self.close_result})
++    }
++    pub fn close(&mut self) -> Result<()> {
++        if self.closed {
++            return self.close_result.clone().unwrap_or(Ok(()));
++        }
++        self.closed = true;
++        let result = self.close_inner();
++        self.close_result = Some(result.clone());
++        result
++    }
++    fn close_inner(&mut self) -> Result<()> {
++        self.shared.stop.store(true, Ordering::Release);
++        self.shared.a_complete.1.notify_all();
++        for s in self.shared.sockets.lock().unwrap().drain(..) {
++            let _ = s.shutdown(Shutdown::Both);
++        }
++        let mut failure = None;
++        for t in self.threads.drain(..) {
++            if t.join()
++                .map_err(|_| "fixture_join".to_string())
++                .and_then(|r| r)
++                .is_err()
++            {
++                failure = Some("fixture_join".to_string());
++            }
++        }
++        for mut n in self.children.drain(..) {
++            let sent = n
++                .child
++                .stdin
++                .as_mut()
++                .is_some_and(|s| s.write_all(b"stop\n").is_ok());
++            drop(n.child.stdin.take());
++            let end = Instant::now() + Duration::from_secs(3);
++            let status = loop {
++                if let Some(status) = n.child.try_wait().map_err(|_| "fixture_wait")? {
++                    break status;
++                }
++                if Instant::now() >= end {
++                    n.child.kill().map_err(|_| "fixture_kill")?;
++                    n.child.wait().map_err(|_| "fixture_wait")?;
++                    return Err("fixture_forced_cleanup".into());
++                }
++                thread::sleep(Duration::from_millis(5));
++            };
++            let mut rest = String::new();
++            n.output
++                .read_to_string(&mut rest)
++                .map_err(|_| "fixture_output")?;
++            let memory =
++                serde_json::from_str::<Value>(rest.trim()).map_err(|_| "fixture_memory")?;
++            self.final_memory.push(
++                json!({"plc":n.index,"pid":n.child.id(),"exit_code":status.code(),"memory":memory}),
++            );
++            if !status.success() || !sent {
++                failure = Some("fixture_exit".into());
++            }
++        }
++        for p in [34102, 34103, 34112, 34113, 34880] {
++            drop(TcpListener::bind(("127.0.0.1", p)).map_err(|_| "fixture_port_release")?);
++        }
++        if let Some(e) = failure {
++            Err(e)
++        } else {
++            Ok(())
++        }
++    }
++}
++impl Drop for CatalogFixture {
++    fn drop(&mut self) {
++        if !self.closed {
++            let _ = self.close();
++        }
++    }
++}
++fn proxy(mut front: TcpStream, i: usize, s: Arc<Shared>) -> Result<()> {
++    front.set_nonblocking(false).map_err(|_| "fixture_socket")?;
++    front
++        .set_read_timeout(Some(Duration::from_secs(10)))
++        .map_err(|_| "fixture_socket")?;
++    front
++        .set_write_timeout(Some(Duration::from_secs(1)))
++        .map_err(|_| "fixture_socket")?;
++    s.socket(&front);
++    let mut back = TcpStream::connect(("127.0.0.1", if i == 0 { 34103 } else { 34113 }))
++        .map_err(|_| "fixture_native")?;
++    back.set_read_timeout(Some(Duration::from_secs(2)))
++        .map_err(|_| "fixture_socket")?;
++    back.set_write_timeout(Some(Duration::from_secs(1)))
++        .map_err(|_| "fixture_socket")?;
++    s.socket(&back);
++    let session = s.sessions[i].fetch_add(1, Ordering::SeqCst) + 1;
++    while let Ok(request) = frame(&mut front) {
++        let job = request.get(7..9) == Some(&[0x32, 1]);
++        let op = if job {
++            request.get(17).copied().unwrap_or(0)
++        } else {
++            0
++        };
++        let began = s.start.elapsed().as_micros() as u64;
++        if back.write_all(&request).is_err() {
++            break;
++        }
++        let Ok(mut response) = frame(&mut back) else {
++            break;
++        };
++        if i == 1 && op == 0xf0 && s.options.slow_setup {
++            s.record(i, json!({"event":"setup_gate_wait","session":session}));
++            let end = Instant::now() + Duration::from_millis(1200);
++            let mut done = s.a_complete.0.lock().unwrap();
++            while !*done && !s.stop.load(Ordering::Acquire) {
++                let remaining = end.saturating_duration_since(Instant::now());
++                if remaining.is_zero() {
++                    return Err("fixture_setup_gate_deadline".into());
++                }
++                done = s.a_complete.1.wait_timeout(done, remaining).unwrap().0;
++            }
++        }
++        if (op == 4 || op == 5) && !s.pause(s.options.io_delay_ms) {
++            break;
++        }
++        let original_response = response.clone();
++        if op == 5
++            && s.options.short_write_ack_once
++            && !s.short_ack_used.swap(true, Ordering::SeqCst)
++        {
++            response.truncate(17);
++            let n = response.len() as u16;
++            response[2..4].copy_from_slice(&n.to_be_bytes());
++        }
++        if front.write_all(&response).is_err() {
++            break;
++        }
++        let mut row = json!({"event":"response_complete","session":session,"operation":op,"started_us":began,"request_hex":hex(&request),"response_hex":hex(&response),"original_response_hex":hex(&original_response)});
++        if i == 0 && op == 4 {
++            if let Some(owner) = s
++                .b_observer
++                .lock()
++                .unwrap()
++                .as_ref()
++                .and_then(std::sync::Weak::upgrade)
++            {
++                row["b_owner_state"] = json!(owner.health().state);
++            }
++        }
++        if op == 4 || op == 5 {
++            if request.len() < 31 {
++                return Err("fixture_raw_shape".into());
++            }
++            let db = u16::from_be_bytes([request[25], request[26]]);
++            let bits =
++                ((request[28] as u32) << 16) | ((request[29] as u32) << 8) | request[30] as u32;
++            row["db"] = json!(db);
++            row["byte_offset"] = json!(bits / 8);
++            row["length"] = json!(u16::from_be_bytes([request[23], request[24]]));
++            if op == 4 {
++                s.reads[i].fetch_add(1, Ordering::SeqCst);
++                row["wire_value"] = json!(response
++                    .get(25..27)
++                    .map(|x| i16::from_be_bytes([x[0], x[1]])));
++            } else {
++                s.writes[i].fetch_add(1, Ordering::SeqCst);
++                row["wire_value"] = json!(request
++                    .get(35..37)
++                    .map(|x| i16::from_be_bytes([x[0], x[1]])));
++            }
++        }
++        s.record(i, row);
++        if i == 0 && op == 4 {
++            *s.a_complete.0.lock().unwrap() = true;
++            s.a_complete.1.notify_all();
++        }
++    }
++    let _ = front.shutdown(Shutdown::Both);
++    let _ = back.shutdown(Shutdown::Both);
++    Ok(())
++}
++pub fn native(which: &str) -> Result<()> {
++    use rust_snap7::{AreaCode, InternalParam as P, InternalParamValue as V, S7Server};
++    let a = which == "a";
++    if !a && which != "b" {
++        return Err("fixture_arguments".into());
++    }
++    let mut db1 = [0xa5; 16];
++    let mut db2 = [0xa5; 16];
++    db1[..2].copy_from_slice(&(if a { 12i16 } else { 34i16 }).to_be_bytes());
++    if a {
++        db1[2..4].copy_from_slice(&1i16.to_be_bytes());
++        db2[..2].copy_from_slice(&56i16.to_be_bytes());
++    }
++    let server = S7Server::create();
++    server
++        .set_param(P::LocalPort, V::U16(if a { 34103 } else { 34113 }))
++        .map_err(|_| "fixture_server")?;
++    server
++        .register_area(AreaCode::S7AreaDB, 1, &mut db1)
++        .map_err(|_| "fixture_memory")?;
++    if a {
++        server
++            .register_area(AreaCode::S7AreaDB, 2, &mut db2)
++            .map_err(|_| "fixture_memory")?;
++    }
++    server.start_to("127.0.0.1").map_err(|_| "fixture_server")?;
++    println!("ready");
++    std::io::stdout().flush().map_err(|_| "fixture_ready")?;
++    let mut line = String::new();
++    std::io::stdin()
++        .read_line(&mut line)
++        .map_err(|_| "fixture_stdin")?;
++    server.stop().map_err(|_| "fixture_stop")?;
++    drop(server);
++    println!(
++        "{}",
++        json!({"db1":hex(&db1),"db2":if a{Some(hex(&db2))}else{None}})
++    );
++    Ok(())
++}
++pub fn manual(dir: &Path) -> Result<()> {
++    fs::create_dir(dir).map_err(|_| "fixture_new_directory")?;
++    let mut f = CatalogFixture::start(&std::env::current_exe().map_err(|_| "fixture_executable")?)?;
++    println!(
++        "{}",
++        json!({"event":"fixture_ready","native_pids":f.pids,"published":false})
++    );
++    std::io::stdout().flush().map_err(|_| "fixture_ready")?;
++    for line in std::io::stdin().lock().lines() {
++        let line = line.map_err(|_| "fixture_stdin")?;
++        if line.is_empty() {
++            break;
++        }
++        if line == "issue" {
++            match f.issue_once() {
++                Ok(body) => println!(
++                    "{}",
++                    json!({"event":"fixture_issued","command_id":body["command_id"]})
++                ),
++                Err(e) => println!("{}", json!({"event":"fixture_rejected","error_key":e})),
++            }
++        } else {
++            println!(
++                "{}",
++                json!({"event":"fixture_rejected","error_key":"fixture_stdin_command"})
++            );
++        }
++    }
++    let result = f.close();
++    fs::write(
++        dir.join("protocol.json"),
++        serde_json::to_vec_pretty(&f.snapshot()).unwrap(),
++    )
++    .map_err(|_| "fixture_evidence")?;
++    result
++}
+--- baseline/field-flow/field-flow-rust/tests/plc_catalog.rs
++++ candidate/field-flow/field-flow-rust/tests/plc_catalog.rs
+@@ -0,0 +1,344 @@
++//! 文件：tests/plc_catalog.rs；严格格式、路径、闭合字段、容量、CLI零副作用与最大日志行。
++#![cfg(feature = "test-fixture")]
++mod catalog_support;
++use catalog_support::*;
++use field_flow::{
++    app::read_points::{Item, Observation},
++    config::{catalog::Catalog, runtime_v2::Loaded},
++    services::devices::PointSample,
++};
++use serde_json::{json, Value};
++use std::{fs, path::Path};
++#[test]
++fn strict_catalog_and_cli() {
++    let root = root("plc_catalog");
++    let p = config(&root);
++    let a = p.parent().unwrap().join("plcs/s7-a.json");
++    let original = fs::read(&a).unwrap();
++    let base: Value = serde_json::from_slice(&original).unwrap();
++    assert!(Catalog::load(&a).unwrap().compatible);
++    assert_eq!(Loaded::load(&p).unwrap().reads.len(), 1);
++    let mut report = Vec::new();
++    for (label, mutated) in [
++        ("unknown", {
++            let mut v = base.clone();
++            v["typo"] = json!(1);
++            v
++        }),
++        ("null_optional", {
++            let mut v = base.clone();
++            v["name"] = Value::Null;
++            v
++        }),
++        ("float_integer", {
++            let mut v = base.clone();
++            v["schema_version"] = json!(1.0);
++            v
++        }),
++        ("bool_integer", {
++            let mut v = base.clone();
++            v["connection"]["port"] = json!(true);
++            v
++        }),
++        ("string_integer", {
++            let mut v = base.clone();
++            v["connection"]["port"] = json!("34102");
++            v
++        }),
++        ("implicit_enabled", {
++            let mut v = base.clone();
++            v["dbs"][0]["enabled"] = json!("true");
++            v
++        }),
++        ("overlap_disabled", {
++            let mut v = base.clone();
++            v["dbs"][0]["points"][1]["byte_offset"] = json!(1);
++            v["dbs"][0]["points"][1]["enabled"] = json!(false);
++            v
++        }),
++        ("duplicate_point", {
++            let mut v = base.clone();
++            v["dbs"][1]["points"][0]["id"] = json!("value");
++            v
++        }),
++        ("non_int", {
++            let mut v = base.clone();
++            v["dbs"][0]["points"][0]["data_type"] = json!("BOOL");
++            v
++        }),
++        ("bit", {
++            let mut v = base.clone();
++            v["dbs"][0]["points"][0]["bit"] = json!(0);
++            v
++        }),
++        ("address", {
++            let mut v = base.clone();
++            v["dbs"][0]["points"][0]["byte_offset"] = json!(15);
++            v
++        }),
++        ("foreign_protocol_field", {
++            let mut v = base.clone();
++            v["tables"] = json!([]);
++            v
++        }),
++        ("host", {
++            let mut v = base.clone();
++            v["connection"]["host"] = json!("0.0.0.0");
++            v
++        }),
++    ] {
++        put(&a, &mutated);
++        let out = cli(&["config", "validate", "--plc-file", a.to_str().unwrap()]);
++        assert_eq!(out.status.code(), Some(2), "{label}");
++        let v: Value = serde_json::from_slice(&out.stdout).unwrap();
++        assert_eq!(v["format_valid"], false);
++        report.push(json!({"label":label,"exit":out.status.code(),"report":v}));
++    }
++    for (label, bytes) in [
++        (
++            "duplicate_key",
++            String::from_utf8(original.clone())
++                .unwrap()
++                .replacen("\"id\": \"s7_a\"", "\"id\":\"s7_a\",\"id\":\"other\"", 1)
++                .into_bytes(),
++        ),
++        ("bom", [vec![0xef, 0xbb, 0xbf], original.clone()].concat()),
++        (
++            "integer_exponent",
++            String::from_utf8(original.clone())
++                .unwrap()
++                .replacen("34102", "3.4102e4", 1)
++                .into_bytes(),
++        ),
++        (
++            "depth",
++            format!("{}0{}", "[".repeat(18), "]".repeat(18)).into_bytes(),
++        ),
++        ("size", vec![b' '; 1048577]),
++    ] {
++        fs::write(&a, bytes).unwrap();
++        assert!(Catalog::load(&a).is_err(), "{label}");
++        report.push(json!({"label":label,"rejected":true}));
++    }
++    fs::write(&a, &original).unwrap();
++    let main = value(&p);
++    for bad in [
++        "../s7-a.json",
++        "/private/tmp/a.json",
++        "plcs//s7-a.json",
++        "./plcs/s7-a.json",
++        "plcs/../s7-a.json",
++        "plcs\\s7-a.json",
++        "$ROOT/a.json",
++        "~a.json",
++        "https://a.json",
++        "plcs/*.json",
++        "",
++    ] {
++        let mut v = main.clone();
++        v["plc_files"][0] = json!(bad);
++        put(&p, &v);
++        assert!(Loaded::load(&p).is_err(), "{bad}");
++    }
++    put(&p, &main);
++    let link = p.parent().unwrap().join("plcs/link.json");
++    std::os::unix::fs::symlink(&a, &link).unwrap();
++    let mut v = main.clone();
++    v["plc_files"][0] = json!("plcs/link.json");
++    put(&p, &v);
++    assert!(Loaded::load(&p).is_err());
++    for k in [
++        "plc_guard_get_int",
++        "get_value_guard_int",
++        "teaching01",
++        "unknown",
++    ] {
++        let mut v = main.clone();
++        v["flows"][0]["kind"] = json!(k);
++        put(&p, &v);
++        assert_eq!(
++            Loaded::load(&p).unwrap_err(),
++            "config_flow_kind_unsupported"
++        );
++    }
++    put(&p, &main);
++    let mut v = main.clone();
++    v["plc_files"] = json!(["plcs/s7-a.json", "plcs/s7-a.json"]);
++    put(&p, &v);
++    assert!(Loaded::load(&p).is_err());
++    for raw in [
++        "schema_version: 2\nschema_version: 2\n",
++        "schema_version: 2\nplc_files: &files []\nflows: *files\n",
++        "schema_version: 2\n<<: {}\n",
++    ] {
++        fs::write(&p, raw).unwrap();
++        assert!(Loaded::load(&p).is_err());
++    }
++    put(&p, &main);
++    for label in [
++        "dependency",
++        "missing_point",
++        "extra_plcs",
++        "budgets",
++        "flow_capacity",
++    ] {
++        let mut v = main.clone();
++        match label {
++            "dependency" => v["flows"][0]["device_ids"] = json!(["s7_a"]),
++            "missing_point" => v["flows"][0]["reads"][0]["point_id"] = json!("missing"),
++            "extra_plcs" => v["plcs"] = json!([]),
++            "budgets" => v["plc_runtime"] = json!([]),
++            _ => {
++                let f = v["flows"][0].clone();
++                v["flows"] = json!(vec![f; 9]);
++            }
++        }
++        put(&p, &v);
++        assert!(Loaded::load(&p).is_err(), "{label}");
++    }
++    put(&p, &main);
++    let b = p.parent().unwrap().join("plcs/s7-b.json");
++    let original_b = fs::read(&b).unwrap();
++    for label in ["device_identity", "endpoint"] {
++        let mut v: Value = serde_json::from_slice(&original_b).unwrap();
++        if label == "device_identity" {
++            v["id"] = json!("s7_a");
++        } else {
++            v["connection"]["port"] = json!(34102);
++        }
++        put(&b, &v);
++        assert!(Loaded::load(&p).is_err());
++    }
++    fs::write(&b, &original_b).unwrap();
++    let mut ds = base.clone();
++    ds["source"] = json!({"kind":"device_simulator","export_mode":"saved_revision","instance_id":"s7_a","revision":{"id":"00000000-0000-0000-0000-000000000000","saved_seq":1,"payload_sha256":"0".repeat(64)},"exporter_version":"synthetic-shape-only","generated_at":"2026-11-04T12:00:00+08:00","runtime_observation":{"observed_at":"2026-11-04T12:00:01+08:00","selected_revision":null,"loaded_revision":null}});
++    put(&a, &ds);
++    assert!(Catalog::load(&a).is_ok());
++    ds["source"]["generated_at"] = json!("2026-11-04T04:00:00Z");
++    put(&a, &ds);
++    assert!(Catalog::load(&a).is_err());
++    let mut disabled = base.clone();
++    disabled["dbs"][0]["enabled"] = json!(false);
++    put(&a, &disabled);
++    assert!(Loaded::load(&p).is_err());
++    let mut too_many = base.clone();
++    too_many["dbs"] = json!(vec![base["dbs"][0].clone(); 65]);
++    put(&a, &too_many);
++    assert!(Catalog::load(&a).is_err());
++    too_many = base.clone();
++    too_many["dbs"][0]["points"] = json!(vec![base["dbs"][0]["points"][0].clone(); 4097]);
++    put(&a, &too_many);
++    assert!(Catalog::load(&a).is_err());
++    fs::write(&a, &original).unwrap();
++    let out = std::process::Command::new(PRODUCT)
++        .current_dir("/private/tmp")
++        .args(["config", "validate", "--config", p.to_str().unwrap()])
++        .output()
++        .unwrap();
++    assert!(out.status.success());
++    let empty = root.join("empty");
++    fs::create_dir(&empty).unwrap();
++    for exe in [PRODUCT, FIXTURE] {
++        for args in [vec![], vec!["--help"]] {
++            let out = std::process::Command::new(exe)
++                .current_dir(&empty)
++                .args(args)
++                .output()
++                .unwrap();
++            assert!(out.status.success());
++            assert_eq!(fs::read_dir(&empty).unwrap().count(), 0);
++        }
++    }
++    for lang in ["en-US", "zh-CN"] {
++        let out = cli(&["--lang", lang, "--help"]);
++        assert!(out.status.success());
++        assert!(String::from_utf8(out.stdout)
++            .unwrap()
++            .contains("config validate"));
++    }
++    assert!(
++        cli(&[
++            "config",
++            "validate",
++            "--config",
++            p.to_str().unwrap(),
++            "--plc-file",
++            a.to_str().unwrap()
++        ])
++        .status
++        .code()
++            == Some(2)
++    );
++    fs::write(
++        root.join("negative-cases.json"),
++        serde_json::to_vec_pretty(&report).unwrap(),
++    )
++    .unwrap();
++}
++#[test]
++fn maximum_observation_and_structural_resource_vectors() {
++    let root = root("observation_bounds");
++    let snapshot = Observation {
++        round_id: "9".repeat(64),
++        status: "complete".into(),
++        items: (0..16)
++            .map(|_| Item {
++                device_id: "d".repeat(64),
++                point_id: "p".repeat(64),
++                status: "success".into(),
++                sample: Some(PointSample {
++                    device_id: "d".repeat(64),
++                    point_id: "p".repeat(64),
++                    flow_id: "f".repeat(64),
++                    request_id: "r".repeat(64),
++                    generation: u64::MAX,
++                    value: i16::MIN,
++                    quality: "good".into(),
++                    received_at: "2026-11-04T12:12:12.123+08:00".into(),
++                }),
++                error_key: None,
++            })
++            .collect(),
++        completed_rounds: u64::MAX,
++        successful_reads: u64::MAX,
++        errors: u64::MAX,
++    };
++    let mut audit =
++        field_flow::infrastructure::audit::Audit::open(&root, &"r".repeat(64), &"i".repeat(64))
++            .unwrap();
++    let chunks = field_flow::runtime::catalog::chunks(&"f".repeat(64), &snapshot);
++    assert_eq!(chunks.len(), 4);
++    for c in chunks {
++        assert_eq!(c["items"].as_array().unwrap().len(), 4);
++        audit.emit("points_health", c).unwrap();
++    }
++    let lines = fs::read_to_string(root.join("runtime.jsonl")).unwrap();
++    assert!(lines.lines().all(|s| s.len() + 1 <= 4096));
++    for raw in [
++        r#"{"event":"health","context":"{\"had_forced_driver_stop\":true}"}"#,
++        r#"{ "event": "health", "context": { "had_forced_driver_stop": true } }"#,
++        r#"{"event":"forced_driver_stop"}"#,
++        r#"{"context":{"error_key":"forced_driver_stop:connect"}}"#,
++    ] {
++        let p = root.join("vector.jsonl");
++        fs::write(&p, raw).unwrap();
++        assert!(forced(&events(&p)[0]));
++    }
++    for raw in [
++        r#"{"event":"health","context":{"had_forced_driver_stop":false}}"#,
++        r#"{"event":"health","context":{"had_forced_driver_stop":"true"}}"#,
++    ] {
++        assert!(!forced(&serde_json::from_str(raw).unwrap()));
++    }
++    assert!(!std::process::Command::new("false")
++        .status()
++        .unwrap()
++        .success());
++    for p in [
++        "config/loopback.yaml",
++        "config/basic02.yaml",
++        "config/basic03.yaml",
++    ] {
++        field_flow::config::Config::load(Path::new(p)).unwrap();
++    }
++}
+--- baseline/field-flow/field-flow-rust/tests/multi_plc.rs
++++ candidate/field-flow/field-flow-rust/tests/multi_plc.rs
+@@ -0,0 +1,414 @@
++//! 文件：tests/multi_plc.rs；真实CLI分阶段双PLC、并发隔离、慢HTTP及只读服务身份观察。
++#![cfg(feature = "test-fixture")]
++mod catalog_support;
++use catalog_support::*;
++use field_flow::{
++    config::runtime_v2::Loaded,
++    domain::id,
++    fixture::catalog_demo::{CatalogFixture, Options},
++    infrastructure::state,
++    runtime::Runtime,
++};
++use serde_json::{json, Value};
++use std::{
++    collections::HashMap,
++    fs,
++    path::Path,
++    time::{Duration, Instant},
++};
++fn stats(trace: &Value) -> (usize, u64) {
++    let times: Vec<_> = trace
++        .as_array()
++        .unwrap()
++        .iter()
++        .filter(|r| r["operation"] == 4)
++        .map(|r| r["elapsed_us"].as_u64().unwrap())
++        .collect();
++    let gap = times.windows(2).map(|w| w[1] - w[0]).max().unwrap_or(0);
++    (times.len(), gap)
++}
++#[test]
++fn catalog_cli_matrix() {
++    let all = Instant::now();
++    let root = root("multi_plc");
++    for mode in ["dry_run", "execute"] {
++        let mut s = Scene::new(&root, mode, mode, |_| {});
++        s.start_fixture(Options::default());
++        s.start(mode == "execute");
++        until(7, || s.wire_round(&[12, 1, 56, 34]));
++        assert_eq!(counts(&s), json!({}));
++        let before = s.snapshot();
++        assert_eq!(before["writes"], json!([0, 0]));
++        assert!(before["gets"].as_u64().unwrap() >= 1);
++        assert!(before["trace"][0].as_array().unwrap().iter().filter(|r|r["event"]=="http_complete").all(|r|r["body"]==json!({"schema_version":1,"source_id":"demo01-feed","ready":false,"command_id":null,"value":null,"issued_at_ms":null,"expires_at_ms":null})));
++        let body = s.fixture.as_ref().unwrap().issue_once().unwrap();
++        assert!(s.fixture.as_ref().unwrap().issue_once().is_err());
++        let gets = before["gets"].as_u64().unwrap();
++        until(7, || s.snapshot()["gets"].as_u64().unwrap() >= gets + 10);
++        until(2, || {
++            counts(&s) == json!({if mode=="execute"{"confirmed"}else{"simulated"}:1})
++        });
++        if mode == "execute" {
++            until(3, || s.wire_round(&[42, 1, 56, 34]));
++        }
++        until(3, || {
++            s.rows().iter().any(|r| {
++                r["event"] == "points_health"
++                    && r["context"]["successful_reads"]
++                        .as_u64()
++                        .is_some_and(|n| n >= 4)
++            })
++        });
++        let after = s.snapshot();
++        assert_eq!(
++            after["writes"],
++            json!([if mode == "execute" { 1 } else { 0 }, 0])
++        );
++        let issued = body["issued_at_ms"].as_i64().unwrap();
++        assert!(field_flow::domain::now_ms() - issued < 10000);
++        let seen: Vec<_> = after["trace"][0]
++            .as_array()
++            .unwrap()
++            .iter()
++            .filter(|r| r["event"] == "http_complete" && r["body"]["ready"] == true)
++            .collect();
++        assert!(seen.len() >= 10);
++        assert!(seen.iter().all(|r| r["body"] == body));
++        check_raw(&after);
++        s.report["pre_issue"] = before;
++        s.report["post_issue"] = after;
++        s.report["input"] = body;
++        s.stop(0);
++        s.finish();
++        let memory = &s.report["fixture"]["final_memory"];
++        assert_eq!(
++            memory[0]["memory"]["db1"],
++            format!(
++                "{}0001{}",
++                if mode == "execute" { "002a" } else { "000c" },
++                "a5".repeat(12)
++            )
++        );
++        assert_eq!(
++            memory[0]["memory"]["db2"],
++            format!("0038{}", "a5".repeat(14))
++        );
++        assert_eq!(
++            memory[1]["memory"]["db1"],
++            format!("0022{}", "a5".repeat(14))
++        );
++        s.save();
++    }
++    for variant in [
++        "three_readers",
++        "b_off",
++        "slow_setup",
++        "parallel_io",
++        "slow_http",
++    ] {
++        let mut s = Scene::new(&root, variant, "dry_run", |v| {
++            let a = read_flow(
++                "a_only",
++                json!(["s7_a"]),
++                json!([{"device_id":"s7_a","point_id":"value"}]),
++            );
++            match variant {
++                "three_readers" => {
++                    v["flows"] = json!((0..3)
++                        .map(|i| read_flow(
++                            &format!("reader{i}"),
++                            json!(["s7_a"]),
++                            json!([{"device_id":"s7_a","point_id":"value"}])
++                        ))
++                        .collect::<Vec<_>>());
++                }
++                "b_off" | "slow_setup" => {
++                    v["flows"] = json!([v["flows"][0].clone(), a]);
++                }
++                "parallel_io" => {
++                    v["flows"] = json!([
++                        a,
++                        read_flow(
++                            "b_only",
++                            json!(["s7_b"]),
++                            json!([{"device_id":"s7_b","point_id":"value"}])
++                        )
++                    ]);
++                }
++                _ => {
++                    v["flows"] = json!([v["flows"][1].clone(), a]);
++                }
++            }
++        });
++        s.start_fixture(Options {
++            b_off: variant == "b_off",
++            slow_setup: variant == "slow_setup",
++            io_delay_ms: if variant == "parallel_io" { 120 } else { 0 },
++            http_delay_ms: if variant == "slow_http" { 1200 } else { 0 },
++            short_write_ack_once: false,
++        });
++        s.start(false);
++        until(7, || {
++            let rows = s.rows();
++            let expected: Vec<String> = if variant == "three_readers" {
++                (0..3).map(|i| format!("reader{i}")).collect()
++            } else {
++                vec!["a_only".into()]
++            };
++            expected.iter().all(|flow| {
++                rows.iter().any(|r| {
++                    r["event"] == "points_health"
++                        && r["context"]["flow_id"] == *flow
++                        && r["context"]["successful_reads"]
++                            .as_u64()
++                            .is_some_and(|n| n >= 20)
++                })
++            })
++        });
++        if matches!(variant, "b_off" | "slow_setup" | "slow_http") {
++            let end = Instant::now() + Duration::from_secs(3);
++            while Instant::now() < end {
++                std::thread::sleep(Duration::from_millis(5));
++            }
++        }
++        let snap = s.snapshot();
++        assert_eq!(snap["writes"], json!([0, 0]));
++        let (n, gap) = stats(&snap["trace"][0]);
++        assert!(n >= 20);
++        if variant != "parallel_io" {
++            assert!(gap <= 500000, "gap {gap}");
++        }
++        if variant == "three_readers" {
++            let rows = s.rows();
++            for i in 0..3 {
++                assert!(rows.iter().any(|r| r["event"] == "points_health"
++                    && r["context"]["flow_id"] == format!("reader{i}")
++                    && r["context"]["successful_reads"]
++                        .as_u64()
++                        .is_some_and(|n| n >= 20)));
++            }
++            assert_eq!(snap["sessions"][0], 1);
++        }
++        if variant == "b_off" {
++            s.normal = false;
++            assert_eq!(snap["reads"][1], 0);
++            assert_eq!(snap["sessions"][1], 0);
++            assert!(s.rows().iter().any(|r| r["event"] == "flow_health"
++                && r["context"]["flow_id"] == "read_pair"
++                && r["context"]["error_key"] == "plc_unavailable"));
++        }
++        if variant == "slow_setup" {
++            let a = snap["trace"][0]
++                .as_array()
++                .unwrap()
++                .iter()
++                .find(|r| r["operation"] == 4)
++                .unwrap()["sequence"]
++                .as_u64()
++                .unwrap();
++            let b = snap["trace"][1]
++                .as_array()
++                .unwrap()
++                .iter()
++                .find(|r| r["operation"] == 240)
++                .unwrap()["sequence"]
++                .as_u64()
++                .unwrap();
++            assert!(a < b);
++            assert!(s
++                .rows()
++                .iter()
++                .any(|r| r["event"] == "driver_ready" && r["context"]["target_id"] == "s7_b"));
++        }
++        if variant == "parallel_io" {
++            let ta = snap["trace"][0].as_array().unwrap();
++            let tb = snap["trace"][1].as_array().unwrap();
++            assert!(ta.iter().filter(|r| r["operation"] == 4).any(|a| tb
++                .iter()
++                .filter(|r| r["operation"] == 4)
++                .any(
++                    |b| a["started_us"].as_u64().unwrap() < b["elapsed_us"].as_u64().unwrap()
++                        && b["started_us"].as_u64().unwrap() < a["elapsed_us"].as_u64().unwrap()
++                )));
++        }
++        if variant == "slow_http" {
++            let t = snap["trace"][0].as_array().unwrap();
++            let start = t.iter().find(|r| r["event"] == "http_enter").unwrap()["elapsed_us"]
++                .as_u64()
++                .unwrap();
++            let end = t.iter().find(|r| r["event"] == "http_complete").unwrap()["elapsed_us"]
++                .as_u64()
++                .unwrap();
++            assert!(t.iter().any(|r| r["operation"] == 4
++                && r["elapsed_us"]
++                    .as_u64()
++                    .is_some_and(|n| n > start && n < end)));
++        }
++        s.report["product_window"] = snap;
++        s.stop(if variant == "b_off" { 1 } else { 0 });
++        if variant == "b_off" {
++            let rows = s.rows();
++            let forced_rows: Vec<_> = rows
++                .iter()
++                .filter(|r| {
++                    forced(r) && r["event"] != "health" && r["event"] != "shutdown_incomplete"
++                })
++                .collect();
++            assert!(!forced_rows.is_empty());
++            assert!(forced_rows
++                .iter()
++                .all(|r| r["context"]["target_id"] == "s7_b"));
++            assert!(
++                !rows
++                    .iter()
++                    .any(|r| r["event"] == "forced_driver_stop"
++                        && r["context"]["target_id"] == "s7_a")
++            );
++        }
++        s.finish();
++    }
++    assert!(all.elapsed() < Duration::from_secs(600));
++}
++#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
++async fn bounded_service_identities_and_connecting_state() {
++    let root = root("service_identities");
++    let config = config(&root);
++    let mut v = value(&config);
++    v["flows"] = json!((0..3)
++        .map(|i| read_flow(
++            &format!("reader{i}"),
++            json!(["s7_a"]),
++            json!([{"device_id":"s7_a","point_id":"value"}])
++        ))
++        .collect::<Vec<_>>());
++    put(&config, &v);
++    let c = Loaded::load(&config).unwrap();
++    let dir = root.join("state");
++    state::init(&dir, "dry_run", &c.config.instance_id).unwrap();
++    preflight();
++    let mut fixture = CatalogFixture::start_with(
++        Path::new(FIXTURE),
++        Options {
++            slow_setup: true,
++            ..Default::default()
++        },
++    )
++    .unwrap();
++    let (state, task) = state::State::open(&dir, "dry_run", &c.config.instance_id, &id()).unwrap();
++    let mut rt = Runtime::start(&c.config, &dir, Path::new(PRODUCT), state.clone()).unwrap();
++    let b_probe = std::sync::Arc::new(rt.owners["s7_b"].clone());
++    fixture.observe_b(&b_probe);
++    let connecting_deadline = Instant::now() + Duration::from_secs(2);
++    while rt.owners["s7_b"].health().state != "connecting" {
++        assert!(Instant::now() < connecting_deadline);
++        tokio::time::sleep(Duration::from_millis(1)).await;
++    }
++    rt.launch_catalog(&c).await.unwrap();
++    let end = Instant::now() + Duration::from_secs(8);
++    let mut identities: HashMap<String, Vec<Value>> = HashMap::new();
++    let mut connecting = false;
++    loop {
++        connecting |= rt.owners["s7_b"].health().state == "connecting"
++            && rt.owners["s7_a"].health().state == "ready";
++        for i in 0..3 {
++            let flow = format!("reader{i}");
++            if let Some(s) = rt.points_snapshot(&flow) {
++                if let Some(sample) = s.items.first().and_then(|i| i.sample.as_ref()) {
++                    let row = json!({"request_id":sample.request_id,"flow_id":sample.flow_id,"received_at":sample.received_at,"generation":sample.generation});
++                    let list = identities.entry(flow).or_default();
++                    if list.last() != Some(&row) {
++                        list.push(row);
++                    }
++                }
++            }
++        }
++        if identities.len() == 3 && identities.values().all(|v| v.len() >= 20) {
++            break;
++        }
++        assert!(Instant::now() < end);
++        tokio::time::sleep(Duration::from_millis(1)).await;
++    }
++    assert!(connecting);
++    let trace = fixture.snapshot();
++    assert_eq!(
++        trace["trace"][0]
++            .as_array()
++            .unwrap()
++            .iter()
++            .find(|r| r["operation"] == 4)
++            .unwrap()["b_owner_state"],
++        "connecting"
++    );
++    let mut all = std::collections::HashSet::new();
++    for rows in identities.values() {
++        for row in rows {
++            assert!(all.insert(row["request_id"].as_str().unwrap()));
++            assert!(row["received_at"].as_str().unwrap().ends_with("+08:00"));
++            assert_eq!(row["generation"], 1);
++        }
++    }
++    rt.health().await.unwrap();
++    rt.shutdown(15000).await.unwrap();
++    drop(b_probe);
++    state.finalize().await.unwrap();
++    drop(state);
++    task.join().await.unwrap();
++    fixture.close().unwrap();
++    preflight();
++    fs::write(root.join("identities.json"),serde_json::to_vec_pretty(&json!({"samples":identities,"connecting_observed":connecting,"fixture":fixture.snapshot()})).unwrap()).unwrap();
++}
++
++#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
++async fn failed_round_has_no_stale_or_fabricated_samples() {
++    let root = root("failed_round");
++    let path = config(&root);
++    let mut v = value(&path);
++    v["flows"] = json!([read_flow(
++        "failure",
++        json!(["s7_a", "s7_b"]),
++        json!([{"device_id":"s7_a","point_id":"value"},{"device_id":"s7_b","point_id":"value"},{"device_id":"s7_a","point_id":"result"}])
++    )]);
++    put(&path, &v);
++    let c = Loaded::load(&path).unwrap();
++    let dir = root.join("state");
++    state::init(&dir, "dry_run", &c.config.instance_id).unwrap();
++    preflight();
++    let mut f = CatalogFixture::start_with(
++        Path::new(FIXTURE),
++        Options {
++            b_off: true,
++            ..Default::default()
++        },
++    )
++    .unwrap();
++    let (st, task) = state::State::open(&dir, "dry_run", &c.config.instance_id, &id()).unwrap();
++    let mut rt = Runtime::start(&c.config, &dir, Path::new(PRODUCT), st.clone()).unwrap();
++    rt.launch_catalog(&c).await.unwrap();
++    let end = Instant::now() + Duration::from_secs(5);
++    let snapshot = loop {
++        let s = rt.points_snapshot("failure").unwrap();
++        if s.status == "failed" {
++            break s;
++        }
++        assert!(Instant::now() < end);
++        tokio::time::sleep(Duration::from_millis(1)).await;
++    };
++    assert_eq!(snapshot.items.len(), 3);
++    assert_eq!(snapshot.items[0].status, "success");
++    assert_eq!(snapshot.items[0].sample.as_ref().unwrap().value, 12);
++    assert_eq!(snapshot.items[1].status, "error");
++    assert!(snapshot.items[1].sample.is_none());
++    assert_eq!(snapshot.items[2].status, "not_attempted");
++    assert!(snapshot.items[2].sample.is_none());
++    assert!(snapshot.items[2].error_key.is_none());
++    assert!(rt.shutdown(15000).await.is_err());
++    drop(st);
++    task.join().await.unwrap();
++    f.close().unwrap();
++    preflight();
++    fs::write(
++        root.join("failure.json"),
++        serde_json::to_vec_pretty(&json!({"round":snapshot,"fixture":f.snapshot()})).unwrap(),
++    )
++    .unwrap();
++}
+--- baseline/field-flow/field-flow-rust/tests/catalog_compatibility.rs
++++ candidate/field-flow/field-flow-rust/tests/catalog_compatibility.rs
+@@ -0,0 +1,276 @@
++//! 文件：tests/catalog_compatibility.rs；旧typed身份、真实confirmed续跑和原State恢复unknown物理保护。
++#![cfg(feature = "test-fixture")]
++mod catalog_support;
++use catalog_support::*;
++use field_flow::{
++    config::runtime_v2::Loaded,
++    domain::{id, Input},
++    infrastructure::state,
++};
++use serde_json::{json, Value};
++use std::{
++    fs,
++    path::Path,
++    time::{Duration, Instant},
++};
++fn intent(c: &Loaded, command: &str) -> field_flow::domain::Intent {
++    let now = field_flow::domain::now_ms();
++    Input {
++        schema_version: 1,
++        source_id: c.config.flows[0].source_id.clone(),
++        ready: true,
++        command_id: Some(command.into()),
++        value: Some(42),
++        issued_at_ms: Some(now),
++        expires_at_ms: Some(now + 60000),
++    }
++    .intent(&c.config.flows[0], &c.config.plcs[0])
++    .unwrap()
++    .unwrap()
++}
++fn schema(dir: &Path) -> Value {
++    let c = rusqlite::Connection::open(dir.join("state.sqlite")).unwrap();
++    let mut stmt = c
++        .prepare("SELECT type,name,sql FROM sqlite_master WHERE sql IS NOT NULL ORDER BY name")
++        .unwrap();
++    json!(stmt
++        .query_map([], |r| Ok((
++            r.get::<_, String>(0)?,
++            r.get::<_, String>(1)?,
++            r.get::<_, String>(2)?
++        )))
++        .unwrap()
++        .map(|r| r.unwrap())
++        .collect::<Vec<_>>())
++}
++#[test]
++fn old_identity_and_confirmed_restart() {
++    let root = root("catalog_compatibility");
++    let mut s = Scene::new(&root, "confirmed", "execute", |v| {
++        v["flows"][1]["interval_ms"] = json!(100);
++    });
++    let c = Loaded::load(&s.config).unwrap();
++    let original = intent(&c, "hash-probe");
++    let legacy = s.dir.join("legacy.yaml");
++    fs::write(&legacy, serde_yaml::to_string(&c.config).unwrap()).unwrap();
++    let old = field_flow::config::Config::load(&legacy).unwrap();
++    assert_eq!(
++        serde_json::to_value(&old.flows[0]).unwrap(),
++        serde_json::to_value(&c.config.flows[0]).unwrap()
++    );
++    let mut old_input = Input {
++        schema_version: 1,
++        source_id: original.source_id.clone(),
++        ready: true,
++        command_id: Some(original.command_id.clone()),
++        value: Some(42),
++        issued_at_ms: Some(original.issued_at_ms),
++        expires_at_ms: Some(original.expires_at_ms),
++    }
++    .intent(&old.flows[0], &old.plcs[0])
++    .unwrap()
++    .unwrap();
++    assert_eq!(
++        old_input.config_identity_hash,
++        original.config_identity_hash
++    );
++    assert_eq!(old_input.target, original.target);
++    let a = s.config.parent().unwrap().join("plcs/s7-a.json");
++    let mut av = value(&a);
++    av["display_name"] = json!("changed label");
++    av["source"] = json!({"kind":"manual","note":"changed provenance"});
++    put(&a, &av);
++    fs::rename(&a, a.with_file_name("renamed.json")).unwrap();
++    let mut mv = value(&s.config);
++    mv["plc_files"][0] = json!("plcs/renamed.json");
++    put(&s.config, &mv);
++    let renamed = Loaded::load(&s.config).unwrap();
++    let mut renamed_input = intent(&renamed, "hash-probe");
++    renamed_input.issued_at_ms = original.issued_at_ms;
++    renamed_input.expires_at_ms = original.expires_at_ms;
++    assert_eq!(
++        original.config_identity_hash,
++        renamed_input.config_identity_hash
++    );
++    assert_eq!(original.target, renamed_input.target);
++    let before_schema = schema(&s.state);
++    s.start_fixture(Default::default());
++    s.start_path(true, legacy);
++    until(3, || s.snapshot()["gets"].as_u64().unwrap() >= 1);
++    let body = s.fixture.as_ref().unwrap().issue_once().unwrap();
++    let issued = Instant::now();
++    until(3, || counts(&s) == json!({"confirmed":1}));
++    s.stop(0);
++    let first = s.snapshot();
++    assert_eq!(first["writes"], json!([1, 0]));
++    let gets = first["gets"].as_u64().unwrap();
++    s.start(true);
++    until(3, || s.snapshot()["gets"].as_u64().unwrap() >= gets + 10);
++    assert_eq!(counts(&s), json!({"confirmed":1}));
++    assert_eq!(s.snapshot()["writes"], json!([1, 0]));
++    assert!(issued.elapsed() < Duration::from_secs(8));
++    s.report["original_body"] = body;
++    s.report["restart_window"] = s.snapshot();
++    s.stop(0);
++    let before_conflict = counts(&s);
++    let mut changed = value(&s.config);
++    changed["flows"][1]["business_name"] = json!("changed_business");
++    put(&s.config, &changed);
++    s.start(true);
++    until(2, || {
++        s.rows().iter().any(|r| {
++            r["event"] == "flow_health" && r["context"]["error_key"] == "identity_conflict"
++        })
++    });
++    assert_eq!(counts(&s), before_conflict);
++    assert_eq!(s.snapshot()["writes"], json!([1, 0]));
++    assert!(issued.elapsed() < Duration::from_secs(8));
++    s.report["live_identity_conflict"] = json!(true);
++    s.stop(0);
++    s.finish();
++    assert_eq!(schema(&s.state), before_schema);
++    s.save();
++    // Changed old semantics are a real identity conflict while the original input is still fresh.
++    let state_dir = root.join("identity-state");
++    state::init(&state_dir, "execute", &c.config.instance_id).unwrap();
++    let rt = tokio::runtime::Runtime::new().unwrap();
++    rt.block_on(async {
++        let (st, task) =
++            state::State::open(&state_dir, "execute", &c.config.instance_id, &id()).unwrap();
++        st.admit(original.clone()).await.unwrap();
++        for kind in ["offset", "db", "size", "business"] {
++            let mut changed = c.clone();
++            match kind {
++                "offset" => changed.config.flows[0].target.byte_offset = 2,
++                "db" => changed.config.flows[0].target.db_number = 2,
++                "size" => changed.config.flows[0].target.db_size_bytes = 18,
++                _ => changed.config.flows[0].business_name = "changed".into(),
++            };
++            let mut i = intent(&changed, "hash-probe");
++            i.issued_at_ms = original.issued_at_ms;
++            i.expires_at_ms = original.expires_at_ms;
++            i.validate_time(field_flow::domain::now_ms()).unwrap();
++            assert_ne!(i.config_identity_hash, original.config_identity_hash);
++            assert_eq!(st.admit(i).await.unwrap_err(), "identity_conflict");
++        }
++        assert_eq!(
++            st.command_status(old_input.clone()).await.unwrap(),
++            "pending"
++        );
++        st.finalize().await.unwrap();
++        drop(st);
++        task.join().await.unwrap();
++    });
++    old_input.value = 43;
++    assert_ne!(original.value, old_input.value);
++}
++#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
++async fn inflight_unknown_and_alias_protection() {
++    let root = root("unknown_compatibility");
++    for alias in [false, true] {
++        let mut s = Scene::new(
++            &root,
++            if alias { "alias" } else { "same" },
++            "execute",
++            |v| {
++                v["flows"][1]["interval_ms"] = json!(100);
++            },
++        );
++        let c = Loaded::load(&s.config).unwrap();
++        let i = intent(&c, "original-inflight");
++        let (st, task) =
++            state::State::open(&s.state, "execute", &c.config.instance_id, &id()).unwrap();
++        st.admit(i.clone()).await.unwrap();
++        st.dispatch(i.clone(), "original-request".into())
++            .await
++            .unwrap();
++        drop(st);
++        task.join().await.unwrap();
++        assert_eq!(counts(&s), json!({"in_flight":1}));
++        let original_schema = schema(&s.state);
++        if alias {
++            let a = s.config.parent().unwrap().join("plcs/s7-a.json");
++            let mut v = value(&a);
++            v["dbs"][0]["points"][0]["id"] = json!("alias_value");
++            put(&a, &v);
++            let mut v = value(&s.config);
++            v["flows"][0]["reads"][0]["point_id"] = json!("alias_value");
++            v["flows"][1]["target"]["point_id"] = json!("alias_value");
++            v["flows"][1]["id"] = json!("new_flow");
++            put(&s.config, &v);
++        }
++        s.start_fixture(Default::default());
++        s.start(true);
++        until(7, || s.wire_round(&[12, 1, 56, 34]));
++        s.fixture.as_ref().unwrap().issue_once().unwrap();
++        until(3, || {
++            s.rows().iter().any(|r| {
++                r["event"] == "flow_health" && r["context"]["error_key"] == "target_unknown"
++            })
++        });
++        assert_eq!(counts(&s), json!({"unknown":1}));
++        assert_eq!(s.snapshot()["writes"], json!([0, 0]));
++        s.report["inspect_blocked"] = state::inspect(&s.state).unwrap();
++        s.stop(0);
++        s.finish();
++        assert_eq!(schema(&s.state), original_schema);
++        let (st, task) =
++            state::State::open(&s.state, "execute", &c.config.instance_id, &id()).unwrap();
++        assert_eq!(st.command_status(i.clone()).await.unwrap(), "unknown");
++        let mut other = i.clone();
++        other.source_id = "other_source".into();
++        other.flow_id = "other_flow".into();
++        other.command_id = "other_command".into();
++        assert_eq!(st.admit(other).await.unwrap_err(), "target_unknown");
++        st.finalize().await.unwrap();
++        drop(st);
++        task.join().await.unwrap();
++        s.save();
++    }
++}
++
++#[test]
++fn reading_applied_42_does_not_confirm_unknown() {
++    let root = root("unknown_readback");
++    let mut s = Scene::new(&root, "truncated_ack", "execute", |v| {
++        v["flows"][1]["interval_ms"] = json!(100);
++    });
++    s.start_fixture(field_flow::fixture::catalog_demo::Options {
++        short_write_ack_once: true,
++        ..Default::default()
++    });
++    s.start(true);
++    until(2, || s.wire_round(&[12, 1, 56, 34]));
++    s.fixture.as_ref().unwrap().issue_once().unwrap();
++    until(3, || counts(&s) == json!({"unknown":1}));
++    until(2, || s.wire_round(&[42, 1, 56, 34]));
++    s.stop(1);
++    let first_rows = s.rows();
++    assert!(!first_rows.iter().any(forced));
++    assert_eq!(s.snapshot()["writes"], json!([1, 0]));
++    s.start(true);
++    until(2, || {
++        s.rows()
++            .iter()
++            .filter(|r| {
++                r["event"] == "flow_health" && r["context"]["error_key"] == "target_unknown"
++            })
++            .count()
++            >= 1
++    });
++    let read_before = s.snapshot()["reads"][0].as_u64().unwrap();
++    until(2, || {
++        s.snapshot()["reads"][0].as_u64().unwrap() >= read_before + 12
++    });
++    assert_eq!(counts(&s), json!({"unknown":1}));
++    assert_eq!(s.snapshot()["writes"], json!([1, 0]));
++    s.stop(0);
++    s.finish();
++    assert_eq!(
++        s.report["fixture"]["final_memory"][0]["memory"]["db1"],
++        format!("002a0001{}", "a5".repeat(12))
++    );
++    s.report["expected_first_protocol_fault_exit"] = json!(1);
++    s.report["restart_normal_exit_unknown_retained"] = json!(true);
++    s.save();
++}
+--- baseline/field-flow/field-flow-rust/tests/modbus_catalog.rs
++++ candidate/field-flow/field-flow-rust/tests/modbus_catalog.rs
+@@ -0,0 +1,229 @@
++//! 文件：tests/modbus_catalog.rs；Modbus仅结构校验、严格codec声明和启动前零副作用能力拒绝。
++#![cfg(feature = "test-fixture")]
++mod catalog_support;
++use catalog_support::*;
++use field_flow::config::catalog::Catalog;
++use serde_json::{json, Value};
++use std::{collections::BTreeMap, fs, path::Path};
++fn hashes(p: &Path) -> BTreeMap<String, String> {
++    use sha2::{Digest, Sha256};
++    let mut m = BTreeMap::new();
++    for e in fs::read_dir(p).unwrap() {
++        let e = e.unwrap();
++        if e.file_type().unwrap().is_file() {
++            m.insert(
++                e.file_name().to_string_lossy().into(),
++                format!("{:x}", Sha256::digest(fs::read(e.path()).unwrap())),
++            );
++        }
++    }
++    m
++}
++#[test]
++fn declarations_and_preflight_no_effects() {
++    let root = root("modbus_catalog");
++    let p = config(&root);
++    let mb = p.parent().unwrap().join("plcs/modbus-example.json");
++    let base = value(&mb);
++    assert!(!Catalog::load(&mb).unwrap().compatible);
++    let out = cli(&["config", "validate", "--plc-file", mb.to_str().unwrap()]);
++    assert_eq!(out.status.code(), Some(0));
++    let result: Value = serde_json::from_slice(&out.stdout).unwrap();
++    assert_eq!(result["format_valid"], true);
++    assert_eq!(result["runtime_compatible"], false);
++    for (label, v) in [
++        ("unit0", {
++            let mut v = base.clone();
++            v["connection"]["unit_id"] = json!(0);
++            v
++        }),
++        ("rack", {
++            let mut v = base.clone();
++            v["connection"]["rack"] = json!(0);
++            v
++        }),
++        ("wrong_fc", {
++            let mut v = base.clone();
++            v["tables"][0]["points"][0]["functions"]["read"] = json!(3);
++            v
++        }),
++        ("input_write", {
++            let mut v = base.clone();
++            v["tables"][1]["points"][0]["functions"]["write"] = json!(5);
++            v
++        }),
++        ("word_missing", {
++            let mut v = base.clone();
++            v["tables"][3]["points"][0]
++                .as_object_mut()
++                .unwrap()
++                .remove("word_order");
++            v
++        }),
++        ("word_extra", {
++            let mut v = base.clone();
++            v["tables"][2]["points"][0]["word_order"] = json!("high_word_first");
++            v
++        }),
++        ("width_overflow", {
++            let mut v = base.clone();
++            v["tables"][3]["points"][0]["pdu_address"] = json!(65535);
++            v
++        }),
++        ("scale0", {
++            let mut v = base.clone();
++            v["tables"][3]["points"][0]["scale"]["factor"] = json!(0);
++            v
++        }),
++        ("scale_bool", {
++            let mut v = base.clone();
++            v["tables"][0]["points"][0]["scale"] = json!({"factor":1,"offset":0});
++            v
++        }),
++        ("duplicate_point", {
++            let mut v = base.clone();
++            v["tables"][1]["points"][0]["id"] = json!("request");
++            v
++        }),
++    ] {
++        put(&mb, &v);
++        assert!(Catalog::load(&mb).is_err(), "{label}");
++    }
++    put(&mb, &base);
++    let mut main = value(&p);
++    main["plc_files"]
++        .as_array_mut()
++        .unwrap()
++        .push(json!("plcs/modbus-example.json"));
++    let mut budget = main["plc_runtime"][0].clone();
++    budget["device_id"] = json!("modbus_station");
++    main["plc_runtime"].as_array_mut().unwrap().push(budget);
++    put(&p, &main);
++    let missing = root.join("missing-state");
++    let init = root.join("initialized");
++    let out = cli(&[
++        "state",
++        "init",
++        "--synthetic",
++        "--mode",
++        "execute",
++        "--state-dir",
++        init.to_str().unwrap(),
++        "--instance-id",
++        "ff-rust-catalog-demo",
++    ]);
++    assert!(out.status.success());
++    let loaded = field_flow::config::runtime_v2::Loaded::load(&p).unwrap();
++    let rt = tokio::runtime::Runtime::new().unwrap();
++    rt.block_on(async {
++        let (st, task) = field_flow::infrastructure::state::State::open(
++            &init,
++            "execute",
++            &loaded.config.instance_id,
++            &field_flow::domain::id(),
++        )
++        .unwrap();
++        let now = field_flow::domain::now_ms();
++        let intent = field_flow::domain::Input {
++            schema_version: 1,
++            source_id: "demo01-feed".into(),
++            ready: true,
++            command_id: Some("unrecovered".into()),
++            value: Some(42),
++            issued_at_ms: Some(now),
++            expires_at_ms: Some(now + 60000),
++        }
++        .intent(&loaded.config.flows[0], &loaded.config.plcs[0])
++        .unwrap()
++        .unwrap();
++        st.admit(intent.clone()).await.unwrap();
++        st.dispatch(intent, "unstarted-request".into())
++            .await
++            .unwrap();
++        drop(st);
++        task.join().await.unwrap();
++    });
++    assert_eq!(
++        field_flow::infrastructure::state::inspect(&init).unwrap()["counts"],
++        json!({"in_flight":1})
++    );
++    let before = hashes(&init);
++    let validate = cli(&["config", "validate", "--config", p.to_str().unwrap()]);
++    assert!(validate.status.success());
++    assert_eq!(
++        serde_json::from_slice::<Value>(&validate.stdout).unwrap()["runtime_compatible"],
++        false
++    );
++    for state in [&missing, &init] {
++        let out = cli(&[
++            "run",
++            "--config",
++            p.to_str().unwrap(),
++            "--state-dir",
++            state.to_str().unwrap(),
++            "--execute",
++        ]);
++        assert_eq!(out.status.code(), Some(2));
++        assert!(out.stdout.is_empty());
++        assert!(String::from_utf8(out.stderr)
++            .unwrap()
++            .contains("unsupported_protocol"));
++    }
++    assert!(!missing.exists());
++    assert_eq!(hashes(&init), before);
++    // Every file is checked, including unreferenced disabled declarations; non-default TSAP is structural only.
++    let mut disabled = base.clone();
++    for t in disabled["tables"].as_array_mut().unwrap() {
++        t["enabled"] = json!(false);
++    }
++    put(&mb, &disabled);
++    let out = cli(&[
++        "run",
++        "--config",
++        p.to_str().unwrap(),
++        "--state-dir",
++        missing.to_str().unwrap(),
++    ]);
++    assert_eq!(out.status.code(), Some(2));
++    assert!(!missing.exists());
++    let a = p.parent().unwrap().join("plcs/s7-a.json");
++    let mut av = value(&a);
++    av["connection"]["local_tsap"] = json!(512);
++    put(&a, &av);
++    assert_eq!(
++        field_flow::config::runtime_v2::Loaded::load(&p)
++            .unwrap()
++            .capability()
++            .unwrap_err(),
++        "unsupported_protocol"
++    );
++    let mut s7main = main.clone();
++    s7main["plc_files"].as_array_mut().unwrap().pop();
++    s7main["plc_runtime"].as_array_mut().unwrap().pop();
++    put(&p, &s7main);
++    let a = p.parent().unwrap().join("plcs/s7-a.json");
++    let mut av = value(&a);
++    av["connection"]["local_tsap"] = json!(512);
++    put(&a, &av);
++    let out = cli(&["config", "validate", "--config", p.to_str().unwrap()]);
++    assert!(out.status.success());
++    assert_eq!(
++        serde_json::from_slice::<Value>(&out.stdout).unwrap()["runtime_compatible"],
++        false
++    );
++    let out = cli(&[
++        "run",
++        "--config",
++        p.to_str().unwrap(),
++        "--state-dir",
++        init.to_str().unwrap(),
++        "--execute",
++    ]);
++    assert_eq!(out.status.code(), Some(2));
++    assert!(String::from_utf8(out.stderr)
++        .unwrap()
++        .contains("unsupported_connection"));
++    assert_eq!(hashes(&init), before);
++    fs::write(root.join("preflight.json"),serde_json::to_vec_pretty(&json!({"before":before,"after":hashes(&init),"missing_state_absent":!missing.exists(),"single_validate":result})).unwrap()).unwrap();
++    preflight();
++}
+--- baseline/field-flow/field-flow-rust/tests/catalog_support/mod.rs
++++ candidate/field-flow/field-flow-rust/tests/catalog_support/mod.rs
+@@ -0,0 +1,387 @@
++//! 文件：tests/catalog_support/mod.rs；FF-004有界真实CLI、结构化JSONL判定及确切资源证据。
++#![allow(dead_code)]
++use field_flow::{
++    domain::id,
++    fixture::catalog_demo::{CatalogFixture, Options},
++    infrastructure::state,
++};
++use serde_json::{json, Value};
++use std::{
++    fs::{self, File},
++    net::TcpListener,
++    path::{Path, PathBuf},
++    process::{Child, Command, Stdio},
++    thread::sleep,
++    time::{Duration, Instant},
++};
++pub const PRODUCT: &str = env!("CARGO_BIN_EXE_field-flow");
++pub const FIXTURE: &str = env!("CARGO_BIN_EXE_ff-fixture");
++pub fn root(suite: &str) -> PathBuf {
++    let base = std::env::var_os("FF004_EVIDENCE_ROOT")
++        .map(PathBuf::from)
++        .unwrap_or_else(|| PathBuf::from(format!("/private/tmp/ff-004-r2-test-{}", id())));
++    fs::create_dir_all(&base).unwrap();
++    let p = base.join(suite);
++    fs::create_dir(&p).expect("new suite evidence directory required");
++    p
++}
++pub fn config(dir: &Path) -> PathBuf {
++    let cfg = dir.join("config");
++    fs::create_dir(&cfg).unwrap();
++    fs::create_dir(cfg.join("plcs")).unwrap();
++    for name in ["s7-a.json", "s7-b.json", "modbus-example.json"] {
++        fs::copy(
++            Path::new("config/plcs").join(name),
++            cfg.join("plcs").join(name),
++        )
++        .unwrap();
++    }
++    fs::copy("config/catalog-demo.yaml", cfg.join("main.yaml")).unwrap();
++    cfg.join("main.yaml")
++}
++pub fn value(p: &Path) -> Value {
++    serde_yaml::from_slice(&fs::read(p).unwrap()).unwrap()
++}
++pub fn put(p: &Path, v: &Value) {
++    fs::write(p, serde_json::to_vec_pretty(v).unwrap()).unwrap();
++}
++pub fn cli(args: &[&str]) -> std::process::Output {
++    Command::new(PRODUCT).args(args).output().unwrap()
++}
++pub fn events(p: &Path) -> Vec<Value> {
++    fs::read_to_string(p)
++        .unwrap_or_default()
++        .lines()
++        .filter_map(|s| serde_json::from_str::<Value>(s).ok())
++        .map(|mut v| {
++            if let Some(s) = v["context"].as_str() {
++                v["context"] = serde_json::from_str(s).expect("JSON context");
++            }
++            v
++        })
++        .collect()
++}
++pub fn forced(v: &Value) -> bool {
++    v["event"] == "forced_driver_stop"
++        || v["error_key"]
++            .as_str()
++            .is_some_and(|s| s.starts_with("forced_driver_stop"))
++        || v["context"]["error_key"]
++            .as_str()
++            .is_some_and(|s| s.starts_with("forced_driver_stop"))
++        || v["had_forced_driver_stop"].as_bool() == Some(true)
++        || v["context"]["had_forced_driver_stop"].as_bool() == Some(true)
++}
++pub fn absent(pid: u32) -> bool {
++    pid > 0
++        && unsafe { libc::kill(pid as i32, 0) } == -1
++        && std::io::Error::last_os_error().raw_os_error() == Some(libc::ESRCH)
++}
++pub fn until(seconds: u64, mut p: impl FnMut() -> bool) {
++    let end = Instant::now() + Duration::from_secs(seconds);
++    while !p() {
++        assert!(Instant::now() < end, "bounded observation deadline");
++        sleep(Duration::from_millis(5));
++    }
++}
++pub fn preflight() {
++    for p in [34102, 34103, 34112, 34113, 34880] {
++        drop(
++            TcpListener::bind(("127.0.0.1", p))
++                .expect("port conflict; do not kill or change ports"),
++        );
++    }
++}
++pub struct Scene {
++    pub dir: PathBuf,
++    pub config: PathBuf,
++    pub state: PathBuf,
++    pub product: Option<Child>,
++    pub fixture: Option<CatalogFixture>,
++    pub started: Instant,
++    pub report: Value,
++    pub normal: bool,
++}
++impl Scene {
++    pub fn new(root: &Path, label: &str, mode: &str, edit: impl FnOnce(&mut Value)) -> Self {
++        let dir = root.join(label);
++        fs::create_dir(&dir).unwrap();
++        let config = config(&dir);
++        let mut v = value(&config);
++        edit(&mut v);
++        put(&config, &v);
++        let state = dir.join("state");
++        let out = cli(&[
++            "state",
++            "init",
++            "--synthetic",
++            "--mode",
++            mode,
++            "--state-dir",
++            state.to_str().unwrap(),
++            "--instance-id",
++            v["instance_id"].as_str().unwrap(),
++        ]);
++        assert!(out.status.success());
++        fs::write(dir.join("init.jsonl"), &out.stdout).unwrap();
++        Self {
++            dir,
++            config,
++            state,
++            product: None,
++            fixture: None,
++            started: Instant::now(),
++            report: json!({"label":label,"mode":mode,"result":"incomplete"}),
++            normal: true,
++        }
++    }
++    pub fn start_fixture(&mut self, options: Options) {
++        preflight();
++        self.fixture = Some(CatalogFixture::start_with(Path::new(FIXTURE), options).unwrap());
++    }
++    pub fn start(&mut self, execute: bool) {
++        self.start_path(execute, self.config.clone());
++    }
++    pub fn start_path(&mut self, execute: bool, p: PathBuf) {
++        let mut c = Command::new(PRODUCT);
++        c.args([
++            "run",
++            "--config",
++            p.to_str().unwrap(),
++            "--state-dir",
++            self.state.to_str().unwrap(),
++        ]);
++        if execute {
++            c.arg("--execute");
++        }
++        let child = c
++            .stdout(Stdio::from(
++                File::options()
++                    .create(true)
++                    .append(true)
++                    .open(self.dir.join("product.jsonl"))
++                    .unwrap(),
++            ))
++            .stderr(Stdio::from(
++                File::options()
++                    .create(true)
++                    .append(true)
++                    .open(self.dir.join("product.stderr"))
++                    .unwrap(),
++            ))
++            .spawn()
++            .unwrap();
++        self.report["product_pid"] = json!(child.id());
++        self.product = Some(child);
++    }
++    pub fn snapshot(&self) -> Value {
++        self.fixture.as_ref().unwrap().snapshot()
++    }
++    pub fn rows(&self) -> Vec<Value> {
++        events(&self.dir.join("product.jsonl"))
++    }
++    pub fn read_round(&self, expected: &[i16]) -> bool {
++        self.rows().iter().any(|v| {
++            let c = &v["context"];
++            v["event"] == "points_health"
++                && c["flow_id"] == "read_pair"
++                && c["status"] == "complete"
++                && c["items"].as_array().is_some_and(|a| {
++                    a.iter()
++                        .map(|i| i["sample"]["value"].as_i64())
++                        .collect::<Vec<_>>()
++                        == expected.iter().map(|n| Some(*n as i64)).collect::<Vec<_>>()
++                })
++        })
++    }
++    pub fn wire_round(&self, expected: &[i16]) -> bool {
++        let s = self.snapshot();
++        let mut rows: Vec<_> = s["trace"]
++            .as_array()
++            .unwrap()
++            .iter()
++            .flat_map(|t| t.as_array().unwrap())
++            .filter(|r| r["operation"] == 4)
++            .collect();
++        rows.sort_by_key(|r| r["sequence"].as_u64().unwrap());
++        let values: Vec<_> = rows.iter().map(|r| r["wire_value"].as_i64()).collect();
++        values
++            .windows(expected.len())
++            .any(|w| w == expected.iter().map(|n| Some(*n as i64)).collect::<Vec<_>>())
++    }
++    pub fn stop(&mut self, expected: i32) {
++        if let Some(mut child) = self.product.take() {
++            assert_eq!(unsafe { libc::kill(child.id() as i32, libc::SIGTERM) }, 0);
++            let end = Instant::now() + Duration::from_secs(16);
++            let status = loop {
++                if let Some(status) = child.try_wait().unwrap() {
++                    break status;
++                }
++                if Instant::now() >= end {
++                    child.kill().unwrap();
++                    child.wait().unwrap();
++                    panic!("forced product cleanup");
++                }
++                sleep(Duration::from_millis(5));
++            };
++            self.report["product_exit"] = json!(status.code());
++            assert_eq!(status.code(), Some(expected));
++            assert!(absent(child.id()));
++        }
++    }
++    pub fn finish(&mut self) {
++        let rows = self.rows();
++        if self.normal {
++            assert!(rows.iter().any(|v| v["event"] == "runtime_tasks_joined"));
++            assert!(rows.iter().any(|v| v["event"] == "shutdown_complete"));
++            assert!(!rows.iter().any(forced), "normal scenario forced stop");
++        }
++        let mut pids = Vec::new();
++        for v in &rows {
++            if let Some(pid) = v["context"]["pid"].as_u64() {
++                pids.push(pid as u32);
++            }
++        }
++        if let Some(f) = self.fixture.as_mut() {
++            f.close().unwrap();
++            let snap = f.snapshot();
++            assert_eq!(snap["trace_truncated"], false);
++            for pid in snap["native_pids"].as_array().unwrap() {
++                pids.push(pid.as_u64().unwrap() as u32);
++            }
++            self.report["fixture"] = snap;
++        }
++        pids.sort();
++        pids.dedup();
++        for pid in &pids {
++            assert!(absent(*pid), "unreaped {pid}");
++        }
++        preflight();
++        self.report["reaped_pids"] = json!(pids);
++        self.report["ports_rebound"] = json!([34102, 34103, 34112, 34113, 34880]);
++        self.report["elapsed_seconds"] = json!(self.started.elapsed().as_secs_f64());
++        self.report["result"] = json!("passed");
++        self.save();
++        assert!(self.started.elapsed() <= Duration::from_secs(45));
++    }
++    pub fn save(&self) {
++        fs::write(
++            self.dir.join("report.json"),
++            serde_json::to_vec_pretty(&self.report).unwrap(),
++        )
++        .unwrap();
++    }
++}
++impl Drop for Scene {
++    fn drop(&mut self) {
++        if let Some(mut child) = self.product.take() {
++            if child.try_wait().unwrap().is_none() {
++                unsafe { libc::kill(child.id() as i32, libc::SIGTERM) };
++                let end = Instant::now() + Duration::from_secs(16);
++                while child.try_wait().unwrap().is_none() && Instant::now() < end {
++                    sleep(Duration::from_millis(10));
++                }
++                if child.try_wait().unwrap().is_none() {
++                    let _ = child.kill();
++                    let _ = child.wait();
++                    self.report["forced_cleanup"] = json!(true);
++                }
++            }
++        }
++        if let Some(f) = self.fixture.as_mut() {
++            let closed = f.close();
++            self.report["cleanup_result"] = json!(closed);
++            self.report["fixture_cleanup"] = f.snapshot();
++        }
++        self.save();
++    }
++}
++pub fn read_flow(id: &str, devices: Value, reads: Value) -> Value {
++    json!({"id":id,"kind":"read_points","business_name":id,"interval_ms":100,"device_ids":devices,"reads":reads})
++}
++pub fn counts(scene: &Scene) -> Value {
++    state::inspect(&scene.state).unwrap()["counts"].clone()
++}
++pub fn check_raw(s: &Value) {
++    fn bytes(v: &Value) -> Vec<u8> {
++        let s = v.as_str().unwrap();
++        (0..s.len())
++            .step_by(2)
++            .map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap())
++            .collect()
++    }
++    for i in 0..2 {
++        let rows = s["trace"][i].as_array().unwrap();
++        let cotp = rows
++            .iter()
++            .find(|r| {
++                r["operation"] == 0
++                    && r["request_hex"]
++                        .as_str()
++                        .is_some_and(|h| h.contains("c1020100") && h.contains("c2020101"))
++            })
++            .expect("COTP C1/C2");
++        let cr = bytes(&cotp["request_hex"]);
++        assert_eq!(&cr[..2], &[3, 0]);
++        assert_eq!(u16::from_be_bytes([cr[2], cr[3]]) as usize, cr.len());
++        assert_eq!(cr[5], 0xe0);
++        let mut last_end = 0;
++        let mut previous_ref = 0;
++        for row in rows
++            .iter()
++            .filter(|r| r["operation"] == 4 || r["operation"] == 5)
++        {
++            let req = bytes(&row["request_hex"]);
++            let resp = bytes(&row["response_hex"]);
++            let op = row["operation"].as_u64().unwrap() as u8;
++            for frame in [&req, &resp] {
++                assert_eq!(&frame[..7], &[3, 0, 0, frame.len() as u8, 2, 0xf0, 0x80]);
++                assert_eq!(
++                    u16::from_be_bytes([frame[2], frame[3]]) as usize,
++                    frame.len()
++                );
++            }
++            assert_eq!(&req[7..11], &[0x32, 1, 0, 0]);
++            assert_eq!(
++                &req[13..19],
++                &[0, 14, 0, if op == 4 { 0 } else { 6 }, op, 1]
++            );
++            assert_eq!(&req[19..25], &[0x12, 0x0a, 0x10, 2, 0, 2]);
++            assert_eq!(req[27], 0x84);
++            let db = u16::from_be_bytes([req[25], req[26]]);
++            let offset = ((req[28] as u32) << 16 | (req[29] as u32) << 8 | req[30] as u32) / 8;
++            assert_eq!(row["db"], db);
++            assert_eq!(row["byte_offset"], offset);
++            assert_eq!(row["length"], 2);
++            assert!(matches!(db, 1 | 2));
++            assert!(matches!(offset, 0 | 2));
++            let reference = u16::from_be_bytes([req[11], req[12]]);
++            assert_eq!(reference, previous_ref + 1);
++            previous_ref = reference;
++            assert_eq!(&resp[7..11], &[0x32, 3, 0, 0]);
++            assert_eq!(&resp[11..13], &req[11..13]);
++            assert_eq!(
++                &resp[13..22],
++                &[0, 2, 0, if op == 4 { 6 } else { 1 }, 0, 0, op, 1, 0xff]
++            );
++            if op == 4 {
++                assert_eq!(req.len(), 31);
++                assert_eq!(resp.len(), 27);
++                assert_eq!(&resp[22..25], &[4, 0, 16]);
++                assert_eq!(row["wire_value"], i16::from_be_bytes([resp[25], resp[26]]));
++            } else {
++                assert_eq!(req.len(), 37);
++                assert_eq!(resp.len(), 22);
++                assert_eq!(&req[31..35], &[0, 4, 0, 16]);
++                assert_eq!(row["wire_value"], i16::from_be_bytes([req[35], req[36]]));
++            }
++            let begin = row["started_us"].as_u64().unwrap();
++            let end = row["elapsed_us"].as_u64().unwrap();
++            assert!(
++                begin >= last_end && end >= begin,
++                "one real in-flight call per PLC"
++            );
++            last_end = end;
++        }
++    }
++}
+--- baseline/field-flow/field-flow-rust/config/catalog-demo.yaml
++++ candidate/field-flow/field-flow-rust/config/catalog-demo.yaml
+@@ -0,0 +1,24 @@
++schema_version: 2
++instance_id: ff-rust-catalog-demo
++plc_files: [plcs/s7-a.json, plcs/s7-b.json]
++plc_runtime:
++  - {device_id: s7_a, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}
++  - {device_id: s7_b, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}
++flows:
++  - id: read_pair
++    kind: read_points
++    business_name: synthetic_pair_samples
++    interval_ms: 200
++    device_ids: [s7_a, s7_b]
++    reads: [{device_id: s7_a, point_id: value}, {device_id: s7_a, point_id: ready}, {device_id: s7_a, point_id: result}, {device_id: s7_b, point_id: value}]
++  - id: demo01
++    kind: demo01
++    business_name: synthetic_command_to_int
++    interval_ms: 500
++    device_ids: [s7_a]
++    source_id: demo01-feed
++    get_url: http://127.0.0.1:34880/demo01/command
++    input_max_age_ms: 10000
++    target: {device_id: s7_a, point_id: value}
++http: {connect_timeout_ms: 500, total_timeout_ms: 1500, pool_wait_ms: 500, max_connections: 8, max_body_bytes: 4096}
++shutdown_timeout_ms: 15000
+--- baseline/field-flow/field-flow-rust/config/plcs/s7-a.json
++++ candidate/field-flow/field-flow-rust/config/plcs/s7-a.json
+@@ -0,0 +1,13 @@
++{
++  "format": "ff.plc",
++  "schema_version": 1,
++  "id": "s7_a",
++  "display_name": "Synthetic S7 A",
++  "protocol": "s7",
++  "source": {"kind": "manual"},
++  "connection": {"host": "127.0.0.1", "port": 34102, "rack": 0, "slot": 1, "local_tsap": 256, "remote_tsap": 257},
++  "dbs": [
++    {"number": 1, "size_bytes": 16, "points": [{"id": "value", "data_type": "int16", "byte_offset": 0}, {"id": "ready", "data_type": "int16", "byte_offset": 2}]},
++    {"number": 2, "size_bytes": 16, "points": [{"id": "result", "data_type": "int16", "byte_offset": 0}]}
++  ]
++}
+--- baseline/field-flow/field-flow-rust/config/plcs/s7-b.json
++++ candidate/field-flow/field-flow-rust/config/plcs/s7-b.json
+@@ -0,0 +1,9 @@
++{
++  "format": "ff.plc",
++  "schema_version": 1,
++  "id": "s7_b",
++  "protocol": "s7",
++  "source": {"kind": "manual"},
++  "connection": {"host": "127.0.0.1", "port": 34112, "rack": 0, "slot": 1},
++  "dbs": [{"number": 1, "size_bytes": 16, "points": [{"id": "value", "data_type": "int16", "byte_offset": 0}]}]
++}
+--- baseline/field-flow/field-flow-rust/config/plcs/modbus-example.json
++++ candidate/field-flow/field-flow-rust/config/plcs/modbus-example.json
+@@ -0,0 +1,14 @@
++{
++  "format": "ff.plc",
++  "schema_version": 1,
++  "id": "modbus_station",
++  "protocol": "modbus_tcp",
++  "source": {"kind": "manual", "note": "Synthetic addresses only"},
++  "connection": {"host": "127.0.0.1", "port": 34502, "unit_id": 1},
++  "tables": [
++    {"table": "coils", "points": [{"id": "request", "data_type": "bool", "pdu_address": 0, "functions": {"read": 1, "write": 5}}]},
++    {"table": "discrete_inputs", "points": [{"id": "ready", "data_type": "bool", "pdu_address": 0, "functions": {"read": 2, "write": null}}]},
++    {"table": "holding_registers", "points": [{"id": "counter", "data_type": "int16", "pdu_address": 0, "functions": {"read": 3, "write": 6}}]},
++    {"table": "input_registers", "points": [{"id": "temperature", "data_type": "float32", "pdu_address": 10, "word_order": "high_word_first", "scale": {"factor": 0.1, "offset": 0}, "functions": {"read": 4, "write": null}}]}
++  ]
++}
+--- baseline/field-flow/field-flow-rust/config/plcs/README.md
++++ candidate/field-flow/field-flow-rust/config/plcs/README.md
+@@ -0,0 +1,17 @@
++# PLC files
++
++[中文](README.zh-CN.md)
++
++One closed ff.plc JSON object per PLC, schema_version=1 independently of main YAML v2 and SQLite schema1. [s7-a.json](s7-a.json)/[s7-b.json](s7-b.json) are fixed synthetic S7 examples; [modbus-example.json](modbus-example.json) validates declarations only and cannot run. Its34502 port is not a fixture endpoint. Follow the [catalog tutorial](../../USER_GUIDE.md#catalog-v2).
++
++JSON is UTF-8 without BOM; reject duplicate/unknown keys, explicit null defaults, implicit types, float/exponent integer lexemes and nesting beyond16. Main≤64KiB,1–4 unique relative non-symlink paths; each PLC≤1MiB,total≤4MiB,≤4096 points,≤64 DBs or4 tables. IDs are ASCII letters/digits/_/- of1–64 bytes. All declarations including disabled/unreferenced entries are validated. Duplicate device/point identity, physical overlap and shared host:port fail. Shared Modbus Unit IDs on a gateway are not independent transports (shared_transport_unsupported).
++
++Required common fields: format/schema_version/id/protocol/source/connection and exactly dbs for s7 or tables for modbus_tcp. Optional name/display_name/description limits128/256/1024 UTF-8 bytes; metadata only brand/model/firmware≤128. Point descriptions name/display_name/source_name/source_path/source_native_type are optional nonempty strings with limits128/256/256/1024/32. IDs/addresses select points, never labels, brand or filenames.
++
++S7 connection requires canonical unicast IPv4, port1–65535, rack0–7, slot0–31. Optional local_tsap/remote_tsap1–65535 default to256 and256+rack×32+slot. Nondefault TSAP is structurally valid but runtime_compatible=false/run exit2. DB number1–65535,size_bytes2–65536,enabled defaults true,points nonempty; each point requires id/data_type=int16/byte_offset0–65534 and optional enabled. offset+2≤size. INT is signed16-bit big-endian. BOOL/bit/scale/word_order are not S7 v1 fields. Declared size is not proof of field layout/write permission.
++
++Modbus connection requires host/port/unit_id1–255 only. Tables are coils/discrete_inputs/holding_registers/input_registers; point pdu_address is zero-based, never automatically converted from40001. Every functions object requires read/write (write may be null). Coils bool:1/null-or5; discrete bool:2/null; holding int16/uint16:3/null-or6; input int16/uint16:4/null. Register int32/uint32/float32 occupy two registers, require high_word_first/low_word_first and null write. Other types/FC15/16/width/quantity are rejected; end address≤65536, no overlap. Bool/16-bit reject word_order. Optional register scale requires finite factor/offset with absolute value≤1e9 and nonzero factor; bool rejects scale. These declarations implement no Modbus wire/client/codec/write permission.
++
++Manual source requires kind=manual and optional note≤512. DS source requires kind=device_simulator, export_mode=saved_revision, instance_id=device id, revision{id=lowercase UUID,saved_seq=1..9007199254740991,payload_sha256=64 lowercase hex}, nonempty exporter_version≤64 and generated_at RFC3339+08:00. Optional runtime_observation requires observed_at+08,selected_revision,loaded_revision; the last two are revision objects or explicit null. Omit missing observations; saved/selected/loaded are distinct. FF validates declarations and hashes, not DS database truth. DS currently has no exporter; reachable connect host and TSAP directions need explicit future DS confirmation. Source data, original revision payload hash and frozen JSON byte hash are provenance, not effect identity.
++
++Main v2 contains instance_id/plc_files/plc_runtime/flows/http/shutdown_timeout_ms. Each plc_runtime has device_id and the unchanged five budgets. All file IDs require exactly one budget. Flow id/business_name/interval_ms/device_ids are required; demo01 additionally source_id/get_url/input_max_age_ms/target{device_id,point_id}; read_points instead reads1–16 unique enabled references in its subset. No fake HTTP/target fields for readers. Budget ranges and startup rules are in the [guide](../../USER_GUIDE.md); configuration validation is read-only, format-valid incompatibility exits0 while run rejects before state open.
+--- baseline/field-flow/field-flow-rust/config/plcs/README.zh-CN.md
++++ candidate/field-flow/field-flow-rust/config/plcs/README.zh-CN.md
+@@ -0,0 +1,17 @@
++# PLC文件
++
++[English](README.md)
++
++每PLC一个闭合ff.plc JSON对象，schema_version=1，与主YAML v2/SQLite schema1独立。[s7-a.json](s7-a.json)/[s7-b.json](s7-b.json)是固定合成S7；[modbus-example.json](modbus-example.json)仅结构校验，不能run，34502不属于夹具端口。按[目录教程](../../USER_GUIDE.zh-CN.md#catalog-v2)操作。
++
++JSON为UTF-8无BOM；拒重复/未知键、null冒充缺省、隐式类型、整数浮点/指数词法、超过16层嵌套。主文件≤64KiB，1–4唯一相对非symlink路径；每PLC≤1MiB、总≤4MiB、≤4096点、≤64 DB或4 table。ID为1–64字节ASCII字母/数字/_/-。包括disabled/未引用声明都完整校验。重复设备/点身份、物理重叠、共享host:port失败。同网关不同Modbus Unit ID不是独立链路（shared_transport_unsupported）。
++
++公共必填format/schema_version/id/protocol/source/connection，且s7恰有dbs，modbus_tcp恰有tables。可选name/display_name/description限128/256/1024 UTF-8字节；metadata仅brand/model/firmware各≤128。点说明name/display_name/source_name/source_path/source_native_type为可选非空字符串，限128/256/256/1024/32。点由ID/地址选择，不由显示名/厂家/文件名选择。
++
++S7 connection必填规范单播IPv4、port1–65535、rack0–7、slot0–31。可选local_tsap/remote_tsap1–65535，缺省256及256+rack×32+slot。非默认TSAP结构有效，但runtime_compatible=false/run exit2。DB number1–65535、size_bytes2–65536、enabled缺省true、points非空。点必填id/data_type=int16/byte_offset0–65534，可选enabled；offset+2≤size。INT为有符号16位大端。BOOL/bit/scale/word_order不属于S7 v1。声明大小不证明现场布局/写许可。
++
++Modbus connection仅host/port/unit_id1–255。table四类coils/discrete_inputs/holding_registers/input_registers；pdu_address零基，不从40001自动换算。每functions必有read/write（write可null）。coils bool为1/null或5；discrete bool为2/null；holding int16/uint16为3/null或6；input int16/uint16为4/null。register的int32/uint32/float32占两register，必须high_word_first/low_word_first且write=null。拒其他类型/FC15/16/width/quantity，末地址≤65536，无重叠。bool/16位拒word_order。register可选scale必须factor/offset有限且绝对值≤1e9，factor非零；bool拒scale。这些声明不实现Modbus wire/client/codec，也不授写权限。
++
++manual来源必有kind=manual，可选note≤512。DS来源必有kind=device_simulator、export_mode=saved_revision、instance_id=设备id、revision{id=规范小写UUID,saved_seq=1..9007199254740991,payload_sha256=64位小写hex}、非空exporter_version≤64及generated_at RFC3339+08:00。可选runtime_observation必有observed_at+08、selected_revision、loaded_revision；后二者为revision对象或显式null。缺事实省略观测，saved/selected/loaded分开。FF只校验声明/hash，不证明DS数据库事实。DS当前没有导出器；未来DS须明确确认可达connect host和TSAP方向。来源、原revision payload SHA、冻结JSON原字节hash都是溯源，不是效果身份。
++
++主v2含instance_id/plc_files/plc_runtime/flows/http/shutdown_timeout_ms。每plc_runtime有device_id及原五预算，每文件ID恰有一预算。flow必有id/business_name/interval_ms/device_ids；demo01另有source_id/get_url/input_max_age_ms/target{device_id,point_id}；read_points改为reads1–16唯一enabled且属于子集的引用，无伪造HTTP/target。预算区间和启动规则见[指南](../../USER_GUIDE.zh-CN.md)。validate只读；结构有效但能力不兼容exit0，run在State.open前拒绝。
+--- baseline/field-flow/field-flow-rust/config/README.md
++++ candidate/field-flow/field-flow-rust/config/README.md
+@@ -2,7 +2,7 @@
+ 
+ [中文](README.zh-CN.md)
+ 
+-Human-reviewable YAML v1 contracts, not a PLC JSON catalog, schema platform or field address. Run one configuration at a time; each writes one physical target. This README-only directory is owned by the parent PLAN.
++Human-reviewable YAML v1 contracts and the separate Rust YAML v2 PLC catalog below; synthetic addresses only. Run one configuration at a time; each writes one physical target. This README-only directory is owned by the parent PLAN.
+ 
+ | File | flow.id / kind | instance_id |
+ | --- | --- | --- |
+@@ -13,3 +13,7 @@
+ All three use source_id=demo01-feed, GET http://127.0.0.1:31880/demo01/command, plc_demo/DB1/16 bytes/offset0/INT, interval500ms and input_max_age10000ms. Proxy/server ports are 31102/31103, loopback only, never102/wildcard. business_name values are synthetic_command_to_int, negative_target_get_to_int and positive_bounded_command_to_int. case/flow/kind/source/command/instance have distinct roles; unknown kinds, invalid targets and overlapping writes remain rejected.
+ 
+ See [own guide](../USER_GUIDE.md) for every field/budget and typed input, and [examples](../examples/README.md) for complete two-mode commands and counts. Build/sync/init before fixture command generation; separate dry/execute state. Field addresses/targets are outside these synthetic examples. Preserve original identity/timestamps/database/unknown; renaming or switching databases is not recovery. Standard DB INT is two signed big-endian bytes, not BOOL/REAL/optimized DB.
++
++## Rust YAML v2
++
++[catalog-demo.yaml](catalog-demo.yaml) loads [two independent S7 JSON files](plcs/README.md) through plc_files. Relative paths resolve from the main file directory; symlinks/traversal are rejected. Each file uses ff.plc/schema_version=1, the main file uses schema_version=2, independently of execution SQLite schema1. All three v1 configurations and basic02/basic03 remain; v2 supports demo01/read_points only. See the [run steps](../USER_GUIDE.md#catalog-v2).
+--- baseline/field-flow/field-flow-rust/config/README.zh-CN.md
++++ candidate/field-flow/field-flow-rust/config/README.zh-CN.md
+@@ -2,7 +2,7 @@
+ 
+ [English](README.md)
+ 
+-人工审阅的YAML v1合同；不是JSON PLC目录、schema平台或现场地址。每次只运行一份配置，每份只写一个物理target。上层PLAN管理此README-only目录。
++人工审阅的YAML v1合同与下方独立Rust YAML v2 PLC目录，仅含合成地址。每次只运行一份配置，每份只写一个物理target。上层PLAN管理此README-only目录。
+ 
+ | File | flow.id / kind | instance_id |
+ | --- | --- | --- |
+@@ -13,3 +13,7 @@
+ 三份均使用source_id=demo01-feed、GET http://127.0.0.1:31880/demo01/command、plc_demo/DB1/16 bytes/offset0/INT、interval500ms、input_max_age10000ms。proxy/server为31102/31103，仅loopback，不用102或wildcard。business_name分别为synthetic_command_to_int、negative_target_get_to_int、positive_bounded_command_to_int。case/flow/kind/source/command/instance角色不同；unknown/非法target/重叠写仍拒绝。
+ 
+ 完整逐字段预算与typed输入见[自身指南](../USER_GUIDE.zh-CN.md)，完整两模式命令和计数见[案例目录](../examples/README.zh-CN.md)。build/sync/init先于fixture生成命令；dry/execute分库。现场地址/target改动不属于这些合成例。保留原命令时间/身份、原库和unknown，不靠改名/换库恢复；标准DB INT两字节有符号大端，非BOOL/REAL/优化DB。
++
++## Rust YAML v2
++
++新增[catalog-demo.yaml](catalog-demo.yaml)通过plc_files加载[两个独立S7 JSON](plcs/README.zh-CN.md)，相对路径按主文件目录解析、拒symlink及穿越。每文件ff.plc/schema_version=1；主文件schema_version=2，与执行SQLite schema1分开。v1三配置和basic02/basic03保持；v2只demo01/read_points。完整[运行步骤](../USER_GUIDE.zh-CN.md#catalog-v2)。
+--- baseline/field-flow/field-flow-rust/README.md
++++ candidate/field-flow/field-flow-rust/README.md
+@@ -8,7 +8,7 @@
+ 
+ [BUILD](BUILD.md) explains product release, test-fixture, native dependencies, three-platform limits and state lifecycle. The product starts its own hidden __driver child; there is no ff-driver binary. Windows source needs adaptation; Linux is untested in this task.
+ 
+-Run defaults to dry_run and does not create schema; state init --synthetic creates only a new private directory. Execute needs its own matching store; inspect is read-only. Preserve unknown state/identities without clearing history, changing IDs or blind retry. App writes use Execution.apply. The registered kinds are demo01, plc_guard_get_int and get_value_guard_int; basic01 reuses demo01 and teaching01 remains a tutorial-copy exercise. Unknown kinds are rejected; no automatic discovery, demo02, POST/auth or BOOL/REAL.
++Run defaults to dry_run and does not create schema; state init --synthetic creates only a new private directory. Execute needs its own matching store; inspect is read-only. Preserve unknown state/identities without clearing history, changing IDs or blind retry. App writes use Execution.apply. The YAML v1 registered kinds are demo01, plc_guard_get_int and get_value_guard_int; basic01 reuses demo01 and teaching01 remains a tutorial-copy exercise. Unknown kinds are rejected; no automatic discovery, demo02, POST/auth or BOOL/REAL.
+ 
+ Copy this directory independently with its own source, manifest/lock, config, locale, fixture and state; no parent/sibling runtime is required. Parent task links below are optional governance navigation.
+ 
+@@ -17,3 +17,5 @@
+ [PLAN](PLAN.md) · [CODE_INDEX](CODE_INDEX.md) · [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.md)
+ 
+ See the [three basic examples](examples/README.md) for standalone commands and the [YAML configuration guide](config/README.md).
++
++For Rust YAML v2 see the [catalog tutorial](USER_GUIDE.md#catalog-v2): one ff.plc JSON per PLC, registered kinds demo01/read_points, S7 standard DB int16. Modbus is structure-validation only; Python/C# loading and DS export are not implemented.
+--- baseline/field-flow/field-flow-rust/README.zh-CN.md
++++ candidate/field-flow/field-flow-rust/README.zh-CN.md
+@@ -8,7 +8,7 @@
+ 
+ [BUILD](BUILD.zh-CN.md)说明产品release、test-fixture、native依赖、三平台限制与状态生命周期。产品自身以隐藏__driver启动child，不存在ff-driver二进制；Windows源码尚需适配，Linux本轮未测。
+ 
+-普通run默认dry_run，不建schema；state init --synthetic仅创建新私有目录。execute需独立匹配库，inspect只读。unknown保留原状态和身份，不清库/换ID/盲重发。应用写只走Execution.apply，当前注册kind为demo01、plc_guard_get_int和get_value_guard_int；basic01复用demo01，teaching01仍只在教程副本练习。未知kind拒绝，无自动发现、demo02、POST/auth或BOOL/REAL。
++普通run默认dry_run，不建schema；state init --synthetic仅创建新私有目录。execute需独立匹配库，inspect只读。unknown保留原状态和身份，不清库/换ID/盲重发。应用写只走Execution.apply，YAML v1当前注册kind为demo01、plc_guard_get_int和get_value_guard_int；basic01复用demo01，teaching01仍只在教程副本练习。未知kind拒绝，无自动发现、demo02、POST/auth或BOOL/REAL。
+ 
+ 可独立复制本目录并使用自身源码、清单/锁、配置、locale、夹具与状态，不依赖父/兄弟runtime。下面父任务链接仅为可选治理导航。
+ 
+@@ -17,3 +17,5 @@
+ [PLAN](PLAN.zh-CN.md) · [CODE_INDEX](CODE_INDEX.md) · [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES.zh-CN.md)
+ 
+ 三个基础案例及独立命令见[案例目录](examples/README.zh-CN.md)，对应[YAML配置说明](config/README.zh-CN.md)。
++
++Rust YAML v2见[点目录教程](USER_GUIDE.zh-CN.md#catalog-v2)：每PLC独立ff.plc JSON，正式kind仅demo01/read_points，S7标准DB int16。Modbus仅结构validate；Python/C#尚未加载、DS尚未导出。
+--- baseline/field-flow/field-flow-rust/USER_GUIDE.md
++++ candidate/field-flow/field-flow-rust/USER_GUIDE.md
+@@ -48,7 +48,7 @@
+ 
+ The fixture parent owns HTTP/proxy threads and starts a native server child using its own executable. The runtime is a separate process; each PLC owner starts one persistent driver child/session. Two proxy TCP legs do not mean two business PLC clients. This bounded protocol fixture is not the Device Simulator (DS) product; DS, Backend, Docker and the other language are unnecessary.
+ 
+-The Rust CLI emits no fixture_ready line: confirm that it stays alive and all three listeners belong to this exercise. It supplies source demo01-feed, cmd-001 and value 42. Command timestamps are generated once (expiry = issuance + 60000 ms). Repeated GET never refreshes them. The default input_max_age_ms=10000 gives only 10 seconds to start the runtime after fixture startup, even though expiry is 60 seconds. Prepare Terminal B’s command before starting Terminal A’s fixture. Stale input is expected once age exceeds 10 seconds.
++The legacy YAML v1 fixture CLI emits no fixture_ready line: confirm that it stays alive and all three listeners belong to this exercise. It supplies source demo01-feed, cmd-001 and value 42. Command timestamps are generated once (expiry = issuance + 60000 ms). Repeated GET never refreshes them. The default input_max_age_ms=10000 gives only 10 seconds to start the runtime after fixture startup, even though expiry is 60 seconds. Prepare Terminal B’s command before starting Terminal A’s fixture. Stale input is expected once age exceeds 10 seconds.
+ 
+ Automated tests can mutate feed/faults internally; the manual CLI has no control panel, management API, continuous command generator, arbitrary point table or interactive fault editing. This guide uses DB1 size16 offset0; this native fixture does not derive arbitrary feed/DB layout from config. Use only the published loopback sample here; configurable DB/address ranges do not enlarge fixture capabilities. The native server fixture does not prove real PLC write protection or actual field block size.
+ 
+@@ -149,7 +149,7 @@
+ 
+ ## 4. Configuration and input contract
+ 
+-config/loopback.yaml is the complete runnable sample. Objects are Config → Plc[], Flow[] → Target, Http. Unknown/missing fields and implicit string/boolean-to-integer conversions are rejected. IDs use ASCII A–Z/a–z/0–9/_/- with length 1–64. flow.id selects identity; kind selects explicit app dispatch; business_name describes the rule; source_id must match the feed. They are different roles.
++config/loopback.yaml is the complete YAML v1 runnable sample. Objects are Config → Plc[], Flow[] → Target, Http. Unknown/missing fields and implicit string/boolean-to-integer conversions are rejected. IDs use ASCII A–Z/a–z/0–9/_/- with length 1–64. flow.id selects identity; kind selects explicit app dispatch; business_name describes the rule; source_id must match the feed. They are different roles.
+ 
+ | Field | Accepted value / relation |
+ | --- | --- |
+@@ -221,7 +221,7 @@
+ let sample = owner.read("teaching-read", f.target.db_number, f.target.byte_offset).await?;
+ let value: i16 = sample.value;
+ ```
+-This does not add a registered read flow. Read quality good means a validated protocol sample at sampled_at_ms, not physical completion.
++This legacy snippet does not register a flow; see the YAML v2 read_points entry below. Read quality good means a validated protocol sample at sampled_at_ms, not physical completion.
+ 
+ Composition/lifecycle only: Config::load/validate, Runtime::start/launch_flows/health/shutdown, State::open/finalize and StateTask::join. State.admit/dispatch/finish and Owner.write are infrastructure used by Execution; do not call them to bypass durable execution. Driver.spawn/call/close, raw iso_exchange, S7 codec, gate/lock, SQL and fixture mutation hooks are internal/test surfaces. No public method for HTTP POST/auth, BOOL/REAL or automatic case discovery exists. The full demo01 code in section7 shows the shortest supported write route.
+ 
+@@ -392,3 +392,124 @@
+ ## Basic examples
+ 
+ Three registered cases and complete commands: [examples](examples/README.md); YAML contracts: [config](config/README.md). teaching01 remains a tutorial-copy exercise.
++
++<a id="catalog-v2"></a>
++
++## Rust catalog configuration v2
++
++YAML v1 preserves demo01/plc_guard_get_int/get_value_guard_int and the three original YAML files. Rust YAML v2 supports demo01/read_points only, loading one ff.plc JSON v1 per PLC from the explicit plc_files list. Paths resolve from the main file directory; no scanning/hot reload. Modbus supports structural validate only; run rejects the whole group before state/log/network IO, including unreferenced or disabled Modbus. Python/C# loading and DS export are not implemented.
++
++The read-only source API is devices.get(device_id)?.read(point_id).await. Composition binds flow_id and injects only the device_ids subset and enabled points; the app receives no raw addresses/writer/SQL/owner map. A sample retains request_id/flow_id/generation, typed int16/quality and local response-completion received_at(+08:00), not device event time. Each read_points iteration awaits reads in order and ends at the first error, leaving later items not_attempted without a sample/value. New rounds clear the previous items. Owners/queues/sessions are reused; independent flows perform independent samples, without deduplication or atomic snapshots.
++
++points_health uses the existing five-second cadence. Only the latest round is held: at most16 items/flow and128 total. Chunks have at most4 items and JSONL lines at most4096 bytes including the audit envelope/escaped context. round_id/chunk_index/chunk_count identify chunks, without an atomic cross-chunk snapshot. in_progress can contain partial success; completed_rounds/successful_reads/errors are saturating counters. New observed_at/received_at use +08; original UTC log envelopes/state producers are unchanged.
++
++Terminal A: finish all builds and both initializations before any fixture. Give B both printed absolute paths, one pasted per line. An occupied port stops the exercise: do not kill occupants or change ports. Empty lsof exit1 only means no matching listener.
++
++```bash
++cd /Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust
++FF_PROJECT=$(pwd -P)
++FF_RUN_ROOT=$(mktemp -d /private/tmp/ff-004-r2-manual-XXXXXX)
++printf '%s\n' "$FF_PROJECT" "$FF_RUN_ROOT"
++cargo build --locked --release --no-default-features --bin field-flow --target-dir "$FF_RUN_ROOT/product"
++cargo build --locked --release --features test-fixture --bin ff-fixture --target-dir "$FF_RUN_ROOT/fixture"
++"$FF_RUN_ROOT/product/release/field-flow" config validate --config "$FF_PROJECT/config/catalog-demo.yaml"
++"$FF_RUN_ROOT/product/release/field-flow" config validate --plc-file "$FF_PROJECT/config/plcs/modbus-example.json"
++"$FF_RUN_ROOT/product/release/field-flow" state init --synthetic --mode dry_run --state-dir "$FF_RUN_ROOT/dry-state" --instance-id ff-rust-catalog-demo
++"$FF_RUN_ROOT/product/release/field-flow" state init --synthetic --mode execute --state-dir "$FF_RUN_ROOT/execute-state" --instance-id ff-rust-catalog-demo
++lsof -nP -iTCP:34102 -iTCP:34103 -iTCP:34112 -iTCP:34113 -iTCP:34880 -sTCP:LISTEN
++```
++
++
++A starts a new dry fixture and waits for fixture_ready, which is still idle:
++
++```bash
++"$FF_RUN_ROOT/fixture/release/ff-fixture" --catalog-demo --evidence-dir "$FF_RUN_ROOT/dry-fixture"
++```
++
++B sets its own variables in its own shell, then starts the product:
++
++```bash
++read -r FF_PROJECT
++read -r FF_RUN_ROOT
++cd "$FF_PROJECT"
++FF_BIN="$FF_RUN_ROOT/product/release/field-flow"
++FF_SCENE=dry
++"$FF_BIN" run --config "$FF_PROJECT/config/catalog-demo.yaml" --state-dir "$FF_RUN_ROOT/dry-state" > "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" 2> "$FF_RUN_ROOT/$FF_SCENE.stderr" &
++FF_PID=$!
++printf 'runtime PID=%s\n' "$FF_PID"
++```
++
++
++B checks the initial complete [12,1,56,34] round with this bounded, read-only check. Stop and preserve a deadline failure; do not refresh identity or enlarge TTL.
++
++```bash
++python3 - "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" initial <<'PY_CHECK'
++import json, pathlib, sys, time
++p, stage = pathlib.Path(sys.argv[1]), sys.argv[2]
++end = time.monotonic() + (15 if stage == "initial" else 8)
++while time.monotonic() < end:
++    for line in p.read_text().splitlines():
++        try:
++            v = json.loads(line)
++            c = v.get("context", {})
++            if isinstance(c, str): c = json.loads(c)
++        except ValueError:
++            continue
++        if stage == "initial":
++            ok = v.get("event") == "points_health" and c.get("flow_id") == "read_pair" and c.get("status") == "complete" and [i.get("sample", {}).get("value") for i in c.get("items", [])] == [12, 1, 56, 34]
++        else:
++            ok = v.get("event") == "health" and any(c.get("store", {}).get("commands", {}).get(k) == 1 for k in ["simulated", "confirmed"])
++        if ok:
++            print(json.dumps(c, ensure_ascii=False)); sys.exit(0)
++    time.sleep(0.05)
++raise SystemExit("observation deadline")
++PY_CHECK
++```
++
++
++Before issue, HTTP is strict seven-key idle, command0 and writes=[0,0]. A now types `issue` once into the fixture stdin and presses ENTER. It freezes that scene's original body/identity/time; a second issue or invalid input is rejected without mutation. B immediately reruns the check above, replacing its single `initial` argument with `issued`. Expect simulated1 within8 seconds; original input_max_age remains10 seconds. After success, B signals only its recorded product PID and actually waits:
++
++```bash
++kill -INT "$FF_PID"
++wait "$FF_PID"
++FF_EXIT=$?
++printf 'runtime exit=%s\n' "$FF_EXIT"
++"$FF_BIN" state inspect --state-dir "$FF_RUN_ROOT/$FF_SCENE-state"
++```
++
++
++A enters an empty line to stop its foreground fixture. Immediately after return, A records its own exit:
++
++```bash
++FF_FIXTURE_EXIT=$?
++printf 'fixture exit=%s\n' "$FF_FIXTURE_EXIT"
++```
++
++B retains FF_PID and checks the report, stderr, exact PID and ports. Normal runtime and fixture exit0. final_memory is A.DB1=000c0001+12 A5 bytes, A.DB2=0038+14 A5 bytes, B.DB1=0022+14 A5 bytes; writes=[0,0]. Extract both driver PIDs from product.jsonl driver_ready.context (parse the string as JSON) and both native server PIDs from protocol.json.native_pids; run ps -p on each exact positive PID and require absence. Invalid arguments/permission errors are not absence.
++
++```bash
++cat "$FF_RUN_ROOT/$FF_SCENE-fixture/protocol.json"
++cat "$FF_RUN_ROOT/$FF_SCENE.stderr"
++ps -p "$FF_PID" -o pid=,stat=,command=
++lsof -nP -iTCP:34102 -iTCP:34103 -iTCP:34112 -iTCP:34113 -iTCP:34880 -sTCP:LISTEN
++```
++
++
++Execute is a separate new scene. A keeps its own variables, rechecks the five free ports, then starts:
++
++```bash
++"$FF_RUN_ROOT/fixture/release/ff-fixture" --catalog-demo --evidence-dir "$FF_RUN_ROOT/execute-fixture"
++```
++
++B keeps the same shell and starts explicitly:
++
++```bash
++FF_SCENE=execute
++"$FF_BIN" run --config "$FF_PROJECT/config/catalog-demo.yaml" --state-dir "$FF_RUN_ROOT/execute-state" --execute > "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" 2> "$FF_RUN_ROOT/$FF_SCENE.stderr" &
++FF_PID=$!
++printf 'runtime PID=%s\n' "$FF_PID"
++```
++
++Repeat initial check, one issue in A, issued check in B, B SIGINT/wait/inspect, A empty-line/exit, B report/PID/port checks. Expect confirmed1, exactly one A WriteVar and zero B writes. Only A.DB1 first INT changes to002a; ready/result/B and all neighboring A5 bytes remain. ACK plus local confirmed is not process completion. Preserve original state/logs/identities; do not reinitialize, change IDs or switch stores to evade unknown. An old confirmed store can use v2 only when all original typed semantics match. Paths/display/source hashes are not the effect hash; actual address/declared-size/business-name changes conflict. Replacing an old PLC id with a DS UUID does not promise seamless state inheritance.
++
++The existing teaching01 exact wiring anchors remain valid for v1 in an independent tutorial copy; delivered source rejects teaching01. The original FF-005 complete hold_ack forced-stop limitation remains. This slice's B-off is the known bootstrap-force/nonzero fault class, not normal closure; ordinary/slow-connect scenes require real join/reap and zero forced stops. No Modbus transport, DS export, POST, real-device, Windows/Linux or deployment proof is claimed.
+--- baseline/field-flow/field-flow-rust/USER_GUIDE.zh-CN.md
++++ candidate/field-flow/field-flow-rust/USER_GUIDE.zh-CN.md
+@@ -48,7 +48,7 @@
+ 
+ 夹具父进程拥有 HTTP/proxy 线程并用自身 executable 启动 native server 子进程。runtime 是独立进程，每 PLC owner 启动一个常驻 driver 子进程/session。proxy 前后两段 TCP 不代表两个业务 PLC client。此有限协议夹具不是 Device Simulator（DS）产品，无需 DS、Backend、Docker 或另一语言。
+ 
+-Rust CLI 没有 fixture_ready 行：核对进程持续存活且三个 listener 属于本演练。固定 source=demo01-feed、cmd-001、value=42。命令时间仅生成一次（expires=issued+60000 ms），重复 GET 不刷新。默认 input_max_age_ms=10000，故夹具启动后只有 10 秒启动 runtime，尽管 expiry 为 60 秒。先准备好终端 B 命令，再启动终端 A 夹具。超过 10 秒后出现 stale 符合语义。
++旧YAML v1夹具CLI没有 fixture_ready 行：核对进程持续存活且三个 listener 属于本演练。固定 source=demo01-feed、cmd-001、value=42。命令时间仅生成一次（expires=issued+60000 ms），重复 GET 不刷新。默认 input_max_age_ms=10000，故夹具启动后只有 10 秒启动 runtime，尽管 expiry 为 60 秒。先准备好终端 B 命令，再启动终端 A 夹具。超过 10 秒后出现 stale 符合语义。
+ 
+ 自动测试可在内部改 feed/故障；人工 CLI 没有控制面板、管理 API、持续命令生成、任意点表或交互故障编辑。本手册仅用DB1/16/offset0；native夹具不会按任意配置生成feed/DB。配置可表达的 DB/地址范围不扩大夹具能力。native server夹具不证明真实PLC写保护或现场块大小。
+ 
+@@ -221,7 +221,7 @@
+ let sample = owner.read("teaching-read", f.target.db_number, f.target.byte_offset).await?;
+ let value: i16 = sample.value;
+ ```
+-这不新增已注册读flow。quality=good是sampled_at_ms时刻的有效协议样本，不是物理完成。
++此旧接口片段不注册读flow；YAML v2的read_points见下文。quality=good是sampled_at_ms时刻的有效协议样本，不是物理完成。
+ 
+ 仅装配/生命周期使用：Config::load/validate、Runtime::start/launch_flows/health/shutdown、State::open/finalize与StateTask::join。State.admit/dispatch/finish与Owner.write归Execution内部，不绕过持久执行。Driver.spawn/call/close、raw iso_exchange、S7 codec、gate/lock、SQL和夹具变更hook属于内部/测试面。不存在POST/auth、BOOL/REAL或自动发现案例公共方法。第7节完整demo同能力代码展示最短合法写路径。
+ 
+@@ -392,3 +392,124 @@
+ ## 基础案例
+ 
+ 三个正式案例及完整运行命令见[案例目录](examples/README.zh-CN.md)，YAML合同见[配置说明](config/README.zh-CN.md)。teaching01仍只在教程副本接线。
++
++<a id="catalog-v2"></a>
++
++## Rust目录配置v2
++
++YAML v1保留demo01/plc_guard_get_int/get_value_guard_int及原三YAML。Rust YAML v2仅支持demo01/read_points，通过plc_files显式列表每PLC加载一个ff.plc JSON v1。路径以主文件目录为基准，无扫描/热重读。Modbus仅结构validate；run在状态/日志/网络IO前拒绝整组，包括未引用或disabled的Modbus。Python/C#尚未加载，DS尚未导出。
++
++只读源码API是devices.get(device_id)?.read(point_id).await。装配绑定flow_id，仅注入device_ids子集及enabled点；app不接收原始地址/writer/SQL/全局owner表。样本保留request_id/flow_id/generation、typed int16/quality及本机响应完成received_at(+08:00)，不是设备事件时间。read_points单轮按reads顺序await，首错结束，后项not_attempted且无sample/value；新轮清空旧项。Owner/队列/会话复用，多流为独立采样，非去重/原子快照。
++
++points_health沿既有五秒节奏。仅保留最近一轮，每flow至多16项、总128项。每块至多4项，每JSONL包含审计外层/转义context至多4096B。round_id/chunk_index/chunk_count标识分块，跨块非原子。in_progress可部分成功；completed_rounds/successful_reads/errors为饱和累计计数。新observed_at/received_at按+08，旧UTC日志外层/状态producer保持。
++
++终端A：先完成全部构建和两模式init，再起夹具。把打印的两个真实绝对路径交给B逐行粘贴。端口占用即停止，不杀占用者/换端口；lsof无输出exit1仅表示未找到监听。
++
++```bash
++cd /Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/field-flow-rust
++FF_PROJECT=$(pwd -P)
++FF_RUN_ROOT=$(mktemp -d /private/tmp/ff-004-r2-manual-XXXXXX)
++printf '%s\n' "$FF_PROJECT" "$FF_RUN_ROOT"
++cargo build --locked --release --no-default-features --bin field-flow --target-dir "$FF_RUN_ROOT/product"
++cargo build --locked --release --features test-fixture --bin ff-fixture --target-dir "$FF_RUN_ROOT/fixture"
++"$FF_RUN_ROOT/product/release/field-flow" config validate --config "$FF_PROJECT/config/catalog-demo.yaml"
++"$FF_RUN_ROOT/product/release/field-flow" config validate --plc-file "$FF_PROJECT/config/plcs/modbus-example.json"
++"$FF_RUN_ROOT/product/release/field-flow" state init --synthetic --mode dry_run --state-dir "$FF_RUN_ROOT/dry-state" --instance-id ff-rust-catalog-demo
++"$FF_RUN_ROOT/product/release/field-flow" state init --synthetic --mode execute --state-dir "$FF_RUN_ROOT/execute-state" --instance-id ff-rust-catalog-demo
++lsof -nP -iTCP:34102 -iTCP:34103 -iTCP:34112 -iTCP:34113 -iTCP:34880 -sTCP:LISTEN
++```
++
++
++A启动全新dry夹具，等fixture_ready，此时仍idle：
++
++```bash
++"$FF_RUN_ROOT/fixture/release/ff-fixture" --catalog-demo --evidence-dir "$FF_RUN_ROOT/dry-fixture"
++```
++
++B在自身shell独立赋值并启动产品：
++
++```bash
++read -r FF_PROJECT
++read -r FF_RUN_ROOT
++cd "$FF_PROJECT"
++FF_BIN="$FF_RUN_ROOT/product/release/field-flow"
++FF_SCENE=dry
++"$FF_BIN" run --config "$FF_PROJECT/config/catalog-demo.yaml" --state-dir "$FF_RUN_ROOT/dry-state" > "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" 2> "$FF_RUN_ROOT/$FF_SCENE.stderr" &
++FF_PID=$!
++printf 'runtime PID=%s\n' "$FF_PID"
++```
++
++
++B用下面有截止、只读检查核对初始完整[12,1,56,34]。超时保留失败并停止，不刷新身份/放大TTL。
++
++```bash
++python3 - "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" initial <<'PY_CHECK'
++import json, pathlib, sys, time
++p, stage = pathlib.Path(sys.argv[1]), sys.argv[2]
++end = time.monotonic() + (15 if stage == "initial" else 8)
++while time.monotonic() < end:
++    for line in p.read_text().splitlines():
++        try:
++            v = json.loads(line)
++            c = v.get("context", {})
++            if isinstance(c, str): c = json.loads(c)
++        except ValueError:
++            continue
++        if stage == "initial":
++            ok = v.get("event") == "points_health" and c.get("flow_id") == "read_pair" and c.get("status") == "complete" and [i.get("sample", {}).get("value") for i in c.get("items", [])] == [12, 1, 56, 34]
++        else:
++            ok = v.get("event") == "health" and any(c.get("store", {}).get("commands", {}).get(k) == 1 for k in ["simulated", "confirmed"])
++        if ok:
++            print(json.dumps(c, ensure_ascii=False)); sys.exit(0)
++    time.sleep(0.05)
++raise SystemExit("observation deadline")
++PY_CHECK
++```
++
++
++issue前HTTP为严格七键idle、command0且writes=[0,0]。现在A在夹具stdin只输入一次`issue`并回车，它冻结该场景原body/身份/时间；第二次issue或非法输入拒绝且不改原值。B立即重跑上方检查，将其唯一`initial`参数改为`issued`。8秒内应看到simulated1；原input_max_age仍10秒。通过后B只向自己记录的产品PID发信号并实际wait：
++
++```bash
++kill -INT "$FF_PID"
++wait "$FF_PID"
++FF_EXIT=$?
++printf 'runtime exit=%s\n' "$FF_EXIT"
++"$FF_BIN" state inspect --state-dir "$FF_RUN_ROOT/$FF_SCENE-state"
++```
++
++
++A输入空行停止前台夹具，返回后立即在A记录自身退出：
++
++```bash
++FF_FIXTURE_EXIT=$?
++printf 'fixture exit=%s\n' "$FF_FIXTURE_EXIT"
++```
++
++B保留FF_PID，核报告、stderr、确切PID及端口。runtime和fixture正常exit0。final_memory为A.DB1=000c0001+12字节A5、A.DB2=0038+14字节A5、B.DB1=0022+14字节A5；writes=[0,0]。从product.jsonl的driver_ready.context提取两个driver PID（字符串再解JSON），从protocol.json.native_pids取两个native server PID；对每个确切正整数另跑ps -p确认不存在。参数错误/权限诊断不是PID消失。
++
++```bash
++cat "$FF_RUN_ROOT/$FF_SCENE-fixture/protocol.json"
++cat "$FF_RUN_ROOT/$FF_SCENE.stderr"
++ps -p "$FF_PID" -o pid=,stat=,command=
++lsof -nP -iTCP:34102 -iTCP:34103 -iTCP:34112 -iTCP:34113 -iTCP:34880 -sTCP:LISTEN
++```
++
++
++execute为全新独立场景。A保持自身变量，重新检查五口空闲后启动：
++
++```bash
++"$FF_RUN_ROOT/fixture/release/ff-fixture" --catalog-demo --evidence-dir "$FF_RUN_ROOT/execute-fixture"
++```
++
++B保留同一shell，显式启动：
++
++```bash
++FF_SCENE=execute
++"$FF_BIN" run --config "$FF_PROJECT/config/catalog-demo.yaml" --state-dir "$FF_RUN_ROOT/execute-state" --execute > "$FF_RUN_ROOT/$FF_SCENE.stdout.jsonl" 2> "$FF_RUN_ROOT/$FF_SCENE.stderr" &
++FF_PID=$!
++printf 'runtime PID=%s\n' "$FF_PID"
++```
++
++重复initial检查、A一次issue、B issued检查、B SIGINT/wait/inspect、A空行/退出、B报告/PID/端口核对。预期confirmed1，A WriteVar恰1且B0；仅A.DB1首INT改002a，ready/result/B和全部邻A5保持。ACK+本地confirmed不是工艺完成。保留原状态/日志/身份，不重新init/更名/换库绕unknown。只有原typed语义逐项一致的confirmed库才可接v2。路径/显示/source hash不是效果hash；实际地址/声明大小/业务名变化会冲突。DS UUID替换旧PLC id不承诺无缝状态继承。
++
++原teaching01精确接线锚点仍用于独立教程副本的v1；正式源码拒绝teaching01。FF-005原完整hold_ack强收限制保留。本切片B-off为已知bootstrap force/非零故障分类，不是正常关闭；普通/慢连接场景必须真实join/reap且零forced。无Modbus通信、DS导出、POST、真实设备、Windows/Linux或部署证明。
+--- baseline/field-flow/field-flow-rust/BUILD.md
++++ candidate/field-flow/field-flow-rust/BUILD.md
+@@ -61,3 +61,7 @@
+ Source/config is a reviewable candidate; target output is a rebuildable artifact; a new synthetic lesson state is disposable only after evidence/ownership review. An existing execute store is execution history and must not be deleted to start again. Before replacing an executable or moving host: stop the active writer normally, actually wait/reap its children, verify ports/PIDs, inspect schema/implementation/mode/instance and unresolved commands, and retain original state and logs. Do not casually copy a running SQLite DB/journal/lock/gate, switch language against the same writable DB or regenerate identities to replay. Backup/restore, schema compatibility, migration and cross-host fencing have no delivered workflow here and need a separate scope. A binary replacement does not authorize schema/data changes or unknown reconciliation.
+ 
+ This task performs no service installation, deployment, real PLC/HTTP operation, Git publication, signing or license-compliance conclusion. [Local runtime guide](USER_GUIDE.md) contains the bounded loopback steps and normal release evidence.
++
++## FF-004 catalog configuration
++
++The product still uses the no-feature release build; build the catalog fixture separately with test-fixture, without making it a deployment dependency. Ship the main v2 YAML and its explicitly listed plc_files JSON files together, preserving relative layout; locales remain embedded. Stop editing before startup freezes all selected bytes; there is no hot reload. validate is read-only without state/log/network IO. Source/JSON/DS hashes are distinct from the old effect hash: v2 demo01 normalizes to the original Flow/Target and uses the original Execution/schema1. Stop the old writer and preserve its store/unknown before switching; do not clear state or replace IDs. Platform gates and the existing UTC-history limitation remain.
+--- baseline/field-flow/field-flow-rust/BUILD.zh-CN.md
++++ candidate/field-flow/field-flow-rust/BUILD.zh-CN.md
+@@ -61,3 +61,7 @@
+ 源码/config是可审查候选，target是可重建产物；新synthetic教学状态只在证据/归属核对后可回收。既有execute库是执行历史，不能删库重来。替换executable或迁机前：正常停writer、实际wait/reap子进程、核对端口/PID、inspect schema/implementation/mode/instance及未决命令，保留原状态/日志。不随意复制运行中SQLite/journal/lock/gate，不切语言共用可写库或生成新身份重放。本轮无可交付的backup/restore、schema兼容迁移或跨主机fencing流程，须另立范围。换binary不授权schema/数据变更或unknown处置。
+ 
+ 本轮不安装服务、不部署、不操作真实PLC/HTTP、不Git发布、不签名或授予许可合规结论。[本机runtime手册](USER_GUIDE.zh-CN.md)含有限loopback步骤和正常释放证据。
++
++## FF-004目录配置
++
++产品仍以无feature release构建；catalog夹具单独用test-fixture构建，不是部署依赖。运行v2时携带主YAML和其plc_files显式列出的JSON，保持相对结构；locale编入自身二进制。先停止编辑，再启动一次完整冻结加载，无热重读。validate只读且不打开库/日志/网络。主YAML/JSON/DS来源hash不是原效果hash；v2 demo01规范化为原Flow/Target后沿用原Execution与schema1。切换writer先停旧端并保全原库/unknown，不能清库换ID。平台门槛和原UTC历史限制不因本切片改变。
+--- baseline/field-flow/field-flow-rust/CODE_INDEX.md
++++ candidate/field-flow/field-flow-rust/CODE_INDEX.md
+@@ -42,3 +42,15 @@
+ - [tests/basic_examples.rs](tests/basic_examples.rs)：自身Fixture/正式CLI有界矩阵，分窗口计数/状态/内存/真实回收。
+ - [examples/README.md](examples/README.md) / [中文](examples/README.zh-CN.md)：基础案例与YAML合同。
+ - [config/README.md](config/README.md) / [中文](config/README.zh-CN.md)：基础案例与YAML合同。
++
++FF-004 Rust catalog additions:
++
++- `src/config/catalog.rs`: strict bounded ff.plc parsing, source/protocol/point validation and frozen byte hashes.
++- `src/config/runtime_v2.rs`: version routing, YAML v2 assembly to original typed demo01 identity, read-only validation report.
++- `src/services/devices.rs`: flow-bound read-only device subset delegating to original Owners.
++- `src/app/read_points.rs`: ordered single read round and bounded current observation.
++- `src/runtime/catalog.rs`: v2 reader scheduling and five-second bounded chunks.
++- `src/fixture/catalog_demo.rs`: fixed two-PLC synthetic fixture, issue-once stdin, raw trace, child/thread joins.
++- `tests/plc_catalog.rs`, `tests/modbus_catalog.rs`: strict declarations, path/capability and zero-side-effect preflight.
++- `tests/multi_plc.rs`, `tests/catalog_compatibility.rs`, `tests/catalog_support/mod.rs`: bounded real CLI, sample identities, protocol/resource and legacy-state compatibility.
++- `config/catalog-demo.yaml`, `config/plcs/*.json`: explicit synthetic v2 catalog and structure-only Modbus declaration.
+--- baseline/field-flow/field-flow-rust/locales/zh-CN.json
++++ candidate/field-flow/field-flow-rust/locales/zh-CN.json
+@@ -1 +1,6 @@
+-{"help":"Field Flow（本地合成运行时）\n用法：\n  field-flow [--lang en-US|zh-CN] --help\n  field-flow state init --synthetic --mode dry_run|execute --state-dir 新目录 --instance-id 标识\n  field-flow state inspect --state-dir 目录\n  field-flow run --config 文件 --state-dir 目录 [--execute]\n运行前必须显式初始化状态目录。使用SIGINT或SIGTERM停止。","error":"操作失败","initialized":"合成状态已初始化"}
++{
++  "help": "Field Flow（本地合成运行时）\n用法：\n  field-flow [--lang en-US|zh-CN] --help\n  field-flow state init --synthetic --mode dry_run|execute --state-dir 新目录 --instance-id 标识\n  field-flow state inspect --state-dir 目录\n  field-flow run --config 文件 --state-dir 目录 [--execute]\n运行前必须显式初始化状态目录。使用SIGINT或SIGTERM停止。\nconfig validate --config FILE | --plc-file FILE",
++  "error": "操作失败",
++  "initialized": "合成状态已初始化",
++  "fixture_help": "ff-fixture --config config/loopback.yaml --evidence-dir NEW_DIRECTORY\nff-fixture --catalog-demo --evidence-dir NEW_DIRECTORY\n输入issue发布一次；空行停止catalog夹具。"
++}
+--- baseline/field-flow/field-flow-rust/locales/en-US.json
++++ candidate/field-flow/field-flow-rust/locales/en-US.json
+@@ -1 +1,6 @@
+-{"help":"Field Flow (synthetic local runtime)\nUsage:\n  field-flow [--lang en-US|zh-CN] --help\n  field-flow state init --synthetic --mode dry_run|execute --state-dir NEW_DIR --instance-id ID\n  field-flow state inspect --state-dir DIR\n  field-flow run --config FILE --state-dir DIR [--execute]\nRun requires an explicitly initialized state directory. Stop with SIGINT or SIGTERM.","error":"Operation failed","initialized":"Synthetic state initialized"}
++{
++  "help": "Field Flow (synthetic local runtime)\nUsage:\n  field-flow [--lang en-US|zh-CN] --help\n  field-flow state init --synthetic --mode dry_run|execute --state-dir NEW_DIR --instance-id ID\n  field-flow state inspect --state-dir DIR\n  field-flow run --config FILE --state-dir DIR [--execute]\nRun requires an explicitly initialized state directory. Stop with SIGINT or SIGTERM.\nconfig validate --config FILE | --plc-file FILE",
++  "error": "Operation failed",
++  "initialized": "Synthetic state initialized",
++  "fixture_help": "ff-fixture --config config/loopback.yaml --evidence-dir NEW_DIRECTORY\nff-fixture --catalog-demo --evidence-dir NEW_DIRECTORY\nEnter issue once to publish; an empty line stops the catalog fixture."
++}
+--- baseline/field-flow/USER_GUIDE.md
++++ candidate/field-flow/USER_GUIDE.md
+@@ -39,7 +39,7 @@
+ 5. A matching S7 INT ACK plus local T3 commit makes confirmed; no proof after a possible send is unknown. This is not physical process completion.
+ 6. Return to runtime, then await interval_ms. Different flow tasks remain concurrent; each flow does not overlap itself or catch up missed ticks. One PLC session serializes its own IO only.
+ 
+-Both complete guides include the full equivalent teaching01 app, YAML, exact module/import/kind/dispatch edits and build/import plus CLI validation. The delivered code registers demo01, plc_guard_get_int and get_value_guard_int; basic01 reuses demo01. teaching01 remains a tutorial-copy exercise; unknown kinds are rejected and files are not automatically discovered. teaching01 is the same GET→INT capability with a different flow/business identity, not demo02. POST/auth, BOOL/DINT/REAL and rising-edge flows are not implemented. Writes must pass through Execution.apply.
++Both complete guides include the full equivalent teaching01 app, YAML, exact module/import/kind/dispatch edits and build/import plus CLI validation. With YAML v1, both projects register demo01, plc_guard_get_int and get_value_guard_int; basic01 reuses demo01. teaching01 remains a tutorial-copy exercise; unknown kinds are rejected and files are not automatically discovered. teaching01 is the same GET→INT capability with a different flow/business identity, not demo02. POST/auth, BOOL/DINT/REAL and rising-edge flows are not implemented. Writes must pass through Execution.apply.
+ 
+ ## Fixture, state and evidence boundaries
+ 
+@@ -52,3 +52,5 @@
+ FF-001 r4 passed independent local QA2 but awaits Human Owner final acceptance. FF-002 documents and bounded rehearsals have their own [spec](plans/FF-002-user-guide-and-runtime-positioning/spec.md) and [Development record](plans/FF-002-user-guide-and-runtime-positioning/tasks.md); Development self-check is not independent QA. [FF PLAN](PLAN.md) indexes the next gate.
+ 
+ The basic library reuses demo01 for basic01, adds negative-target GET for basic02 and positive value≤100 for basic03. Complete standalone commands: [Rust examples](field-flow-rust/examples/README.md), [Python examples](field-flow-python/examples/README.md). Advanced and C# cases remain planned; precise DEV/QA/Owner gates belong to the FF-005 bundle.
++
++Rust adds the [YAML v2 catalog tutorial](field-flow-rust/USER_GUIDE.md#catalog-v2): one JSON per PLC, demo01/read_points only. All three v1 kinds/basic02/basic03 remain. Python/C# loading and DS export are not implemented; Modbus is structural validation only.
+--- baseline/field-flow/USER_GUIDE.zh-CN.md
++++ candidate/field-flow/USER_GUIDE.zh-CN.md
+@@ -39,7 +39,7 @@
+ 5. 匹配S7 INT ACK加本地T3提交才confirmed；可能发送后缺证据为unknown，不表示物理工艺完成。
+ 6. 返回runtime后等待interval_ms；不同flow并发，同流不重叠/不补历史tick。每PLC session仅串行自身IO。
+ 
+-两个完整手册均包含同能力teaching01的完整app/YAML、逐文件module/import/kind/dispatch接线及编译/导入/CLI验证。正式源码注册demo01、plc_guard_get_int和get_value_guard_int；basic01复用demo01。teaching01仍只在教程副本练习；未知kind拒绝，不自动发现文件。teaching01是不同flow/business身份的同能力GET→INT，不是demo02；POST/auth、BOOL/DINT/REAL、上升沿flow未实现，写必须经过Execution.apply。
++两个完整手册均包含同能力teaching01的完整app/YAML、逐文件module/import/kind/dispatch接线及编译/导入/CLI验证。YAML v1中，两工程注册demo01、plc_guard_get_int和get_value_guard_int；basic01复用demo01。teaching01仍只在教程副本练习；未知kind拒绝，不自动发现文件。teaching01是不同flow/business身份的同能力GET→INT，不是demo02；POST/auth、BOOL/DINT/REAL、上升沿flow未实现，写必须经过Execution.apply。
+ 
+ ## 夹具、状态与证据边界
+ 
+@@ -52,3 +52,5 @@
+ FF-001 r4已通过独立本地QA2，待Human Owner终验。FF-002文档/有限演练有自己的[spec](plans/FF-002-user-guide-and-runtime-positioning/spec.md)与[Development记录](plans/FF-002-user-guide-and-runtime-positioning/tasks.md)，DEV自检不替独立QA。[FF PLAN](PLAN.zh-CN.md)索引下一gate。
+ 
+ 正式基础案例：basic01复用demo01、basic02负target才GET、basic03正数且≤100；各自完整命令见[Rust案例](field-flow-rust/examples/README.zh-CN.md)与[Python案例](field-flow-python/examples/README.zh-CN.md)。进阶与C#仍为planned，精确DEV/QA/Owner阶段见FF-005 bundle。
++
++Rust新增[YAML v2点目录教程](field-flow-rust/USER_GUIDE.zh-CN.md#catalog-v2)：每PLC一个JSON，仅demo01/read_points；v1三kind/basic02/basic03保持。Python/C#未加载、DS未导出，Modbus仅结构校验。

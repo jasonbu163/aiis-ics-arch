@@ -161,7 +161,7 @@ config/loopback.yaml is the complete runnable sample. Objects are Config → Plc
 | `plc.host / port / rack / slot` | literal IPv4 / 1–65535 / 0–7 / 0–31 |
 | `connect_timeout_ms / io_timeout_ms` | PLC: 500–3000 / 500–5000 |
 | `queue_capacity / queue_wait_ms / ready_wait_ms` | 1–16 / 100–5000 / 100–5000 |
-| `flow.kind / interval_ms / input_max_age_ms` | demo01 only before tutorial / 100–10000 / 1–60000 |
+| `flow.kind / interval_ms / input_max_age_ms` | demo01 / plc_guard_get_int / get_value_guard_int / 100–10000 / 1–60000 |
 | `get_url` | http(s), host, no credentials/fragment; no proxy/redirect/retry |
 | `target.plc_id / db_number` | existing PLC / 1–65535 |
 | `db_size_bytes / byte_offset / type` | 2–65536 / 0–65534 / INT; offset+2 ≤ size |
@@ -268,15 +268,15 @@ python3 - <<'PY'
 from pathlib import Path
 p = Path("src/field_flow/config.py")
 s = p.read_text()
-old = 'f.kind == "demo01"'
+old = 'f.kind in ("demo01", "plc_guard_get_int", "get_value_guard_int")'
 assert s.count(old) == 1
-p.write_text(s.replace(old, 'f.kind in ("demo01", "teaching01")'))
+p.write_text(s.replace(old, 'f.kind in ("demo01", "plc_guard_get_int", "get_value_guard_int", "teaching01")'))
 p = Path("src/field_flow/runtime.py")
 s = p.read_text()
 assert s.count('from field_flow.app import demo01') == 1
-s = s.replace('from field_flow.app import demo01', 'from field_flow.app import demo01, teaching01')
-old = 'result = await demo01.once(self.http, flow, plc, execution)'
-new = 'case = {"demo01": demo01.once, "teaching01": teaching01.once}[flow.kind]\n                result = await case(self.http, flow, plc, execution)'
+s = s.replace('from field_flow.app import demo01, plc_guard_get_int, get_value_guard_int', 'from field_flow.app import demo01, plc_guard_get_int, get_value_guard_int, teaching01')
+old = '{"demo01": demo01.once, "get_value_guard_int": get_value_guard_int.once}'
+new = '{"demo01": demo01.once, "get_value_guard_int": get_value_guard_int.once, "teaching01": teaching01.once}'
 assert s.count(old) == 1
 p.write_text(s.replace(old, new))
 PY
@@ -371,3 +371,7 @@ Expect simulated1/write0 in dry-run, confirmed1/write1 in execute, and inspect m
 The bounded FF-002 rehearsal uses the actual product CLI in independent macOS arm64 copies, separate new synthetic dry/execute scenes and both wired tutorial cases; evidence and failures belong to the FF-002 tasks bundle. It is Development self-check until fresh Verification records its own verdict. No FF-001 full fault matrix rerun, real endpoint/PLC, DS joint validation, production hosting, platform port, long soak or distribution compliance is claimed. Preserve report/PID/exit/port evidence before any eventual task-owned resource cleanup.
 
 Local navigation: [README](README.md), [CODE_INDEX](CODE_INDEX.md), [notices](THIRD_PARTY_NOTICES.md).
+
+## Basic examples
+
+Three registered cases and complete commands: [examples](examples/README.md); YAML contracts: [config](config/README.md). teaching01 remains a tutorial-copy exercise.

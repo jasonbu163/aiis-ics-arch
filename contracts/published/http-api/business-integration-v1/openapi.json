@@ -1,0 +1,5775 @@
+{
+  "components": {
+    "schemas": {
+      "DriveData": {
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "tv"
+            ]
+          },
+          {
+            "required": [
+              "km"
+            ]
+          },
+          {
+            "required": [
+              "dewPointSet"
+            ]
+          },
+          {
+            "required": [
+              "dewPointActual"
+            ]
+          },
+          {
+            "required": [
+              "oxygen"
+            ]
+          },
+          {
+            "required": [
+              "mufflePressure"
+            ]
+          },
+          {
+            "required": [
+              "nh3FlowSet"
+            ]
+          },
+          {
+            "required": [
+              "nh3FlowActual"
+            ]
+          },
+          {
+            "required": [
+              "ngFlowSet"
+            ]
+          },
+          {
+            "required": [
+              "ngFlowActual"
+            ]
+          },
+          {
+            "required": [
+              "uncoilerSet"
+            ]
+          },
+          {
+            "required": [
+              "uncoilerActual"
+            ]
+          },
+          {
+            "required": [
+              "entryLooperSet"
+            ]
+          },
+          {
+            "required": [
+              "entryLooperActual"
+            ]
+          },
+          {
+            "required": [
+              "furnaceSet"
+            ]
+          },
+          {
+            "required": [
+              "furnaceActual"
+            ]
+          },
+          {
+            "required": [
+              "exitLooperSet"
+            ]
+          },
+          {
+            "required": [
+              "exitLooperActual"
+            ]
+          },
+          {
+            "required": [
+              "recoilerSet"
+            ]
+          },
+          {
+            "required": [
+              "recoilerActual"
+            ]
+          }
+        ],
+        "properties": {
+          "dewPointActual": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Dewpointactual",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "dewPointSet": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Dewpointset",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "entryLooperActual": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Entrylooperactual",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "entryLooperSet": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Entrylooperset",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "equipmentId": {
+            "title": "Equipmentid",
+            "type": "string"
+          },
+          "exitLooperActual": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Exitlooperactual",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "exitLooperSet": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Exitlooperset",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "furnaceActual": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Furnaceactual",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "furnaceSet": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Furnaceset",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "km": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Km",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "mufflePressure": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Mufflepressure",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "ngFlowActual": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Ngflowactual",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "ngFlowSet": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Ngflowset",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "nh3FlowActual": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Nh3Flowactual",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "nh3FlowSet": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Nh3Flowset",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "oxygen": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Oxygen",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "quality": {
+            "const": "good",
+            "title": "Quality",
+            "type": "string"
+          },
+          "recoilerActual": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Recoileractual",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "recoilerSet": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Recoilerset",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "sampledAt": {
+            "format": "date-time",
+            "title": "Sampledat",
+            "type": "string"
+          },
+          "tv": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Tv",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "uncoilerActual": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Uncoileractual",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "uncoilerSet": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Uncoilerset",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          }
+        },
+        "required": [
+          "equipmentId",
+          "sampledAt",
+          "quality"
+        ],
+        "title": "DriveData",
+        "type": "object",
+        "x-missing-measurement": "omit; explicit null rejected; persisted SQL NULL",
+        "x-post-merge-range": "validate complete min/avg/max ordering before any mutation"
+      },
+      "DriveReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "affectedRecordIds": {
+            "items": {
+              "exclusiveMinimum": 0.0,
+              "type": "integer"
+            },
+            "title": "Affectedrecordids",
+            "type": "array"
+          },
+          "applied": {
+            "title": "Applied",
+            "type": "boolean"
+          },
+          "businessDigest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Businessdigest",
+            "type": "string"
+          },
+          "businessRetention": {
+            "const": "no_auto_ttl",
+            "default": "no_auto_ttl",
+            "title": "Businessretention",
+            "type": "string"
+          },
+          "changedFields": {
+            "items": {
+              "enum": [
+                "equipmentId",
+                "sampledAt",
+                "quality",
+                "tv",
+                "km",
+                "dewPointSet",
+                "dewPointActual",
+                "oxygen",
+                "mufflePressure",
+                "nh3FlowSet",
+                "nh3FlowActual",
+                "ngFlowSet",
+                "ngFlowActual",
+                "uncoilerSet",
+                "uncoilerActual",
+                "entryLooperSet",
+                "entryLooperActual",
+                "furnaceSet",
+                "furnaceActual",
+                "exitLooperSet",
+                "exitLooperActual",
+                "recoilerSet",
+                "recoilerActual"
+              ],
+              "type": "string"
+            },
+            "title": "Changedfields",
+            "type": "array"
+          },
+          "committedAt": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\+08:00$",
+            "title": "Committedat",
+            "type": "string"
+          },
+          "confirmation": {
+            "enum": [
+              "business_committed",
+              "decision_only"
+            ],
+            "title": "Confirmation",
+            "type": "string"
+          },
+          "contractVersion": {
+            "const": "aiis.business-integration/v1",
+            "default": "aiis.business-integration/v1",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "digestProfile": {
+            "const": "bi-json/v1",
+            "default": "bi-json/v1",
+            "title": "Digestprofile",
+            "type": "string"
+          },
+          "equipmentId": {
+            "title": "Equipmentid",
+            "type": "string"
+          },
+          "eventId": {
+            "title": "Eventid",
+            "type": "string"
+          },
+          "mappingId": {
+            "title": "Mappingid",
+            "type": "string"
+          },
+          "mappingRevision": {
+            "title": "Mappingrevision",
+            "type": "string"
+          },
+          "originalOutcome": {
+            "enum": [
+              "created",
+              "updated",
+              "duplicate",
+              "stale"
+            ],
+            "title": "Originaloutcome",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "created",
+              "updated",
+              "duplicate",
+              "stale"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "performanceId": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Performanceid"
+          },
+          "producerId": {
+            "title": "Producerid",
+            "type": "string"
+          },
+          "receiptId": {
+            "exclusiveMinimum": 0.0,
+            "title": "Receiptid",
+            "type": "integer"
+          },
+          "recordId": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recordid"
+          },
+          "requestDigest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Requestdigest",
+            "type": "string"
+          },
+          "resource": {
+            "const": "drive",
+            "default": "drive",
+            "title": "Resource",
+            "type": "string"
+          },
+          "sourceTime": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\+08:00$",
+            "title": "Sourcetime",
+            "type": "string"
+          },
+          "status": {
+            "const": "committed",
+            "default": "committed",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "digestProfile",
+          "producerId",
+          "eventId",
+          "resource",
+          "equipmentId",
+          "mappingId",
+          "mappingRevision",
+          "requestDigest",
+          "businessDigest",
+          "receiptId",
+          "recordId",
+          "performanceId",
+          "affectedRecordIds",
+          "sourceTime",
+          "committedAt",
+          "status",
+          "confirmation",
+          "applied",
+          "outcome",
+          "originalOutcome",
+          "changedFields",
+          "businessRetention"
+        ],
+        "title": "DriveReceipt",
+        "type": "object"
+      },
+      "EquipmentIntegrationError403": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 403,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "const": "equipment.integration_scope_rejected",
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "const": "equipment.integration_scope_rejected",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "EquipmentIntegrationError403",
+        "type": "object"
+      },
+      "EquipmentIntegrationError409": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 409,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "enum": [
+              "equipment.integration_event_conflict",
+              "equipment.integration_value_conflict"
+            ],
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "enum": [
+              "equipment.integration_event_conflict",
+              "equipment.integration_value_conflict"
+            ],
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "EquipmentIntegrationError409",
+        "type": "object"
+      },
+      "EquipmentIntegrationError413": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 413,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "const": "equipment.integration_payload_too_large",
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "const": "equipment.integration_payload_too_large",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "EquipmentIntegrationError413",
+        "type": "object"
+      },
+      "EquipmentIntegrationError415": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 415,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "const": "equipment.integration_media_type",
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "const": "equipment.integration_media_type",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "EquipmentIntegrationError415",
+        "type": "object"
+      },
+      "EquipmentIntegrationError422": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 422,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "const": "equipment.integration_invalid_request",
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "const": "equipment.integration_invalid_request",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "EquipmentIntegrationError422",
+        "type": "object"
+      },
+      "EquipmentIntegrationError500": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 500,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "const": "equipment.integration_internal_error",
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "const": "equipment.integration_internal_error",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "EquipmentIntegrationError500",
+        "type": "object"
+      },
+      "EquipmentIntegrationError503": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 503,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "enum": [
+              "equipment.integration_not_ready",
+              "equipment.integration_unavailable",
+              "equipment.integration_commit_unknown"
+            ],
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "enum": [
+              "equipment.integration_not_ready",
+              "equipment.integration_unavailable",
+              "equipment.integration_commit_unknown"
+            ],
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "EquipmentIntegrationError503",
+        "type": "object"
+      },
+      "ExternalEventRef": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "external_event",
+            "title": "Kind",
+            "type": "string"
+          },
+          "observedAt": {
+            "title": "Observedat",
+            "type": "string"
+          },
+          "sourceEventId": {
+            "title": "Sourceeventid",
+            "type": "string"
+          },
+          "sourceId": {
+            "title": "Sourceid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "sourceId",
+          "sourceEventId"
+        ],
+        "title": "ExternalEventRef",
+        "type": "object"
+      },
+      "IntegrationEnvelope_DriveData_": {
+        "additionalProperties": false,
+        "properties": {
+          "contractVersion": {
+            "const": "aiis.business-integration/v1",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DriveData"
+          },
+          "eventId": {
+            "title": "Eventid",
+            "type": "string"
+          },
+          "mappingId": {
+            "title": "Mappingid",
+            "type": "string"
+          },
+          "mappingRevision": {
+            "title": "Mappingrevision",
+            "type": "string"
+          },
+          "producerId": {
+            "title": "Producerid",
+            "type": "string"
+          },
+          "sourceRefs": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "external_event": "#/components/schemas/ExternalEventRef",
+                  "plc_fact": "#/components/schemas/PlcFactRef"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/PlcFactRef"
+                },
+                {
+                  "$ref": "#/components/schemas/ExternalEventRef"
+                }
+              ]
+            },
+            "maxItems": 128,
+            "minItems": 1,
+            "title": "Sourcerefs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "producerId",
+          "eventId",
+          "mappingId",
+          "mappingRevision",
+          "sourceRefs",
+          "data"
+        ],
+        "title": "IntegrationEnvelope[DriveData]",
+        "type": "object"
+      },
+      "IntegrationEnvelope_ProcessCurveData_": {
+        "additionalProperties": false,
+        "properties": {
+          "contractVersion": {
+            "const": "aiis.business-integration/v1",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProcessCurveData"
+          },
+          "eventId": {
+            "title": "Eventid",
+            "type": "string"
+          },
+          "mappingId": {
+            "title": "Mappingid",
+            "type": "string"
+          },
+          "mappingRevision": {
+            "title": "Mappingrevision",
+            "type": "string"
+          },
+          "producerId": {
+            "title": "Producerid",
+            "type": "string"
+          },
+          "sourceRefs": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "external_event": "#/components/schemas/ExternalEventRef",
+                  "plc_fact": "#/components/schemas/PlcFactRef"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/PlcFactRef"
+                },
+                {
+                  "$ref": "#/components/schemas/ExternalEventRef"
+                }
+              ]
+            },
+            "maxItems": 128,
+            "minItems": 1,
+            "title": "Sourcerefs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "producerId",
+          "eventId",
+          "mappingId",
+          "mappingRevision",
+          "sourceRefs",
+          "data"
+        ],
+        "title": "IntegrationEnvelope[ProcessCurveData]",
+        "type": "object"
+      },
+      "IntegrationEnvelope_ProcessSpeedData_": {
+        "additionalProperties": false,
+        "properties": {
+          "contractVersion": {
+            "const": "aiis.business-integration/v1",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProcessSpeedData"
+          },
+          "eventId": {
+            "title": "Eventid",
+            "type": "string"
+          },
+          "mappingId": {
+            "title": "Mappingid",
+            "type": "string"
+          },
+          "mappingRevision": {
+            "title": "Mappingrevision",
+            "type": "string"
+          },
+          "producerId": {
+            "title": "Producerid",
+            "type": "string"
+          },
+          "sourceRefs": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "external_event": "#/components/schemas/ExternalEventRef",
+                  "plc_fact": "#/components/schemas/PlcFactRef"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/PlcFactRef"
+                },
+                {
+                  "$ref": "#/components/schemas/ExternalEventRef"
+                }
+              ]
+            },
+            "maxItems": 128,
+            "minItems": 1,
+            "title": "Sourcerefs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "producerId",
+          "eventId",
+          "mappingId",
+          "mappingRevision",
+          "sourceRefs",
+          "data"
+        ],
+        "title": "IntegrationEnvelope[ProcessSpeedData]",
+        "type": "object"
+      },
+      "IntegrationEnvelope_ProcessTemperatureData_": {
+        "additionalProperties": false,
+        "properties": {
+          "contractVersion": {
+            "const": "aiis.business-integration/v1",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProcessTemperatureData"
+          },
+          "eventId": {
+            "title": "Eventid",
+            "type": "string"
+          },
+          "mappingId": {
+            "title": "Mappingid",
+            "type": "string"
+          },
+          "mappingRevision": {
+            "title": "Mappingrevision",
+            "type": "string"
+          },
+          "producerId": {
+            "title": "Producerid",
+            "type": "string"
+          },
+          "sourceRefs": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "external_event": "#/components/schemas/ExternalEventRef",
+                  "plc_fact": "#/components/schemas/PlcFactRef"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/PlcFactRef"
+                },
+                {
+                  "$ref": "#/components/schemas/ExternalEventRef"
+                }
+              ]
+            },
+            "maxItems": 128,
+            "minItems": 1,
+            "title": "Sourcerefs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "producerId",
+          "eventId",
+          "mappingId",
+          "mappingRevision",
+          "sourceRefs",
+          "data"
+        ],
+        "title": "IntegrationEnvelope[ProcessTemperatureData]",
+        "type": "object"
+      },
+      "IntegrationEnvelope_ProcessTensionData_": {
+        "additionalProperties": false,
+        "properties": {
+          "contractVersion": {
+            "const": "aiis.business-integration/v1",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProcessTensionData"
+          },
+          "eventId": {
+            "title": "Eventid",
+            "type": "string"
+          },
+          "mappingId": {
+            "title": "Mappingid",
+            "type": "string"
+          },
+          "mappingRevision": {
+            "title": "Mappingrevision",
+            "type": "string"
+          },
+          "producerId": {
+            "title": "Producerid",
+            "type": "string"
+          },
+          "sourceRefs": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "external_event": "#/components/schemas/ExternalEventRef",
+                  "plc_fact": "#/components/schemas/PlcFactRef"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/PlcFactRef"
+                },
+                {
+                  "$ref": "#/components/schemas/ExternalEventRef"
+                }
+              ]
+            },
+            "maxItems": 128,
+            "minItems": 1,
+            "title": "Sourcerefs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "producerId",
+          "eventId",
+          "mappingId",
+          "mappingRevision",
+          "sourceRefs",
+          "data"
+        ],
+        "title": "IntegrationEnvelope[ProcessTensionData]",
+        "type": "object"
+      },
+      "IntegrationEnvelope_ProductionObservationData_": {
+        "additionalProperties": false,
+        "properties": {
+          "contractVersion": {
+            "const": "aiis.business-integration/v1",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProductionObservationData"
+          },
+          "eventId": {
+            "title": "Eventid",
+            "type": "string"
+          },
+          "mappingId": {
+            "title": "Mappingid",
+            "type": "string"
+          },
+          "mappingRevision": {
+            "title": "Mappingrevision",
+            "type": "string"
+          },
+          "producerId": {
+            "title": "Producerid",
+            "type": "string"
+          },
+          "sourceRefs": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "external_event": "#/components/schemas/ExternalEventRef",
+                  "plc_fact": "#/components/schemas/PlcFactRef"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/PlcFactRef"
+                },
+                {
+                  "$ref": "#/components/schemas/ExternalEventRef"
+                }
+              ]
+            },
+            "maxItems": 128,
+            "minItems": 1,
+            "title": "Sourcerefs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "producerId",
+          "eventId",
+          "mappingId",
+          "mappingRevision",
+          "sourceRefs",
+          "data"
+        ],
+        "title": "IntegrationEnvelope[ProductionObservationData]",
+        "type": "object"
+      },
+      "IntegrationEnvelope_ProductionParameterData_": {
+        "additionalProperties": false,
+        "properties": {
+          "contractVersion": {
+            "const": "aiis.business-integration/v1",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProductionParameterData"
+          },
+          "eventId": {
+            "title": "Eventid",
+            "type": "string"
+          },
+          "mappingId": {
+            "title": "Mappingid",
+            "type": "string"
+          },
+          "mappingRevision": {
+            "title": "Mappingrevision",
+            "type": "string"
+          },
+          "producerId": {
+            "title": "Producerid",
+            "type": "string"
+          },
+          "sourceRefs": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "external_event": "#/components/schemas/ExternalEventRef",
+                  "plc_fact": "#/components/schemas/PlcFactRef"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/PlcFactRef"
+                },
+                {
+                  "$ref": "#/components/schemas/ExternalEventRef"
+                }
+              ]
+            },
+            "maxItems": 128,
+            "minItems": 1,
+            "title": "Sourcerefs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "producerId",
+          "eventId",
+          "mappingId",
+          "mappingRevision",
+          "sourceRefs",
+          "data"
+        ],
+        "title": "IntegrationEnvelope[ProductionParameterData]",
+        "type": "object"
+      },
+      "IntegrationEnvelope_TemperatureData_": {
+        "additionalProperties": false,
+        "properties": {
+          "contractVersion": {
+            "const": "aiis.business-integration/v1",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/TemperatureData"
+          },
+          "eventId": {
+            "title": "Eventid",
+            "type": "string"
+          },
+          "mappingId": {
+            "title": "Mappingid",
+            "type": "string"
+          },
+          "mappingRevision": {
+            "title": "Mappingrevision",
+            "type": "string"
+          },
+          "producerId": {
+            "title": "Producerid",
+            "type": "string"
+          },
+          "sourceRefs": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "external_event": "#/components/schemas/ExternalEventRef",
+                  "plc_fact": "#/components/schemas/PlcFactRef"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/PlcFactRef"
+                },
+                {
+                  "$ref": "#/components/schemas/ExternalEventRef"
+                }
+              ]
+            },
+            "maxItems": 128,
+            "minItems": 1,
+            "title": "Sourcerefs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "producerId",
+          "eventId",
+          "mappingId",
+          "mappingRevision",
+          "sourceRefs",
+          "data"
+        ],
+        "title": "IntegrationEnvelope[TemperatureData]",
+        "type": "object"
+      },
+      "IntegrationSuccess_DriveReceipt_": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DriveReceipt"
+          },
+          "message": {
+            "const": "success",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data"
+        ],
+        "title": "IntegrationSuccess[DriveReceipt]",
+        "type": "object"
+      },
+      "IntegrationSuccess_ProcessCurveReceipt_": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProcessCurveReceipt"
+          },
+          "message": {
+            "const": "success",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data"
+        ],
+        "title": "IntegrationSuccess[ProcessCurveReceipt]",
+        "type": "object"
+      },
+      "IntegrationSuccess_ProcessSpeedReceipt_": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProcessSpeedReceipt"
+          },
+          "message": {
+            "const": "success",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data"
+        ],
+        "title": "IntegrationSuccess[ProcessSpeedReceipt]",
+        "type": "object"
+      },
+      "IntegrationSuccess_ProcessTemperatureReceipt_": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProcessTemperatureReceipt"
+          },
+          "message": {
+            "const": "success",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data"
+        ],
+        "title": "IntegrationSuccess[ProcessTemperatureReceipt]",
+        "type": "object"
+      },
+      "IntegrationSuccess_ProcessTensionReceipt_": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProcessTensionReceipt"
+          },
+          "message": {
+            "const": "success",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data"
+        ],
+        "title": "IntegrationSuccess[ProcessTensionReceipt]",
+        "type": "object"
+      },
+      "IntegrationSuccess_ProductionObservationReceipt_": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProductionObservationReceipt"
+          },
+          "message": {
+            "const": "success",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data"
+        ],
+        "title": "IntegrationSuccess[ProductionObservationReceipt]",
+        "type": "object"
+      },
+      "IntegrationSuccess_ProductionParameterReceipt_": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProductionParameterReceipt"
+          },
+          "message": {
+            "const": "success",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data"
+        ],
+        "title": "IntegrationSuccess[ProductionParameterReceipt]",
+        "type": "object"
+      },
+      "IntegrationSuccess_TemperatureReceipt_": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/TemperatureReceipt"
+          },
+          "message": {
+            "const": "success",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data"
+        ],
+        "title": "IntegrationSuccess[TemperatureReceipt]",
+        "type": "object"
+      },
+      "MonitorIntegrationError403": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 403,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "const": "monitor.integration_scope_rejected",
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "const": "monitor.integration_scope_rejected",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "MonitorIntegrationError403",
+        "type": "object"
+      },
+      "MonitorIntegrationError409": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 409,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "enum": [
+              "monitor.integration_event_conflict",
+              "monitor.integration_value_conflict"
+            ],
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "enum": [
+              "monitor.integration_event_conflict",
+              "monitor.integration_value_conflict"
+            ],
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "MonitorIntegrationError409",
+        "type": "object"
+      },
+      "MonitorIntegrationError413": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 413,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "const": "monitor.integration_payload_too_large",
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "const": "monitor.integration_payload_too_large",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "MonitorIntegrationError413",
+        "type": "object"
+      },
+      "MonitorIntegrationError415": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 415,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "const": "monitor.integration_media_type",
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "const": "monitor.integration_media_type",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "MonitorIntegrationError415",
+        "type": "object"
+      },
+      "MonitorIntegrationError422": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 422,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "const": "monitor.integration_invalid_request",
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "const": "monitor.integration_invalid_request",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "MonitorIntegrationError422",
+        "type": "object"
+      },
+      "MonitorIntegrationError500": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 500,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "const": "monitor.integration_internal_error",
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "const": "monitor.integration_internal_error",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "MonitorIntegrationError500",
+        "type": "object"
+      },
+      "MonitorIntegrationError503": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 503,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "enum": [
+              "monitor.integration_not_ready",
+              "monitor.integration_unavailable",
+              "monitor.integration_commit_unknown"
+            ],
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "enum": [
+              "monitor.integration_not_ready",
+              "monitor.integration_unavailable",
+              "monitor.integration_commit_unknown"
+            ],
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "MonitorIntegrationError503",
+        "type": "object"
+      },
+      "PerformanceIntegrationError403": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 403,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "const": "performance.integration_scope_rejected",
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "const": "performance.integration_scope_rejected",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "PerformanceIntegrationError403",
+        "type": "object"
+      },
+      "PerformanceIntegrationError404": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 404,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "const": "performance.integration_parent_not_found",
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "const": "performance.integration_parent_not_found",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "PerformanceIntegrationError404",
+        "type": "object"
+      },
+      "PerformanceIntegrationError409Observation": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 409,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "enum": [
+              "performance.integration_event_conflict",
+              "performance.integration_value_conflict",
+              "performance.integration_observation_time_conflict"
+            ],
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "enum": [
+              "performance.integration_event_conflict",
+              "performance.integration_value_conflict",
+              "performance.integration_observation_time_conflict"
+            ],
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "PerformanceIntegrationError409Observation",
+        "type": "object"
+      },
+      "PerformanceIntegrationError409Process": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 409,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "enum": [
+              "performance.integration_event_conflict",
+              "performance.integration_value_conflict",
+              "performance.integration_parent_mismatch"
+            ],
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "enum": [
+              "performance.integration_event_conflict",
+              "performance.integration_value_conflict",
+              "performance.integration_parent_mismatch"
+            ],
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "PerformanceIntegrationError409Process",
+        "type": "object"
+      },
+      "PerformanceIntegrationError413": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 413,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "const": "performance.integration_payload_too_large",
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "const": "performance.integration_payload_too_large",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "PerformanceIntegrationError413",
+        "type": "object"
+      },
+      "PerformanceIntegrationError415": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 415,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "const": "performance.integration_media_type",
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "const": "performance.integration_media_type",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "PerformanceIntegrationError415",
+        "type": "object"
+      },
+      "PerformanceIntegrationError422": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 422,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "const": "performance.integration_invalid_request",
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "const": "performance.integration_invalid_request",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "PerformanceIntegrationError422",
+        "type": "object"
+      },
+      "PerformanceIntegrationError500": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 500,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "const": "performance.integration_internal_error",
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "const": "performance.integration_internal_error",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "PerformanceIntegrationError500",
+        "type": "object"
+      },
+      "PerformanceIntegrationError503": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 503,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "enum": [
+              "performance.integration_not_ready",
+              "performance.integration_unavailable",
+              "performance.integration_commit_unknown"
+            ],
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "enum": [
+              "performance.integration_not_ready",
+              "performance.integration_unavailable",
+              "performance.integration_commit_unknown"
+            ],
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "PerformanceIntegrationError503",
+        "type": "object"
+      },
+      "PlcFactRef": {
+        "additionalProperties": false,
+        "properties": {
+          "configRevision": {
+            "title": "Configrevision",
+            "type": "string"
+          },
+          "instanceId": {
+            "title": "Instanceid",
+            "type": "string"
+          },
+          "kind": {
+            "const": "plc_fact",
+            "title": "Kind",
+            "type": "string"
+          },
+          "observedAt": {
+            "title": "Observedat",
+            "type": "string"
+          },
+          "plcId": {
+            "title": "Plcid",
+            "type": "string"
+          },
+          "pointId": {
+            "title": "Pointid",
+            "type": "string"
+          },
+          "sampleId": {
+            "title": "Sampleid",
+            "type": "string"
+          },
+          "sourceGeneration": {
+            "title": "Sourcegeneration",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "instanceId",
+          "plcId",
+          "sampleId",
+          "pointId"
+        ],
+        "title": "PlcFactRef",
+        "type": "object"
+      },
+      "ProcessCurveData": {
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "lineSpeedSet"
+            ]
+          },
+          {
+            "required": [
+              "lineSpeedAct"
+            ]
+          },
+          {
+            "required": [
+              "uncSetTensionP"
+            ]
+          },
+          {
+            "required": [
+              "uncActTensionP"
+            ]
+          },
+          {
+            "required": [
+              "recSetTensionP"
+            ]
+          },
+          {
+            "required": [
+              "recActTensionP"
+            ]
+          },
+          {
+            "required": [
+              "uncSetTensionKg"
+            ]
+          },
+          {
+            "required": [
+              "recSetTensionKg"
+            ]
+          },
+          {
+            "required": [
+              "furnSetTensionKg"
+            ]
+          },
+          {
+            "required": [
+              "furnActTensionKg"
+            ]
+          },
+          {
+            "required": [
+              "coolFan1SetFre"
+            ]
+          },
+          {
+            "required": [
+              "coolFan1ActFre"
+            ]
+          },
+          {
+            "required": [
+              "coolFan2SetFre"
+            ]
+          },
+          {
+            "required": [
+              "coolFan2ActFre"
+            ]
+          },
+          {
+            "required": [
+              "n2Total"
+            ]
+          },
+          {
+            "required": [
+              "electConsum"
+            ]
+          },
+          {
+            "required": [
+              "h2Flow"
+            ]
+          },
+          {
+            "required": [
+              "n2Flow"
+            ]
+          },
+          {
+            "required": [
+              "oxygenContent"
+            ]
+          },
+          {
+            "required": [
+              "dewPoint"
+            ]
+          },
+          {
+            "required": [
+              "mufflePressure"
+            ]
+          },
+          {
+            "required": [
+              "z1TempSet"
+            ]
+          },
+          {
+            "required": [
+              "z1TempAct"
+            ]
+          },
+          {
+            "required": [
+              "z2TempSet"
+            ]
+          },
+          {
+            "required": [
+              "z2TempAct"
+            ]
+          },
+          {
+            "required": [
+              "z3TempSet"
+            ]
+          },
+          {
+            "required": [
+              "z3TempAct"
+            ]
+          },
+          {
+            "required": [
+              "z4TempSet"
+            ]
+          },
+          {
+            "required": [
+              "z4TempAct"
+            ]
+          },
+          {
+            "required": [
+              "z5TempSet"
+            ]
+          },
+          {
+            "required": [
+              "z5TempAct"
+            ]
+          },
+          {
+            "required": [
+              "z6TempSet"
+            ]
+          },
+          {
+            "required": [
+              "z6TempAct"
+            ]
+          }
+        ],
+        "properties": {
+          "coilNumber": {
+            "title": "Coilnumber",
+            "type": "string"
+          },
+          "coolFan1ActFre": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Coolfan1Actfre",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "coolFan1SetFre": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Coolfan1Setfre",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "coolFan2ActFre": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Coolfan2Actfre",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "coolFan2SetFre": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Coolfan2Setfre",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "dewPoint": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Dewpoint",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "electConsum": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Electconsum",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "equipmentId": {
+            "title": "Equipmentid",
+            "type": "string"
+          },
+          "furnActTensionKg": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Furnacttensionkg",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "furnSetTensionKg": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Furnsettensionkg",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "h2Flow": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "H2Flow",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "lineSpeedAct": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Linespeedact",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "lineSpeedSet": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Linespeedset",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "mufflePressure": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Mufflepressure",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "n2Flow": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "N2Flow",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "n2Total": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "N2Total",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "oxygenContent": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Oxygencontent",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "quality": {
+            "const": "good",
+            "title": "Quality",
+            "type": "string"
+          },
+          "recActTensionP": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Recacttensionp",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "recSetTensionKg": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Recsettensionkg",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "recSetTensionP": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Recsettensionp",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "sampledAt": {
+            "format": "date-time",
+            "title": "Sampledat",
+            "type": "string"
+          },
+          "uncActTensionP": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Uncacttensionp",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "uncSetTensionKg": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Uncsettensionkg",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "uncSetTensionP": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": -3.4028234663852886e+38,
+            "title": "Uncsettensionp",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "z1TempAct": {
+            "maximum": 2147483647.0,
+            "minimum": -2147483648.0,
+            "title": "Z1Tempact",
+            "type": "integer"
+          },
+          "z1TempSet": {
+            "maximum": 2147483647.0,
+            "minimum": -2147483648.0,
+            "title": "Z1Tempset",
+            "type": "integer"
+          },
+          "z2TempAct": {
+            "maximum": 2147483647.0,
+            "minimum": -2147483648.0,
+            "title": "Z2Tempact",
+            "type": "integer"
+          },
+          "z2TempSet": {
+            "maximum": 2147483647.0,
+            "minimum": -2147483648.0,
+            "title": "Z2Tempset",
+            "type": "integer"
+          },
+          "z3TempAct": {
+            "maximum": 2147483647.0,
+            "minimum": -2147483648.0,
+            "title": "Z3Tempact",
+            "type": "integer"
+          },
+          "z3TempSet": {
+            "maximum": 2147483647.0,
+            "minimum": -2147483648.0,
+            "title": "Z3Tempset",
+            "type": "integer"
+          },
+          "z4TempAct": {
+            "maximum": 2147483647.0,
+            "minimum": -2147483648.0,
+            "title": "Z4Tempact",
+            "type": "integer"
+          },
+          "z4TempSet": {
+            "maximum": 2147483647.0,
+            "minimum": -2147483648.0,
+            "title": "Z4Tempset",
+            "type": "integer"
+          },
+          "z5TempAct": {
+            "maximum": 2147483647.0,
+            "minimum": -2147483648.0,
+            "title": "Z5Tempact",
+            "type": "integer"
+          },
+          "z5TempSet": {
+            "maximum": 2147483647.0,
+            "minimum": -2147483648.0,
+            "title": "Z5Tempset",
+            "type": "integer"
+          },
+          "z6TempAct": {
+            "maximum": 2147483647.0,
+            "minimum": -2147483648.0,
+            "title": "Z6Tempact",
+            "type": "integer"
+          },
+          "z6TempSet": {
+            "maximum": 2147483647.0,
+            "minimum": -2147483648.0,
+            "title": "Z6Tempset",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "equipmentId",
+          "sampledAt",
+          "quality"
+        ],
+        "title": "ProcessCurveData",
+        "type": "object",
+        "x-missing-measurement": "omit; explicit null rejected; persisted SQL NULL",
+        "x-post-merge-range": "validate complete min/avg/max ordering before any mutation"
+      },
+      "ProcessCurveReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "affectedRecordIds": {
+            "items": {
+              "exclusiveMinimum": 0.0,
+              "type": "integer"
+            },
+            "title": "Affectedrecordids",
+            "type": "array"
+          },
+          "applied": {
+            "title": "Applied",
+            "type": "boolean"
+          },
+          "businessDigest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Businessdigest",
+            "type": "string"
+          },
+          "businessRetention": {
+            "const": "no_auto_ttl",
+            "default": "no_auto_ttl",
+            "title": "Businessretention",
+            "type": "string"
+          },
+          "changedFields": {
+            "items": {
+              "enum": [
+                "equipmentId",
+                "sampledAt",
+                "quality",
+                "coilNumber",
+                "lineSpeedSet",
+                "lineSpeedAct",
+                "uncSetTensionP",
+                "uncActTensionP",
+                "recSetTensionP",
+                "recActTensionP",
+                "uncSetTensionKg",
+                "recSetTensionKg",
+                "furnSetTensionKg",
+                "furnActTensionKg",
+                "coolFan1SetFre",
+                "coolFan1ActFre",
+                "coolFan2SetFre",
+                "coolFan2ActFre",
+                "n2Total",
+                "electConsum",
+                "h2Flow",
+                "n2Flow",
+                "oxygenContent",
+                "dewPoint",
+                "mufflePressure",
+                "z1TempSet",
+                "z1TempAct",
+                "z2TempSet",
+                "z2TempAct",
+                "z3TempSet",
+                "z3TempAct",
+                "z4TempSet",
+                "z4TempAct",
+                "z5TempSet",
+                "z5TempAct",
+                "z6TempSet",
+                "z6TempAct"
+              ],
+              "type": "string"
+            },
+            "title": "Changedfields",
+            "type": "array"
+          },
+          "committedAt": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\+08:00$",
+            "title": "Committedat",
+            "type": "string"
+          },
+          "confirmation": {
+            "enum": [
+              "business_committed",
+              "decision_only"
+            ],
+            "title": "Confirmation",
+            "type": "string"
+          },
+          "contractVersion": {
+            "const": "aiis.business-integration/v1",
+            "default": "aiis.business-integration/v1",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "digestProfile": {
+            "const": "bi-json/v1",
+            "default": "bi-json/v1",
+            "title": "Digestprofile",
+            "type": "string"
+          },
+          "equipmentId": {
+            "title": "Equipmentid",
+            "type": "string"
+          },
+          "eventId": {
+            "title": "Eventid",
+            "type": "string"
+          },
+          "mappingId": {
+            "title": "Mappingid",
+            "type": "string"
+          },
+          "mappingRevision": {
+            "title": "Mappingrevision",
+            "type": "string"
+          },
+          "originalOutcome": {
+            "enum": [
+              "created",
+              "updated",
+              "duplicate",
+              "stale"
+            ],
+            "title": "Originaloutcome",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "created",
+              "updated",
+              "duplicate",
+              "stale"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "performanceId": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Performanceid"
+          },
+          "producerId": {
+            "title": "Producerid",
+            "type": "string"
+          },
+          "receiptId": {
+            "exclusiveMinimum": 0.0,
+            "title": "Receiptid",
+            "type": "integer"
+          },
+          "recordId": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recordid"
+          },
+          "requestDigest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Requestdigest",
+            "type": "string"
+          },
+          "resource": {
+            "const": "process_curve",
+            "default": "process_curve",
+            "title": "Resource",
+            "type": "string"
+          },
+          "sourceTime": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\+08:00$",
+            "title": "Sourcetime",
+            "type": "string"
+          },
+          "status": {
+            "const": "committed",
+            "default": "committed",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "digestProfile",
+          "producerId",
+          "eventId",
+          "resource",
+          "equipmentId",
+          "mappingId",
+          "mappingRevision",
+          "requestDigest",
+          "businessDigest",
+          "receiptId",
+          "recordId",
+          "performanceId",
+          "affectedRecordIds",
+          "sourceTime",
+          "committedAt",
+          "status",
+          "confirmation",
+          "applied",
+          "outcome",
+          "originalOutcome",
+          "changedFields",
+          "businessRetention"
+        ],
+        "title": "ProcessCurveReceipt",
+        "type": "object"
+      },
+      "ProcessSpeedData": {
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "setSpeed"
+            ]
+          },
+          {
+            "required": [
+              "avgSpeed"
+            ]
+          },
+          {
+            "required": [
+              "maxSpeed"
+            ]
+          }
+        ],
+        "properties": {
+          "avgSpeed": {
+            "exclusiveMaximum": 100000000.0,
+            "minimum": 0.0,
+            "title": "Avgspeed",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 10,
+              "rounding": "reject",
+              "scale": 2
+            }
+          },
+          "coilNo": {
+            "title": "Coilno",
+            "type": "string"
+          },
+          "equipmentId": {
+            "title": "Equipmentid",
+            "type": "string"
+          },
+          "maxSpeed": {
+            "exclusiveMaximum": 100000000.0,
+            "minimum": 0.0,
+            "title": "Maxspeed",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 10,
+              "rounding": "reject",
+              "scale": 2
+            }
+          },
+          "quality": {
+            "const": "good",
+            "title": "Quality",
+            "type": "string"
+          },
+          "recordTime": {
+            "format": "date-time",
+            "title": "Recordtime",
+            "type": "string"
+          },
+          "setSpeed": {
+            "exclusiveMaximum": 100000000.0,
+            "minimum": 0.0,
+            "title": "Setspeed",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 10,
+              "rounding": "reject",
+              "scale": 2
+            }
+          },
+          "zone": {
+            "title": "Zone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "equipmentId",
+          "quality",
+          "recordTime",
+          "coilNo",
+          "zone"
+        ],
+        "title": "ProcessSpeedData",
+        "type": "object",
+        "x-missing-measurement": "omit; explicit null rejected; persisted SQL NULL",
+        "x-post-merge-range": "validate complete min/avg/max ordering before any mutation"
+      },
+      "ProcessSpeedReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "affectedRecordIds": {
+            "items": {
+              "exclusiveMinimum": 0.0,
+              "type": "integer"
+            },
+            "title": "Affectedrecordids",
+            "type": "array"
+          },
+          "applied": {
+            "title": "Applied",
+            "type": "boolean"
+          },
+          "businessDigest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Businessdigest",
+            "type": "string"
+          },
+          "businessRetention": {
+            "const": "no_auto_ttl",
+            "default": "no_auto_ttl",
+            "title": "Businessretention",
+            "type": "string"
+          },
+          "changedFields": {
+            "items": {
+              "enum": [
+                "setSpeed",
+                "avgSpeed",
+                "maxSpeed"
+              ],
+              "type": "string"
+            },
+            "title": "Changedfields",
+            "type": "array"
+          },
+          "committedAt": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\+08:00$",
+            "title": "Committedat",
+            "type": "string"
+          },
+          "confirmation": {
+            "enum": [
+              "business_committed",
+              "decision_only"
+            ],
+            "title": "Confirmation",
+            "type": "string"
+          },
+          "contractVersion": {
+            "const": "aiis.business-integration/v1",
+            "default": "aiis.business-integration/v1",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "digestProfile": {
+            "const": "bi-json/v1",
+            "default": "bi-json/v1",
+            "title": "Digestprofile",
+            "type": "string"
+          },
+          "equipmentId": {
+            "title": "Equipmentid",
+            "type": "string"
+          },
+          "eventId": {
+            "title": "Eventid",
+            "type": "string"
+          },
+          "mappingId": {
+            "title": "Mappingid",
+            "type": "string"
+          },
+          "mappingRevision": {
+            "title": "Mappingrevision",
+            "type": "string"
+          },
+          "originalOutcome": {
+            "enum": [
+              "created",
+              "updated",
+              "duplicate",
+              "stale"
+            ],
+            "title": "Originaloutcome",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "created",
+              "updated",
+              "duplicate",
+              "stale"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "performanceId": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Performanceid"
+          },
+          "producerId": {
+            "title": "Producerid",
+            "type": "string"
+          },
+          "receiptId": {
+            "exclusiveMinimum": 0.0,
+            "title": "Receiptid",
+            "type": "integer"
+          },
+          "recordId": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recordid"
+          },
+          "requestDigest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Requestdigest",
+            "type": "string"
+          },
+          "resource": {
+            "const": "process_speed",
+            "default": "process_speed",
+            "title": "Resource",
+            "type": "string"
+          },
+          "sourceTime": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\+08:00$",
+            "title": "Sourcetime",
+            "type": "string"
+          },
+          "status": {
+            "const": "committed",
+            "default": "committed",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "digestProfile",
+          "producerId",
+          "eventId",
+          "resource",
+          "equipmentId",
+          "mappingId",
+          "mappingRevision",
+          "requestDigest",
+          "businessDigest",
+          "receiptId",
+          "recordId",
+          "performanceId",
+          "affectedRecordIds",
+          "sourceTime",
+          "committedAt",
+          "status",
+          "confirmation",
+          "applied",
+          "outcome",
+          "originalOutcome",
+          "changedFields",
+          "businessRetention"
+        ],
+        "title": "ProcessSpeedReceipt",
+        "type": "object"
+      },
+      "ProcessTemperatureData": {
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "setTemp"
+            ]
+          },
+          {
+            "required": [
+              "maxTemp"
+            ]
+          },
+          {
+            "required": [
+              "minTemp"
+            ]
+          },
+          {
+            "required": [
+              "avgTemp"
+            ]
+          },
+          {
+            "required": [
+              "duration"
+            ]
+          }
+        ],
+        "properties": {
+          "avgTemp": {
+            "exclusiveMaximum": 1000000.0,
+            "exclusiveMinimum": -1000000.0,
+            "title": "Avgtemp",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 8,
+              "rounding": "reject",
+              "scale": 2
+            }
+          },
+          "coilNo": {
+            "title": "Coilno",
+            "type": "string"
+          },
+          "duration": {
+            "maximum": 9999999999.0,
+            "minimum": 0.0,
+            "title": "Duration",
+            "type": "integer"
+          },
+          "equipmentId": {
+            "title": "Equipmentid",
+            "type": "string"
+          },
+          "maxTemp": {
+            "exclusiveMaximum": 1000000.0,
+            "exclusiveMinimum": -1000000.0,
+            "title": "Maxtemp",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 8,
+              "rounding": "reject",
+              "scale": 2
+            }
+          },
+          "minTemp": {
+            "exclusiveMaximum": 1000000.0,
+            "exclusiveMinimum": -1000000.0,
+            "title": "Mintemp",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 8,
+              "rounding": "reject",
+              "scale": 2
+            }
+          },
+          "quality": {
+            "const": "good",
+            "title": "Quality",
+            "type": "string"
+          },
+          "recordTime": {
+            "format": "date-time",
+            "title": "Recordtime",
+            "type": "string"
+          },
+          "setTemp": {
+            "exclusiveMaximum": 1000000.0,
+            "exclusiveMinimum": -1000000.0,
+            "title": "Settemp",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 8,
+              "rounding": "reject",
+              "scale": 2
+            }
+          },
+          "zone": {
+            "title": "Zone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "equipmentId",
+          "quality",
+          "recordTime",
+          "coilNo",
+          "zone"
+        ],
+        "title": "ProcessTemperatureData",
+        "type": "object",
+        "x-missing-measurement": "omit; explicit null rejected; persisted SQL NULL",
+        "x-post-merge-range": "validate complete min/avg/max ordering before any mutation"
+      },
+      "ProcessTemperatureReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "affectedRecordIds": {
+            "items": {
+              "exclusiveMinimum": 0.0,
+              "type": "integer"
+            },
+            "title": "Affectedrecordids",
+            "type": "array"
+          },
+          "applied": {
+            "title": "Applied",
+            "type": "boolean"
+          },
+          "businessDigest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Businessdigest",
+            "type": "string"
+          },
+          "businessRetention": {
+            "const": "no_auto_ttl",
+            "default": "no_auto_ttl",
+            "title": "Businessretention",
+            "type": "string"
+          },
+          "changedFields": {
+            "items": {
+              "enum": [
+                "setTemp",
+                "maxTemp",
+                "minTemp",
+                "avgTemp",
+                "duration"
+              ],
+              "type": "string"
+            },
+            "title": "Changedfields",
+            "type": "array"
+          },
+          "committedAt": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\+08:00$",
+            "title": "Committedat",
+            "type": "string"
+          },
+          "confirmation": {
+            "enum": [
+              "business_committed",
+              "decision_only"
+            ],
+            "title": "Confirmation",
+            "type": "string"
+          },
+          "contractVersion": {
+            "const": "aiis.business-integration/v1",
+            "default": "aiis.business-integration/v1",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "digestProfile": {
+            "const": "bi-json/v1",
+            "default": "bi-json/v1",
+            "title": "Digestprofile",
+            "type": "string"
+          },
+          "equipmentId": {
+            "title": "Equipmentid",
+            "type": "string"
+          },
+          "eventId": {
+            "title": "Eventid",
+            "type": "string"
+          },
+          "mappingId": {
+            "title": "Mappingid",
+            "type": "string"
+          },
+          "mappingRevision": {
+            "title": "Mappingrevision",
+            "type": "string"
+          },
+          "originalOutcome": {
+            "enum": [
+              "created",
+              "updated",
+              "duplicate",
+              "stale"
+            ],
+            "title": "Originaloutcome",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "created",
+              "updated",
+              "duplicate",
+              "stale"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "performanceId": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Performanceid"
+          },
+          "producerId": {
+            "title": "Producerid",
+            "type": "string"
+          },
+          "receiptId": {
+            "exclusiveMinimum": 0.0,
+            "title": "Receiptid",
+            "type": "integer"
+          },
+          "recordId": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recordid"
+          },
+          "requestDigest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Requestdigest",
+            "type": "string"
+          },
+          "resource": {
+            "const": "process_temperature",
+            "default": "process_temperature",
+            "title": "Resource",
+            "type": "string"
+          },
+          "sourceTime": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\+08:00$",
+            "title": "Sourcetime",
+            "type": "string"
+          },
+          "status": {
+            "const": "committed",
+            "default": "committed",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "digestProfile",
+          "producerId",
+          "eventId",
+          "resource",
+          "equipmentId",
+          "mappingId",
+          "mappingRevision",
+          "requestDigest",
+          "businessDigest",
+          "receiptId",
+          "recordId",
+          "performanceId",
+          "affectedRecordIds",
+          "sourceTime",
+          "committedAt",
+          "status",
+          "confirmation",
+          "applied",
+          "outcome",
+          "originalOutcome",
+          "changedFields",
+          "businessRetention"
+        ],
+        "title": "ProcessTemperatureReceipt",
+        "type": "object"
+      },
+      "ProcessTensionData": {
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "setTension"
+            ]
+          },
+          {
+            "required": [
+              "avgTension"
+            ]
+          },
+          {
+            "required": [
+              "maxTension"
+            ]
+          },
+          {
+            "required": [
+              "minTension"
+            ]
+          }
+        ],
+        "properties": {
+          "avgTension": {
+            "exclusiveMaximum": 100000000.0,
+            "minimum": 0.0,
+            "title": "Avgtension",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 10,
+              "rounding": "reject",
+              "scale": 2
+            }
+          },
+          "coilNo": {
+            "title": "Coilno",
+            "type": "string"
+          },
+          "equipmentId": {
+            "title": "Equipmentid",
+            "type": "string"
+          },
+          "maxTension": {
+            "exclusiveMaximum": 100000000.0,
+            "minimum": 0.0,
+            "title": "Maxtension",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 10,
+              "rounding": "reject",
+              "scale": 2
+            }
+          },
+          "minTension": {
+            "exclusiveMaximum": 100000000.0,
+            "minimum": 0.0,
+            "title": "Mintension",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 10,
+              "rounding": "reject",
+              "scale": 2
+            }
+          },
+          "quality": {
+            "const": "good",
+            "title": "Quality",
+            "type": "string"
+          },
+          "recordTime": {
+            "format": "date-time",
+            "title": "Recordtime",
+            "type": "string"
+          },
+          "setTension": {
+            "exclusiveMaximum": 100000000.0,
+            "minimum": 0.0,
+            "title": "Settension",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 10,
+              "rounding": "reject",
+              "scale": 2
+            }
+          },
+          "zone": {
+            "title": "Zone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "equipmentId",
+          "quality",
+          "recordTime",
+          "coilNo",
+          "zone"
+        ],
+        "title": "ProcessTensionData",
+        "type": "object",
+        "x-missing-measurement": "omit; explicit null rejected; persisted SQL NULL",
+        "x-post-merge-range": "validate complete min/avg/max ordering before any mutation"
+      },
+      "ProcessTensionReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "affectedRecordIds": {
+            "items": {
+              "exclusiveMinimum": 0.0,
+              "type": "integer"
+            },
+            "title": "Affectedrecordids",
+            "type": "array"
+          },
+          "applied": {
+            "title": "Applied",
+            "type": "boolean"
+          },
+          "businessDigest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Businessdigest",
+            "type": "string"
+          },
+          "businessRetention": {
+            "const": "no_auto_ttl",
+            "default": "no_auto_ttl",
+            "title": "Businessretention",
+            "type": "string"
+          },
+          "changedFields": {
+            "items": {
+              "enum": [
+                "setTension",
+                "avgTension",
+                "maxTension",
+                "minTension"
+              ],
+              "type": "string"
+            },
+            "title": "Changedfields",
+            "type": "array"
+          },
+          "committedAt": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\+08:00$",
+            "title": "Committedat",
+            "type": "string"
+          },
+          "confirmation": {
+            "enum": [
+              "business_committed",
+              "decision_only"
+            ],
+            "title": "Confirmation",
+            "type": "string"
+          },
+          "contractVersion": {
+            "const": "aiis.business-integration/v1",
+            "default": "aiis.business-integration/v1",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "digestProfile": {
+            "const": "bi-json/v1",
+            "default": "bi-json/v1",
+            "title": "Digestprofile",
+            "type": "string"
+          },
+          "equipmentId": {
+            "title": "Equipmentid",
+            "type": "string"
+          },
+          "eventId": {
+            "title": "Eventid",
+            "type": "string"
+          },
+          "mappingId": {
+            "title": "Mappingid",
+            "type": "string"
+          },
+          "mappingRevision": {
+            "title": "Mappingrevision",
+            "type": "string"
+          },
+          "originalOutcome": {
+            "enum": [
+              "created",
+              "updated",
+              "duplicate",
+              "stale"
+            ],
+            "title": "Originaloutcome",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "created",
+              "updated",
+              "duplicate",
+              "stale"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "performanceId": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Performanceid"
+          },
+          "producerId": {
+            "title": "Producerid",
+            "type": "string"
+          },
+          "receiptId": {
+            "exclusiveMinimum": 0.0,
+            "title": "Receiptid",
+            "type": "integer"
+          },
+          "recordId": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recordid"
+          },
+          "requestDigest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Requestdigest",
+            "type": "string"
+          },
+          "resource": {
+            "const": "process_tension",
+            "default": "process_tension",
+            "title": "Resource",
+            "type": "string"
+          },
+          "sourceTime": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\+08:00$",
+            "title": "Sourcetime",
+            "type": "string"
+          },
+          "status": {
+            "const": "committed",
+            "default": "committed",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "digestProfile",
+          "producerId",
+          "eventId",
+          "resource",
+          "equipmentId",
+          "mappingId",
+          "mappingRevision",
+          "requestDigest",
+          "businessDigest",
+          "receiptId",
+          "recordId",
+          "performanceId",
+          "affectedRecordIds",
+          "sourceTime",
+          "committedAt",
+          "status",
+          "confirmation",
+          "applied",
+          "outcome",
+          "originalOutcome",
+          "changedFields",
+          "businessRetention"
+        ],
+        "title": "ProcessTensionReceipt",
+        "type": "object"
+      },
+      "ProductionObservationData": {
+        "additionalProperties": false,
+        "oneOf": [
+          {
+            "properties": {
+              "coilNo": {
+                "maxLength": 50,
+                "minLength": 1,
+                "type": "string"
+              },
+              "observationStatus": {
+                "const": "in_production"
+              }
+            },
+            "required": [
+              "coilNo"
+            ]
+          },
+          {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "grade"
+                  ]
+                },
+                {
+                  "required": [
+                    "weight"
+                  ]
+                },
+                {
+                  "required": [
+                    "totalLength"
+                  ]
+                },
+                {
+                  "required": [
+                    "diameter"
+                  ]
+                },
+                {
+                  "required": [
+                    "density"
+                  ]
+                },
+                {
+                  "required": [
+                    "spec"
+                  ]
+                },
+                {
+                  "required": [
+                    "startTime"
+                  ]
+                },
+                {
+                  "required": [
+                    "endTime"
+                  ]
+                },
+                {
+                  "required": [
+                    "outputQuantity"
+                  ]
+                },
+                {
+                  "required": [
+                    "qualifiedQuantity"
+                  ]
+                },
+                {
+                  "required": [
+                    "efficiencyRate"
+                  ]
+                },
+                {
+                  "required": [
+                    "qualityScore"
+                  ]
+                },
+                {
+                  "required": [
+                    "remark"
+                  ]
+                }
+              ]
+            },
+            "properties": {
+              "coilNo": {
+                "type": "null"
+              },
+              "observationStatus": {
+                "enum": [
+                  "not_in_production",
+                  "unknown"
+                ]
+              }
+            }
+          }
+        ],
+        "properties": {
+          "coilNo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coilno"
+          },
+          "density": {
+            "exclusiveMaximum": 100.0,
+            "minimum": 0.0,
+            "title": "Density",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 5,
+              "rounding": "reject",
+              "scale": 3
+            }
+          },
+          "diameter": {
+            "exclusiveMaximum": 1000000.0,
+            "minimum": 0.0,
+            "title": "Diameter",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 8,
+              "rounding": "reject",
+              "scale": 2
+            }
+          },
+          "efficiencyRate": {
+            "exclusiveMaximum": 1000.0,
+            "minimum": 0.0,
+            "title": "Efficiencyrate",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 5,
+              "rounding": "reject",
+              "scale": 2
+            }
+          },
+          "endTime": {
+            "format": "date-time",
+            "title": "Endtime",
+            "type": "string"
+          },
+          "equipmentId": {
+            "title": "Equipmentid",
+            "type": "string"
+          },
+          "grade": {
+            "title": "Grade",
+            "type": "string"
+          },
+          "observationStatus": {
+            "enum": [
+              "in_production",
+              "not_in_production",
+              "unknown"
+            ],
+            "title": "Observationstatus",
+            "type": "string"
+          },
+          "outputQuantity": {
+            "exclusiveMaximum": 1000000.0,
+            "minimum": 0.0,
+            "title": "Outputquantity",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 10,
+              "rounding": "reject",
+              "scale": 4
+            }
+          },
+          "qualifiedQuantity": {
+            "exclusiveMaximum": 1000000.0,
+            "minimum": 0.0,
+            "title": "Qualifiedquantity",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 10,
+              "rounding": "reject",
+              "scale": 4
+            }
+          },
+          "quality": {
+            "const": "good",
+            "title": "Quality",
+            "type": "string"
+          },
+          "qualityScore": {
+            "exclusiveMaximum": 1000.0,
+            "minimum": 0.0,
+            "title": "Qualityscore",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 5,
+              "rounding": "reject",
+              "scale": 2
+            }
+          },
+          "remark": {
+            "title": "Remark",
+            "type": "string"
+          },
+          "sampledAt": {
+            "format": "date-time",
+            "title": "Sampledat",
+            "type": "string"
+          },
+          "spec": {
+            "title": "Spec",
+            "type": "string"
+          },
+          "startTime": {
+            "format": "date-time",
+            "title": "Starttime",
+            "type": "string"
+          },
+          "totalLength": {
+            "exclusiveMaximum": 100000000.0,
+            "minimum": 0.0,
+            "title": "Totallength",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 10,
+              "rounding": "reject",
+              "scale": 2
+            }
+          },
+          "weight": {
+            "exclusiveMaximum": 1000000.0,
+            "minimum": 0.0,
+            "title": "Weight",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 10,
+              "rounding": "reject",
+              "scale": 4
+            }
+          }
+        },
+        "required": [
+          "equipmentId",
+          "quality",
+          "sampledAt",
+          "observationStatus"
+        ],
+        "title": "ProductionObservationData",
+        "type": "object",
+        "x-total-duration-seconds": {
+          "maximum": 2147483647,
+          "minimum": 0,
+          "priority": [
+            "manual_pair",
+            "reported_pair",
+            "observed_pair"
+          ]
+        }
+      },
+      "ProductionObservationReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "affectedRecordIds": {
+            "items": {
+              "exclusiveMinimum": 0.0,
+              "type": "integer"
+            },
+            "title": "Affectedrecordids",
+            "type": "array"
+          },
+          "applied": {
+            "title": "Applied",
+            "type": "boolean"
+          },
+          "businessDigest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Businessdigest",
+            "type": "string"
+          },
+          "businessRetention": {
+            "const": "no_auto_ttl",
+            "default": "no_auto_ttl",
+            "title": "Businessretention",
+            "type": "string"
+          },
+          "changedFields": {
+            "items": {
+              "enum": [
+                "sampledAt",
+                "observationStatus",
+                "coilNo",
+                "grade",
+                "weight",
+                "totalLength",
+                "diameter",
+                "density",
+                "spec",
+                "startTime",
+                "endTime",
+                "outputQuantity",
+                "qualifiedQuantity",
+                "efficiencyRate",
+                "qualityScore",
+                "remark"
+              ],
+              "type": "string"
+            },
+            "title": "Changedfields",
+            "type": "array"
+          },
+          "committedAt": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\+08:00$",
+            "title": "Committedat",
+            "type": "string"
+          },
+          "confirmation": {
+            "enum": [
+              "business_committed",
+              "decision_only"
+            ],
+            "title": "Confirmation",
+            "type": "string"
+          },
+          "contractVersion": {
+            "const": "aiis.business-integration/v1",
+            "default": "aiis.business-integration/v1",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "digestProfile": {
+            "const": "bi-json/v1",
+            "default": "bi-json/v1",
+            "title": "Digestprofile",
+            "type": "string"
+          },
+          "equipmentId": {
+            "title": "Equipmentid",
+            "type": "string"
+          },
+          "eventId": {
+            "title": "Eventid",
+            "type": "string"
+          },
+          "mappingId": {
+            "title": "Mappingid",
+            "type": "string"
+          },
+          "mappingRevision": {
+            "title": "Mappingrevision",
+            "type": "string"
+          },
+          "originalOutcome": {
+            "enum": [
+              "created",
+              "updated",
+              "duplicate",
+              "stale"
+            ],
+            "title": "Originaloutcome",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "created",
+              "updated",
+              "duplicate",
+              "stale"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "performanceId": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Performanceid"
+          },
+          "producerId": {
+            "title": "Producerid",
+            "type": "string"
+          },
+          "receiptId": {
+            "exclusiveMinimum": 0.0,
+            "title": "Receiptid",
+            "type": "integer"
+          },
+          "recordId": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recordid"
+          },
+          "requestDigest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Requestdigest",
+            "type": "string"
+          },
+          "resource": {
+            "const": "production_observation",
+            "default": "production_observation",
+            "title": "Resource",
+            "type": "string"
+          },
+          "sourceTime": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\+08:00$",
+            "title": "Sourcetime",
+            "type": "string"
+          },
+          "status": {
+            "const": "committed",
+            "default": "committed",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "digestProfile",
+          "producerId",
+          "eventId",
+          "resource",
+          "equipmentId",
+          "mappingId",
+          "mappingRevision",
+          "requestDigest",
+          "businessDigest",
+          "receiptId",
+          "recordId",
+          "performanceId",
+          "affectedRecordIds",
+          "sourceTime",
+          "committedAt",
+          "status",
+          "confirmation",
+          "applied",
+          "outcome",
+          "originalOutcome",
+          "changedFields",
+          "businessRetention"
+        ],
+        "title": "ProductionObservationReceipt",
+        "type": "object"
+      },
+      "ProductionParameterData": {
+        "additionalProperties": false,
+        "anyOf": [
+          {
+            "required": [
+              "grade"
+            ]
+          },
+          {
+            "required": [
+              "entryTime"
+            ]
+          },
+          {
+            "required": [
+              "thickness"
+            ]
+          },
+          {
+            "required": [
+              "width"
+            ]
+          },
+          {
+            "required": [
+              "totalTime"
+            ]
+          },
+          {
+            "required": [
+              "weight"
+            ]
+          },
+          {
+            "required": [
+              "speed"
+            ]
+          }
+        ],
+        "properties": {
+          "coilNo": {
+            "title": "Coilno",
+            "type": "string"
+          },
+          "entryTime": {
+            "format": "date-time",
+            "title": "Entrytime",
+            "type": "string"
+          },
+          "equipmentId": {
+            "title": "Equipmentid",
+            "type": "string"
+          },
+          "grade": {
+            "title": "Grade",
+            "type": "string"
+          },
+          "quality": {
+            "const": "good",
+            "title": "Quality",
+            "type": "string"
+          },
+          "sampledAt": {
+            "format": "date-time",
+            "title": "Sampledat",
+            "type": "string"
+          },
+          "speed": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": 0.0,
+            "title": "Speed",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "thickness": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": 0.0,
+            "title": "Thickness",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "totalTime": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": 0.0,
+            "title": "Totaltime",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "weight": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": 0.0,
+            "title": "Weight",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          },
+          "width": {
+            "maximum": 3.4028234663852886e+38,
+            "minimum": 0.0,
+            "title": "Width",
+            "type": "number",
+            "x-float-storage": {
+              "digest": "exact decimal of normalized binary32",
+              "nonzeroUnderflow": "reject",
+              "profile": "binary32",
+              "relativeTolerance": 1e-06
+            }
+          }
+        },
+        "required": [
+          "equipmentId",
+          "sampledAt",
+          "quality",
+          "coilNo"
+        ],
+        "title": "ProductionParameterData",
+        "type": "object",
+        "x-missing-measurement": "omit; explicit null rejected; persisted SQL NULL",
+        "x-post-merge-range": "validate complete min/avg/max ordering before any mutation"
+      },
+      "ProductionParameterReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "affectedRecordIds": {
+            "items": {
+              "exclusiveMinimum": 0.0,
+              "type": "integer"
+            },
+            "title": "Affectedrecordids",
+            "type": "array"
+          },
+          "applied": {
+            "title": "Applied",
+            "type": "boolean"
+          },
+          "businessDigest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Businessdigest",
+            "type": "string"
+          },
+          "businessRetention": {
+            "const": "no_auto_ttl",
+            "default": "no_auto_ttl",
+            "title": "Businessretention",
+            "type": "string"
+          },
+          "changedFields": {
+            "items": {
+              "enum": [
+                "equipmentId",
+                "sampledAt",
+                "quality",
+                "coilNo",
+                "grade",
+                "entryTime",
+                "thickness",
+                "width",
+                "totalTime",
+                "weight",
+                "speed"
+              ],
+              "type": "string"
+            },
+            "title": "Changedfields",
+            "type": "array"
+          },
+          "committedAt": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\+08:00$",
+            "title": "Committedat",
+            "type": "string"
+          },
+          "confirmation": {
+            "enum": [
+              "business_committed",
+              "decision_only"
+            ],
+            "title": "Confirmation",
+            "type": "string"
+          },
+          "contractVersion": {
+            "const": "aiis.business-integration/v1",
+            "default": "aiis.business-integration/v1",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "digestProfile": {
+            "const": "bi-json/v1",
+            "default": "bi-json/v1",
+            "title": "Digestprofile",
+            "type": "string"
+          },
+          "equipmentId": {
+            "title": "Equipmentid",
+            "type": "string"
+          },
+          "eventId": {
+            "title": "Eventid",
+            "type": "string"
+          },
+          "mappingId": {
+            "title": "Mappingid",
+            "type": "string"
+          },
+          "mappingRevision": {
+            "title": "Mappingrevision",
+            "type": "string"
+          },
+          "originalOutcome": {
+            "enum": [
+              "created",
+              "updated",
+              "duplicate",
+              "stale"
+            ],
+            "title": "Originaloutcome",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "created",
+              "updated",
+              "duplicate",
+              "stale"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "performanceId": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Performanceid"
+          },
+          "producerId": {
+            "title": "Producerid",
+            "type": "string"
+          },
+          "receiptId": {
+            "exclusiveMinimum": 0.0,
+            "title": "Receiptid",
+            "type": "integer"
+          },
+          "recordId": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recordid"
+          },
+          "requestDigest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Requestdigest",
+            "type": "string"
+          },
+          "resource": {
+            "const": "production_parameters",
+            "default": "production_parameters",
+            "title": "Resource",
+            "type": "string"
+          },
+          "sourceTime": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\+08:00$",
+            "title": "Sourcetime",
+            "type": "string"
+          },
+          "status": {
+            "const": "committed",
+            "default": "committed",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "digestProfile",
+          "producerId",
+          "eventId",
+          "resource",
+          "equipmentId",
+          "mappingId",
+          "mappingRevision",
+          "requestDigest",
+          "businessDigest",
+          "receiptId",
+          "recordId",
+          "performanceId",
+          "affectedRecordIds",
+          "sourceTime",
+          "committedAt",
+          "status",
+          "confirmation",
+          "applied",
+          "outcome",
+          "originalOutcome",
+          "changedFields",
+          "businessRetention"
+        ],
+        "title": "ProductionParameterReceipt",
+        "type": "object"
+      },
+      "TemperatureData": {
+        "additionalProperties": false,
+        "properties": {
+          "equipmentId": {
+            "title": "Equipmentid",
+            "type": "string"
+          },
+          "quality": {
+            "const": "good",
+            "title": "Quality",
+            "type": "string"
+          },
+          "sampledAt": {
+            "format": "date-time",
+            "title": "Sampledat",
+            "type": "string"
+          },
+          "zone1Act": {
+            "exclusiveMaximum": 1e+20,
+            "exclusiveMinimum": -1e+20,
+            "title": "Zone1Act",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 30,
+              "rounding": "reject",
+              "scale": 10
+            }
+          },
+          "zone1Set": {
+            "exclusiveMaximum": 1e+20,
+            "exclusiveMinimum": -1e+20,
+            "title": "Zone1Set",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 30,
+              "rounding": "reject",
+              "scale": 10
+            }
+          },
+          "zone2Act": {
+            "exclusiveMaximum": 1e+20,
+            "exclusiveMinimum": -1e+20,
+            "title": "Zone2Act",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 30,
+              "rounding": "reject",
+              "scale": 10
+            }
+          },
+          "zone2Set": {
+            "exclusiveMaximum": 1e+20,
+            "exclusiveMinimum": -1e+20,
+            "title": "Zone2Set",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 30,
+              "rounding": "reject",
+              "scale": 10
+            }
+          },
+          "zone3Act": {
+            "exclusiveMaximum": 1e+20,
+            "exclusiveMinimum": -1e+20,
+            "title": "Zone3Act",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 30,
+              "rounding": "reject",
+              "scale": 10
+            }
+          },
+          "zone3Set": {
+            "exclusiveMaximum": 1e+20,
+            "exclusiveMinimum": -1e+20,
+            "title": "Zone3Set",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 30,
+              "rounding": "reject",
+              "scale": 10
+            }
+          },
+          "zone4Act": {
+            "exclusiveMaximum": 1e+20,
+            "exclusiveMinimum": -1e+20,
+            "title": "Zone4Act",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 30,
+              "rounding": "reject",
+              "scale": 10
+            }
+          },
+          "zone4Set": {
+            "exclusiveMaximum": 1e+20,
+            "exclusiveMinimum": -1e+20,
+            "title": "Zone4Set",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 30,
+              "rounding": "reject",
+              "scale": 10
+            }
+          },
+          "zone5Act": {
+            "exclusiveMaximum": 1e+20,
+            "exclusiveMinimum": -1e+20,
+            "title": "Zone5Act",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 30,
+              "rounding": "reject",
+              "scale": 10
+            }
+          },
+          "zone5Set": {
+            "exclusiveMaximum": 1e+20,
+            "exclusiveMinimum": -1e+20,
+            "title": "Zone5Set",
+            "type": "number",
+            "x-decimal-storage": {
+              "precision": 30,
+              "rounding": "reject",
+              "scale": 10
+            }
+          }
+        },
+        "required": [
+          "equipmentId",
+          "sampledAt",
+          "quality",
+          "zone1Set",
+          "zone1Act",
+          "zone2Set",
+          "zone2Act",
+          "zone3Set",
+          "zone3Act",
+          "zone4Set",
+          "zone4Act",
+          "zone5Set",
+          "zone5Act"
+        ],
+        "title": "TemperatureData",
+        "type": "object"
+      },
+      "TemperatureReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "affectedRecordIds": {
+            "items": {
+              "exclusiveMinimum": 0.0,
+              "type": "integer"
+            },
+            "title": "Affectedrecordids",
+            "type": "array"
+          },
+          "applied": {
+            "title": "Applied",
+            "type": "boolean"
+          },
+          "businessDigest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Businessdigest",
+            "type": "string"
+          },
+          "businessRetention": {
+            "const": "no_auto_ttl",
+            "default": "no_auto_ttl",
+            "title": "Businessretention",
+            "type": "string"
+          },
+          "changedFields": {
+            "items": {
+              "enum": [
+                "equipmentId",
+                "sampledAt",
+                "quality",
+                "zone1Set",
+                "zone1Act",
+                "zone2Set",
+                "zone2Act",
+                "zone3Set",
+                "zone3Act",
+                "zone4Set",
+                "zone4Act",
+                "zone5Set",
+                "zone5Act"
+              ],
+              "type": "string"
+            },
+            "title": "Changedfields",
+            "type": "array"
+          },
+          "committedAt": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\+08:00$",
+            "title": "Committedat",
+            "type": "string"
+          },
+          "confirmation": {
+            "enum": [
+              "business_committed",
+              "decision_only"
+            ],
+            "title": "Confirmation",
+            "type": "string"
+          },
+          "contractVersion": {
+            "const": "aiis.business-integration/v1",
+            "default": "aiis.business-integration/v1",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "digestProfile": {
+            "const": "bi-json/v1",
+            "default": "bi-json/v1",
+            "title": "Digestprofile",
+            "type": "string"
+          },
+          "equipmentId": {
+            "title": "Equipmentid",
+            "type": "string"
+          },
+          "eventId": {
+            "title": "Eventid",
+            "type": "string"
+          },
+          "mappingId": {
+            "title": "Mappingid",
+            "type": "string"
+          },
+          "mappingRevision": {
+            "title": "Mappingrevision",
+            "type": "string"
+          },
+          "originalOutcome": {
+            "enum": [
+              "created",
+              "updated",
+              "duplicate",
+              "stale"
+            ],
+            "title": "Originaloutcome",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "created",
+              "updated",
+              "duplicate",
+              "stale"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "performanceId": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Performanceid"
+          },
+          "producerId": {
+            "title": "Producerid",
+            "type": "string"
+          },
+          "receiptId": {
+            "exclusiveMinimum": 0.0,
+            "title": "Receiptid",
+            "type": "integer"
+          },
+          "recordId": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recordid"
+          },
+          "requestDigest": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Requestdigest",
+            "type": "string"
+          },
+          "resource": {
+            "const": "temperature",
+            "default": "temperature",
+            "title": "Resource",
+            "type": "string"
+          },
+          "sourceTime": {
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\+08:00$",
+            "title": "Sourcetime",
+            "type": "string"
+          },
+          "status": {
+            "const": "committed",
+            "default": "committed",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contractVersion",
+          "digestProfile",
+          "producerId",
+          "eventId",
+          "resource",
+          "equipmentId",
+          "mappingId",
+          "mappingRevision",
+          "requestDigest",
+          "businessDigest",
+          "receiptId",
+          "recordId",
+          "performanceId",
+          "affectedRecordIds",
+          "sourceTime",
+          "committedAt",
+          "status",
+          "confirmation",
+          "applied",
+          "outcome",
+          "originalOutcome",
+          "changedFields",
+          "businessRetention"
+        ],
+        "title": "TemperatureReceipt",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "AIIS Business Integration",
+    "version": "aiis.business-integration/v1"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/integration/equipment/drive-samples": {
+      "post": {
+        "operationId": "business_equipment_drive_v1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationEnvelope_DriveData_"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationSuccess_DriveReceipt_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError403"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError409"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError413"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError415"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError422"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError500"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError503"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Receive Drive",
+        "tags": [
+          "Business Integration"
+        ]
+      }
+    },
+    "/api/v1/integration/equipment/production-parameter-samples": {
+      "post": {
+        "operationId": "business_equipment_production_parameters_v1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationEnvelope_ProductionParameterData_"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationSuccess_ProductionParameterReceipt_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError403"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError409"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError413"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError415"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError422"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError500"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError503"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Receive Production Parameters",
+        "tags": [
+          "Business Integration"
+        ]
+      }
+    },
+    "/api/v1/integration/equipment/temperature-samples": {
+      "post": {
+        "operationId": "business_equipment_temperature_v1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationEnvelope_TemperatureData_"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationSuccess_TemperatureReceipt_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError403"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError409"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError413"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError415"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError422"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError500"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentIntegrationError503"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Receive Temperature",
+        "tags": [
+          "Business Integration"
+        ]
+      }
+    },
+    "/api/v1/integration/monitor/process-curve-samples": {
+      "post": {
+        "operationId": "business_monitor_process_curve_v1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationEnvelope_ProcessCurveData_"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationSuccess_ProcessCurveReceipt_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorIntegrationError403"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorIntegrationError409"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorIntegrationError413"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorIntegrationError415"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorIntegrationError422"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorIntegrationError500"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorIntegrationError503"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Receive Process Curve",
+        "tags": [
+          "Business Integration"
+        ]
+      }
+    },
+    "/api/v1/integration/performances/production-observations": {
+      "post": {
+        "operationId": "business_performance_production_observation_v1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationEnvelope_ProductionObservationData_"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationSuccess_ProductionObservationReceipt_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError403"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError409Observation"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError413"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError415"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError422"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError500"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError503"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Receive Production Observation",
+        "tags": [
+          "Business Integration"
+        ]
+      }
+    },
+    "/api/v1/integration/performances/{record_id}/process-speed-samples": {
+      "post": {
+        "operationId": "business_performance_process_speed_v1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "record_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "title": "Record Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationEnvelope_ProcessSpeedData_"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationSuccess_ProcessSpeedReceipt_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError403"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError404"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError409Process"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError413"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError415"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError422"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError500"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError503"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Receive Process Speed",
+        "tags": [
+          "Business Integration"
+        ]
+      }
+    },
+    "/api/v1/integration/performances/{record_id}/process-temperature-samples": {
+      "post": {
+        "operationId": "business_performance_process_temperature_v1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "record_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "title": "Record Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationEnvelope_ProcessTemperatureData_"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationSuccess_ProcessTemperatureReceipt_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError403"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError404"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError409Process"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError413"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError415"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError422"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError500"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError503"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Receive Process Temperature",
+        "tags": [
+          "Business Integration"
+        ]
+      }
+    },
+    "/api/v1/integration/performances/{record_id}/process-tension-samples": {
+      "post": {
+        "operationId": "business_performance_process_tension_v1",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "record_id",
+            "required": true,
+            "schema": {
+              "exclusiveMinimum": 0,
+              "title": "Record Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationEnvelope_ProcessTensionData_"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationSuccess_ProcessTensionReceipt_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError403"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError404"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError409Process"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError413"
+                }
+              }
+            },
+            "description": "Content Too Large"
+          },
+          "415": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError415"
+                }
+              }
+            },
+            "description": "Unsupported Media Type"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError422"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError500"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceIntegrationError503"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Receive Process Tension",
+        "tags": [
+          "Business Integration"
+        ]
+      }
+    }
+  },
+  "x-source-state": "source_ready_unadopted",
+  "x-source-task": "ARCH-BE-010:r2:A"
+}

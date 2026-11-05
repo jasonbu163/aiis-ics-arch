@@ -1,0 +1,33 @@
+{
+  "directory": "/private/tmp/arch-be008-log-check-c475e9567e7049f68ffd2cc88aabcc2f",
+  "retainedFiles": 5,
+  "stdoutValidatedLines": 64,
+  "fileLimit": 10485760,
+  "fileDetails": [
+    {
+      "path": "/private/tmp/arch-be008-log-check-c475e9567e7049f68ffd2cc88aabcc2f/backend-20261028_002.jsonl",
+      "bytes": 10487140,
+      "sha256": "9d56798273d916ee2a83cb506148310701173a13d988e31c0d3e01fd153ca9c4"
+    },
+    {
+      "path": "/private/tmp/arch-be008-log-check-c475e9567e7049f68ffd2cc88aabcc2f/backend-20261028_003.jsonl",
+      "bytes": 10487140,
+      "sha256": "5413fb8392b5ad7fbf6f5edd020ad3a0d5220df9f9fa21b2f41aa026592742dc"
+    },
+    {
+      "path": "/private/tmp/arch-be008-log-check-c475e9567e7049f68ffd2cc88aabcc2f/backend-20261028_004.jsonl",
+      "bytes": 10487140,
+      "sha256": "6e385119b938769738c213177cd0c58474c56ca76cdf2890bc6c4c3863fb435e"
+    },
+    {
+      "path": "/private/tmp/arch-be008-log-check-c475e9567e7049f68ffd2cc88aabcc2f/backend-20261028_005.jsonl",
+      "bytes": 10487140,
+      "sha256": "9aef0e53c8f7df666748e80f420b2ea41645c607455914c971cccf3fe1145c9d"
+    },
+    {
+      "path": "/private/tmp/arch-be008-log-check-c475e9567e7049f68ffd2cc88aabcc2f/backend-20261028_006.jsonl",
+      "bytes": 4194856,
+      "sha256": "f3e1aa4d2eab02177dfd775d08af229abd0d04849a6368bd24e94c914852d205"
+    }
+  ]
+}

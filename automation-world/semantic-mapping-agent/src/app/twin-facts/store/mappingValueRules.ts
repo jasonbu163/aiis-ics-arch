@@ -1,19 +1,12 @@
-/**
- * File Path: /automation-world/semantic-mapping-agent/src/app/twin-facts/store/mappingValueRules.ts
- * Description: Reactive Backend-owned Mapping Value Rule state.
- * Main Features:
- *   - Keeps generic presets and Collection Fact-origin presets separate from fact values
- *   - Loads missing fact-origin presets as local drafts before an individual save or removal
- *   - Preserves immutable keys and origins after the Backend creates a preset
- */
+/** 本地值规则与来源草稿，保存绑定已加载修订。 */
 import { ref } from "vue";
+import { loadLocalConfiguration, localConfiguration, currentRevision } from "../api/localConfiguration";
 
 import {
   applyMappingValueRuleImportInBackend,
   createMappingValueRuleInBackend,
   deleteMappingValueRuleInBackend,
   listCollectionFactsFromBackend,
-  listMappingValueRulesFromBackend,
   previewMappingValueRuleImportInBackend,
   updateMappingValueRuleInBackend,
 } from "../api";
@@ -112,6 +105,8 @@ function validateDraft(draft: MappingValueRuleDraft): MappingValueRuleConfigurat
 }
 
 export function useMappingValueRulesStore() {
+  let loadedRevision = localConfiguration.value?.revision ?? 0;
+  let draftRevision = loadedRevision;
   const configurations = ref<MappingValueRuleConfiguration[]>([]);
   const factOriginDrafts = ref<MappingValueRuleDraft[]>([]);
   const draft = ref<MappingValueRuleDraft>(emptyDraft());
@@ -125,7 +120,8 @@ export function useMappingValueRulesStore() {
 
   async function load() {
     await run(async () => {
-      configurations.value = await listMappingValueRulesFromBackend();
+      const snapshot = await loadLocalConfiguration();
+      configurations.value = snapshot.document.mappingValueRules; loadedRevision = snapshot.revision;
     });
   }
 
@@ -157,6 +153,7 @@ export function useMappingValueRulesStore() {
   }
 
   function startCreate() {
+    draftRevision = currentRevision();
     selectedId.value = null;
     selectedOriginKey.value = null;
     draft.value = emptyDraft();
@@ -165,6 +162,7 @@ export function useMappingValueRulesStore() {
   }
 
   function open(valueRuleId: string) {
+    draftRevision = loadedRevision;
     const rule = configurations.value.find((item) => item.id === valueRuleId);
     if (!rule) return;
     selectedId.value = rule.id;
@@ -175,6 +173,7 @@ export function useMappingValueRulesStore() {
   }
 
   function openFactOriginDraft(sourceKey: string, factName: string) {
+    draftRevision = loadedRevision;
     const key = originKey(sourceKey, factName);
     const pending = factOriginDrafts.value.find((item) => (
       item.originSourceKey && item.originFactName
@@ -196,8 +195,8 @@ export function useMappingValueRulesStore() {
     await run(async () => {
       const input = validateDraft(draft.value);
       const saved = selectedId.value
-        ? await updateMappingValueRuleInBackend(selectedId.value, input)
-        : await createMappingValueRuleInBackend(input);
+        ? await updateMappingValueRuleInBackend(selectedId.value, input, draftRevision)
+        : await createMappingValueRuleInBackend(input, draftRevision);
       selectedId.value = saved.id;
       draft.value = draftFromConfiguration(saved);
       configurations.value = upsert(saved);
@@ -208,13 +207,15 @@ export function useMappingValueRulesStore() {
         ));
         selectedOriginKey.value = null;
       }
+      loadedRevision = currentRevision(); draftRevision = loadedRevision;
       status.value = "saved";
     });
   }
 
   async function remove(valueRuleId: string) {
     await run(async () => {
-      await deleteMappingValueRuleInBackend(valueRuleId);
+      await deleteMappingValueRuleInBackend(valueRuleId, loadedRevision);
+      loadedRevision = currentRevision();
       configurations.value = configurations.value.filter((item) => item.id !== valueRuleId);
       if (selectedId.value === valueRuleId) startCreate();
       status.value = "deleted";
@@ -247,9 +248,11 @@ export function useMappingValueRulesStore() {
         throw new Error("MAPPING_VALUE_RULE_IMPORT_PREVIEW_REQUIRED");
       }
       await applyMappingValueRuleImportInBackend(importItems.value);
-      configurations.value = await listMappingValueRulesFromBackend();
+      const snapshot = await loadLocalConfiguration();
+      configurations.value = snapshot.document.mappingValueRules; loadedRevision = snapshot.revision;
       importItems.value = [];
       importPreview.value = null;
+      loadedRevision = currentRevision(); draftRevision = loadedRevision;
       status.value = "saved";
     });
   }

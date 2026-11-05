@@ -1,0 +1,25 @@
+{
+  "sdk": "10.0.403",
+  "runtime": "10.0.14",
+  "direct": {
+    "packages.lock.json": {
+      "FastEndpoints": "8.3.0",
+      "FastEndpoints.OpenApi": "8.3.0",
+      "FluentValidation": "12.1.1",
+      "Microsoft.AspNetCore.OpenApi": "10.0.14",
+      "Microsoft.EntityFrameworkCore": "10.0.14",
+      "Microsoft.EntityFrameworkCore.Relational": "10.0.14",
+      "MySql.Data": "26.10.0",
+      "MySql.EntityFrameworkCore": "10.0.12",
+      "Serilog.AspNetCore": "10.0.0",
+      "Serilog.Formatting.Compact": "3.0.0",
+      "Serilog.Sinks.File": "7.0.0"
+    },
+    "tests/AIIS.Backend.Tests/packages.lock.json": {
+      "Microsoft.AspNetCore.Mvc.Testing": "10.0.14",
+      "Microsoft.NET.Test.Sdk": "18.11.0",
+      "MSTest.TestAdapter": "4.5.2",
+      "MSTest.TestFramework": "4.5.2"
+    }
+  }
+}

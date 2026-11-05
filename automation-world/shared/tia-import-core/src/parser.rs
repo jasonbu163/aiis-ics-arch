@@ -17,7 +17,7 @@ pub enum Type {
 #[derive(Clone, Debug)]
 pub struct Field {
     pub name: String,
-    kind: Type,
+    pub(crate) kind: Type,
     line: usize,
     file: String,
     comment: String,

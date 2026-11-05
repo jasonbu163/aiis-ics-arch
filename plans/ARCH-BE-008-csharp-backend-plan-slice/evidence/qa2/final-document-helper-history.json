@@ -1,0 +1,6 @@
+{
+  "initialAuditExitCode": 1,
+  "productFailure": false,
+  "reason": "helper expected literal qa_passed in module catalogs without a status column; actual QA2 passed link and pending Owner semantics were correct; final assertion checks the documented catalog shape",
+  "finalAuditExitCode": 0
+}

@@ -1,25 +1,15 @@
-/**
- * File Path: /automation-world/semantic-mapping-agent/src/app/twin-facts/store/mappingConfigurations.ts
- * Description: Reactive Backend-owned Mapping Configuration state.
- * Main Features:
- *   - Automatically derives enabled Target APIs without saved mappings into local drafts
- *   - Separates draft removal from deletion of saved Mapping records
- *   - Keeps parameter-owned source/fact bindings and constants mutually exclusive
- *   - Builds side-effect-free previews and invokes confirmed saved-row manual runs through Tauri only
- */
+/** 本地映射CRUD、离线来源身份与草稿/已保存纯预览。 */
 import { computed, ref } from "vue";
+import { changeConfiguration, loadLocalConfiguration, localConfiguration, currentRevision, previewSavedMapping } from "../api/localConfiguration";
 
 import {
   applyMappingConfigurationImportInBackend,
   createMappingConfigurationInBackend,
   deleteMappingConfigurationInBackend,
   listCollectionFactsFromBackend,
-  listMappingConfigurationsFromBackend,
-  listMappingManualRunsFromBackend,
-  listMappingValueRulesFromBackend,
-  listTargetApiConfigurationsFromBackend,
   previewMappingConfigurationImportInBackend,
   runMappingManualOnce,
+  savedBackendBaseUrl,
   updateMappingConfigurationInBackend,
 } from "../api";
 import type {
@@ -118,9 +108,7 @@ function validateDraft(draft: MappingConfigurationDraft): MappingConfigurationIn
     if (!sourceKey || !factName) throw new Error("MAPPING_CONFIGURATION_REQUIRED");
     return [path, { ...binding, sourceKey, factName, value: null }];
   }));
-  if (!Object.values(bindings).some((binding) => binding.kind === "fact")) {
-    throw new Error("MAPPING_CONFIGURATION_FACT_REQUIRED");
-  }
+  if (!Object.values(bindings).some(binding => binding.kind === "fact")) throw new Error("MAPPING_CONFIGURATION_FACT_REQUIRED");
   return {
     mappingKey,
     name,
@@ -210,6 +198,8 @@ function setJsonPath(target: Record<string, unknown>, path: string, value: unkno
 }
 
 export function useMappingConfigurationsStore() {
+  let loadedRevision = localConfiguration.value?.revision ?? 0;
+  let draftRevision = loadedRevision;
   const configurations = ref<MappingConfiguration[]>([]);
   const localDrafts = ref<LocalMappingConfigurationDraft[]>([]);
   const targetApis = ref<TargetApiConfiguration[]>([]);
@@ -230,6 +220,8 @@ export function useMappingConfigurationsStore() {
     (item) => item.apiKey === draft.value.targetApiKey,
   ) ?? null);
   const selectedTargetApiLocked = computed(() => selectedDraftId.value !== null);
+  const savedPreview = ref<Record<string, unknown> | null>(null);
+  async function previewSaved(id: string) { await run(async () => { savedPreview.value = await previewSavedMapping(id); }); }
   const requestPreview = computed(() => buildMappingRequestPreview(
     selectedTargetApi.value,
     draft.value.bindings,
@@ -244,21 +236,10 @@ export function useMappingConfigurationsStore() {
   }
 
   async function loadBackendResources() {
-    const [mappings, targets, rules] = await Promise.all([
-      listMappingConfigurationsFromBackend(),
-      listTargetApiConfigurationsFromBackend(),
-      listMappingValueRulesFromBackend(),
-    ]);
-    configurations.value = mappings;
-    targetApis.value = targets;
-    valueRules.value = rules;
-    const audits = await Promise.all(mappings.map(async (mapping) => [
-      mapping.id,
-      await listMappingManualRunsFromBackend(mapping.id),
-    ] as const));
-    manualRuns.value = Object.fromEntries(audits.flatMap(([mappingId, runs]) => (
-      runs.length ? [[mappingId, runs[0]] as const] : []
-    )));
+    const snapshot = await loadLocalConfiguration();
+    configurations.value = snapshot.document.mappings; targetApis.value = snapshot.document.targetApis;
+    valueRules.value = snapshot.document.mappingValueRules; loadedRevision = snapshot.revision;
+    manualRuns.value = {};
   }
 
   function appendMissingTargetApiDrafts() {
@@ -281,6 +262,7 @@ export function useMappingConfigurationsStore() {
     factsBusy.value = true;
     error.value = "";
     try {
+      const sourceLocator = `${savedBackendBaseUrl()}/api/integration/v1/collection-facts`;
       const facts: BackendCollectionFactRecord[] = [];
       let pageNumber = 1;
       while (true) {
@@ -289,7 +271,12 @@ export function useMappingConfigurationsStore() {
         if (page.items.length < 100) break;
         pageNumber += 1;
       }
+      if (sourceLocator !== `${savedBackendBaseUrl()}/api/integration/v1/collection-facts`) throw new Error("SMA_SOURCE_CONTEXT_CHANGED");
       sourceFacts.value = facts;
+      const saved = await loadLocalConfiguration();
+      const metadata = new Map(saved.document.sourceMetadata.map(item => [`${item.sourceKey}\u0000${item.factName}`, item]));
+      for (const fact of facts) metadata.set(`${fact.sourceKey}\u0000${fact.name}`, { sourceKey: fact.sourceKey, factName: fact.name, dataType: fact.dataType, factKind: fact.factKind, sourceLocator, definitionVersion: fact.contractVersion });
+      await changeConfiguration({ kind: "metadata", resource: "sourceMetadata", id: null, payload: [...metadata.values()] }, saved.revision);
     } catch (caught) {
       error.value = String(caught);
       throw caught;
@@ -299,32 +286,35 @@ export function useMappingConfigurationsStore() {
   }
 
   function startCreate() {
+    draftRevision = currentRevision();
     selectedId.value = null;
     selectedDraftId.value = null;
     draft.value = emptyDraft();
     status.value = "idle";
     error.value = "";
-    void loadSourceFacts().catch(() => undefined);
+
   }
 
   async function open(mappingId: string) {
+    draftRevision = loadedRevision;
     const mapping = configurations.value.find((item) => item.id === mappingId);
     if (!mapping) return;
     selectedId.value = mapping.id;
     selectedDraftId.value = null;
     draft.value = draftFromConfiguration(mapping);
     status.value = "idle";
-    await loadSourceFacts();
+
   }
 
   async function openDraft(localId: string) {
+    draftRevision = loadedRevision;
     const localDraft = localDrafts.value.find((item) => item.localId === localId);
     if (!localDraft) return;
     selectedId.value = null;
     selectedDraftId.value = localId;
     draft.value = cloneDraft(localDraft.draft);
     status.value = "idle";
-    await loadSourceFacts();
+
   }
 
   function removeDraft(localId: string) {
@@ -366,8 +356,8 @@ export function useMappingConfigurationsStore() {
     await run(async () => {
       const input = validateDraft(draft.value);
       const saved = selectedId.value
-        ? await updateMappingConfigurationInBackend(selectedId.value, input)
-        : await createMappingConfigurationInBackend(input);
+        ? await updateMappingConfigurationInBackend(selectedId.value, input, draftRevision)
+        : await createMappingConfigurationInBackend(input, draftRevision);
       configurations.value = [...configurations.value.filter((item) => item.id !== saved.id), saved]
         .sort((left, right) => left.name.localeCompare(right.name));
       if (selectedDraftId.value) {
@@ -376,13 +366,15 @@ export function useMappingConfigurationsStore() {
       }
       selectedId.value = saved.id;
       draft.value = draftFromConfiguration(saved);
+      loadedRevision = currentRevision(); draftRevision = loadedRevision;
       status.value = "saved";
     });
   }
 
   async function remove(mappingId: string) {
     await run(async () => {
-      await deleteMappingConfigurationInBackend(mappingId);
+      await deleteMappingConfigurationInBackend(mappingId, loadedRevision);
+      loadedRevision = currentRevision();
       configurations.value = configurations.value.filter((item) => item.id !== mappingId);
       const { [mappingId]: _removedRun, ...remainingRuns } = manualRuns.value;
       manualRuns.value = remainingRuns;
@@ -407,6 +399,7 @@ export function useMappingConfigurationsStore() {
       await loadBackendResources();
       importItems.value = [];
       importPreview.value = null;
+      loadedRevision = currentRevision(); draftRevision = loadedRevision;
       status.value = "saved";
     });
   }
@@ -417,20 +410,7 @@ export function useMappingConfigurationsStore() {
   }
 
   async function runManual(mappingId: string) {
-    const mapping = configurations.value.find((item) => item.id === mappingId);
-    if (!mapping?.rowVersion) throw new Error("MAPPING_MANUAL_RUN_VERSION_REQUIRED");
-    if (manualRunBusyIds.value.includes(mappingId)) return;
-    manualRunBusyIds.value = [...manualRunBusyIds.value, mappingId];
-    error.value = "";
-    try {
-      const result = await runMappingManualOnce(mapping.id, mapping.rowVersion);
-      manualRuns.value = { ...manualRuns.value, [mapping.id]: result };
-    } catch (caught) {
-      error.value = String(caught);
-      throw caught;
-    } finally {
-      manualRunBusyIds.value = manualRunBusyIds.value.filter((item) => item !== mappingId);
-    }
+    await run(async () => { await runMappingManualOnce(mappingId, ""); });
   }
 
   async function run(operation: () => Promise<void>) {
@@ -457,7 +437,7 @@ export function useMappingConfigurationsStore() {
     selectedDraftId,
     selectedTargetApi,
     selectedTargetApiLocked,
-    requestPreview,
+    requestPreview, savedPreview, previewSaved,
     busy,
     factsBusy,
     status,

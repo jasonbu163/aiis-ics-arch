@@ -1,0 +1,106 @@
+{
+  "task": "ARCH-BE-008",
+  "revision": "r1",
+  "finding": "F-QA1-001",
+  "pid": 17688,
+  "TZ": "UTC",
+  "argv": [
+    "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+    "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet/bin/Debug/net10.0/AIIS.Backend.Api.dll"
+  ],
+  "cases": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/plans",
+        "headers": {
+          "Content-Type": "text/plain"
+        },
+        "body": "{\"coilNo\":\"QA1-MEDIA-ONLY\",\"grade\":\"G\",\"spec\":\"S\",\"weight\":\"1.2300\",\"thickness\":\"0.123\",\"width\":\"10.00\"}"
+      },
+      "response": {
+        "status": 415,
+        "headers": {
+          "Content-Length": "0",
+          "Connection": "close",
+          "Date": "Wed, 28 Oct 2026 06:25:31 GMT",
+          "Server": "Kestrel",
+          "X-Request-Id": "0HNPKNH22HQES:00000001"
+        },
+        "bodyBytes": 0,
+        "bodyUtf8": ""
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/plans",
+        "headers": {
+          "Content-Type": "application/octet-stream"
+        },
+        "body": "{\"coilNo\":\"QA1-MEDIA-ONLY\",\"grade\":\"G\",\"spec\":\"S\",\"weight\":\"1.2300\",\"thickness\":\"0.123\",\"width\":\"10.00\"}"
+      },
+      "response": {
+        "status": 415,
+        "headers": {
+          "Content-Length": "0",
+          "Connection": "close",
+          "Date": "Wed, 28 Oct 2026 06:25:31 GMT",
+          "Server": "Kestrel",
+          "X-Request-Id": "0HNPKNH22HQET:00000001"
+        },
+        "bodyBytes": 0,
+        "bodyUtf8": ""
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/plans",
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        "body": "{\"coilNo\":\"QA1-MEDIA-ONLY\",\"grade\":\"G\",\"spec\":\"S\",\"weight\":\"1.2300\",\"thickness\":\"0.123\",\"width\":\"10.00\"}"
+      },
+      "response": {
+        "status": 415,
+        "headers": {
+          "Content-Length": "0",
+          "Connection": "close",
+          "Date": "Wed, 28 Oct 2026 06:25:31 GMT",
+          "Server": "Kestrel",
+          "X-Request-Id": "0HNPKNH22HQEU:00000001"
+        },
+        "bodyBytes": 0,
+        "bodyUtf8": ""
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/api/v1/plans",
+        "headers": {
+          "Content-Type": "application/merge-patch+json"
+        },
+        "body": "{\"coilNo\":\"QA1-MEDIA-ONLY\",\"grade\":\"G\",\"spec\":\"S\",\"weight\":\"1.2300\",\"thickness\":\"0.123\",\"width\":\"10.00\"}"
+      },
+      "response": {
+        "status": 415,
+        "headers": {
+          "Connection": "close",
+          "Content-Type": "application/json; charset=utf-8",
+          "Date": "Wed, 28 Oct 2026 06:25:31 GMT",
+          "Server": "Kestrel",
+          "Transfer-Encoding": "chunked",
+          "X-Request-Id": "0HNPKNH22HQEV:00000001"
+        },
+        "bodyBytes": 132,
+        "bodyUtf8": "{\"code\":415,\"message\":\"plan_invalid_request\",\"data\":null,\"errorCode\":\"plan_invalid_request\",\"timestamp\":1793168731232,\"errors\":null}"
+      }
+    }
+  ],
+  "schemaAndRowsUnchanged": true,
+  "exitCode": 0,
+  "pidAbsent": true,
+  "port18108Rebind": true
+}

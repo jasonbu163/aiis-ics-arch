@@ -1,0 +1,99 @@
+{
+  "files": [
+    {
+      "path": "/private/tmp/arch-be008-run-eihb7rry/http-logs/backend-20261028.jsonl",
+      "bytes": 47223,
+      "lines": 122,
+      "sha256": "202b2eafcb1af35773d29ff5252b3be0dddc3a5f1c7f29fa5271b9ce8c70f5c1"
+    },
+    {
+      "path": "/private/tmp/arch-be008-run-eihb7rry/outage-logs/backend-20261028.jsonl",
+      "bytes": 2395,
+      "lines": 8,
+      "sha256": "fb82e8707ce04228d27fab48ebbcfa7c84a1cac9105e0c5e7eaa6e68d36691e8"
+    },
+    {
+      "path": "/private/tmp/arch-be008-run-eihb7rry/restarted-http-logs/backend-20261028.jsonl",
+      "bytes": 443,
+      "lines": 3,
+      "sha256": "78a6149122e9423d75fa114e076a295adc36b2702dea739254c7c2685cfc6648"
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-ny.stdout.jsonl",
+      "bytes": 78360,
+      "lines": 179,
+      "sha256": "eafddb0a2c1c26e406da38ac7efdd95603d757875ab15867674fa43c402d2644"
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa1-3c2_4j81/media-repro.stdout.jsonl",
+      "bytes": 2599,
+      "lines": 8,
+      "sha256": "fc86cfb9bcac530683212602b8c94a7c859635d6ff8006a119cb97956c211a5f"
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-ny-logs/backend-20261028.jsonl",
+      "bytes": 78360,
+      "lines": 179,
+      "sha256": "eafddb0a2c1c26e406da38ac7efdd95603d757875ab15867674fa43c402d2644"
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa1-3c2_4j81/media-repro-logs/backend-20261028.jsonl",
+      "bytes": 2599,
+      "lines": 8,
+      "sha256": "fc86cfb9bcac530683212602b8c94a7c859635d6ff8006a119cb97956c211a5f"
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-attempt2/formal-ny.stdout.jsonl",
+      "bytes": 86790,
+      "lines": 198,
+      "sha256": "4851b449ad15c175773494577aa0f5160d686173f8786ed9a585c1078ffcbee2"
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-attempt3/formal-ny.stdout.jsonl",
+      "bytes": 231726,
+      "lines": 526,
+      "sha256": "c7d334be91e3ba26fac4306b6059db69c5d22dc14c6668b105e1382c5738cb8a"
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-attempt3/formal-utc.stdout.jsonl",
+      "bytes": 444,
+      "lines": 3,
+      "sha256": "676f54e4d700641114c6c18af0faea857e4671d8ef7195704ed9d590d256a573"
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-attempt2/formal-ny-logs/backend-20261028.jsonl",
+      "bytes": 86790,
+      "lines": 198,
+      "sha256": "4851b449ad15c175773494577aa0f5160d686173f8786ed9a585c1078ffcbee2"
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-attempt3/formal-ny-logs/backend-20261028.jsonl",
+      "bytes": 231726,
+      "lines": 526,
+      "sha256": "c7d334be91e3ba26fac4306b6059db69c5d22dc14c6668b105e1382c5738cb8a"
+    },
+    {
+      "path": "/private/tmp/arch-be008-qa1-3c2_4j81/formal-attempt3/formal-utc-logs/backend-20261028.jsonl",
+      "bytes": 444,
+      "lines": 3,
+      "sha256": "676f54e4d700641114c6c18af0faea857e4671d8ef7195704ed9d590d256a573"
+    }
+  ],
+  "parsedJsonLines": 1961,
+  "eventCountsIncludingStdoutAndFileCopies": {
+    "<no-event>": 13,
+    "backend_started": 13,
+    "plan_created": 26,
+    "plan_request_finished": 951,
+    "plan_transaction_rolled_back": 22,
+    "plan_transaction_failed": 23,
+    "plan_request_failed": 30,
+    "plan_validation_failed": 869,
+    "plan_unique_conflict": 1,
+    "backend_stopped": 13
+  },
+  "privateSecretMatches": 0,
+  "createdEventsHaveRequestIdAndPlanId": true,
+  "stdoutAndFileBothParsed": true,
+  "formalStopsLogged": true
+}

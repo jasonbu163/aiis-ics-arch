@@ -39,7 +39,7 @@ Python签名描述实际对象合同，非已有完整类型SDK。内部布局�
 5. 匹配S7 INT ACK加本地T3提交才confirmed；可能发送后缺证据为unknown，不表示物理工艺完成。
 6. 返回runtime后等待interval_ms；不同flow并发，同流不重叠/不补历史tick。每PLC session仅串行自身IO。
 
-两个完整手册均包含同能力teaching01的完整app/YAML、逐文件module/import/kind/dispatch接线及编译/导入/CLI验证。正式源码仍仅接受demo01，不自动发现文件。teaching01是不同flow/business身份的同能力GET→INT，不是demo02；POST/auth、BOOL/DINT/REAL、上升沿flow未实现，写必须经过Execution.apply。
+两个完整手册均包含同能力teaching01的完整app/YAML、逐文件module/import/kind/dispatch接线及编译/导入/CLI验证。YAML v1中，两工程注册demo01、plc_guard_get_int和get_value_guard_int；basic01复用demo01。teaching01仍只在教程副本练习；未知kind拒绝，不自动发现文件。teaching01是不同flow/business身份的同能力GET→INT，不是demo02；POST/auth、BOOL/DINT/REAL、上升沿flow未实现，写必须经过Execution.apply。
 
 ## 夹具、状态与证据边界
 
@@ -50,3 +50,7 @@ state init --synthetic显式创建新schema1目录；普通run不建schema。默
 来源Unix毫秒与monotonic耗时保留各自语义。现SQLite日历元数据/JSONL为UTC，与根Asia/Shanghai日历存储合同不同；本轮记录限制，不改实现/schema/历史。平台移植、时间数据迁移、现场endpoint、DS/Backend联调、服务托管、备份升级、长稳/容量、分发均另需批准和证据。
 
 FF-001 r4已通过独立本地QA2，待Human Owner终验。FF-002文档/有限演练有自己的[spec](plans/FF-002-user-guide-and-runtime-positioning/spec.md)与[Development记录](plans/FF-002-user-guide-and-runtime-positioning/tasks.md)，DEV自检不替独立QA。[FF PLAN](PLAN.zh-CN.md)索引下一gate。
+
+正式基础案例：basic01复用demo01、basic02负target才GET、basic03正数且≤100；各自完整命令见[Rust案例](field-flow-rust/examples/README.zh-CN.md)与[Python案例](field-flow-python/examples/README.zh-CN.md)。进阶与C#仍为planned，精确DEV/QA/Owner阶段见FF-005 bundle。
+
+Rust新增[YAML v2点目录教程](field-flow-rust/USER_GUIDE.zh-CN.md#catalog-v2)：每PLC一个JSON，仅demo01/read_points；v1三kind/basic02/basic03保持。Python/C#未加载、DS未导出，Modbus仅结构校验。

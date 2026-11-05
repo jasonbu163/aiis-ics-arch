@@ -1,0 +1,161 @@
+{
+  "sourceMigrationSha256": "806b008ebc4d232326db9967132a5bdb5d507518dca96017592ed80e00d056eb",
+  "columns": [
+    {
+      "name": "id",
+      "type": "int",
+      "nullable": false
+    },
+    {
+      "name": "coil_no",
+      "type": "varchar(50)",
+      "nullable": false
+    },
+    {
+      "name": "grade",
+      "type": "varchar(20)",
+      "nullable": false
+    },
+    {
+      "name": "spec",
+      "type": "varchar(50)",
+      "nullable": false
+    },
+    {
+      "name": "weight",
+      "type": "decimal(12,4)",
+      "nullable": false
+    },
+    {
+      "name": "thickness",
+      "type": "decimal(10,3)",
+      "nullable": false
+    },
+    {
+      "name": "width",
+      "type": "decimal(10,2)",
+      "nullable": false
+    },
+    {
+      "name": "material_status",
+      "type": "varchar(20)",
+      "nullable": false
+    },
+    {
+      "name": "density",
+      "type": "decimal(10,2)",
+      "nullable": false
+    },
+    {
+      "name": "entry_length",
+      "type": "decimal(10,2)",
+      "nullable": false
+    },
+    {
+      "name": "uncoiler1_tension",
+      "type": "decimal(10,2)",
+      "nullable": false
+    },
+    {
+      "name": "exit_tension",
+      "type": "decimal(10,2)",
+      "nullable": false
+    },
+    {
+      "name": "process1_tension",
+      "type": "decimal(10,2)",
+      "nullable": false
+    },
+    {
+      "name": "entry_loop_tension",
+      "type": "decimal(10,2)",
+      "nullable": false
+    },
+    {
+      "name": "exit_loop_tension",
+      "type": "decimal(10,2)",
+      "nullable": false
+    },
+    {
+      "name": "entry_unit_tension",
+      "type": "decimal(12,4)",
+      "nullable": false
+    },
+    {
+      "name": "entry_loop_unit_tension",
+      "type": "decimal(12,4)",
+      "nullable": false
+    },
+    {
+      "name": "process_unit_tension",
+      "type": "decimal(12,4)",
+      "nullable": false
+    },
+    {
+      "name": "exit_loop_unit_tension",
+      "type": "decimal(12,4)",
+      "nullable": false
+    },
+    {
+      "name": "exit_unit_tension",
+      "type": "decimal(12,4)",
+      "nullable": false
+    },
+    {
+      "name": "status",
+      "type": "varchar(20)",
+      "nullable": false
+    },
+    {
+      "name": "priority",
+      "type": "smallint",
+      "nullable": false
+    },
+    {
+      "name": "remark",
+      "type": "varchar(500)",
+      "nullable": true
+    },
+    {
+      "name": "created_at",
+      "type": "datetime(0)",
+      "nullable": false
+    },
+    {
+      "name": "updated_at",
+      "type": "datetime(0)",
+      "nullable": false
+    }
+  ],
+  "indexes": [
+    {
+      "name": "ix_plans_coil_no",
+      "columns": [
+        "coil_no"
+      ],
+      "unique": true
+    },
+    {
+      "name": "ix_plans_id",
+      "columns": [
+        "id"
+      ],
+      "unique": false
+    },
+    {
+      "name": "ix_plans_priority",
+      "columns": [
+        "priority"
+      ],
+      "unique": false
+    },
+    {
+      "name": "ix_plans_status",
+      "columns": [
+        "status"
+      ],
+      "unique": false
+    }
+  ],
+  "fixtureColumnsMatch": true
+}

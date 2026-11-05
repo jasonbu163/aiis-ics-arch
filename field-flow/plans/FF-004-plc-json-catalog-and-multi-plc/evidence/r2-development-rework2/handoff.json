@@ -1,0 +1,57 @@
+{
+  "task_id": "FF-004",
+  "revision": "r2",
+  "slice": "A",
+  "rework": "rework2",
+  "status": "developer_handoff",
+  "development": "/root/ff004_development_r2",
+  "repository": "/Users/jason/Desktop/DreamCode/aiis-ics-arch",
+  "head": "8030dbb3401ac6d1cf8bea46c81cfeff9e8e073b",
+  "spec_sha256": "a7418cfe8f34515719beb50d9d901f42d7a283e2b33c61a2a57b129104a7870e",
+  "tasks_sha256": "f477ad1cc5050fb07ff2204514ae10fda794c4f3a2a3bd6f4ec8b38fd3ece3d2",
+  "qa2_checklist_sha256": "ed3468e0bb68ed9da056d1553a3f1c2468a77a3a57c2fcf3e06b868ec00f01a7",
+  "old60_evidence_unchanged": true,
+  "implementation_manifest_sha256": "8cb0550a0be8310385e92efe0160b71432aab5f3fa06254cc077e09010a9f1dd",
+  "candidate_manifest_sha256": "8643a2a681daab6a8024f4db8ec87eabf9a3875d256d1c7aaeb77815c6926cb5",
+  "copy_manifest_sha256": "8ff77d28d9ab4c37d8637a12fea2ede0951b7218982fcf6fe6635c704d69a836",
+  "evidence_files_sha256": "a07cfc55fc8e986ff123b423a44d35385580f3aa313f68a597922dd0d506d3c1",
+  "changed_since_QA2": [
+    "field-flow/field-flow-rust/src/config/catalog.rs",
+    "field-flow/field-flow-rust/tests/plc_catalog.rs"
+  ],
+  "full_tests": {
+    "raw": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/full.txt",
+    "exit": 0,
+    "nonzero_tests": 32,
+    "old": 21,
+    "new": 11,
+    "new_matrix_seconds": 57.19
+  },
+  "copy_tests": {
+    "raw": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/copy-tests.txt",
+    "exit": 0,
+    "nonzero_tests": 4
+  },
+  "release_replay": {
+    "raw": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2/manuals.txt",
+    "exit": 0,
+    "formal_and_copy_scenes": 4,
+    "normal_zero_forced": true
+  },
+  "blackbox": {
+    "same_sha_vectors": 24,
+    "expected_matches": 24,
+    "report": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/evidence/r2-development-rework2/repro-after.json"
+  },
+  "resources": {
+    "owned_root": "/private/tmp/ff-004-r2-dev-IVyzcc/rework2",
+    "running_owned": 0,
+    "pid_absent_count": 376,
+    "ports_rebound": 8,
+    "new_legacy_prefix_dirs": 76,
+    "retention": "fresh QA3 and Owner acceptance; no deletion; coordinator later audits ownership/dependencies"
+  },
+  "limits": "macOS arm64 synthetic S7 int16; no real endpoints, Python/C#/Modbus transport/DS export/Windows/Linux/teaching rerun/deployment/schema/Git writes; original bootstrap force and hold_ack limits retained",
+  "next_gate": "Coordinator launches new fresh-context Verification QA3; no QA3 verdict or Owner acceptance claimed",
+  "generated_at": "2026-11-04T18:36:07.510210+08:00"
+}

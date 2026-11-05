@@ -1,118 +1,12 @@
-/* File Path: /automation-world/semantic-mapping-agent/src/app/styles/responsive.css
- * Description: Cross-module responsive composition rules.
- * Main Features:
- *   - Collapses shell, workbench, and diagnostic grids for narrow viewports
- *   - Keeps DTB-015 editors, runtime evidence, and controls reachable at 1024px
- */
-
-.workspace-module-host,
-.single-fact-workspace-stack,
-.single-fact-runtime-stack,
-.projection-detail-stack {
-  min-width: 0;
+/* SMA保留页响应布局；CU壳层自行处理侧栏与顶栏窄窗。 */
+.single-fact-workspace-stack, .mapping-page-stack { min-width: 0; }
+@media (max-width: 760px) {
+  .sma-content .panel-header, .sma-overlays .panel-header { align-items: flex-start; flex-wrap: wrap; }
+  .sma-content .action-row, .sma-overlays .action-row { justify-content: flex-start; }
+  .sma-overlays .sma-dialog { width: calc(100vw - 16px); max-height: calc(100vh - 16px); margin: 8px auto; }
+  .sma-content .runtime-metrics { grid-template-columns: 1fr; }
 }
-
-.single-fact-workspace-stack > .panel,
-.single-fact-runtime-stack > .panel {
-  min-width: 0;
-  max-width: 100%;
-}
-
-.collection-contract-editor textarea,
-.service-mapping-editor textarea,
-.single-fact-step-form input,
-.single-fact-step-form select {
-  max-width: 100%;
-}
-
-@media (max-width: 1100px) {
-  .workspace {
-    padding: 18px;
-  }
-
-  .runtime-settings,
-  .single-fact-step-form {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .projection-detail-scroll,
-  .collection-fact-table-scroll {
-    max-width: 100%;
-    overflow-x: auto;
-  }
-}
-
-@media (max-width: 980px) {
-  .app-shell {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    position: static;
-    height: auto;
-    overflow: visible;
-    border-right: 0;
-    border-bottom: 1px solid #253239;
-  }
-
-  .sidebar-nav {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .sidebar-footer {
-    margin-top: 12px;
-  }
-
-  .content-topbar,
-  .panel-header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .topbar-actions {
-    align-items: flex-start;
-    justify-content: space-between;
-    width: 100%;
-  }
-
-  .connection-summary {
-    text-align: left;
-  }
-
-  .workspace {
-    padding: 18px;
-  }
-
-  .workspace-segmented {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    max-width: 100%;
-    overscroll-behavior-inline: contain;
-  }
-
-  .workspace-segmented button {
-    flex: 0 0 auto;
-    white-space: nowrap;
-  }
-
-  .catalog-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .catalog-layout,
-  .catalog-list-panel,
-  .catalog-detail-panel {
-    min-width: 0;
-    max-width: 100%;
-  }
-
-  .diagnostics-layout,
-  .probe-grid,
-  .diagnostics-controls {
-    grid-template-columns: 1fr;
-  }
-
-  .danger-action {
-    width: fit-content;
-  }
+@media (max-width: 760px) {
+  /* 窄窗将操作列留在横滚内容中，避免固定操作遮住普通数据列。 */
+  :is(.sma-content, .sma-overlays) .mapping-list-table :is(th, td):last-child { position: static; right: auto; box-shadow: none; }
 }

@@ -1,0 +1,83 @@
+[
+  {
+    "name": "dotnet-info",
+    "argv": [
+      "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+      "--info"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "exitCode": 0,
+    "elapsedSeconds": 0.21013283729553223
+  },
+  {
+    "name": "restore-api",
+    "argv": [
+      "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+      "restore",
+      "AIIS.Backend.Api.csproj",
+      "--configfile",
+      "NuGet.Config",
+      "--locked-mode"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "exitCode": 0,
+    "elapsedSeconds": 0.5047187805175781
+  },
+  {
+    "name": "restore-tests",
+    "argv": [
+      "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+      "restore",
+      "tests/AIIS.Backend.Tests/AIIS.Backend.Tests.csproj",
+      "--configfile",
+      "NuGet.Config",
+      "--locked-mode"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "exitCode": 0,
+    "elapsedSeconds": 0.3755640983581543
+  },
+  {
+    "name": "build",
+    "argv": [
+      "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+      "build",
+      "AIIS.Backend.Api.csproj",
+      "--no-restore"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "exitCode": 0,
+    "elapsedSeconds": 0.4181790351867676
+  },
+  {
+    "name": "msbuild-items",
+    "argv": [
+      "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+      "msbuild",
+      "AIIS.Backend.Api.csproj",
+      "-getItem:Compile,Content,None",
+      "-nologo"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "exitCode": 0,
+    "elapsedSeconds": 0.22523903846740723
+  },
+  {
+    "name": "a",
+    "argv": [
+      "/private/tmp/arch-be008-sdk-rfSK3RBg/sdk/dotnet",
+      "test",
+      "tests/AIIS.Backend.Tests/AIIS.Backend.Tests.csproj",
+      "--no-restore",
+      "--filter",
+      "TestCategory!=MySQL",
+      "--logger",
+      "trx;LogFileName=qa2-a.trx",
+      "--results-directory",
+      "/private/tmp/arch-be008-qa2-gkv496cr/results-a"
+    ],
+    "cwd": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend-dotnet",
+    "exitCode": 0,
+    "elapsedSeconds": 2.793214797973633
+  }
+]

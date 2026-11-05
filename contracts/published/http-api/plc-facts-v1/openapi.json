@@ -1,0 +1,2491 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "PLC facts v1 source contract",
+    "version": "1"
+  },
+  "paths": {
+    "/api/v1/integration/plc-facts/batches": {
+      "post": {
+        "tags": [
+          "plc-facts"
+        ],
+        "summary": "Batches",
+        "operationId": "plc_facts_batches",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiptOut"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integration/plc-facts/latest": {
+      "get": {
+        "tags": [
+          "plc-facts"
+        ],
+        "summary": "Latest",
+        "operationId": "plc_facts_latest",
+        "parameters": [
+          {
+            "name": "plcId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Plcid"
+            }
+          },
+          {
+            "name": "dbNumber",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 65535,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dbnumber"
+            }
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Groupid"
+            }
+          },
+          {
+            "name": "pointId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Pointid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "pageCursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Pagecursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadOut"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integration/plc-facts/history": {
+      "get": {
+        "tags": [
+          "plc-facts"
+        ],
+        "summary": "History",
+        "operationId": "plc_facts_history",
+        "parameters": [
+          {
+            "name": "plcId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Plcid"
+            }
+          },
+          {
+            "name": "dbNumber",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 65535,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Dbnumber"
+            }
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Groupid"
+            }
+          },
+          {
+            "name": "pointId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Pointid"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "pageCursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Pagecursor"
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "changes",
+                "range"
+              ],
+              "type": "string",
+              "title": "Mode"
+            }
+          },
+          {
+            "name": "instanceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Instanceid"
+            }
+          },
+          {
+            "name": "sourceGeneration",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sourcegeneration"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "earliest",
+                    "tail"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To"
+            }
+          },
+          {
+            "name": "view",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "projection",
+                "original"
+              ],
+              "type": "string",
+              "default": "projection",
+              "title": "View"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadOut"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Typed PLC facts failure; persistence and retry boundary are explicit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Address": {
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "maximum": 65535.0,
+            "minimum": 0.0,
+            "title": "Offset"
+          },
+          "bit": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 7.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bit"
+          },
+          "confirmed": {
+            "type": "boolean",
+            "title": "Confirmed"
+          },
+          "origin": {
+            "type": "string",
+            "title": "Origin"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "offset",
+          "bit",
+          "confirmed",
+          "origin",
+          "reason"
+        ],
+        "title": "Address"
+      },
+      "BatchIn": {
+        "properties": {
+          "contractVersion": {
+            "type": "string",
+            "const": "plc-facts/v1",
+            "title": "Contractversion"
+          },
+          "sourceProfile": {
+            "type": "string",
+            "const": "daa-local/v2",
+            "title": "Sourceprofile"
+          },
+          "digestProfile": {
+            "type": "string",
+            "const": "pf-json/v1",
+            "title": "Digestprofile"
+          },
+          "instanceId": {
+            "type": "string",
+            "title": "Instanceid"
+          },
+          "batchId": {
+            "type": "string",
+            "title": "Batchid"
+          },
+          "batchCreatedAt": {
+            "type": "string",
+            "title": "Batchcreatedat"
+          },
+          "requestDigest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Requestdigest"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Parent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cycles": {
+            "items": {
+              "$ref": "#/components/schemas/CycleIn"
+            },
+            "type": "array",
+            "title": "Cycles"
+          },
+          "samples": {
+            "items": {
+              "$ref": "#/components/schemas/SamplePartIn"
+            },
+            "type": "array",
+            "title": "Samples"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "contractVersion",
+          "sourceProfile",
+          "digestProfile",
+          "instanceId",
+          "batchId",
+          "batchCreatedAt",
+          "requestDigest",
+          "parent",
+          "cycles",
+          "samples"
+        ],
+        "title": "BatchIn"
+      },
+      "ChangesData": {
+        "properties": {
+          "contractVersion": {
+            "type": "string",
+            "const": "plc-facts/v1",
+            "title": "Contractversion",
+            "default": "plc-facts/v1"
+          },
+          "digestProfile": {
+            "type": "string",
+            "const": "pf-json/v1",
+            "title": "Digestprofile",
+            "default": "pf-json/v1"
+          },
+          "asOf": {
+            "type": "string",
+            "title": "Asof"
+          },
+          "hasMore": {
+            "type": "boolean",
+            "title": "Hasmore"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/Coverage"
+          },
+          "mode": {
+            "type": "string",
+            "const": "changes",
+            "title": "Mode",
+            "default": "changes"
+          },
+          "items": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/FactItem"
+                },
+                {
+                  "$ref": "#/components/schemas/GapItem"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "nextCursor": {
+            "type": "string",
+            "title": "Nextcursor"
+          },
+          "snapshotHighSerial": {
+            "type": "string",
+            "title": "Snapshothighserial"
+          },
+          "scannedThrough": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "scanBudgetReached": {
+            "type": "boolean",
+            "title": "Scanbudgetreached"
+          },
+          "baseline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "explicit_tail"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline"
+          },
+          "omittedThrough": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Omittedthrough"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "asOf",
+          "hasMore",
+          "coverage",
+          "items",
+          "nextCursor",
+          "snapshotHighSerial",
+          "scannedThrough",
+          "scanBudgetReached",
+          "baseline"
+        ],
+        "title": "ChangesData"
+      },
+      "Coverage": {
+        "properties": {
+          "complete": {
+            "type": "boolean",
+            "const": false,
+            "title": "Complete",
+            "default": false
+          },
+          "meaning": {
+            "type": "string",
+            "const": "receipt_feed_only_not_source_completeness",
+            "title": "Meaning",
+            "default": "receipt_feed_only_not_source_completeness"
+          },
+          "unknownBeforeSerial": {
+            "type": "string",
+            "title": "Unknownbeforeserial"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "unknownBeforeSerial"
+        ],
+        "title": "Coverage"
+      },
+      "CycleIn": {
+        "properties": {
+          "cycleId": {
+            "type": "string",
+            "title": "Cycleid"
+          },
+          "manifestUtf8": {
+            "type": "string",
+            "title": "Manifestutf8"
+          },
+          "manifestSha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Manifestsha256"
+          },
+          "contextUtf8": {
+            "type": "string",
+            "title": "Contextutf8"
+          },
+          "contextSha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Contextsha256"
+          },
+          "transportManifest": {
+            "items": {
+              "$ref": "#/components/schemas/TransportSample"
+            },
+            "type": "array",
+            "title": "Transportmanifest"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cycleId",
+          "manifestUtf8",
+          "manifestSha256",
+          "contextUtf8",
+          "contextSha256",
+          "transportManifest"
+        ],
+        "title": "CycleIn"
+      },
+      "CycleOut": {
+        "properties": {
+          "cycleId": {
+            "type": "string",
+            "title": "Cycleid"
+          },
+          "cycleDigest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Cycledigest"
+          },
+          "complete": {
+            "type": "boolean",
+            "title": "Complete"
+          },
+          "qualityGood": {
+            "type": "boolean",
+            "title": "Qualitygood"
+          },
+          "receivedParts": {
+            "type": "integer",
+            "title": "Receivedparts"
+          },
+          "expectedParts": {
+            "type": "integer",
+            "title": "Expectedparts"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cycleId",
+          "cycleDigest",
+          "complete",
+          "qualityGood",
+          "receivedParts",
+          "expectedParts"
+        ],
+        "title": "CycleOut"
+      },
+      "Definition": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "plcId": {
+            "type": "string",
+            "title": "Plcid"
+          },
+          "dbId": {
+            "type": "string",
+            "title": "Dbid"
+          },
+          "sourcePath": {
+            "type": "string",
+            "maxLength": 2048,
+            "title": "Sourcepath"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 512,
+            "title": "Name"
+          },
+          "nameMode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "auto_path",
+                  "auto_address",
+                  "manual"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Namemode"
+          },
+          "dataType": {
+            "type": "string",
+            "title": "Datatype"
+          },
+          "comment": {
+            "type": "string",
+            "maxLength": 4096,
+            "title": "Comment"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "groupId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Groupid"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Address"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "plcId",
+          "dbId",
+          "sourcePath",
+          "name",
+          "dataType",
+          "comment",
+          "enabled",
+          "groupId",
+          "address"
+        ],
+        "title": "Definition"
+      },
+      "Diagnosis": {
+        "properties": {
+          "sampleId": {
+            "type": "string",
+            "title": "Sampleid"
+          },
+          "part": {
+            "type": "integer",
+            "title": "Part"
+          },
+          "diagnosis": {
+            "type": "string",
+            "enum": [
+              "eligible",
+              "duplicate_proven",
+              "expired_unproven",
+              "conflict",
+              "source_rejected"
+            ],
+            "title": "Diagnosis"
+          },
+          "historicalProof": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HistoricalProof"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sampleId",
+          "part",
+          "diagnosis"
+        ],
+        "title": "Diagnosis"
+      },
+      "FactItem": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "fact",
+            "title": "Kind",
+            "default": "fact"
+          },
+          "position": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "sourceSha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Sourcesha256"
+          },
+          "contentDigest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Contentdigest"
+          },
+          "projectionDigest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Projectiondigest"
+          },
+          "projection": {
+            "$ref": "#/components/schemas/Projection"
+          },
+          "cycle": {
+            "$ref": "#/components/schemas/CycleOut"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "position",
+          "sourceSha256",
+          "contentDigest",
+          "projectionDigest",
+          "projection",
+          "cycle"
+        ],
+        "title": "FactItem"
+      },
+      "FailureData": {
+        "properties": {
+          "contractVersion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "plc-facts/v1"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contractversion"
+          },
+          "instanceId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instanceid"
+          },
+          "batchId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Batchid"
+          },
+          "requestDigest": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requestdigest"
+          },
+          "receiptId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Receiptid"
+          },
+          "recordedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recordedat"
+          },
+          "persistence": {
+            "type": "string",
+            "enum": [
+              "none",
+              "rejection_recorded",
+              "unknown"
+            ],
+            "title": "Persistence"
+          },
+          "newFactsCommitted": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Newfactscommitted"
+          },
+          "retryable": {
+            "type": "boolean",
+            "title": "Retryable"
+          },
+          "retirementAllowed": {
+            "type": "boolean",
+            "title": "Retirementallowed"
+          },
+          "rejectionToken": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rejectiontoken"
+          },
+          "rejectionExpiresAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rejectionexpiresat"
+          },
+          "diagnostics": {
+            "items": {
+              "$ref": "#/components/schemas/Diagnosis"
+            },
+            "type": "array",
+            "title": "Diagnostics"
+          },
+          "requiresResync": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requiresresync"
+          },
+          "lostFrom": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Position"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lostThrough": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Position"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "earliestRecoverableCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Earliestrecoverablecursor"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "persistence",
+          "newFactsCommitted",
+          "retryable",
+          "retirementAllowed"
+        ],
+        "title": "FailureData"
+      },
+      "FailureOut": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "enum": [
+              403,
+              409,
+              410,
+              413,
+              415,
+              422,
+              429,
+              503,
+              500
+            ],
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "errorCode": {
+            "type": "string",
+            "title": "Errorcode"
+          },
+          "data": {
+            "$ref": "#/components/schemas/FailureData"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "errorCode",
+          "data"
+        ],
+        "title": "FailureOut"
+      },
+      "GapItem": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "gap",
+            "title": "Kind",
+            "default": "gap"
+          },
+          "position": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "raw_expired",
+              "raw_unavailable"
+            ],
+            "title": "Reason"
+          },
+          "instanceId": {
+            "type": "string",
+            "title": "Instanceid"
+          },
+          "plcId": {
+            "type": "string",
+            "title": "Plcid"
+          },
+          "sourceGeneration": {
+            "type": "string",
+            "title": "Sourcegeneration"
+          },
+          "sourceSeq": {
+            "type": "string",
+            "title": "Sourceseq"
+          },
+          "cycleId": {
+            "type": "string",
+            "title": "Cycleid"
+          },
+          "sampleId": {
+            "type": "string",
+            "title": "Sampleid"
+          },
+          "part": {
+            "type": "integer",
+            "title": "Part"
+          },
+          "pointIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Pointids"
+          },
+          "sourceSha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Sourcesha256"
+          },
+          "contentDigest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Contentdigest"
+          },
+          "observedFrom": {
+            "type": "string",
+            "title": "Observedfrom"
+          },
+          "observedTo": {
+            "type": "string",
+            "title": "Observedto"
+          },
+          "expiredAt": {
+            "type": "string",
+            "title": "Expiredat"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "position",
+          "reason",
+          "instanceId",
+          "plcId",
+          "sourceGeneration",
+          "sourceSeq",
+          "cycleId",
+          "sampleId",
+          "part",
+          "pointIds",
+          "sourceSha256",
+          "contentDigest",
+          "observedFrom",
+          "observedTo",
+          "expiredAt"
+        ],
+        "title": "GapItem"
+      },
+      "HistoricalProof": {
+        "properties": {
+          "sampleId": {
+            "type": "string",
+            "title": "Sampleid"
+          },
+          "part": {
+            "type": "integer",
+            "title": "Part"
+          },
+          "contentDigest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Contentdigest"
+          },
+          "sourceSha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Sourcesha256"
+          },
+          "position": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "proofExpiresAt": {
+            "type": "string",
+            "title": "Proofexpiresat"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sampleId",
+          "part",
+          "contentDigest",
+          "sourceSha256",
+          "position",
+          "proofExpiresAt"
+        ],
+        "title": "HistoricalProof"
+      },
+      "LatestData": {
+        "properties": {
+          "contractVersion": {
+            "type": "string",
+            "const": "plc-facts/v1",
+            "title": "Contractversion",
+            "default": "plc-facts/v1"
+          },
+          "digestProfile": {
+            "type": "string",
+            "const": "pf-json/v1",
+            "title": "Digestprofile",
+            "default": "pf-json/v1"
+          },
+          "asOf": {
+            "type": "string",
+            "title": "Asof"
+          },
+          "hasMore": {
+            "type": "boolean",
+            "title": "Hasmore"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/Coverage"
+          },
+          "mode": {
+            "type": "string",
+            "const": "latest",
+            "title": "Mode",
+            "default": "latest"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/LatestDb"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "nextPageCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nextpagecursor"
+          },
+          "bindingRevision": {
+            "type": "string",
+            "title": "Bindingrevision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "asOf",
+          "hasMore",
+          "coverage",
+          "items",
+          "nextPageCursor",
+          "bindingRevision"
+        ],
+        "title": "LatestData"
+      },
+      "LatestDb": {
+        "properties": {
+          "plcId": {
+            "type": "string",
+            "title": "Plcid"
+          },
+          "dbNumber": {
+            "type": "integer",
+            "title": "Dbnumber"
+          },
+          "points": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/LatestPoint"
+            },
+            "type": "object",
+            "title": "Points"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "plcId",
+          "dbNumber",
+          "points"
+        ],
+        "title": "LatestDb"
+      },
+      "LatestPoint": {
+        "properties": {
+          "definition": {
+            "$ref": "#/components/schemas/Definition"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "observedAt": {
+            "type": "string",
+            "title": "Observedat"
+          },
+          "quality": {
+            "type": "string",
+            "enum": [
+              "good",
+              "bad"
+            ],
+            "title": "Quality"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "expiresAt": {
+            "type": "string",
+            "title": "Expiresat"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceRef"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "definition",
+          "value",
+          "observedAt",
+          "quality",
+          "reason",
+          "expiresAt",
+          "source"
+        ],
+        "title": "LatestPoint"
+      },
+      "OriginalItem": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "original",
+            "title": "Kind",
+            "default": "original"
+          },
+          "position": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "instanceId": {
+            "type": "string",
+            "title": "Instanceid"
+          },
+          "plcId": {
+            "type": "string",
+            "title": "Plcid"
+          },
+          "sampleId": {
+            "type": "string",
+            "title": "Sampleid"
+          },
+          "sourceSha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Sourcesha256"
+          },
+          "payloadUtf8": {
+            "type": "string",
+            "title": "Payloadutf8"
+          },
+          "sourceSampleComplete": {
+            "type": "boolean",
+            "title": "Sourcesamplecomplete"
+          },
+          "expiresAt": {
+            "type": "string",
+            "title": "Expiresat"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "position",
+          "instanceId",
+          "plcId",
+          "sampleId",
+          "sourceSha256",
+          "payloadUtf8",
+          "sourceSampleComplete",
+          "expiresAt"
+        ],
+        "title": "OriginalItem"
+      },
+      "Parent": {
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "title": "Batchid"
+          },
+          "requestDigest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Requestdigest"
+          },
+          "rejectionToken": {
+            "type": "string",
+            "title": "Rejectiontoken"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "batchId",
+          "requestDigest",
+          "rejectionToken"
+        ],
+        "title": "Parent"
+      },
+      "PartResult": {
+        "properties": {
+          "sampleId": {
+            "type": "string",
+            "title": "Sampleid"
+          },
+          "part": {
+            "type": "integer",
+            "title": "Part"
+          },
+          "parts": {
+            "type": "integer",
+            "title": "Parts"
+          },
+          "sourceSha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Sourcesha256"
+          },
+          "contentDigest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Contentdigest"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "created",
+              "duplicate"
+            ],
+            "title": "Outcome"
+          },
+          "originalOutcome": {
+            "type": "string",
+            "enum": [
+              "created",
+              "duplicate"
+            ],
+            "title": "Originaloutcome"
+          },
+          "confirmation": {
+            "type": "string",
+            "enum": [
+              "created",
+              "duplicate",
+              "historical_committed"
+            ],
+            "title": "Confirmation"
+          },
+          "sourceSampleComplete": {
+            "type": "boolean",
+            "title": "Sourcesamplecomplete"
+          },
+          "position": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "latestAdvancedPointIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Latestadvancedpointids"
+          },
+          "expiresAt": {
+            "type": "string",
+            "title": "Expiresat"
+          },
+          "valueReadable": {
+            "type": "boolean",
+            "title": "Valuereadable"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sampleId",
+          "part",
+          "parts",
+          "sourceSha256",
+          "contentDigest",
+          "outcome",
+          "originalOutcome",
+          "confirmation",
+          "sourceSampleComplete",
+          "position",
+          "latestAdvancedPointIds",
+          "expiresAt",
+          "valueReadable"
+        ],
+        "title": "PartResult"
+      },
+      "PointFact": {
+        "properties": {
+          "definition": {
+            "$ref": "#/components/schemas/Definition"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "observedAt": {
+            "type": "string",
+            "title": "Observedat"
+          },
+          "quality": {
+            "type": "string",
+            "enum": [
+              "good",
+              "bad"
+            ],
+            "title": "Quality"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "definition",
+          "value",
+          "observedAt",
+          "quality",
+          "reason"
+        ],
+        "title": "PointFact"
+      },
+      "Position": {
+        "properties": {
+          "commitSerial": {
+            "type": "string",
+            "title": "Commitserial"
+          },
+          "ordinal": {
+            "type": "integer",
+            "maximum": 32.0,
+            "minimum": 0.0,
+            "title": "Ordinal"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "commitSerial",
+          "ordinal"
+        ],
+        "title": "Position"
+      },
+      "Projection": {
+        "properties": {
+          "sourceSha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Sourcesha256"
+          },
+          "sampleId": {
+            "type": "string",
+            "title": "Sampleid"
+          },
+          "cycleId": {
+            "type": "string",
+            "title": "Cycleid"
+          },
+          "instanceId": {
+            "type": "string",
+            "title": "Instanceid"
+          },
+          "plcId": {
+            "type": "string",
+            "title": "Plcid"
+          },
+          "sourceGeneration": {
+            "type": "string",
+            "title": "Sourcegeneration"
+          },
+          "sourceSeq": {
+            "type": "string",
+            "title": "Sourceseq"
+          },
+          "groupId": {
+            "type": "string",
+            "title": "Groupid"
+          },
+          "configRevision": {
+            "type": "string",
+            "title": "Configrevision"
+          },
+          "dbNumber": {
+            "type": "integer",
+            "title": "Dbnumber"
+          },
+          "origin": {
+            "type": "string",
+            "title": "Origin"
+          },
+          "startedAt": {
+            "type": "string",
+            "title": "Startedat"
+          },
+          "finishedAt": {
+            "type": "string",
+            "title": "Finishedat"
+          },
+          "savedAt": {
+            "type": "string",
+            "title": "Savedat"
+          },
+          "part": {
+            "type": "integer",
+            "title": "Part"
+          },
+          "parts": {
+            "type": "integer",
+            "title": "Parts"
+          },
+          "points": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/PointFact"
+            },
+            "type": "object",
+            "title": "Points"
+          },
+          "expiresAt": {
+            "type": "string",
+            "title": "Expiresat"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sourceSha256",
+          "sampleId",
+          "cycleId",
+          "instanceId",
+          "plcId",
+          "sourceGeneration",
+          "sourceSeq",
+          "groupId",
+          "configRevision",
+          "dbNumber",
+          "origin",
+          "startedAt",
+          "finishedAt",
+          "savedAt",
+          "part",
+          "parts",
+          "points",
+          "expiresAt"
+        ],
+        "title": "Projection"
+      },
+      "RangeData": {
+        "properties": {
+          "contractVersion": {
+            "type": "string",
+            "const": "plc-facts/v1",
+            "title": "Contractversion",
+            "default": "plc-facts/v1"
+          },
+          "digestProfile": {
+            "type": "string",
+            "const": "pf-json/v1",
+            "title": "Digestprofile",
+            "default": "pf-json/v1"
+          },
+          "asOf": {
+            "type": "string",
+            "title": "Asof"
+          },
+          "hasMore": {
+            "type": "boolean",
+            "title": "Hasmore"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/Coverage"
+          },
+          "mode": {
+            "type": "string",
+            "const": "range",
+            "title": "Mode",
+            "default": "range"
+          },
+          "items": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/FactItem"
+                },
+                {
+                  "$ref": "#/components/schemas/GapItem"
+                },
+                {
+                  "$ref": "#/components/schemas/OriginalItem"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "nextPageCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nextpagecursor"
+          },
+          "snapshotHighSerial": {
+            "type": "string",
+            "title": "Snapshothighserial"
+          },
+          "scannedThrough": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "scanBudgetReached": {
+            "type": "boolean",
+            "title": "Scanbudgetreached"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "asOf",
+          "hasMore",
+          "coverage",
+          "items",
+          "nextPageCursor",
+          "snapshotHighSerial",
+          "scannedThrough",
+          "scanBudgetReached"
+        ],
+        "title": "RangeData"
+      },
+      "ReadOut": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "const": 200,
+            "title": "Code",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "const": "success",
+            "title": "Message",
+            "default": "success"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChangesData"
+              },
+              {
+                "$ref": "#/components/schemas/RangeData"
+              },
+              {
+                "$ref": "#/components/schemas/LatestData"
+              }
+            ],
+            "title": "Data"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "ReadOut"
+      },
+      "ReceiptData": {
+        "properties": {
+          "contractVersion": {
+            "type": "string",
+            "const": "plc-facts/v1",
+            "title": "Contractversion",
+            "default": "plc-facts/v1"
+          },
+          "digestProfile": {
+            "type": "string",
+            "const": "pf-json/v1",
+            "title": "Digestprofile",
+            "default": "pf-json/v1"
+          },
+          "instanceId": {
+            "type": "string",
+            "title": "Instanceid"
+          },
+          "batchId": {
+            "type": "string",
+            "title": "Batchid"
+          },
+          "requestDigest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Requestdigest"
+          },
+          "receiptId": {
+            "type": "string",
+            "title": "Receiptid"
+          },
+          "status": {
+            "type": "string",
+            "const": "committed",
+            "title": "Status",
+            "default": "committed"
+          },
+          "persistence": {
+            "type": "string",
+            "const": "committed",
+            "title": "Persistence",
+            "default": "committed"
+          },
+          "newFactsCommitted": {
+            "type": "boolean",
+            "title": "Newfactscommitted"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "created",
+              "duplicate"
+            ],
+            "title": "Outcome"
+          },
+          "originalOutcome": {
+            "type": "string",
+            "enum": [
+              "created",
+              "duplicate"
+            ],
+            "title": "Originaloutcome"
+          },
+          "confirmation": {
+            "type": "string",
+            "const": "facts_committed",
+            "title": "Confirmation",
+            "default": "facts_committed"
+          },
+          "commitSerial": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Commitserial"
+          },
+          "committedAt": {
+            "type": "string",
+            "title": "Committedat"
+          },
+          "proofExpiresAt": {
+            "type": "string",
+            "title": "Proofexpiresat"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/PartResult"
+            },
+            "type": "array",
+            "title": "Results"
+          },
+          "cycles": {
+            "items": {
+              "$ref": "#/components/schemas/CycleOut"
+            },
+            "type": "array",
+            "title": "Cycles"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "instanceId",
+          "batchId",
+          "requestDigest",
+          "receiptId",
+          "newFactsCommitted",
+          "outcome",
+          "originalOutcome",
+          "commitSerial",
+          "committedAt",
+          "proofExpiresAt",
+          "results",
+          "cycles"
+        ],
+        "title": "ReceiptData"
+      },
+      "ReceiptOut": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "const": 200,
+            "title": "Code",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "const": "success",
+            "title": "Message",
+            "default": "success"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ReceiptData"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "ReceiptOut"
+      },
+      "SamplePartIn": {
+        "properties": {
+          "sampleId": {
+            "type": "string",
+            "title": "Sampleid"
+          },
+          "cycleId": {
+            "type": "string",
+            "title": "Cycleid"
+          },
+          "part": {
+            "type": "integer",
+            "maximum": 16.0,
+            "minimum": 1.0,
+            "title": "Part"
+          },
+          "parts": {
+            "type": "integer",
+            "maximum": 16.0,
+            "minimum": 1.0,
+            "title": "Parts"
+          },
+          "pointIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Pointids"
+          },
+          "payloadUtf8": {
+            "type": "string",
+            "title": "Payloadutf8"
+          },
+          "sourceSha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Sourcesha256"
+          },
+          "contentDigest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Contentdigest"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sampleId",
+          "cycleId",
+          "part",
+          "parts",
+          "pointIds",
+          "payloadUtf8",
+          "sourceSha256",
+          "contentDigest"
+        ],
+        "title": "SamplePartIn"
+      },
+      "SourceRef": {
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "title": "Instanceid"
+          },
+          "sourceGeneration": {
+            "type": "string",
+            "title": "Sourcegeneration"
+          },
+          "sourceSeq": {
+            "type": "string",
+            "title": "Sourceseq"
+          },
+          "configRevision": {
+            "type": "string",
+            "title": "Configrevision"
+          },
+          "definitionDigest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Definitiondigest"
+          },
+          "sampleId": {
+            "type": "string",
+            "title": "Sampleid"
+          },
+          "part": {
+            "type": "integer",
+            "title": "Part"
+          },
+          "cycleId": {
+            "type": "string",
+            "title": "Cycleid"
+          },
+          "groupId": {
+            "type": "string",
+            "title": "Groupid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "instanceId",
+          "sourceGeneration",
+          "sourceSeq",
+          "configRevision",
+          "definitionDigest",
+          "sampleId",
+          "part",
+          "cycleId",
+          "groupId"
+        ],
+        "title": "SourceRef"
+      },
+      "TransportPart": {
+        "properties": {
+          "part": {
+            "type": "integer",
+            "maximum": 16.0,
+            "minimum": 1.0,
+            "title": "Part"
+          },
+          "pointIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Pointids"
+          },
+          "contentDigest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Contentdigest"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "part",
+          "pointIds",
+          "contentDigest"
+        ],
+        "title": "TransportPart"
+      },
+      "TransportSample": {
+        "properties": {
+          "sampleId": {
+            "type": "string",
+            "title": "Sampleid"
+          },
+          "dbNumber": {
+            "type": "integer",
+            "maximum": 65535.0,
+            "minimum": 1.0,
+            "title": "Dbnumber"
+          },
+          "sourceSha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "title": "Sourcesha256"
+          },
+          "parts": {
+            "items": {
+              "$ref": "#/components/schemas/TransportPart"
+            },
+            "type": "array",
+            "title": "Parts"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sampleId",
+          "dbNumber",
+          "sourceSha256",
+          "parts"
+        ],
+        "title": "TransportSample"
+      }
+    }
+  }
+}

@@ -77,6 +77,8 @@ h1,h2,h3,p { margin-top:0; }
 .ds-batch-field { display:grid;grid-template-columns:minmax(140px,1fr) minmax(150px,1fr) minmax(180px,2fr);gap:var(--agent-action-gap);align-items:center; }
 .ds-policy-source { display:block;color:var(--agent-text-muted);font-size:12px;overflow-wrap:anywhere; }
 .ds-policy-error { color:var(--agent-danger); }
+.ds-import-note { display:block;margin:8px 0 0;color:var(--agent-text-muted);line-height:1.6;overflow-wrap:anywhere; }
+.ds-import-note.ds-policy-error { color:var(--agent-danger); }
 .ds-actions > .console-action-button + .console-action-button { margin-left:0; }
 @media(max-width:640px){.ds-policy-filter,.ds-batch-field {grid-template-columns:1fr;} }
 

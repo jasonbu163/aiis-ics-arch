@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/private/tmp/arch-be008-qa2-gkv496cr/formal_probes.py", line 140, in <module>
+    for coil in ['qa1-abc',' QA2-ABC ']:invalid('ascii-sequential-'+coil,{**base,'coilNo':coil},'plan_coil_already_exists',409)
+  File "/private/tmp/arch-be008-qa2-gkv496cr/formal_probes.py", line 53, in invalid
+    return request(label,'POST','/api/v1/plans',body,expected,error,content_type)
+  File "/private/tmp/arch-be008-qa2-gkv496cr/formal_probes.py", line 37, in request
+    assert status==expected,(label,status,record['body'])
+AssertionError: ('ascii-sequential-qa1-abc', 200, {'code': 200, 'message': 'success', 'data': {'id': 18, 'coilNo': 'qa1-abc', 'grade': 'G', 'spec': 'S', 'weight': '1.2300', 'thickness': '0.123', 'width': '10.00', 'materialStatus': 'special', 'density': '0.00', 'entryLength': '0.00', 'uncoiler1Tension': '0.00', 'exitTension': '0.00', 'process1Tension': '0.00', 'entryLoopTension': '0.00', 'exitLoopTension': '0.00', 'entryUnitTension': '0.0000', 'entryLoopUnitTension': '0.0000', 'processUnitTension': '0.0000', 'exitLoopUnitTension': '0.0000', 'exitUnitTension': '0.0000', 'status': 'planned', 'priority': 5, 'remark': None, 'createdAt': '2026-10-28T15:08:46+08:00', 'updatedAt': '2026-10-28T15:08:46+08:00'}, 'timestamp': 1793171326909})

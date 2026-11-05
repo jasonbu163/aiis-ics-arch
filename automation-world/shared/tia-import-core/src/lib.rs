@@ -1,8 +1,10 @@
 //! AIIS无I/O TIA导入核心：有界扫描、显式闭包展开、标准布局及确定技术命名。
+mod dependencies;
 pub mod layout;
 pub mod model;
 pub mod naming;
 pub mod parser;
+pub use dependencies::{resolve_udt_dependencies, UdtDependencyIssue, UdtDependencyPlan};
 pub use layout::layout_standard;
 pub use model::*;
 pub use naming::*;

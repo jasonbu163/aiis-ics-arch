@@ -1,0 +1,38 @@
+{
+  "files": [
+    {
+      "path": "/private/tmp/arch-be008-run-eihb7rry/http-logs/backend-20261028.jsonl",
+      "lines": 122,
+      "sha256": "202b2eafcb1af35773d29ff5252b3be0dddc3a5f1c7f29fa5271b9ce8c70f5c1"
+    },
+    {
+      "path": "/private/tmp/arch-be008-run-eihb7rry/outage-logs/backend-20261028.jsonl",
+      "lines": 8,
+      "sha256": "fb82e8707ce04228d27fab48ebbcfa7c84a1cac9105e0c5e7eaa6e68d36691e8"
+    },
+    {
+      "path": "/private/tmp/arch-be008-run-eihb7rry/restarted-http-logs/backend-20261028.jsonl",
+      "lines": 3,
+      "sha256": "78a6149122e9423d75fa114e076a295adc36b2702dea739254c7c2685cfc6648"
+    }
+  ],
+  "eventCounts": {
+    "<no-event>": 3,
+    "backend_started": 3,
+    "plan_created": 10,
+    "plan_request_finished": 43,
+    "plan_transaction_rolled_back": 18,
+    "plan_transaction_failed": 19,
+    "plan_request_failed": 20,
+    "plan_validation_failed": 13,
+    "plan_unique_conflict": 1,
+    "backend_stopped": 3
+  },
+  "actualNamedUnique1062RequestIds": [
+    "0HNPKND4QQ14F"
+  ],
+  "confirmedRollbackSameRequestIds": [
+    "0HNPKND4QQ14F"
+  ],
+  "createdEventsHavePlanIdAndRequestId": true
+}

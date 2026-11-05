@@ -1,0 +1,17 @@
+{
+  "attempt1": {
+    "exitCode": 1,
+    "stage": "before-only read audit",
+    "reason": "helper list-order assumption for ORDER BY index_name used ASCII PRIMARY-first instead of comparing exact index multiset",
+    "productFailure": false,
+    "columnsMigrationFixtureAlreadyMatched": true,
+    "rowsNotModified": true
+  },
+  "finalAuditAttempt1": {
+    "exitCode": 1,
+    "reason": "empty table SHOW CREATE omits AUTO_INCREMENT table option; helper replaced populated counter with a marker rather than removing only that non-schema counter option",
+    "productFailure": false,
+    "columnsTypesNullDefaultsAndIndexesStillMatched": true,
+    "fix": "normalize only table auto increment counter to absence; compare all other schema exactly"
+  }
+}

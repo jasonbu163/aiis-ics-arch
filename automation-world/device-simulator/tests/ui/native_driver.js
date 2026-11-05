@@ -150,7 +150,7 @@
     await report('policies_saved', ['instance/client maintenance inheritance; Ramp -> Sine -> Random saved through real UI; UiValue UI owner initial12'])
   }
   async function apply() {
-    await nav('instances'); await select(id('revision-selection'), null, 0); await click(id('apply-open')); await settled(); await click(id('apply-ack')); await click(id('apply-confirm')); await until(() => !one(id('apply-preview')), 'apply closed'); await settled(); await nav('overview'); await until(() => one(id('control-start')) && !one(id('control-start')).disabled, 'loaded stopped')
+    await nav('instances'); await click(id('configuration-publish')); await settled(); await click(id('version-confirm')); await until(() => !one(id('version-preview')), 'version saved'); await settled(); await click(id('apply-open')); await settled(); await click(id('apply-ack')); await click(id('apply-confirm')); await until(() => !one(id('apply-preview')), 'apply closed'); await settled(); await nav('overview'); await until(() => one(id('control-start')) && !one(id('control-start')).disabled, 'loaded stopped')
     await report('applied', [one(id('revision-facts')).innerText])
   }
   async function preferences() {

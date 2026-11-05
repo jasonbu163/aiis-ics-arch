@@ -1,6 +1,12 @@
 //! 文件：src/bin/ff-fixture.rs；独立本机合成夹具入口，无参仅帮助。
 fn main() {
     let args: Vec<_> = std::env::args().skip(1).collect();
+    if args.len()==2 && args[0]=="__catalog_native" {
+        std::process::exit(match field_flow::fixture::catalog_demo::native(&args[1]){Ok(())=>0,Err(e)=>{eprintln!("{e}");1}});
+    }
+    if args.len()==3 && args[0]=="--catalog-demo" && args[1]=="--evidence-dir" {
+        std::process::exit(match field_flow::fixture::catalog_demo::manual(std::path::Path::new(&args[2])){Ok(())=>0,Err(e)=>{eprintln!("{e}");1}});
+    }
     if args == ["__native_fixture"] {
         std::process::exit(if field_flow::fixture::native_server().is_ok() {
             0
@@ -9,7 +15,8 @@ fn main() {
         })
     }
     if args.is_empty() || args == ["--help"] {
-        println!("ff-fixture --config config/loopback.yaml --evidence-dir NEW_DIRECTORY\nStop with ENTER.");
+        let lang=if std::env::var("LANG").unwrap_or_default().starts_with("zh"){include_str!("../../locales/zh-CN.json")}else{include_str!("../../locales/en-US.json")};
+        let text:serde_json::Value=serde_json::from_str(lang).unwrap();println!("{}",text["fixture_help"].as_str().unwrap());
         return;
     }
     if args.len() != 4 || args[0] != "--config" || args[2] != "--evidence-dir" {

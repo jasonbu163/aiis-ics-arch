@@ -1,6 +1,6 @@
 /** File Path: /automation-world/semantic-mapping-agent/src/app/twin-facts/manifest.ts
  * Description: Side-effect-free twin-facts page manifest.
- * Main Features: Declares the Facts & Simulation, Service Mapping, and Mapping Runtime workspaces.
+ * Main Features: Declares the Read-only Source Facts, Service Mapping, and Mapping Runtime workspaces.
  */
 import type { AppModuleManifest } from "../navigation";
 
@@ -9,14 +9,13 @@ export const twinFactsManifest: AppModuleManifest = {
   order: 40,
   pages: [
     {
-      id: "twinFacts", labelKey: "factsAndSimulationWorkspace", helpKey: "helpTwinFacts", helpTopicId: "collection-facts", defaultDetail: "collection_facts",
+      id: "twinFacts", labelKey: "sourceFactsWorkspace", defaultDetail: "collection_facts",
       views: [
         { id: "contract", labelKey: "factsTableTitle" },
-        { id: "inspector", labelKey: "collectionSimulationTitle" },
       ],
     },
     {
-      id: "mappingIdentity", labelKey: "navMappingIdentity", helpKey: "helpMappingTargets", helpTopicId: "service-mapping", defaultDetail: "service-input-mapping.v1",
+      id: "mappingIdentity", labelKey: "navMappingIdentity", defaultDetail: "service-input-mapping.v1",
       views: [
         { id: "apiMaterials", labelKey: "apiMaterialsTitle" },
         { id: "targetApis", labelKey: "targetApiConfigurationTitle" },
@@ -25,9 +24,9 @@ export const twinFactsManifest: AppModuleManifest = {
       ],
     },
     {
-      id: "simulationRuntime", labelKey: "mappingRuntimeWorkspace", helpKey: "helpSimulationRuntime", helpTopicId: "single-fact-runtime", defaultDetail: "HTTP Facts → Target API",
+      id: "mappingRuntime", labelKey: "mappingRuntimeWorkspace", defaultDetail: "HTTP Facts → Target API",
       views: [
-        { id: "simulation", labelKey: "mappingExecutionTitle" },
+        { id: "execution", labelKey: "mappingExecutionTitle" },
       ],
     },
   ],

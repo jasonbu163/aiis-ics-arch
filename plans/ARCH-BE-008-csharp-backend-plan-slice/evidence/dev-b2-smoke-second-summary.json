@@ -1,0 +1,10 @@
+{
+  "pid": 69096,
+  "processTZ": "UTC",
+  "readAfterRestartIdentical": true,
+  "rows": 10,
+  "tables": 1,
+  "planId": 11,
+  "createdAt": "2026-10-28T13:56:18+08:00",
+  "updatedAt": "2026-10-28T13:56:18+08:00"
+}

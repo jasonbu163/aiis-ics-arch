@@ -1,7 +1,7 @@
 <!--
 File Path: /automation-world/semantic-mapping-agent/src/app/twin-facts/views/TwinFactsModuleView.vue
 Description: Twin-facts module composition root.
-Main Features: Owns JSON fact authoring, inspection, mapping, and both managed runtimes.
+Main Features: Composes read-only source facts, mapping configuration, and HTTP mapping runtime.
 -->
 <script setup lang="ts">
 import type { LocaleMessages } from "../../../locales";

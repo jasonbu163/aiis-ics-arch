@@ -3,6 +3,9 @@ import re
 from datetime import timezone
 from zoneinfo import ZoneInfo
 from sqlalchemy import func
+from app.performance.crud.async_integration import storage_context
+from app.performance.integration_storage import storage_sample, legacy_view
+from common.integration.storage import to_storage_time as storage_time, to_legacy_time as legacy_time
 from sqlalchemy.exc import DBAPIError, IntegrityError
 from common.exceptions import BusinessException
 from common.log import log_event
@@ -29,6 +32,7 @@ async def delivery_after_rejection(db, actor, equipment, stream, sample_id, dige
     """业务拒绝回滚后，在新一致性视图恢复已提交投递的优先级；不锁缺失回执。"""
     committing = False
     try:
+        await storage_context(db)
         receipt = await receipts.get_receipt(db, actor, equipment, stream, sample_id)
         if receipt is None:
             await rollback(db)
@@ -51,9 +55,13 @@ async def delivery_after_rejection(db, actor, equipment, stream, sample_id, dige
 
 async def transaction(db, sample, actor, stream, apply, **keys):
     digest = fingerprint(sample, stream, **keys)
+    original_sample = sample
     for attempt in range(3):
         committing = False
         try:
+            context = await storage_context(db)
+            adoption = context[0] if context else None
+            sample = storage_sample(original_sample, adoption)
             receipt = await receipts.get_receipt(db, actor, sample.equipment_id, stream, sample.sample_id)
             if receipt is not None:
                 if receipt.fingerprint != digest:
@@ -64,11 +72,16 @@ async def transaction(db, sample, actor, stream, apply, **keys):
                     # 初查receipt（及认证读）可能已建立RR快照；尚未写业务，先结束该只读事务。
                     # 之后state FOR UPDATE本身不建立一致性视图，历史事件读在取得水位锁后才建新视图。
                     await rollback(db)
-                result, targets = await apply(db, sample, digest)
+                    context=await storage_context(db)
+                if context:
+                    result, targets = await apply(db, sample, digest, context=context, original_sample=original_sample)
+                else:
+                    result, targets = await apply(db, sample, digest)
                 result.update(equipment_id=sample.equipment_id, sample_id=sample.sample_id)
                 time = sample.sampled_at if stream == "production_observation" else sample.record_time
                 await receipts.add_receipt(db, actor_user_id=actor, equipment_id=sample.equipment_id, stream=stream,
-                    sample_id=sample.sample_id, fingerprint=digest, sampled_at=time, outcome=result["outcome"], result=result, **targets)
+                    sample_id=sample.sample_id, fingerprint=digest, sampled_at=time, outcome=result["outcome"], result=result, **targets,
+                    **(dict(created_at=storage_time(context[1]),updated_at=storage_time(context[1])) if context else {}))
             committing = True
             await db.commit()
         except BusinessException as exc:
@@ -121,8 +134,8 @@ def apply_weight(record):
     record.effective_weight = record.collected_weight
     record.effective_weight_source = "collected_weight" if record.collected_weight is not None else "unavailable"
 
-async def apply_observation(db, sample, digest):
-    state = await crud.state_for_update(db, sample.equipment_id)
+async def apply_observation(db, sample, digest, context=None, original_sample=None):
+    state = await crud.state_for_update(db, sample.equipment_id, context=context) if context else await crud.state_for_update(db, sample.equipment_id)
     previous = await receipts.get_applied_event(db, sample.equipment_id, sample.sampled_at)
     if previous is not None:
         if previous.fingerprint != digest:
@@ -133,7 +146,7 @@ async def apply_observation(db, sample, digest):
             if state.fingerprint != digest:
                 raise BusinessException(MappingError.OBSERVATION_TIME_CONFLICT, code=409)
             return dict(state.result, outcome="duplicate"), dict(performance_id=state.performance_id)
-        return dict(record_id=state.performance_id, affected_record_ids=[], sampled_at=utc_time(sample.sampled_at), outcome="stale"), dict(performance_id=state.performance_id)
+        return dict(record_id=state.performance_id, affected_record_ids=[], sampled_at=utc_time((original_sample or sample).sampled_at), outcome="stale"), dict(performance_id=state.performance_id)
     active = await crud.active_records(db, sample.equipment_id)
     record = None
     outcome = "updated"
@@ -142,7 +155,8 @@ async def apply_observation(db, sample, digest):
         if record is None:
             record = await crud.add_record(db, equipment_id=sample.equipment_id, http_coil_key=sample.coil_no.encode("utf-8"),
                 coil_no=sample.coil_no, parent_coil_no=sample.coil_no, plan_id=None, device_id=None,
-                production_date=sample.sampled_at.replace(tzinfo=timezone.utc).astimezone(ZoneInfo("Asia/Shanghai")).date(),
+                production_date=(original_sample or sample).sampled_at.replace(tzinfo=timezone.utc).astimezone(ZoneInfo("Asia/Shanghai")).date(),
+                **(dict(created_at=storage_time(context[1]),updated_at=storage_time(context[1])) if context else {}),
                 first_observed_at=sample.sampled_at, last_observed_at=sample.sampled_at, record_source="external_observation",
                 output_quantity=None, qualified_quantity=None, efficiency_rate=None, quality_score=None)
             outcome = "created"
@@ -153,6 +167,8 @@ async def apply_observation(db, sample, digest):
         apply_weight(record)
         record.observation_status = "in_production"
         record.last_observed_at = sample.sampled_at
+        if context:
+            record.updated_at=storage_time(context[1])
         if record.first_observed_at is None:
             record.first_observed_at = sample.sampled_at
         apply_duration(record)
@@ -164,6 +180,8 @@ async def apply_observation(db, sample, digest):
         old_status = old.observation_status
         old.observation_status = status
         old.last_observed_at = sample.sampled_at
+        if context:
+            old.updated_at=storage_time(context[1])
         apply_duration(old)
         affected.append(old.id)
         log_event("INFO", "performance_mapping_transition", equipment_id=sample.equipment_id, record_id=old.id,
@@ -172,12 +190,14 @@ async def apply_observation(db, sample, digest):
         affected.append(record.id)
     current_id = record.id if record is not None else (active[-1].id if sample.observation_status == "unknown" and active else None)
     result = dict(record_id=record.id if record is not None else current_id, affected_record_ids=affected,
-                  sampled_at=utc_time(sample.sampled_at), outcome=outcome)
+                  sampled_at=utc_time((original_sample or sample).sampled_at), outcome=outcome)
     state.last_sampled_at = sample.sampled_at
     state.fingerprint = digest
     state.performance_id = current_id
     state.observation_status = sample.observation_status
     state.result = result
+    if context:
+        state.updated_at=storage_time(context[1])
     await db.flush()
     return result, dict(performance_id=result["record_id"])
 

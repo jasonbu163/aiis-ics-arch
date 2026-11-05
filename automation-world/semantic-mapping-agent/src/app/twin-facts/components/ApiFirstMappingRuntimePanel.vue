@@ -4,7 +4,9 @@ Description: Control surface for the continuous API-first Mapping Runtime.
 Main Features: Shows independent lifecycle, local app-open preference and per-Mapping interval semantics, safe counters, bounded logs, and full workspace-width layout without exposing target payloads.
 -->
 <script setup lang="ts">
+import { ConsoleCard, ConsoleActionButton, StatusCapsule } from "@aw-ui";
 import { computed } from "vue";
+import { formatBusinessTime } from "../../../console/time";
 
 import type { LocaleMessages } from "../../../locales";
 import type { TwinRuntimeSnapshot } from "../types";
@@ -32,13 +34,11 @@ function statusText(status: TwinRuntimeSnapshot["status"]) {
 </script>
 
 <template>
-  <article class="panel api-first-mapping-runtime-panel">
-    <header class="panel-header">
-      <div><p class="panel-kicker">{{ labels.apiFirstMappingRuntimeKicker }}</p><h2>{{ labels.apiFirstMappingRuntimeTitle }}</h2></div>
-      <span class="status-pill">{{ statusText(runtime.status) }}</span>
-    </header>
+  <ConsoleCard class="api-first-mapping-runtime-panel" :title="labels.apiFirstMappingRuntimeTitle">
+    <p v-if="busy" class="hint" role="status">{{ labels.loading }}</p>
+<template #actions><StatusCapsule :label="statusText(runtime.status)" :tone="runtime.status === 'failed' ? 'danger' : runtime.status === 'paused' ? 'warning' : active ? 'success' : 'neutral'" /></template>
     <p>{{ labels.apiFirstMappingRuntimeHint }}</p>
-    <p class="warning">{{ labels.apiFirstMappingRuntimeSafety }}</p>
+    <p class="warning" role="alert">{{ labels.apiFirstMappingRuntimeSafety }}</p>
     <label class="runtime-auto-start">
       <input
         type="checkbox"
@@ -55,22 +55,23 @@ function statusText(status: TwinRuntimeSnapshot["status"]) {
       <div><small>{{ labels.failedTransactions }}</small><strong>{{ runtime.failedTransactions }}</strong></div>
     </div>
     <div class="action-row runtime-actions">
-      <button v-if="!active" class="primary-action" type="button" :disabled="!enabled || busy" @click="$emit('action', 'start')">{{ labels.startRuntime }}</button>
-      <button v-if="runtime.status === 'running'" class="secondary-action" type="button" :disabled="busy" @click="$emit('action', 'pause')">{{ labels.pauseRuntime }}</button>
-      <button v-if="runtime.status === 'paused'" class="secondary-action" type="button" :disabled="busy" @click="$emit('action', 'resume')">{{ labels.resumeRuntime }}</button>
-      <button v-if="active" class="danger-action" type="button" :disabled="busy" @click="$emit('action', 'stop')">{{ labels.stopRuntime }}</button>
+      <ConsoleActionButton tone="primary" v-if="!active" native-type="button" :disabled="!enabled || busy" @click="$emit('action', 'start')">{{ labels.startRuntime }}</ConsoleActionButton>
+      <ConsoleActionButton tone="secondary" v-if="runtime.status === 'running'" native-type="button" :disabled="busy" @click="$emit('action', 'pause')">{{ labels.pauseRuntime }}</ConsoleActionButton>
+      <ConsoleActionButton tone="secondary" v-if="runtime.status === 'paused'" native-type="button" :disabled="busy" @click="$emit('action', 'resume')">{{ labels.resumeRuntime }}</ConsoleActionButton>
+      <ConsoleActionButton tone="danger" v-if="active" native-type="button" :disabled="busy" @click="$emit('action', 'stop')">{{ labels.stopRuntime }}</ConsoleActionButton>
     </div>
     <p v-if="runtime.cursor"><strong>{{ labels.twinCursor }}</strong> <code>{{ runtime.cursor }}</code></p>
-    <p v-if="runtime.lastErrorCode" class="warning"><code>{{ runtime.lastErrorCode }}</code></p>
-    <p v-if="error" class="warning">{{ error }}</p>
-    <ol class="runtime-event-list"><li v-for="entry in runtime.logs.slice(-8).reverse()" :key="entry.sequence"><code>{{ entry.timestamp }}</code><span>{{ entry.event }}</span><small>{{ entry.message }}</small></li></ol>
-  </article>
+    <p v-if="runtime.lastErrorCode" class="warning" role="alert"><code>{{ runtime.lastErrorCode }}</code></p>
+    <p v-if="error" class="warning" role="alert">{{ error }}</p>
+    <p class="hint">{{ labels.businessTimeHint }}</p>
+    <ol class="runtime-event-list"><li v-for="entry in runtime.logs.slice(-8).reverse()" :key="entry.sequence"><code :title="entry.timestamp">{{ formatBusinessTime(entry.timestamp, labels.timeMissing) }}</code><span>{{ entry.event }}</span><small>{{ entry.message }}</small></li></ol>
+  </ConsoleCard>
 </template>
 
 <style scoped>
 .api-first-mapping-runtime-panel { display: grid; min-width: 0; max-width: none; gap: 12px; }
 .api-first-mapping-runtime-panel code { overflow-wrap: anywhere; white-space: normal; }
-.runtime-auto-start { display: flex; align-items: center; gap: 8px; color: #315f5d; font-size: 13px; font-weight: 650; }
-.runtime-auto-start-hint { margin: -6px 0 0; color: #52707a; font-size: 12px; }
+.runtime-auto-start { display: flex; align-items: center; gap: 8px; color: var(--agent-text-muted); font-size: 13px; font-weight: 650; }
+.runtime-auto-start-hint { margin: -6px 0 0; color: var(--agent-text-muted); font-size: 12px; }
 .runtime-actions { flex-wrap: wrap; gap: 12px; }
 </style>

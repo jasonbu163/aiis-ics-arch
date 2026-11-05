@@ -1,0 +1,156 @@
+[
+  {
+    "path": "/private/tmp/arch-be008-disabled-125b32befb344a66a205510b161edb5c",
+    "kind": "directory",
+    "bytes": 1718,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/private/tmp/arch-be008-disabled-e771324bf817481d8d686899da992398",
+    "kind": "directory",
+    "bytes": 1717,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/private/tmp/arch-be008-log-check-19c8520fa7e846b8ac1ccbe9796a7cbc",
+    "kind": "directory",
+    "bytes": 46143416,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/private/tmp/arch-be008-log-check-cb4734feee334f579f76cd2d7899722f",
+    "kind": "directory",
+    "bytes": 46143416,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/private/tmp/arch-be008-release-metadata.json",
+    "kind": "file",
+    "bytes": 1151627,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/private/tmp/arch-be008-run-68i4YG5R",
+    "kind": "directory",
+    "bytes": 54725,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/private/tmp/arch-be008-run-GyiTC6VL",
+    "kind": "directory",
+    "bytes": 73248,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/private/tmp/arch-be008-run-root.path",
+    "kind": "file",
+    "bytes": 37,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/private/tmp/arch-be008-run-uzFgtzgt",
+    "kind": "directory",
+    "bytes": 129438,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/private/tmp/arch-be008-sdk-rfSK3RBg",
+    "kind": "directory",
+    "bytes": 1318287126,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/private/tmp/arch-be008-test-logs-9d2fd6463c4d4208bad3bcaaba7984a4",
+    "kind": "directory",
+    "bytes": 12237,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/private/tmp/arch-be008-test-logs-fa8eef8b74b64ee083395648d937aa0d",
+    "kind": "directory",
+    "bytes": 12233,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/private/tmp/arch-be008-tool-root.path",
+    "kind": "file",
+    "bytes": 37,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-disabled-4e49b862eac54111a77205428d04b995",
+    "kind": "directory",
+    "bytes": 1471,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-test-logs-4ef910aee604413ca04f659915d804ed",
+    "kind": "directory",
+    "bytes": 1047,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-test-logs-5646802632714f0bbb7540d87f4276bf",
+    "kind": "directory",
+    "bytes": 10398,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-test-logs-804174906b794afaa206eafc4d02fd4c",
+    "kind": "directory",
+    "bytes": 1047,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-test-logs-bafe3654d49e400b930ad51cb949c1ab",
+    "kind": "directory",
+    "bytes": 10396,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-test-logs-d3bfacd1b3964a6eb9b856f0d539c9ff",
+    "kind": "directory",
+    "bytes": 1324,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-test-logs-e69d5529fda44d29b15655b04e6394da",
+    "kind": "directory",
+    "bytes": 10397,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-test-logs-f161b0a2429b465ba756120b1be5e580",
+    "kind": "directory",
+    "bytes": 1047,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  },
+  {
+    "path": "/var/folders/k5/gb101k5j2nddcgfgrtsn0p300000gn/T/arch-be008-test-logs-f7d0cc06956944e1bcbf9f360c55f725",
+    "kind": "directory",
+    "bytes": 10393,
+    "ownership": "ARCH-BE-008 Development private tools/run/test logs or helper path",
+    "cleanupTrigger": "coordinator after QA/evidence and runtime dependency review"
+  }
+]

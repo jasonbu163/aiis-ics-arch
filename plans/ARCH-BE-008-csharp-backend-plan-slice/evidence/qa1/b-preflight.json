@@ -1,0 +1,41 @@
+{
+  "dockerInfo": {
+    "exitCode": 0,
+    "filteredOutput": "\"29.7.2\"|\"aarch64\"|\"linux\""
+  },
+  "resourceAbsence": [
+    {
+      "kind": "container",
+      "name": "aiis-arch-be008-mysql",
+      "inspectExit": 1,
+      "exists": false,
+      "diagnostic": "Error response from daemon: No such container: aiis-arch-be008-mysql"
+    },
+    {
+      "kind": "network",
+      "name": "aiis-arch-be008-net",
+      "inspectExit": 1,
+      "exists": false,
+      "diagnostic": "Error response from daemon: network aiis-arch-be008-net not found"
+    },
+    {
+      "kind": "volume",
+      "name": "aiis-arch-be008-mysql-data",
+      "inspectExit": 1,
+      "exists": false,
+      "diagnostic": "Error response from daemon: get aiis-arch-be008-mysql-data: no such volume"
+    }
+  ],
+  "ports": [
+    {
+      "port": 13388,
+      "reuseBindPassed": true
+    },
+    {
+      "port": 18108,
+      "reuseBindPassed": true
+    }
+  ],
+  "runRoot": "/private/tmp/arch-be008-run-eihb7rry",
+  "mode": "0o700"
+}

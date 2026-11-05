@@ -6,6 +6,10 @@ Main Features:
     - Upserts speed rows by performance, zone, and record_time
     - Leaves transaction commit and rollback to the Projection host
 """
+from app.performance.crud.sync_integration import storage_context
+from app.performance.integration_storage import legacy_input
+from common.integration.storage import to_storage_time as storage_time
+
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
@@ -139,12 +143,15 @@ def sync_process_speed(
     fact: ProcessSpeedFact,
 ) -> ProcessRecordSyncResult:
     """Synchronize one speed process fact without committing it."""
+    context = storage_context(db)
     performance = resolve_parent_performance(db, fact)
     zone = normalize_required_zone(fact.zone_value)
     record_time = normalize_record_time(
         fact.record_time_value,
         collected_at=fact.collected_at,
     )
+    if context:
+        record_time=legacy_input(fact.record_time_value,fact.collected_at,context[0])
     values = {
         "set_speed": normalize_optional_decimal(fact.set_speed_value, input_key="set_speed"),
         "avg_speed": normalize_optional_decimal(fact.avg_speed_value, input_key="avg_speed"),
@@ -169,6 +176,10 @@ def sync_process_speed(
         action = "created"
 
     _write_values(record, values)
+    if context:
+        if action=="created":
+            record.created_at=storage_time(context[1])
+        record.updated_at=storage_time(context[1])
     sync_crud.flush(db)
     return ProcessRecordSyncResult(
         action=action,
