@@ -3,6 +3,8 @@
 内容修订：2026-10-27（Asia/Shanghai）· Human Owner已最终接受`DS-001 r1`、`ARCH-AW-005 r5`及DS当前版本（旧技术QA保持精确候选；初值/纯文字手册由DS-001接续，新增截图及DS-001独立QA已按Owner指令取消，当前真实验收见各自记录）；原`ARCH-AW-004 r2`已验收快照SHA `0eb3c149bf7093bbdce2f0b7a07af71e769fe24cb04a542c7f4dc43e6979eecb`保持历史效力。005范围与实现/验证归[005 spec](../plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md)及[005 tasks](../plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md)，不倒记为004旧QA。本文件交付首版目标设计；范围批准见 [spec](../plans/ARCH-AW-004-ds-detailed-design/spec.md)，实施核对与文档自检见 [Development 记录](../plans/ARCH-AW-004-ds-detailed-design/tasks.md)。本文不记录本r2独立QA verdict或Human Owner最终验收。r1原正文367行SHA-256为`77216e4233c0b3c0a06fe624d93fee7f826a1a26e5f0bf497f58498aff4bd94c`，其交付/独立文档qa_passed与终验pending保留在任务角色历史；r2重新核验整版R1–R23/AC1–AC29，不继承r1结论。此次已采纳一次性hold维护写和preserve_compatible_hold推荐，所有连接/负载/时延/资源数值都是已批准设计目标，尚非实测能力。
 
 <a id="boundary"></a>
+
+**当前操作语义同步：2026-11-05 · [ARCH-DOC-001 r1](../plans/ARCH-DOC-001-project-state-and-decision-sync/spec.md)**。10月27日接受保持原候选；10月29日DIRECT草稿/版本增量为DEV自检交付、人工确认待定，见[当前DS说明](../automation-world/device-simulator/README.zh-CN.md)。
 ## 1. 定位、依据与效力
 
 DS（Device Simulator）定位独立S7 PLC模拟器，AW仅工程归属，运行不依赖DAA/SMA/Backend；可供经有限profile实证的其它兼容S7程序使用。完整产品推荐Tauri管理，r4曾从DAA固定白名单派生最小Tauri/Vue骨架；r5已批准从196份冻结DAA输入复用适用壳、控件与五枚图标，实现六页产品MVP，桌面与非默认测试宿主共用同一Rust runtime。DS是本地开发、测试、联调工具，首版只模拟多个独立 S7 设备实例。DAA 可以读取模拟值，测试客户端可以向明确允许的字段写入；这些结果只证明模拟链路，不代表真实 PLC、联锁、生产控制或物理动作。DS 不成为 DAA/SMA/CA 的生产依赖，不引入中央 Backend、账号权限服务、流程 runtime 或低代码画布。
@@ -86,7 +88,7 @@ flowchart LR
 | 配置 SQLite | 草稿、不可变revision、来源及单事务selected引用；无持久apply journal，不逐tick保存运行值。 |
 | 快照/日志 | 返回连接/队列/规则/资源与有界审计、陈旧及日志降级标志；成功提交和拒绝返回同一 result ID。观察不能触发 start/connect/reset。 |
 
-配置流为：页面草稿 → 服务结构校验 → CAS 保存 → 新 `saved_revision` → 用户选择实例并显式 apply → 完整校验、兼容影响清单及确认 → 预构建image → 单事务selected → 安装与`loaded_revision` → 用户独立 start 才 bind。客户端读写、规则tick、普通UI手改/一次性维护、初始化/重置都经各自有界工作/控制通道到统一入口，返回 `operation_id/instance_id/epoch/seq/result/error_code`；页面刷新与 S7 回执消费同一结果事实。
+配置流为：页面编辑草稿 → 服务结构校验 → CAS保存同一草稿/ETag（不生成版本） → 用户显式“保存为版本”、核对完整工作区及清理清单并确认 → 新不可变`saved_revision`（相同内容不重复生成） → 用户选择实例，在停止且连接释放后显式apply → 完整校验、核对保留/初始化/移除清单并确认加载后保持停止 → 预构建image → 单事务selected → 安装与`loaded_revision` → 用户另行独立start才bind。客户端读写、规则tick、普通UI手改/一次性维护、初始化/重置都经各自有界工作/控制通道到统一入口，返回 `operation_id/instance_id/epoch/seq/result/error_code`；页面刷新与 S7 回执消费同一结果事实。
 
 <a id="configuration"></a>
 ## 4. 概念配置、SQLite 与版本应用
@@ -102,7 +104,7 @@ flowchart LR
 | Source document / UDT | 独立 ID、instance ID、文件名/完整 UTF-8 源/摘要/来源种类、导入器版本、诊断、声明树及引用；不保留任意服务器文件路径作为读取指令。 |
 | DB / point / layout | DB ID、用户 DB 号/名称/长度、来源映射、结构树/叶 ID/原始路径/类型、手工或推算地址、确认者依据/确认结构摘要；手工结构标记为手工。 |
 | Region / policy | DB 内 bit 范围、继承层级、client_read、writer_owner、UI/客户端写开关、mode、初值、固定/波形参数、默认关闭的allow_ui_maintenance；编译为无歧义 coverage map。 |
-| Revision | workspace `saved_revision`、内容摘要、不可变内容；实例 apply 固定其中一个实例切片及其摘要，不引用可变草稿。 |
+| Revision | 显式“保存为版本”产生不可变workspace版本、`saved_revision`及摘要；保存草稿只更新同一草稿/ETag。实例apply固定已发布版本中的实例切片，不引用可变草稿。 |
 | Apply selection与进程状态 | 持久selected/previous不可变revision引用；expected selection CAS。operation ID、prepared image、loaded/selection_unknown/load_failed与保留清单是本进程有界状态，不写持久命令或分阶段journal。保存成功不等于loaded/listening。 |
 | 运行 image（仅内存） | DB bytes、值更新时间/来源、commit_seq、epoch、模拟时钟/seed、连接与统计；不进入配置初值列，也无样本/outbox。 |
 
@@ -110,7 +112,7 @@ flowchart LR
 
 ### 4.2 保存与冲突
 
-编辑是本地草稿；服务检查身份、字段和大小后以 `expected_etag` CAS 保存完整 workspace 草稿及不可变 `saved_revision`。允许保存仍有未确认地址/缺失 UDT 的草稿，但列明 issue，不能应用；格式损坏、重复身份等硬错误拒绝保存。确定失败/回滚不改变已保存版本；保存commit或ack未知时查询saved revision/ETag核实，查询也失败则明示未知、禁自动重试，不能声称已回滚；冲突返回当前ETag，保留用户草稿供对比，禁止自动覆盖。导入确认使用源摘要、ETag 与一次性 preview token，过期预览必须重做。
+当前编辑先保留本地草稿，服务以`expected_etag` CAS保存同一份持久workspace草稿，不隐式生成不可变版本。导入、地址/命名/初值策略确认和关闭编辑也只更新草稿；用户另行“保存为版本”核对完整工作区清单后，才发布不可变版本，内容与最新版本相同不重复生成。允许保存未确认地址/缺失UDT的草稿，但issue未解决不能发布可加载配置；格式损坏、重复身份等硬错误拒绝。草稿保存结果未知时查询草稿ETag，版本发布结果未知时查询版本列表/摘要，不能混用两个事实或盲重试；冲突保留用户编辑供核对。导入仍受源摘要、ETag及一次性预览token保护，过期须重做。此为10月29日DIRECT操作语义，不将其倒记为004/005旧QA或10月27日Owner接受。
 
 普通保存不能提交伪造的 source hash、完整性或推算证明；服务拥有派生字段。手工新增 DB/点位/修改类型属于明确 editor 操作，产生新的手工结构 revision，并取消相关来源证明；不把用户 `confirmed=true` 视为完整布局证明。
 
@@ -225,7 +227,7 @@ apply前逐点列“保留/初始化/删除”及原因、规则时钟影响，�
 2. 服务保存源完整内容、来源摘要、导入器版本、声明树、UDT引用及行号诊断；给新增/删除/类型/树/地址/初值确认失效差异。先预览，用户确认后才保存候选；不自动应用或开始监听。
 3. 展示完整树及叶点，用户可新增手工DB/点、改DB号/名称/点显示名、offset/bit、类型和来源说明。导入结构只经重导入或显式“转为手工编辑”修改；后者保留原源但派生结构不再声称源一致。
 4. 地址辅助必须手动触发并针对完整DB；显示原值、建议值、长度与人工保护，再逐项确认。只支持完整非优化标准树（含受限STRUCT/UDT/一维数组，STRING整DB拒推）。复杂结构需用户依据TIA标准非优化绝对地址逐叶手工确认，并附依据；确认是人工审核，不是布局引擎证明。
-5. 全部启用点地址确认、边界/重叠、初值与策略校验通过，再保存并在stopped显式apply。运行中结构修改只形成草稿/新revision，旧loaded image保持，不能原地改DB内存大小。
+5. 全部启用点地址确认、边界/重叠、初值与策略校验通过后，先保存草稿，再显式保存为版本，并在stopped预览确认加载。运行中结构修改只形成草稿/新revision，旧loaded image保持，不能原地改DB内存大小。
 
 ### 6.2 首版支持矩阵
 
@@ -609,8 +611,8 @@ DS 自有 ConsoleCard 为内容提供统一 token 间距，选择栏采用自适
 | 历史管理与异常 | 使用状态同时核全部实例；最新、已选/实际已加载、有效预览保护，回退保留须明确放弃才能删除。单个/当前页批量共用清单，取消不删版本或回退记录。历史版本预览若被校验拒绝，当前已加载版本保持；界面通用错误不列历史逐项原因，不能算作成功打开后取消。详细操作以手册为准。 |
 | 只读导入 | 固定multi.db/types.udt仅Alpha→DB71（无UDT）、Beta→DB88（仅Measure闭包）；不改源。各DB地址/命名/DS初值策略确认后选最新版停机加载。:=/BEGIN初值不导入、RETAIN不代表DS保值。 |
 
-共享标准word布局示例仍为Alpha长度4（ready0.0/count2），Beta长度8（unit.running0.0/unit.value2/bytes[3]6/bytes[4]7）；REAL不强制4字节对齐。DS初值是主动配置或类型默认，运行值按既有加载/重置/保留合同处理。手册提供混合类型失败、继承恢复、保存旧版选择和正常重开步骤；当前版本已获Owner最终接受；本节仍是操作说明，不新增逐项执行、协议或容量证据。
+共享标准word布局示例仍为Alpha长度4（ready0.0/count2），Beta长度8（unit.running0.0/unit.value2/bytes[3]6/bytes[4]7）；REAL不强制4字节对齐。DS初值是主动配置或类型默认，运行值按既有加载/重置/保留合同处理。手册提供混合类型失败、继承恢复、保存旧版选择和正常重开步骤；10月27日基线已获Owner接受，10月29日增量仍为DEV自检/人工确认边界；本节仍是操作说明，不新增逐项执行、协议或容量证据。
 
-2026-10-22真实键入后回退问题及旧同步input/change驱动的证据边界保留在[005 tasks](../plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md)，旧[owning checklist](../plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md)保持原时间与候选身份。本次前端实现修复事件绑定并补缓冲，开发自检和手册不追认旧真人输入通过；2026-10-27真实Owner最终接受见[DS-001记录](../automation-world/device-simulator/plans/DS-001-policy-table-and-usability/spec.md#owner-acceptance-ds001)及[005记录](../plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md#owner-acceptance-r5)。[七张旧原生图及来源](../automation-world/device-simulator/docs/user-guide/images/README.zh-CN.md)保留为历史，不要求新增截图；DAA–DS读取至SQLite联调另批，阶段C暂不开展。
+2026-10-22真实键入后回退问题及旧同步input/change驱动的证据边界保留在[005 tasks](../plans/ARCH-AW-005-ds-g0-prototype-validation/tasks.md)，旧[owning checklist](../plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md)保持原时间与候选身份。本次前端实现修复事件绑定并补缓冲，开发自检和手册不追认旧真人输入通过；2026-10-27真实Owner最终接受见[DS-001记录](../automation-world/device-simulator/plans/DS-001-policy-table-and-usability/spec.md#owner-acceptance-ds001)及[005记录](../plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md#owner-acceptance-r5)。[七张旧原生图及来源](../automation-world/device-simulator/docs/user-guide/images/README.zh-CN.md)保留为历史，不要求新增截图；DAA–DS读取至SQLite已于10月30日在受控范围独立接受，阶段C、自动启动及现场仍另项。
 
 2026-10-29当前操作增量：实例页“配置版本与加载”维护整个DS工作区快照，服务端检查全部实例selected/实际loaded/previous及pending apply，最新版本始终保护。单个/当前页批量删除共用清单：使用保护项不可选；仅作回退保留的项需列出全部实例并明确勾选放弃，才同一事务CAS清除这些previous标记并删除版本，当前已选/已加载/运行值不变。任何引用变化或失败整批不执行，未知回执重读而不重试。当前selected与实际loaded均为同版且配置一致时，重复确认不重新安装、不重置值或代次，previous保持；真正换版才更新回退记录。取消/离开预览释放票据，刷新版本事实不覆盖草稿。新发布默认保留最近5份加使用保护及回退保留旧版，自动清理不替用户放弃回退，启动、保存草稿和此次开发不裁剪既有库。沿用SQLite v1表结构，不迁移真实库。此DIRECT增量仅记录DEV交付/手册§2.7/2.8步骤，待Owner手工确认；不回写旧004/005/DS-001验收或DAA-007阶段结论。

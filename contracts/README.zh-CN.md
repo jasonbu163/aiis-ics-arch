@@ -60,7 +60,7 @@
 
 ## PLC事实provider v1
 
-[PLC facts v1](published/http-api/plc-facts-v1/README.zh-CN.md)固定匿名batch/latest/history、严格Decimal JSON、可靠结果、安全发布游标及有限保留。机器产物描述源码合同；数据库采用、真实运行验证、DAA联调和部署分别另设gate。
+[PLC facts v1](published/http-api/plc-facts-v1/README.zh-CN.md)固定匿名batch/latest/history、严格Decimal JSON、可靠结果、安全发布游标及有限保留。固定源码合同及获批隔离MySQL A+B验证归[BE-009](../plans/ARCH-BE-009-backend-facts-integration/checklist.md)。Owner终验/provider-ready、实际数据库采用、DAA联调和部署分别保留。
 
 
-[业务集成v1](published/http-api/business-integration-v1/README.zh-CN.md)发布八路typed匿名业务入口、闭合schema、样例和摘要向量。BE010 r2源码仍未采用，真实目标采用及数据库/B需另批。
+[业务集成v1](published/http-api/business-integration-v1/README.zh-CN.md)发布八路typed匿名业务入口、闭合schema、样例和摘要向量。[BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/checklist.md)已通过获批隔离A+B验证；Owner终验、真实目标/时间采用及DAA/SMA接线待定，默认仍关闭/未采用。AW需求保留自身proposed状态，不据此声称这些provider不存在。

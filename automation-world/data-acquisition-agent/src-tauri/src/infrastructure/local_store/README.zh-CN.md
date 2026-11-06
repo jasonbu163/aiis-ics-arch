@@ -1,13 +1,13 @@
-# 本地采集双库 v2
+# 本地采集与事实投递双库
 
-本适配层拥有 DAA-002 的本地 SQLite schema 与 SQL；不是 Backend DDL 或上传协议。实际实现/证据状态见 [任务](../../../../plans/DAA-002-local-acquisition-loop/tasks.md)。
+本适配层拥有本地 SQLite schema 与 SQL。DAA-008 只为新空 config-v2/runtime-v3 增加投递元数据；既有 v2/v2 保持本地行为且无投递 DDL。当前自检与 hot-journal 阻碍见[DAA-008](../../../../plans/DAA-008-reliable-facts-upload/tasks.md)，历史本地证据仍归 DAA-002/007。
 
 | 库 | 表与责任 |
 | --- | --- |
 | `config.sqlite` | `schema_migrations`、`instance_metadata`、内容去重 `source_documents`、CAS `configuration_draft`、不可变 `configuration_revisions`、`active_selection`、可恢复 `activation_intents` |
 | `runtime.sqlite` | `schema_migrations`、`runtime_metadata`、稳定 `plc_sources`、不可变 `configuration_contexts`、`activation_journal`、完整 `collection_cycles`、自描述 `samples`、独立 `sample_delivery` / `sample_references`、有限 `runtime_events` |
 
-仅在空 `local-acquisition-v1/` 同时初始化双库，设置 application ID、user_version=2、相同 instance ID与time_profile 并核完整性。缺任一库、schema/身份不符、损坏、symlink 或异常 WAL/SHM 材料即拒绝，不自动修补或替换。profile 级 OS 锁覆盖 DAA 新旧 GUI/headless；不宣称不同 profile/主机之间的设备排他。
+新库只在空 local-acquisition-v1 同时建立 config2/runtime3，身份/时间合同匹配并核完整性。已知 v2/v2 不转换；缺库、未知/损坏/schema/身份不符、symlink 或 WAL/SHM 均拒绝，profile 锁保持。r1 还会在 RO preflight 拒绝真实 hot rollback journal，受控恢复需另批 Revision；不删 journal、不用 immutable 绕过、不升级旧库。
 
 逐连接回读验证 `page_size=4096`、增量 auto-vacuum、`journal_mode=DELETE`、`synchronous=EXTRA(3)`、`foreign_keys=ON`、`busy_timeout=1000`；另设 `mmap_size=0`、trusted_schema 关闭。使用本机默认 VFS。hot journal 由 SQLite 恢复，应用不删 journal、不转换异常 WAL。硬件和文件系统行为仍影响耐久性。
 
@@ -15,7 +15,7 @@
 
 统一串行 worker 最多接纳 4 个写入、1 个执行及 4 个排队短查询。查询 deadline 从入队前开始，过期未执行工作不再运行；执行中的 watchdog 按剩余 1000 ms 预算 interrupt，并在复用连接前 join。超时不保证能取消阻塞的 OS 磁盘 I/O。每 PLC actor 等完整轮提交结果才开始下一轮，全部读取/排队/提交在途最多 4 轮；最多 4 个连续写任务后给短查询机会。
 
-完整轮事务先核不可变 context 及精确预期成员，分配一个 cycle ID/每 DB 一个 sample ID，写入所有成功/失败/null 质量、原时刻、排序 point-ID 字典、完整 manifest、pending 和下一个源序号，并原子更新 used revision。序号以整数持久化、十进制字符串输出，组筛选自然跳号。mutable ACK 不进入样本/manifest 摘要。产品无 ACK mutator/上传器/清队列；已确认种子仅在 `#[cfg(test)]`。
+完整轮事务先核不可变 context 及精确预期成员，分配一个 cycle ID/每 DB 一个 sample ID，写入所有成功/失败/null 质量、原时刻、排序 point-ID 字典、完整 manifest、pending 和下一个源序号，并原子更新 used revision。序号以整数持久化、十进制字符串输出，组筛选自然跳号。mutable ACK 不进入样本/manifest 摘要。v3 只允许严格回执同库原子确认；v2 无上传器，两种版本均无人工 ACK 或清空队列入口。
 
 编码是 UTF-8 紧凑 serde JSON、固定 struct 字段顺序、BTreeMap 点字典与稳定 UUID key；有限 REAL 保留实际 f32 解码值的 f64 表示。新业务日历时刻统一固定上海毫秒`+08:00`，保存时间由SQLite在同轮事务内生成一次；不是PLC事件时间或精确COMMIT后时刻。SHA-256 覆盖原 payload 字节；历史不重新生成值。元数据每页最多 100 行。较大完整 context 通过同一 `daa_get_sample.contextOffset` 按 UTF-8 边界分段，每段最多 64KiB，带原 SHA、总字节数及 next offset；GUI 重组原上下文。跨调用不保留 statement/读事务。
 
@@ -26,6 +26,10 @@
 事件保留 500 行，文件日志在 32MiB 内轮转。Engine 与串行 worker 共享同一个 Arc 日志对象和轮转 mutex，写入相同 profile 下的有界产品 JSONL；维护失败/延期同时输出结构化 stdout，字段为稳定的 event/process/resource/result/error_code，不递归提交 storage job。日志持久化失败报告 `local_log_failed/unknown_interval`，并锁存 `log_io_unknown_interval`；须修复日志并重启才能解除，不能靠普通存储健康探针恢复。此时停止新增存储写入和采集意图，后续维护写入也延期；只读历史/config/capacity、显式 Stop/disconnect 和正常 shutdown 仍可用，快照 PLC 错误及日志查询会反馈故障。这些日志是诊断记录，不能代替账本持久化。
 
 ## SQLite 3.46.0 适用性
+
+新 v3 投递表为 `delivery_settings`、`delivery_cycles`、`delivery_parts`、`delivery_batches`、`delivery_receipts`、`delivery_events`。设置 CAS 不重写采集 context。冻结请求绑定完整轮原材料及固定片；未决/unknown/父依赖通过引用保护。只有严格回执在同 runtime 事务更新 receipt/parts/sample ACK/引用，原 payload/manifest/context、SHA 与源序号不改。确认整轮清理先在原保留事务中删除无依赖投递元数据，再删除样本。请求、回执、元数据及 journal 计入物理预算，另保留 32 MiB ACK 恢复空间。独立单 worker 与共享 HTTP 许可保持单在途；PLC/组轮转持久保存，重试采用单调 deadline，并在重开按 1–300 秒重建。GET 只写有界读取诊断。
+
+下面的历史适用性说明不证明 r1 的 hot-journal 恢复；本次真实 ACK 崩溃在 RO preflight 失败，继续作为独立阻碍保留。
 
 获批固定 bundled 依赖为 rusqlite 0.32.1 / libsqlite3-sys 0.30.1，source ID 为 `2024-05-23 13:25:27 96c92aba00c8375bc32fafcdf12429c58bd8aabfcadab6683e35bbb9cdebf19e`。此版本未包含全部后续修复。
 

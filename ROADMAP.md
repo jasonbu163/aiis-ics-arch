@@ -6,9 +6,9 @@ Chinese version: [ROADMAP.zh-CN.md](ROADMAP.zh-CN.md)
 
 This roadmap describes the target responsibilities of PW, AW and AIW, and the capability stages for reaching them while preserving the stable baseline. It is a development direction, not a claim that the target applications, tables or deployments already exist.
 
-The current source surfaces remain `backend/` (FastAPI/SQLAlchemy/Alembic), `frontend-js/` (Vue JavaScript) and `automation-world/` (Rust/Tauri). The frozen CAF compatibility source path collects and decodes PLC values, writes backend-owned raw/latest snapshots directly to the database, and supplies the backend Projection framework. The new DAA local SQLite baseline is described in the snapshot below. The public template does not imply that a customer Handler or a live PLC chain is running.
+Current source includes `backend/` (FastAPI/SQLAlchemy/Alembic), the independent `backend-dotnet/` Plan learning slice, `frontend-js/` (Vue JavaScript), `automation-world/` (Rust/Tauri) and `field-flow/` (independent Rust/Python runtimes). Frozen CAF retains the old direct-database raw/latest → Projection compatibility source. New DAA owns local SQLite acquisition; the independent `plc_facts` provider and typed business integrations have passed bounded isolated MySQL verification. Their Owner acceptance, live adoption and DAA/SMA wiring remain separate.
 
-Existing documentation at `automation-world/control-agent/` records the relocated frozen old CA baseline. New CA targets general node orchestration and controlled execution; CAF relocation/path needs its owning task evidence and is not certified here. DAA inherits an independent project from frozen CA; SMA contains a filtered copy of generic HTTP mapping from `data-twin-backend` (DTB) Twin State Studio (TSS), with original TSS retained. [ARCH-AW-001](plans/ARCH-AW-001-agent-foundation/spec.md) tracks initialization and no-I/O native startup; its bundle owns independent QA/final acceptance. CU shared UI source has been delivered and DAA has adopted its layout; SMA/CA integration remains separately scoped. New AW APIs, DAA upload/acknowledgement/replay and the end-to-end business chain remain targets; the status snapshot below distinguishes existing code from those goals.
+[ARCH-AW-001](plans/ARCH-AW-001-agent-foundation/spec.md) owns the historical CA relocation/freeze and independent DAA/SMA initialization. Original DTB TSS remains the provenance of SMA, not its current configuration authority. SMA-002/003 cleanup and CU adoption are owner-accepted; SMA-004 local SQLite configuration/pure preview passed QA2, with normal manual/continuous delivery disabled and final acceptance pending. CU is consumed by DAA and SMA; new CA integration remains planned. [DAA](automation-world/data-acquisition-agent/PLAN.md), [SMA](automation-world/semantic-mapping-agent/PLAN.md), [FF](field-flow/PLAN.md) and provider task bundles own each exact boundary. No source or bounded QA establishes a live field chain.
 
 | Document | Responsibility |
 | --- | --- |
@@ -28,7 +28,7 @@ The future direction replaces r1's interchangeable-backend/default-stack roadmap
 | World | Owns | Current transition and target |
 | --- | --- | --- |
 | PW | Business models, users and permissions, business rules, transactions and business APIs | Existing FastAPI business capabilities remain PW responsibilities; future target is C#/.NET/ASP.NET Core with FastEndpoints |
-| AW — Automation World | Acquisition, field facts, semantic mapping; later archiving and controlled execution as needed | Rust; reuse CAF/TSS material. DAA owns local SQLite configuration; SMA currently uses Backend-held TSS mapping configuration. Existing FastAPI is the near-term host for AW API contracts; the new upload/durable-intent chains and AWB/Axum remain future work. |
+| AW — Automation World | Acquisition, field facts, semantic mapping; later archiving and controlled execution as needed | Rust; reuse CAF/TSS material. DAA owns local SQLite configuration; SMA owns a local SQLite configuration snapshot; normal delivery is disabled in this stage. FastAPI facts/business providers passed isolated QA; DAA upload, SMA delivery, the durable-intent chain and AWB/Axum still require their own implementation/adoption gates. |
 | AIW | Models, analysis, reasoning and recommendations | Python/FastAPI; PW business rules and authorization decide how outputs are adopted |
 
 These are responsibility boundaries. They do not require three repositories, three immediate deployments or a simultaneous language migration. Python business code does not become AIW merely because it is Python. AIW does not acquire direct authority over field actions.
@@ -37,7 +37,7 @@ Keep the current stable baseline usable and approve each implementation independ
 
 ### 2.1 Three-world architecture overview
 
-**Status snapshot: 2026-10-21.** PW owns business rules and authorization, AIW provides analysis and recommendations, and AW owns acquisition, mapping and field execution. The overview organizes responsibilities without requiring directory, repository or deployment separation.
+**Current snapshot: 2026-11-05.** The 2026-10-21 snapshot and its QA remain in [ARCH-MULTI-002](plans/ARCH-MULTI-002-three-worlds-diagram-sync/spec.md); later task evidence updates the current view here. PW owns business rules and authorization, AIW provides analysis and recommendations, and AW owns acquisition, mapping and field execution. The overview organizes responsibilities without requiring directory, repository or deployment separation.
 
 Solid lines in this overview describe responsibilities already represented in source; dotted lines represent planned, unconnected or separately integrated relationships. Neither establishes accepted live-field operation. Green marks existing source baselines, amber an application whose overall development/verification remains open, and dashed purple future work. The source tasks in §2.2 own exact scope and acceptance.
 
@@ -45,7 +45,7 @@ Solid lines in this overview describe responsibilities already represented in so
 flowchart TB
     subgraph PW["Human world · PW / Platform World"]
         WEB["Business UI · Existing foundation<br/>Vue / modules / role access"]
-        BIZ["Business API / Service · Existing foundation<br/>Rules / transactions / business state / task authorization<br/>FastAPI today; .NET later"]
+        BIZ["Business API / Service · Existing foundation<br/>Rules / transactions / business state / task authorization<br/>FastAPI plus isolated integration QA<br/>Independent .NET Plan learning slice passed QA"]
         BDB[("PW business database")]
         WEB --> BIZ --> BDB
     end
@@ -54,16 +54,18 @@ flowchart TB
     end
     subgraph AW["Heaven world · AW / Automation World"]
         subgraph APPS["Three independent applications · Own Tauri / Vue + Rust Runtime"]
-            DAA["DAA · In development<br/>Local SQLite configuration/acquisition baseline exists<br/>Continuous reads / decoding / quality / samples"]
-            SMA["SMA · Existing compatibility baseline<br/>TSS facts to POST / sequential scheduler<br/>Backend-held mapping configuration"]
+            DAA["DAA · Local Stage B accepted in controlled DS scope<br/>SQLite / reads / quality / samples<br/>Upload and ACK unconnected"]
+            SMA["SMA · Local configuration and pure preview<br/>CU adopted; SQLite QA2 passed<br/>Normal delivery disabled"]
             CA["New CA · Planned<br/>General nodes / conditions / versions / context<br/>Internal connectors / controlled execution"]
         end
-        FACT["AW facts API / storage · Unconnected<br/>FastAPI first; AWB later as needed"]
-        CU["CU · Existing shared UI<br/>Layout / themes / components<br/>DAA integrated; SMA/CA later"]
+        FACT["Facts provider · Source and isolated MySQL QA passed<br/>Owner acceptance and live adoption pending"]
+        CU["CU · Existing shared UI<br/>Layout / themes / components<br/>DAA and SMA integrated; new CA later"]
         MGMT["AWB + AWC · Planned<br/>Axum management API + central console<br/>Registration / health / configuration publication"]
         DAA -. "Upload / acknowledgement / replay" .-> FACT
         FACT -. "HTTP fact reads" .-> SMA
-        CU -. "Build-time source reuse / separate integration" .-> APPS
+        CU -->|Build-time UI source| DAA
+        CU -->|Build-time UI source| SMA
+        CU -. "Future integration" .-> CA
         DAA -. "Registration / health" .-> MGMT
         SMA -. "Registration / health" .-> MGMT
         CA -. "Registration / health" .-> MGMT
@@ -79,23 +81,24 @@ flowchart TB
     classDef existing fill:#eaf7ef,stroke:#5b9670,color:#204b30;
     classDef developing fill:#fff4df,stroke:#ba862e,color:#624617;
     classDef planned fill:#f5f0fa,stroke:#9875b4,color:#52376a,stroke-dasharray:5 4;
-    class WEB,BIZ,BDB,SMA,CU existing;
-    class DAA developing;
-    class AI,CA,FACT,MGMT planned;
+    class WEB,BIZ,BDB,FACT,CU existing;
+    class DAA,SMA developing;
+    class AI,CA,MGMT planned;
 ```
 
 ### 2.2 Implemented, in development and planned
 
-“Implemented” means the corresponding source or bounded baseline exists; it does not establish whole-stage acceptance, field verification or deployment. The owning tasks may advance after this dated snapshot.
+“Implemented” means source or a bounded baseline exists; it does not establish whole-stage acceptance, field verification or deployment. This dated current view cites task-owned evidence; prior dated snapshots and acceptance remain historical.
 
 | Area | Status | Current boundary and next gate | Source |
 | --- | --- | --- | --- |
-| PW | Existing foundation; stack migration planned | FastAPI + Vue continue to own business capabilities; .NET/FastEndpoints migration is separate future work | [Root README](README.md), [current PLAN](PLAN.md) |
-| DAA | Local baseline exists; overall development/verification open | SQLite configuration, acquisition, history and imports exist; overall Stage B remains open, DAA–DS S7-to-SQLite validation requires separate approval, and upload/acknowledgement/replay are unconnected | [DAA README](automation-world/data-acquisition-agent/README.md), [DAA PLAN](automation-world/data-acquisition-agent/PLAN.md) |
-| SMA | Existing TSS compatibility baseline; focused-workbench evolution planned | Backend-held mapping configuration, HTTP facts-to-POST and sequential scheduling today; arbitrary HTTP sources, per-row continuous runs, local SQLite/reliable outbox and similar extensions need separate scope | [SMA README](automation-world/semantic-mapping-agent/README.md), [three-application roadmap](plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design) |
-| CU | Shared source and workbench implemented | DAA adopted its layout; SMA/new CA integrate separately. Built applications run their own artifacts without an online CU process | [CU PLAN](automation-world/console-ui/PLAN.md), [DAA PLAN](automation-world/data-acquisition-agent/PLAN.md) |
-| DS | In development: product MVP refinement and independent verification | Final acceptance pending; full DAA–DS application S7-to-SQLite validation requires separate approval, and partial DS evidence does not close overall DAA Stage B | [DS implementation task](plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md), [current PLAN](PLAN.md) |
-| Field Flow | Planned; documentation only today | Two independent Rust/Python field-flow programs have no runtime source yet; their future flows can provide input for CA migration | [FF README](field-flow/README.md) |
+| PW | Existing foundation; independent C# learning slice | FastAPI + Vue remain the business baseline. BE-008 Plan create/detail/list passed QA2 without authentication; Owner acceptance and any migration/adoption remain separate | [Root README](README.md), [current PLAN](PLAN.md) |
+| DAA | Controlled local Stage B owner-accepted | DAA-001–007 accepted; 2026-10-30 acceptance is limited to controlled DS S7 → SQLite. Upload/ACK/replay are unconnected; backend-first/DAA-later is the chosen sequence | [DAA README](automation-world/data-acquisition-agent/README.md), [DAA PLAN](automation-world/data-acquisition-agent/PLAN.md) |
+| SMA | Cleanup/CU accepted; local configuration QA2 passed | SQLite single-document/revision and pure preview exist. SMA-004 awaits Owner acceptance; normal manual/start/resume/auto-start delivery is rejected. GET→POST and reliable runtime remain future stages | [SMA README](automation-world/semantic-mapping-agent/README.md), [SMA PLAN](automation-world/semantic-mapping-agent/PLAN.md) |
+| CU | Shared source and grouped navigation owner-accepted | CU-001–008 accepted; DAA/SMA consume the UI source. Built applications need no online CU process; new CA integration is separate | [CU PLAN](automation-world/console-ui/PLAN.md) |
+| DS | S7 product baseline owner-accepted | 2026-10-27 acceptance is preserved; 2026-10-29 DIRECT draft/version changes have DEV self-check with manual confirmation pending. DAA joint acceptance is separate; Modbus/debugging remain draft | [DS README](automation-world/device-simulator/README.md), [DS PLAN](automation-world/device-simulator/PLAN.md) |
+| Field Flow | Independent runtime source and bounded local QA | FF-005 basic cases accepted; FF-001/002 and FF-004 r2 A passed local QA, awaiting Owner acceptance. Rust per-PLC JSON/YAML v2 and S7 int16 multi-PLC calls exist; Modbus only validates structure, not transport. Full hold_ack/legacy UTC limits remain | [FF PLAN](field-flow/PLAN.md) |
+| Facts/business providers | Implemented and isolated MySQL QA passed | BE-009 independent seven-table facts owner and BE-010 eight typed business operations/four new tables passed A+B. Default admission remains closed/unadopted; Owner acceptance, actual target adoption and full chain remain pending | [Facts provider](contracts/published/http-api/plc-facts-v1/README.md), [business provider](contracts/published/http-api/business-integration-v1/README.md) |
 | New CA | Planned; design direction defined | General nodes, versions, context, internal connectors and controlled execution await implementation; connectors require explicit support matrices | [CA flow design](plans/ARCH-AW-006-unified-flow-agent-design/spec.md#r2-design) |
 | AW fact-upload chain | Planned / unconnected | New DAA upload, receipt acknowledgement, idempotent replay and facts-to-business integration follow their API/runtime contracts | [DAA README](automation-world/data-acquisition-agent/README.md), [three-application roadmap](plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design) |
 | AWB / AWC | Planned | Registration/heartbeat and read-only health first, then configuration publication and remote operations; heartbeat is neither business completion nor a device-write lease | [Three-application roadmap](plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design) |
@@ -107,7 +110,7 @@ The two main target paths are:
 - Data upward: `PLC → DAA → AW facts API → SMA → PW business API → business database / UI`.
 - Business actions downward: `Human or AIW recommendation → PW validation/authorization → CA field checks → device execution → receipt`.
 
-Ordinary point-value exchange can still compose supported CA connectors directly under the resource and side-effect contracts in §3/§5. `aw_` marks AW-owned backend tables only; exact schemas, independent storage, HA/SA and archiving follow §7/§8. Example table names do not assert that those tables already exist.
+Ordinary point-value exchange can still compose supported CA connectors directly under the resource and side-effect contracts in §3/§5. `aw_` marks AW-owned backend tables only; exact schemas, independent storage, HA/SA and archiving follow §7/§8. Example table names do not assert that those tables already exist; BE-009 actually uses its independent `plc_facts_*` tables, without replacing old monitor snapshots.
 
 ## 3. Data and configuration flows
 
@@ -126,12 +129,12 @@ The current DAA application instead uses local SQLite configuration and acquisit
 ### Near-term target path
 
 ```text
-PLC -> DAA acquisition/decoding -> FastAPI AW facts API / aw_* latest facts
+PLC -> DAA acquisition/decoding -> FastAPI plc_facts API / owner-specific latest facts
     -> SMA binding/validation/request assembly -> PW business API
     -> business Service / business tables -> UI; later AIW consumption when authorized
 
 DAA UI -> local Rust configuration service -> own SQLite -> validation/explicit activation
-SMA UI -> current Backend-held TSS mapping configuration / HTTP runtime
+SMA UI -> local Rust service -> own SQLite configuration / pure preview (delivery disabled)
 CA UI -> target own versioned configuration/progress; implementation separately scoped
 Third party -> system API validation/durable intent -> CA atomic claim -> device write/ack
                                                      CA -> execution receipt
@@ -140,7 +143,7 @@ Later as needed: central publication -> Agent download/validation/activation/sta
 
 Business APIs accept semantic device/business identities, measurements, timestamps and events. Business Services do not interpret PLC DB numbers, offsets, bits or raw point names; provenance can remain available for tracing. SMA owns HTTP field conversion/request assembly; CA handles general flows. Order transitions, business-state rules and transactions remain in PW.
 
-Freeze the configuration, facts, mapping/receipt contracts and one actual business API pilot first. The pilot does not require implementing all eight inventoried legacy Handler APIs. Once contracts are fixed, Backend, DAA, SMA and CA implementation can proceed in parallel; integration requires real callable APIs.
+BE-009/010 now supply fixed provider contracts and isolated technical QA. The chosen sequence is backend first, DAA uploader later; SMA local GET→POST execution and source-identity adaptation still need independent scopes. A single end-to-end business pilot remains useful for wiring these components; eight implemented business operations do not themselves prove that pilot or full-chain completion.
 
 Ordinary HTTP-to-HTTP or PLC-to-PLC point-value exchange can run within CA under explicit resource and side-effect contracts without passing through Backend. Orders, recipes, quality decisions and other PW-owned business state still use the owning Service/API; a point-value exchange cannot silently assume those business responsibilities. The fact-upload and durable-intent paths above remain targets, not claims that they are connected.
 
@@ -153,21 +156,23 @@ CA owns the general Tauri/Rust node orchestration design: local workbench, flow 
 ```mermaid
 flowchart LR
     PLC[PLC] --> DAA[Independent DAA: bulk continuous acquisition]
-    DAA -->|Future acknowledged replay| FACT[Backend facts API]
-    HTTP[Public HTTP facts / API] --> SMA[Independent SMA: mapping tables / workbench]
-    SMA -->|Business API delivery| PW[PW / Backend Service]
-    IO[HTTP / PLC / future WS / external integration DB] <--> CA[Independent CA: internal connectors / general flows]
-    CA <--> PW
+    DAA -. "Upload and ACK not connected" .-> FACT[Backend facts API: isolated QA passed]
+    HTTP[Public HTTP facts / API] -. "Future execution input" .-> SMA[Independent SMA: local configuration / pure preview]
+    SMA -. "Delivery disabled; future GET-to-POST" .-> PW[PW / Backend Service]
+    IO[HTTP / PLC / future WS / external integration DB] -.-> CA[Independent CA: planned internal connectors / general flows]
+    CA -.-> IO
+    CA -.-> PW
+    PW -.-> CA
     DAA -.Future registration / heartbeat.-> AWB[AWB registration / health]
     SMA -.Future registration / heartbeat.-> AWB
     CA -.Future registration / heartbeat.-> AWB
-    AWB -->|API / events| AWC[AWC central health view]
+    AWB -. "Future API / events" .-> AWC[AWC planned central health view]
 ```
 
 | Component | Responsibility | Boundary |
 | --- | --- | --- |
 | DAA | Continuous sampling, decoding/quality, original time/identity, history/capacity and future replay | Current upload is not connected; no general business flows or device-task dispatch |
-| SMA | Tables/batch management for many similar HTTP mappings, workbench and delivery diagnosis | Current TSS Backend-held configuration; no general PLC/DB connectors |
+| SMA | Tables/batch management for many similar HTTP mappings, workbench and delivery diagnosis | Local SQLite configuration/pure preview; normal execution disabled; no general PLC/DB connectors |
 | CA | Typed nodes/conditions/subflows, internal connectors, pinned versions and execution/reconciliation | Does not assume PW rules or equate protocol success with device/business completion |
 | PW / Backend | Rules, data owner, transactions, Service/API and schema | Request threads do not poll PLCs; connectors do not bypass owned business writes |
 | CU / local UI | Reusable CU source; each App workbench manages its local objects | Shared source is not an online dependency; local workbenches differ from central AWC |
@@ -175,9 +180,9 @@ flowchart LR
 
 DAA's full target remains `PLC read → decoding/quality → local sample buffer → HTTP POST → acknowledgement/replay`. Its locking, SQLite, import and diagnostics may inform reuse, without proving a shared Core, connectors or heartbeat delivery. Window close, background continuation, exit and OS hosting follow each App's implementation contract.
 
-SMA already has a [mapping table](automation-world/semantic-mapping-agent/src/app/twin-facts/components/MappingConfigurationsPanel.vue), [JSON/XLSX batch preview/import](automation-world/semantic-mapping-agent/src/app/twin-facts/components/MappingBatchOperationsDialog.vue) and [start/pause/resume/stop controls](automation-world/semantic-mapping-agent/src/app/twin-facts/components/ApiFirstMappingRuntimePanel.vue). The current [scheduler](automation-world/semantic-mapping-agent/src-tauri/src/services/mapping_runtime/mod.rs) loads enabled POST mappings, awaits each `run_mapping_tick` sequentially and reads fresh bound Facts Snapshot chunks per mapping. This supports refinement of existing tables and a home workbench, without proving batch concurrency or throughput.
+SMA retains [mapping tables](automation-world/semantic-mapping-agent/src/app/twin-facts/components/MappingConfigurationsPanel.vue) and [JSON/XLSX import previews](automation-world/semantic-mapping-agent/src/app/twin-facts/components/MappingBatchOperationsDialog.vue), now backed by its Rust-owned SQLite snapshot. Saved-row previews reuse pure mapping rules. Normal manual/start/resume/auto-start paths reject execution before HTTP-client construction or spawning. The [old TSS scheduler](automation-world/semantic-mapping-agent/src-tauri/src/services/mapping_runtime/mod.rs) is retained only for explicit compatibility fixtures, not a normal fallback or evidence of active delivery.
 
-Continuous selection of a subset or per-row start/stop, arbitrary HTTP GET sources, bounded concurrency/isolation, capacity optimization and persistent SQLite/checkpoint/outbox recovery need separately approved runtime/storage contracts and evidence. The current all-enabled-POST continuous run and saved-row single-round test are distinct; a rowVersion is not a complete historical-version store. The [006 r2 design](plans/ARCH-AW-006-unified-flow-agent-design/spec.md#r2-design) supplies the detailed workbench, mapping and CA version/context/extension behavior; no immediate SMA storage migration is required.
+SMA-004 deliberately selected one configuration snapshot with revision/CAS. Full relational configuration/version publication, runtime checkpoint/outbox, configurable GET sources, per-row running and throughput remain separately scoped. Existing sourceKey/factName bindings are not automatically compatible with the new provider point identities; that adaptation belongs to the next execution contract. [SMA PLAN](automation-world/semantic-mapping-agent/PLAN.md) owns the sequence, while [006 r2](plans/ARCH-AW-006-unified-flow-agent-design/spec.md#r2-design) remains design history/reference for future CA and mapping capabilities.
 
 ## 5. CA internal connectors and source reuse
 
@@ -197,7 +202,7 @@ CU supplies reusable UI source outside PLC/DB execution. Each App composes its o
 | DTB `twin-state-studio/` | Pure Rust mapping Domain, scheduler, facts/target-API binding, value rules, editing and diagnostics | Adapt lifecycle, networking and backend dependencies; retain functional logic while reusing CAF visual material |
 | DTB generic backend | Fact/configuration APIs, execution leases and receipts | Fit this repository's MySQL, Registry/manifest, authentication/permissions, response contract and explicit Alembic migrations |
 
-External source references in DTB are `twin-state-studio/README.zh-CN.md`, `twin-state-studio/src-tauri/src/domain/mapping_runtime/mod.rs`, `twin-state-studio/src-tauri/src/services/mapping_runtime/mod.rs` and `backend/app/tss/`. They fix SMA provenance. The current SMA uses Backend-held TSS mapping configuration and retains applicable desktop HTTP/pure computation and excludes customer/SQL/legacy IPC and cross-DTB help generation. It starts independently; online capabilities still require compatible Backend contracts. This foundation neither imports DTB backend nor implements new AW APIs.
+External source references in DTB are `twin-state-studio/README.zh-CN.md`, `twin-state-studio/src-tauri/src/domain/mapping_runtime/mod.rs`, `twin-state-studio/src-tauri/src/services/mapping_runtime/mod.rs` and `backend/app/tss/`. They fix SMA provenance. SMA now owns local SQLite configuration and pure preview. Applicable HTTP/pure mapping algorithms remain as provenance and explicit compatibility fixtures; facts production, Simulation, help, customer/SQL/legacy IPC and cross-DTB help generation are retired. Backend facts/business providers were implemented separately under BE-009/010; DAA/SMA execution wiring is still unconnected.
 
 MSSQL-specific mechanisms such as `ROWVERSION` need a MySQL-compatible contract. DTB migration files are historical source material, not ready-to-run migrations for this repository. Preserve source attribution and applicable licensing. Import reusable public capabilities and sanitized examples only; customer pages, real configurations, data/resources and legacy direct-business-table writes remain outside the new AW boundary.
 
@@ -205,7 +210,7 @@ The original CAF database-snapshot and Backend Projection chain remains a histor
 
 ## 7. Configuration, facts, instances and fleet health
 
-Configuration authority differs by App: DAA already owns local SQLite; SMA currently retains Backend-held TSS mapping configuration, with technical startup preferences distinct from mapping authority; CA's own versioned SQLite/progress remains a target design. The general SQLite summary in §2 describes direction, not a requirement to migrate all Apps now. FastAPI facts, durable intents, claims and receipts follow their contracts. The `aw_` names below illustrate Backend AW ownership, not an additional editable authority beside each object's chosen writer.
+Configuration authority differs by App: DAA already owns local SQLite; SMA owns a Rust-managed local SQLite snapshot/revision; technical startup preferences and UI preferences are separate; CA's own versioned SQLite/progress remains a target design. The general SQLite summary in §2 describes direction, not a requirement to migrate all Apps now. FastAPI facts, durable intents, claims and receipts follow their contracts. The `aw_` names below illustrate Backend AW ownership, not an additional editable authority beside each object's chosen writer.
 
 | Illustrative table | AW responsibility |
 | --- | --- |
@@ -216,15 +221,15 @@ Configuration authority differs by App: DAA already owns local SQLite; SMA curre
 | `aw_mapping_runtime_states` | Mapping runtime states, leases and receipts |
 | `aw_agent_states` | Agent status and applied configuration versions |
 
-These names illustrate ownership, not a final schema. Orders, device business states and business sampling records keep their business owners and table names. A table does not become AW-owned because a Mapping references it. The prefix establishes neither database/permission isolation nor a completed AW split.
+These are historical ownership examples, not the implemented provider schema; see the independent `plc_facts_*` models and fixed provider contract. Orders, device business states and business sampling records keep their business owners and table names. A table does not become AW-owned because a Mapping references it. The prefix establishes neither database/permission isolation nor a completed AW split.
 
-Acquisition configuration must cover both [plc_points.yaml](automation-world/control-agent/config/plc_points.yaml) (connections, DB blocks, types, offset/bit) and [plc_snapshot_policy.yaml](backend/config/plc_snapshot_policy.yaml) (raw/latest retention selection). Explicitly import, preview and validate legacy configuration; local Rust saves drafts and activates complete revisions. Central publication/download is later work. SQLite commit and memory activation are distinct; recovery remains to be specified.
+DAA configuration is edited through its UI/Rust service and persisted in its own SQLite. The frozen [PLC YAML](automation-world/control-agent/config/plc_points.yaml) and [snapshot policy](backend/config/plc_snapshot_policy.yaml) document compatibility provenance; ordinary DAA startup no longer imports them. DB/UDT import, explicit validation and activation follow the current DAA contract. Central publication remains future work.
 
-Facts can reuse `(sourceKey, factName)` identity. API/schema tasks must define source/Agent identity, stable sample ID or sequence, collection and receive times, quality, point-contract version and mapping version, together with batch atomicity, authorization, idempotency and version behavior.
+The implemented [facts provider](contracts/published/http-api/plc-facts-v1/README.md) fixes sample/point/source identities, order, quality, time, digests and receipt/cursor semantics. SMA's saved legacy sourceKey/factName references still require explicit adaptation; they are not a second provider identity contract.
 
 Latest facts describe current state; they cannot prove every intervening change was consumed. Events, append-only business records and history need explicit separate contracts. Missing, bad-quality, stale and out-of-order values need policies so a stopped source's last value is not indefinitely treated as valid.
 
-**Configuration and fleet management cover all three application types.** DAA currently owns local SQLite configuration; SMA currently uses Backend-held TSS configuration and may refine its tables/workbench before a separately approved local-SQLite or reliable-outbox project. CA's versioned local configuration/progress is a target design. Neither this roadmap nor AWB management forces a simultaneous storage migration. Future publication requires one writable authority per object, desired/cached/applied versions and separate receipt, validation and application acknowledgements; rollback preserves pending samples/work, unknown outcomes, outboxes, cursors and audit.
+**Configuration and fleet management cover all three application types.** DAA currently owns local SQLite configuration; SMA local configuration is implemented, while reliable runtime/outbox and active/previous publication remain future capabilities. CA's versioned local configuration/progress is a target design. Neither this roadmap nor AWB management forces a simultaneous storage migration. Future publication requires one writable authority per object, desired/cached/applied versions and separate receipt, validation and application acknowledgements; rollback preserves pending samples/work, unknown outcomes, outboxes, cursors and audit.
 
 Future enrolled DAA, SMA and CA instances use a common identity/heartbeat contract: stable agentId and deployment/site/project, agentKind as application type distinct from duty profile, actual software/capability and acquisition/mapping/flow versions, process instance/boot/sequence, desired/applied configuration and observedAt. AWB adds receivedAt/lastSeen, rejects conflicting identity and old/replayed generations from refreshing TTL, and uses configurable stale/offline thresholds and bounded latest-state heartbeat retention. Types report their own work: DAA sampling/disk/replay; SMA mapping results/delivery latency/backlog; CA flows/nodes/unknown outcomes. Unsupported metrics remain explicit rather than fabricated zeros.
 
@@ -309,14 +314,14 @@ Compare old/new results before switching by source/target. Disable the correspon
 
 ## 9. Deferred decisions and task alignment
 
-- [ARCH-BE-003](plans/ARCH-BE-003-mapping-service-api-pilot/spec.md) needs its own revision for the target project, sample identity, idempotency and permissions. Begin with one business API, not the complete legacy Handler inventory.
+- [ARCH-BE-003](plans/ARCH-BE-003-mapping-service-api-pilot/spec.md) retains its own QA/acceptance history. [BE-009](plans/ARCH-BE-009-backend-facts-integration/spec.md) and [BE-010](plans/ARCH-BE-010-anonymous-business-integration/spec.md) now own the implemented facts and typed business contracts; DAA/SMA integration and live adoption remain separate.
 - [CA-CONFIG-001](plans/CA-CONFIG-001-packaged-configuration-management/spec.md) needs separate reassessment against local SQLite authority and later central publication. This roadmap does not modify or approve its implementation.
 - [ARCH-BE-002](plans/ARCH-BE-002-energy-price-api/spec.md) is an independent reusable public capability, not a prerequisite of the sampling pilot.
 - [ARCH-AW-006 r2](plans/ARCH-AW-006-unified-flow-agent-design/spec.md#r2-design) supplies the three-application, SMA table/workbench and CA flow design with sanitized production-line/laboratory cases. Exact approval and stages remain in its bundle; software implementation is separately scoped. CA first-version HTTP GET/POST, supported S7 and no-login scope is unchanged.
-- [ARCH-AW-007 r2](plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design) owns this roadmap synchronization. CA directory/identifier/OS, SMA runtime/storage/capacity extensions, connector matrices, formal identity/API/schema/thresholds/trust, central-authority migration and remote operations/fencing remain for their owning specs; the three Apps, connectors and management plane advance by their own dependencies.
+- [ARCH-AW-007 r2](plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design) owns the accepted three-application direction; [ARCH-DOC-001 r1](plans/ARCH-DOC-001-project-state-and-decision-sync/spec.md) owns this current-state document synchronization. CA directory/identifier/OS, SMA runtime/storage/capacity extensions, connector matrices, formal identity/API/schema/thresholds/trust, central-authority migration and remote operations/fencing remain for their owning specs; the three Apps, connectors and management plane advance by their own dependencies.
 - Advance AWB, headless Runtime extraction, unified AWC, database changes and PW technology migration when justified, with enrollment/read-only health before central publication and remote operations. PW/AW/AIW capabilities may advance independently; no all-at-once migration is required.
 - Exact component versions/drivers, supported database combinations, deployment forms, directory decisions beyond this target and schedules belong to their implementation tasks. Automatic OpenAPI ingestion, full import/export and simulation can be scoped there as needed.
 
-Document rollback removes only the exact 007 body/index additions without resetting or overwriting existing dirty work. Original bundles retain their sources, QA and acceptance; these are not retroactive approval for 007 or 006. Configuration rollback does not undo external effects.
+Document rollback removes only the owning approved document task body/index additions without resetting or overwriting existing dirty work. Original bundles retain their sources, QA and acceptance; these are not retroactive approval for 007 or 006. Configuration rollback does not undo external effects.
 
 This documentation task creates no Agent directories, code, APIs, tables or deployment artifacts. Future stages remain planned. Runtime/build/site evidence and final acceptance are recorded in their owning task bundles, not inferred from this roadmap.

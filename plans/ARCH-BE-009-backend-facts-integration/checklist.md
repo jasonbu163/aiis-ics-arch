@@ -1,5 +1,53 @@
 Task ID: ARCH-BE-009
 Revision: r1
+Status: owner_accepted
+Owner Role: QA / Verification
+Allowed Writers: QA / Verification, Human Owner
+Handoff: Human Owner 已于2026-11-05接受本次获批源码及隔离MySQL A+B交付；原独立qa_passed与全部历史保留；本角色登记完毕并释放写入，协调者机械同步索引
+Workflow Mode: STD
+Execution Mode: agent_team_same_session
+Independent QA Verdict: qa_passed
+Owner Accepted At: 2026-11-05 Asia/Shanghai
+Record Purpose: Owner final-acceptance receipt only; no new QA run
+
+# Human Owner最终验收登记（2026-11-05）
+
+Human Owner在本会话引用[主-DAA](codex://threads/01a143e5-5616-76c0-9df7-13b487bc9c26)的验收建议，明确表示“可以作为我我的验收语句，我授权”。当前lifecycle coordinator核对该会话最新答复后，转交Owner采用的完整原句如下：
+
+> 验收 ARCH-BE-009 r1、ARCH-BE-010 r2 在本次获批源码及隔离 MySQL A+B 范围内的交付，接受独立核验结果和已记录限制。请完成验收登记及无依赖临时资源收尾，保留必要证据。已有数据库和真实历史不动，实际环境采用、DAA/SMA 联调及生产部署另行批准。
+
+本记录只登记上述真实Owner决定在ARCH-BE-009 r1的效力；ARCH-BE-010 r2由其所属checklist分别登记。独立A+B结论保持`qa_passed`，当前本任务状态为`owner_accepted`。此前“Owner pending”、A/B各阶段批准与失败/返工内容均保留为其发生时点的事实，不回写历史，不新增验证结论。
+
+| 验收对象与边界 | 本次登记 |
+| --- | --- |
+| 精确获批交付 | 固定B候选`joint-B-candidate.json` SHA-256 `2532d8423c73f0e9c0a7ac42d616014b2ca09419588cd07a0218bd4ce080cafb`，及下方完整A/B独立证据、失败历史和已记录限制；本任务[spec](spec.md)仍为r1。 |
+| 当前工作树关系 | closeout entry记录当前HEAD为`0465f45ced6a2c8f8ca271b8bbf71f9eabc99de9`，区别于QA时的`8030dbb3401ac6d1cf8bea46c81cfeff9e8e073b`。本次只读哈希核对：候选157实现条目中148份原样，2份获批spec均原样；另9份是后续Markdown文档变化，全部保留且不纳入本次验收，不声称当前159项/HEAD整体等于旧候选。 |
+| 后续文档差异 | `CODE_INDEX.md`、`backend/README.md`及`.zh-CN.md`、`contracts/README.md`及`.zh-CN.md`、两个published provider目录各自的`README.md`及`.zh-CN.md`；精确前后SHA见closeout entry。 |
+| 仍独立推进的gate | 实际目标schema/时间采用、准入启用、DAA上传器与阶段C实际接线、DAA/SMA联调、生产部署、现场/真实PLC及生产长期SLA继续按各自范围另批；本次接受不改变默认关闭/未采用的运行边界。已有数据库、真实历史和DAA配置/历史保持不动。 |
+
+## 已授权资源收尾与保留证据
+
+此前专用运行资源已按具体B批准完成回收并由独立QA核验：2容器、2卷、2网络、8个随专用卷移除的schema，以及27份生成口令/key/操作配置均已清理。其原收据和独立缺失观察完整保留在下方；本次没有重建资源、Docker/数据库查询或读取/恢复秘密配置。
+
+本次实际收尾执行者仍为当前lifecycle coordinator。其只读自有进程盘点为0个B进程；在确认无运行依赖后清理115个自有`__pycache__`/`.pytest_cache`/`uv-cache`目录，共438份缓存文件、2,229,142 bytes。9,763份非缓存证据在清理前后的SHA逐项一致，冻结源码副本、原始命令/日志/报告、diff和失败证据均保留。Verification本次只读消费该收据，没有执行删除或新增运行验证。
+
+五个B证据根继续保留：`/private/tmp/arch-be009-r1-b-dev`、`/private/tmp/arch-be010-r2-b-dev`、`/private/tmp/arch-be009-r1-b-qa`、`/private/tmp/arch-be010-r2-b-qa`、`/private/tmp/arch-be009-r1-be010-r2-b-my8s9bnu`。用途为已接受基线审计和DAA阶段C交接；待这些证据依赖结束、必要结论已持久化后，由协调者确认归属再回收重复临时证据。closeout根`/private/tmp/arch-be009-be010-owner-closeout-4iqs6drx`仅为本次验收/一致性/资源审计保留，同样在交接证据依赖结束后回收。关键QA结论、限制、命令结果、定量守恒、资源身份及本次收尾数量均已在任务checklist中持久化。
+
+| 本次只读输入 | SHA-256 |
+| --- | --- |
+| closeout根`entry.json` | `91a9b5b6600df44334ad261f33938011fe749e9c6f8c02c3f11c41999c7519f0` |
+| closeout根`resource-closeout.json` | `e46a6d45385305f1d29eba8ef6e8bba43c440f38953e64a9e42890a4d15fd379` |
+| 原B专用运行资源`cleanup-receipt.json` | `23048893ca4c71a6fc7ca76d0e9a466371c41e6fda15880458f8515cac5e41cb` |
+| 下方验收前完整checklist原文 | `01803851a120c38c083290b30b42e0c5adac106c7edec618622195a4156d431c`，66,252 bytes，作为完整原始字节后缀保留。 |
+
+本次沿用原实际Verification角色，仅使用project-governance核对验收文档归属；复读适用契约与完整bundle，使用stdlib `python3 -B -`进行文件SHA、元数据、UTF-8、前置段链接/空白及原文后缀检查，exit0。不重跑A/B测试或扩大原QA结论，不改spec/tasks/实现/测试/配置/索引，不进行数据库、Docker、DAA、真实环境/历史、邮件或Git动作。写入仅限本checklist前置收据；此前66,252 bytes完全不变，完成后向协调者报告最终SHA并停止写入。
+
+---
+
+# 验收前B/A原始完整记录（历史，以下字节原样保留）
+
+Task ID: ARCH-BE-009
+Revision: r1
 Status: qa_passed
 Owner Role: QA / Verification
 Allowed Writers: QA / Verification, Human Owner

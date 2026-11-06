@@ -10,3 +10,5 @@ pub(crate) mod plc_layout;
 pub(crate) mod tia_source;
 #[cfg(test)]
 pub(crate) mod yaml_migration;
+
+pub(crate) mod facts_http;

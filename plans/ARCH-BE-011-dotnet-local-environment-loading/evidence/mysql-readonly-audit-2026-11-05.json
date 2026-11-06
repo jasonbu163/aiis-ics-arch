@@ -1,0 +1,342 @@
+{
+  "audit_date": "2026-11-05",
+  "auditor": "coordinator_read_only",
+  "target_alias": "python_host_development_config",
+  "configuration_source": "backend/.env",
+  "database_writes_authorized": false,
+  "database_writes_executed": false,
+  "business_rows_emitted": false,
+  "queries": [
+    "SELECT VERSION() AS version, @@version_comment AS distribution, @@session.time_zone AS session_zone, @@global.time_zone AS server_zone, @@system_time_zone AS system_zone, TIMESTAMPDIFF(SECOND, UTC_TIMESTAMP(), CURRENT_TIMESTAMP()) AS offset_seconds, @@session.transaction_read_only AS transaction_read_only, @@session.sql_mode AS sql_mode",
+    "SELECT TABLE_NAME, ENGINE, TABLE_COLLATION FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('plans','alembic_version') ORDER BY TABLE_NAME",
+    "SELECT version_num FROM alembic_version ORDER BY version_num",
+    "SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT, EXTRA, DATETIME_PRECISION, CHARACTER_SET_NAME, COLLATION_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='plans' ORDER BY ORDINAL_POSITION",
+    "SELECT INDEX_NAME, NON_UNIQUE, SEQ_IN_INDEX, COLUMN_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='plans' ORDER BY INDEX_NAME, SEQ_IN_INDEX",
+    "SELECT CONSTRAINT_TYPE FROM information_schema.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA=DATABASE() AND TABLE_NAME='plans'",
+    "SELECT EVENT_MANIPULATION, ACTION_TIMING FROM information_schema.TRIGGERS WHERE EVENT_OBJECT_SCHEMA=DATABASE() AND EVENT_OBJECT_TABLE='plans'",
+    "SELECT `id`,`coil_no`,`grade`,`spec`,`material_status`,`status`,`priority`,`remark`,`created_at`,`updated_at`,`weight`,`thickness`,`width`,`density`,`entry_length`,`uncoiler1_tension`,`exit_tension`,`process1_tension`,`entry_loop_tension`,`exit_loop_tension`,`entry_unit_tension`,`entry_loop_unit_tension`,`process_unit_tension`,`exit_loop_unit_tension`,`exit_unit_tension` FROM `plans` LIMIT 0",
+    "SELECT EXISTS(SELECT 1 FROM plans LIMIT 1) AS has_rows",
+    "SHOW GRANTS FOR CURRENT_USER"
+  ],
+  "limitations": [
+    "Trigger visibility is limited by the existing application account privileges.",
+    "Grant metadata was inspected; INSERT was never attempted and role-derived grants were not expanded.",
+    "A PyMySQL metadata audit is not a functional validation of the C# MySql.Data/EF provider."
+  ],
+  "python_testing_flag": false,
+  "application_account_used": true,
+  "maintenance_account_selected": false,
+  "session_guard": "SET SESSION TRANSACTION READ ONLY; START TRANSACTION READ ONLY",
+  "server": {
+    "version": "8.4.6",
+    "distribution": "MySQL Community Server - GPL",
+    "session_zone": "SYSTEM",
+    "server_zone": "SYSTEM",
+    "system_zone": "CST",
+    "offset_seconds": 28800,
+    "transaction_read_only": 1,
+    "sql_mode": "ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
+  },
+  "csharp_create_clock_guard_passes": false,
+  "tables": [
+    {
+      "TABLE_NAME": "alembic_version",
+      "ENGINE": "InnoDB",
+      "TABLE_COLLATION": "utf8mb4_0900_ai_ci"
+    },
+    {
+      "TABLE_NAME": "plans",
+      "ENGINE": "InnoDB",
+      "TABLE_COLLATION": "utf8mb4_0900_ai_ci"
+    }
+  ],
+  "schema_revisions": [
+    "e4f6a8b0c2d4"
+  ],
+  "plans_present": true,
+  "column_contract": {
+    "expected_count": 25,
+    "actual_count": 25,
+    "differences": [],
+    "extra_column_count": 0,
+    "matches": true
+  },
+  "expected_column_metadata": [
+    {
+      "COLUMN_NAME": "id",
+      "COLUMN_TYPE": "int",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "auto_increment",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "coil_no",
+      "COLUMN_TYPE": "varchar(50)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": "utf8mb4",
+      "COLLATION_NAME": "utf8mb4_0900_ai_ci"
+    },
+    {
+      "COLUMN_NAME": "grade",
+      "COLUMN_TYPE": "varchar(20)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": "utf8mb4",
+      "COLLATION_NAME": "utf8mb4_0900_ai_ci"
+    },
+    {
+      "COLUMN_NAME": "spec",
+      "COLUMN_TYPE": "varchar(50)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": "utf8mb4",
+      "COLLATION_NAME": "utf8mb4_0900_ai_ci"
+    },
+    {
+      "COLUMN_NAME": "weight",
+      "COLUMN_TYPE": "decimal(12,4)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "thickness",
+      "COLUMN_TYPE": "decimal(10,3)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "width",
+      "COLUMN_TYPE": "decimal(10,2)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "material_status",
+      "COLUMN_TYPE": "varchar(20)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": "utf8mb4",
+      "COLLATION_NAME": "utf8mb4_0900_ai_ci"
+    },
+    {
+      "COLUMN_NAME": "density",
+      "COLUMN_TYPE": "decimal(10,2)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "entry_length",
+      "COLUMN_TYPE": "decimal(10,2)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "uncoiler1_tension",
+      "COLUMN_TYPE": "decimal(10,2)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "exit_tension",
+      "COLUMN_TYPE": "decimal(10,2)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "process1_tension",
+      "COLUMN_TYPE": "decimal(10,2)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "entry_loop_tension",
+      "COLUMN_TYPE": "decimal(10,2)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "exit_loop_tension",
+      "COLUMN_TYPE": "decimal(10,2)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "entry_unit_tension",
+      "COLUMN_TYPE": "decimal(12,4)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "entry_loop_unit_tension",
+      "COLUMN_TYPE": "decimal(12,4)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "process_unit_tension",
+      "COLUMN_TYPE": "decimal(12,4)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "exit_loop_unit_tension",
+      "COLUMN_TYPE": "decimal(12,4)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "exit_unit_tension",
+      "COLUMN_TYPE": "decimal(12,4)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "status",
+      "COLUMN_TYPE": "varchar(20)",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": "utf8mb4",
+      "COLLATION_NAME": "utf8mb4_0900_ai_ci"
+    },
+    {
+      "COLUMN_NAME": "priority",
+      "COLUMN_TYPE": "smallint",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "remark",
+      "COLUMN_TYPE": "varchar(500)",
+      "IS_NULLABLE": "YES",
+      "EXTRA": "",
+      "DATETIME_PRECISION": null,
+      "CHARACTER_SET_NAME": "utf8mb4",
+      "COLLATION_NAME": "utf8mb4_0900_ai_ci"
+    },
+    {
+      "COLUMN_NAME": "created_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": 0,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    },
+    {
+      "COLUMN_NAME": "updated_at",
+      "COLUMN_TYPE": "datetime",
+      "IS_NULLABLE": "NO",
+      "EXTRA": "",
+      "DATETIME_PRECISION": 0,
+      "CHARACTER_SET_NAME": null,
+      "COLLATION_NAME": null
+    }
+  ],
+  "schema_fingerprint_sha256": "6f2c9bbbe5d8ab3aba1c75f09a4ea5b02fd163a2a1e5760108ed2d65c8b1fedc",
+  "index_contract": {
+    "checks": {
+      "PRIMARY": true,
+      "ix_plans_id": true,
+      "ix_plans_coil_no": true,
+      "ix_plans_priority": true,
+      "ix_plans_status": true
+    },
+    "matches": true,
+    "extra_index_count": 0
+  },
+  "constraint_type_counts": {
+    "PRIMARY KEY": 1,
+    "UNIQUE": 1
+  },
+  "visible_trigger_events": [],
+  "select_expected_columns_limit_zero_passed": true,
+  "plans_have_existing_rows": false,
+  "direct_grant_observation": {
+    "select": true,
+    "insert": true,
+    "all_privileges_on_matching_scope": true
+  },
+  "status": "read_only_audit_completed",
+  "transaction_end": "rolled_back",
+  "python_env_unchanged": true,
+  "helper_sha256": "f85111d435b58043e5def0466582a73d144877894b958f08ee413e950f116839",
+  "execution_boundary": "Explicit Owner-authorized read-only analysis; not Development, QA, adoption or write validation.",
+  "attempt_history": [
+    {
+      "attempt": 1,
+      "environment": "sandbox",
+      "status": "connect_failed",
+      "mysql_error_number": 2003
+    },
+    {
+      "attempt": 2,
+      "environment": "approved_network_execution",
+      "status": "helper_assertion_failed_after_metadata_read",
+      "cause": "temporary helper column-name pattern excluded digits; no project change"
+    },
+    {
+      "attempt": 3,
+      "environment": "approved_network_execution",
+      "status": "read_only_audit_completed",
+      "correction": "temporary helper now accepts digits in public column names"
+    }
+  ],
+  "application_source_changes": false,
+  "user_secrets_read_or_written": false
+}

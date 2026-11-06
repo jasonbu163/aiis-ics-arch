@@ -1,11 +1,11 @@
 # DAA 多 PLC 采集与持久补传详细设计
 
-**内容修订：2026-11-04 · ARCH-AW-008 r1；原设计：ARCH-AW-003 r3**
+**当前状态同步：2026-11-05 · ARCH-DOC-001 r1；事实合同修订：2026-11-04 · ARCH-AW-008 r1；原设计：ARCH-AW-003 r3**
 **效力：阶段 C 目标设计与共同需求；正式 provider schema 和软件实施仍另批。**
 
-本文承接 [AW 白皮书](AIIS_AW_Whitepaper_Roadmap_v0.4.md)与[运行原理](AIIS_AW_Runtime_Design.md)，与 [SMA 设计](AIIS_SMA_Detailed_Design.md)配套。2026-11-04 的文档修订由 [ARCH-AW-008 r1](../plans/ARCH-AW-008-stage-c-facts-contract/spec.md)管理；匿名接口、JSON／回执、latest／历史游标、上海三自然月及业务永久保存以[共同需求合同](../contracts/demands/automation-world-facts-integration.zh-CN.md)集中解释，其状态为 proposed，不能当成已实现或 provider 已发布的协议。
+本文承接[AW白皮书](AIIS_AW_Whitepaper_Roadmap_v0.4.md)与[运行原理](AIIS_AW_Runtime_Design.md)，与[SMA设计](AIIS_SMA_Detailed_Design.md)配套。11月4日事实需求修订归[ARCH-AW-008 r1](../plans/ARCH-AW-008-stage-c-facts-contract/spec.md)，当前状态同步归[ARCH-DOC-001 r1](../plans/ARCH-DOC-001-project-state-and-decision-sync/spec.md)。[共同需求](../contracts/demands/automation-world-facts-integration.zh-CN.md)仍proposed；[事实provider](../contracts/published/http-api/plc-facts-v1/README.zh-CN.md)与[业务provider](../contracts/published/http-api/business-integration-v1/README.zh-CN.md)已固定源码合同并通过独立隔离MySQL A+B QA，Owner终验/真实采用待定。DAA上传器仍未实现，不能把后端验证当作阶段C已完成。
 
-[ARCH-AW-003 r3](../plans/ARCH-AW-003-daa-detailed-design/checklist.md)已于2026-10-17文档终验；r1/r2/r3批准和QA记录仍是各自历史快照，不重写。DAA阶段B已于2026-10-30在[受控DS联调范围](../automation-world/data-acquisition-agent/plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2)验收，原证据限制及来源未明事项继续跟踪。本次独立文档QA和Owner文档终验归ARCH-AW-008，不继承旧QA，也不预记结果；后端／DAA可靠上传软件及实际联调尚未因本文获准执行。
+[ARCH-AW-003 r3](../plans/ARCH-AW-003-daa-detailed-design/checklist.md)已于2026-10-17文档终验；r1/r2/r3批准和QA记录仍是各自历史快照，不重写。DAA阶段B已于2026-10-30在[受控DS联调范围](../automation-world/data-acquisition-agent/plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2)验收，原证据限制及来源未明事项继续跟踪。11月4日需求文档QA/终验归ARCH-AW-008；当前状态同步的独立文档QA/终验归ARCH-DOC-001，不继承旧QA，也不预记结果；后端／DAA可靠上传软件及实际联调尚未因本文获准执行。
 
 ## 阅读导航
 
@@ -29,8 +29,8 @@ DAA（Data Acquisition Agent）是现场侧固定 S7 采集程序：管理 PLC �
 | --- | --- |
 | 已接受工程基线 | 多PLC、本地配置／草稿激活、DB/UDT与受限辅助偏移、唯一串行会话、完整轮采集／双SQLite／容量及受控DS读到本地历史；以DAA各任务证据为准 |
 | 阶段C需求 | 单一匿名事实入口、冻结组批、可靠回执、最新优先／公平补传，以及Backend逐点latest、安全history和三自然月窗口 |
-| 待定正式合同 | provider字段／类型／缺值／摘要／片编码、DDL、来源定义起效、游标算法与所有运行限额，由后续软件spec冻结 |
-| 当前未接通 | DAA上传器／本地可靠ACK和新Backend事实一写两读，SMA新持久消费／业务闭环；不能凭设计存在称已实现 |
+| 已固定后端合同 | BE-009/010 provider已固定字段/类型/摘要/片编码、独立DDL、来源/游标与限额，并通过隔离QA；DAA仍需独立软件任务消费固定版本 |
+| 当前未接通 | DAA上传器/本地可靠ACK到已实现事实provider的接线、SMA新GET→POST/持久消费及业务闭环；后端优先、DAA后续是已选择顺序 |
 
 2026-11-04只读核对的现行依据如下，不将软件原路径的存在视为启用：
 
@@ -40,7 +40,7 @@ DAA（Data Acquisition Agent）是现场侧固定 S7 采集程序：管理 PLC �
 | [本地 IPC](../automation-world/data-acquisition-agent/src-tauri/src/commands/local_acquisition.rs) | uploadAvailable=false；当前产品不对pending执行可靠上传ACK |
 | [样本v2](../automation-world/data-acquisition-agent/src-tauri/src/domain/local_sample.rs)与[持久写入](../automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/runtime.rs) | 按DB保存不可变原文字节与SHA，manifest／源序号／pending同轮提交；时区为上海+08 |
 | [DAA App](../automation-world/data-acquisition-agent/src/App.vue)及[壳层适配](../automation-world/data-acquisition-agent/src/layouts/AgentLayout.vue) | 已消费CU公共布局并呈现工作台／配置中心子页面；A阶段及后续原生修订证据各自保留 |
-| [SMA README](../automation-world/semantic-mapping-agent/README.zh-CN.md) | 当前沿TSS派生及Backend-held配置演进，可靠输入／checkpoint／outbox仍为后续能力，不强制先迁库 |
+| [SMA README](../automation-world/semantic-mapping-agent/README.zh-CN.md) | 当前为Rust/SQLite配置与纯预览，正常投递关闭；可靠输入/checkpoint/outbox和新源身份适配仍属后续 |
 
 已有 raw/latest 表或查询 API 不证明新幂等接收、条件推进和安全增量 feed 已具备。[Projection 输入解析](../backend/projection/input_resolver.py)当前直接读取 `decoded_payload[point_name]` 标量；嵌套自描述体并不天然兼容。其版本适配/迁移留 Backend 任务。本设计不批准 Backend/SMA 代码、数据库、依赖或现场动作，也不引入 Celery、Redis、AWB、中央配置或共享可写库。
 
@@ -63,22 +63,22 @@ flowchart LR
       M -->|共享串行会话 / 各组时钟| P[每 PLC 唯一受管理连接]
       P -->|读取解码 / 原时间 / 质量| W[采样写入协调器]
       W -->|事实 / 成员 / 源序号短事务提交| R
-      R -->|只取已提交事实| U[上传器 / 冻结批次]
-      U -->|可靠回执校验 / 本地 ack 短事务| R
+      R -. "未来只取已提交事实" .-> U[待实现上传器 / 冻结批次]
+      U -. "未来可靠回执校验/本地ack短事务" .-> R
       K[容量管理器] -->|采样准入 / 暂停与恢复| M
       K -->|引用安全清理 / 空间核算| R
     end
-    U -->|独立上传周期 / 最新优先与公平历史补传| API[Backend 一个固定事实 API]
-    API -->|可靠持久回执| U
+    U -. "上传未接通：独立周期/最新优先/公平补传" .-> API[Backend固定事实API：隔离QA通过]
+    API -. "待接线可靠回执" .-> U
     API --> RAW[raw 去重追加]
     API --> L[latest 条件推进]
     RAW --> F[安全 feed / 完整性信息]
     L --> D[查询时派生目录]
-    F --> S[SMA 独立运行时]
-    D --> S
-    L --> S
-    S --> O[SMA 持久处理 / outbox]
-    O --> T[业务或第三方 API]
+    F -. "未来输入" .-> S[SMA：本地配置/纯预览；可靠运行待实现]
+    D -. "未来新点身份适配" .-> S
+    L -. "未来接线" .-> S
+    S -. "未来可靠处理" .-> O[SMA持久处理/outbox：待实现]
+    O -. "正常投递关闭" .-> T[业务或第三方API]
 ```
 
 配置流按 §5 分库短事务推进：草稿校验 → config.sqlite 的版本/意图 → runtime.sqlite 解释摘要 → 持久 active → 运行加载核对 → 解开采样屏障。图中连接不表示两个 SQLite 库整体原子；任一步失败保持可辨、可恢复和停止准入。事实流必须先完成 runtime.sqlite 本地提交，再组批上传；容量服务可以阻止下一轮，不能靠 UI 队列绕过保护。
@@ -97,7 +97,7 @@ flowchart LR
 
 反馈不是确认事实的写入路径。回执先由 Rust 校验并持久 ack，随后报告 UI；UI 看到了响应或日志不能替代提交。事件允许丢失/合并，重订阅后用快照收敛显示；显示缺失不得倒退持久 ack/序号。订阅数、快照载荷、日志级别/条数/保留均有界，不把每轮完整点表无限推到 WebView；凭据和敏感载荷脱敏。
 
-图中 raw/latest 是 Backend 的存储职责，不是 DAA 可直连的表。箭头表示目标语义，不是已存在模块、API 路径或新增目录承诺。
+图中 raw/latest 是 Backend 的存储职责，不是 DAA 可直连的表。本图保留目标机制；虚线标明上传/SMA运行未接，实线也只表示所属模块语义关系，不能把整图当作已验收链路。Backend provider本身已有隔离QA，Owner/真实采用另行。
 
 | 组件           | 负责                                            | 不承担                           |
 | -------------- | ----------------------------------------------- | -------------------------------- |
@@ -260,7 +260,7 @@ WAL 允许读写并行但只有一个写入者，多个库不具有整体原子�
 
 样本事实只保存一份不可变自描述载荷，样本级 ack 单调由未确认到已确认。批次是投递尝试的持久容器，保存稳定 `batchId`、固定包/片成员、内容摘要、重试状态和结果；样本与批次为多对多引用。优先批次可携带历史批次中同一 sampleId。DB 逻辑包和片段保留定义/值/质量与完整轮次关联，HTTP 组批不重新制造样本身份。
 
-同一 `batchId` 重试必须使用相同成员和语义内容；传输层重试时间等不能改写样本时间或参与事实内容。推荐从不可变样本和冻结投递格式重建请求，并保持必要版本信息；具体字节编码及摘要算法待 Backend 合同确认。
+同一 `batchId` 重试必须使用相同成员和语义内容；传输层重试时间等不能改写样本时间或参与事实内容。后续DAA编码器应从不可变样本和冻结投递格式重建请求，并保持必要版本信息；具体规范字节、域分离摘要与向量已由[plc-facts/v1正式provider](../contracts/published/http-api/plc-facts-v1/README.zh-CN.md)的OpenAPI/schema/vectors及pf-json/v1实现固定，不重新等待Backend算法设计。DAA客户端生成/校验这些版本及持久重试的实现仍须单独批准和验证；隔离provider QA不证明客户端已接通或真实目标已采用。
 
 | 样本状态 | 含义                                            | 清理资格                                     |
 | -------- | ----------------------------------------------- | -------------------------------------------- |
@@ -301,7 +301,7 @@ API 超时、断线或本地回执提交失败，均保留原样本/批次重试
 
 ### 6.4 后端窗口到期拒绝
 
-过期补传收到明确不可重试的拒绝与范围后，转“需处理”，停止对该拒绝无限重试；拒绝不是可靠持久接收 ack，不自动删本地样本。原冻结批次保持原成员/内容。混合有效／过期批次首版全批拒绝新提交，逐成员诊断不是部分ACK。已证明无新提交、核实旧证明并按正式矩阵终结／退休原批后，才可新建关联派生批次引用原合法sampleId与原内容；unknown先原请求核实，不能直接重组。历史已接收的重复回执、批次退休与人工缺口接受语义须另行定稿；不能用再次成功响应复活已过期事实。长期拒绝仍钉住空间，最终可能容量停采，需 Human Owner 按后续处置合同显式决定，不静默删除或假确认。
+过期补传收到明确不可重试的拒绝与范围后，转“需处理”，停止对该拒绝无限重试；拒绝不是可靠持久接收 ack，不自动删本地样本。原冻结批次保持原成员/内容。混合有效／过期批次首版全批拒绝新提交，逐成员诊断不是部分ACK。已证明无新提交、核实旧证明并按正式矩阵终结／退休原批后，才可新建关联派生批次引用原合法sampleId与原内容；unknown先原请求核实，不能直接重组。历史已接收重复回执、有限proof、混合新/过期批次的整批拒绝、拒绝证明及允许退休/父批派生约束，已由[plc-facts/v1正式provider](../contracts/published/http-api/plc-facts-v1/README.zh-CN.md)定稿，后续客户端须按其矩阵核实，不重新等待Backend定稿。尚未实施的DAA本地批次终结/释放引用、人工缺口接受及相应产品处置仍另立规格；不能用再次成功响应复活已过期事实。长期拒绝仍钉住空间，最终可能容量停采，需 Human Owner 按后续处置合同显式决定，不静默删除或假确认。
 
 <a id="capacity"></a>
 
@@ -372,7 +372,7 @@ DELETE 释放页供重用，通常不立即缩小主文件；可复用页足够�
 
 ### 9.1 信息语义草案
 
-以下名字是便于讨论的语义标签，不是正式 JSON/schema、索引或响应包装。正式命名与编码由 Backend 会话确认。
+以下为原设计语义标签；正式JSON/schema、命名、摘要及响应包装现由已实现provider机器合同固定，不能用此讨论表覆盖正式合同。
 
 | 信息                      | 含义/稳定性                                                      |
 | ------------------------- | ---------------------------------------------------------------- |
@@ -424,11 +424,11 @@ B 是接收历史证明，不代表其中原始载荷永久可读。窗口到期
 
 ## 10. Backend 接收、latest 与增量读取配合合同
 
-本节是[ARCH-AW-008 r1共同需求](../contracts/demands/automation-world-facts-integration.zh-CN.md)在DAA侧的责任视图。需求状态proposed，候选路径不是现有可调用API；正式provider版本／schema／限额／算法须Backend独立spec定稿，不以本次文档批准替代软件授权。
+本节保留[共同需求](../contracts/demands/automation-world-facts-integration.zh-CN.md)在DAA侧的责任视图。其proposed状态不否定后续provider已实现：正式版本/schema/限额/算法现以[BE-009事实provider](../contracts/published/http-api/plc-facts-v1/README.zh-CN.md)及源码为准，隔离A+B QA已通过、Owner终验/实际采用待定。DAA尚无上传器或可靠ACK客户端，以下客户端动作仍须独立软件范围。
 
 ### 10.1 一个匿名事实入口与可靠事务
 
-事实入口候选为 POST /api/v1/integration/plc-facts/batches；最新和历史读取为同前缀的GET latest／history。三个新增机器路由均无登录、JWT、API Key或角色授权，既有前端展示／管理和现有业务POST仍遵守其认证／权限分组；不按调用方自称或User-Agent绕过。instance／PLC／代次仅是客户端声明，不证明调用身份或设备所有权。
+已实现事实provider入口为POST /api/v1/integration/plc-facts/batches；最新和历史读取为同前缀的GET latest／history。三个新增机器路由均无登录、JWT、API Key或角色授权，既有前端展示／管理和现有业务POST仍遵守其认证／权限分组；不按调用方自称或User-Agent绕过。instance／PLC／代次仅是客户端声明，不证明调用身份或设备所有权。
 
 首版整批事务为：合同／类型／限额校验→样本身份与内容去重→raw新增或确认重复→latest原子条件推进→接收／完整性／安全发布记录→持久提交→回执。跨存储须先给出等效可靠账本方案；易失入队不是持久接收。
 
@@ -440,7 +440,7 @@ B 是接收历史证明，不代表其中原始载荷永久可读。窗口到期
 | 请求／回执范围 | batch覆盖固定成员，每个sample／片摘要对应；轮次完整另核manifest |
 | 输入拒绝／提交unknown | 区分不可重试与暂时错误；unknown不能被解释为已回滚或成功 |
 
-latest语义按PLC/pointId独立维护、按DB聚合；建议逐点物理表，实际DDL、旧PLC/DB/group表兼容及辅助账本由Backend确定，不限定只许两张物理表。同DB两个组各自更新点，不互相覆盖整DB；某点高seq也不能跳掉另一点合法较低seq。来源首次采用、冲突、旧代次截止／新基线及定义起效须受控并发规则；opaque代次／revision、时间和UUID字符串都不提供排序／接管资格。
+latest语义按PLC/pointId独立维护、按DB聚合；BE-009采用独立七表及逐点latest，旧monitor PLC/DB/group快照表与Projection输入保持兼容，不双写替换；精确DDL/账本以provider源码为准。同DB两个组各自更新点，不互相覆盖整DB；某点高seq也不能跳掉另一点合法较低seq。来源首次采用、冲突、旧代次截止／新基线及定义起效须受控并发规则；opaque代次／revision、时间和UUID字符串都不提供排序／接管资格。
 
 ### 10.1.1 回执校验与冻结材料保护
 
@@ -458,9 +458,9 @@ latest语义按PLC/pointId独立维护、按DB聚合；建议逐点物理表，�
 
 ### 10.2 history的时间段与安全增量模式
 
-GET history有两种模式：range按上海原observedAt筛选，候选[from,to)及独立pageCursor／nextPageCursor；changes按Backend可靠发布位置返回nextCursor／hasMore。模式、合同版本和筛选绑定，不混用游标；参数／排序／快照边界由provider冻结。latest用于状态和预览，逐样本／历史输入使用history。
+GET history有两种模式：range按上海原observedAt筛选，候选[from,to)及独立pageCursor／nextPageCursor；changes按Backend可靠发布位置返回nextCursor／hasMore。模式、合同版本和筛选绑定，不混用游标；参数/排序/快照边界现已由provider固定。latest用于状态和预览，逐样本／历史输入使用history。
 
-10:20才提交10:05补传，changes仍须读到，不能以上次最大采集时间为下一起点。较小raw自增ID可能先分配后提交，未经证明的max(raw.id)／最大sourceSeq也不构成安全cursor。Backend须选择并证明提交有序发布、缺口感知或等效机制，不漏并发晚提交。
+10:20才提交10:05补传，changes仍须读到，不能以上次最大采集时间为下一起点。较小raw自增ID可能先分配后提交，未经证明的max(raw.id)／最大sourceSeq也不构成安全cursor。BE-009已在隔离QA中验证提交有序发布/并发晚提交与显式缺口；实际采用仍须满足provider门槛，不能仅依赖max(raw.id)或最大sourceSeq。
 
 空页不证明没有在途事务或历史完整。cursor过期／过滤改变／材料已删须返回明确原因、可恢复范围和缺口，显式重同步；不静默跳尾。SMA接收cursor、每映射处理checkpoint及业务确认各自独立，有状态／窗口算法还需源序与迟到规则。
 
@@ -476,13 +476,13 @@ GET history有两种模式：range按上海原observedAt筛选，候选[from,to)
 
 完整合法JSON、应有manifest及可靠／冲突／历史／unknown回执集中在[共同请求样例](../contracts/demands/automation-world-facts-integration.zh-CN.md#request)和[回执矩阵](../contracts/demands/automation-world-facts-integration.zh-CN.md#receipts)。另有固定两片仅到一片的场景，不能把分片ACK当整轮完成；当前本地v2按DB成包不证明分片能力已经实现。
 
-原payload／manifest的原字节SHA、规范化传输contentDigest、冻结requestDigest分别解释，字段包含／排除、自引用、排序和数值／时间规范化及测试向量由provider在编码前冻结。原v2 revision→传输configRevision、原读取起止／savedAt／origin／context和point定义的[逐字段映射](../contracts/demands/automation-world-facts-integration.zh-CN.md#identity)不得丢失；精简JSON投影不能被当成原字节证据。
+原payload／manifest的原字节SHA、规范化传输contentDigest、冻结requestDigest分别解释，字段包含／排除、自引用、排序和数值／时间规范化及测试向量现已由provider固定，DAA编码时消费同一版本。原v2 revision→传输configRevision、原读取起止／savedAt／origin／context和point定义的[逐字段映射](../contracts/demands/automation-world-facts-integration.zh-CN.md#identity)不得丢失；精简JSON投影不能被当成原字节证据。
 
 ### 10.4 派生目录、最新质量与定义漂移
 
 目录查询合并同PLC/DB的有效当前定义，不包含未采／未上报的TIA字段。latest取“最近结果”：有效较新bad结果携带新observedAt、reason和缺值；旧好值若作参考，另带原身份／时间。质量、新鲜度、存储可用期分别判断。
 
-单包缺点不是删除；显式停用／退役／定义变化需有效成员声明，可随同一事实入口的受限元数据表达，正式编码由Backend确定。没有声明也没有新事实，只能陈旧／到期；旧历史不能复活旧成员或回退当前类型／地址，停用声明不为旧值续期。
+单包缺点不是删除；显式停用／退役／定义变化需有效成员声明，可随同一事实入口的受限元数据表达，正式编码以现有provider及受控来源采用合同为准。没有声明也没有新事实，只能陈旧／到期；旧历史不能复活旧成员或回退当前类型／地址，停用声明不为旧值续期。
 
 SMA保存逐绑定定义签名，含name、地址／类型／有效性，排除value、quality、时间、sampleId／sourceSeq。定义真变只暂停受影响绑定，无关revision变化不全停；历史按原定义与获准映射版本解释。SMA改业务绑定，真实地址仍由DAA修正；DAA未报告PLC程序变化时不能单凭JSON检测全部漂移。
 
@@ -498,13 +498,13 @@ SMA保存逐绑定定义签名，含name、地址／类型／有效性，排除v
 
 一包各点时刻不同时，整包不可变原文读取默认取最早成员截止保守到期；latest各点独立到期。Backend若采用等效投影／存储方案，须证明不返回过期值，并区分投影／原文及摘要，不能通过“查看原文”泄露早成员到期值。
 
-逻辑到期、有界物理清理、磁盘回收和副本／备份分别定义，清理SLA／批量／锁预算及有限去重、历史回执、完整性摘要保留由Backend冻结。摘要不能成为永久原值备份，历史确认不复活raw/latest。异常未来时间须明确拒绝／隔离，不改成接收时间。旧UTC设计文字在此修订不等于迁移历史数据库，禁止整体加八小时或重编码原文。
+逻辑到期、有界物理清理、磁盘回收和副本／备份分别定义，批量/锁预算及有限去重、历史回执/完整性摘要保留已由BE-009固定并在隔离QA验证；生产长期清理SLA仍需另批运行证据。摘要不能成为永久原值备份，历史确认不复活raw/latest。异常未来时间须明确拒绝／隔离，不改成接收时间。旧UTC设计文字在此修订不等于迁移历史数据库，禁止整体加八小时或重编码原文。
 
 长期无新值的latest及目录也到期。后端不因消费者尚未处理而续期；源窗口和DAA本地天数／容量独立，过期拒绝不提供本地删除许可，受保护材料满额可能停采或产生真实缺口。
 
 ### 10.6 业务默认永久保存与两段确认
 
-DAA收到事实可靠回执，仅证明Backend事实提交；SMA还需把typed业务数据交模块API/Service校验、幂等和持久提交。新模块机器集成入口目标匿名，现有认证POST不自动降级；现有actor参与幂等的模块需显式适配producer身份，不能伪造admin。候选业务请求／可靠回执见[共同业务样例](../contracts/demands/automation-world-facts-integration.zh-CN.md#business)。
+DAA收到事实可靠回执，仅证明Backend事实提交；SMA还需把typed业务数据交模块API/Service校验、幂等和持久提交。BE-010八类typed匿名业务入口已通过隔离QA，Owner终验/真实采用待定；既有认证POST不降级，新通道producer身份不伪造admin。候选业务请求／可靠回执见[共同业务样例](../contracts/demands/automation-world-facts-integration.zh-CN.md#business)。
 
 可靠确认后的业务记录默认永久保存，即无自动到期删除；修正／删除走模块规则。业务表自带实际值、事件时间和必要来源／定义／映射版本，不只存raw外键。raw清理不级联业务或未完成outbox；SMA输入／输出有独立有限容量，不复制全raw作无限备份。未取得输入已过期必须报缺口；已可靠冻结足够请求则按自身／目标期限继续投递，不能承诺未入库数据自动永久保存。
 
@@ -512,7 +512,7 @@ DAA收到事实可靠回执，仅证明Backend事实提交；SMA还需把typed�
 
 ## 11. SMA 配合合同与独立设计
 
-SMA通过候选HTTP latest派生目录和history的range／changes取事实，当前Backend-held TSS配置与表格化映射路线保留，不强制近期迁入SQLite。可靠输入／双进度／outbox分期立项；不以通用画布／共享Flow Core或SMA软件完成作为DAA首版阶段C前置。[SMA 详细设计](AIIS_SMA_Detailed_Design.md)是该角色的机制正文，本文保留共同接口边界。
+SMA后续通过已实现事实provider的HTTP latest派生目录及history range/changes取事实。当前SMA本地SQLite配置/纯预览已实现、QA2通过待Owner，正常投递关闭；legacy sourceKey/factName绑定仍需显式适配新点身份。可靠输入/双进度/outbox独立立项，不以画布/共享Flow Core或SMA整体完成作为DAA首版阶段C前置。[SMA详细设计](AIIS_SMA_Detailed_Design.md)保留其机制目标，当前配置存储不等于可靠运行状态。
 
 | SMA 输入用途 | 必须维持的语义 |
 | --- | --- |
@@ -647,20 +647,20 @@ DAA业务配置现以 SQLite 为权威，env 只保留确有必要的启动/定�
 
 ## 15. 开放参数、证据和实施 gate
 
-目标行为已确定；下列数值、选型和正式 schema 没有因此定案。决定前需要对应证据，之后由各会话精确 spec 批准，不因本设计一次批准全部实施。
+当前B阶段参数已由DAA已接受任务固定，Backend正式schema/摘要/游标/来源/保留规则亦已由BE-009/010固定并通过隔离QA。下表沿原设计列出责任分类；已固定项按现行README/provider引用，只有新上传器、扩展或真实采用仍需相应新证据，不能将全表当作尚未决定。决定前需要对应证据，之后由各会话精确 spec 批准，不因本设计一次批准全部实施。
 
 | 待决事项                                      | 决定责任                    | 前置证据                                   | 实施 gate                      |
 | --------------------------------------------- | --------------------------- | ------------------------------------------ | ------------------------------ |
 | 最大 PLC 数、CPU/驱动/访问模式/类型矩阵       | DAA                         | 驱动文档、目标 PLC/类型样例、连接/解码验证 | DAA 技术范围批准，现场动作另批 |
 | 最低周期、超时、合并阈值、各组公平策略        | DAA                         | 请求数/字节/耗时/PLC负载测量               | 调度与驱动窄任务               |
-| 事实粒度、manifest/分片、失败质量编码         | DAA + Backend，SMA 消费核对 | 跨 DB/部分失败/请求限额推演                | 正式接收与完整性合同先稳定     |
+| 事实粒度、manifest/分片、失败质量编码         | DAA + Backend，SMA 消费核对 | 跨 DB/部分失败/请求限额推演                | BE-009正式合同已固定；DAA客户端实现/联调另批     |
 | SQLite 库/实际版本、schema/索引、同步参数     | DAA                         | 已知缺陷/修复、目标平台崩溃与吞吐证据      | 存储任务批准，不本轮安装依赖   |
 | 天数/额度/余量/高低水位/WAL/回收              | DAA                         | 真实落盘速率、维护峰值、断网窗口           | 有界容量与恢复验证任务         |
 | 上传周期、批次/队列/并发/速率、公平预算、退避 | DAA + Backend               | API 限额、新增/补传吞吐与长断网评估        | 上传器任务批准                 |
 | 配置摘要、激活/备份恢复、凭据安全             | DAA                         | 跨库断点、身份恢复、平台凭据能力           | 配置/安全/恢复窄任务           |
-| API 路径/版本/匿名集成包装、整批确认       | Backend                     | 现有合同/权限、重试和拒绝场景              | Backend 专属 spec 与合同批准   |
-| 代次唯一来源、latest 质量/退役政策            | Backend + DAA，SMA 核对     | 双源交接、旧源补传、配置变更推演           | 接收/来源交接合同              |
-| feed 并发安全、三自然月实施/清理及去重/feed 保留             | Backend + SMA               | 晚提交/分页/过期、最长补传与滞后           | feed 与保留任务                |
+| API 路径/版本/匿名集成包装、整批确认       | Backend                     | 现有合同/权限、重试和拒绝场景              | BE-009/010隔离QA已通过；Owner终验及真实采用待定   |
+| 代次唯一来源、latest 质量/退役政策            | Backend + DAA，SMA 核对     | 双源交接、旧源补传、配置变更推演           | BE-009已固定；实际来源采用另批              |
+| feed 并发安全、三自然月实施/清理及去重/feed 保留             | Backend + SMA               | 晚提交/分页/过期、最长补传与滞后           | BE-009已固定/隔离QA通过；生产长期SLA另批                |
 | SMA 等缺口、流程版本/重算、窗口/多源时钟      | SMA                         | 四类流程真实输入、迟到/缺失策略            | SMA 专属语义 spec              |
 | SMA checkpoint/outbox、目标幂等与保留         | SMA + 目标 owning方         | 重启/丢回执/多目标部分失败                 | 持久处理与投递任务             |
 | 关闭窗口/显式退出、后台托管、平台与安装升级   | DAA/系统                    | 平台生命周期、二进制/库兼容与资源测试      | 独立桌面/运行交付任务          |
@@ -676,7 +676,7 @@ DAA业务配置现以 SQLite 为权威，env 只保留确有必要的启动/定�
 | Backend | 事实去重/latest条件推进、派生目录、三自然月/拒绝、安全feed/来源、旧标量适配；业务API校验/事务/长期持久 | 正式匿名集成边界／字段／DDL／回执／清理SLA；既有鉴权保留，不在请求内轮询PLC |
 | SMA | 本地绑定/API材料/目标/转换/调度、定义确认、四类时序、持久输入/双进度/outbox及目标投递 | 签名/转换/目标幂等/缺口/容量；不连接PLC或业务SQL |
 
-本次文档明确单份自描述体、派生目录、匿名一写两读、逐点最近结果、上海原observedAt加最多三自然月和逐绑定定义确认；字段/单位/签名算法/成员声明/错误回执、SQLite选型/数值、时钟容差/物理清理SLA、目标幂等及后台托管仍待各端任务。正式合同先明确新旧标量兼容，再各自立项，不把本设计当代码或运行授权。
+本次文档明确单份自描述体、派生目录、匿名一写两读、逐点最近结果、上海原observedAt加最多三自然月和逐绑定定义确认；后端字段/单位/摘要/成员声明/错误及有限清理规则已经provider固定；DAA上传器参数/兼容、SMA执行与目标接线、生产长期清理SLA及后台托管仍待所属任务。正式合同先明确新旧标量兼容，再各自立项，不把本设计当代码或运行授权。
 
 这是供 Human Owner 转交的材料，不表示已消息其他会话或对方接受联动任务。以下保留A／B／C实施分工及回退语义。A已接受、B已在受控DS范围接受，原证据限制保留；C仍须独立软件spec批准、Development、fresh Verification与Owner验收。本次ARCH-AW-008仅修订文档，不重开A／B整套测试或自动启动C。
 
@@ -686,7 +686,7 @@ DAA业务配置现以 SQLite 为权威，env 只保留确有必要的启动/定�
 | B：本地采集闭环（受控范围已接受） | SQLite配置权威/草稿激活，完整DB/UDT与受限地址支持，多PLC唯一会话/跨DB组、全结果本地事务、容量/重启恢复；驱动/类型/规模/最低周期与SQLite参数由本阶段技术spec定稿。 | 用获批脱敏/受控夹具证明界面配置真实保存/生效、独立周期采集、持久历史/待传队列及激活/断点/容量恢复；不要求Backend或SMA实现完成。 | 新旧配置/库不静默互写；配置回退不删样本/倒退seq/ack，二进制/schema回退须兼容证据。 |
 | C：可靠事实上传闭环 | Backend正式请求/身份/manifest/回执/拒绝/限额合同先稳定；DAA上传器与Backend新事实API分别获批实现，再联调最新优先/公平补传、去重/latest、到期/缺口。 | 受控断网恢复、重启、丢回执、本地ack失败、乱序、混合拒绝和公平补传对账；双方接口/持久边界核对，覆盖适用F05–F22/F27–F30。 | 旧直库/新API不能对同来源同时有效写入；切换/回退另批并核实在途/进度/身份，不能靠UI开关静默替换生产链路。 |
 
-A阶段导航及B阶段受控DS闭环各有已接受基线，本次不重跑。阶段C须先稳定正式Backend合同，再让双方独立获批并行开发；实际HTTP联调待Backend固定就绪。完整Backend B01–B08及DAA D01–D08见[共同实施边界](../contracts/demands/automation-world-facts-integration.zh-CN.md#implementation)，本任务未创建未来软件spec。SMA具体开发仍归其专属会话，**不是DAA首版本地/事实上报闭环的前置**；其表单绑定/持久输入/outbox等按未改SMA设计另立任务，不强制跟随DAA的DB包组织业务请求。
+A阶段导航及B阶段受控DS闭环各有已接受基线，本次不重跑。阶段C后端正式合同与隔离QA现已具备；先完成明确后端接受/交接，再按已选择的后端优先顺序独立批准DAA上传器及实际HTTP联调。完整Backend B01–B08及DAA D01–D08见[共同实施边界](../contracts/demands/automation-world-facts-integration.zh-CN.md#implementation)，本任务未创建未来软件spec。SMA具体开发仍归其专属会话，**不是DAA首版本地/事实上报闭环的前置**；其当前配置与后续GET→POST/持久输入/outbox按SMA所属阶段分别处理，不强制跟随DAA的DB包组织业务请求。
 
 真实PLC/TIA核对、吞吐/磁盘/长时间资源证据、原生打包/分发、后台托管、生产数据库迁移与旧链路切换均仍需独立批准，不由阶段A的构建/界面通过推定。
 

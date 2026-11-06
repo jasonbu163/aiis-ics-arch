@@ -60,7 +60,7 @@ Each contract should use one of these statuses:
 
 ## PLC facts provider v1
 
-[PLC facts v1](published/http-api/plc-facts-v1/README.md) fixes the anonymous batch/latest/history source contract, strict Decimal JSON, durable outcomes, publication cursors and finite retention. The machine artifacts describe source implementation; database adoption, runtime verification, DAA integration and deployment have separate gates.
+[PLC facts v1](published/http-api/plc-facts-v1/README.md) fixes the anonymous batch/latest/history source contract, strict Decimal JSON, durable outcomes, publication cursors and finite retention. The fixed source contract and approved isolated MySQL A+B verification are recorded in [BE-009](../plans/ARCH-BE-009-backend-facts-integration/checklist.md). Owner acceptance/provider-ready, actual database adoption, DAA integration and deployment remain separate.
 
 
-[Business integration v1](published/http-api/business-integration-v1/README.md) publishes the eight typed anonymous business operations, closed schemas, examples and digest vectors. BE010 r2 source remains unadopted; actual target adoption and database/B require separate approval.
+[Business integration v1](published/http-api/business-integration-v1/README.md) publishes the eight typed anonymous business operations, closed schemas, examples and digest vectors. [BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/checklist.md) passed approved isolated A+B verification; Owner acceptance, real target/time adoption and DAA/SMA wiring remain pending. Defaults stay closed/unadopted. The AW demand remains proposed as its own document status; it is not a claim that these providers do not exist.

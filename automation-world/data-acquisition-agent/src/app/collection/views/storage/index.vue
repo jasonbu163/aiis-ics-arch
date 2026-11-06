@@ -1,6 +1,7 @@
 <!-- DAA本地SQLite视图：唯一local owner提供状态/动作，导航不驱动PLC或health。 -->
 <template>
   <template v-if="local">
+    <FactsDeliveryPanel configure />
 
     <div class="daa-local-metrics">
       <ConsoleMetricCard label-key="common.local.pendingSummary" :value="local.snapshot ? String(local.snapshot.capacity.pendingCount) : '—'" />
@@ -8,7 +9,6 @@
       <ConsoleMetricCard label-key="common.local.mainBytes" :value="local.formatBytes(local.snapshot?.capacity.mainBytes)" />
       <ConsoleMetricCard label-key="common.local.quotaMiB" :value="local.snapshot ? String(local.snapshot.capacity.quotaBytes / 1048576) : '—'" />
     </div>
-    <el-alert :title="t('common.local.uploadPending')" type="info" :closable="false" />
     <el-alert v-if="local.snapshot && !local.snapshot.capacity.admission" :title="t('common.local.capacityRisk')" :description="local.label(local.snapshot.capacity.state)" type="warning" :closable="false" show-icon />
     <LocalHistoryPanel />
     <ConsoleCard title-key="common.local.storage" compact>
@@ -30,6 +30,7 @@
 </template>
 
 <script setup lang="ts">
+import FactsDeliveryPanel from '../../../../components/console/FactsDeliveryPanel.vue';
 import { ElForm, ElFormItem, ElInputNumber, ElCollapse, ElCollapseItem } from 'element-plus';
 import ConsoleMetricCard from '../../../../components/console/ConsoleMetricCard.vue';
 

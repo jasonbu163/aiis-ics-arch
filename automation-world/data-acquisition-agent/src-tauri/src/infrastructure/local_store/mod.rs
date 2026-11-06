@@ -1,6 +1,9 @@
 //! 本地SQLite双库与公平有界执行队列：统一串行数据库工作，不在PLC/UI等待中持有事务。
 pub(crate) mod capacity;
 mod configuration;
+pub(crate) mod delivery;
+#[cfg(test)]
+pub(crate) mod delivery_tests;
 #[cfg(test)]
 mod point_naming_tests;
 mod runtime;
@@ -10,9 +13,13 @@ mod source_import_tests;
 #[cfg(test)]
 mod tests;
 mod yaml_migration;
+use crate::domain::facts_wire::text;
 use crate::domain::local_configuration::{id, Configuration, LocalResult};
+use crate::domain::local_delivery::DeliverySettings;
 use crate::domain::local_sample::encode;
-use rusqlite::Connection;
+use delivery::event;
+use rusqlite::{params, Connection};
+use serde_json::Value;
 use std::{
     collections::VecDeque,
     path::{Path, PathBuf},
@@ -124,13 +131,21 @@ pub(crate) fn preflight(dir: &Path) -> LocalResult<ProfilePreflight> {
             rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
         )
         .map_err(unsupported)?;
-        for (key, want) in [("application_id", app), ("user_version", 2)] {
+        for (key, want) in [("application_id", app)] {
             let got: i64 = c
                 .query_row(&format!("PRAGMA {key}"), [], |r| r.get(0))
                 .map_err(unsupported)?;
             if got != want {
                 return Err(unsupported(format!("{key}_mismatch")));
             }
+        }
+        let user_version: i64 = c
+            .query_row("PRAGMA user_version", [], |r| r.get(0))
+            .map_err(unsupported)?;
+        if (app == schema::CONFIG_APP && user_version != 2)
+            || (app == schema::RUNTIME_APP && ![2, 3].contains(&user_version))
+        {
+            return Err(unsupported("user_version_mismatch"));
         }
         let (identity, version, profile): (String, i64, String) = c
             .query_row(
@@ -139,11 +154,25 @@ pub(crate) fn preflight(dir: &Path) -> LocalResult<ProfilePreflight> {
                 |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
             )
             .map_err(unsupported)?;
-        if version != 2
+        if version != user_version
             || profile != crate::domain::business_time::TIME_PROFILE
             || !crate::domain::local_configuration::valid_id(&identity)
         {
             return Err(unsupported("metadata_mismatch"));
+        }
+        let ledger: i64 = c
+            .query_row("SELECT max(version) FROM schema_migrations", [], |r| {
+                r.get(0)
+            })
+            .map_err(unsupported)?;
+        if ledger != version {
+            return Err(unsupported("schema_ledger_mismatch"));
+        }
+        if app == schema::CONFIG_APP {
+            schema::verify_structure(&c, &schema::config_sql()).map_err(unsupported)?;
+        }
+        if app == schema::RUNTIME_APP && version == 3 {
+            delivery::verify_schema(&c).map_err(unsupported)?;
         }
         identities.push(identity);
     }
@@ -195,13 +224,21 @@ fn connect(p: &Path, new: bool, app: i64) -> LocalResult<Connection> {
         }
     }
     if !new {
-        for (key, want) in [("application_id", app), ("user_version", 2)] {
+        for (key, want) in [("application_id", app)] {
             let got: i64 = c
                 .query_row(&format!("PRAGMA {key}"), [], |r| r.get(0))
                 .map_err(sql_error)?;
             if got != want {
                 return Err("schema_mismatch".into());
             }
+        }
+        let version: i64 = c
+            .query_row("PRAGMA user_version", [], |r| r.get(0))
+            .map_err(sql_error)?;
+        if (app == schema::CONFIG_APP && version != 2)
+            || (app == schema::RUNTIME_APP && ![2, 3].contains(&version))
+        {
+            return Err("schema_mismatch".into());
         }
         let check: String = c
             .query_row("PRAGMA integrity_check", [], |r| r.get(0))
@@ -258,17 +295,23 @@ impl Stores {
             .map_err(sql_error)?;
             tx.commit().map_err(sql_error)?;
             let tx = runtime.transaction().map_err(sql_error)?;
-            tx.execute_batch(&schema::runtime_sql())
+            tx.execute_batch(&schema::runtime_v3_sql())
                 .map_err(sql_error)?;
             tx.execute(
-                "INSERT INTO runtime_metadata VALUES(1,?1,2,1,NULL,'asia-shanghai-rfc3339-ms-v1')",
+                "INSERT INTO runtime_metadata VALUES(1,?1,3,1,NULL,'asia-shanghai-rfc3339-ms-v1')",
                 [&instance],
             )
             .map_err(sql_error)?;
             tx.execute_batch(&format!(
-                "PRAGMA application_id={}; PRAGMA user_version=2;",
+                "PRAGMA application_id={}; PRAGMA user_version=3;",
                 schema::RUNTIME_APP
             ))
+            .map_err(sql_error)?;
+            let settings = crate::domain::local_delivery::DeliverySettings::default();
+            tx.execute(
+                "INSERT INTO delivery_settings(id,settings_revision,payload) VALUES(1,?1,?2)",
+                rusqlite::params![settings.settings_revision, encode(&settings)?],
+            )
             .map_err(sql_error)?;
             tx.commit().map_err(sql_error)?;
         }
@@ -306,6 +349,9 @@ impl Stores {
             test_meter: None,
         };
         s.recover_activation()?;
+        if s.delivery_available()? {
+            s.recover_delivery()?;
+        }
         let clean: i64 = s
             .runtime
             .query_row(
@@ -524,5 +570,158 @@ impl Drop for StoreHandle {
         if Arc::strong_count(&self.join) == 1 {
             self.shutdown();
         }
+    }
+}
+
+// Independent delivery settings CAS and physical accounting use the same serial Store owner.
+impl Stores {
+    pub fn delivery_settings(&self) -> LocalResult<DeliverySettings> {
+        self.delivery_guard()?;
+        let raw: String = self
+            .runtime
+            .query_row(
+                "SELECT payload FROM delivery_settings WHERE id=1",
+                [],
+                |r| r.get(0),
+            )
+            .map_err(sql_error)?;
+        serde_json::from_str(&raw).map_err(|_| "delivery_settings_corrupt".into())
+    }
+    pub fn save_delivery_settings(
+        &mut self,
+        mut settings: DeliverySettings,
+        expected: String,
+    ) -> LocalResult<DeliverySettings> {
+        self.delivery_guard()?;
+        settings.validate()?;
+        let old = self.delivery_settings()?;
+        if old.settings_revision != expected {
+            return Err("settings_conflict".into());
+        }
+        let count:i64=self.runtime.query_row("SELECT count(*) FROM delivery_batches WHERE state!='acknowledged' AND state!='rejected' AND NOT(state='blocked' AND body IS NULL AND request_digest='' AND body_sha='' AND attempt=0 AND parent_id IS NULL AND last_error='source_adoption_required')",[],|r|r.get(0)).map_err(sql_error)?;
+        if count > 0
+            && (old.target_id != settings.target_id
+                || old.origin != settings.origin
+                || old.adoption_reference != settings.adoption_reference
+                || old.contract_pins != settings.contract_pins
+                || serde_json::to_value(&old.sources).unwrap()
+                    != serde_json::to_value(&settings.sources).unwrap())
+        {
+            return Err(format!("delivery_target_unresolved:{count}"));
+        }
+        let mut resolved = vec![];
+        if old.target_id == settings.target_id
+            && old.origin == settings.origin
+            && old.contract_pins == settings.contract_pins
+        {
+            let diagnostics=self.runtime.prepare("SELECT batch_id,members FROM delivery_batches WHERE state='blocked' AND body IS NULL AND request_digest='' AND body_sha='' AND attempt=0 AND parent_id IS NULL AND last_error='source_adoption_required'").map_err(sql_error)?.query_map([],|r|Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?))).map_err(sql_error)?.take(100).collect::<std::result::Result<Vec<_>,_>>().map_err(sql_error)?;
+            for (batch, members) in diagnostics {
+                let v: Value = serde_json::from_str(&members).map_err(|_| "delivery_corrupt")?;
+                let cycle = text(&v, "cycleId")?;
+                if let Ok(built) = self.build_delivery_cycle(cycle) {
+                    if Self::source_admitted(&settings, &built) {
+                        resolved.push((batch, cycle.to_string()));
+                    }
+                }
+            }
+        }
+        settings.settings_revision = id();
+        let quota = self.delivery_quota()?;
+        self.admit_maintenance(quota)?;
+        let tx = self.runtime.transaction().map_err(sql_error)?;
+        let n=tx.execute("UPDATE delivery_settings SET settings_revision=?1,payload=?2 WHERE id=1 AND settings_revision=?3",params![settings.settings_revision,encode(&settings)?,expected]).map_err(sql_error)?;
+        if n != 1 {
+            return Err("settings_conflict".into());
+        }
+        for (batch, cycle) in resolved {
+            tx.execute(
+                "DELETE FROM sample_references WHERE reference_id=?1",
+                [format!("delivery-blocked:{cycle}")],
+            )
+            .map_err(sql_error)?;
+            tx.execute("DELETE FROM delivery_batches WHERE batch_id=?1 AND state='blocked' AND body IS NULL AND request_digest='' AND body_sha='' AND attempt=0 AND parent_id IS NULL AND last_error='source_adoption_required'",[&batch]).map_err(sql_error)?;
+            event(
+                &tx,
+                "delivery_recovered",
+                &batch,
+                "source_material_rechecked",
+            )?;
+        }
+        tx.commit().map_err(sql_error)?;
+        Ok(settings)
+    }
+    pub(super) fn delivery_quota(&self) -> LocalResult<u64> {
+        let view = self.configuration()?;
+        Ok(match view.active {
+            Some(r) => self.revision(&r)?.storage.quota_bytes,
+            None => 1024 * 1024 * 1024,
+        })
+    }
+    pub fn delivery_bytes(&self) -> LocalResult<(u64, u64, u64)> {
+        let req: u64 = self
+            .runtime
+            .query_row(
+                "SELECT coalesce(sum(length(CAST(body AS BLOB))),0) FROM delivery_batches",
+                [],
+                |r| r.get(0),
+            )
+            .map_err(sql_error)?;
+        let ack:u64=self.runtime.query_row("SELECT coalesce(sum(length(CAST(response_utf8 AS BLOB))),0) FROM delivery_receipts",[],|r|r.get(0)).map_err(sql_error)?;
+        let metadata:u64=self.runtime.query_row("SELECT (SELECT coalesce(sum(length(CAST(wire AS BLOB))),0) FROM delivery_cycles)+(SELECT coalesce(sum(length(CAST(members AS BLOB))),0) FROM delivery_batches)+(SELECT coalesce(sum(length(CAST(payload AS BLOB))),0) FROM delivery_settings)+(SELECT coalesce(sum(length(CAST(point_ids AS BLOB))),0) FROM delivery_parts)",[],|r|r.get(0)).map_err(sql_error)?;
+        Ok((req, ack, metadata))
+    }
+}
+
+impl Stores {
+    pub fn read_result(&mut self, plc: &str, result: &str) -> LocalResult<()> {
+        self.delivery_guard()?;
+        let tx = self.runtime.transaction().map_err(sql_error)?;
+        event(&tx, "read_result", plc, result)?;
+        tx.commit().map_err(sql_error)?;
+        self.log.event("read_result", plc, result)
+    }
+}
+
+impl Stores {
+    pub fn delivery_schedule(&self) -> LocalResult<Vec<(String, String)>> {
+        self.delivery_guard()?;
+        let rows=self.runtime.prepare("SELECT batch_id,next_attempt_at FROM delivery_batches WHERE state='prepared' OR state='unknown' OR state='retry_wait' ORDER BY created_order LIMIT 9").map_err(sql_error)?.query_map([],|r|Ok((r.get(0)?,r.get(1)?))).map_err(sql_error)?.collect::<std::result::Result<Vec<_>,_>>().map_err(sql_error)?;
+        if rows.len() > 8 {
+            return Err("delivery_queue_limit".into());
+        }
+        Ok(rows)
+    }
+    #[cfg(test)]
+    pub fn next_delivery(&mut self) -> LocalResult<Option<delivery::Frozen>> {
+        let now = delivery::db_now(&self.runtime)?;
+        let due=self.runtime.prepare("SELECT batch_id FROM delivery_batches WHERE state='prepared' OR ((state='unknown' OR state='retry_wait') AND next_attempt_at<=?1) ORDER BY created_order LIMIT 8").map_err(sql_error)?.query_map([now],|r|r.get(0)).map_err(sql_error)?.collect::<std::result::Result<Vec<_>,_>>().map_err(sql_error)?;
+        self.next_delivery_ready(due)
+    }
+}
+
+impl Stores {
+    pub fn recover_delivery(&mut self) -> LocalResult<()> {
+        self.delivery_guard()?;
+        let tx = self.runtime.transaction().map_err(sql_error)?;
+        let now = delivery::db_now(&tx)?;
+        tx.execute("UPDATE delivery_batches SET state='unknown',last_error='process_restarted',next_attempt_at=?1 WHERE state='inflight'",[&now]).map_err(sql_error)?;
+        let rows=tx.prepare("SELECT batch_id,next_attempt_at FROM delivery_batches WHERE state='prepared' OR state='unknown' OR state='retry_wait' ORDER BY created_order LIMIT 9").map_err(sql_error)?.query_map([],|r|Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?))).map_err(sql_error)?.collect::<std::result::Result<Vec<_>,_>>().map_err(sql_error)?;
+        if rows.len() > 8 {
+            return Err("delivery_queue_limit".into());
+        }
+        for (id, at) in rows {
+            let delay = (crate::domain::facts_wire::time(&at)?
+                - crate::domain::facts_wire::time(&now)?)
+            .num_seconds()
+            .clamp(1, 300);
+            let next = (crate::domain::facts_wire::time(&now)? + chrono::Duration::seconds(delay))
+                .to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
+            tx.execute(
+                "UPDATE delivery_batches SET next_attempt_at=?1 WHERE batch_id=?2",
+                params![next, id],
+            )
+            .map_err(sql_error)?;
+        }
+        tx.commit().map_err(sql_error)
     }
 }

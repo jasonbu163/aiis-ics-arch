@@ -4,9 +4,9 @@ English version: [PLAN.md](PLAN.md)
 
 ## 当前基线
 
-- [ARCH-BE-009 r1](../plans/ARCH-BE-009-backend-facts-integration/spec.md)：B `qa_passed`；Development 9项正式MySQL及42项扩展；fresh QA独立通过9项正式、47项具名扩展、181项聚焦和44项旧测试（9项未选）通过；A与全部失败史保留。2容器/2卷/2网及8专用库、27份临时口令/操作配置已清理且独立核验。Owner终验、真实采用、DAA及生产长期SLA仍为独立gate；现有库/真实历史未操作。
+- [ARCH-BE-009 r1](../plans/ARCH-BE-009-backend-facts-integration/spec.md)：`owner_accepted`；Development 9项正式MySQL及42项扩展；fresh QA独立通过9项正式、47项具名扩展、181项聚焦和44项旧测试（9项未选）通过；A与全部失败史保留。2容器/2卷/2网及8专用库、27份临时口令/操作配置已清理且独立核验。Human Owner于2026-11-05验收获批源码及隔离A+B交付；真实采用、DAA/SMA联调及生产长期SLA仍为独立gate；现有库/真实历史未操作。
 
-- [ARCH-BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/spec.md)：B `qa_passed`；两轮真实MySQL/ASGI/时间/并发/断线、各161项受影响源码回归及事实清理后永久业务回执通过；A与全部失败史保留。2容器/2卷/2网及8专用库、27份临时口令/操作配置已清理且独立核验。Owner终验、真实采用、DAA及生产长期SLA仍为独立gate；现有库/真实历史未操作。
+- [ARCH-BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/spec.md)：`owner_accepted`；两轮真实MySQL/ASGI/时间/并发/断线、各161项受影响源码回归及事实清理后永久业务回执通过；A与全部失败史保留。2容器/2卷/2网及8专用库、27份临时口令/操作配置已清理且独立核验。Human Owner于2026-11-05验收获批源码及隔离A+B交付；真实采用、DAA/SMA联调及生产长期SLA仍为独立gate；现有库/真实历史未操作。
 
 - [ARCH-BE-005 r3](../plans/ARCH-BE-005-backend-business-module-reintegration/spec.md)：`owner_accepted`；独立 A 及两轮隔离 MySQL 各五场景、专用资源清理完成，Human Owner 于 2026-10-16 最终验收；保留全部历史。
 
@@ -23,6 +23,8 @@ English version: [PLAN.md](PLAN.md)
 - `ARCH-MIG-001 r1` 已替换为仅含十四张 Core 表的单一 `d4e6f8a0b2c4` root；operation/metadata parity、
   downgrade 与 single-head 证据已通过 fresh-context Verification，并获得 Human Owner 最终验收。
 - `ARCH-DOCKER-001 r1` 空 volume runtime 证明已获 Human Owner 接受。`ARCH-001 r3` Development 已恢复
-  固定名称的热更新开发栈与 production-shaped 外部数据库 config/build 表面；下一步是 fresh-context r3 Verification。
+  固定名称的热更新开发栈与 production-shaped 外部数据库 config/build 表面；fresh-context r3 Verification及Human Owner接受已在[ARCH-001](../plans/ARCH-001-public-architecture-baseline-extraction/checklist.md)完成；这份历史Core接受不代后续provider完成采用。
 
 详细工作记录归根目录架构任务三文件和单独获批的 backend 任务；本索引不承载项目业务 backlog。
+
+API-only `plc_facts` owner使用独立七表，不替换旧monitor raw/latest或Projection输入。BE-010拥有四张业务集成表及有限时间兼容；源码迁移按BE-009 `0a2c4e6f8b10`→BE-010 `1b3d5f7a9c20`接续。Human Owner于2026-11-05验收两项获批源码与隔离A+B交付；实际目标采用及DAA/SMA联调仍单独处理。

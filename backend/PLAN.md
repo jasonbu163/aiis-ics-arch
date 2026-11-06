@@ -4,9 +4,9 @@ Chinese version: [PLAN.zh-CN.md](PLAN.zh-CN.md)
 
 ## Current baseline
 
-- [ARCH-BE-009 r1](../plans/ARCH-BE-009-backend-facts-integration/spec.md): B `qa_passed`; 9 formal MySQL cases and 42 expanded Dev scenarios; fresh QA independently passed 9 formal, 47 named expanded scenarios, 181 focused and 44 legacy tests (9 deselected) passed; A/failure histories retained. Two containers/volumes/networks, eight dedicated schemas and 27 temporary credential/config files were cleaned and independently observed absent. Owner acceptance, live adoption, DAA and production SLA remain separate; existing databases/history were not operated on.
+- [ARCH-BE-009 r1](../plans/ARCH-BE-009-backend-facts-integration/spec.md): `owner_accepted`; 9 formal MySQL cases and 42 expanded Dev scenarios; fresh QA independently passed 9 formal, 47 named expanded scenarios, 181 focused and 44 legacy tests (9 deselected) passed; A/failure histories retained. Two containers/volumes/networks, eight dedicated schemas and 27 temporary credential/config files were cleaned and independently observed absent. Human Owner accepted the approved source and isolated A+B delivery on 2026-11-05; live adoption, DAA/SMA integration and production SLA remain separate; existing databases/history were not operated on.
 
-- [ARCH-BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/spec.md): B `qa_passed`; both real MySQL/ASGI/time/concurrency/disconnect rounds, 161 affected source regressions in each, and permanent business receipts after facts cleanup passed; A/failure histories retained. Two containers/volumes/networks, eight dedicated schemas and 27 temporary credential/config files were cleaned and independently observed absent. Owner acceptance, live adoption, DAA and production SLA remain separate; existing databases/history were not operated on.
+- [ARCH-BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/spec.md): `owner_accepted`; both real MySQL/ASGI/time/concurrency/disconnect rounds, 161 affected source regressions in each, and permanent business receipts after facts cleanup passed; A/failure histories retained. Two containers/volumes/networks, eight dedicated schemas and 27 temporary credential/config files were cleaned and independently observed absent. Human Owner accepted the approved source and isolated A+B delivery on 2026-11-05; live adoption, DAA/SMA integration and production SLA remain separate; existing databases/history were not operated on.
 
 - [ARCH-BE-005 r3](../plans/ARCH-BE-005-backend-business-module-reintegration/spec.md): `owner_accepted`; Human Owner accepted on 2026-10-16 after independent A and two isolated MySQL rounds, all five scenarios in each round and dedicated resource cleanup; prior histories are preserved.
 
@@ -24,6 +24,8 @@ Chinese version: [PLAN.zh-CN.md](PLAN.zh-CN.md)
   downgrade and single-head evidence passed fresh-context Verification and received Human Owner final acceptance.
 - `ARCH-DOCKER-001 r1` empty-volume runtime proof is owner-accepted. `ARCH-001 r3` Development restored the
   fixed-name hot-reload development stack and production-shaped external-database config/build surface;
-  fresh-context r3 Verification is next.
+  fresh-context r3 Verification and Human Owner acceptance are complete under [ARCH-001](../plans/ARCH-001-public-architecture-baseline-extraction/checklist.md). This historical Core acceptance does not accept later provider adoption.
 
 Detailed work records live in the root architecture task bundle and in any separately approved backend task. This index does not carry project business backlog.
+
+The API-only `plc_facts` owner uses seven independent tables and does not replace old monitor raw/latest or Projection inputs. BE-010 owns four business-integration tables and bounded time compatibility; the source migration order is BE-009 `0a2c4e6f8b10` → BE-010 `1b3d5f7a9c20`. Human Owner accepted both approved source and isolated A+B delivery scopes on 2026-11-05; actual target adoption and DAA/SMA integration remain separate.

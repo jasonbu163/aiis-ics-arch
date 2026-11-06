@@ -4,7 +4,7 @@ English: [README.md](README.md)。
 
 [openapi.json](openapi.json)从backend正常模块注册应用提取精确八路匿名POST及闭合组件引用；[examples.json](examples.json)保存八份规范请求、请求/业务摘要、完整成功/错误例与冻结bi-json/v1向量。wire仍为aiis.business-integration/v1，r2只是任务Revision。
 
-这是source_ready_unadopted源码，默认关闭/空scope/未采用。准入先于采用校验和session创建；shanghai-v1另要求精确外部business-time-adoption/v1凭据、有限basisProfile及事务内UUID/schema/revision/DB时钟匹配。配置字符串不能单独启用写入。真实schema/时间采用、数据库/Docker/B及Owner接受仍是独立gate。
+这是source_ready_unadopted源码，默认关闭/空scope/未采用。准入先于采用校验和session创建；shanghai-v1另要求精确外部business-time-adoption/v1凭据、有限basisProfile及事务内UUID/schema/revision/DB时钟匹配。配置字符串不能单独启用写入。获批隔离MySQL A+B已通过独立验证，见[BE-010 r2](../../../../plans/ARCH-BE-010-anonymous-business-integration/checklist.md)。实际目标schema/时间采用、Owner接受、DAA/SMA接线及部署仍独立；B的合成采用未迁移真实历史。
 
 | 资源 | 数值/技术存储域 |
 | --- | --- |

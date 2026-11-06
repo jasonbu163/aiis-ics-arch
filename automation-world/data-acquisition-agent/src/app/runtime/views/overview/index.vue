@@ -1,6 +1,7 @@
 <!-- DAA本地SQLite视图：唯一local owner提供状态/动作，导航不驱动PLC或health。 -->
 <template>
   <template v-if="local">
+    <FactsDeliveryPanel />
 
     <div class="daa-local-metrics">
       <ConsoleMetricCard label-key="common.local.connectedCount" :value="local.snapshot ? String(local.snapshot.plcs.filter(p => p.connected).length) + ' / ' + String(local.plcs.length) : '—'" />
@@ -12,6 +13,7 @@
 </template>
 
 <script setup lang="ts">
+import FactsDeliveryPanel from '../../../../components/console/FactsDeliveryPanel.vue';
 import ConsoleMetricCard from '../../../../components/console/ConsoleMetricCard.vue';
 
 import { inject } from 'vue';

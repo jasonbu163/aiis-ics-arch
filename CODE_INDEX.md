@@ -140,9 +140,13 @@ documentation initialization in this repository.
 - `automation-world/data-acquisition-agent/` — independent DAA runtime; CU public-source shell, workbench plus PLC/points/storage leaves, one local owner, pure preference/navigation shell and local PLAN; legacy YAML/direct-DB/headless graph retired.
 - `automation-world/data-acquisition-agent/src-tauri/src/config/local_bootstrap.rs` — SQLite-only ordinary startup, explicit UI read permission with a process-only deny override, retired-key provenance and the unchanged owned debug validation factory; no resident YAML discovery.
 - `automation-world/data-acquisition-agent/src-tauri/src/domain/local_{configuration,sample,runtime}.rs` — configuration/context/envelope v1, sample/manifest v2, stable IDs, group/read budgets and self-describing runtime DTOs.
+- `automation-world/data-acquisition-agent/src-tauri/src/domain/{facts_canonical,facts_wire,local_delivery}.rs` — DAA-008 lossless pf-json, original-cycle transport, strict receipts, source settings and fixed manual-read DTOs.
+- `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/{facts_http.rs,local_store/delivery.rs}` / `services/local_delivery.rs` / `commands/local_delivery.rs` — fixed bounded HTTP, v3 delivery ledger, explicit single worker, monotonic retry and nine named IPC commands; r1 hot-journal recovery remains blocked.
+- `automation-world/data-acquisition-agent/src/services/factsDelivery.ts` / `components/console/{FactsDeliveryPanel,FactsDeliveryDialog}.vue` — real Workbench/storage delivery controls, source/CAS dialog, bounded queue/events/manual reads and read-only originals.
+- `automation-world/data-acquisition-agent/src-tauri/src/{domain/facts_canonical_tests.rs,infrastructure/facts_http_tests.rs,infrastructure/local_store/delivery_tests.rs,services/local_delivery_tests.rs}` / `tests/facts-delivery.test.mjs` — fixed provider vectors, transport substitutes, owned synthetic SQLite transactions/crashes and focused UI contracts; no actual HTTP/DS proof.
 - `automation-world/data-acquisition-agent/src-tauri/src/domain/business_time.rs` — centralized Shanghai calendar timestamps, canonical millisecond parsing and retention boundaries; monotonic scheduling remains separate.
 - `automation-world/data-acquisition-agent/src-tauri/src/services/local_{configuration,activation,supervisor,scheduler,storage,queries,recovery}.rs` — protected derived configuration/CAS, token activation, unique PLC actors, fair groups, admission, bounded history and stopped recovery.
-- `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/` — empty-profile SQLite schema v2 with time-profile admission before writes, DELETE/EXTRA, serial work, atomic complete cycles and protected capacity cleanup; paired schema READMEs.
+- `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/` — new config2/runtime3 and legacy v2/v2 admission, DELETE/EXTRA, serial work, immutable cycles and same-runtime delivery transactions with protected capacity; paired schema READMEs.
 - `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/{tia_source,plc_layout,local_decode,managed_s7,local_profile_lock,local_logging,local_fixture}.rs` — full bounded source expansion, verified standard nested layout inference, typed values, persistent S7, OS lock, bounded logs and compile-gated owned fixtures.
 - `automation-world/data-acquisition-agent/src-tauri/src/commands/local_{acquisition,validation}.rs` / `src/bin/daa-local-validation.rs` — named local IPC and nondefault debug JSON Lines adapter; no ACK/upload/SQL executor.
 - `automation-world/data-acquisition-agent/src/services/localAcquisition.ts` / `src/console/composables/useLocalAcquisitionConsole.ts` — bootstrap-first IPC contract, local edit-base CAS and one runtime refresh owner; normal reload/save no longer query or retry YAML migration.
@@ -237,31 +241,32 @@ documentation initialization in this repository.
 - [Fixed native driver](automation-world/device-simulator/tests/ui/native_driver.js), [bounded report adapter](automation-world/device-simulator/src-tauri/src/testing/native_driver.rs), [product test host](automation-world/device-simulator/runtime/src/bin/ds-test-host.rs), [test-only hooks](automation-world/device-simulator/runtime/src/testing/hooks.rs), [generic fixture](automation-world/device-simulator/tests/fixtures/product-workspace.json), [protocol fixture](automation-world/device-simulator/tests/fixtures/protocol-workspace.json): real DOM/normal IPC and same product runtime; non-default feature plus owned manifest.
 
 
-## ARCH-BE-010 A0 integration source
+<a id="arch-be-010-a0-integration-source"></a>
+## ARCH-BE-010 shared integration primitives and A0 provenance
 
 - [backend/common/integration/__init__.py](backend/common/integration/__init__.py) — finite JSON/envelope/digest/receipt/HTTP primitives; no DB wiring.
 - [backend/common/integration/canonical.py](backend/common/integration/canonical.py) — finite JSON/envelope/digest/receipt/HTTP primitives; no DB wiring.
 - [backend/common/integration/envelope.py](backend/common/integration/envelope.py) — finite JSON/envelope/digest/receipt/HTTP primitives; no DB wiring.
 - [backend/common/integration/http.py](backend/common/integration/http.py) — finite JSON/envelope/digest/receipt/HTTP primitives; no DB wiring.
 - [backend/common/integration/receipt.py](backend/common/integration/receipt.py) — finite JSON/envelope/digest/receipt/HTTP primitives; no DB wiring.
-- [backend/app/equipment/api/integration.py](backend/app/equipment/api/integration.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/equipment/schemas/integration.py](backend/app/equipment/schemas/integration.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/equipment/models/integration.py](backend/app/equipment/models/integration.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/equipment/integration_config.py](backend/app/equipment/integration_config.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/equipment/integration_domain.py](backend/app/equipment/integration_domain.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/equipment/integration_error_codes.py](backend/app/equipment/integration_error_codes.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/performance/api/integration.py](backend/app/performance/api/integration.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/performance/schemas/integration.py](backend/app/performance/schemas/integration.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/performance/models/integration.py](backend/app/performance/models/integration.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/performance/integration_config.py](backend/app/performance/integration_config.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/performance/integration_domain.py](backend/app/performance/integration_domain.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/performance/integration_error_codes.py](backend/app/performance/integration_error_codes.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/monitor/api/integration.py](backend/app/monitor/api/integration.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/monitor/schemas/integration.py](backend/app/monitor/schemas/integration.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/monitor/models/integration.py](backend/app/monitor/models/integration.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/monitor/integration_config.py](backend/app/monitor/integration_config.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/monitor/integration_domain.py](backend/app/monitor/integration_domain.py) — module-owned anonymous preparation, default-off / unadopted.
-- [backend/app/monitor/integration_error_codes.py](backend/app/monitor/integration_error_codes.py) — module-owned anonymous preparation, default-off / unadopted.
+- [backend/app/equipment/api/integration.py](backend/app/equipment/api/integration.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/equipment/schemas/integration.py](backend/app/equipment/schemas/integration.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/equipment/models/integration.py](backend/app/equipment/models/integration.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/equipment/integration_config.py](backend/app/equipment/integration_config.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/equipment/integration_domain.py](backend/app/equipment/integration_domain.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/equipment/integration_error_codes.py](backend/app/equipment/integration_error_codes.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/performance/api/integration.py](backend/app/performance/api/integration.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/performance/schemas/integration.py](backend/app/performance/schemas/integration.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/performance/models/integration.py](backend/app/performance/models/integration.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/performance/integration_config.py](backend/app/performance/integration_config.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/performance/integration_domain.py](backend/app/performance/integration_domain.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/performance/integration_error_codes.py](backend/app/performance/integration_error_codes.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/monitor/api/integration.py](backend/app/monitor/api/integration.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/monitor/schemas/integration.py](backend/app/monitor/schemas/integration.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/monitor/models/integration.py](backend/app/monitor/models/integration.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/monitor/integration_config.py](backend/app/monitor/integration_config.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/monitor/integration_domain.py](backend/app/monitor/integration_domain.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
+- [backend/app/monitor/integration_error_codes.py](backend/app/monitor/integration_error_codes.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
 - [backend/tests/test_business_integration_contract.py](backend/tests/test_business_integration_contract.py) — A0 no-DB validation and frozen public vectors.
 - [backend/tests/test_business_integration_api.py](backend/tests/test_business_integration_api.py) — A0 no-DB validation and frozen public vectors.
 - [backend/tests/test_business_integration_migration.py](backend/tests/test_business_integration_migration.py) — A0 no-DB validation and frozen public vectors.
@@ -280,7 +285,7 @@ documentation initialization in this repository.
 - `backend/scripts/plc_facts_maintenance/main.py` — no-argument help before settings import; explicit status/adopt/cleanup and JSON Lines evidence.
 - `backend/tests/test_plc_facts_{contract,api,source,ordering,cursor,retention,migration,compatibility,maintenance}.py` — no-DB source and behavior checks.
 - `backend/tests_mysql/test_plc_facts.py` — separately gated MySQL verification entry, never run by A.
-- `contracts/published/http-api/plc-facts-v1/` — generated OpenAPI/schema and independent source vectors; source-only gate.
+- `contracts/published/http-api/plc-facts-v1/` — fixed OpenAPI/schema and independent source vectors; isolated A+B QA passed, Owner final/provider-ready and actual adoption pending.
 
 Package `__init__.py` files, `mocks/` and `seeds/` are import-safe and do not execute setup or fallback providers.
 

@@ -1,5 +1,10 @@
 //! 全轮事实、源序号、manifest和pending同事务提交；有界历史只返回原持久字节。
+use super::delivery::{db_now, event, Frozen};
 use super::{sql_error, Stores};
+use crate::domain::{
+    facts_canonical as pf,
+    facts_wire::{text, time, Batch, Parent, RECEIPT_MAX},
+};
 use crate::domain::{
     local_configuration::{id, LocalResult},
     local_runtime::HistoryQuery,
@@ -7,6 +12,7 @@ use crate::domain::{
 };
 use rusqlite::{params, OptionalExtension};
 use serde_json::{json, Value};
+use std::collections::BTreeSet;
 impl Stores {
     pub fn commit_cycle(&mut self, mut input: CycleInput) -> LocalResult<Value> {
         use crate::domain::business_time;
@@ -282,7 +288,7 @@ impl Stores {
             )
             .map_err(sql_error)?;
         Ok(
-            json!({"schemaVersion":1,"payload":raw,"sha256":hash,"manifest":manifest,"manifestSha256":mhash,"context":chunk,"contextOffset":context_offset,"contextNextOffset":next,"contextBytes":context_bytes,"contextSha256":chash,"deliveryState":state}),
+            json!({"schemaVersion":1,"payload":raw,"sha256":hash,"manifest":manifest,"manifestSha256":mhash,"context":chunk,"contextOffset":context_offset,"contextNextOffset":next,"contextBytes":context_bytes,"contextSha256":chash,"deliveryState":state,"deliveries":self.sample_deliveries(id)?}),
         )
     }
     pub fn logs(&self, cursor: i64, limit: u32) -> LocalResult<Value> {
@@ -351,7 +357,11 @@ impl Stores {
                 continue;
             }
             self.admit_maintenance(quota)?;
+            let delivery = self.delivery_available()?;
             let tx = self.runtime.transaction().map_err(sql_error)?;
+            if delivery {
+                super::delivery::cleanup_cycle(&tx, &cycle)?;
+            }
             for s in &samples {
                 tx.execute("DELETE FROM sample_delivery WHERE sample_id=?1", [s])
                     .map_err(sql_error)?;
@@ -390,5 +400,218 @@ impl Stores {
         }
         // Cleanup may have committed; free space and the old-image journal bound must be re-read.
         self.reclaim_incremental(policy.quota_bytes)
+    }
+}
+
+// Reliable receipts and sample delivery state share one runtime transaction.
+impl Stores {
+    pub fn commit_delivery(
+        &mut self,
+        frozen: &Frozen,
+        envelope: &Value,
+        raw: &str,
+    ) -> LocalResult<()> {
+        crate::domain::local_delivery::verify_success(&frozen.batch, envelope)?;
+        if pf::parse(raw.as_bytes(), RECEIPT_MAX)? != *envelope {
+            return Err("invalid_receipt".into());
+        }
+        if raw.len() > RECEIPT_MAX {
+            return Err("response_too_large".into());
+        }
+        let data = &envelope["data"];
+        let tx = self.runtime.transaction().map_err(sql_error)?;
+        let old: Option<String> = tx
+            .query_row(
+                "SELECT receipt_id FROM delivery_receipts WHERE batch_id=?1",
+                [&frozen.batch.batch_id],
+                |r| r.get(0),
+            )
+            .optional()
+            .map_err(sql_error)?;
+        if let Some(receipt) = old {
+            if receipt == text(data, "receiptId")? {
+                return Ok(());
+            }
+            return Err("delivery_receipt_conflict".into());
+        }
+        let state: String = tx
+            .query_row(
+                "SELECT state FROM delivery_batches WHERE batch_id=?1 AND body_sha=?2",
+                params![frozen.batch.batch_id, frozen.body_sha],
+                |r| r.get(0),
+            )
+            .map_err(sql_error)?;
+        if !["inflight", "unknown", "retry_wait", "prepared"].contains(&state.as_str()) {
+            return Err("delivery_state_conflict".into());
+        }
+        tx.execute(
+            "INSERT INTO delivery_receipts VALUES(?1,?2,?3,?4,?5,?6,?7,'acknowledged')",
+            params![
+                frozen.batch.batch_id,
+                text(data, "receiptId")?,
+                frozen.batch.request_digest,
+                raw,
+                pf::sha(raw.as_bytes()),
+                text(data, "committedAt")?,
+                text(data, "proofExpiresAt")?
+            ],
+        )
+        .map_err(sql_error)?;
+        let now = db_now(&tx)?;
+        for part in &frozen.batch.samples {
+            let n=tx.execute("UPDATE delivery_parts SET state='acknowledged',receipt_id=?1 WHERE sample_id=?2 AND part=?3 AND batch_id=?4 AND content_digest=?5",params![text(data,"receiptId")?,part.sample_id,part.part,frozen.batch.batch_id,part.content_digest]).map_err(sql_error)?;
+            if n != 1 {
+                return Err("delivery_part_conflict".into());
+            }
+            let (expected,total,acked):(u32,u32,u32)=tx.query_row("SELECT max(parts),count(*),sum(CASE WHEN state='acknowledged' THEN 1 ELSE 0 END) FROM delivery_parts WHERE sample_id=?1",[&part.sample_id],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?))).map_err(sql_error)?;
+            if total == expected && acked == expected {
+                tx.execute("UPDATE sample_delivery SET state='acknowledged',acknowledged_at=?1 WHERE sample_id=?2",params![now,part.sample_id]).map_err(sql_error)?;
+                tx.execute("DELETE FROM sample_references WHERE sample_id=?1 AND reference_id LIKE 'delivery-batch:%'",[&part.sample_id]).map_err(sql_error)?;
+            }
+            tx.execute(
+                "DELETE FROM sample_references WHERE sample_id=?1 AND reference_id=?2",
+                params![
+                    part.sample_id,
+                    format!("delivery-batch:{}", frozen.batch.batch_id)
+                ],
+            )
+            .map_err(sql_error)?;
+        }
+        for cycle in &frozen.batch.cycles {
+            let remaining:u32=tx.query_row("SELECT count(*) FROM delivery_parts WHERE cycle_id=?1 AND state!='acknowledged'",[&cycle.cycle_id],|r|r.get(0)).map_err(sql_error)?;
+            if remaining == 0 {
+                for sample in &cycle.transport_manifest {
+                    tx.execute(
+                        "DELETE FROM sample_references WHERE sample_id=?1 AND reference_id=?2",
+                        params![
+                            sample.sample_id,
+                            format!("delivery-cycle:{}", cycle.cycle_id)
+                        ],
+                    )
+                    .map_err(sql_error)?;
+                }
+            }
+        }
+        tx.execute("UPDATE delivery_batches SET state='acknowledged',body=NULL,last_error=NULL WHERE batch_id=?1",[&frozen.batch.batch_id]).map_err(sql_error)?;
+        event(
+            &tx,
+            "delivery_acknowledged",
+            &frozen.batch.batch_id,
+            "acknowledged",
+        )?;
+        tx.commit().map_err(sql_error)?;
+        self.log.event(
+            "delivery_acknowledged",
+            &frozen.batch.batch_id,
+            "acknowledged",
+        )?;
+        Ok(())
+    }
+    pub fn reject_delivery(
+        &mut self,
+        frozen: &Frozen,
+        envelope: &Value,
+        eligible: &[(String, u32)],
+        raw: &str,
+    ) -> LocalResult<()> {
+        let data = &envelope["data"];
+        if raw.len() > RECEIPT_MAX || pf::parse(raw.as_bytes(), RECEIPT_MAX)? != *envelope {
+            return Err("invalid_receipt".into());
+        }
+        let now = db_now(&self.runtime)?;
+        if time(text(data, "rejectionExpiresAt")?)? <= time(&now)? {
+            return self
+                .fail_delivery(
+                    &frozen.batch.batch_id,
+                    "needs_review",
+                    "parent_proof_expired",
+                    1,
+                    false,
+                )
+                .map(|_| ());
+        }
+        let child = if !eligible.is_empty() && frozen.depth < 8 {
+            let parts = frozen
+                .batch
+                .samples
+                .iter()
+                .filter(|p| eligible.contains(&(p.sample_id.clone(), p.part)))
+                .cloned()
+                .collect::<Vec<_>>();
+            let used = parts
+                .iter()
+                .map(|p| p.cycle_id.as_str())
+                .collect::<BTreeSet<_>>();
+            let cycles = frozen
+                .batch
+                .cycles
+                .iter()
+                .filter(|c| used.contains(c.cycle_id.as_str()))
+                .cloned()
+                .collect();
+            Some(Batch::new(
+                frozen.batch.instance_id.clone(),
+                id(),
+                now.clone(),
+                cycles,
+                parts,
+                Some(Parent {
+                    batch_id: frozen.batch.batch_id.clone(),
+                    request_digest: frozen.batch.request_digest.clone(),
+                    rejection_token: text(data, "rejectionToken")?.into(),
+                }),
+            )?)
+        } else {
+            None
+        };
+        let tx = self.runtime.transaction().map_err(sql_error)?;
+        let existing: Option<String> = tx
+            .query_row(
+                "SELECT receipt_id FROM delivery_receipts WHERE batch_id=?1",
+                [&frozen.batch.batch_id],
+                |r| r.get(0),
+            )
+            .optional()
+            .map_err(sql_error)?;
+        if let Some(receipt) = existing {
+            if receipt == text(data, "receiptId")? {
+                return Ok(());
+            }
+            return Err("delivery_receipt_conflict".into());
+        }
+        tx.execute(
+            "INSERT INTO delivery_receipts VALUES(?1,?2,?3,?4,?5,?6,?7,'rejected')",
+            params![
+                frozen.batch.batch_id,
+                text(data, "receiptId")?,
+                frozen.batch.request_digest,
+                raw,
+                pf::sha(raw.as_bytes()),
+                text(data, "recordedAt")?,
+                text(data, "rejectionExpiresAt")?
+            ],
+        )
+        .map_err(sql_error)?;
+        tx.execute("UPDATE delivery_batches SET state='rejected',last_error=?2 WHERE batch_id=?1 AND body_sha=?3",params![frozen.batch.batch_id,text(envelope,"errorCode")?,frozen.body_sha]).map_err(sql_error)?;
+        for p in &frozen.batch.samples {
+            tx.execute("UPDATE delivery_parts SET state='needs_review' WHERE sample_id=?1 AND part=?2 AND batch_id=?3",params![p.sample_id,p.part,frozen.batch.batch_id]).map_err(sql_error)?;
+        }
+        if let Some(child) = child {
+            let body = child.bytes()?;
+            tx.execute("INSERT INTO delivery_batches(batch_id,target_id,settings_revision,request_digest,body_sha,body,members,parent_id,parent_depth,state,next_attempt_at,created_at) VALUES(?1,?2,(SELECT settings_revision FROM delivery_settings WHERE id=1),?3,?4,?5,?6,?7,?8,'prepared',?9,?9)",params![child.batch_id,frozen.target_id,child.request_digest,pf::sha(body.as_bytes()),body,encode(&child.samples.iter().map(|p|json!({"sampleId":p.sample_id,"part":p.part,"contentDigest":p.content_digest})).collect::<Vec<_>>())?,frozen.batch.batch_id,frozen.depth+1,child.batch_created_at]).map_err(sql_error)?;
+            for p in &child.samples {
+                tx.execute("UPDATE delivery_parts SET state='prepared',batch_id=?1 WHERE sample_id=?2 AND part=?3 AND batch_id=?4",params![child.batch_id,p.sample_id,p.part,frozen.batch.batch_id]).map_err(sql_error)?;
+                tx.execute(
+                    "INSERT OR IGNORE INTO sample_references VALUES(?1,?2)",
+                    params![p.sample_id, format!("delivery-batch:{}", child.batch_id)],
+                )
+                .map_err(sql_error)?;
+            }
+        }
+        event(&tx, "delivery_rejected", &frozen.batch.batch_id, "rejected")?;
+        tx.commit().map_err(sql_error)?;
+        self.log
+            .event("delivery_rejected", &frozen.batch.batch_id, "rejected")?;
+        Ok(())
     }
 }

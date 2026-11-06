@@ -11,6 +11,19 @@
 
 本计划跟踪项目级契约中枢的落地。
 
+## 当前证据 — 2026-11-05
+
+| 合同线索 | 实际范围与下一gate |
+| --- | --- |
+| [PLC事实provider](published/http-api/plc-facts-v1/README.zh-CN.md) | BE-009源码及隔离MySQL A+B QA通过，Owner终验/provider-ready及真实采用待定。 |
+| [typed业务provider](published/http-api/business-integration-v1/README.zh-CN.md) | BE-010 r2八路及隔离A+B QA通过，真实schema/时间采用及终验待定。 |
+| [AW需求](demands/automation-world-facts-integration.zh-CN.md) | 文档仍proposed；AW008文档QA2通过、Owner文档终验待定，provider证据独立。 |
+| 旧CA授权 | 原需求/provider/前置gate保留为历史输入，不证明新CA现场就绪。 |
+
+下方K0–K3是早期契约中枢快照。旧MySQL root阻塞、migration head `b4c5d6e7f8a9`及迁移前路径属于历史，不是BE-009/010当前schema head或阻塞。现行源码迁移包含BE-009 `0a2c4e6f8b10`再接BE-010 `1b3d5f7a9c20`，不据此断言实际数据库revision。冻结CA当前路径为`automation-world/control-agent/`；新provider QA不替旧CA授予现场执行接受。
+
+## 历史K0–K3记录
+
 ## 目标
 
 建立一套可复用机制，支持 AI 开发后端、第三方开发前端、AI 开发前端、`control-agent` runtime 开发，以及后端 / Worker 交接。
@@ -72,7 +85,7 @@
 - 后端实现不创建遥控 `control-agent` 的 API。
 - 数据库型验证恢复后，测试证明响应壳和 camelCase 字段正确。
 
-当前验证备注：
+历史验证备注：
 
 - `uv run python -m compileall app/control_agent alembic/versions/20260624_1200_b4c5d6e7f8a9_add_control_agent_gate_tokens.py tests/test_control_agent_authorization.py tests/test_migrations.py` 通过。
 - Alembic 脚本发现结果为单一 head：`b4c5d6e7f8a9`。
@@ -95,9 +108,10 @@
 - `contracts/gates/control-agent-preflight.zh-CN.md` 标明 CA 门禁开发前必须满足的检查。
 - 门禁清单区分后端就绪与 CA 实现就绪。
 
-## 验证命令
+<a id="验证命令"></a>
+## 历史验证命令
 
-进入实现阶段后，根据改动范围运行：
+以下原命令仅保留历史，不作为当前可复制操作指令；新验证按所属README/任务及具体批准执行：
 
 ```bash
 uv run pytest tests/test_control_agent_authorization.py tests/test_response_contract.py

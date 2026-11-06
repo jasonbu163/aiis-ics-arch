@@ -127,7 +127,16 @@ pub fn run() {
             commands::local_acquisition::daa_get_local_snapshot,
             commands::local_acquisition::daa_list_history,
             commands::local_acquisition::daa_get_sample,
-            commands::local_acquisition::daa_get_logs
+            commands::local_acquisition::daa_get_logs,
+            commands::local_delivery::daa_get_delivery_settings,
+            commands::local_delivery::daa_save_delivery_settings,
+            commands::local_delivery::daa_get_delivery_snapshot,
+            commands::local_delivery::daa_set_delivery,
+            commands::local_delivery::daa_preview_delivery,
+            commands::local_delivery::daa_test_facts_endpoint,
+            commands::local_delivery::daa_list_deliveries,
+            commands::local_delivery::daa_get_delivery,
+            commands::local_delivery::daa_get_facts_source_material,
         ])
         .build(tauri::generate_context!())
         .expect("error while building AIIS Data Acquisition Agent")

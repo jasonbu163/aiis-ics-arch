@@ -2,7 +2,7 @@
 ## 从冻结参考工程到独立采集、映射与控制执行
 
 **文档版本：v0.4 · AW 范围收敛版**  
-**原稿日期：2026-10-07；事实链路修订：2026-11-04 · ARCH-AW-008 r1；原设计：ARCH-AW-002 r2/r3**
+**原稿日期：2026-10-07；当前同步：2026-11-05 · ARCH-DOC-001 r1；事实链路修订：2026-11-04 · ARCH-AW-008 r1；原设计：ARCH-AW-002 r2/r3**
 **文档性质：长期目标设计与后续 Roadmap，不是当前实施规范**  
 **讨论对象：以 Rust 为主要实现技术的工业自动化运行时、配置、采集、映射、归档、运行管理及必要的对外接口**  
 **工程起点：`aiis-ics-arch` 中既有的 `control-agent` 及相关采集、Projection 和本地管理经验**  
@@ -10,7 +10,7 @@
 **详细原理：[AW 运行原理设计](AIIS_AW_Runtime_Design.md)**  
 **配套资料：[AIIS 三界协作与跨域设计背景资料 v0.1](AIIS_Three_Worlds_Background_Notes_v0.1.md)**
 
-> **方向更新（ARCH-AW-007 r2）：** 新路线保留 DAA、SMA、CA 三应用：DAA 负责大量持续采集，SMA 沿已过滤 TSS 基线精简表格化批量 HTTP 映射与工作台，CA 承担通用节点编排及内部多协议连接器。AWB/AWC 未来统一管理三类实例，先登记/心跳与只读健康，再配置/远程操作。全项目 [中文 ROADMAP](../ROADMAP.zh-CN.md)、[English ROADMAP](../ROADMAP.md) 与 [007 r2](../plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design)、[006 r2](../plans/ARCH-AW-006-unified-flow-agent-design/spec.md#r2-design) 提供当前方向；精确批准、交付、独立 QA 与最终验收状态归所属 bundle，原设计正文/来源及 r1 验证历史保留。DAA 当前 SQLite 本地采集且新上传未接入；SMA 当前 Backend-held TSS/Facts→POST 与逐项 await 调度，子集/逐行常驻、任意 HTTP 源、本地 SQLite/可靠 outbox 和容量优化分期，不强制近期迁库；CA 自身版本化存储仍为目标。本文旧表单/共享 Core/角色节点限制等按当时范围解释，不构成三 App 统一迁移或 CA 能力总界限；CAF/旧 CA 保持冻结。CA 首版 HTTP GET/POST、明确受支持 S7 与无登录前提依 006 r2；原可靠投递、PW Service/API owner、版本固定及 unknown 核实原则仍为适用参考，后续实施 spec 明确采用/替代条款。本提示不宣称软件、QA、设备或部署许可。
+> **当前状态同步（2026-11-05 · [ARCH-DOC-001 r1](../plans/ARCH-DOC-001-project-state-and-decision-sync/spec.md)）：** DAA受控本地阶段B已接受，上传/ACK仍未接通。SMA-002职责清理、003 CU接入已接受；004的Rust/SQLite单配置快照与纯预览通过QA2、待Owner终验，正常manual/start/resume/auto-start投递关闭。Backend事实/八类typed业务provider已通过获批隔离MySQL A+B QA，Owner终验、真实采用及DAA/SMA接线仍独立。FOA命名和SMA/CA合并宿主已由[007 r2](../plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design)替代为DAA/SMA/CA三应用；共享Flow Core/画布/中央管理是可选未来能力，不是近期前置。原任务的批准、失败与QA/接受仍按各自候选保留，本文同步不授予产品或现场接受。
 
 > **现阶段继续保持 `aiis-ics-arch` 的现有结构与正常开发，不因本文启动 PW/AW/AIW 拆分。**
 >
@@ -20,7 +20,7 @@
 
 本次在 v0.4 文件原位修订，保留原入口和历史来源；文件名不是冻结发布版本。2026-10-15 的文档范围见 [ARCH-AW-002 r2](../plans/ARCH-AW-002-agent-runtime-design/spec.md)。本文确定角色与阶段，详细机制由配套原理设计展开；两文均不授权功能实施。
 
-2026-11-04补充[ARCH-AW-008 r1](../plans/ARCH-AW-008-stage-c-facts-contract/spec.md)的[跨端共同需求](../contracts/demands/automation-world-facts-integration.zh-CN.md)：匿名事实一写两读、可靠回执／游标、上海三自然月和独立永久业务记录。合同位于demands/proposed，尚非provider接受或已实现接口；Backend／DAA软件分别立项。原ARCH-AW-002 r3、ARCH-AW-003文档终验及阶段B受控DS验收保留各自范围；本次新文档QA／终验另行办理，不启动软件或实际联调。
+2026-11-04的[ARCH-AW-008 r1](../plans/ARCH-AW-008-stage-c-facts-contract/spec.md)将匿名事实一写两读、可靠回执/游标、上海三自然月与永久业务记录集中到[共同需求](../contracts/demands/automation-world-facts-integration.zh-CN.md)，需求文档仍为proposed。后续[事实provider](../contracts/published/http-api/plc-facts-v1/README.zh-CN.md)及[业务provider](../contracts/published/http-api/business-integration-v1/README.zh-CN.md)已独立实现并通过隔离MySQL QA；Owner终验和实际采用仍待定。需求状态不否定provider存在；原ARCH-AW-002/003文档接受及DAA受控B接受保持各自边界。
 
 本文替代 v0.3 作为 **AW 专项讨论主稿**。原稿中有价值但超出 AW 内部设计的内容移入配套背景资料，并未被判为错误或取消。两份文档都不自动修改现行仓库契约或授权代码实施。[U6]
 
@@ -73,9 +73,9 @@ AW 中的 Agent 是采集、映射、归档、监督或执行角色，不等同�
 
 | 级别 | 内容 | 效力 |
 |---|---|---|
-| 已有工程事实 | 旧CA冻结；DAA阶段B已在受控DS范围验收，唯一SQLite入口／本地完整轮历史可用，新上传未接通；SMA仍Backend-held TSS派生 | 历史证据限制继续跟踪，不证明新事实API或业务可靠闭环 |
+| 已有工程事实 | 旧CA冻结；DAA阶段B已在受控DS范围验收，唯一SQLite入口／本地完整轮历史可用，新上传未接通；SMA清理/CU已接受、本地SQLite配置/纯预览通过QA2且正常投递关闭 | 历史证据限制继续跟踪，Backend事实/业务provider另已通过隔离QA，但DAA/SMA新执行链与可靠业务闭环未接通 |
 | 本次明确方向 | 旧 CA 称 CAF 冻结参考；新 CA 为 Control Agent；DAA 首版 S7、本地 SQLite、事实 API；SMA 对外语义投递，CA 对内执行持久有效意图 | 后续设计依据，不是实现完成 |
-| 推荐方案 | CU 共享 UI 源码与设计工作台；SMA/CA 共享可视化编辑代码和 Rust Flow Core，各自独立运行 | 具体模块/库/节点清单仍需实施任务 |
+| 推荐方案 | CU公共源码与设计工作台已交付并被DAA/SMA消费；共享可视化编辑/Flow Core仅为后续可选复用，各应用独立运行 | 具体模块/库/节点清单仍需实施任务 |
 | 长期目标 | AWB/Axum、中央发布、PG/Redis、HA/SA、独立后台托管与统一 AWC | 按需求另行立项，不是近期依赖 |
 | 待决细则 | S7 支持矩阵、SQLite draft 策略、API/握手、画布库、容量和服务托管 | 不在本轮冻结 |
 
@@ -147,7 +147,7 @@ CAF 不是新 CA 的另一运行模式。继承素材不等于延续旧直库权
 | SMA | Semantic Mapping Agent | AW 事实转语义对象并向第三方/上层 API 投递 | 不写 PLC，不直连业务库，不代替接收方业务校验 |
 | HA | Historian Agent | 原始采样默认归档、语义结果可选归档、批量持久化与保留 | 不复制平台的业务表，不代行映射 |
 | SA | Supervisor Agent | 健康、业务进展、依赖诊断、受控保活和生命周期管理 | 不默认获得设备写入权，不自动等同冗余主备 |
-| CA | Control Agent | 领取本系统持久有效意图、现场校验、资源仲裁、设备下发及确认回执 | 不从任意外部 URL 直取数据写设备；实现另行立项 |
+| CA | Control Agent | 通用节点/受控内部连接器编排；设备执行时领取本系统持久有效意图、现场校验、仲裁、下发及回执 | 不绕过PW业务规则或受控节点/设备授权；通用连接器及执行实现另行立项 |
 | DS | Device Simulator | 开发、测试与联调的设备模拟工具 | 不是生产 Agent，不是 DAA/SMA/CA 生产依赖，不证明真实设备行为 |
 | Backend | 本系统 API 宿主 | 接入校验、持久意图、事实 API、原子领取与回执、内部存储/schema | 不在请求线程运行 PLC 常驻循环 |
 
@@ -169,7 +169,7 @@ AWB/AWC 的正式展开使用 Automation World；角色名称和 `agent.toml` �
 | 未来 AW PG schema | SeaORM Migration | 唯一受控迁移流程，不接管当前项目 Alembic |
 | 工程控制台 | Tauri + Web 前端 | 配置与管理入口，不承担所有后台循环 |
 | 中央持久化 | PostgreSQL | 配置、元数据、历史按职责授权 |
-| 本地持久化 | SQLite | DAA 近期配置权威；SMA/CA 建议沿用；运行记录独立管理 |
+| 本地持久化 | SQLite | DAA配置权威；SMA当前Rust/SQLite单快照；CA后续另定；运行记录独立管理 |
 | 实时数据 | 独立 AW Redis | 最新状态与选择采用的记录流 |
 | 后续消息机制 | 按需要引入 MQTT | 不要求第一步同时实现所有消息通路 |
 
@@ -184,14 +184,14 @@ Rust 程序主动领取配置、投递数据，只需要相应客户端能力；
 
 ```text
 DAA Tauri UI → Rust 配置服务 → 自身双 SQLite → 有效内存配置
-SMA 当前 Backend-held 配置 → 映射（本地配置／可靠状态分期）
+SMA UI → Rust配置服务 → 本地SQLite单快照/revision → 纯预览（正常投递关闭）
 设备 → DAA 本地提交 → 匿名事实 API → Backend raw/latest
        → SMA latest/history → 模块 typed API → 独立永久业务记录
 第三方/上层 → 本系统 API 校验并持久化 → CA 原子领取 → 设备写入/确认
                                                CA → 本系统执行回执
 ```
 
-DAA 获取事实，SMA 向外表达事实，CA 向内执行意图。“对外/对内”描述业务责任：SMA 可以 GET 材料，CA 可以 POST 领取、心跳和回执；CA 回执由自身完成，不依赖 SMA。
+DAA 获取事实，SMA 向外表达事实，CA 向内执行意图。“对外/对内”描述业务责任：SMA可以GET材料，CA可以POST领取、心跳和回执；CA回执独立完成。未来CA也可按受支持的类型化连接器组合HTTP/PLC等点值交换，PW拥有的业务状态仍经所属Service/API。
 
 Agent 不直接持有 Backend 业务库或 Redis 凭据，也不依赖任意表名/SQL。Backend 可调整关系库、缓存或历史存储，但不能静默降低 API 成功回执的可靠性。Redis 不属于本轮部署，也不能替代可靠执行意图的真相源。
 
@@ -208,7 +208,7 @@ latest 不等于完整历史；独立 Redis/PG 不自动带来持久交付或事
 
 ### 5.1 一个业务配置权威
 
-DAA当前配置明确保存在本地SQLite，配置／采样双库，各实例独立目录；Rust服务管理点位、连接与采集组，UI经受控command操作。SMA继续Backend-held配置和表格化HTTP映射，不强制近期迁库；若另批本地状态再确定唯一权威和恢复。CA按其路线，不借本任务统一迁移。
+DAA当前配置保存在本地SQLite，配置/样本双库和实例目录独立；Rust服务管理点位、连接与采集组。SMA-004另行采用Rust管理的单SQLite完整配置快照/revision，连接、材料、目标、值规则与映射离线维护；UI偏好及技术启动JSON不属于业务配置权威。当前SMA没有draft/active/previous发布系统或可靠运行库，正常投递关闭；CA自身版本化存储仍属后续设计。
 
 DAA普通YAML runtime／直库writer／常驻迁入入口已退役，私有防重复记录保留；env只用于启动路径等部署配置，不形成第二个点位／业务配置权威。本次不读写已有profile或历史。匿名事实入口无需凭据；其他既有鉴权目标保留自己的合同。
 
@@ -220,14 +220,14 @@ DAA普通YAML runtime／直库writer／常驻迁入入口已退役，私有防�
 
 ### 5.3 编辑、生效与回退分开
 
-近期建议 `draft → 校验/预览 → active → previous`。draft 是编辑区，active 是当前运行完整快照，previous 是上次切换出去且需兼容检查的版本。草稿保留量、schema 和切换恢复策略在后续任务确认。
+DAA激活和未来CA/运行版本可参考 `draft → 校验/预览 → active → previous`；当前SMA-004只保存一份完整配置快照及revision，不实现该发布状态机。原设计建议为：draft 是编辑区，active 是当前运行完整快照，previous 是上次切换出去且需兼容检查的版本。草稿保留量、schema 和切换恢复策略在后续任务确认。
 
 第 7 节 current/previous 是原稿长期“两个稳定运行槽”合同；active 与 current 概念对应，但本地草稿不是已经批准的第三个运行槽。不能将两种命名直接写成已实现的精确 schema。详见[原理设计](AIIS_AW_Runtime_Design.md)。
 
 <a id="central-config"></a>
 ## 6. 长期中央配置：不设固定版本上限，由 AWC 管理
 
-本节在需要中央发布时适用；近期DAA配置权威为自身SQLite、SMA仍Backend-held，不要求本节先行建设。
+本节在需要中央发布时适用；近期DAA配置权威为自身SQLite，SMA为本地Rust/SQLite单配置快照，不要求本节先行建设。
 
 ### 6.1 存放版本记录，不按版本建物理表
 
@@ -378,7 +378,7 @@ SMA 读取自身有效配置中的点位关联、字段类型、转换与映射�
 
 ### 8.3 变化驱动与周期刷新
 
-建议保留以下运行原则；具体阈值在项目配置和验收中确定：
+以下是后续映射/输出优化原则，不授权DAA丢弃完整采集事实；具体阈值在项目配置和验收中确定：
 
 - 状态、布尔和枚举在值或质量变化时及时更新。
 - 模拟量可配置变化阈值，并保留最大刷新间隔。
@@ -614,9 +614,10 @@ SA 监督的不只是 PID，还包括最近成功采样、映射进度、归档�
 
 API 接收、协议写成功、PLC 接受与设备完成分开记录；超时/断线/重启可能发生在动作之后，`unknown` 应先核实确认序号和现场结果。取消、租约失效和回退不能盲重试或撤销已发生动作；数据库去重不等于物理动作恰好一次。[U3]
 
-### 13.1 共用代码，分别装配能力
+<a id="131-共用代码分别装配能力"></a>
+### 13.1 可选共享流程代码，各自装配能力
 
-推荐 Tauri + Vue 流程画布 + Rust Flow Core 解释版本化定义。SMA 负责事实加工和 API 投递，CA 负责持久意图与设备执行；共享编辑、校验、调度、分支和跟踪，各自拥有节点、权限、配置库、队列、状态和生命周期。SMA 在 Rust 装配/加载阶段拒绝设备写节点；重试工具不能统一决定副作用恢复。
+未来需要通用流程时，可评估Tauri/Vue画布及Rust Flow Core复用。SMA当前以本地配置表格、纯预览为主，CA按007 r2承担通用节点/内部连接器；SMA可先独立建设本地GET→POST，CA也可按受支持连接器做简单HTTP映射。共享编辑、校验或调度须由实际重复需求驱动，不把完整Core、画布或另一应用进程作为近期交付前置；队列、状态、权限和生命周期继续各自拥有。
 
 Vue Flow 仅为候选。完整 Node-RED 为 Node.js 编排加 Rust 设备服务的备选，不能承诺任意导出 JSON/Function 节点由 Rust 直接执行。节点合同、有限 DAG/等待及典型流程详见[运行原理设计](AIIS_AW_Runtime_Design.md)。
 
@@ -670,7 +671,7 @@ CU 提供共享 UI 源码、布局主题、组件预览和可运行设计工作�
 
 ### 15.1 当前阶段：工程基线与设计交付分开
 
-ARCH-AW-001保留旧CA冻结和独立工程证据；DAA阶段A布局与阶段B受控DS本地采集已接受，原历史限制保留。ARCH-AW-008只更新跨端共同需求和相关设计，新可靠上传／Backend接口未因此实现。合同稳定后Backend与DAA各获软件spec批准可并行，provider就绪后实际联调；SMA／业务模块及自动启动／真实现场不是DAA首版阶段C前置。本轮不改变源码或历史receipt。
+ARCH-AW-001保留旧CA冻结和独立工程证据；DAA阶段A布局与阶段B受控DS本地采集已接受，原历史限制保留。ARCH-AW-008本身只更新共同需求和设计；其后BE-009/010已完成事实/业务provider及隔离A+B QA，Owner与真实采用仍待定。当前选择先Backend、DAA暂缓，可靠上传仍未接通；DAA后续获批实施及provider真实采用就绪后才受控联调；SMA／业务模块及自动启动／真实现场不是DAA首版阶段C前置。本轮不改变源码或历史receipt。
 
 不为三界额外创建强制顶层目录，不因白皮书收录建设 PG/Redis/AWB 或拆除 Projection。现行旧链路的切换、配置导入和新 CA 实施都另行限定范围。
 
@@ -682,7 +683,7 @@ ARCH-AW-001保留旧CA冻结和独立工程证据；DAA阶段A布局与阶段B�
 |---|---|---|
 | E0 文档依据 | 修订本白皮书并形成详细原理设计 | 名称、阶段、合同草案与现状一致；独立文档 QA |
 | E1 DAA 最小闭环 | S7 支持矩阵、本地 SQLite、DB/UDT 导入与受限推算、事实 API | 缺定义拒绝、TIA 偏移核对、编辑/启用隔离、批次与回执、旧配置迁移 |
-| E2 有限共享底座 | CU 共享组件与工作台、SMA/CA 画布及 Rust Flow Core | UI 与流程边界、独立构建运行、节点权限、版本固定、无副作用预览 |
+| E2 可选共享底座 | CU组件/工作台已交付；SMA/CA画布及Rust Flow Core按重复需求另立，非近期前置 | UI 与流程边界、独立构建运行、节点权限、版本固定、无副作用预览 |
 | E3 两类模拟闭环 | SMA 单目标投递；新 CA 持久意图到模拟设备握手 | 幂等与积压、原子领取、半写/丢回执/重启/unknown、资源仲裁 |
 | E4 现场可靠性 | 授权设备接入、后台托管、容量与恢复 | PLC 联锁/实点、断网断电、长时间运行、唯一写入与回退；现场另批 |
 | E5 按需中央化 | AWB/Axum、中央发布、PG/Redis、HA/SA、统一 AWC | 明确收益、迁移归属、配置权威切换和故障保障；非近期前置 |

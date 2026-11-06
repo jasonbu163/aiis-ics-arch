@@ -12,9 +12,10 @@
 | [AW 白皮书与演进路线](AIIS_AW_Whitepaper_Roadmap_v0.4.md) | 角色与分阶段路线；ARCH-AW-008对齐事实到业务的生命周期，不授权软件。 |
 | [AW 运行原理与详细设计](AIIS_AW_Runtime_Design.md) | 采集、配置与执行边界；匿名事实集成及独立业务确认；中文设计正文。 |
 | [DAA 详细设计](AIIS_DAA_Detailed_Design.md) | 已接受的受控阶段B基线；阶段C不可变双SQLite事实、有界最新优先上传、可靠回执与Backend读取／保留需求。 |
-| [SMA 详细设计](AIIS_SMA_Detailed_Design.md) | 当前Backend-held配置与分期HTTP映射；后续定义检查、安全历史消费和可靠typed业务投递，不要求立即迁库。 |
-| [AW事实集成共同需求](../contracts/demands/automation-world-facts-integration.zh-CN.md) · [English](../contracts/demands/automation-world-facts-integration.md) | proposed：匿名一写两读、JSON／可靠回执、逐点latest、安全history、上海三自然月及业务永久保存；不是provider实现。 |
-| [DS 详细设计](AIIS_DS_Detailed_Design.md) · [使用手册](../automation-world/device-simulator/USER_GUIDE.zh-CN.md) · [快速流程](../automation-world/device-simulator/USER_GUIDE.zh-CN.md#quick-start) | 手册覆盖创建实例/点位→确认→保存草稿→保存为版本→停机加载→启动，以及[版本切换/回退](../automation-world/device-simulator/USER_GUIDE.zh-CN.md#switch-version)、单个/批量删除、多DB/UDT导入和策略编辑。2026-10-27的DS-001 r1、ARCH-AW-005 r5验收与原DEV/QA历史保持原范围，独立QA仅DS-001例外未执行；DAA至SQLite联调另批，阶段C暂不开展。 |
+| [SMA 详细设计](AIIS_SMA_Detailed_Design.md) | 当前Rust/SQLite配置与纯预览阶段，正常投递关闭；清理/CU已接受，本地配置QA2通过待Owner，GET→POST/history/outbox仍另项。 |
+| [AW事实集成共同需求](../contracts/demands/automation-world-facts-integration.zh-CN.md) · [English](../contracts/demands/automation-world-facts-integration.md) | proposed：匿名一写两读、JSON／可靠回执、逐点latest、安全history、上海三自然月及业务永久保存；需求状态独立于已实现provider及其隔离QA。 |
+| [DS 详细设计](AIIS_DS_Detailed_Design.md) · [使用手册](../automation-world/device-simulator/USER_GUIDE.zh-CN.md) · [快速流程](../automation-world/device-simulator/USER_GUIDE.zh-CN.md#quick-start) | 手册覆盖创建实例/点位→确认→保存草稿→保存为版本→停机加载→启动，以及[版本切换/回退](../automation-world/device-simulator/USER_GUIDE.zh-CN.md#switch-version)、单个/批量删除、多DB/UDT导入和策略编辑。2026-10-27的DS-001 r1、ARCH-AW-005 r5验收与原DEV/QA历史保持原范围，独立QA仅DS-001例外未执行；受控DAA–DS S7→SQLite联调已于10月30日独立接受；10月29日DS草稿/版本增量仍保持DEV自检/人工确认边界，阶段C另项。 |
+| [事实provider](../contracts/published/http-api/plc-facts-v1/README.zh-CN.md) / [业务provider](../contracts/published/http-api/business-integration-v1/README.zh-CN.md) | 固定源码合同及独立通过的隔离MySQL A+B范围；Owner终验、真实采用及DAA/SMA接线待定。 |
 
 
 ## 权威边界

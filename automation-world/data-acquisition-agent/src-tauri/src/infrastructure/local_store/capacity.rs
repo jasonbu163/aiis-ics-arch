@@ -95,6 +95,14 @@ impl Stores {
             + sector
             + 4 * MAX_CYCLE * 16
             + 32 * 1024 * 1024;
+        if self.delivery_available()? {
+            c.reserved_bytes = c.reserved_bytes.saturating_add(32 * 1024 * 1024);
+            (
+                c.delivery_request_bytes,
+                c.delivery_receipt_bytes,
+                c.delivery_metadata_bytes,
+            ) = self.delivery_bytes()?;
+        }
         c.pending_count = self
             .runtime
             .query_row(

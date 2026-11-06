@@ -9,3 +9,5 @@ pub(crate) mod local_supervisor;
 pub(crate) mod local_yaml_migration;
 
 pub(crate) mod local_point_naming;
+
+pub(crate) mod local_delivery;

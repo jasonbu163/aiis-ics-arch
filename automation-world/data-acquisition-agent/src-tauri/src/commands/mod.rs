@@ -2,3 +2,5 @@
 pub(crate) mod local_acquisition;
 #[cfg(feature = "local-validation")]
 pub(crate) mod local_validation;
+
+pub(crate) mod local_delivery;

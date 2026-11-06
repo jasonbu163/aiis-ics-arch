@@ -1,0 +1,398 @@
+Task ID: DAA-008
+Revision: r1
+Status: owner_approved
+Owner Role: PM
+Allowed Writers: PM, Human Owner
+Handoff: Human Owner已于2026-11-05精确批准r1 A0及第11.1节A1 -> 唯一主协调/root -> 实际Development；仅实施已批源码和有限合成SQLite验证，B实际HTTP/DS/MySQL/Docker另批，完整阶段C及最终验收未完成
+Workflow Mode: STD
+Execution Mode: agent_team_same_session
+Task Namespace: aiis-ics-arch
+Classification: root
+Capability: DAA本地事实的有界定时上传、可靠回执、补传与重启恢复及受控阶段C端到端验收
+Owner: Automation World / Data Acquisition Agent
+Acceptance Chain Reference: 本spec第13节；PM -> Human Owner精确r1及阶段批准 -> Development -> fresh-context Verification -> Human Owner最终验收
+Depends On: aiis-ics-arch::ARCH-BE-009 r1 owner_accepted固定事实provider；aiis-ics-arch::DAA-007 r2 owner_accepted本地采集基线
+Related Task: aiis-ics-arch::ARCH-AW-008 r1；aiis-ics-arch::ARCH-BE-010 r2；aiis-ics-arch::DAA-002 r2；aiis-ics-arch::DAA-006 r3
+Created: 2026-11-05 Asia/Shanghai
+
+# DAA阶段C：可靠事实上传与受控联调
+
+## 1. 给Human Owner的审阅摘要与当前效力
+
+本次拟实现：在既有本地采集之后，按独立上报周期，把完整本地样本按后端已固定的事实合同上传；断网时继续本地保存，恢复后最新优先并公平补历史；对重复、丢回执、结果不确定和进程重启保留原投递身份，取得并保存可靠证明后才标记已上报。工作台集中控制采集与上报，上报与存储页维护一个后端目标、周期、队列及诊断。
+
+端到端顺序固定为：新profile采集 → 全轮样本/manifest/context本地commit → 冻结HTTP batch → POST → 严格校验可靠ACK → 同一runtime事务确认 → latest/history人工核对。网络与后端失败不撤销已经完成的本地采集提交。
+
+**当前只交付本spec草案。** 不改代码，不运行应用或数据库，不读取真实.env、SQLite或既有profile，不迁移、清理、覆盖任何已有配置、样本、历史原文、ID或SHA。后端已验收不等于本任务获批，也不等于实际联调目标已经启用。
+
+为保持这一数据保护承诺，本r1提出明确限制：**只在新空隔离profile新建runtime SQLite v3；config SQLite仍为v2，样本/manifest仍为v2，采集配置/context仍为v1。既有v2/v2 profile继续原本地功能且上传不可用，不自动升级或纳入上报。** 上传既有profile的历史、升级旧schema另行立项，不在本次验收中暗做。没有第三个业务数据库。
+
+普通入口继续`pnpm tauri dev`。所有启动均未连接、未采集、未上报；本次新增显式开始/暂停/继续上传，不实现程序启动后的自动采集或自动上传。后端目标、schema/时区/source采用、HTTP监听、DS实例、数据库、Docker以及故障/资源清理的具体操作，须后续逐项说明并批准。SMA实现、BE010八类业务API接线均不是本任务前置。
+
+Human Owner本轮原话明确后端`ARCH-BE-009 r1`、`ARCH-BE-010 r2`已`owner_accepted`，并要求“按STD先出DAA阶段C实施spec”；实施需在spec提交后再次确认。本任务没有Parent Task ID，不继承其他任务的范围批准、数据库动作或最终验收。
+
+## 2. 证据基线、合同优先级与来源固定
+
+### 2.1 已验收与当前缺口
+
+| 表面 | 当前只读核对事实 | 本任务边界 |
+| --- | --- | --- |
+| [DAA-007 r2核验及Owner接受](../DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2) | 受控DS/S7到本地双SQLite阶段B已接受；8590样本/4295轮与原profile保留；历史证据限制和来源未明事项继续跟踪。 | 使用其源码能力，不重做导入/命名/分组整套验收，也不打开这些历史数据库。 |
+| [当前样本v2](../../src-tauri/src/domain/local_sample.rs)、[runtime持久化](../../src-tauri/src/infrastructure/local_store/runtime.rs) | DB样本/同轮manifest/配置context保存原文与SHA，按PLC持久sourceSeq；sample_delivery只有pending/acknowledged。 | 为新profile增加投递元数据，不改原点位体、原序号和完整轮语义。 |
+| [SQLite schema/preflight](../../src-tauri/src/infrastructure/local_store/mod.rs) | 当前仅接受已知双库v2；未知时区/schema、单库、WAL或身份不匹配拒绝。 | 显式增加v2/v3已知组合；不能通过放宽未知版本、CREATE IF NOT EXISTS或ALTER自动接管旧库。 |
+| [现有bootstrap](../../src-tauri/src/commands/local_acquisition.rs) | uploadAvailable=false；本地采集控制与历史详情已实现。 | 真正具备v3存储与上传器后才提供上传能力；浏览器预览和v2 profile保持不可上传。 |
+| [BE009 r1最终验收](../../../../plans/ARCH-BE-009-backend-facts-integration/checklist.md) | 独立源码及两轮隔离MySQL8.4.6验证完成，2026-11-05 Owner接受；事实独立七表，专用运行资源已收尾。 | 固定消费三API；不修改后端、旧monitor表或接口，不把已回收测试目标当持续HTTP环境。 |
+| [BE010 r2最终验收](../../../../plans/ARCH-BE-010-anonymous-business-integration/checklist.md) | 八类匿名typed业务入口已接受。 | 仅未来SMA/第三方业务投递背景；DAA不调用、不映射、不以业务入库作为本阶段C前置。 |
+| [AW008需求](../../../../contracts/demands/automation-world-facts-integration.zh-CN.md)、[DAA详细设计](../../../../docs/AIIS_DAA_Detailed_Design.md) | 提供最新优先、历史补传、可靠确认与生命周期语义；AW008文档QA与Owner终验分层。 | 具体wire/摘要/限额以已验收BE009 provider为准；AW008未终验不新增为本spec起草或源码A的阻塞，也不代登记其验收。 |
+
+### 2.2 固定provider材料
+
+公开版本固定`plc-facts/v1`、`daa-local/v2`、`pf-json/v1`、`pf-cursor/v1`。下列SHA-256于2026-11-05直接读取公开源码/合同取得；不依赖tmp、部署URL或真实DB。实施handoff须重算一致；改变输入时区分纯文档与语义变化，后者返回PM，不默默跟随。
+
+| 根目录相对路径 | SHA-256 |
+| --- | --- |
+| contracts/published/http-api/plc-facts-v1/openapi.json | bec51c468ff64a8d34dbb0a2faab2fda76d2b33769ee5ef066dc81e8bca274ee |
+| contracts/published/http-api/plc-facts-v1/schema.json | 60d0e285bebb1c6d24588f4d5f90e7bdd85ed0befdeab9d0b93445a94f45d4b3 |
+| contracts/published/http-api/plc-facts-v1/vectors.json | 9a5ae0e90a006a7e450ec12557868e9eda20690f4853b6ae29aea2bdf714e782 |
+| backend/app/plc_facts/canonical.py | c48f0957b65c4348dec4fdfd8d76d9bd29891355b302b4d189b81cad7bbf1cd9 |
+| backend/app/plc_facts/source.py | a7fd7ef75149e251a47d838fbd57db00c540c7990d1f64f3d9e9a67edc1489d8 |
+| backend/app/plc_facts/schemas/receipt_out.py | 14d37df54acbef48fe55eedc9d26b1c3512a422f9f4bdaac45b304b651979e40 |
+| backend/app/plc_facts/services/async_ingest.py | 91b15e1842847db6612fc83753a9a9fac2caaa44a57c655ee223a12685a9a60f |
+| plans/ARCH-BE-009-backend-facts-integration/spec.md | 26121323384f2b8fd590921f53c477d759b564cf5214078c05834496a4884f48 |
+| plans/ARCH-BE-009-backend-facts-integration/checklist.md | d3bd116083aaf78a91c971ae1167f383ea15be021abaf9c20d15f7bc3469744e |
+| plans/ARCH-BE-010-anonymous-business-integration/checklist.md | 2c5cf0efdee2ae010976873228df757b5a70585521b3719be5871f39f93c9368 |
+| automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/schema.rs | c8c2189bd24bc427833fbe98d2a6b8b8c1f99a00e6b7e64a46e3afe26f922d81 |
+| automation-world/data-acquisition-agent/src-tauri/src/domain/local_sample.rs | 8de692e6b4ebdbce23685ed83a98ed3c5ada2783bbee2c74dbf5219677355677 |
+| automation-world/data-acquisition-agent/src-tauri/Cargo.lock | 0fd260eb50278b28e6b3a2e016dcc18ed6a4030b0c95a2a828db8ddcbfc05a61 |
+
+后端Owner接受对应固定B候选`2532d8423c73f0e9c0a7ac42d616014b2ca09419588cd07a0218bd4ce080cafb`；其checklist已区分148实现原样、后续9份Markdown变化与当前HEAD。DAA消费上述具体合同/源码，不声称整个共享工作树等于旧候选。机器JSON只读消费，不复制出可漂移的第二份provider合同。
+
+## 3. R01：阶段、批准与数据保护
+
+| gate | 可交付/可执行内容 | 进入条件 |
+| --- | --- | --- |
+| 当前PM | 本spec及主协调四处DAA PLAN/catalog中的draft索引 | 只有分析/规格授权；不创建tasks/checklist，不编译/测试/HTTP/SQLite/Docker/DS。 |
+| A0源码与纯检查 | 第10节有限源码、依赖声明/锁的必要变化、向量/状态机/传输替身、手册和DEV self-check | Owner精确批准本r1 A源码范围；不因此获得任何数据库或网络运行授权。 |
+| A1合成SQLite验证 | 新空临时目录中的v2/v3合成存储、事务/崩溃/恢复、容量与旧格式兼容测试 | Owner须明确同意第11.1节有限合成SQLite操作提案；代码批准没有明确包含该提案时，A1保持未执行。原路径/env/历史均排除。 |
+| G-B / B受控联调 | 新隔离DAA profile、专用Backend目标、受控DS与真实HTTP的必要增量验证，Owner原生操作及独立核验 | A候选固定后，另批第11.2节精确环境/目标身份、数据库/schema采用、Docker/监听/DS/故障及收尾动作。当前没有这些操作的批准。 |
+| 阶段C完成 | A0/A1与获批B均有实际Development、fresh-context Verification及Owner最终接受 | A-only不记阶段C完成；SMA、生产、真实PLC、自动启动、长期SLA与部署另项。 |
+
+现有profile的路径、文件内容、schema、样本状态和私有回执均为保护对象：本任务不发现/扫描用户目录、不导入、不复制/挂载旧profile到测试区，不改用户.env/default profile选择，不做旧UTC/v2数据迁移。兼容验证只用本任务从零创建的合成v2夹具。对现有数据的“不动”不能由程序开启后无感升级来替代。
+
+## 4. R02–R04：双库增量、样本与固定HTTP合同
+
+### R02. 新空profile的精确版本方案
+
+保持`<DAA_PROFILE_DIR>/local-acquisition-v1/{config.sqlite,runtime.sqlite}`和既有profile锁。config.sqlite application_id/PRAGMA user_version/instance_metadata/schema_migrations均保持现有v2；采集配置schemaVersion=1。**只有新空profile的runtime.sqlite显式建v3**：application_id沿用本应用runtime标识，user_version/runtime_metadata.schema_version/schema_migrations均为3；time_profile仍为`asia-shanghai-rfc3339-ms-v1`。样本与manifest的schemaVersion仍为2，原SHA算法不变。
+
+preflight精确区分：v2 config+v2 runtime为旧本地能力；v2 config+v3 runtime且instance/time/结构完整为新可靠上传能力；其他组合、单库、WAL、symlink或未知版本在任何持久写之前拒绝。v2/v2正常打开不执行投递DDL、不增加表/列/版本、不写投递设置；其原本地编辑/采样语义保持，上传页说明该profile需要另批升级，不能让旧profile启动致命失败。新空profile先检查真正为空，再串行显式初始化两库；半初始化不猜测修补或覆盖原件。
+
+新runtime v3保留原表与sample_delivery的pending/acknowledged二态，新增六张投递表，普通rowid/明确列与索引，不用ATTACH、跨库事务、触发器或第三库：
+
+| 新表 | 持久事实与约束 |
+| --- | --- |
+| delivery_settings | 单例id=1，settings_revision CAS、targetId、规范后端origin、上报周期、目标交接引用/合同pins、允许的PLC声明及已核来源材料；JSON≤64KiB。初始无目标、不运行。不是采集Configuration的一部分，不改变configuration_contexts原文/revision。 |
+| delivery_cycles | cycleId唯一，原manifest/context SHA、固定transportManifest/cycleDigest、targetId；引用原轮与完整样本集合。生成后不可改；定义原证据缺失/冲突为blocked。 |
+| delivery_parts | unique(sampleId,part)，原source SHA/contentDigest、parts/pointIds、状态、当前batchId、可靠ACK关联；完整预期集合由delivery_cycles固定。不能把同一片同时放入两个未终结batch。 |
+| delivery_batches | batchId唯一，targetId、settingsRevision、requestDigest/bodySHA、完整冻结UTF-8请求、成员集、parent关联/深度、state/attempt/nextAttemptAt/最后错误；新建冻结一次，重试不改身份/原材料/创建时间/分片。最多8个未终结冻结批。 |
+| delivery_receipts | batchId唯一，成功或可靠终结拒绝的原响应UTF-8/SHA、receiptId、请求摘要、提交/证明截止及逐成员结果；先完整验证再同事务保存。每条响应≤8MiB；不会将GET结果写成ACK。 |
+| delivery_events | 最多500条脱敏投递状态事件/诊断，稳定英文key和上海日历时间；与采集事件区分，普通每点值不落日志。 |
+
+ACK、delivery_parts、sample_delivery及sample_references在**同一runtime短事务**提交，消除第三库ACK补偿。未终结batch、unknown、合法派生依赖通过sample_references保护相关样本/整轮/context。全固定片已有相符可靠证明才将该sample标acknowledged；不改payload/manifest/context原文、SHA、ID、sourceSeq、value/quality/time。单片已提交、整个sample全片已提交、整轮complete和qualityGood分别表达。
+
+新profile的投递配置保存使用独立CAS，不生成PLC采集版本，也不重写历史context。后端origin/targetId/合同/source声明改变时，若有未终结投递则拒绝直接切换并显示受影响数量；本r1不提供跨后端搬运、人工“标已传”或丢弃旧队列按钮。
+
+### R03. 唯一事实载体与原文约束
+
+消费[原typed wire](../../../../backend/app/plc_facts/schemas/batch_in.py)和[source规则](../../../../backend/app/plc_facts/source.py)。DB样本包仍是一轮一个PLC/采集组在某DB的原SamplePayload；HTTP batch是可容纳若干DB包/固定片的传输容器，两者不是同一个层次。跨DB依序读取不冒称PLC物理原子帧。采集点enabled仍代表需上传的事实集合，不新增第二套上传点开关或自由JSON编辑器。
+
+例如PLC-A同一组读DB71与DB88，得到两个原sample与一份完整轮manifest；如果实际编码在预算内，可一次HTTP携带这两个包。PLC-B也有DB71时是另一plcId的原sample，可放后续HTTP或同一有界batch，均不冲突。用户只配置后端地址和周期，上传JSON由固定合同生成，预览只读。
+
+必须读取同一已提交轮的完整原payload/manifest/context，先核三者原SHA和关联、expectedPointIds/样本DB/定义/来源/序号/时间；只读原字符串作为payloadUtf8/manifestUtf8/contextUtf8。原UTF-8 SHA加`sha256:`前缀用于wire，原库无前缀SHA不改。每个失败点也保留definition/observedAt/bad/null/reason，不能删除、补零、替换旧good值；当前ASCII CHAR/STRING和有限PLC标量范围保持。
+
+sourceSeq始终是原PLC代次内的十进制字符串，不转JavaScript number，不因重启、补传、组周期、目标设置变化而重置。sampleId/cycleId/pointId/plcId/instanceId/sourceGeneration/revision使用原值；中文sourcePath与原命名不重新转换，传输不替点位重命名。
+
+原context解码后>1MiB、manifest>128KiB、payload>512KiB或无法生成合法最小请求时，该轮明确blocked并保存原因/原引用，其他PLC/轮次仍有公平机会。**不能裁剪source文档/树/失败点、重编码历史或另造“精简context”绕过合同。** 可显示需要后续配置/合同处理，不将不兼容轮退回采集线程无限重试。
+
+### R04. 版本、规范摘要、固定分片与请求限额
+
+固定三API：POST `/api/v1/integration/plc-facts/batches`，GET `/api/v1/integration/plc-facts/latest`和`/history`。只通过Rust HTTP adapter调用；不连MySQL、不写旧monitor表、不调用八类业务接口、不修改后端合同。新接口匿名；scope/source binding是准入而非身份认证，原前端/管理API权限保留。
+
+pf-json/v1不能用serde_json默认f64 round-trip替代：原JSON数字须保留原数值token，按十进制符号/系数/指数精确展开，零统一0、不用指数、去不必要小数零；UTF-8字节顺序排序对象键，控制字符用小写`\\u00xx`，仅必要引号/反斜杠转义，不做Unicode normalization。重复键、BOM、非法UTF-8/surrogate、NaN/Infinity、深度>20、>256有效数字或指数绝对值>1000均拒绝。实现采用serde_json的raw_value/arbitrary_precision能力与明确的无损数值表示/重复键检查；不引入Python runtime、机器浮点canonical或第二份合同生成器。
+
+摘要域分别为原文SHA、`sample-part`、`cycle`、`batch`、`definition`、`definition-set`；按provider的`plc-facts/v1 + NUL + domain + NUL + canonical`生成，不能混用。nameMode省略/空值、definition只取规定字段、context定义集包含停用点、requestDigest排除自身并规定数组排序，均直接对齐source.py；合法原时间文本/原points不改。**先通过固定vectors及独立反例，再接任何HTTP。**
+
+分片固定：原pointId按UTF-8字节序，下一点使本片超过512点或规范points 128KiB则开下一片，最多16片；sampleId不变，片身份为(instanceId,sampleId,part)，part从1开始。每片仍携带完整原payload，完整transportManifest固定原轮所有预期样本/片/contentDigest；同轮跨多个HTTP批时重复携带同一manifest/context与完整清单，不把当前批子集冒充完整轮。
+
+| 项目 | r1固定预算 |
+| --- | --- |
+| 每HTTP请求 | 实际编码后UTF-8≤4MiB；≤16 cycles、32 sample-parts、8 PLC，DAA原有4 PLC上限不扩大；不压缩。实际转义后的body字节决定是否可装包。 |
+| 冻结与内存 | 单HTTP在途；最多8个未终结冻结batch；一次只读取/构建一个≤4MiB请求与一个≤8MiB响应，不预载整个积压。达到8批后停止新冻结，已存在恢复继续。 |
+| HTTP连接/时限 | connect≤3s，完整请求/响应≤15s；GET≤8s；关闭自动redirect、cookie、透明重试与环境代理；标准TLS校验，不提供跳过证书选项。只访问保存的规范origin+固定三路径。 |
+| 成功/失败ACK读取 | header/Content-Length提前检查，stream累计≤8MiB，超限中止；strict JSON、深度≤20。32片×512点×最坏128-byte ID的转义列表上界<4.3MiB，另留metadata余量；8MiB覆盖合法完整回执，测试必须覆盖该上界而非截断JSON。 |
+| latest/history读取 | stream≤2MiB；客户端latest每页最多8点、history projection/changes每页最多8项、original每页1项（provider limit默认100/最大500不改变）。这些小页容纳原512KiB文本经JSON转义及128KiB片和envelope，不请求接近provider上限的大页。按hasMore/空页/scanBudgetReached/cursor继续；单次人工校对最多20页，超出显示未完成和可继续，不冒称全部。 |
+| 重试 | 1/2/4/8/16/30秒指数退避，上界30秒，再加0..20% jitter；合法Retry-After优先，限制1..300秒；墙钟跳变不导致紧循环。每批attempt和nextAttemptAt持久，有界计数/最后错误，无无限日志列表。 |
+
+reqwest 0.13.4已存在当前Cargo.lock，未来允许以该固定版本提升为直接依赖，使用blocking/标准TLS所需features；确切feature与锁图差异由Development在任何依赖解析前记录，不能顺带升级全锁或安装辅助依赖。serde_json只增加上述必要feature。HTTP工作在独立单worker，采集actor/SQLite队列/UI不等待网络。
+
+## 5. R05–R07：设置、最新优先和容量
+
+### R05. 一个目标和独立上报周期
+
+首版只有一个后端origin和一个全局上传周期，默认5秒，允许1..3600秒整数；采集组现有500..3600000ms周期不变。origin只允许http/https、明确host/可选端口，无用户信息/query/fragment，API路径固定，不开放任意method/header/template/SQL。目标设置、来源交接引用和节拍存新runtime delivery_settings，真实URL不提交仓库，也不要求写进.env。保存设置不发HTTP、不连接PLC、不启采、不启传。
+
+显式“开始上报”仅打开上传调度，不主动连接/采集；“暂停上报”禁止新dispatch，当前请求在15秒总预算内收尾并持久已取得结果，未决则unknown；“继续上报”先遵公平恢复规则。程序退出先停派发、处理在途已得结果并保留未决身份，再关闭存储/锁；重开只恢复本地状态，**不会因上次running自动发HTTP**。收集和上报可各自暂停，不要求PLC一直在线才能上传已落盘材料。
+
+读取模式的“测试接口”固定GET latest，必须选择已有PLC、limit=1，显示返回状态及准入诊断；它是读取测试，不写测试点、不证明事实POST已提交。包预览只生成只读摘要/折叠JSON，不自动发送。真实POST只由明确开始/继续上报后的调度触发。
+
+### R06. 有积压时最新优先，但历史不饥饿
+
+采样轮完整提交后才进入可选集合，按本地collection_cycles/sample_order索引分页，每次最多扫描200轮；冻结前复核原哈希、target/设置revision及唯一片归属。每个已配置PLC/组的一轮是最新候选，取当前未冻结的最高sourceSeq**整轮**，不把不同轮的点值拼成一个新样本。旧轮都保留待补，不覆盖本地历史。
+
+上传显式启动或网络恢复时，首个可派发新批选最新候选；之后最多连续3次最新通道派发，就必须给历史/到期unknown恢复通道1次机会。两个通道各按PLC轮询；历史优先最老未确认sourceSeq，同一批最多装入各轮合法片，不要求按所有PLC全局时间排序。无最新候选时连续补历史；无历史时不空等。due unknown原批按原身份重发，不重新入新批；其退避期间其他合法PLC可以前进。调度游标/3:1计数和已冻结成员持久，重启不能永远重置为最新而饿死历史。
+
+尚未可靠终结的旧批不允许被拆散或换batchId规避；与其无成员重叠的新最新批可以先发。最多8未终结批或容量不足时停止新冻结，转为已冻结恢复；不能声称在永久unknown/硬容量耗尽下仍能无限采集/最新上报。UI分别呈现新样本待传、已冻结/不确定、需处理与已确认，不靠总待传下降制造成功。
+
+### R07. 保留已有容量门禁，预留可靠确认空间
+
+新runtime的表、索引、请求原文、回执及事件均计入原runtime.sqlite+rollback journal物理配额；默认quota1GiB、日志32MiB及既有90%停止/70%恢复、可用盘/旧页journal保守预算保持。config库原64MiB限制独立，不能把delivery设置塞入采集源context扩大每个包。
+
+在现有保守预留之外，**再保留32MiB的ACK/状态恢复页预算**，计入capacity.reservedBytes。每次新采样/新冻结前核物理空间与该预留，不把“未来可能删除已确认请求”当空闲。一次至多8MiB回执，短事务含其页/索引及旧页journal；测试须核最坏响应和rollback预算。新采样/新冻结达到门禁即暂停；已冻结HTTP发送可继续，ACK确认与拒绝证明保存使用专用预留，不以普通90%门禁把恢复永久挡住。真实ENOSPC/IOERR仍可能发生，失败不丢原批、不标已传，关闭新派发并显示storage_fault。
+
+确认完成后，冗余的完整冻结请求可在同一可靠确认事务中释放，只保留bodySHA/requestDigest、完整成员绑定和可靠回执；未知或有效父拒绝链仍有依赖时不释放其恢复材料。新metadata/回执随**新profile既有的已确认整轮保留规则**有界回收，先确认无active batch/unknown/派生/校对引用，再原子删除关联投递metadata，才能沿用原cleanup_acknowledged的已过本地保留期/整轮全确认/无引用条件。不得放宽原清理条件，不删除pending/blocked/expired_unconfirmed，不修改原历史内容或把后端三月到期当本地删除许可；既有v2库不增加任何清理动作。
+
+UI显示原样本字节、冻结请求/回执/投递metadata字节与总库/journal预算，不能只统计payload忽略新缓存。积压与需处理可占满配额，处理方式是暂停/恢复或后续明确运维决定，不能以换身份/删未确认样本维持表面可用。
+
+## 6. R08–R11：状态机、ACK、unknown与错误矩阵
+
+### R08. 持久状态与崩溃边界
+
+sample_delivery仍保留原二态；下表为新delivery_parts/batches的细状态，不回写payload。
+
+| 状态 | 进入依据 | 合法后续 |
+| --- | --- | --- |
+| pending | 完整轮已落盘，未冻结 | 有空间且原材料有效时prepared；不可编码为blocked。 |
+| prepared | 原请求/成员/目标/digest及references已一次事务落盘 | 先持久inflight，再离开事务发送；从未发送不等于可以随意重写冻结批。 |
+| inflight | 已持久dispatch标记，HTTP结果尚未可靠落本地 | 完整ACK同事务到acknowledged；可靠终结拒绝到rejected；结果不明到unknown。重启一律按unknown恢复。 |
+| retry_wait | 完整可验证失败表明本次none且可重试，原批保留 | 到期原字节原身份重发；不能由此否认更早提交。 |
+| unknown | 超时/连接中断/坏响应/显式unknown/ACK持久化失败/崩溃 | 原批重试收回原结果；有效证明到已确认或可靠拒绝；超过证明/准入/来源边界仍不确定则needs_review。 |
+| rejected | 完整有效persistence=rejection_recorded且retirementAllowed=true | 保存原拒绝与token；按R10创建原成员合法子集的派生批，不改父批。 |
+| acknowledged | 所有相关固定片的可靠提交证明已原子持久 | 不再派发；历史查看仍读取原样本/SHA。 |
+| blocked / expired_unconfirmed / needs_review | 不能编码、冲突、来源/合同/时间/证明过窗或无法确定结果 | 原样本及证据保留；暂停受影响成员，其他PLC公平继续。无“忽略即成功”或自动删除。 |
+
+冻结事务成功前绝不发送。标inflight失败则不发送；其提交结果本地不确定时，先按batchId/bodySHA查询本地表而不是立刻创建新批。HTTP结束后关闭网络资源再提交ACK，不持SQLite事务等待15秒网络。正常暂停/退出不杀掉正在提交的SQLite事务；异常退出依靠rollback journal恢复完整旧/新状态，不能遗留半个sample acknowledged。
+
+### R09. 严格可靠回执与本地原子确认
+
+必须同时校验：HTTP200、application/json、完整typed success envelope的code/message、版本、instanceId/batchId/requestDigest、status/persistence=committed、confirmation=facts_committed、receiptId/committedAt/proofExpiresAt，以及**results与冻结batch成员集恰好一致且无重复/缺项/额外项**；逐片part/parts/sourceSha256/contentDigest/position相符；cycles恰为所含轮、cycleDigest及expectedParts相符，receivedParts/complete/qualityGood逻辑相容。latestAdvancedPointIds只能来自该片，允许为空；outcome/confirmation/originalOutcome/newFactsCommitted/commitSerial按provider规则校验，duplicate或historical_committed同样是可用历史提交证明，不误记成新写入或当前值可读。
+
+按原请求与已存回执建立局部不变量：源样本只有所有固定片已可靠确认且集合/摘要完整才acknowledged；整轮complete另外统计全transportManifest，不用单个batch的results数量替代expected集合。provider首次部分回执的complete字段在原批重放时保持历史值，不能要求它随其他批片到齐而改写。客户端依据全部已验证片集合展示本地确认完整性，与服务端回执当时完整性分列。
+
+所有严格校验通过后，在一个runtime事务保存原回执/SHA、片确认、样本二态、批终态与引用释放；原回执服务器日历时间保留原字符串/最高9位精度，不经过现有毫秒normalize截断。事务失败/未知时只读核本地原批/receiptId完整状态；无法证明全事务提交即unknown，不向UI报上传成功。上报成功计数是本地可靠确认数，不以发送次数/HTTP200次数或newFactsCommitted代替。
+
+### R10. unknown与可靠拒绝的恢复
+
+unknown的首要对账就是**重发完全相同target、batchId、batchCreatedAt、requestDigest、请求字节**，恢复provider的原稳定成功/拒绝结果；重试不重采、不重算新值、不把新batchId当幂等重试。三自然月原值过期但120天证明仍有效时，原批恢复historical_committed，可确认历史提交但valueReadable=false，不重建raw/latest。
+
+只有完整可靠拒绝绑定当前原批/摘要/稳定receiptId，且newFactsCommitted=false、retirementAllowed=true、token/截止与各成员diagnostics完整，才允许自动派生：保持sample/cycle/part/原文/内容摘要，只选原成员中eligible/duplicate_proven的未确认合法子集，新batchId与创建时间，parent引用原batchId/requestDigest/rejectionToken。子批完整轮manifest/transportManifest仍保留；父链最多8层，token永不记日志。expired_unproven/conflict/source_rejected成员转需处理，不删；空合法子集不造空请求。拒绝proof、父token缺失/过窗或unknown父都不派生。
+
+batchCreatedAt的新准入为24小时。原批已知committed/rejected时可在120天证明期内恢复；未到达后端或无证明的旧prepared批可能得到batch_admission_expired。先恢复原批，只有可靠终结拒绝才合法派生新的子批；不能把“已过24小时”本身当作未提交证明。proof_expired/parent_proof_expired保留原身份/证据转needs_review，不无限换父/重置期限。
+
+GET latest/history只是核对事实值、来源、摘要和完整性，不是batch ACK查询。latest被更高seq覆盖、history空页/过滤/到期gap、cursor过窗或覆盖声明不完整均不能证明旧POST没有提交；有匹配fact也不能替代绑定原batch的可靠回执。人工“结果核对”只保存read_result作为诊断，不能直接把sample_delivery设已确认。
+
+### R11. 失败分类、退避及不确定边界
+
+| 结果 | DAA固定处理 |
+| --- | --- |
+| 网络无响应、超时、重定向、非JSON/超限/截断/错壳/成员摘要不符的HTTP200 | 视为unknown；原批保留，停止该错误循环并显示诊断；可按有界退避原批恢复，连续5次协议失败转needs_review。 |
+| 完整429 busy / Retry-After | 不新确认；按1..300秒Retry-After/退避保留原批，其他PLC公平继续，不并发灌请求。 |
+| 503 unavailable/capacity_exceeded/clock_invalid/not_ready | 完整none仍原批retry_wait，容量/时钟/采用诊断可定位目标，不能自改后端；连续5次not_ready/clock_invalid暂停目标待处理。 |
+| 503/500，persistence=unknown或无法完整判断 | 原批unknown优先恢复；500不能无依据称未提交。 |
+| 403 scope_rejected | 暂停目标并保留队列，请检查批准的scope；不加伪token或修改客户端UA。 |
+| 403 source_rejected、409 batch/sample/cycle/binding conflict | 无可靠终结证明则blocked/needs_review；有可靠终结证明按R10仅处理合法子集；不能修改源ID、definition、seq或换generation绕过。 |
+| 410 sample_expired/batch_admission_expired | 有可靠拒绝按R10；无证明转expired_unconfirmed/needs_review，不造ACK、不改observedAt/创建时间续期。 |
+| 410 proof_expired/parent_proof_expired | 失去足够证明，保留未知边界并需人工审查，不标已传；其他合法新样本可继续。 |
+| 413/415/422 payload/media/invalid_request/digest_mismatch | 冻结后不能随意改包；blocked并定位合同/字节/digest；已有可靠拒绝才允许原成员同内容合法派生。已满足固定4MiB仍413属于目标/合同差异，不能无限递归拆包。 |
+| GET cursor_expired/gap/mismatch | 明确展示校对未完成/范围缺口；经人工明确选earliest或固定range重做只读校对，不保存SMA消费checkpoint或偷用tail跳过缺口。 |
+
+## 7. R12–R14：来源交接、时间/保留与重启
+
+### R12. 后端采用与目标变化不由DAA猜测
+
+运行前由后端责任方在另批环境完成schema/上海DB时钟、准入PLC集合、HMAC key和source binding采用，交付非秘密targetId、origin、源码/机器合同pins、schema profile/revision、采用引用及与DAA当前instanceId/plcId/generation/definitionSetDigest/contextSHA/seq窗口的核对材料。允许使用BE009-B的0a2或BE009-BE010-JOINT的1b3已知profile；不要求为DAA先接通BE010业务写入。DAA无MySQL凭据、HMAC key、维护CLI调用或来源管理API。
+
+界面“查看接入材料”返回当前新profile只读来源JSON和digest，供后端按其批准流程采用；生成/查看不发HTTP、不改DB来源、不新造PLC。context/定义变化后，builder对新轮definitionSetDigest与已核材料比较：仅周期/注释/其他PLC变化且本PLC定义不变可继续；定义变化/代次变化的受影响轮暂停，等后端另行明确采用及原raw-only窗口，不能按revision UUID大小抢占latest。
+
+公开ReceiptData/ReadBase**没有storageEpoch/adoptionId字段**，latest只有bindingRevision、cursor为opaque。DAA可冻结已知targetId/来源资料、已观察bindingRevision变化与响应矛盾，暂停受影响队列要求复核；不能发明HTTP字段或宣称自动识别同URL悄然换库/恢复备份/重置采用。计划目标变更必须先停传并核原未决投递；未被告知且外部抹掉证明的静默换库风险保留，由运行交接和目标持久性约束承担。
+
+### R13. 时间、值与期限
+
+本地原采集/保存毫秒+08:00事实保持，服务端返回最多9位小数按原精度保存；UI默认上海`YYYY-MM-DD HH:mm:ss`，诊断才展开精度。重试deadline/周期使用单调时钟，持久nextAttemptAt为上海日历时间；重启时重建有限剩余等待并限制1..300秒，不用系统TZ决定业务时间。sourceSeq排序与原observedAt/HTTP到达时间独立。
+
+后端raw/latest默认最多三自然月（可1/2月），每点从原observedAt起算；原样本按最早成员保守到期，latest按点到期；120天最小证明不含原值、不续期。DAA本地retentionDays不自动等同后端期限，不修改旧时间/重采作为补传。后端拒绝过期不授本地删除权；本r1没有“过期后自动丢弃待传”功能。服务端clock_invalid或原未来时间拒绝只能诊断，不将源时间替换成接收时间。
+
+### R14. 重启恢复与单实例
+
+沿用原profile独占锁及StoreHandle串行队列，upload worker只有一个；UI重复点击开始/继续幂等，不产生第二worker。启动重读v3投递状态，prepared保留原文；inflight→unknown；已持久完整receipt与sample_delivery原子核对后不重复派发；冲突/缺列/不完整batch不猜测修复，保持需处理。
+
+恢复读取只做有界索引扫描，每页100batch/part，不能加载整个历史或重新创建所有batch。目标/成员/原文SHA不一致即暂停受影响记录。即使上次running、采样意图或旧env开关存在，启动仍停传/停采；用户显式继续后再发。崩溃点覆盖：冻结前、冻结commit后、inflight标记后、HTTP发送后无回执、得到回执未写库、ACK事务中、ACK commit后但UI未收到结果；每一处重启都恢复同一身份或已确认状态。
+
+## 8. R15–R16：页面、IPC与日志
+
+### R15. 保持CU布局，最小可用交互
+
+一级工作台/配置中心，二级仍为PLC配置、点位与采集组配置、上报与存储。工作台新增独立“上报运行”卡：目标摘要、停止/上传中/退避/不确定/需处理、待传/已确认/需处理数、最近可靠确认时间、开始/暂停/继续；原PLC控制不变。无需在多个配置页来回找运行按钮。
+
+上报与存储页：上报设置卡（origin、周期、已核目标引用，保存/读取测试/只读包预览）、队列摘要和需处理列表、本地历史与现有存储策略折叠。编辑目标/详细回执/原包预览采用弹窗；不把完整JSON和编辑区堆在列表下。普通行默认20条、可10/20/50，后端有界分页；拖拽列宽/最小列宽/横滚/本机稳定字段偏好/恢复默认使用已有公共工具。明暗、ZH/EN、窄窗间距和弹窗可达均需增量检查。
+
+样本详情继续顶部摘要+点位结果表+折叠格式化JSON。新投递详情只追加关联batch/片/ACK/重试原因，原payload/manifest/context与SHA不变；“已确认”只来自本地原子ACK，historical_committed明确“历史提交已确认，原值已到期”，unknown明确“结果待核实”。采集日志与上传日志分开入口/筛选，不做每点滚动刷屏。
+
+新增具名IPC固定：`daa_get_delivery_settings`、`daa_save_delivery_settings`（expectedRevision CAS）、`daa_get_delivery_snapshot`、`daa_set_delivery`（显式start/pause/resume）、`daa_preview_delivery`（原轮只读/有界）、`daa_test_facts_endpoint`（仅GET）、`daa_list_deliveries`、`daa_get_delivery`、`daa_get_facts_source_material`。参数deny_unknown_fields、UUID/数量/字符串上限及原profile能力门禁；没有任意URL请求/SQL/文件执行、人工ACK或删队列IPC。现有IPC envelope=1，新增DTO有明确schemaVersion；Bootstrap.uploadAvailable改为能力布尔，不代表正在上传或后端已就绪。
+
+### R16. 可追溯但有界的日志
+
+复用既有stdout/持久JSON Lines日志与32MiB保留，不新增daemon/日志平台。稳定事件包括delivery_prepared/started/acknowledged/retry_scheduled/unknown/rejected/blocked/recovered/paused；只记录受控batch/sample/cycle/targetId、digest、计数/状态/耗时/稳定errorCode，不记录值、完整请求/context、origin中私密路径、父token/HMAC/凭据、SQL。常规无变化轮询不逐条落盘；事件500条和文件轮转各自有界。日志失败仍沿原安全门禁，不把日志成功当ACK，也不把已提交ACK称回滚。
+
+## 9. 实施顺序、分工与必要验证
+
+| 步骤 | Development未来工作 | 验证/门槛 |
+| --- | --- | --- |
+| P0 | 固定本spec批准、provider pins/源码、交付树diff和原v2保护边界；确认A0/A1范围。 | Pin不一致或超allowlist先返PM；不读取真实profile验证“没有被改”。 |
+| P1 | pf-json无损表示、SHA/固定片/完整轮/请求及ACK纯合同；HTTP adapter替身接口。 | 独立provider vectors全对；非法/大小/precision反例；无HTTP/DB。 |
+| P2 | 新空runtime v3、六表/配置CAS、同库冻结/ACK/引用、容量恢复与单worker状态机。 | 仅另明确批准的A1合成目录；v2格式原表/原串/状态逐项守恒；故障后无半ACK。 |
+| P3 | 单目标HTTP、3:1最新/补传、unknown原批恢复/拒绝派生、启动停态与IPC/CU/i18n。 | 传输替身覆盖网络/响应矩阵；需要真实loopback listener也转B批准，不借“mock”名义先监听。 |
+| P4 | 中英文阶段C手册和DEV精确handoff；新的fresh-context Verification核A0/A1。 | 沿用未变阶段B证据，只跑受影响存储/启动/样本/前端测试；A-only不代表阶段C完成。 |
+| G-B | 提交精确操作提案；后端责任方按已验收代码准备持续HTTP目标，Owner明确批准。 | 无批准不连接/探库/建库/开Docker/操作DS；记录target/source/合同与资源生命周期。 |
+| P5 | Owner按手册做最短原生链路，Development闭库核账；独立Verification消费双方候选和实际证据。 | 完成AC18–AC20与全部前置后才交Owner阶段C终验；必要返工后新的fresh QA。 |
+
+后端负责部署/准入/schema/时间/source采用与事实查询；DAA负责原样本到可靠本地确认。DS只提供受控S7数据。SMA以后负责事实到业务映射及业务ACK，当前没有SMA checkpoint/outbox、业务表写入或页面业务展示验收。
+
+## 10. 精确候选allowlist与排除
+
+**本轮PM唯一写入为本spec。** 主协调可机械同步DAA的PLAN.md/PLAN.zh-CN.md和plans/README.md/README.zh-CN.md四处draft索引。下表是批准后有限实现面，不授权此刻修改；花括号仅展开所列名字。
+
+| 相对DAA根的路径 | 未来责任/有限修改 |
+| --- | --- |
+| `plans/DAA-008-reliable-facts-upload/spec.md` | PM/Human Owner范围、批准与Revision。 |
+| `plans/DAA-008-reliable-facts-upload/tasks.md` | 批准后Development创建，自检/完整diff/资源/hand-off。 |
+| `plans/DAA-008-reliable-facts-upload/checklist.md` | developer_handoff后fresh Verification创建，分A/B结论与Owner验收。 |
+| `src-tauri/Cargo.toml`、`src-tauri/Cargo.lock` | 仅reqwest0.13.4直接依赖/必要feature及serde_json无损解析feature；实际锁diff审计，无批量升级。 |
+| `src-tauri/src/domain/{mod,local_runtime,local_delivery,facts_wire,facts_canonical}.rs` | DTO/纯合同/状态；不修改local_sample或点位/命名/共享导入核心。 |
+| `src-tauri/src/infrastructure/{mod,facts_http}.rs` | HTTP adapter及其模块注册；无直库、旧CA或任意执行。 |
+| `src-tauri/src/infrastructure/local_store/{mod,schema,runtime,capacity,delivery,delivery_tests,time_contract_tests,tests}.rs` | 显式新空v3、v2/v2兼容、投递事务/引用/容量、必要单元夹具；runtime原payload/seq/manifest写入和旧清理条件原样。 |
+| `src-tauri/src/infrastructure/local_store/README.md`、`README.zh-CN.md` | 精确v2/v3矩阵/表与事务边界，不混写任务证据。 |
+| `src-tauri/src/services/{mod,local_supervisor,local_queries,local_delivery}.rs` | 唯一worker生命周期/快照/有界调度/退出；不改PLC协议或新建第二采集actor。 |
+| `src-tauri/src/commands/{mod,local_acquisition,local_delivery}.rs`、`src-tauri/src/lib.rs` | 新具名IPC/能力DTO及注册；原PLC门禁/旧入口拒绝不变。 |
+| `src-tauri/src/domain/facts_canonical_tests.rs`、`src-tauri/src/services/local_delivery_tests.rs`、`src-tauri/src/infrastructure/facts_http_tests.rs` | 新公开行为/向量/状态/响应/传输替身测试，通过模块cfg(test)注册；不生成生产fixture fallback。 |
+| `src/services/localAcquisition.ts`、`src/services/factsDelivery.ts`、`src/console/composables/useLocalAcquisitionConsole.ts` | 新DTO/IPC facade/状态接线；HTTP不放浏览器，不保存业务真相到localStorage。 |
+| `src/app/collection/views/storage/index.vue`、`src/app/runtime/views/overview/index.vue` | 既有两页增加真实上传卡/设置/队列；PLC/点位编辑页不扩功能。 |
+| `src/components/console/{FactsDeliveryPanel,FactsDeliveryDialog}.vue`、`src/components/console/LocalSampleDetail.vue`、`src/components/shell/AgentTopbar.vue` | 有限上传组件、弹窗、原详情附加关联及能力/状态显示。 |
+| `src/console/{tableWidths,types}.ts`、`src/styles/app.css`、`src/locales/{en-US,zh-CN}/common.json` | 复用公共列宽/最小间距和对称文案，只限上传触达面。 |
+| `tests/facts-delivery.test.mjs`、`tests/sample-details.test.mjs`、`tests/time-and-history-preferences.test.mjs` | 上传可见交互及触达详情/时间/列宽的必要增量断言，不复制实现做镜像测试。 |
+| `README.md`、`README.zh-CN.md`、`STAGE_C_GUIDE.md`、`STAGE_C_GUIDE.zh-CN.md` | 当前能力及分门禁操作手册；原阶段B JOINT_TEST_GUIDE pair保留。 |
+
+主协调独立拥有上述四处DAA本地PLAN/catalog机械同步；根CODE_INDEX.md只在实际新增结构后由Development按自有段最小同步。除此不改根设计/合同、后端/DS/SMA/FF、旧task bundle、AGENTS/skills/workflow/角色、Tauri启动feature/构建入口、pnpm依赖、旧直库writer/权限、真实env或profile。新路径必要性/主要风险/验收超出此表时，返PM修订并重新取得精确批准。
+
+排除自动启动/自启恢复采集、后台服务/daemon、OS调度、生产清理SLA、真实PLC/现场切换、打包签名/发布部署、生产DB迁移、旧profile升级/历史上传、任意目标JSON映射、SMA业务投递、跨后端队列迁移、多目标/多HTTP并发、客户端身份认证平台、Celery/Redis/Python Worker、Git commit/push/tag/分支发布和外发消息。
+
+## 11. 运行提案与Owner试行手册要求
+
+### 11.1 A1有限合成SQLite操作提案（待明确批准）
+
+此提案是本r1可审阅部分，**现在不执行**。若Owner批准时明确包含它，只允许Development/Verification各自在新建`/private/tmp/daa-008-r1-a-<随机后缀>/`私有目录中创建全新合成v2/v3 SQLite、启动本任务单测子进程并注入本地故障；不运行完整GUI/DS/HTTP监听、不连接MySQL、不执行Docker。所有绝对数据库路径先canonicalize且拒绝symlink/既有文件，夹具从公开结构和合成值生成，不复制/读取用户profile、原8590样本或.env。
+
+允许检验明确新文件的建库/读写/BEGIN/commit/rollback/崩溃恢复/配额计量/删除本任务合成夹具；不能把“SQLite单测”扩大为访问应用默认路径。任务记录须固定目录、应用/运行版本、argv、退出码、before/after原串/表摘要；结束子进程无连接，必要证据持久化后按归属回收可再生物。若Owner只批准A0源码，则A1保持pending，缺少真实本地事务证据不记通过。
+
+### 11.2 B操作提案的必需字段（当前不选目标）
+
+A候选固定后，在tasks中向Owner提交一个具体、可审阅的操作提案，至少列：新隔离DAA profile绝对路径与不得存在旧数据的前置；后端候选/三机器合同SHA、专用MySQL8.4.6实例alias/schema/账号/最小权限/端口、schema精确revision及F7/时区/retention、source采用计划/seq边界；API绑定地址/监听进程/目标origin；受控DS实例ID/端口/版本/合成值；Docker镜像/容器/卷/网络精确新名称与归属、创建和清理动作；故障注入/响应丢失/停止恢复范围；凭据不公开；保留证据/profile与资源收尾条件。
+
+如复用已运行DS或已有后端目标，只读检查也须按具体批准，不能因为Owner曾同意阶段B而重新操作同实例。本任务不重建BE009已回收的QA容器或恢复其口令。实际schema/时间/source采用由后端责任方实施和交接，DAA不增后端写面。没有上述具体批准就停留于A-only交接，阶段C联调未完成。
+
+### 11.3 未来最短手动步骤与证据
+
+手册需给“开始条件/一次配置/按顺序操作/预期现象/失败停在哪里/交给谁核账”，URL和路径在B批准后填具体受控值；普通启动始终`pnpm tauri dev`。只做以下增量，不重复阶段B导入/命名/分组整套：
+
+| 步骤 | Owner手动动作 | DEV/QA应取得的证据 |
+| --- | --- | --- |
+| M01 | 用获批全新profile启动，核停止态；按手册准备最小PLC/点组及后端接入材料，不动原profile。 | 新instance/generation/seq/合同pins、后端采用引用；原运行环境没有被替换。 |
+| M02 | 保存目标/周期并GET测试；预览一轮JSON，显式开始采集与上报。 | DS已知值→本地原样本→POST→可靠ACK→本地已确认→latest/history逐项对照，覆盖BOOL false、整数0、REAL和bad/null；两PLC同DB互不串。 |
+| M03 | 在批准的方式下暂使API不可达，保持有限采集；随后恢复。 | 本地积压增长、未伪ACK；恢复首批最新、3:1历史继续；旧seq只补raw，不覆盖较新latest。 |
+| M04 | 保留积压并正常Cmd+Q退出；同新profile重开，不点任何运行按钮，查看历史/队列；然后显式继续。 | 重开无自动采集/上传，原payload/manifest/context/ID/SHA及冻结batch不变；继续恢复同身份，确认后不重复落事实。 |
+| M05 | 打开任意上传/需处理详情，按手册查询后端核对；结束后正常退出。 | 完整身份/值/质量/观察/保存/提交时间/摘要、完整轮、队列和后端事实账闭环；真实错误和未覆盖项如实保留。 |
+
+丢ACK、ACK本地事务失败、进程崩溃位置、409/混合拒绝/父token、120天证明与三自然月截止、32片大回执、竞争/分页/容量等难稳定手工制造的情况由必要自动化承担；不要求Owner重复点击数轮同一功能，也不靠口头“正常”代替双方数据账。
+
+## 12. 编号验收标准与证据归属
+
+以下均为未来要求，本次没有实施或测试通过记录。每项在tasks列真实命令/输入/退出码，在checklist由独立角色记录pass/fail/blocked；失败历史保留，参数/allowlist/主要风险变化返PM。
+
+| AC | 需证明的结果 | 最小验证面/关联 |
+| --- | --- | --- |
+| AC01 范围与来源 | owner_accepted后端pins/版本/路由和本spec一致，STD实际角色/阶段门禁真实；本轮只spec。 | 静态SHA/本地链接/metadata；R01/第2节。 |
+| AC02 既有数据保护 | 未发现/读取/复制/挂载/升级真实profile或env；真实旧库schema/历史/状态不受本任务操作。 | 路径guard+仅合成v2的配置/原样本/ID/seq/delivery/表结构before-after；原有正常启动/退出lifecycle变化单列，不误称整个SQLite文件在打开后字节不变；R01/R02。不能用打开真实库去证明未打开。 |
+| AC03 双库版本 | 新空config2/runtime3正确；合成v2/v2保留本地能力且无投递DDL/上传，未知/半库/时区/WAL/symlink/身份异常拒绝。 | A1新夹具/崩溃preflight，user_version/metadata/schema_migrations/表集合；R02。 |
+| AC04 原材料与数值 | 原文三SHA/关联完整，中文key/name、missing nameMode、整数0/false、REAL边界/长十进制/指数/负零及9位时间不变义；坏值完整。 | provider vectors+独立lexical预期，禁止同一canonical实现生成唯一oracle；R03/R04/R13。 |
+| AC05 固定片与限额 | 两PLC同DB/跨DB同轮、全manifest/片集合、512点/128KiB/16片/4MiB边界成立；单context/最小包超限blocked且其他PLC继续。 | 纯构建+替身和A1持久冻结；不裁剪/重写原文；R03/R04。 |
+| AC06 冻结与幂等 | batch成员/原请求bytes/digests/创建时间仅冻结一次；同片不能进入两个未终结批。 | 原字节重发/重启/唯一约束，后端B duplicate无新增事实；R08/R10。 |
+| AC07 调度公平 | 最新优先首批、3:1历史机会、各PLC轮询、采集周期独立、单HTTP在途/最多8冻结批，存储/UI/采集不等网络。 | 注入单调时钟+有限负载/慢传输，无长时间sleep；R05–R07。 |
+| AC08 严格ACK | 状态/媒体/完整壳/版本/身份/各片摘要/完整成员/轮次都匹配才确认；合法重复/历史确认可用，HTTP200错壳/缺片/多片/截断不成功。 | 完整typed正反响应矩阵、8MiB上限与最坏合法32片回执；R09/R11。 |
+| AC09 本地原子确认 | receipt/parts/sample_delivery/references同事务全成或全不成，原样本原文/ID/SHA不变；全片确认不等于当时cycle.complete/qualityGood。 | A1真实SQLite故障/重开，部分片确认及历史partial ACK；R02/R09。 |
+| AC10 unknown恢复 | 无响应/commit后丢ACK/本地ACK失败/崩溃均保原batch恢复，空history/缺latest不能标未提交或确认成功。 | 替身+A1崩溃矩阵，B原POST已提交再丢响应后同receipt恢复；R08–R10。 |
+| AC11 拒绝与过窗 | 错误完整分类；可靠拒绝才同成员子集派生，unknown父禁止，token换key仍按provider恢复；proof/父/24h过窗不假ACK、不删材料。 | 合成403/409/410/413/415/422/429/503/500及父深度8边界；B有限代表例；R10/R11。 |
+| AC12 容量与保留 | 请求/ACK/metadata/journal计物理预算，32MiB确认预留；高水停采/新冻结但允许恢复；IO失败unknown；有引用/pending/unknown历史不清。 | A1空间meter与真实SQL故障/rollback、合法大ACK/恢复、fresh-profile已确认有界清理；R07。 |
+| AC13 目标与source | 设置CAS/不随采集版本改写；未决不能换目标；受影响定义/source变化暂停，未知静默换库不能声称自动检测。 | 设置竞争/同URL风险说明/无新增wire字段；B target/source采用交接；R02/R12。 |
+| AC14 启停/重开 | start/pause/resume幂等单worker，正常/异常退出无半批；重开始终停采停传，原批原样待显式继续。 | A1逐崩溃点+M04，退出后无自有HTTP/线程/锁占用；R05/R14。 |
+| AC15 CU与文案 | 两页最小真实控件、弹窗间距、默认20条/分页/公共列宽记忆、ZH/EN与明暗窄窗可用；详情原文/SHA保持。 | pnpm build/新增Node行为断言、必要视觉与Owner M05增量；R15。 |
+| AC16 安全边界 | 仅Rust固定三API，URL无凭据/query/任意路径、标准TLS/无redirect；无MySQL/PLC新行为/业务映射/认证改造/自动启动。 | adapter/IPC guard正负例、源码allowlist、浏览器无桥门禁；R04/R12/R15。 |
+| AC17 日志与真实交接 | 有界JSON Lines/稳定key/时间语义，token/值/body/DSN无泄漏；正式交付树与验证候选一致、资源归属清楚。 | 相关编译/测试/JSON/i18n/link/diff结果；R16/第10节，DEV self-check不充QA。 |
+| AC18 真实正常事实链 | 具体B批准后，Owner原生DS→DAA→SQLite→真实HTTP→后端独立facts七表→latest/history及本地ACK逐项一致。 | 固定双方候选/目标/真实请求响应摘要、完整轮、值/quality/time/ID/原SHA；M01/M02/M05。 |
+| AC19 真实补传与重启 | API不可达缓冲/恢复最新先行并历史补传；较旧结果不倒灌latest；积压退出重开原文/冻结身份不变且不自启，继续不重复事实。 | M03/M04与闭库前后双方完整数据账；新增样本区间单独固定，不补造早期基线。 |
+| AC20 完整阶段C终验 | A0/A1/B各有实际证据，新的fresh Verification覆盖确切候选，所有必需finding关闭或按Owner决定记录；Owner最后接受受控范围。 | A-only/B未批时明确整体未完成；生产/长期SLA/真实PLC/SMA/自动启动仍另项。 |
+
+建议未来命令：Cargo `fmt --check`、`test --locked`仅本新增canonical/delivery/storage受影响模块，Node仅facts-delivery/sample-details/time-and-history-preferences三文件及`pnpm build`。实际完整argv、features/环境/新目录和退出码由DEV固定后交QA；合成SQLite/监听门禁与第3/11节一致。无必要不重跑整个阶段B、后端A/B或DS整套，已有测试失败按entry/本次差异如实归因，禁止削断言、allow(dead_code)掩盖或用skip冒充通过。
+
+## 13. 风险、回退、开放门禁与PM交接
+
+| 风险/限制 | 本r1决定与回退 |
+| --- | --- |
+| 新profile限定 | 原v2配置/历史不能直接上传；这是本次数据保护范围的明确代价。后续旧profile升级/旧历史投递另出spec，不能称当前支持。 |
+| v3旧二进制兼容 | 旧程序将拒绝runtime3；不回写版本或降级DDL。代码回退使用保留的原v2 profile/原已接受版本，新v3原样保留供恢复，部署回滚另批。 |
+| 原context/样本过大 | blocked并保持原件；其他PLC继续。需要缩小将来的采集配置或新provider版本时另审，不改已持久材料。 |
+| 有限proof/目标持久性 | 120天后、外部丢证明或同URL静默换库可能无法再证明旧提交；保留needs_review，不承诺无限exactly-once/自动对账消除一切未知。 |
+| 长断网与磁盘耗尽 | 只在有限quota/恢复预留下继续；满盘暂停，不删未确认数据。真实底层IO故障仍可让ACK未知。 |
+| 匿名集成 | producer/plc/source为声明可被冒用；本次按Owner已选匿名边界使用，不以client字段当认证，网络部署另批。 |
+| 后端全局门闩/有界预算 | 首版单在途降低压力；真实吞吐靠B有限数据证明，不外推长稳或现场规模。 |
+| 脏工作树/临时副本 | 默认直接改正式DAA源码工作树，按文件/段审计并保留他人修改；用临时验证副本时交付前必须核一致，不能把成果仅留tmp。 |
+
+源码回退只识别本任务自有增量，保留所有新profile投递事实/ACK，不reset共享树、不删已确认/未知材料。临时源码/缓存/构建产物有任务归属、保留原因及清理触发；最终必要结果持久到tasks/checklist，Owner接受后只回收无运行/后续/证据依赖的自有可再生资源。**已有SQLite配置、历史及阶段B联调profile始终保留。**
+
+待Owner决定的门禁只有：精确r1 A0范围；是否一并明确允许第11.1节有限合成SQLite验证；后续具体B操作提案；完成后的阶段C最终验收。技术算法、版本矩阵、重试/响应/容量预算已在本文给定，不推给编码时临时决定。若Owner希望本轮直接上传旧历史、自动启动、多目标或新增后端协议，属于实质范围变化，先修订spec。
+
+后续技能路由：治理/范围使用aiis与project-governance；Rust runtime/SQLite/HTTP worker使用rust-runtime，桌面入口/IPC使用desktop-tauri；Vue/CU/样式使用frontend-ui，文案使用i18n-workflow，真实结构索引使用code-document-indexer；协议对账仅消费现有S7能力，必要时plc-point-mapping；实际B涉及后端采用由后端责任方使用backend-arch，Docker确实获批后才用docker-expert/docker-project-ops。PM不替Development/Verification执行上述技术工作；本profile为contract_only，不宣称平台ACL/自动路由或团队激活。
+
+| 日期/Revision | 真实事件与效力 |
+| --- | --- |
+| 2026-11-05 r1 | Owner确认BE009/BE010已最终验收并授权本轮按STD先出阶段C实施spec；实际PM起草本draft。未批准本spec正文/代码、合成SQLite或B环境/数据库/Docker操作。 |
+
+本轮PM只读公开源码/合同和已存在任务记录，机器JSON以stdlib完整解析并核版本/路径/摘要，未导入项目、未读真实.env/数据库、未运行产品测试/编译/HTTP/DS/Docker或安装依赖。任务目录当前只创建spec，不预建tasks/checklist，不把规格自检称独立QA。主协调下一步提交**DAA-008 r1**给Human Owner审阅；取得明确阶段批准后才选择实际Development，developer_handoff后启动新的fresh-context Verification；本spec最终SHA及文档自检结果由外部handoff报告，避免自引用。
+
+### PM文档自检记录（非Development/独立QA）
+
+2026-11-05，在仓根以stdlib `python3 -B -`执行本spec专用检查，真实exit0：身份/状态/角色/STD元数据、11个本地链接及显式anchor、13项文件SHA、3份provider机器JSON完整解析、13张表139行列数、AC01–AC20顺序、UTF-8/行末空白及目录仅spec均符合。随后`git diff --check -- automation-world/data-acquisition-agent/plans/DAA-008-reliable-facts-upload/spec.md`真实exit0；新未跟踪文件正文空白由前述stdlib直接检查，未以Git忽略新文件冒充验证。检查不导入或执行项目，无真实数据/数据库/HTTP/设备副作用。
+
+## 14. r1精确批准收据与A0/A1交接（2026-11-05）
+
+Human Owner对精确`aiis-ics-arch::DAA-008 r1`的明确原话，由唯一主协调`/root`转交本实际PM登记：
+
+> 批准 DAA-008 r1，按 STD 完成 A0 源码实施及第 11.1 节有限合成 SQLite 验证，并完成对应独立核验。已有 SQLite 配置、历史及原联调 profile 不迁移、不清理、不覆盖，只做必要增量验证，不重复阶段 B 整套测试。实际 HTTP／DS／MySQL 联调环境及 Docker 操作另提具体方案批准；自动启动策略、旧历史上传、SMA 和真实现场验证暂不做。完整阶段 C 待实际联调及最终验收后再确认完成。
+
+批准对象是本次登记前完整`Revision: r1 / Status: draft`正文，SHA-256为`f407532ff91d8ec5aa8df4d1cfaad4ca99700dc2095a1ebeba816d75f2f0e3e2`。本实际PM写入前已完整读入并核对正式spec与主协调before原件均匹配。登记仅修改顶部Status/Handoff并追加本收据，**原r1全部正文、需求、版本/参数、allowlist、AC及风险保持原字节**。前文“当前草案”“未批准”“待Owner决定”等保留为获批原稿的起草时点事实；当前批准效力以本收据及顶部状态为准，不回写历史。
+
+现已明确通过的范围门禁为：第3节A0源码与纯检查，及第11.1节限定的A1新建私有临时目录/合成v2与v3 SQLite验证。A1仅可使用本任务从零生成的合成夹具与已列故障/容量/恢复动作；不读取、复制、挂载、迁移、清理或覆盖任何既有SQLite配置、历史或原联调profile。原schema/样本/回执保护、必要增量验证和不重复阶段B整套的限制持续有效。
+
+**B仍未批准。** 实际HTTP或loopback监听、DS/MySQL联调目标、数据库/schema/source采用及Docker资源/故障/清理操作必须另提第11.2节具体方案并批准；不能从A0/A1批准推断该运行授权。自动启动策略、旧历史上传、SMA、真实PLC/现场及生产部署继续排除；A0/A1实施或核验通过均不把完整阶段C记为完成。
+
+下一实际角色为Development：在本spec原有限allowlist内创建自己的tasks.md，记录正式交付树、精确实现/命令结果、A0/A1输入/副作用边界、已知限制与资源归属；形成developer_handoff后，由唯一主协调启动新的fresh-context Verification。当前没有Development完成、独立QA或Owner最终验收结果，本PM不预建tasks/checklist，不代其书写事实，不另开notifier或执行产品/数据库/网络动作。后续完整阶段C仍须获批实际联调、相应独立核验及Human Owner最终确认。
+
+本次批准登记使用aiis/project-governance核对范围与角色归属，并复读根AGENTS/README/PLAN、最近DAA文档、workflow/pm角色及完整原spec。stdlib文件比较/哈希、metadata、链接/空白与恢复原稿检查，以及本文件`git diff --check`均用于文档自检，不冒充Development检查或独立QA。登记版最终SHA及精确差异检查结果在handoff输出固定，避免本文件自引用。

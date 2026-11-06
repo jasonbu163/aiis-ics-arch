@@ -6,9 +6,9 @@ English version: [ROADMAP.md](ROADMAP.md)
 
 本路线描述 PW、AW、AIW 的目标职责，以及保留稳定基线、逐步到达目标的能力阶段。它是发展方向，不表示目标应用、数据表或部署已经存在。
 
-当前源码仍为 `backend/`（FastAPI/SQLAlchemy/Alembic）、`frontend-js/`（Vue JavaScript）和 `automation-world/`（Rust/Tauri）。冻结 CAF 兼容源码路径采集、解码 PLC 数据，直接写入后端拥有的 raw/latest 快照表，供后端 Projection 框架消费。新 DAA 的本地 SQLite 基线见下方状态快照。公开模板不代表已包含客户业务 Handler，也不证明真实 PLC 链路正在运行。
+当前源码包括`backend/`（FastAPI/SQLAlchemy/Alembic）、独立`backend-dotnet/` Plan学习切片、`frontend-js/`（Vue JavaScript）、`automation-world/`（Rust/Tauri）及`field-flow/`（独立Rust/Python runtime）。冻结CAF保留原直库raw/latest→Projection兼容源码；新DAA拥有本地SQLite采集。独立plc_facts事实provider和typed业务集成入口已通过有限隔离MySQL验证，Owner终验、真实采用及DAA/SMA接线分别保留。
 
-`automation-world/control-agent/` 的既有文档记录迁移验证后冻结的旧 CA 兼容基线；新 CA 面向通用节点编排与受控执行，CAF 的精确迁移路径由对应任务核对。本次不认证迁移。DAA 已从冻结 CA 继承独立工程，SMA 已从 `data-twin-backend`（DTB）Twin State Studio（TSS）过滤复制通用 HTTP 映射工程，原 TSS 保留。工程初始化和 no-I/O 原生启动由 [ARCH-AW-001](plans/ARCH-AW-001-agent-foundation/spec.md) 跟踪；独立 QA/最终验收以该 bundle 为准。CU 共享 UI 源码已交付，DAA 已接入其布局；SMA/CA 接入仍由各自任务处理。新 AW API、DAA 上传/确认/补传及业务闭环仍是目标，下方状态快照区分已有源码与这些目标。
+[ARCH-AW-001](plans/ARCH-AW-001-agent-foundation/spec.md)记录原CA迁入冻结及DAA/SMA初始化历史。DTB TSS仍是SMA来源，不再是当前配置权威。SMA-002职责清理、003 CU接入已获Owner接受；004本地SQLite配置/纯预览通过QA2，正常单次/持续投递关闭、最终验收待定。DAA和SMA已消费CU公共源码，新CA接入仍是规划。[DAA](automation-world/data-acquisition-agent/PLAN.zh-CN.md)、[SMA](automation-world/semantic-mapping-agent/PLAN.zh-CN.md)、[FF](field-flow/PLAN.zh-CN.md)及provider任务分别拥有精确范围；源码或有限QA不证明真实现场链路已运行。
 
 | 文档 | 职责 |
 | --- | --- |
@@ -28,7 +28,7 @@ English version: [ROADMAP.md](ROADMAP.md)
 | 领域 | 拥有的职责 | 当前过渡与目标 |
 | --- | --- | --- |
 | PW | 业务模型、用户与权限、业务规则、事务、业务 API | 现有 FastAPI 业务继续属于 PW；未来目标为 C#/.NET/ASP.NET Core + FastEndpoints |
-| AW — Automation World | 采集、现场事实、语义映射；后续按需归档与受控执行 | 使用 Rust，复用 CAF/TSS 素材。DAA 使用本地 SQLite 配置，SMA 当前使用 Backend-held TSS 映射配置；现有 FastAPI 暂承 AW API 合同，新上传/持久意图链与 AWB/Axum 仍按后续任务推进。 |
+| AW — Automation World | 采集、现场事实、语义映射；后续按需归档与受控执行 | 使用 Rust，复用 CAF/TSS 素材。DAA 使用本地 SQLite 配置，SMA拥有本地SQLite配置快照，当前阶段关闭正常投递。FastAPI事实/业务provider已通过隔离QA；DAA上传、SMA投递、持久意图链及AWB/Axum仍按各自实施/采用gate推进。 |
 | AIW | 模型、分析、推理与建议 | Python/FastAPI；由 PW 业务规则和授权决定如何采用其输出 |
 
 三界首先是职责边界，不强制三个仓库、立即独立部署或同时迁移语言。Python 业务代码不会因使用 Python 自动成为 AIW；AIW 也不直接取得现场动作权。
@@ -37,7 +37,7 @@ English version: [ROADMAP.md](ROADMAP.md)
 
 ### 2.1 三界架构总图
 
-**状态快照日期：2026-10-21。** PW 负责业务规则与授权，AIW 提供分析与建议，AW 负责采集、映射与现场执行。总图按职责组织，不强制目录、仓库或部署拆分。
+**当前快照日期：2026-11-05。** 2026-10-21旧快照及其QA保留在[ARCH-MULTI-002](plans/ARCH-MULTI-002-three-worlds-diagram-sync/spec.md)，此处依据后续任务证据更新当前视图。 PW 负责业务规则与授权，AIW 提供分析与建议，AW 负责采集、映射与现场执行。总图按职责组织，不强制目录、仓库或部署拆分。
 
 本图实线表示已有源码中的职责关系，虚线表示规划、尚未接通或需要各应用分别接入的关系；均不代表真实现场链路已验收。绿色为已有源码基线，橙色为整体仍在开发/验证中的应用，紫色虚框为后续规划。具体范围和验收以 §2.2 来源任务为准。
 
@@ -45,7 +45,7 @@ English version: [ROADMAP.md](ROADMAP.md)
 flowchart TB
     subgraph PW["人界 · PW / Platform World"]
         WEB["业务管理台 · 已实现底座<br/>Vue / 模块 / 角色权限"]
-        BIZ["业务 API / Service · 已实现底座<br/>规则 / 事务 / 业务状态 / 任务授权<br/>当前 FastAPI；.NET 为后续方向"]
+        BIZ["业务 API / Service · 已实现底座<br/>规则 / 事务 / 业务状态 / 任务授权<br/>当前FastAPI及隔离集成QA<br/>独立.NET Plan学习切片已通过QA"]
         BDB[("PW 业务数据库")]
         WEB --> BIZ --> BDB
     end
@@ -54,16 +54,18 @@ flowchart TB
     end
     subgraph AW["天界 · AW / Automation World"]
         subgraph APPS["三个独立应用 · 各自 Tauri / Vue + Rust Runtime"]
-            DAA["DAA · 开发中<br/>已实现本地 SQLite 配置与采集基线<br/>持续读取 / 解码 / 质量 / 样本"]
-            SMA["SMA · 已实现兼容基线<br/>TSS 事实到 POST / 顺序调度<br/>Backend-held 映射配置"]
+            DAA["DAA · 受控DS范围本地阶段B已接受<br/>SQLite / 读取 / 质量 / 样本<br/>上传与ACK未接通"]
+            SMA["SMA · 本地配置与纯预览<br/>CU已接入；SQLite通过QA2<br/>正常投递关闭"]
             CA["新 CA · 后续规划<br/>通用节点 / 条件 / 版本 / 上下文<br/>内部连接器 / 受控执行"]
         end
-        FACT["AW 事实 API / 存储 · 待接通<br/>近期 FastAPI 承接；后续按需 AWB"]
-        CU["CU · 已实现共享 UI<br/>布局 / 主题 / 组件<br/>DAA 已接入；SMA/CA 后续接入"]
+        FACT["事实provider · 源码及隔离MySQL QA通过<br/>Owner终验和真实采用待定"]
+        CU["CU · 已实现共享 UI<br/>布局 / 主题 / 组件<br/>DAA/SMA已接入；新CA后续"]
         MGMT["AWB + AWC · 后续规划<br/>Axum 管理接口 + 中央控制台<br/>登记 / 健康 / 配置发布"]
         DAA -. "上传 / 确认 / 补传" .-> FACT
         FACT -. "HTTP 事实读取" .-> SMA
-        CU -. "构建时源码复用 / 分别接入" .-> APPS
+        CU -->|构建时UI源码| DAA
+        CU -->|构建时UI源码| SMA
+        CU -. "未来接入" .-> CA
         DAA -. "登记与健康" .-> MGMT
         SMA -. "登记与健康" .-> MGMT
         CA -. "登记与健康" .-> MGMT
@@ -79,23 +81,24 @@ flowchart TB
     classDef existing fill:#eaf7ef,stroke:#5b9670,color:#204b30;
     classDef developing fill:#fff4df,stroke:#ba862e,color:#624617;
     classDef planned fill:#f5f0fa,stroke:#9875b4,color:#52376a,stroke-dasharray:5 4;
-    class WEB,BIZ,BDB,SMA,CU existing;
-    class DAA developing;
-    class AI,CA,FACT,MGMT planned;
+    class WEB,BIZ,BDB,FACT,CU existing;
+    class DAA,SMA developing;
+    class AI,CA,MGMT planned;
 ```
 
 ### 2.2 当前已实现、开发中与后续规划
 
-“已实现”仅说明对应源码或有限基线已存在，不自动表示整阶段验收、现场验证或部署完成。状态会随所属任务变化，本表保留上述日期的快照。
+“已实现”仅说明源码或有限基线存在，不自动表示整阶段验收、现场验证或部署完成。本表是上述日期的当前视图，依据所属任务更新；此前日期快照和验收保持历史效力。
 
 | 部分 | 状态 | 当前边界与后续门槛 | 来源 |
 | --- | --- | --- | --- |
-| PW | 已实现底座；技术栈迁移为后续规划 | 当前 FastAPI + Vue 继续承载业务；.NET/FastEndpoints 后续单独迁移 | [根 README](README.zh-CN.md)、[当前 PLAN](PLAN.zh-CN.md) |
-| DAA | 已实现本地基线；整体开发/验证中 | 本地 SQLite 配置、采集、历史和导入已有实现；阶段 B 整体未关闭，DAA–DS S7→SQLite 联调另批；上传/确认/补传尚未接通 | [DAA README](automation-world/data-acquisition-agent/README.zh-CN.md)、[DAA PLAN](automation-world/data-acquisition-agent/PLAN.zh-CN.md) |
-| SMA | 已实现 TSS 兼容基线；专用工作台演进为后续规划 | 当前 Backend-held 映射配置、HTTP 事实→POST、逐项调度；任意 HTTP 源、逐行常驻、本地 SQLite/可靠 outbox 等另立范围 | [SMA README](automation-world/semantic-mapping-agent/README.zh-CN.md)、[三应用路线](plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design) |
-| CU | 已实现共享源码与工作台 | DAA 已接入布局；SMA/新 CA 接入分别推进。构建后各应用运行自身产物，无需 CU 在线 | [CU PLAN](automation-world/console-ui/PLAN.zh-CN.md)、[DAA PLAN](automation-world/data-acquisition-agent/PLAN.zh-CN.md) |
-| DS | 开发中：产品 MVP 收敛与独立核验 | 尚未最终验收；DAA–DS 完整应用 S7→SQLite 联调独立批准，不以 DS 局部证据关闭 DAA 阶段 B | [DS 实施任务](plans/ARCH-AW-005-ds-g0-prototype-validation/spec.md)、[当前 PLAN](PLAN.zh-CN.md) |
-| Field Flow | 后续规划；当前只有文档 | Rust/Python 两个独立现场流程程序尚无运行源码，未来可作为 CA 流程迁移来源 | [FF README](field-flow/README.zh-CN.md) |
+| PW | 已实现底座；独立C#学习切片 | FastAPI+Vue继续承载业务。BE-008计划创建/详情/列表在无登录范围通过QA2；Owner终验及迁移/采用另项 | [根README](README.zh-CN.md)、[当前PLAN](PLAN.zh-CN.md) |
+| DAA | 受控本地阶段B已获Owner接受 | DAA-001至007已接受；10月30日范围仅受控DS S7→SQLite。上传/ACK/补传未接通，后端优先、DAA后续是已选择顺序 | [DAA README](automation-world/data-acquisition-agent/README.zh-CN.md)、[DAA PLAN](automation-world/data-acquisition-agent/PLAN.zh-CN.md) |
+| SMA | 清理/CU已接受；本地配置通过QA2 | 已有SQLite单文档/revision及纯预览；004待Owner终验。正常manual/start/resume/auto-start拒绝；GET→POST及可靠runtime仍为后续阶段 | [SMA README](automation-world/semantic-mapping-agent/README.zh-CN.md)、[SMA PLAN](automation-world/semantic-mapping-agent/PLAN.zh-CN.md) |
+| CU | 公共源码和分组导航已接受 | CU-001至008已接受；DAA/SMA消费UI源码，构建产物不要求CU进程在线；新CA接入另项 | [CU PLAN](automation-world/console-ui/PLAN.zh-CN.md) |
+| DS | S7产品基线已接受 | 10月27日接受保持；10月29日DIRECT草稿/版本增量为DEV自检、人工确认待定。DAA联调接受独立；Modbus/设备调试仍为草案 | [DS README](automation-world/device-simulator/README.zh-CN.md)、[DS PLAN](automation-world/device-simulator/PLAN.zh-CN.md) |
+| Field Flow | 独立runtime源码及有限本地QA | FF-005基础案例已接受；FF-001/002及FF-004 r2 A通过本地QA、待Owner终验。Rust每PLC JSON/YAML v2及多PLC S7 int16已实现；Modbus仅结构校验，无通信。原hold_ack/旧UTC限制保留 | [FF PLAN](field-flow/PLAN.zh-CN.md) |
+| 事实/业务provider | 已实现并通过隔离MySQL QA | BE-009独立七表事实owner及BE-010八类typed业务/四新表通过A+B；默认关闭/未采用。Owner终验、实际目标采用及全链仍待定 | [事实provider](contracts/published/http-api/plc-facts-v1/README.zh-CN.md)、[业务provider](contracts/published/http-api/business-integration-v1/README.zh-CN.md) |
 | 新 CA | 后续规划；设计方向已明确 | 通用节点、版本、上下文、内部连接器及受控执行待实施；各连接器按支持矩阵验收 | [CA 流程设计](plans/ARCH-AW-006-unified-flow-agent-design/spec.md#r2-design) |
 | AW 事实上传链 | 后续规划 / 待接通 | 新 DAA 上传、接收确认、幂等补传及事实到业务闭环按各自 API/运行合同实施 | [DAA README](automation-world/data-acquisition-agent/README.zh-CN.md)、[三应用路线](plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design) |
 | AWB / AWC | 后续规划 | 先登记/心跳与只读健康，再配置发布及远程操作；心跳不代表业务完成或设备写租约 | [三应用路线](plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design) |
@@ -126,12 +129,12 @@ PLC -> 原 CA / CAF 采集/解码 -> 后端 raw/latest 快照数据库
 ### 近期目标链路
 
 ```text
-PLC -> DAA 采集/解码 -> FastAPI AW 事实 API / aw_* 最新事实
+PLC -> DAA 采集/解码 -> FastAPI plc_facts API / owner所属最新事实
     -> SMA 绑定/校验/请求组装 -> PW 业务 API
     -> 业务 Service / 业务表 -> UI；后续 AIW 按授权消费
 
 DAA UI -> 本机 Rust 配置服务 -> 自身 SQLite -> 校验/显式启用
-SMA UI -> 当前 Backend-held TSS 映射配置 / HTTP runtime
+SMA UI -> 本机Rust服务 -> 自身SQLite配置 / 纯预览（投递关闭）
 CA UI -> 目标自身版本化配置/进度；实施另立范围
 第三方 -> 本系统 API 校验/持久化 -> CA 原子领取 -> 设备下发/确认
                                       CA -> 本系统执行回执
@@ -140,7 +143,7 @@ CA UI -> 目标自身版本化配置/进度；实施另立范围
 
 业务 API 接收设备/业务身份、测量值、时间和事件等语义数据。业务 Service 不解释 PLC DB 编号、offset、bit 或原始点名；来源信息可保留用于追踪。HTTP 字段转换和请求组装归 SMA，通用流程归 CA，订单流转、业务状态规则及事务留在 PW。
 
-先冻结配置、事实、映射/回执合同和一个实际业务 API 试点，无需先实现已盘点的全部八个旧 Handler API。合同固定后，Backend、DAA、SMA、CA 可并行实施；闭环联调以真实可调用 API 为准。
+BE-009/010现已交付固定provider合同及隔离技术QA。当前顺序为后端优先、DAA上传后续；SMA本地GET→POST执行和来源身份适配仍需独立范围。仍需选择一个业务目标做端到端接线试点；八类业务接口已实现不等于该试点或完整闭环已经完成。
 
 普通 HTTP→HTTP 或 PLC→PLC 点值交换，可在明确资源与副作用合同下由 CA 直接执行，不强制经过 Backend。订单、配方、质量判定等 PW 拥有的业务状态仍经所属 Service/API，点值交换不能暗中承接这些业务责任。上述事实上传与持久意图链仍是目标，不代表已接通。
 
@@ -153,21 +156,23 @@ CA 承担通用 Tauri/Rust 节点编排设计，包括本机工作台、流程�
 ```mermaid
 flowchart LR
     PLC[PLC] --> DAA[独立 DAA：大量持续采集]
-    DAA -->|未来确认补传| FACT[Backend 事实 API]
-    HTTP[公开 HTTP 事实 / API] --> SMA[独立 SMA：映射表格 / 工作台]
-    SMA -->|业务 API 投递| PW[PW / Backend Service]
-    IO[HTTP / PLC / 后续 WS / 外部集成 DB] <--> CA[独立 CA：内部连接器 / 通用流程]
-    CA <--> PW
+    DAA -. "上传与ACK未接通" .-> FACT[Backend事实API：隔离QA已通过]
+    HTTP[公开HTTP事实 / API] -. "未来执行输入" .-> SMA[独立SMA：本地配置 / 纯预览]
+    SMA -. "投递关闭；未来GET到POST" .-> PW[PW / Backend Service]
+    IO[HTTP / PLC / 后续WS / 外部集成DB] -.-> CA[独立CA：规划内部连接器 / 通用流程]
+    CA -.-> IO
+    CA -.-> PW
+    PW -.-> CA
     DAA -.未来登记 / 心跳.-> AWB[AWB 注册 / 健康]
     SMA -.未来登记 / 心跳.-> AWB
     CA -.未来登记 / 心跳.-> AWB
-    AWB -->|API / 事件| AWC[AWC 中央健康视图]
+    AWB -. "未来API / 事件" .-> AWC[AWC规划中央健康视图]
 ```
 
 | 组件 | 职责 | 边界 |
 | --- | --- | --- |
 | DAA | 持续采样、解码/质量、原时间/身份、历史/容量与未来补传 | 当前上传未接通；不负责一般业务流程或设备任务下发 |
-| SMA | 大量同构 HTTP 映射的表格/批量管理、工作台与投递诊断 | 当前 TSS Backend-held 配置；不拥有通用 PLC/DB 连接器 |
+| SMA | 大量同构 HTTP 映射的表格/批量管理、工作台与投递诊断 | 本地SQLite配置/纯预览；正常执行关闭，不拥有通用PLC/DB连接器 |
 | CA | 有类型节点/条件/子流程、内部连接器、固定版本与执行/核实 | 不代行 PW 规则，不把协议成功当设备/业务完成 |
 | PW / Backend | 规则、数据 owner、事务、Service/API 和 schema | 请求线程不轮询 PLC；连接器不绕过所属业务写入 |
 | CU / 本机 UI | CU 源码复用，各 App 工作台管理本机对象 | 共享源码不成为在线依赖；本机工作台与中央 AWC 分开 |
@@ -175,9 +180,9 @@ flowchart LR
 
 DAA 完整目标仍为 `PLC read → 解码/质量 → 本地样本缓冲 → HTTP POST → 确认/补传`。其实例锁、SQLite、导入及诊断可供复用参考，不证明共享 Core、连接器或心跳已交付。窗口关闭、后台继续、退出与 OS 托管按各 App 实施合同确定。
 
-SMA 已有[映射表格](automation-world/semantic-mapping-agent/src/app/twin-facts/components/MappingConfigurationsPanel.vue)、[JSON/XLSX 批量预览/导入](automation-world/semantic-mapping-agent/src/app/twin-facts/components/MappingBatchOperationsDialog.vue)及[启停/暂停/恢复控制](automation-world/semantic-mapping-agent/src/app/twin-facts/components/ApiFirstMappingRuntimePanel.vue)。当前[调度器](automation-world/semantic-mapping-agent/src-tauri/src/services/mapping_runtime/mod.rs)加载已启用 POST 映射，逐项 await `run_mapping_tick`，每条按绑定点分块读取 fresh Facts Snapshot。这支持精简已有表格与建设首页工作台，不证明批量并发或吞吐。
+SMA保留[映射表格](automation-world/semantic-mapping-agent/src/app/twin-facts/components/MappingConfigurationsPanel.vue)与[JSON/XLSX批量预览/导入](automation-world/semantic-mapping-agent/src/app/twin-facts/components/MappingBatchOperationsDialog.vue)，现由Rust管理的SQLite配置快照支撑，已保存行预览复用纯映射规则。正常manual/start/resume/auto-start在HTTP client构造或spawn前拒绝。[旧TSS调度器](automation-world/semantic-mapping-agent/src-tauri/src/services/mapping_runtime/mod.rs)只为显式兼容fixture保留，不是正常fallback，也不证明当前投递可用。
 
-勾选子集或逐行常驻启停、任意 HTTP GET 源、有界并发/隔离、容量优化及持久 SQLite/checkpoint/outbox 恢复，均需另批 runtime/存储合同与证据。当前全部已启用 POST 集合连续运行与已保存行单轮测试分开，rowVersion 不等于完整历史版本库。[006 r2 设计](plans/ARCH-AW-006-unified-flow-agent-design/spec.md#r2-design)提供工作台、映射及 CA 版本/上下文/扩展细节，不要求 SMA 立即迁库。
+SMA-004明确选择单配置快照及revision/CAS。完整关系配置/版本发布、runtime checkpoint/outbox、可配置GET源、逐行常驻和吞吐仍另立范围。现存sourceKey/factName绑定不天然适配新provider点身份，转换属于后续执行合同。[SMA PLAN](automation-world/semantic-mapping-agent/PLAN.zh-CN.md)管理顺序；[006 r2](plans/ARCH-AW-006-unified-flow-agent-design/spec.md#r2-design)继续作为未来CA及映射能力的设计历史/参考。
 
 ## 5. CA 内部连接器与源码复用
 
@@ -197,7 +202,7 @@ CU 提供 UI 复用源码，不执行 PLC/DB 操作。各 App 组合自身 UI �
 | DTB `twin-state-studio/` | 纯 Rust 映射 Domain、调度器、事实/目标 API 绑定、值规则、编辑与诊断 | 适配生命周期、网络和后端依赖；保留功能逻辑，复用 CAF 视觉素材 |
 | DTB 通用后端 | 事实/配置 API、执行租约与回执 | 适配本仓库 MySQL、Registry/manifest、认证权限、响应合同与显式 Alembic 迁移 |
 
-DTB 外部来源路径为 `twin-state-studio/README.zh-CN.md`、`twin-state-studio/src-tauri/src/domain/mapping_runtime/mod.rs`、`twin-state-studio/src-tauri/src/services/mapping_runtime/mod.rs` 和 `backend/app/tss/`。它们固定 SMA 的来源归属；当前 SMA 沿 Backend-held TSS 映射配置，保留适用桌面 HTTP/纯计算实现，并排除客户/SQL/legacy IPC、跨 DTB 帮助生成。SMA 可独立启动，其在线功能仍要求兼容 Backend 合同；本轮不迁入 DTB backend，也未建立新 AW API。
+DTB 外部来源路径为 `twin-state-studio/README.zh-CN.md`、`twin-state-studio/src-tauri/src/domain/mapping_runtime/mod.rs`、`twin-state-studio/src-tauri/src/services/mapping_runtime/mod.rs` 和 `backend/app/tss/`。它们固定 SMA 的来源归属；SMA当前拥有本地SQLite配置和纯预览；适用HTTP/纯映射算法保留为来源及显式兼容fixture，事实生产、Simulation、内置帮助、客户/SQL/legacy IPC和跨DTB帮助生成均已退役。Backend事实/业务provider另由BE-009/010实施，DAA/SMA执行接线仍未接通。
 
 MSSQL 的 `ROWVERSION` 等专有机制需要 MySQL 兼容合同。DTB 旧迁移文件属于来源历史，不能作为本仓库现成迁移。保留来源归属与适用许可，仅接纳可复用公共能力与脱敏示例；客户页面、真实配置、数据/资源及 legacy 直接写业务表路径不进入新 AW 边界。
 
@@ -206,7 +211,7 @@ MSSQL 的 `ROWVERSION` 等专有机制需要 MySQL 兼容合同。DTB 旧迁移�
 
 ## 7. 配置、事实、实例与集中健康
 
-配置权威按 App 区分：DAA 已有本地 SQLite；SMA 当前保留 Backend-held TSS 映射配置，技术启动偏好不等于映射权威；CA 自身版本化 SQLite/进度仍为目标设计。§2 的 SQLite 总述表达方向，不要求三 App 立即迁移。FastAPI 的事实、持久意图、领取与回执各依合同；下列 `aw_` 名称仅说明 Backend AW 归属，不在每个对象选定写方之外增设可编辑权威。
+配置权威按 App 区分：DAA 已有本地 SQLite；SMA拥有Rust管理的本地SQLite快照/revision，技术启动与UI偏好各自独立；CA 自身版本化 SQLite/进度仍为目标设计。§2 的 SQLite 总述表达方向，不要求三 App 立即迁移。FastAPI 的事实、持久意图、领取与回执各依合同；下列 `aw_` 名称仅说明 Backend AW 归属，不在每个对象选定写方之外增设可编辑权威。
 
 | 表名示例 | AW 职责 |
 | --- | --- |
@@ -217,15 +222,15 @@ MSSQL 的 `ROWVERSION` 等专有机制需要 MySQL 兼容合同。DTB 旧迁移�
 | `aw_mapping_runtime_states` | 映射运行状态、租约和回执 |
 | `aw_agent_states` | Agent 状态与已应用配置版本 |
 
-这些名称说明归属，不是最终 schema。订单、设备业务状态与业务采样记录保留各业务 Owner 和表名；被 Mapping 引用不代表改归 AW。前缀不等于数据库隔离、权限隔离或已经完成 AW 拆分。
+这些名称是历史归属示例，不是现行provider schema；实际独立`plc_facts_*`表以正式provider为准。订单、设备业务状态与业务采样记录保留各业务 Owner 和表名；被 Mapping 引用不代表改归 AW。前缀不等于数据库隔离、权限隔离或已经完成 AW 拆分。
 
-采集配置同时覆盖 [plc_points.yaml](automation-world/control-agent/config/plc_points.yaml) 的连接、DB-block、类型、offset/bit，以及 [plc_snapshot_policy.yaml](backend/config/plc_snapshot_policy.yaml) 的 raw/latest 保存选择。旧配置须显式导入、预览和校验；通过本机 Rust 服务保存草稿，再明确启用完整版本。长期才增加中央发布/下载；SQLite 提交与内存切换分开，恢复协议待定。
+DAA经UI/Rust服务编辑并在自身SQLite保存配置。冻结[PLC YAML](automation-world/control-agent/config/plc_points.yaml)与[快照策略](backend/config/plc_snapshot_policy.yaml)仅说明兼容来源，普通DAA启动已不迁入它们。DB/UDT导入、明确校验和激活遵循当前DAA合同；中央发布仍属未来范围。
 
-事实可沿用 `(sourceKey, factName)` 身份。API/schema 任务需要明确来源/Agent 标识、稳定采样 ID 或序列、采集和接收时间、quality、点位合同版本与映射版本，以及批量原子性、鉴权、幂等和版本机制。
+已实现[事实provider](contracts/published/http-api/plc-facts-v1/README.zh-CN.md)已固定样本/点/来源身份、顺序、质量、时间、摘要及回执/游标语义。SMA保存的legacy sourceKey/factName仍需显式适配，不能成为第二份provider身份合同。
 
 latest 表示当前状态，不能证明期间每次变化都已消费。事件、追加型业务记录和历史归档需要分别明确合同；缺失、坏质量、过期和乱序数据需要处理策略，避免来源停止后最后一个值长期被视为有效。
 
-**配置与集中管理覆盖三个应用类型。** DAA 当前本地 SQLite 权威；SMA 当前沿 Backend-held TSS 配置，可先精简表格/工作台，本地 SQLite 或可靠 outbox 另立任务；CA 的版本化本地配置/进度仍为设计目标。本路线和 AWB 管理不强制同步迁移三者存储。未来发布须保证每个对象单一可写权威，区分期望/缓存/已生效版本与接收、校验、应用确认；回退保留待补传样本/任务、unknown、outbox、游标与审计。
+**配置与集中管理覆盖三个应用类型。** DAA 当前本地 SQLite 权威；SMA本地配置已实现，可靠runtime/outbox和active/previous发布仍另立范围；CA 的版本化本地配置/进度仍为设计目标。本路线和 AWB 管理不强制同步迁移三者存储。未来发布须保证每个对象单一可写权威，区分期望/缓存/已生效版本与接收、校验、应用确认；回退保留待补传样本/任务、unknown、outbox、游标与审计。
 
 未来登记 DAA、SMA、CA 实例采用统一身份/心跳合同：稳定 agentId 与部署/现场/项目、作为应用类型的 agentKind 与独立职责 profile、实际软件/能力及采集/映射/流程版本、进程 instance/boot/seq、期望/生效配置及 observedAt。AWB 补 receivedAt/lastSeen，冲突身份和旧代次/回放不刷新 TTL，阈值可配置，心跳按有界 latest 保留。各类型报告自身工作：DAA 采样/磁盘/补传，SMA 映射结果/投递延迟/积压，CA 流程/节点/unknown；尚不支持的指标明确说明，不伪造零值。
 
@@ -304,20 +309,20 @@ S0–S4 是能力里程碑，不对应版本号、日期或实施授权。每项
 
 三 App、CA 连接器扩展与 AWB 管理合同可分别推进；阶段不要求整齐串行，也不绑定日期。PG/Redis、HA/SA、OS 托管及 PW/AIW 方向不是心跳系统的强制一揽子依赖。Tauri/sidecar 名称不证明窗口关闭、注销或主机重启后的常驻能力，目标 OS 托管仍需单独验收。
 
-TSS 当前每周期重新读取绑定事实，相同值也发送；失败或结果不确定的目标请求不自动重放。这不等于可靠离线投递。追加型 API 需要稳定幂等键、事务内业务写入与回执、成功确认，以及明确的重试/人工恢复边界。单个 Mapping 的租约不负责不同 Mapping 对同一业务目标的冲突仲裁。
+保留的TSS兼容算法每周期重新读取绑定事实，相同值也发送；失败或结果不确定的目标请求不自动重放。这不等于可靠离线投递。追加型 API 需要稳定幂等键、事务内业务写入与回执、成功确认，以及明确的重试/人工恢复边界。单个 Mapping 的租约不负责不同 Mapping 对同一业务目标的冲突仲裁。
 
 先比较新旧结果，再按来源/目标切换。停用对应旧 Projection 后才能启用 SMA 生产写入，保证每个业务目标只有一个有效写入方；明确游标/采样身份、回退和重复消费边界。这些是未来切换门槛，不授权现在改变现场系统。短时 smoke 不替代长期或现场验证。
 
 ## 9. 延后决策与任务衔接
 
-- [ARCH-BE-003](plans/ARCH-BE-003-mapping-service-api-pilot/spec.md) 需要针对目标项目、采样身份、幂等与权限独立修订；从一个业务 API 开始，不先补齐全部旧 Handler。
+- [ARCH-BE-003](plans/ARCH-BE-003-mapping-service-api-pilot/spec.md)保留自身QA/接受历史。[BE-009](plans/ARCH-BE-009-backend-facts-integration/spec.md)与[BE-010](plans/ARCH-BE-010-anonymous-business-integration/spec.md)现已拥有事实与typed业务实现合同；DAA/SMA联调及真实采用仍独立。
 - [CA-CONFIG-001](plans/CA-CONFIG-001-packaged-configuration-management/spec.md) 按本地 SQLite 权威及长期中央发布的阶段独立重审；本路线不修改或批准其实施。
 - [ARCH-BE-002](plans/ARCH-BE-002-energy-price-api/spec.md) 是独立公共能力，不是采样试点的前置依赖。
 - [ARCH-AW-006 r2](plans/ARCH-AW-006-unified-flow-agent-design/spec.md#r2-design) 提供三应用、SMA 表格/工作台、CA 流程设计及产线/实验室脱敏案例；精确批准与阶段归其 bundle，软件实施另立范围。CA 首版 HTTP GET/POST、受支持 S7、无登录范围保持。
-- [ARCH-AW-007 r2](plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design) 管理本次路线同步。CA 目录/identifier/OS、SMA runtime/存储/容量扩展、连接器矩阵、正式身份/API/schema/阈值/信任、中央权威迁移与远程操作/fencing 仍待所属规格；三 App、连接器、管理面按各自依赖推进。
+- [ARCH-AW-007 r2](plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design)管理已接受的三应用方向；[ARCH-DOC-001 r1](plans/ARCH-DOC-001-project-state-and-decision-sync/spec.md)管理本次当前状态同步。CA 目录/identifier/OS、SMA runtime/存储/容量扩展、连接器矩阵、正式身份/API/schema/阈值/信任、中央权威迁移与远程操作/fencing 仍待所属规格；三 App、连接器、管理面按各自依赖推进。
 - AWB、无界面 Runtime 提取、统一 AWC、数据库更换和 PW 技术栈迁移按需推进；登记/只读健康先于中央发布与远程运维。PW/AW/AIW 能力可分别推进，无需一次性全迁。
 - 精确组件版本/驱动、数据库支持组合、部署形态、本目标以外的目录决策与工期归实施任务。自动 OpenAPI 导入、完整导入导出与模拟器按需要再确定范围。
 
-文档回退只撤销 007 的确切正文/索引增量，不 reset 或覆盖既有 dirty；历史来源、QA、验收仍由原 bundle 证明，不追认为 007 或 006 的批准。已发生外部动作不由配置回退撤销。
+文档回退只撤销所属获批文档任务的确切正文/索引增量，不 reset 或覆盖既有 dirty；历史来源、QA、验收仍由原 bundle 证明，不追认为 007 或 006 的批准。已发生外部动作不由配置回退撤销。
 
 本轮文档不创建 Agent 目录、代码、API、表结构或部署产物；后续阶段均为规划。构建、运行、现场证据及最终验收记录在所属任务 bundle 中，不从本路线推断。

@@ -167,6 +167,17 @@ pub(crate) fn dispatch(
             let r: Logs = parse(request)?;
             engine.logs(r.cursor, r.limit)
         }
+        "daa_get_delivery_settings"
+        | "daa_save_delivery_settings"
+        | "daa_get_delivery_snapshot"
+        | "daa_set_delivery"
+        | "daa_preview_delivery"
+        | "daa_test_facts_endpoint"
+        | "daa_list_deliveries"
+        | "daa_get_delivery"
+        | "daa_get_facts_source_material" => {
+            super::local_delivery::dispatch(engine, command, request)
+        }
         _ => Err("unknown_local_command".into()),
     }
 }
@@ -176,7 +187,7 @@ pub(crate) fn daa_get_bootstrap(state: tauri::State<'_, LocalState>) -> Result<V
         return Err(error.clone());
     }
     Ok(
-        json!({"schemaVersion":1,"mode":state.bootstrap.mode,"origin":if state.bootstrap.validation{"fixture"}else{"native"},"localStorage":state.engine.is_some(),"readAllowed":state.bootstrap.read_allowed,"uploadAvailable":false,"version":env!("CARGO_PKG_VERSION"),"identity":"com.aiis.aw.dataacquisitionagent","ignoredKeys":state.bootstrap.ignored_keys}),
+        json!({"schemaVersion":1,"mode":state.bootstrap.mode,"origin":if state.bootstrap.validation{"fixture"}else{"native"},"localStorage":state.engine.is_some(),"readAllowed":state.bootstrap.read_allowed,"uploadAvailable":state.engine.as_ref().and_then(|e|e.delivery_available().ok()).unwrap_or(false),"version":env!("CARGO_PKG_VERSION"),"identity":"com.aiis.aw.dataacquisitionagent","ignoredKeys":state.bootstrap.ignored_keys}),
     )
 }
 #[derive(serde::Serialize)]
@@ -206,7 +217,7 @@ pub(crate) fn failure(engine: &LocalEngine, code: String) -> LocalFailure {
     }
 }
 type IpcResult = Result<Value, LocalFailure>;
-async fn invoke(
+pub(crate) async fn invoke(
     state: tauri::State<'_, LocalState>,
     command: &'static str,
     request: Value,

@@ -1,6 +1,6 @@
 # PLC facts v1 source contract
 
-Direction: DAA original local samples → Backend facts provider → future SMA facts consumer. This is a source-only implemented contract (`ARCH-BE-009 r1` A); database adoption, MySQL proof, provider-ready acceptance, DAA uploader, joint validation and deployment remain separate gates. The directory name does not imply publication to an external service.
+Direction: DAA original local samples → Backend facts provider → future SMA facts consumer. `ARCH-BE-009 r1` source and approved isolated MySQL A+B passed independent QA, with [current verification evidence](../../../../plans/ARCH-BE-009-backend-facts-integration/checklist.md). Owner final/provider-ready, actual target adoption, DAA uploader, joint validation and deployment remain pending separate gates. The directory name does not imply publication to an external service.
 
 Versions: `plc-facts/v1`, `daa-local/v2`, `pf-json/v1`, `pf-cursor/v1`.
 

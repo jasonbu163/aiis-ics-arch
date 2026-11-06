@@ -9,7 +9,7 @@ export interface Bootstrap {
     origin: string;
     localStorage: boolean;
     readAllowed: boolean;
-    uploadAvailable: false;
+    uploadAvailable: boolean;
 }
 export let bootstrap: Bootstrap = { schemaVersion: 1, mode: 'local_sqlite', origin: 'browser', localStorage: false, readAllowed: false, uploadAvailable: false, ignoredKeys: [] };
 export let bootstrapError = '';
@@ -207,6 +207,7 @@ export interface RawSample {
     contextBytes: number;
     contextSha256: string;
     deliveryState: string;
+    deliveries?: Array<{ part: number; parts: number; state: string; batchId: string | null; receiptId: string | null; lastError: string | null }>;
 }
 export interface LogRow {
     cursor: number;

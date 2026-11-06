@@ -3,6 +3,8 @@ import { computed, watch, onMounted, onUnmounted, reactive, ref, type InjectionK
 import { ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 import { bootstrap, localCall, LocalCommandError, type Configuration, type ConfigurationView, type Snapshot, type ImportPreview, type Source, type Offset, type Point, type History, type RawSample, type LogRow, type Identification, type BlockMapping, type NameRequest, type NamePreview, previewPointNames, confirmPointNames } from '../../services/localAcquisition';
+import * as facts from '../../services/factsDelivery';
+import { historyBoundary } from '../time';
 export const localConsoleKey: InjectionKey<LocalConsole> = Symbol('daa-local-owner');
 export type LocalConsole = ReturnType<typeof useLocalAcquisitionConsole>;
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
@@ -10,6 +12,24 @@ export function useLocalAcquisitionConsole() {
     const { t, te } = useI18n();
     const available = bootstrap.localStorage && ['native', 'fixture'].includes(bootstrap.origin);
     const view = ref<ConfigurationView | null>(null), draft = ref<Configuration | null>(null), snapshot = ref<Snapshot | null>(null), busy = ref(false), error = ref(''), notice = ref(''), selectedPlc = ref(''), selectedDb = ref(''), query = ref(''), pointPage = ref(1), preview = ref<ImportPreview | null>(null), offsets = ref<Offset[]>([]), sources = ref<Source[]>([]), history = ref<History | null>(null), raw = ref<RawSample | null>(null), logs = ref<LogRow[]>([]);
+    const factsReadMode = ref('test'), factsReadFrom = ref(''), factsReadTo = ref(''), factsReadPage = ref(0);
+    const deliveryKind = ref<'batches' | 'events'>('batches');
+    const delivery = ref<facts.DeliverySnapshot | null>(null), deliverySettings = ref<facts.DeliverySettings | null>(null), deliveryPage = ref<facts.DeliveryPage | null>(null), deliveryPageSize = ref(20), deliveryPageNumber = ref(1), deliveryCursors = ref<Array<number | null>>([null]), deliveryDialog = ref<'settings' | 'detail' | 'source' | 'preview' | 'read' | null>(null), deliveryDetail = ref<Record<string, unknown> | null>(null), sourceMaterial = ref<facts.SourceMaterial | null>(null);
+    async function loadDeliveries(direction: 'reset' | 'next' | 'previous' = 'reset', size = deliveryPageSize.value) {
+        await perform(async () => { if (!bootstrap.uploadAvailable) return; const cursors = direction === 'reset' ? [null] : [...deliveryCursors.value]; let number = direction === 'reset' ? 1 : deliveryPageNumber.value;
+            if (direction === 'next') { if (!deliveryPage.value?.nextCursor) return; cursors.push(deliveryPage.value.nextCursor); number++; if (cursors.length > 64) cursors.shift(); }
+            if (direction === 'previous') { if (cursors.length <= 1) return; cursors.pop(); number--; }
+            deliveryPage.value = await facts.listDeliveries(cursors[cursors.length - 1], size, deliveryKind.value); deliveryCursors.value = cursors; deliveryPageNumber.value = number; deliveryPageSize.value = size; });
+    }
+    async function deliveryControl(action: 'start' | 'pause' | 'resume') { await perform(async () => { delivery.value = await facts.setDelivery(action); }); }
+    async function editDelivery() { await perform(async () => { deliverySettings.value = await facts.getDeliverySettings(); sourceMaterial.value = await facts.getFactsSourceMaterial(); deliveryDialog.value = 'settings'; }); }
+    async function saveDelivery(settings: facts.DeliverySettings) { await perform(async () => { deliverySettings.value = await facts.saveDeliverySettings(settings, deliverySettings.value!.settingsRevision); deliveryDialog.value = null; delivery.value = await facts.getDeliverySnapshot(); }); }
+    async function inspectDelivery(batchId: string) { await perform(async () => { deliveryDetail.value = await facts.getDelivery(batchId); deliveryDialog.value = 'detail'; }); }
+    async function showSourceMaterial() { await perform(async () => { sourceMaterial.value = await facts.getFactsSourceMaterial(); deliveryDetail.value = sourceMaterial.value as unknown as Record<string, unknown>; deliveryDialog.value = 'source'; }); }
+    async function previewFacts() { await perform(async () => { const cycleId = history.value?.items[0]?.cycleId; if (!cycleId) throw new Error('delivery_no_cycle'); deliveryDetail.value = await facts.previewDelivery(cycleId); deliveryDialog.value = 'preview'; }); }
+    function openFactsRead() { deliveryDetail.value = null; factsReadPage.value = 0; deliveryDialog.value = 'read'; }
+    async function testFacts(continued = false, newBudget = false) { await perform(async () => { if (!selectedPlc.value) throw new Error('unknown_plc'); const range = ['range','original'].includes(factsReadMode.value); const cursor = continued ? String(deliveryDetail.value?.nextCursor ?? '') : null; const page = continued && !newBudget ? factsReadPage.value + 1 : 1; if (page > 20 || continued && !cursor) throw new Error('query_limits'); deliveryDetail.value = await facts.testFactsEndpoint(selectedPlc.value, { mode: factsReadMode.value, from: range ? historyBoundary(factsReadFrom.value, false) : null, to: range ? historyBoundary(factsReadTo.value, false) : null, cursor, page }); factsReadPage.value = page; deliveryDialog.value = 'read'; }); }
+    watch([factsReadMode, factsReadFrom, factsReadTo, selectedPlc], () => { if (deliveryDialog.value === 'read') { deliveryDetail.value = null; factsReadPage.value = 0; } });
     const conflictVersion = ref(''), snapshotError = ref('');
     const identification = ref<Identification | null>(null), mappings = ref<BlockMapping[]>([]), importPage = ref(1), importPageSize = ref(10);
     const sourcePreviewOpen = ref(false), offsetPreviewOpen = ref(false), sourceStructureOpen = ref(false);
@@ -118,6 +138,7 @@ export function useLocalAcquisitionConsole() {
             return;
         try {
             snapshot.value = await localCall<Snapshot>('daa_get_local_snapshot');
+            if (bootstrap.uploadAvailable) delivery.value = await facts.getDeliverySnapshot();
             snapshotError.value = '';
             if (!draft.value)
                 accept(snapshot.value.configuration);
@@ -347,5 +368,5 @@ export function useLocalAcquisitionConsole() {
             clearInterval(timer);
         if (nameTimer) clearTimeout(nameTimer);
     });
-    return reactive({ selectedPoints, preparePointEdit, finishPointEdit, selectedNameIds, namePreview, namePreviewOpen, namePreviewBusy, namePage, namePageSize, pagedNames, pointPageSize, closeNames, invalidateNames, toggleNamePoint, previewNames, stagePointEdit, confirmNames, sourcePreviewOpen, offsetPreviewOpen, sourceStructureOpen, identification, mappings, importPage, importPageSize, importRows, pagedImportRows, invalidateImport, changeImportTarget, available, editing, dirty, confirmAction, conflictVersion, snapshotError, selectedTargets, bootstrap, view, draft, snapshot, busy, error, notice, selectedPlc, selectedDb, query, pointPage, preview, offsets, sources, history, historyFilter, historyPage, historyPageSize, historyPreviousAvailable, historyNextAvailable, historyPreviousBounded, raw, rawSampleId, logs, label, plcs, dbs, groups, points, pagedPoints, perform, refresh, reload, save, saveCandidate, activate, addPlc, removePlc, addGroup, removeGroup, control, readFiles, importSources, infer, address, manual, bulk, loadHistory, inspect, loadLogs, state, formatBytes });
+    return reactive({ factsReadMode, factsReadFrom, factsReadTo, factsReadPage, openFactsRead, deliveryKind, delivery, deliverySettings, deliveryPage, deliveryPageSize, deliveryPageNumber, deliveryCursors, deliveryDialog, deliveryDetail, sourceMaterial, loadDeliveries, deliveryControl, editDelivery, saveDelivery, inspectDelivery, showSourceMaterial, previewFacts, testFacts, selectedPoints, preparePointEdit, finishPointEdit, selectedNameIds, namePreview, namePreviewOpen, namePreviewBusy, namePage, namePageSize, pagedNames, pointPageSize, closeNames, invalidateNames, toggleNamePoint, previewNames, stagePointEdit, confirmNames, sourcePreviewOpen, offsetPreviewOpen, sourceStructureOpen, identification, mappings, importPage, importPageSize, importRows, pagedImportRows, invalidateImport, changeImportTarget, available, editing, dirty, confirmAction, conflictVersion, snapshotError, selectedTargets, bootstrap, view, draft, snapshot, busy, error, notice, selectedPlc, selectedDb, query, pointPage, preview, offsets, sources, history, historyFilter, historyPage, historyPageSize, historyPreviousAvailable, historyNextAvailable, historyPreviousBounded, raw, rawSampleId, logs, label, plcs, dbs, groups, points, pagedPoints, perform, refresh, reload, save, saveCandidate, activate, addPlc, removePlc, addGroup, removeGroup, control, readFiles, importSources, infer, address, manual, bulk, loadHistory, inspect, loadLogs, state, formatBytes });
 }

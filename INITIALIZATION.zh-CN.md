@@ -4,6 +4,12 @@ English version: [INITIALIZATION.md](INITIALIZATION.md)
 
 本文件包含源码检查和由操作者执行的 Docker 部署步骤。Docker 构建/启停与数据库写入须单独批准运行范围；下列命令是操作说明，不代表已经执行部署。
 
+## 可选事实/业务集成入口
+
+下方普通应用/数据库启动不会启用新匿名集成。[PLC事实v1](contracts/published/http-api/plc-facts-v1/README.zh-CN.md)与[业务集成v1](contracts/published/http-api/business-integration-v1/README.zh-CN.md)已通过有限隔离MySQL验证，Owner终验及实际目标采用仍待定。没有具体操作批准时保持默认关闭/空scope/未采用；普通schema升级本身不等于事实来源或业务时间采用，也不迁移真实历史时间。
+
+后续操作应按所属[事实维护](backend/scripts/plc_facts_maintenance/README.zh-CN.md)、[业务时间采用](backend/scripts/business_time_adoption/README.zh-CN.md)手册及精确任务的目标证据执行。本启动教程不接通DAA上传或SMA投递；本节只补导航与边界，不新增命令或数据库操作授权。
+
 ## 手动测试顺序
 
 使用 database-only + `uv run run.py` + `pnpm dev` 时，直接按[宿主机源码开发](#宿主机源码开发与-database-only)执行，包含显式账号初始化步骤。

@@ -32,6 +32,9 @@
       </ConsoleTableShell>
     </section>
 
+    <section v-if="raw.deliveries?.length" class="daa-sample-section">
+      <h3>{{ t('common.delivery.sampleLinks') }}</h3><dl v-for="part in raw.deliveries" :key="part.part" class="daa-local-facts"><dt>{{ t('common.delivery.part') }}</dt><dd>{{ part.part }} / {{ part.parts }}</dd><dt>{{ t('common.delivery.state') }}</dt><dd>{{ t('common.delivery.states.' + part.state) }}</dd><dt>{{ t('common.delivery.batch') }}</dt><dd>{{ part.batchId || '—' }}</dd><dt>{{ t('common.delivery.receipt') }}</dt><dd>{{ part.receiptId || '—' }}</dd><dt>{{ t('common.delivery.reason') }}</dt><dd>{{ part.lastError ? label(part.lastError) : '—' }}</dd></dl>
+    </section>
     <section class="daa-sample-section">
       <p class="daa-capability-note">{{ t('common.local.sampleView.originalNote') }}</p>
       <details v-for="entry in jsonEntries" :key="entry.id" class="daa-details" @toggle="toggleJson(entry.id, $event)">
@@ -61,7 +64,7 @@ const props = defineProps<{ raw: RawSample; sampleId: string }>()
 const { t, te } = useI18n()
 const label = (code: string) => code ? te(`common.local.codes.${code}`) ? t(`common.local.codes.${code}`) : code : '—'
 const details = computed(() => sampleDetails(props.raw))
-const deliveryLabel = computed(() => props.raw.deliveryState === 'pending' ? t('common.local.sampleView.pending') : label(props.raw.deliveryState))
+const deliveryLabel = computed(() => props.raw.deliveryState === 'pending' ? t('common.local.sampleView.pending') : props.raw.deliveryState === 'acknowledged' ? t('common.delivery.states.acknowledged') : label(props.raw.deliveryState))
 const page = ref(1), pageSize = ref(20)
 const pagedRows = computed(() => details.value?.rows.slice((page.value - 1) * pageSize.value, page.value * pageSize.value) ?? [])
 watch(pageSize, () => { page.value = 1 })

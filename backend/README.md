@@ -12,7 +12,8 @@ app/
 ├── system/           # dictionaries and projection control-plane APIs
 ├── control_agent/    # backend-side CA authorization contract
 ├── schema_maintenance/
-├── monitor/          # collector/raw/latest facts only
+├── monitor/          # legacy collector/raw/latest plus owned business integrations
+├── plc_facts/        # independent anonymous facts provider
 ├── auxiliary/        # shifts and stop records
 ├── energy/           # unique price owner
 ├── aiis_demo/        # opt-in reference module
@@ -26,12 +27,18 @@ The monitor Core surface returns collector health and project-neutral PLC DB-blo
 ## Runtime boundaries
 
 - FastAPI request handlers call async Service/CRUD layers and never poll a PLC.
-- The resident Rust/Tauri control-agent owns PLC collection and writes field facts through the approved contract.
+- DAA owns new local PLC acquisition; its HTTP uploader is not connected yet. Frozen control-agent retains the old direct-database snapshot/Projection compatibility path. Field Flow is an independent field-process runtime under its own scope.
 - Celery, Redis, Beat, Flower and Python Worker runtime are not dependencies of this Core.
 - The Core baseline is the single `d4e6f8a0b2c4` Alembic root for fourteen Core tables. Its upgrade operations and
   fourteen-table SQLAlchemy metadata subset are mechanically checked by `tests/test_core_migration_baseline.py`; private project
   repositories retain their own historical migration graphs. The `a6c8e0f2b4d6` successor adds only `energy_prices`;
   `b8d0f2a4c6e8` adds only `energy_price_hours`, bringing the price-only fixture to sixteen tables. The reintegration and sample successors are described below. Prepare schema explicitly before runtime adoption.
+
+## Facts and typed business integration — 2026-11-05
+
+[BE-009 facts](../contracts/published/http-api/plc-facts-v1/README.md) and [BE-010 typed business integration](../contracts/published/http-api/business-integration-v1/README.md) have passed independently approved isolated MySQL A+B verification. Owner final acceptance, actual target adoption and DAA/SMA wiring remain pending. Normal default-off/empty-scope/unadopted admission remains; anonymous routes do not remove existing route authentication or permissions.
+
+The API-only `plc_facts` owner adds seven independent tables; old monitor raw/latest and Projection inputs are preserved. BE-010 adds four owner business/receipt tables and bounded 13-table/41-column time compatibility, with the source order `f6a8c0e2b4d6` → `0a2c4e6f8b10` → `1b3d5f7a9c20`. Schema existence is not target adoption. Isolated synthetic time adoption did not convert real history. See the [facts maintenance guide](scripts/plc_facts_maintenance/README.md), [business-time adoption guide](scripts/business_time_adoption/README.md) and owning task records; this README does not authorize running those operations.
 
 ## Local checks
 

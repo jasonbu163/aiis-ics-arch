@@ -8,13 +8,13 @@ AW owns the field-acquisition and semantic-mapping desktop engineering surfaces.
 | --- | --- | --- |
 | [CA](control-agent/README.md) | Relocated Control Agent, retaining the raw/latest database-snapshot compatibility contract | Frozen after relocation validation; exact provenance is in the task receipt |
 | [DAA](data-acquisition-agent/README.md) | SQLite-owned configuration, acquisition, decoding and diagnostics; inherited headless retired | Continuing acquisition development; new AW APIs are not connected |
-| [SMA](semantic-mapping-agent/README.md) | Read-only HTTP facts, API materials, targets, value rules, mapping preview and runtime diagnostics | Consumes CU public UI source; requires compatible Backend HTTP contracts; delivery status belongs to the SMA PLAN |
+| [SMA](semantic-mapping-agent/README.md) | local connection/material/target/rule/mapping configuration and pure previews, plus gated read-only facts inspection | Consumes CU shared source; normal delivery is disabled in the current local-configuration stage |
 
 CA freezing does not stop an existing deployment or switch the production chain. Original DTB TSS remains intact. New apps do not depend on CA/TSS checkout or dependency directories, and copies are not continuously overwritten. SMA excludes customer device/scene pages, SQL/legacy Projection IPC and cross-repository help generation.
 
 ## Independent projects and configuration
 
-In each app directory run `pnpm install --frozen-lockfile`, `pnpm build`, `cargo test --manifest-path src-tauri/Cargo.toml --locked`, and `pnpm tauri dev`. DAA also retains `pnpm tauri:dev` with its optional inherited driver; runtime gates still control external access. Rebuild dependencies and targets after relocating source; cached absolute paths are not startup evidence.
+In each app directory run `pnpm install --frozen-lockfile`, `pnpm build`, `cargo test --manifest-path src-tauri/Cargo.toml --locked`, and `pnpm tauri dev`. Ordinary `pnpm tauri dev` obtains DAA driver features from its Tauri configuration; startup remains stopped. Rebuild dependencies and targets after relocating source; cached absolute paths are not startup evidence.
 
 | App | Identifier | Dev / preview | Env / localStorage |
 | --- | --- | --- | --- |
@@ -22,11 +22,11 @@ In each app directory run `pnpm install --frozen-lockfile`, `pnpm build`, `cargo
 | DAA | com.aiis.aw.dataacquisitionagent | 15191 / 14191 | DAA_* / daa.* |
 | SMA | com.aiis.aw.semanticmappingagent | 15192 / 14192 | SMA_* / sma.* |
 
-DAA/SMA read only their own root `.env` or explicit absolute `DAA_ENV_FILE` / `SMA_ENV_FILE`; they never discover cwd/parent/root env files. Relative DAA YAML paths anchor to its own root; logs/outputs use the independent identifier's local data directory. SMA startup JSON uses its own app-data. Explicit absolute `DAA_PROFILE_DIR` / `SMA_PROFILE_DIR` support isolated validation. Real config, logs and output remain untracked. SMA starts with an empty Backend and HTTP off. Simulation/Mapping auto-start defaults false and does not migrate CA/TSS preferences. DAA YAML is only a one-time source; DAA SQLite configuration and local history are described below. JSON retains the existing SMA technical startup-preference duties; SMA mapping storage remains outside this change.
+DAA/SMA read only their application-root `.env` or explicit absolute `DAA_ENV_FILE` / `SMA_ENV_FILE`, without searching parent directories. Absolute `DAA_PROFILE_DIR` / `SMA_PROFILE_DIR` select independent local data. DAA UI/Rust owns `config.sqlite` / `runtime.sqlite`; ordinary YAML runtime/import and direct-database writing are retired, with historical private receipts protected. SMA Rust owns `configuration.sqlite3`, a single complete configuration document with revision/CAS; its technical startup JSON and `sma.*` UI preferences are separate and cannot authorize delivery. Simulation, facts production and built-in help are retired. Normal manual/start/resume/auto-start delivery is rejected before HTTP/spawn, even when old preferences or the HTTP gate are enabled. Configuration/pure-preview work is offline; explicit read-only HTTP inspection still uses its gate. Real configuration and logs are not committed.
 
 ## Evolution and evidence
 
-This is the S2 engineering prerequisite. S1 configuration/fact/mapping-receipt and business API contracts, new AW fact upload, the business chain, the later shared UI/integration targets require independent tasks. Startup does not establish those integrations. See [PLAN](PLAN.md) and the unique root [ARCH-AW-001 bundle](../plans/ARCH-AW-001-agent-foundation/spec.md).
+As of 2026-11-05, DAA controlled local Stage B and SMA cleanup/CU are owner-accepted; SMA local configuration/pure preview passed QA2, awaiting final acceptance. [Facts provider](../contracts/published/http-api/plc-facts-v1/README.md) and [typed business provider](../contracts/published/http-api/business-integration-v1/README.md) passed isolated MySQL A+B verification, with Owner final acceptance and real adoption pending. DAA upload/ACK and SMA local GET→POST execution/reliable delivery remain unconnected. Current tasks and next gates are in [PLAN](PLAN.md); [ARCH-AW-001](../plans/ARCH-AW-001-agent-foundation/spec.md) owns only historical initialization, not all later work.
 
 Use `pnpm preview --strictPort` for CA preview so port 14190 conflicts fail while preserving frozen CA source. DAA/SMA dev/preview enforce strictPort in their own Vite configuration.
 

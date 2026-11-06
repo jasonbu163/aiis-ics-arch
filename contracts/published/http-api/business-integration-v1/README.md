@@ -4,7 +4,7 @@ Chinese: [README.zh-CN.md](README.zh-CN.md).
 
 [openapi.json](openapi.json) contains exactly eight anonymous POST operations and their closed component-reference set, extracted from normal backend module registration. [examples.json](examples.json) contains the eight normative requests, request/business digests, complete success/error examples and frozen `bi-json/v1` normalization vectors. The wire version stays `aiis.business-integration/v1`; r2 is the implementation-task revision.
 
-This is `source_ready_unadopted` source. Defaults are disabled/empty/unadopted. Scope admission precedes adoption checking and session creation; `shanghai-v1` additionally requires the exact external `business-time-adoption/v1` evidence, finite basis profile and a transaction-local target UUID/schema/revision/DB-clock match. No setting string alone enables business writes. Actual schema/time adoption, database/Docker/B and Owner acceptance remain separate gates.
+This is `source_ready_unadopted` source. Defaults are disabled/empty/unadopted. Scope admission precedes adoption checking and session creation; `shanghai-v1` additionally requires the exact external `business-time-adoption/v1` evidence, finite basis profile and a transaction-local target UUID/schema/revision/DB-clock match. No setting string alone enables business writes. Approved isolated MySQL A+B verification passed independently; see [BE-010 r2](../../../../plans/ARCH-BE-010-anonymous-business-integration/checklist.md). Actual target schema/time adoption, Owner acceptance, DAA/SMA wiring and deployment remain separate gates; synthetic B adoption did not migrate real history.
 
 | Resource | Values / technical storage domain |
 | --- | --- |

@@ -34,13 +34,17 @@ AIIS ICS Architecture 是可复用工业信息系统架构的公开源码基线�
 ## 运行边界
 
 ```text
-frontend-js -> FastAPI Core API -> 配置的数据库
-PLC -> 常驻 control-agent -> raw/latest 现场事实 -> backend Projection 宿主
+frontend-js -> FastAPI 业务 API -> 所属业务数据库
+冻结兼容：PLC -> 旧 control-agent -> monitor raw/latest -> Projection
+当前 DAA：受控 DS/S7 -> 本地 SQLite（阶段 B 已接受）；上传/ACK 未接通
+目标链：DAA -> plc_facts API -> SMA -> typed 业务 API -> 业务记录
 ```
+
+截至2026-11-05，[PLC事实服务](contracts/published/http-api/plc-facts-v1/README.zh-CN.md)与[八类typed业务集成入口](contracts/published/http-api/business-integration-v1/README.zh-CN.md)已通过独立获批的隔离MySQL验证。Owner终验、目标schema/时间采用及DAA/SMA接线仍分别推进，准入保持默认关闭/未采用。SMA已拥有本地SQLite配置与纯预览，当前配置阶段关闭正常投递，见[SMA说明](automation-world/semantic-mapping-agent/README.zh-CN.md)和所属任务。
 
 后端 Registry 只发现声明了启用 manifest 的模块。Registry 负责暴露路由和 metadata，不负责创建数据表；表结构变化必须走显式迁移任务。`control-agent` 始终是独立的运行时和交付边界。
 
-前端 route 和 locale 自动发现属于 JavaScript 模板。完整的 manifest 菜单自动组装由 [ARCH-FE-001](plans/ARCH-FE-001-frontend-module-auto-assembly/spec.md) 单独跟踪；打包后的数据库设置和 YAML 上传由 [CA-CONFIG-001](plans/CA-CONFIG-001-packaged-configuration-management/spec.md) 单独跟踪。
+前端 route 和 locale 自动发现属于 JavaScript 模板。manifest驱动的路由/菜单/权限装配已通过r3独立QA、待Owner终验，由 [ARCH-FE-001](plans/ARCH-FE-001-frontend-module-auto-assembly/spec.md) 单独跟踪；打包后的数据库设置和 YAML 上传由 [CA-CONFIG-001](plans/CA-CONFIG-001-packaged-configuration-management/spec.md) 单独跟踪。
 
 ## 本地验证
 
@@ -84,4 +88,6 @@ AW 的归属、CA冻结、DAA/SMA独立启动与后续边界见 [Automation Worl
 
 独立 Rust/Python 现场运行程序见 [Field Flow](field-flow/README.zh-CN.md)。Rust 是长期部署 runtime 的建设主线，Python 用于学习与快速原型。FF-001 r4 的两工程均已实现 demo01 本地 HTTP GET → PLC INT 闭环。Fresh-context [QA2](field-flow/plans/FF-001-dual-runtime-demo01/checklist.md)已通过精确[双版本交接](field-flow/plans/FF-001-dual-runtime-demo01/tasks.md)的 AC01–AC15，独立关闭全部三项 Rust QA1 缺陷。历史失败保留，Human Owner 最终验收、现场验证及长期运行验收待定。
 
-独立的 [C# Plan 首期学习切片](backend-dotnet/README.zh-CN.md)直接写 MySQL，仅三个 API、无登录，不替代 Python；实际检查与待 fresh Verification 的状态归 [ARCH-BE-008](plans/ARCH-BE-008-csharp-backend-plan-slice/tasks.md)。
+独立的 [C# Plan 首期学习切片](backend-dotnet/README.zh-CN.md)直接写 MySQL，仅三个 API、无登录，不替代 Python；QA2已通过，实际证据与待Human Owner最终验收的状态归 [ARCH-BE-008](plans/ARCH-BE-008-csharp-backend-plan-slice/tasks.md)。
+
+[FF-005](field-flow/plans/FF-005-basic-and-advanced-examples/spec.md)基础案例已获Owner接受。[FF-004 r2 A](field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/spec.md)的Rust每PLC JSON/YAML v2及有界多PLC S7 int16调用通过QA3，最终验收待定。Modbus结构校验不代表通信、DS导出或Python/C#目录加载已交付；原完整`hold_ack`强收及旧UTC限制继续保留。

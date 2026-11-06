@@ -1,11 +1,11 @@
 # SMA 语义映射与可靠 API 投递详细设计
 
-**内容修订：2026-11-04 · ARCH-AW-008 r1；原设计：ARCH-AW-003 r2**
+**当前状态同步：2026-11-05 · ARCH-DOC-001 r1；事实合同修订：2026-11-04 · ARCH-AW-008 r1；原设计：ARCH-AW-003 r2**
 **效力：目标设计、推荐机制与接口语义草案；不表示已实现或正式协议冻结。**
 
-> **方向更新（ARCH-AW-007 r2）：** 新路线保留 DAA、SMA、CA 三应用：DAA 负责大量持续采集，SMA 沿已过滤 TSS 基线精简表格化批量 HTTP 映射与工作台，CA 承担通用节点编排及内部多协议连接器。AWB/AWC 未来统一管理三类实例，先登记/心跳与只读健康，再配置/远程操作。全项目 [中文 ROADMAP](../ROADMAP.zh-CN.md)、[English ROADMAP](../ROADMAP.md) 与 [007 r2](../plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design)、[006 r2](../plans/ARCH-AW-006-unified-flow-agent-design/spec.md#r2-design) 提供当前方向；精确批准、交付、独立 QA 与最终验收状态归所属 bundle，原设计正文/来源及 r1 验证历史保留。DAA 当前 SQLite 本地采集且新上传未接入；SMA 当前 Backend-held TSS/Facts→POST 与逐项 await 调度，子集/逐行常驻、任意 HTTP 源、本地 SQLite/可靠 outbox 和容量优化分期，不强制近期迁库；CA 自身版本化存储仍为目标。本文旧表单/共享 Core/角色节点限制等按当时范围解释，不构成三 App 统一迁移或 CA 能力总界限；CAF/旧 CA 保持冻结。CA 首版 HTTP GET/POST、明确受支持 S7 与无登录前提依 006 r2；原可靠投递、PW Service/API owner、版本固定及 unknown 核实原则仍为适用参考，后续实施 spec 明确采用/替代条款。本提示不宣称软件、QA、设备或部署许可。
+> **当前状态同步（2026-11-05 · [ARCH-DOC-001 r1](../plans/ARCH-DOC-001-project-state-and-decision-sync/spec.md)）：** DAA受控本地阶段B已接受，上传/ACK仍未接通。SMA-002职责清理、003 CU接入已接受；004的Rust/SQLite单配置快照与纯预览通过QA2、待Owner终验，正常manual/start/resume/auto-start投递关闭。Backend事实/八类typed业务provider已通过获批隔离MySQL A+B QA，Owner终验、真实采用及DAA/SMA接线仍独立。FOA命名和SMA/CA合并宿主已由[007 r2](../plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design)替代为DAA/SMA/CA三应用；共享Flow Core/画布/中央管理是可选未来能力，不是近期前置。原任务的批准、失败与QA/接受仍按各自候选保留，本文同步不授予产品或现场接受。
 
-本文与 [DAA 详细设计](AIIS_DAA_Detailed_Design.md)配套，承接 [AW 运行原理设计](AIIS_AW_Runtime_Design.md)和 [AW 白皮书](AIIS_AW_Whitepaper_Roadmap_v0.4.md)。本轮由 [ARCH-AW-008 r1](../plans/ARCH-AW-008-stage-c-facts-contract/spec.md)管理；原ARCH-AW-003文档终验及ARCH-AW-007已接受路线仍归各自bundle，不重写历史证据。匿名事实一写两读、JSON／可靠回执、latest来源顺序、history和三自然月／业务永久保存以[共同需求合同](../contracts/demands/automation-world-facts-integration.zh-CN.md)集中定义，状态proposed，未表示Backend provider接受、发布或实现。DAA正文解释现场事实，本文解释SMA绑定、转换、持久处理与业务投递；表格化HTTP映射继续按ARCH-AW-007演进，通用画布／共享Flow Core及本地迁库不作为近期前置。
+本文与[DAA设计](AIIS_DAA_Detailed_Design.md)配套，原事实需求修订归[ARCH-AW-008 r1](../plans/ARCH-AW-008-stage-c-facts-contract/spec.md)，当前状态同步归[ARCH-DOC-001 r1](../plans/ARCH-DOC-001-project-state-and-decision-sync/spec.md)。[共同需求](../contracts/demands/automation-world-facts-integration.zh-CN.md)仍proposed，后续[事实provider](../contracts/published/http-api/plc-facts-v1/README.zh-CN.md)与[业务provider](../contracts/published/http-api/business-integration-v1/README.zh-CN.md)已固定源码合同并通过隔离QA，Owner终验/真实采用待定。当前SMA配置/纯预览已有实现；下述定义漂移、独立调度、checkpoint/outbox和可靠投递是后续机制目标，不能据设计存在声称已交付。
 
 ## 阅读导航
 
@@ -21,7 +21,7 @@
 <a id="position"></a>
 ## 1. 定位、首版范围和现状证据
 
-SMA（Semantic Mapping Agent）将现场事实转换为业务对象，通过公开业务API投递；API/Service拥有业务校验、事务和存储。SMA不连接PLC，不持有Backend／目标业务库凭据，不执行业务SQL或控制设备。可靠运行状态属于SMA职责，但当前Backend-held配置保留，本地SQLite是后续可选路线，不是本次强制迁库。独立Agent化不是把Backend Service搬进桌面进程。
+SMA（Semantic Mapping Agent）负责将事实映射为业务对象，经所属API/Service校验和事务投递；不连接PLC、不持有业务库凭据或执行业务SQL。当前清理/CU已接受，本地Rust/SQLite配置与纯预览通过QA2待Owner；正常manual/start/resume/auto-start投递拒绝。Backend-held TSS配置已退出正常应用，仅保留来源及显式兼容算法；独立Agent不把Backend Service搬进桌面。
 
 | 层次 | 本文采用的依据 |
 | --- | --- |
@@ -30,13 +30,13 @@ SMA（Semantic Mapping Agent）将现场事实转换为业务对象，通过公�
 | 待确认实施细节 | endpoint/字段/单位/权限/schema/签名算法、转换与 OpenAPI 支持矩阵、容量/保留/并发数值、目标幂等与后台托管 |
 | 未来方向 | 通用节点平台、业务画布、共享 Rust Flow Core、中央配置；不作为首版前置 |
 
-2026-11-04只读复核的现状／历史证据入口（不表示未来能力已实现）：
+2026-11-05当前入口与保留来源（不表示未来执行能力已实现）：
 
 | 当前入口 | 事实及限制 |
 | --- | --- |
-| [SMA README](../automation-world/semantic-mapping-agent/README.zh-CN.md) | 过滤复用 TSS HTTP facts/materials/targets/映射 UI，既有 `/api/tss/v1` 与 collection-facts 合同仍保留，不打包 Backend |
-| [API 材料 store](../automation-world/semantic-mapping-agent/src/app/twin-facts/store/apiMaterials.ts) | OpenAPI catalog 与 Backend-owned selected materials 合并，`listApiMaterialsFromBackend`/`syncApiMaterialSelectionInBackend` 保存选择；不是本地 SQLite 权威 |
-| [managed runtime](../automation-world/semantic-mapping-agent/src-tauri/src/domain/runtime/mod.rs) | `record_success` 更新内存 cursor，尚不能证明持久 feed/checkpoint/outbox 恢复 |
+| [SMA README](../automation-world/semantic-mapping-agent/README.zh-CN.md) | TSS来源保留；现有配置维护和纯预览由本地SQLite支撑，旧TSS HTTP/lease算法仅用于显式兼容fixture，不作fallback |
+| [API 材料 store](../automation-world/semantic-mapping-agent/src/app/twin-facts/store/apiMaterials.ts) | 本地保存OpenAPI目录/入选材料，支持本地JSON导入/预览/应用和显式受门禁HTTP刷新；连接/材料/目标/规则/映射以Rust/SQLite为唯一业务权威 |
+| [managed runtime](../automation-world/semantic-mapping-agent/src-tauri/src/domain/runtime/mod.rs) | 旧runtime算法保留为兼容fixture；正常执行入口已拒绝，不提供持久feed/checkpoint/outbox恢复 |
 | [Projection 输入解析](../backend/projection/input_resolver.py) | 按 `decoded_payload[point_name]` 直接取标量，不能直接消费新嵌套 points；适配归 Backend |
 | [projection-mapping README](../tools/plc/projection-mapping/README.zh-CN.md) / [PLAN](../tools/plc/projection-mapping/PLAN.zh-CN.md) | 工程准备/显式复核映射材料，不推断业务表、不写业务库、不接 PLC runtime；另有显式只读导出数据库 schema 能力，不是运行时 SMA |
 
@@ -47,27 +47,32 @@ TSS 提供交互参考，Projection 提供已有职责/迁移参照，工具提�
 
 ```mermaid
 flowchart LR
-    DAA[DAA 原身份自描述事实] --> FACT[Backend 固定事实接收 API]
+    DAA[DAA 本地事实：受控B接受] -. "上传/ACK未接" .-> FACT[Backend固定事实API：隔离QA通过]
     FACT --> R[短期 raw / latest]
     R --> DIR[查询时派生目录]
     R --> FEED[安全 raw feed / latest HTTP]
-    DIR --> B[源绑定与定义校验]
-    FEED --> IN[SMA 输入持久化与接收游标]
+    DIR -. "未来新点身份适配" .-> B[源绑定与定义校验]
+    FEED -. "未来可靠输入" .-> IN[SMA 输入持久化与接收游标]
     API[OpenAPI 材料 / 手工目标] --> C[SMA 配置服务]
     B --> C
-    C --> CFG[(当前 Backend-held / 后续独立版本存储)]
-    CFG --> MAP[版本化映射 / 时序处理]
+    C --> CFG[(当前Rust/SQLite单配置快照及revision)]
+    CFG --> PREVIEW[当前纯预览：正常投递拒绝]
+    CFG -. "未来运行版本" .-> MAP[版本化映射 / 时序处理]
     IN --> MAP
     MAP --> OUT[(处理记录 / checkpoint / outbox)]
     OUT --> SEND[独立发送器]
-    SEND --> BUSINESS[公开业务 API / Service]
+    SEND -. "未来投递/ACK接线" .-> BUSINESS[公开typed业务API：隔离QA通过]
     BUSINESS --> STORE[可靠确认后的长期业务记录]
-    BUSINESS -->|可靠回执或结果核实| SEND
+    BUSINESS -. "未来可靠回执/结果核实" .-> SEND
+    classDef future stroke-dasharray:5 4;
+    class B,IN,MAP,OUT,SEND future;
 ```
+
+实线配置/纯预览是当前本地能力；Backend节点仅有隔离QA。虚线及虚线边框节点为未接线/未来可靠运行，不能从节点存在推定GET→POST已完成。
 
 | 组件 | 负责 | 边界 |
 | --- | --- | --- |
-| 本地配置服务 | 材料快照/目标/源绑定/转换/调度、草稿与生效版本 | 不与 Backend 同时编辑同一映射配置 |
+| 本地配置服务 | 当前材料/目标/绑定/规则/映射完整单快照revision；未来运行版本另定 | 不与 Backend 同时编辑同一映射配置 |
 | 事实接收器 | HTTP 读取、身份去重、完整性/定义信息、持久接收 cursor | 不把最大 sourceSeq 当安全 feed cursor |
 | 映射处理器 | 固定规则版本、时效/质量/定义校验、转换/状态/窗口、生成业务请求 | 不直接执行网络副作用 |
 | 输出发送器 | 有界请求、稳定输出身份、目标独立回执/重试/核实 | 发送成功不等于业务可靠入库 |
@@ -78,7 +83,11 @@ flowchart LR
 <a id="configuration"></a>
 ## 3. 配置权威、版本和可选本地持久化
 
-当前SMA沿Backend-held材料／映射配置演进，近期按ARCH-AW-007精简HTTP映射和工作台，不以迁入SQLite作为阶段C前置。下述草稿／版本及可靠运行状态是后续目标；若单独批准本地存储，须明确唯一可编辑权威、导入边界和writer交接，保存连接、适用目标凭据引用、材料快照、目标、绑定、转换与调度。匿名事实／拟议模块集成入口不要求凭据，现有鉴权目标仍按其合同。材料快照不能替代当前API合同；接收cursor、处理checkpoint、outbox／目标回执和审计逻辑独立，物理布局由SMA任务决定，不照搬DAA两文件。
+当前[SMA-004](../automation-world/semantic-mapping-agent/plans/SMA-004-local-configuration/spec.md)选择一个Rust管理的SQLite文件`configuration.sqlite3`，保存完整单文档及单调revision/CAS。连接、材料、目标、规则、映射与必要只读源元数据可离线维护；UI偏好/localStorage和技术启动JSON独立。未采用多JSON/localStorage业务权威或逐实体完整关系库；没有旧TSS自动迁入/fallback。
+
+此配置阶段已通过独立QA2，Owner终验待定；正常manual/start/resume/auto-start在HTTP构造/spawn前拒绝，旧偏好或HTTP开启也不能放行。已保存行预览读取本地revision并复用纯映射规则，不申请lease、不投递、不宣称业务成功。单快照revision不是运行checkpoint，也没有配置历史发布、active/previous、outbox或运行库。
+
+下表及后续激活/回退机制是未来运行版本设计参考，不是当前配置schema。进入时需单独规格与兼容证据；本地配置不要求另造一套DAA式双库。
 
 | 状态 | 推荐动作 | 对执行的影响 |
 | --- | --- | --- |
@@ -91,7 +100,7 @@ flowchart LR
 
 配置恢复/回退不倒退接收 cursor、处理 checkpoint、输出确认或处理幂等身份。材料/规则改动仅给受影响映射增加自己的版本；全局 configRevision 变化不让无关映射重处理全部历史。凭据用引用，具体安全存储/备份恢复/schema/SQLite 版本另定。
 
-若未来批准迁库，现有Backend-held材料／映射需显式导出、审核、导入草稿并确定停用哪一写入口。本次不迁移，不建立两个同时可编辑权威；可靠输入／checkpoint／outbox仍需单独立项。
+当前不会自动迁入旧TSS或localStorage连接；真实/默认profile采用及任何既有配置迁移另批。后续可靠输入/checkpoint/outbox及运行版本如需扩展schema，另定迁移/回退合同，禁止双可编辑权威。
 
 <a id="sources"></a>
 ## 4. 通过 HTTP 发现目录与读取事实
@@ -104,9 +113,9 @@ flowchart LR
 | latest | 实时状态映射、预览取样 | 原 sampleId/pointId、采集时间/质量、当前来源/定义，映射最大年龄 |
 | 安全 raw feed | 完整历史、逐样本/有状态/窗口处理 | 稳定输入身份、原定义/值/时间/质量、nextCursor、cycle/分片及完整前缀/缺口 |
 
-候选匿名读取为GET `/api/v1/integration/plc-facts/latest`及`/history`，目录从latest查询投影，不增第三个必需读取接口。正式provider字段／分页仍须定稿，既有管理／前端API认证、权限分组与数据范围保留。SMA不依赖内部表名；points按pointId保留身份及原定义／值／质量。组跨DB完整性仍由manifest／全部片证明。latest逐点须关联原sampleId、来源代次／序号及定义版本，聚合不丢来源；失败保留定义和缺值／原因，不能补0。
+已实现provider匿名读取为GET `/api/v1/integration/plc-facts/latest`及`/history`，目录从latest查询投影，不增第三个必需读取接口。正式provider字段/分页已固定，SMA仍需实施适配，既有管理／前端API认证、权限分组与数据范围保留。SMA不依赖内部表名；points按pointId保留身份及原定义／值／质量。组跨DB完整性仍由manifest／全部片证明。latest逐点须关联原sampleId、来源代次／序号及定义版本，聚合不丢来源；失败保留定义和缺值／原因，不能补0。
 
-points 的 pointId 键是身份数据，snake/camel 字段转换不能改写它；Backend 当前 [common serializer](../backend/common/response.py)递归转换字典键，新接口须明确 preserve mapping keys。SMA 不能再自行转换这些键或按改写后名称绑定；适配实现留 Backend。
+points 的 pointId 键是身份数据，snake/camel 字段转换不能改写它；Backend 当前 [common serializer](../backend/common/response.py)递归转换字典键，新事实provider已实现原样键输出；SMA适配亦须preserve mapping keys。SMA 不能再自行转换这些键或按改写后名称绑定；Backend provider隔离QA已核；SMA后续客户端接线仍另项。
 
 Backend 在查询时投影/合并目录，不另持久无值 pointCatalog。同 PLC/DB 的组 A 上传 point-1、组 B 上传 point-2，目录应合并两个；读取失败/包缺点不是删除，明确停用/删除依有效成员声明。目录不保证发现未采集或未上报的 TIA 字段，SMA 不请求 DAA 全结构来暗建另一个永久目录。
 
@@ -148,7 +157,7 @@ SMA 能改源绑定、业务字段和转换，不能修改真实 PLC 地址/类�
 <a id="materials"></a>
 ## 6. API 材料、手工目标及参数合同
 
-支持从当前 Backend OpenAPI 取得可选操作材料，也允许手工配置目标；本轮未发起实际材料读取。OpenAPI 描述操作、参数、requestBody、schema/ref 和安全要求，但不保证运行权限、业务幂等或持久化语义；这些仍需目标确认。[OpenAPI 官方规范](https://spec.openapis.org/oas/v3.1.1.html)
+当前配置阶段支持本地OpenAPI JSON导入/显式目录应用、保存材料选择及手工目标；显式网络刷新仍受原HTTP gate。材料/配置保存不依赖Backend在线，不自动读取事实或运行审计。OpenAPI 描述操作、参数、requestBody、schema/ref 和安全要求，但不保证运行权限、业务幂等或持久化语义；这些仍需目标确认。[OpenAPI 官方规范](https://spec.openapis.org/oas/v3.1.1.html)
 
 | 材料/目标信息 | 推荐保存与校验 |
 | --- | --- |
@@ -192,21 +201,23 @@ SMA 能改源绑定、业务字段和转换，不能修改真实 PLC 地址/类�
 
 ### 7.2 一次处理的固定输入
 
-新增模块typed集成入口的信封以[业务投递需求与JSON](../contracts/demands/automation-world-facts-integration.zh-CN.md#business)为准：稳定producerId/eventId、mappingId／版本、sourceRefs与模块data关联。sourceRefs从latest逐点来源或history取得sampleId、pointId、来源代次／序号与定义版本。上例仅示意业务内容，不替代可靠信封。既有业务POST继续认证，不把通用JSON当任意表写入口，不伪造admin actor绕过有用户语义的Service。
+新增模块typed集成入口的正式信封、闭合字段、规范请求/摘要及回执以[business-integration/v1 OpenAPI](../contracts/published/http-api/business-integration-v1/openapi.json)和[正式examples/摘要向量](../contracts/published/http-api/business-integration-v1/examples.json)为准，说明见[provider README](../contracts/published/http-api/business-integration-v1/README.zh-CN.md)。[业务投递需求与JSON](../contracts/demands/automation-world-facts-integration.zh-CN.md#business)仍为proposed需求/责任来源，不覆盖已固定provider源码合同。稳定producerId/eventId、mappingId／版本、sourceRefs与模块data关联。sourceRefs从latest逐点来源或history取得sampleId、pointId、来源代次／序号与定义版本。上例仅示意业务内容，不替代可靠信封。既有业务POST继续认证，不把通用JSON当任意表写入口，不伪造admin actor绕过有用户语义的Service。
 
 从接收库挑选符合模式的输入，固定映射版本/确认定义/目标模板/输入身份后，再生成业务对象。单输入处理键至少是映射 ID+映射版本+sampleId，包内多个独立点输出还包含 pointId/字段组；多输入对象使用稳定输入身份集合/触发身份，窗口使用窗口身份。字段组/目标分清，不能一份包中两个合法输出互相去重。
 
 同一已处理输入在下一调度周期再看到，默认不重复生成输出；调度轮次不重新制造采样身份。确需周期心跳或重复上送最新状态时，先独立声明业务触发身份和幂等语义，不能用随机 ID 绕过去重。显式改版重算和窗口修正采用各自可追溯修订身份，不默认为源重传产生新业务记录。
 
 <a id="preview"></a>
-## 8. JSON 预览与真实投递测试
+<a id="8-json-预览与真实投递测试"></a>
+## 8. JSON 预览与后续真实投递测试
 
 预览使用已读事实或明确标记的隔离示例，展示来源定义/采集时间/质量、转换前后、缺字段/类型错误、请求 method/path/query/header/body 和目标版本；敏感字段脱敏。默认只读计算，不生成生产 outbox、不发送 HTTP。编辑预览不等于修改事实，也不能把合成值注入 raw/latest。
 
 真实投递测试必须是显式操作，选择获准目标/测试上下文，固定原输入和输出身份，走同一持久 outbox/幂等/可靠确认链路；测试与正常运行若指同一业务效果，重用同一幂等身份，不能随机换键重复写。需要隔离测试目标时由目标合同明确命名空间/业务影响，测试记录单独标记，不能据此认证生产验收。本轮只设计流程，未实际调用 API。
 
 <a id="timing"></a>
-## 9. 独立调度与四类时序
+<a id="9-独立调度与四类时序"></a>
+## 9. 后续独立调度与四类时序
 
 SMA 接收、处理、发送周期分别配置，独立于 DAA 采集和上报周期。接收器公平拉取有界页；每映射非重入，超期记录延迟不无限堆 tick；发送器对目标限并发/速率并退避。某个映射等待缺口或目标阻塞，不让其他无关映射停止。首版具体线程/任务模型和限额留实现，不在本文指定依赖。
 
@@ -222,7 +233,8 @@ SMA 接收、处理、发送周期分别配置，独立于 DAA 采集和上报�
 正常恢复例：初始完整到1000，先收到1005，实时状态可更新但需新鲜度校验；无状态可处理1005；有状态先缓存。1001–1004补齐且对应定义获准后，有状态按1001→1002→1003→1004→1005执行；重复1005不重复产生同版本输出。窗口按原时间修正，不能把补传到达时间当事件发生时间。历史事件触发实时副作用需要规则明示，不默认全量补做旧业务动作。
 
 <a id="persistence"></a>
-## 10. 持久输入、双进度、checkpoint 与 outbox
+<a id="10-持久输入双进度checkpoint-与-outbox"></a>
+## 10. 后续持久输入、双进度、checkpoint 与 outbox
 
 ### 10.1 概念实体与事务边界
 
@@ -271,7 +283,7 @@ T1 前退出可重取；T1 后/T2 前退出从持久输入处理；T2 后退出�
 | rejected | 不可重试业务/合同拒绝，保留原因和必要请求引用待处理 |
 | unknown | 超时可能已经产生效果，又无足够幂等/结果核实证据；不盲目换键重发 |
 
-DAA→Backend事实ACK与SMA→模块业务ACK是两段确认。目标回执须绑定producer/event、冻结摘要和可靠业务记录／范围；同事件同内容恢复原结果，同事件异内容拒绝冲突。正式状态码由目标合同定稿，不能仅按HTTP 200/202推断持久级别；若先入队，仍须最终业务持久确认或可靠查询，才计入“已入库”。
+DAA→Backend事实ACK与SMA→模块业务ACK是两段确认。目标回执须绑定producer/event、冻结摘要和可靠业务记录／范围；同事件同内容恢复原结果，同事件异内容拒绝冲突。BE-010已固定八路typed业务成功/错误与幂等回执；其他目标仍按自己的正式合同定稿，不能仅按HTTP 200/202推断持久级别；若先入队，仍须最终业务持久确认或可靠查询，才计入“已入库”。
 
 ### 11.2 多目标与副作用边界
 
@@ -307,7 +319,7 @@ SMA 停机超过三个月、feed/cursor 过期不一定能从 raw 补齐，必�
 
 业务记录应有业务值和最小来源/定义/映射版本追溯，不能依赖将来 raw 查询才能解释。必要输出请求/去重/处理摘要按各自期限保留，不等于永久全原始载荷。raw/latest 到期不级联删除业务、未完成 outbox 和仍有效幂等摘要；本地/目标业务保留政策也不能反过来延长 Backend 事实窗口。
 
-DAA 到期补传明确拒绝不假 ack，本地未确认仍保护且满额可停采；SMA 不代 DAA 收走这些过期事实当永久仓库。已接收历史回执与混合新/过期批次策略由 Backend 定稿，不能据此恢复已到期 raw/latest。
+DAA 到期补传明确拒绝不假 ack，本地未确认仍保护且满额可停采；SMA 不代 DAA 收走这些过期事实当永久仓库。已接收历史回执、有限proof及混合新/过期批次的拒绝/退休/派生矩阵已由[plc-facts/v1正式provider](../contracts/published/http-api/plc-facts-v1/README.zh-CN.md)固定，不能据此恢复已到期raw/latest。DAA本地处置、SMA缺口接受/重同步及可靠运行客户端仍为后续实施，不把这些未接线能力混同为Backend合同未定稿。
 
 ### 12.3 SMA 本地有界保留
 
@@ -317,6 +329,8 @@ DAA 到期补传明确拒绝不假 ack，本地未确认仍保护且满额可停
 
 <a id="workbench"></a>
 ## 13. GUI 工作区、状态与审计
+
+当前仅本地配置和已保存行纯预览；下表运行工作台、outbox和恢复诊断属于后续可靠运行设计，不恢复正常投递。
 
 | 工作区 | 首版信息/操作 |
 | --- | --- |
@@ -334,7 +348,7 @@ DAA 到期补传明确拒绝不假 ack，本地未确认仍保护且满额可停
 <a id="migration"></a>
 ## 14. 兼容、单 writer 切换与回退
 
-现有Backend-held TSS配置／HTTP UI是当前基线。若未来独立批准迁库，先列旧配置与本地差异、身份／定义／目标／材料对应，审核后显式导入草稿；当前不要求立刻迁库，不双向自动同步或静默迁移profile。projection-mapping是工程准备／审核工具，可显式只读导出schema；[数据库模块](../tools/plc/projection-mapping/src-python/core/database.py)读取information_schema，[CLI](../tools/plc/projection-mapping/src-python/cli/commands.py)注册操作。它不承担常驻事实消费、业务写库或PLC runtime，也不自动推断业务表；SMA运行时仍只走公开HTTP，本轮未运行工具。
+当前正常应用配置权威为本地Rust/SQLite单快照；Backend-held TSS是来源及显式兼容fixture。若未来批准旧材料导入，先列身份/定义/目标/材料差异，经审核显式导入；不自动迁入、双向同步或静默采用profile。projection-mapping是工程准备／审核工具，可显式只读导出schema；[数据库模块](../tools/plc/projection-mapping/src-python/core/database.py)读取information_schema，[CLI](../tools/plc/projection-mapping/src-python/cli/commands.py)注册操作。它不承担常驻事实消费、业务写库或PLC runtime，也不自动推断业务表；SMA运行时仍只走公开HTTP，本轮未运行工具。
 
 Backend 的旧 `decoded_payload[point_name]` 标量字典需显式适配新嵌套 points，定版本/兼容读取/历史数据语义后才联调。不能把新包塞给旧 Projection 并声称兼容。DAA 事实接口只写事实，SMA 业务目标另经公开 API/Service，不能让事实 API 顺便写业务表。
 
@@ -375,17 +389,17 @@ F01–F30 的三方共同编号、预期/持久边界/责任/未来证据以 [DA
 
 | 待确认项 | 责任 | 决定前证据/进入实施 gate |
 | --- | --- | --- |
-| points/目录/成员声明/定义有效版本、来源交接/可靠回执 | Backend + DAA，SMA消费核对 | 跨DB/移组/旧定义/拒绝推演；先正式合同再实现 |
+| points/目录/成员声明/定义有效版本、来源交接/可靠回执 | Backend provider已固定并隔离QA；DAA/SMA接线仍待实现 | 后续遵循正式provider合同并核对跨DB/移组/旧定义/拒绝，不重新当作全未定 |
 | 最大三自然月的精度/时钟容差/清理SLA、feed/去重/回执窗口 | Backend | 月末/未来时钟/晚提交/过期与最长滞后证据；不改已批准上限语义 |
-| 本地配置/运行物理布局、SQLite版本/schema/备份、容量/水位/日志 | SMA | 崩溃/写入/维护峰值/恢复证据；独立存储任务 |
+| 本地配置单SQLite快照/revision已实现；运行布局/容量/水位/日志仍后续 | SMA | 当前配置QA2待Owner；可靠运行存储的崩溃/维护/恢复另立 |
 | 签名规范化、转换/质量/缺值/最大年龄、多源时差/窗口 | SMA +业务Owner | 绑定漂移与真实业务字段/边界样本；窄映射任务 |
 | OpenAPI版本/解析矩阵、手工目标、权限/凭据引用 | SMA +目标Owner | 不支持结构定位/必填编码/版本兼容审阅；材料任务 |
 | 输出幂等/业务持久回执/结果查询、部分成功/修正/期限 | 目标API Owner + SMA | 丢回执、多目标、入队后最终确认与重算证据；业务API合同先稳定 |
 | 接收/处理/发送周期、并发/预算/退避、公平与unknown处置 | SMA | 吞吐/积压/超期/目标失败推演；运行任务 |
 | 旧配置导入/标量适配/唯一writer、平台/后台/打包 | Backend/DAA/SMA/Human Owner | 只读比对、在途核实、回退/生命周期证据；另行批准切换 |
 
-候选顺序：先确定事实一写两读和业务目标合同；Backend／DAA软件spec各自批准后可并行实施，provider就绪后才受控联调，未来B01–B08／D01–D08见[共同需求实施边界](../contracts/demands/automation-world-facts-integration.zh-CN.md#implementation)。SMA／模块目标不是DAA阶段C完成的强制前置；SMA继续Backend-held路线，分别立项有限绑定／转换／预览，必要时再单独批准本地配置持久化；随后持久输入/双进度/outbox 的离线夹具与单目标闭环；再多目标/迟到窗口/过期/容量与兼容联调；最后独立批准原生运行、现场和旧writer切换。画布/共享 Flow Core/中央配置等后续按收益另立，不阻塞表单式首版。
+当前事实/业务provider合同和实现已形成，隔离A+B QA通过，Owner及真实采用待定；先Backend、DAA暂缓是已选顺序，后续DAA获批接线再受控联调。原候选B01–B08／D01–D08见[共同需求实施边界](../contracts/demands/automation-world-facts-integration.zh-CN.md#implementation)。SMA／模块目标不是DAA阶段C完成的强制前置；SMA本地配置/纯预览已通过QA2待Owner，旧sourceKey/factName绑定仍需新点身份适配；随后另立持久输入/双进度/outbox 的离线夹具与单目标闭环；再多目标/迟到窗口/过期/容量与兼容联调；最后独立批准原生运行、现场和旧writer切换。画布/共享 Flow Core/中央配置等后续按收益另立，不阻塞表单式首版。
 
 后续 SMA 按 `rust-runtime`、涉及壳用 `desktop-tauri`，UI/文案用 `frontend-ui`/`i18n-workflow`；Backend 正式 API/数据库用 `backend-arch`，DAA 点位算法用 `plc-point-mapping`。本次只用适用文档/架构治理，不恢复 Celery/Redis，不修改技能/角色配置。
 
-本次新文档QA只核验ARCH-AW-008 r1交付，不继承旧ARCH-AW-003或ARCH-AW-007的QA／终验结论，也不证明API、软件恢复或业务持久化已运行通过。旧任务证据保留，本次fresh-context Verification与Owner终验分别办理。本文不授权代码、正式schema、迁移、发布或实际联调。
+ARCH-AW-008原文档QA只核验其r1交付；当前ARCH-DOC-001文档同步不替代软件QA或接受，其新文档QA只核验本同步范围，不继承旧ARCH-AW-003或ARCH-AW-007的QA／终验结论，也不证明API、软件恢复或业务持久化已运行通过。旧任务证据保留，本次fresh-context Verification与Owner终验分别办理。本文不授权代码、正式schema、迁移、发布或实际联调。

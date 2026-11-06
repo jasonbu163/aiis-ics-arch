@@ -1,25 +1,25 @@
 # Automation World 运行原理与详细设计
 
-**内容修订：2026-11-04 · ARCH-AW-008 r1；原运行设计：ARCH-AW-002 r2；DS增补：r3**
+**当前状态同步：2026-11-05 · ARCH-DOC-001 r1；事实合同修订：2026-11-04 · ARCH-AW-008 r1；原运行设计：ARCH-AW-002 r2；DS增补：r3**
 **效力：设计依据与合同草案；未实施能力、依赖与现场操作仍需精确任务批准。**
 
-> **方向更新（ARCH-AW-007 r2）：** 新路线保留 DAA、SMA、CA 三应用：DAA 负责大量持续采集，SMA 沿已过滤 TSS 基线精简表格化批量 HTTP 映射与工作台，CA 承担通用节点编排及内部多协议连接器。AWB/AWC 未来统一管理三类实例，先登记/心跳与只读健康，再配置/远程操作。全项目 [中文 ROADMAP](../ROADMAP.zh-CN.md)、[English ROADMAP](../ROADMAP.md) 与 [007 r2](../plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design)、[006 r2](../plans/ARCH-AW-006-unified-flow-agent-design/spec.md#r2-design) 提供当前方向；精确批准、交付、独立 QA 与最终验收状态归所属 bundle，原设计正文/来源及 r1 验证历史保留。DAA 当前 SQLite 本地采集且新上传未接入；SMA 当前 Backend-held TSS/Facts→POST 与逐项 await 调度，子集/逐行常驻、任意 HTTP 源、本地 SQLite/可靠 outbox 和容量优化分期，不强制近期迁库；CA 自身版本化存储仍为目标。本文旧表单/共享 Core/角色节点限制等按当时范围解释，不构成三 App 统一迁移或 CA 能力总界限；CAF/旧 CA 保持冻结。CA 首版 HTTP GET/POST、明确受支持 S7 与无登录前提依 006 r2；原可靠投递、PW Service/API owner、版本固定及 unknown 核实原则仍为适用参考，后续实施 spec 明确采用/替代条款。本提示不宣称软件、QA、设备或部署许可。
+> **当前状态同步（2026-11-05 · [ARCH-DOC-001 r1](../plans/ARCH-DOC-001-project-state-and-decision-sync/spec.md)）：** DAA受控本地阶段B已接受，上传/ACK仍未接通。SMA-002职责清理、003 CU接入已接受；004的Rust/SQLite单配置快照与纯预览通过QA2、待Owner终验，正常manual/start/resume/auto-start投递关闭。Backend事实/八类typed业务provider已通过获批隔离MySQL A+B QA，Owner终验、真实采用及DAA/SMA接线仍独立。FOA命名和SMA/CA合并宿主已由[007 r2](../plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md#r2-design)替代为DAA/SMA/CA三应用；共享Flow Core/画布/中央管理是可选未来能力，不是近期前置。原任务的批准、失败与QA/接受仍按各自候选保留，本文同步不授予产品或现场接受。
 
 ## 1. 阅读依据与阶段
 
-本文承接先行修订的 [AW 白皮书](AIIS_AW_Whitepaper_Roadmap_v0.4.md)，原稿范围由 [ARCH-AW-002 r2](../plans/ARCH-AW-002-agent-runtime-design/spec.md)管理，本次事实链路文档范围由[ARCH-AW-008 r1](../plans/ARCH-AW-008-stage-c-facts-contract/spec.md)管理。白皮书回答角色与路线，本文回答各部件如何协作，后续实施 spec 再固定单次范围、验收和风险。
+本文承接[AW白皮书](AIIS_AW_Whitepaper_Roadmap_v0.4.md)。原设计范围归[ARCH-AW-002 r2/r3](../plans/ARCH-AW-002-agent-runtime-design/spec.md)，事实合同修订归[ARCH-AW-008 r1](../plans/ARCH-AW-008-stage-c-facts-contract/spec.md)，当前状态同步归[ARCH-DOC-001 r1](../plans/ARCH-DOC-001-project-state-and-decision-sync/spec.md)。白皮书解释职责与路线，本文保留机制设计；各实施任务固定单次范围、验收与风险。
 
-**DAA/SMA合同更新（2026-11-04 · ARCH-AW-008 r1）：**[共同需求](../contracts/demands/automation-world-facts-integration.zh-CN.md)以demands/proposed记录匿名事实一写两读、不可变样本／可靠回执、逐点latest、安全history游标、上海原observedAt加最多三自然月及模块业务永久保存。Backend尚未因此接受／实现provider合同，软件和实际联调另批。[DAA](AIIS_DAA_Detailed_Design.md)阶段B已在受控DS范围验收，历史证据限制保留；新可靠上传未接入。[SMA](AIIS_SMA_Detailed_Design.md)当前Backend-held配置及TSS派生路线继续，本地SQLite／双进度／outbox为分期目标，不强制近期迁库。ARCH-AW-002 r3及ARCH-AW-003原文档终验归历史bundle，本次新文档核验单独办理。DAA已选全样本，满额保护停采，不合并丢弃；本文其余CA／DS设计不因本次扩大。
+**DAA/SMA合同与实现层级：**[共同需求](../contracts/demands/automation-world-facts-integration.zh-CN.md)保留proposed状态；后续[事实provider](../contracts/published/http-api/plc-facts-v1/README.zh-CN.md)及[业务provider](../contracts/published/http-api/business-integration-v1/README.zh-CN.md)已固定机器合同并通过隔离A+B QA，Owner终验/实际采用待定。DAA受控B已接受，完整轮样本先本地提交、满额保护停采，不合并丢弃；可靠上传未接。SMA当前为本地SQLite配置/纯预览，正常投递关闭；可靠输入/双进度/outbox是后续范围。原文档接受保持其历史候选，不外推为本次或未来软件接受。
 
 | 层级 | 本文采用的依据 |
 | --- | --- |
 | 已有工程 | [ARCH-AW-001](../plans/ARCH-AW-001-agent-foundation/spec.md) 记录原 CA 冻结、DAA/SMA 独立初始化；不证明新 API/SQLite/流程能力 |
 | 确定方向 | 原 CA 称 CAF 冻结参考，新 CA 为 Control Agent；DAA 首版 S7、DB/UDT、SQLite、事实 API；SMA 对外语义投递，CA 对内执行持久有效意图；CA 基于 Tauri |
-| 推荐方案 | CU 共享 UI 源码与工作台；SMA/CA 共享可视化编辑器与 Rust Flow Core，独立宿主和状态 |
-| 待细化 | SMA/CA SQLite 生命周期、draft 保留、画布选型、节点/API/握手/支持矩阵和后台托管 |
+| 推荐方案 | CU源码/工作台已交付；共享编辑器/Flow Core是可选未来复用，不是SMA或CA近期前置 |
+| 待细化 | SMA未来运行库/版本生命周期、CA存储、画布/节点/握手/支持矩阵和后台托管；SMA现行配置单快照已实现 |
 | 长期方向 | AWB/Axum、中央配置、PG/Redis、HA/SA、统一 AWC，不是近期闭环前置 |
 
-2026-10-15历史核对时，`automation-world/control-agent/`仍存在且README沿冻结说明，CU目录文档当时仍沿旧CA。当前DAA已消费CU公共布局／二级导航，详见DAA阶段A证据；本段其余命名材料保留为历史。旧CA移出命名及冻结来源不因本轮改写；DAA消费CU的证据不外推为所有CU能力或新CA已运行，不改冻结receipt。CAF 英文展开与最终路径待核对，AWC 长期控制台角色与 CU 共享源码不是同一命名层次。
+2026-10-15历史核对时，`automation-world/control-agent/`仍存在且README沿冻结说明，CU目录文档当时仍沿旧CA。当前DAA与SMA已各按自身任务消费CU公共布局/二级导航，详见DAA阶段A证据；本段其余命名材料保留为历史。旧CA移出命名及冻结来源不因本轮改写；DAA消费CU的证据不外推为所有CU能力或新CA已运行，不改冻结receipt。CAF 英文展开与最终路径待核对，AWC 长期控制台角色与 CU 共享源码不是同一命名层次。
 
 ## 2. 职责边界
 
@@ -29,7 +29,7 @@
 | CU / console-ui | UI 组件、布局、主题、页面配置 | 共享源码及可运行设计工作台 | 构建依赖，不是在线前置；不拥有 Flow Core/设备权限 |
 | DAA / Data Acquisition Agent | PLC 点位、采集策略；连接、读取、解码、时间与质量标记 | 向 Backend 交付结构化采集事实，按 API 回执确认接收 | 不编排业务流程，不执行设备写入，不映射平台业务表 |
 | SMA / Semantic Mapping Agent | AW 事实及公开 API 材料；提取、转换、聚合、条件判断 | 语义对象/记录、第三方或上层 API 投递；分别记录各输出确认 | 不写 PLC，不直连对方业务库，不代替接收方业务校验 |
-| CA / Control Agent | 本系统校验、持久化且具备执行资格的意图；映射、现场校验、仲裁 | 设备下发、核实结果及执行回执 | 不直接把任意外部 URL 数据变成设备指令，不通过 SQL 轮询任意业务表 |
+| CA / Control Agent | 规划通用节点/受控内部连接器编排；设备执行须有本系统持久有效意图、现场校验和仲裁 | 节点结果；设备下发、核实及执行回执 | 新CA尚未实现；不绕过PW业务规则或节点/设备授权，不通过SQL轮询任意业务表 |
 | DS / Device Simulator | 模拟区域、点位和规则；开发联调客户端读写 | 隔离的模拟设备端点与诊断 | 非生产 Agent/依赖，不证明真实设备、联锁或物理动作 |
 | Backend | 第三方接入、权限与业务校验、持久化、事实接口、领取与回执 | API 合同和持久状态 | 不在 FastAPI 请求内运行 PLC 常驻循环；拥有存储实现与 schema |
 
@@ -39,15 +39,15 @@
 flowchart LR
     PLC[PLC / 设备] --> DAA[DAA 采集]
     DAA --> LOCAL[(DAA 本地可靠提交)]
-    LOCAL -->|匿名事实 API / 可靠ACK| B[Backend raw / latest]
-    B -->|latest / history HTTP| SMA[SMA 语义映射]
-    SMA -->|模块 typed API / 独立业务ACK| BIZ[Backend 业务 / 意图 Service]
+    LOCAL -. "上传/ACK未接通" .-> B[Backend plc_facts：隔离QA通过]
+    B -. "未来latest/history接线" .-> SMA[SMA本地配置/纯预览：正常投递关闭]
+    SMA -. "未来typed业务投递/ACK" .-> BIZ[Backend业务Service：集成隔离QA通过]
     BIZ --> STORE[(独立永久业务记录)]
-    SMA -->|其他目标按各自合同| X[第三方 / 上层系统]
+    SMA -. "未来其他目标合同" .-> X[第三方 / 上层系统]
     X -->|提交业务请求| BIZ
-    BIZ -->|领取已校验持久的有效执行意图| CA[CA 执行]
-    CA -->|受控写入与确认| PLC
-    CA -->|执行回执 - 独立合同| BIZ
+    BIZ -. "规划有效意图合同" .-> CA[新CA：规划执行]
+    CA -. "规划受控写入/确认" .-> PLC
+    CA -. "规划独立执行回执" .-> BIZ
 ```
 
 
@@ -55,22 +55,22 @@ flowchart LR
 
 CU 承载通用视觉组件、布局主题、节点外观/表单等适用 UI 代码及可运行设计工作台。UI 低代码编排描述页面布局与参数呈现；SMA/CA 业务流程画布描述触发、数据处理与副作用执行。二者可以共用交互组件，发布目标与权限仍分开。
 
-**构建视图（目标示意，非新增目录承诺）：**
+**构建视图（当前UI复用及可选未来流程，不承诺新增目录）：**
 
 ```text
 CU 共享 UI 源码 ─→ DAA UI ─→ DAA 前端产物/安装包
-              ├→ SMA UI + 流程编辑器 ─→ SMA 前端产物/安装包
-              ├→ CA UI  + 流程编辑器 ─→ CA 前端产物/安装包
+              ├→ SMA UI（已接入；未来流程编辑器可选） ─→ SMA 前端产物/安装包
+              ├⇢ 未来 CA UI / 可选流程编辑器 ─→ CA 前端产物/安装包
               └→ CU 设计工作台（组件预览、调参、页面组合）
-共享 Rust Flow Core ─→ SMA Rust 宿主 / CA Rust 宿主
+可选未来共享Rust基础 ─→ SMA/CA各自Rust宿主，不是当前前置
 ```
 
 **运行视图：**
 
 ```text
-DAA UI ↔ DAA Rust 配置/采集服务 ↔ 自身 SQLite → Backend 事实 API
-SMA UI ↔ 当前 Backend-held 配置；后续持久输入/checkpoint/outbox → 目标 API（共享 Core/本地库另期）
-CA UI  ↔ CA Rust 宿主  + Flow Core ↔ 自身 SQLite/执行记录 ↔ Backend/设备
+DAA UI ↔ DAA Rust配置/采集服务 ↔ 自身SQLite；上传到Backend事实API尚未接通
+SMA UI ↔ 本机Rust配置服务 ↔ 自身SQLite快照/revision → 纯预览；正常投递关闭
+未来 CA UI ↔ 独立Rust宿主/受控连接器 ↔ 自身执行记录 ↔ Backend/设备；共享Flow Core可选
 CU 工作台独立用于设计；三应用安装运行不依赖工作台在线或外部共享源码目录。
 ```
 
@@ -94,7 +94,7 @@ DAA 使用固定链路：`有效配置 -> 定时 S7 读取 -> 解码与质量标
 
 ## 4. 本地 SQLite 配置
 
-DAA当前以本地SQLite为唯一配置权威，普通YAML运行／迁入入口及直库writer已退役，迁入防重复私有记录保留；配置库和样本库分开。SMA当前Backend-held配置保留，若未来独立批准本地持久化再确定权威交接；CA存储仍按自己的路线。各应用／实例不共享打开的可写库。
+DAA以本地SQLite为唯一配置权威，普通YAML运行/迁入和直库writer已退役，配置与样本库分开，私有迁入防重复记录保留。SMA亦已独立采用Rust管理的SQLite单配置快照/revision，不共享DAA库；其UI/技术启动偏好独立，未实现active/previous发布或持久投递/outbox。CA存储仍按后续路线，各实例不共享打开的可写库。
 
 | 配置状态建议 | 含义 |
 | --- | --- |
@@ -102,7 +102,7 @@ DAA当前以本地SQLite为唯一配置权威，普通YAML运行／迁入入口�
 | active | 已校验并明确应用的完整版本；每次采集/流程执行固定引用此版本 |
 | previous | 上一次被替换的完整有效版本，用于显式、兼容性校验后的回退 |
 
-以上是本地编辑的生命周期建议；active 对应白皮书长期 current 的概念，previous 是上次切出版本，不是按版本排序的次新版。draft 的保留量/schema 及其与长期两个稳定运行槽的关系待定，不直接声称已实现精确双槽合同。
+以上是DAA/未来运行发布的生命周期参考，不是当前SMA配置状态机；active 对应白皮书长期 current 的概念，previous 是上次切出版本，不是按版本排序的次新版。draft 的保留量/schema 及其与长期两个稳定运行槽的关系待定，不直接声称已实现精确双槽合同。
 
 配置由 Rust 配置服务统一办理写入和校验，Vue 通过受控 Tauri command 提交；运行时不让多个进程直接编辑同一打开的 SQLite 文件。激活应事务保存完整版本，并在明确批次边界或停止状态切换内存配置；SQLite 提交和运行切换是两个步骤，须定义崩溃后的恢复行为。建议每个批次/流程 run 固定完整 revision，在允许边界暂停新工作后准备并提交；提交后内存切换失败应进入可诊断停止/待恢复状态，不能继续使用旧内存却报告新版本已生效。重启核对持久生效指针、摘要与兼容性，再恢复或等待显式处理，精确机制待定。
 
@@ -114,7 +114,7 @@ DAA当前以本地SQLite为唯一配置权威，普通YAML运行／迁入入口�
 
 DAA 只消费公开的采集接收 API，不引入 Redis 客户端、业务表名或数据库凭据。Backend 可以在合同保持一致的前提下调整关系库、最新值缓存或历史存储；具体采用 Redis 仍属于独立后端任务，本设计不恢复该中间件，也不让易失缓存替代可靠执行意图的真相源。
 
-“写入成功”的确认语义必须明确：已接收、已可靠持久化或仅入队不能混用。后端换存储后不能降低已有承诺却继续返回同样的成功语义。本次事实入口选择匿名集成、首版有界整批事务；既有前端／管理／业务POST认证和权限分组不降级。路径／字段／摘要／错误／限额等由后续Backend spec冻结；下表是信息需求，非已实现schema。
+“写入成功”的确认语义必须明确：已接收、已可靠持久化或仅入队不能混用。后端换存储后不能降低已有承诺却继续返回同样的成功语义。本次事实入口选择匿名集成、首版有界整批事务；既有前端／管理／业务POST认证和权限分组不降级。事实和typed业务路径/字段/摘要/错误/限额现已由各自provider固定并通过隔离QA，引用其机器合同；下表仅保留职责信息需求，执行意图/设备领取等尚未实施，不把需求表当成现成schema。
 
 | 合同 | 最小信息需求 |
 | --- | --- |
@@ -131,9 +131,10 @@ latest由Backend按点的有效来源代次、定义与持久sourceSeq原子推�
 raw/latest默认且最多保留上海原point observedAt加三自然月，整包原文按最早成员截止保守到期或经证明的等效投影处理；重试不续期。业务记录独立保存实际值及必要来源／映射版本，默认永久、无自动TTL删除，不随raw清理级联。完整JSON、来源切换、混合批次退休／派生、gap与清理边界集中见[共同需求](../contracts/demands/automation-world-facts-integration.zh-CN.md)，四份设计不另复制竞争schema。
 
 轮询不能保证捕获两次采样间的短脉冲；需计数器、锁存或设备事件缓冲。网络慢先本地有界缓冲，保护数据满额暂停采集并显示缺口风险，不静默合并／丢样。
-## 6. SMA/CA 共享可视化流程底座
+<a id="6-smaca-共享可视化流程底座"></a>
+## 6. SMA/CA 可选共享可视化流程底座
 
-对于 SMA，本节是后续通用流程平台方向；本次表单/规则式首版及本地持久投递见 [SMA 详细设计](AIIS_SMA_Detailed_Design.md)，可先于共享 Core 建设独立立项。CA 的既有设计边界保持原范围。
+本节保留共享可视化/Flow Core的后续可选设计，不要求SMA和CA合并宿主，也不成为本地表格配置或GET→POST的前置。SMA当前配置/纯预览见[SMA详细设计](AIIS_SMA_Detailed_Design.md)；共享实现必须由实际重复需求另行批准，CA通用连接器范围以007 r2及其实施任务为准。
 
 推荐采用 Tauri 中的 Vue 流程画布及参数面板，发布标准化流程定义，由 Rust 解释执行；每次改流程无需生成和重新编译 Rust 源码。画布负责编辑、预览和诊断，Rust 负责最终校验、执行和持久状态。Tauri 提供 command/event 通信机制，但不自动提供流程或后台托管语义。[Tauri IPC](https://v2.tauri.app/concept/inter-process-communication/)
 
@@ -237,9 +238,11 @@ SMA 需要断网补报时，先持久保存事件与 outbox；仅保存最新值
 
 ## 12. 开放决策、兼容与来源
 
-待决项包括 S7 CPU/驱动/访问方式/类型支持矩阵；DAA 已选 samples 后的正式载荷/确认细则；事实匿名入口的正式schema／摘要／限额／混合批次矩阵，及其他API各自认证／领取合同；SMA HTTP 目录/latest/安全 raw feed 的正式编码与回执；SQLite schema、draft 保留、previous 与崩溃恢复；凭据安全存储；Vue 画布及首批节点；CA 握手/仲裁；实例身份、后台托管与目标平台打包。业务算法超出受限表达式时，先定义有类型扩展模块，不默认任意脚本。
+事实匿名入口的正式schema、编码/摘要、限额、latest/history及历史确认/混合批次拒绝/退休与派生约束，现由[plc-facts/v1正式provider](../contracts/published/http-api/plc-facts-v1/README.zh-CN.md)及其OpenAPI/schema/vectors固定；八类typed业务信封、回执和错误由[business-integration/v1正式provider](../contracts/published/http-api/business-integration-v1/README.zh-CN.md)固定。两者已通过隔离A+B QA，Owner终验和真实目标采用仍另行，不因本段授予provider-ready或接线完成。DAA上传/回执消费、SMA新点身份及目录派生适配/可靠输入/投递客户端尚未接通，应消费这些版本，不能重新把已固定后端合同列为待决。
 
-当前DAA已退役旧YAML运行／直库writer，可靠上传尚未接入；SMA保留既有HTTP和Backend-held配置，CAF仍冻结参考。本文不启动新迁移或现场切换。未来迁移明确配置导入、数据/写入归属、旧记录保留、新旧比对和回退，正式切换时一个目标只能有一个有效写入方。具体代码和迁移证据以 owning bundle 为准。
+待决项包括既有受控范围外的S7 CPU/驱动/访问方式/类型扩展；DAA本地批次处置和人工缺口接受；其他API各自认证/领取合同；超出当前DAA/SMA配置实现的SQLite schema、draft保留、previous与崩溃恢复；凭据安全存储；Vue画布及首批节点；CA握手/仲裁；实例身份、后台托管与目标平台打包。新协议/限额扩展与客户端实施各按后续规格确认，不改现行provider。业务算法超出受限表达式时，先定义有类型扩展模块，不默认任意脚本。
+
+当前DAA已退役旧YAML运行／直库writer，可靠上传尚未接入；SMA已采用本地Rust/SQLite单配置快照及纯预览，正常投递拒绝；旧TSS仅保留来源/显式兼容fixture，CAF仍冻结参考。本文不启动新迁移或现场切换。未来迁移明确配置导入、数据/写入归属、旧记录保留、新旧比对和回退，正式切换时一个目标只能有一个有效写入方。具体代码和迁移证据以 owning bundle 为准。
 
 设计来源是 2026-10-15 讨论、ARCH-AW-002 r1 设计素材、r2 批准范围，以及本轮原位修订白皮书；有效历史来源和许可继续保留。下列官方技术链接用于核验事实，不代表已批准依赖/版本：Siemens 标准块访问、Tauri IPC、Vue Flow、Node-RED 嵌入与节点结构均在对应段落引用。示例合同不形成 `contracts/` 中冻结的可执行 schema。
 

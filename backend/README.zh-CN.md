@@ -12,7 +12,8 @@ app/
 ├── system/           # 字典与 Projection 控制面 API
 ├── control_agent/    # 后端侧 CA 授权合同
 ├── schema_maintenance/
-├── monitor/          # 只保留 collector/raw/latest 事实
+├── monitor/          # 旧collector/raw/latest及自身业务集成
+├── plc_facts/        # 独立匿名事实provider
 ├── auxiliary/        # 班次与停机记录
 ├── energy/           # 能源价唯一owner
 ├── aiis_demo/        # manifest 参考模块
@@ -26,13 +27,19 @@ monitor Core 只返回 collector 健康状态和项目无关的 PLC DB-block raw
 ## 运行边界
 
 - FastAPI handler 调用 async Service/CRUD，不能轮询 PLC。
-- 常驻 Rust/Tauri control-agent 负责 PLC 采集，并通过批准的合同写入现场事实。
+- DAA承接新本地PLC采集，HTTP上传器尚未接通；冻结control-agent保留原直库快照/Projection兼容链。Field Flow为按自身范围交付的独立现场流程runtime。
 - Celery、Redis、Beat、Flower 和 Python Worker runtime 不是 Core 依赖。
 - Core baseline 现在是只包含十四张 Core 表的单一 `d4e6f8a0b2c4` Alembic root。其 upgrade 实际操作与十四表
   SQLAlchemy metadata 子集由 `tests/test_core_migration_baseline.py` 机械核对；私有项目仓继续保留自己的历史
   migration 图。
 
 后继 `a6c8e0f2b4d6` 仅增加 `energy_prices`，`b8d0f2a4c6e8` 后继仅增加 `energy_price_hours`，价格独立fixture为十六表；回迁及样本后继见下方说明，运行采用前须显式准备schema。
+
+## 事实与typed业务集成 — 2026-11-05
+
+[BE-009事实](../contracts/published/http-api/plc-facts-v1/README.zh-CN.md)和[BE-010 typed业务集成](../contracts/published/http-api/business-integration-v1/README.zh-CN.md)已通过独立获批的隔离MySQL A+B验证。Owner终验、实际目标采用及DAA/SMA接线待定，默认关闭/空scope/未采用准入保持；匿名新路由不删除既有接口认证或权限。
+
+API-only `plc_facts` owner新增独立七表，旧monitor raw/latest和Projection输入保留。BE-010新增四张所属业务/回执表及有限13表41时间列兼容，源码接链`f6a8c0e2b4d6`→`0a2c4e6f8b10`→`1b3d5f7a9c20`。表存在不等于目标采用，隔离合成时间采用没有转换真实历史。操作说明归[事实维护手册](scripts/plc_facts_maintenance/README.zh-CN.md)、[业务时间采用手册](scripts/business_time_adoption/README.zh-CN.md)及所属任务；本README不授权执行这些操作。
 
 ## 本地检查
 

@@ -18,7 +18,7 @@
 - `docs/` 保存跨仓库与流程类长期文档，由根目录 PLAN 统一管理，只建立双语 README 索引而不建立独立 PLAN。
 - 项目客户模块、真实 PLC/数据库地址、输入工件、构建产物、日志和密钥不进入公开架构仓。
 
-前后端模块采用 `app/<module>/.../manifest` 约定。后端 manifest 是模块向 Registry opt-in 的唯一入口；前端 route/locale 自动发现属于基础设施，菜单自动组装另行立项，不在本契约中默认宣称已实现。
+前后端模块采用 `app/<module>/.../manifest` 约定。后端 manifest 是模块向 Registry opt-in 的唯一入口；前端 route/locale、菜单、默认入口与权限装配共同消费模块 Registry。ARCH-FE-001 r3 的源码装配已通过独立 QA，Human Owner 最终验收仍由其任务记录，不将装配能力扩大为后端授权或生产接受。
 
 `main` 是持续 Core 开发线；大版本维护线使用字面分支 `release/1.x.x`、未来的 `release/2.x.x`、
 `release/3.x.x` 等，并只能在独立获批的对应大版本发布任务中 fast-forward。精确源码版本只由不可变的
@@ -30,7 +30,7 @@ annotated tag（例如 `v1.0.0`、`v1.2.1`、`v2.1.2`）固定；已发布 tag �
 
 - 后端使用 `uv` 和仓库锁文件；前端使用 `pnpm`；Rust 使用 Cargo。
 - 本仓使用Tauri的AW agent与工具，面向使用者的普通开发启动统一使用`pnpm tauri dev`。应用运行所需Cargo features由该应用Tauri配置统一传递，不要求使用者改换启动别名或手填驱动feature；专用测试、编译与打包命令在相应任务文档另行说明。
-- FastAPI 请求线程不得轮询 PLC；现场采集、重连和设备事实归常驻 `control-agent`。
+- FastAPI 请求线程不得轮询 PLC；新采集、重连和本地设备事实由独立 DAA 承接。冻结 `control-agent` 保留旧直库快照兼容参考；Field Flow 是独立现场流程 runtime，具体读写、恢复与切换仍按各自获批范围。
 - 未经独立批准不得恢复 Celery、Redis、Beat、Flower、Python Worker 或旧工业命令合同。
 - 数据库表结构变化必须通过显式 Alembic / schema-maintenance 任务；模块 Registry 不自动建表。
 - 示例环境文件只能使用占位符、默认关闭选项和通用权限；真实 `.env` 永不提交。

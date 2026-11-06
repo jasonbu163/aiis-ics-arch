@@ -31,6 +31,9 @@ pub(crate) struct Gate {
     pub rounds: usize,
 }
 pub(crate) struct LocalEngine {
+    pub delivery: Mutex<super::local_delivery::DeliveryControl>,
+    pub delivery_http: Mutex<()>,
+    pub delivery_epoch: Instant,
     pub storage: StoreHandle,
     pub bootstrap: Bootstrap,
     pub loaded: Mutex<Option<Loaded>>,
@@ -110,6 +113,9 @@ impl LocalEngine {
             .transpose()?;
         let engine = Arc::new(Self {
             storage,
+            delivery: Mutex::new(Default::default()),
+            delivery_http: Mutex::new(()),
+            delivery_epoch: Instant::now(),
             bootstrap,
             loaded: Mutex::new(None),
             states: Mutex::new(BTreeMap::new()),
@@ -324,6 +330,7 @@ impl LocalEngine {
         if self.stopped.swap(true, Ordering::SeqCst) {
             return;
         }
+        self.stop_delivery();
         self.gate.lock().unwrap().closed = true;
         let mut actors = self.actors.lock().unwrap();
         for a in actors.values() {

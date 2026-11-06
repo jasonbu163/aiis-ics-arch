@@ -6,6 +6,7 @@
 
 | Task ID | 状态 | 规格 | 最新事实 / 下一 gate |
 | --- | --- | --- | --- |
+| DAA-008 | `draft` | [r2](plans/DAA-008-reliable-facts-upload/spec.md) | r1 [QA2](plans/DAA-008-reliable-facts-upload/checklist.md)仍为qa_failed，仅F001开放；F002–004关闭，有限A1回执预算补证通过。[Development](plans/DAA-008-reliable-facts-upload/tasks.md)冻结在正式树，PM已出新profile原生回滚例外的r2草案，待Owner精确批准。已有profile/历史受保护，实际B及完整阶段C仍另批。 |
 | DAA-001 | owner_accepted | [r1](plans/DAA-001-cu-layout-migration/spec.md) | Human Owner 于 2026-10-17 验收 r1；新的 fresh Verification 通过，F-001/F-002 关闭，原失败历史保留。仅阶段 A 布局与既有功能兼容，B/C 实施另批。 |
 | DAA-002 | `owner_accepted` | [r2](plans/DAA-002-local-acquisition-loop/spec.md) | Human Owner于2026-10-30验收r2，QA4通过AC01–AC20、F-001–F-004解除。本地采集、双SQLite、容量恢复及受控原生基线已接受。失败历史和历史raw当前可用性限制保留；后续入口退役/DS联调归DAA-003/007。 |
 | DAA-003 | `owner_accepted` | [r1](plans/DAA-003-sqlite-only-startup/spec.md) | Human Owner于2026-10-30验收r1，QA2解除F-001/F-002。接受SQLite唯一入口及历史一次性停用草稿迁入；DAA-007已退出普通迁入链。配置/历史和私有回执保护保持，失败及历史raw当前可用性限制保留。 |

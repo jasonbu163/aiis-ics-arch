@@ -112,3 +112,12 @@ h1,h2,h3,p { margin-top:0; }
 .daa-history-table { width: 100%; }
 .daa-local-filters .el-date-editor { min-width: 210px; }
 .daa-history-pagination .row-actions { flex-wrap: wrap; }
+
+/* DAA可靠上传触达面的公共间距/窄窗横滚，消费既有主题。 */
+.daa-delivery-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 12px 0; }
+.daa-delivery-actions .el-select { width: 100px; }
+.daa-delivery-table { overflow-x: auto; margin-top: 12px; }
+.daa-delivery-dialog .el-dialog__body { display: grid; gap: 16px; }
+.daa-delivery-source { padding-block: 12px; border-top: 1px solid var(--el-border-color); }
+.daa-delivery-dialog .el-form-item { margin-bottom: 16px; }
+.daa-delivery-dialog dd { overflow-wrap: anywhere; }

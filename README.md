@@ -35,13 +35,17 @@ deployment, or production readiness. Publication of those Git refs is a separate
 ## Runtime boundaries
 
 ```text
-frontend-js -> FastAPI Core API -> configured database
-PLC -> resident control-agent -> raw/latest field facts -> backend Projection host
+frontend-js -> FastAPI business API -> owning business database
+Frozen compatibility: PLC -> old control-agent -> monitor raw/latest -> Projection
+Current DAA: controlled DS/S7 -> local SQLite (Stage B accepted); upload/ACK unconnected
+Target chain: DAA -> plc_facts API -> SMA -> typed business API -> business records
 ```
+
+As of 2026-11-05, [PLC facts](contracts/published/http-api/plc-facts-v1/README.md) and [eight typed business integration operations](contracts/published/http-api/business-integration-v1/README.md) have passed independently approved isolated MySQL verification. Owner final acceptance, target schema/time adoption and DAA/SMA integration remain separate; their default admission remains closed/unadopted. SMA owns local SQLite configuration and pure previews; normal delivery is disabled in its current configuration stage. See [SMA](automation-world/semantic-mapping-agent/README.md) and the owning task records.
 
 The backend module registry discovers only modules that provide an enabled manifest. Registry discovery exposes routes and metadata; it does not create database tables. Schema changes require an explicit migration task. The `control-agent` remains a separate runtime and artifact boundary.
 
-Frontend route and locale discovery are part of the JavaScript template. Full manifest-driven menu assembly is tracked separately in [ARCH-FE-001](plans/ARCH-FE-001-frontend-module-auto-assembly/spec.md). Packaged database settings and YAML upload are tracked separately in [CA-CONFIG-001](plans/CA-CONFIG-001-packaged-configuration-management/spec.md).
+Frontend route and locale discovery are part of the JavaScript template. Manifest-driven route/menu/access assembly passed independent r3 QA and awaits Owner final acceptance under [ARCH-FE-001](plans/ARCH-FE-001-frontend-module-auto-assembly/spec.md). Packaged database settings and YAML upload are tracked separately in [CA-CONFIG-001](plans/CA-CONFIG-001-packaged-configuration-management/spec.md).
 
 ## Local validation
 
@@ -85,4 +89,6 @@ See [Automation World](automation-world/README.md) for CA freezing, independent 
 
 See [Field Flow](field-flow/README.md) for independent Rust/Python field runtimes. Rust is the long-term runtime development line; Python is for learning and rapid prototypes. FF-001 r4 implements demo01's local HTTP GET → PLC INT loop in both projects. Fresh-context [QA2](field-flow/plans/FF-001-dual-runtime-demo01/checklist.md) passed AC01–AC15 for the exact [dual-version handoff](field-flow/plans/FF-001-dual-runtime-demo01/tasks.md), independently closing all three Rust QA1 defects. Earlier failures remain; Human Owner final acceptance, field validation and long-running acceptance are pending.
 
-See [C# Plan learning slice](backend-dotnet/README.md) for the independent, direct-MySQL three-API prototype. It has no login and does not replace Python; actual checks and the pending fresh Verification gate belong to [ARCH-BE-008](plans/ARCH-BE-008-csharp-backend-plan-slice/tasks.md).
+See [C# Plan learning slice](backend-dotnet/README.md) for the independent, direct-MySQL three-API prototype. It has no login and does not replace Python; QA2 has passed; actual evidence and the pending Human Owner final acceptance belong to [ARCH-BE-008](plans/ARCH-BE-008-csharp-backend-plan-slice/tasks.md).
+
+[FF-005](field-flow/plans/FF-005-basic-and-advanced-examples/spec.md) basic examples are owner-accepted. [FF-004 r2 A](field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/spec.md) passed QA3 for Rust per-PLC JSON/YAML v2 and bounded multi-PLC S7 int16 calls; final acceptance is pending. Modbus structure validation does not provide Modbus transport, DS export or Python/C# catalog loading. The recorded full `hold_ack` forced-recovery and legacy UTC limitations remain.

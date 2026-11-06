@@ -6,6 +6,7 @@ DAA 实施任务各有唯一的本地 bundle。这里只链接已存在的角色
 
 | 任务 | 状态 | PM 范围 | Development | Verification |
 | --- | --- | --- | --- | --- |
+| DAA-008 可靠事实上报与阶段C验收 | `draft` | [spec.md](DAA-008-reliable-facts-upload/spec.md)；r2恢复例外待精确批准，已批r1原文归档保留 | [tasks.md](DAA-008-reliable-facts-upload/tasks.md)；r1返工冻结，恢复未实施 | [checklist.md](DAA-008-reliable-facts-upload/checklist.md)；保留QA1历史，QA2 qa_failed仅F001开放，B/完整阶段C待后续 |
 | DAA-001 CU 布局与既有页面迁移 | owner_accepted | [spec.md](DAA-001-cu-layout-migration/spec.md)；Human Owner 于 2026-10-17 精确批准 r1 | [tasks.md](DAA-001-cu-layout-migration/tasks.md) 第7节；最新阶段 A 精确交接及定向返工自检 | [checklist.md](DAA-001-cu-layout-migration/checklist.md)；新的 fresh Verification qa_passed，F-001/F-002 关闭且失败历史保留；Human Owner 于 2026-10-17 验收 r1，见第7节 |
 | DAA-002 本地采集闭环 | `owner_accepted` | [spec.md](DAA-002-local-acquisition-loop/spec.md)；r2精确范围批准保持 | [tasks.md](DAA-002-local-acquisition-loop/tasks.md)；精确r2开发及文档返工已交接，历史实施与原raw引用按bundle保留 | [checklist.md](DAA-002-local-acquisition-loop/checklist.md#owner-acceptance-r2); Human Owner于2026-10-30验收r2，QA4通过AC01–AC20、F-001–F-004解除。本地采集、双SQLite、容量恢复及受控原生基线已接受。失败历史和历史raw当前可用性限制保留；后续入口退役/DS联调归DAA-003/007。 |
 | DAA-003 SQLite 唯一入口与 YAML 迁入 | `owner_accepted` | [spec.md](DAA-003-sqlite-only-startup/spec.md)；2026-10-19 精确批准 r1 | [tasks.md](DAA-003-sqlite-only-startup/tasks.md)；精确实施及QA1界面返工已交接，先前失败及限制保留 | [checklist.md](DAA-003-sqlite-only-startup/checklist.md#owner-acceptance-r1); Human Owner于2026-10-30验收r1，QA2解除F-001/F-002。接受SQLite唯一入口及历史一次性停用草稿迁入；DAA-007已退出普通迁入链。配置/历史和私有回执保护保持，失败及历史raw当前可用性限制保留。 |

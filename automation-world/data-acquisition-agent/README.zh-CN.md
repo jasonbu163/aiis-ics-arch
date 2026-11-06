@@ -11,7 +11,7 @@ cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
 pnpm tauri dev
 ```
 
-来源为CA冻结receipt；[DAA PLAN](PLAN.zh-CN.md)管理实施，[AW PLAN](../PLAN.zh-CN.md)管理跨工程阶段。Human Owner于2026-10-30验收DAA-002 r2、DAA-003 r1、DAA-004 r1及[DAA-007 r2](plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2)，确认阶段B在本次受控DS联调范围完成。原QA/失败及已知限制分别保留；本次不启动阶段C、自动启动策略或真实现场验证。
+来源为CA冻结receipt；[DAA PLAN](PLAN.zh-CN.md)管理实施，[AW PLAN](../PLAN.zh-CN.md)管理跨工程阶段。Human Owner于2026-10-30验收DAA-002 r2、DAA-003 r1、DAA-004 r1及[DAA-007 r2](plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2)，确认阶段B在本次受控DS联调范围完成。原QA/失败及已知限制分别保留；DAA-008 正在实施另批的 A0/A1 候选；实际阶段 C 联调、自动启动策略与真实现场验证继续分立。
 
 ## 配置权威与启动
 
@@ -46,11 +46,13 @@ DAA-007 r2将已完成的迁入退出普通bootstrap、engine、reload和保存�
 
 四页只有 `useLocalAcquisitionConsole` 一个 owner；纯 shell 只管导航/主题/语言（`daa.theme` / `daa.locale`）。浏览器无桥预览不假保存、不请求 Backend/health；bootstrap 失败单独显示。首次快照失败为尚未加载；后续失败保留最近成功值并显示陈旧；仅一个 1Hz 刷新源。
 
-新空profile使用双 SQLite v2；DELETE/EXTRA、实例身份/profile 独占锁、CAS/激活恢复、每PLC唯一串行 actor、完整轮 sample/manifest/seq/pending 同事务、有界原字节历史、容量预留与保护维护保持。启动连接/采集意图总为 stopped。缺库、损坏、身份不符、非预期WAL材料仍 fail-closed。receipt 仍复用 source_documents；DAA-007仅对新空库创建v2 schema/ledger，无旧库DDL/迁移和依赖升级，见[局部存储说明](src-tauri/src/infrastructure/local_store/README.zh-CN.md)。
+新空 profile 创建 config SQLite v2/runtime SQLite v3；既有 v2/v2 继续本地能力，不运行投递 DDL 或迁移。DELETE/EXTRA、身份/profile 锁、采集配置 CAS、PLC 串行 actor 与完整轮原始事实保持。启动停采停传。六张同 runtime 投递表承载独立设置、有界冻结请求与严格回执，见[局部存储说明](src-tauri/src/infrastructure/local_store/README.zh-CN.md)。
 
-限额仍为4PLC、每PLC8组/32DB/4096叶、每组256启用点、周期≥500ms，是准入限额而非现场吞吐承诺。每PLC一个会话复用采集/测试/诊断。产品不能ACK或清pending，上报只留阶段C说明“本地保存，上传未接入”。为journal/系统余量可早于90%停采，保留天数不会删除pending。日志写失败锁存未知区间，修复并重启后才恢复，history/Stop/断开/退出仍可用。SQLite3.46.0 DELETE/EXTRA是有限存储合同，不是WAL修复或硬件断电保证。
+限额仍为 4 PLC、每 PLC 8 组/32 DB/4096 叶、每组 256 启用点、周期≥500ms。只有完整有效回执才能确认样本，没有人工 ACK 或清空队列。容量包含投递元数据及额外 32 MiB 恢复预留；pending 不因保留期删除。这是准入限额，不证明现场吞吐或断电安全。
 
 ## 隔离验证边界
+
+DAA-008 r1 当前为 A-only 候选，已确认 hot-journal 恢复阻碍，精确失败与未闭合门禁见[tasks](plans/DAA-008-reliable-facts-upload/tasks.md)。不要删 journal 或改版本绕过。实际 HTTP/DS/MySQL/Docker、原生视觉及完整阶段 C 均未获本轮运行授权/验证。[阶段 C 手册](STAGE_C_GUIDE.zh-CN.md)区分这些门禁，并说明未来显式操作顺序。
 
 `pnpm build --config vite.validation.config.ts --outDir <绝对临时dist> --emptyOutDir` 继续隔离 env。非默认 debug `local-validation` 保留原固定fixture、绝对tmp路径/owner marker/继承env拒绝/release编译拒绝；不会自动发现源码根 YAML。原CLI/二进制及必需参数保持，不能真实传输、执行任意SQL或ACK。DAA-003历史原生迁入/保存重开证据使用其自有tmp env/profile和read gate=false；r2已退役普通迁入，browser/fixture不替代它。本次受控DS范围之外，真实PLC/实际profile迁移、Backend/SMA、C阶段、自动启动策略、生产DB/API、现场切换、Docker/Git/发布/部署及跨平台签名另行批准。
 
@@ -72,7 +74,7 @@ DAA机器身份仍是opaque `point.id`，历史样本字典亦按ID。`name`现�
 
 点位页按稳定ID勾选，跨页保留（10/20/50），预览旧→新和冲突后显式确认；取消零写、保留选择。原编辑器预览有限用户字段patch并与派生名一起保存；原偏移确认同时成名，无第三次确认。token300秒过期并绑定输入/ETag。None/manual在重导、无关地址/类型变化后保名；直接受影响的managed遵循固定profile。旧历史/receipt/active版本原bytes不改，新元数据的旧binary降级需另证。
 
-[共享导入核心](../shared/tia-import-core/README.zh-CN.md)只保留一套纯parser/展开/布局/命名，DAA保留不可变源证明、闭包、ID及SQLite/CAS。没有DDL/第二技术key或YAML运行模式。共享本身不授予DS产品接受；本次所需DS基线及DAA–DS读取至SQLite闭环已分别接受，阶段B结论归DAA-007。阶段C仍需稳定Backend API合同和独立批准。
+[共享导入核心](../shared/tia-import-core/README.zh-CN.md)只保留一套纯parser/展开/布局/命名，DAA保留不可变源证明、闭包、ID及SQLite/CAS。没有DDL/第二技术key或YAML运行模式。共享本身不授予DS产品接受；本次所需DS基线及DAA–DS读取至SQLite闭环已分别接受，阶段B结论归DAA-007。Backend plc-facts/v1 合同现已固定并获 Owner 接受；DAA-008 负责 A0/A1 上传器候选，实际阶段 C 联调仍需具体 B 批准。
 
 普通`pnpm tauri dev`使用本仓package→Tauri beforeDevCommand→Vite15191与`src/main.ts`及本仓`src-tauri`入口。验收不自动复制临时代码或更新安装包。旧`yaml_migration_*`日志仅属于历史迁入；r2普通启动不再产生迁入事件。`runtime_started` stopped和`runtime_stopped` clean描述启动意图和正常关闭，不表示失败。
 
@@ -80,6 +82,6 @@ DAA机器身份仍是opaque `point.id`，历史样本字典亦按ID。`name`现�
 
 [联调手册](JOINT_TEST_GUIDE.zh-CN.md)随2026-10-30最终验收在本次受控DS范围定稿。[tasks](plans/DAA-007-ds-joint-validation-and-time-contract/tasks.md)保留实际开发/Owner/闭库事实，[checklist](plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2)记录AC01–AC22独立核验、8590份样本/4295轮完整重开比较与真实Owner决定。历史checkpoint缺失和15:27来源未明继续跟踪；原联调profile及SQLite配置/历史保留，阶段C/自动启动/现场另项。
 
-新版仅初始化新空profile：两库user_version/metadata/schema_migrations=2，time_profile=`asia-shanghai-rfc3339-ms-v1`；样本及manifest=2，配置/context及IPC envelope仍为1。日历时间固定上海毫秒`+08:00`，savedAt为同轮持久化事务内生成时间；stdout保留纳秒、文件日志保留毫秒。旧UTC v1、未知/缺失合同、单库或身份异常在profile锁、RW连接、恢复、迁入及持久日志之前只读拒绝；合格v2/新空才取得锁并复核，漂移拒绝可能已留下锁文件，但未RW业务库。拒绝诊断壳给出`time_profile_unsupported`，业务动作不可用。原配置/历史不迁移、不旁建替代库；旧profile继续使用原兼容版本，迁移与降级另批。
+DAA-007 阶段 B 当时只初始化新空 profile：两库user_version/metadata/schema_migrations=2，time_profile=`asia-shanghai-rfc3339-ms-v1`；样本及manifest=2，配置/context及IPC envelope仍为1。日历时间固定上海毫秒`+08:00`，savedAt为同轮持久化事务内生成时间；stdout保留纳秒、文件日志保留毫秒。旧UTC v1、未知/缺失合同、单库或身份异常在profile锁、RW连接、恢复、迁入及持久日志之前只读拒绝；合格v2/新空才取得锁并复核，漂移拒绝可能已留下锁文件，但未RW业务库。拒绝诊断壳给出`time_profile_unsupported`，业务动作不可用。原配置/历史不迁移、不旁建替代库；旧profile继续使用原兼容版本，迁移与降级另批。
 
-历史、陈旧快照和最老待传时间按上海`YYYY-MM-DD HH:mm:ss`显示。历史筛选以上海墙上时间解释，终止秒包含`.999`，原详情JSON/SHA保持。仅历史表提供普通列拖拽、最小宽、横滚、本机应用/表/稳定字段隔离偏好和恢复默认，不写SQLite业务配置。联调沿用手册原Owner合成profile，由Owner一次手工填写应用根.env，之后正常短命令启动；默认profile不属于本次操作范围。
+历史、陈旧快照和最老待传时间按上海`YYYY-MM-DD HH:mm:ss`显示。历史筛选以上海墙上时间解释，终止秒包含`.999`，原详情JSON/SHA保持。当前历史、样本与投递表提供普通列拖拽、最小宽、横滚、本机应用/表/稳定字段隔离偏好和恢复默认，不写SQLite业务配置。联调沿用手册原Owner合成profile，由Owner一次手工填写应用根.env，之后正常短命令启动；默认profile不属于本次操作范围。

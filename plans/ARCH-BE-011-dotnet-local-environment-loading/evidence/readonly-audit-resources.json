@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-05",
+  "task_id": "ARCH-BE-011",
+  "temporary_root": "/private/tmp/arch-be011-readonly-7i9lcfty",
+  "purpose": "One-shot read-only MySQL audit helper, sanitized transient outputs and uv cache",
+  "process_state": "All synchronous helper processes exited; MySQL transaction rolled back and connection closed",
+  "durable_evidence": "plans/ARCH-BE-011-dotnet-local-environment-loading/evidence/mysql-readonly-audit-2026-11-05.json",
+  "durable_evidence_sha256": "a3e5408bb83891a90f561fce68bd634f3eaa921454baecfb8a8985774140a03b",
+  "removed_file_count": 9,
+  "cleanup_trigger": "Read-only observations and attempt history persisted; no runtime or evidence dependency remains",
+  "real_configuration_modified": false,
+  "user_secrets_touched": false,
+  "temporary_root_absent": true
+}

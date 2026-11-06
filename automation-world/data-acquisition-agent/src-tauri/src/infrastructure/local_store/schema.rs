@@ -41,3 +41,69 @@ pub(super) fn config_sql() -> String {
         crate::domain::business_time::SQL_NOW.trim_start_matches("SELECT "),
     )
 }
+
+/// 仅新空profile使用；不在v2打开路径执行任何投递DDL。
+pub(super) fn runtime_v3_sql() -> String {
+    let base = runtime_sql().replace("VALUES(2,", "VALUES(3,").replace(
+        "CHECK(schema_version=2),clean_exit",
+        "CHECK(schema_version=3),clean_exit",
+    );
+    format!("{base}\n{DELIVERY}")
+}
+pub(super) const DELIVERY: &str = r#"
+CREATE INDEX delivery_cycle_candidates ON collection_cycles(plc_id,group_id,source_seq);
+CREATE TABLE delivery_settings(id INTEGER PRIMARY KEY CHECK(id=1),settings_revision TEXT NOT NULL,payload TEXT NOT NULL,latest_streak INTEGER NOT NULL DEFAULT 0,latest_cursor TEXT NOT NULL DEFAULT '',history_cursor TEXT NOT NULL DEFAULT '');
+CREATE TABLE delivery_cycles(cycle_id TEXT PRIMARY KEY REFERENCES collection_cycles(id),target_id TEXT NOT NULL,manifest_sha TEXT NOT NULL,context_sha TEXT NOT NULL,cycle_digest TEXT NOT NULL,wire TEXT NOT NULL);
+CREATE TABLE delivery_parts(sample_id TEXT NOT NULL REFERENCES samples(id),part INTEGER NOT NULL,parts INTEGER NOT NULL,cycle_id TEXT NOT NULL REFERENCES delivery_cycles(cycle_id),source_sha TEXT NOT NULL,content_digest TEXT NOT NULL,point_ids TEXT NOT NULL,state TEXT NOT NULL,batch_id TEXT,receipt_id TEXT,PRIMARY KEY(sample_id,part));
+CREATE INDEX delivery_part_cycle ON delivery_parts(cycle_id,state);
+CREATE INDEX delivery_part_batch ON delivery_parts(batch_id,state);
+CREATE TABLE delivery_batches(batch_id TEXT NOT NULL UNIQUE,target_id TEXT NOT NULL,settings_revision TEXT NOT NULL,request_digest TEXT NOT NULL,body_sha TEXT NOT NULL,body TEXT,members TEXT NOT NULL,parent_id TEXT,parent_depth INTEGER NOT NULL,state TEXT NOT NULL,attempt INTEGER NOT NULL DEFAULT 0,protocol_failures INTEGER NOT NULL DEFAULT 0,readiness_failures INTEGER NOT NULL DEFAULT 0,next_attempt_at TEXT NOT NULL,created_at TEXT NOT NULL,last_error TEXT,created_order INTEGER PRIMARY KEY AUTOINCREMENT);
+CREATE INDEX delivery_dispatch ON delivery_batches(state,next_attempt_at,created_order);
+CREATE TABLE delivery_receipts(batch_id TEXT PRIMARY KEY REFERENCES delivery_batches(batch_id),receipt_id TEXT NOT NULL,request_digest TEXT NOT NULL,response_utf8 TEXT NOT NULL,response_sha TEXT NOT NULL,committed_at TEXT NOT NULL,proof_expires_at TEXT NOT NULL,terminal TEXT NOT NULL);
+CREATE TABLE delivery_events(id INTEGER PRIMARY KEY,event TEXT NOT NULL,resource TEXT NOT NULL,result TEXT NOT NULL,created_at TEXT NOT NULL);
+"#;
+
+/// 只读比较显式已知DDL；缺表/列/索引/约束或意外触发器一律拒绝，不修补。
+pub(super) fn verify_structure(c: &rusqlite::Connection, sql: &str) -> Result<(), String> {
+    use rusqlite::OptionalExtension;
+    let mut expected_count = 0;
+    for statement in sql.split(';') {
+        let expected = statement.trim();
+        if !expected.starts_with("CREATE TABLE ")
+            && !expected.starts_with("CREATE INDEX ")
+            && !expected.starts_with("CREATE UNIQUE INDEX ")
+        {
+            continue;
+        }
+        expected_count += 1;
+        let name = expected
+            .split_whitespace()
+            .nth(if expected.starts_with("CREATE UNIQUE INDEX ") {
+                3
+            } else {
+                2
+            })
+            .and_then(|s| s.split('(').next())
+            .ok_or("schema_structure_mismatch")?;
+        let actual: Option<String> = c
+            .query_row("SELECT sql FROM sqlite_master WHERE name=?1", [name], |r| {
+                r.get(0)
+            })
+            .optional()
+            .map_err(super::sql_error)?;
+        if actual.as_deref() != Some(expected) {
+            return Err("schema_structure_mismatch".into());
+        }
+    }
+    let actual: u32 = c
+        .query_row(
+            "SELECT count(*) FROM sqlite_master WHERE sql IS NOT NULL AND name NOT LIKE 'sqlite_%'",
+            [],
+            |r| r.get(0),
+        )
+        .map_err(super::sql_error)?;
+    if actual != expected_count {
+        return Err("schema_structure_mismatch".into());
+    }
+    Ok(())
+}

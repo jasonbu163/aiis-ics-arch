@@ -4,6 +4,12 @@ Chinese version: [INITIALIZATION.zh-CN.md](INITIALIZATION.zh-CN.md)
 
 This document covers source checks and operator-run Docker deployment procedures. Docker build/start/stop and database writes require separately approved runtime scope; the commands below are instructions, not evidence that deployment has run.
 
+## Optional facts/business integrations
+
+The general application/database startup below does not enable new anonymous integrations. [PLC facts v1](contracts/published/http-api/plc-facts-v1/README.md) and [business integration v1](contracts/published/http-api/business-integration-v1/README.md) passed bounded isolated MySQL verification, while Owner acceptance and actual target adoption remain pending. Keep their default-off/empty-scope/unadopted state unless a separate operation is approved. A normal schema upgrade alone is not facts-source or business-time adoption and does not migrate real historical timestamps.
+
+Use the owning [facts maintenance](backend/scripts/plc_facts_maintenance/README.md) and [business-time adoption](backend/scripts/business_time_adoption/README.md) guides and exact task-approved target evidence for any future operation. DAA upload and SMA delivery are not connected by this startup guide. This section adds navigation and boundaries only; it authorizes no additional command or database action.
+
 ## Manual test order
 
 For `uv run run.py` + `pnpm dev` with database-only, follow [host-source development](#host-source-development-with-database-only), including the explicit account initialization step.

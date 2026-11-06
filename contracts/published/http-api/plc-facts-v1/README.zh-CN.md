@@ -1,6 +1,6 @@
 # PLC事实v1源码合同
 
-方向：DAA原本地样本 → Backend事实provider → 后续SMA事实消费者。当前是`ARCH-BE-009 r1` A的implemented/source-only合同；数据库采用、真实MySQL证明、provider-ready验收、DAA上传器、联合验证和部署仍分别另设gate。目录名不代表已发布到外部服务。
+方向：DAA原本地样本 → Backend事实provider → 后续SMA事实消费者。`ARCH-BE-009 r1`源码及获批隔离MySQL A+B已通过独立QA，见[当前核验](../../../../plans/ARCH-BE-009-backend-facts-integration/checklist.md)。Owner终验/provider-ready、实际目标采用、DAA上传器、联合验证和部署仍分别待定。目录名不代表已发布到外部服务。
 
 固定版本：`plc-facts/v1`、`daa-local/v2`、`pf-json/v1`、`pf-cursor/v1`。
 
