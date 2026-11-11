@@ -4,7 +4,7 @@
 主要功能:
     - 定义模块 manifest 元数据结构
     - 从已导入 app package 的直接子 package 受控发现 manifest
-    - 为 Router、Projection、Alembic 和 schema maintenance 提供稳定注册结果
+    - 为 Router、Alembic 和 schema maintenance 提供稳定注册结果
 
 Registry 只读取静态 manifest、Router 定义和 model package。它不执行 DDL、
 migration、seed、外部连接或后台 runtime；认证 user 与现场 control_agent 仍由
@@ -392,7 +392,7 @@ def get_module_manifests(module_names: Iterable[str] | None = None) -> tuple[Mod
 def get_enabled_module_manifests(
     module_names: Iterable[str] | None = None,
 ) -> tuple[ModuleManifest, ...]:
-    """Return enabled manifests for ordinary Router and Projection discovery."""
+    """Return enabled manifests for ordinary Router discovery."""
     return tuple(manifest for manifest in get_module_manifests(module_names) if manifest.enabled)
 
 

@@ -58,9 +58,17 @@
 | [control-agent 前置门禁](gates/control-agent-preflight.zh-CN.md) | 项目交付 | 后端 + `control-agent` | `proposed` |
 | [AW事实集成](demands/automation-world-facts-integration.zh-CN.md) · [English](demands/automation-world-facts-integration.md) | DAA／SMA／HTTP消费者 | Backend事实与typed业务模块 | `proposed`；仅ARCH-AW-008文档范围 |
 
+## PLC事实provider v2
+
+[PLC facts v2](published/http-api/plc-facts-v2/README.zh-CN.md)定义每次提交一个 PLC/DB 完整样本及授权原值查询。源码和隔离验证由 [ARCH-BE-012 r4](../plans/ARCH-BE-012-simplified-plc-facts/tasks.md)记录。
+
 ## PLC事实provider v1
 
-[PLC facts v1](published/http-api/plc-facts-v1/README.zh-CN.md)固定匿名batch/latest/history、严格Decimal JSON、可靠结果、安全发布游标及有限保留。固定源码合同及获批隔离MySQL A+B验证归[BE-009](../plans/ARCH-BE-009-backend-facts-integration/checklist.md)。Owner终验/provider-ready、实际数据库采用、DAA联调和部署分别保留。
+[PLC facts v1](published/http-api/plc-facts-v1/README.zh-CN.md)是已退役匿名 batch/latest/history 源码的历史合同，固定严格Decimal JSON、可靠结果、安全发布游标及有限保留。固定源码合同及获批隔离MySQL A+B验证归[BE-009](../plans/ARCH-BE-009-backend-facts-integration/checklist.md)。Owner终验/provider-ready、实际数据库采用、DAA联调和部署分别保留。
 
 
 [业务集成v1](published/http-api/business-integration-v1/README.zh-CN.md)发布八路typed匿名业务入口、闭合schema、样例和摘要向量。[BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/checklist.md)已通过获批隔离A+B验证；Owner终验、真实目标/时间采用及DAA/SMA接线待定，默认仍关闭/未采用。AW需求保留自身proposed状态，不据此声称这些provider不存在。
+
+## 通用任务流程候选合同
+
+[通用任务流程 v1](published/http-api/generic-task-workflow-v1/README.zh-CN.md)保存 ARCH-TASK-001 r1 实际注册的计划/实绩源码合同和 A/B 合成样例。业务集成 v1 的四条历史实绩操作随本候选退出，设备和监控操作保留。部署、独立验证和 Human Owner 终验分别进行。

@@ -1,0 +1,68 @@
+{
+  "module": "plan",
+  "fieldConfigVersion": 1,
+  "configRevision": "1",
+  "changes": [
+    {
+      "scope": "shared_sync",
+      "slotNo": 1,
+      "name": "productCode",
+      "type": "string",
+      "labels": {
+        "zh-CN": "产品编码",
+        "en-US": "Product code"
+      },
+      "unit": null,
+      "performanceOwner": "order_snapshot",
+      "enabled": true,
+      "planEditable": true,
+      "planVisible": true
+    },
+    {
+      "scope": "shared_sync",
+      "slotNo": 2,
+      "name": "targetLength",
+      "type": "number",
+      "labels": {
+        "zh-CN": "目标长度",
+        "en-US": "Target length"
+      },
+      "unit": "m",
+      "performanceOwner": "order_snapshot",
+      "enabled": true,
+      "planEditable": true,
+      "planVisible": true
+    },
+    {
+      "scope": "shared_sync",
+      "slotNo": 3,
+      "name": "completedLength",
+      "type": "number",
+      "labels": {
+        "zh-CN": "已生产长度",
+        "en-US": "Completed length"
+      },
+      "unit": "m",
+      "performanceOwner": "automated",
+      "enabled": true,
+      "syncEnabled": true,
+      "planVisible": true
+    },
+    {
+      "scope": "plan_local",
+      "slotNo": 1,
+      "name": "customerOrderNo",
+      "type": "string",
+      "labels": {
+        "zh-CN": "客户订单号",
+        "en-US": "Customer order no."
+      },
+      "unit": null,
+      "performanceOwner": null,
+      "enabled": true,
+      "isNullable": true,
+      "planEditable": true,
+      "planVisible": true
+    }
+  ]
+}

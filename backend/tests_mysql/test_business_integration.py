@@ -5,29 +5,66 @@ import asyncio
 from copy import deepcopy
 from datetime import datetime
 from decimal import Decimal
+import importlib.util
 import json
 import os
 from pathlib import Path
 import sys
 
 
+def require_copy_imports(backend):
+    """在加载 settings 或数据库前拒绝非本轮源码。"""
+    if Path.cwd().resolve()!=backend.resolve() or Path(__file__).resolve().parents[1]!=backend.resolve():
+        raise RuntimeError('B requires the isolated backend working directory')
+    for name,relative in (('settings','settings.py'),('database','database/__init__.py'),('app','app/__init__.py')):
+        spec=importlib.util.find_spec(name)
+        if spec is None or spec.origin is None or Path(spec.origin).resolve()!=(backend/relative).resolve():
+            raise RuntimeError('B project imports must resolve to the isolated source')
+
+
+def guard_configuration(root, profile):
+    """连接之前校验原 BE-010 或 r4 两阶段的显式目标。"""
+    if not root.is_relative_to(Path('/private/tmp')) or (root/'.env').exists():
+        raise RuntimeError('dedicated public temporary source required')
+    assert profile['profile']=='BE010-r2-B' and profile['expected_table_count']==75
+    assert profile['target_revision']=='1b3d5f7a9c20'
+    phase=os.environ.get('BE010_R4_PHASE')
+    revision=os.environ.get('BE010_SUCCESSOR_REVISION','1b3d5f7a9c20')
+    if phase in ('previous','successor'):
+        assert os.environ.get('BE010_SUCCESSOR_ACK')=='ARCH-BE-012-r4-successor'
+        assert os.environ.get('ARCH_BE012_B_SERVER_UUID')
+        rounds={'13392':('18392','arch-be012-r4-dev','arch_be012_r4_dev_'),
+                '13393':('18393','arch-be012-r4-qa','arch_be012_r4_qa_')}
+        round_target=rounds.get(os.environ.get('MYSQL_PORT'))
+        assert round_target and os.environ.get('ARCH_BE012_B_HTTP_PORT')==round_target[0]
+        assert os.environ.get('ARCH_BE012_B_TARGET_ALIAS')==round_target[1]
+        assert os.environ['TEST_MYSQL_DATABASE']==round_target[2]+'upgrade'
+        assert revision==('1b3d5f7a9c20' if phase=='previous' else '2c4e6a8b0d12')
+        assert os.environ.get('ARCH_BE012_B_CONFIRM')==':'.join(('RUN',round_target[1],
+            os.environ['TEST_MYSQL_DATABASE'],os.environ['ARCH_BE012_B_SERVER_UUID'],
+            os.environ['MYSQL_PORT'],round_target[0]))
+    else:
+        assert phase is None and revision=='1b3d5f7a9c20'
+    assert os.environ['BE010_MYSQL_EXECUTION_ACK']=='ARCH-BE-010-r2-B'
+    assert os.environ['BE010_MYSQL_SCHEMA_ACK']==os.environ['TEST_MYSQL_DATABASE']
+    assert os.environ['BE010_MYSQL_ENDPOINT_ACK']==os.environ['MYSQL_HOST']+':'+os.environ['MYSQL_PORT']
+    assert os.environ['MYSQL_HOST']=='127.0.0.1'
+    assert os.environ['TEST_MYSQL_DATABASE'].startswith('arch_be012_r4_' if phase else 'arch_be010_r2_')
+    assert os.environ['TEST_MYSQL_DATABASE']!=os.environ['MYSQL_DATABASE']
+    assert os.environ['MYSQL_USER']!='root' and os.environ['TESTING'].lower()=='true'
+    assert all(os.environ.get(key,'False').lower()=='false' for key in ('BACKEND_MOCK_ENABLED','PROJECTION_RUNNER_ENABLED','ADMIN_BOOTSTRAP_ENABLED','SUPERVISOR_BOOTSTRAP_ENABLED','OPERATOR_BOOTSTRAP_ENABLED'))
+    return phase,revision
+
+
 class Target:
-    """仅接受显式临时公开BE010-r2-B、单一schema/endpoint ACK；不创建/删除数据库。"""
+    """仅接受显式临时公开 schema/endpoint ACK；不创建或删除数据库。"""
     def __init__(self):
         self.root=Path.cwd().resolve()
         if not self.root.is_relative_to(Path('/private/tmp')) or (self.root/'.env').exists():
             raise RuntimeError('dedicated public temporary source required')
+        require_copy_imports(self.root)
         profile=json.loads((self.root/'profile.json').read_text())
-        assert profile['profile']=='BE010-r2-B' and profile['expected_table_count']==75
-        assert profile['target_revision']=='1b3d5f7a9c20'
-        assert os.environ['BE010_MYSQL_EXECUTION_ACK']=='ARCH-BE-010-r2-B'
-        assert os.environ['BE010_MYSQL_SCHEMA_ACK']==os.environ['TEST_MYSQL_DATABASE']
-        assert os.environ['BE010_MYSQL_ENDPOINT_ACK']==os.environ['MYSQL_HOST']+':'+os.environ['MYSQL_PORT']
-        assert os.environ['MYSQL_HOST']=='127.0.0.1'
-        assert os.environ['TEST_MYSQL_DATABASE'].startswith('arch_be010_r2_')
-        assert os.environ['TEST_MYSQL_DATABASE']!=os.environ['MYSQL_DATABASE']
-        assert os.environ['MYSQL_USER']!='root' and os.environ['TESTING'].lower()=='true'
-        assert all(os.environ.get(key,'False').lower()=='false' for key in ('BACKEND_MOCK_ENABLED','PROJECTION_RUNNER_ENABLED','ADMIN_BOOTSTRAP_ENABLED','SUPERVISOR_BOOTSTRAP_ENABLED','OPERATOR_BOOTSTRAP_ENABLED'))
+        phase,revision=guard_configuration(self.root,profile)
         self._guard()
         from settings import settings
         assert settings.primary_database=='mysql' and settings.TEST_MYSQL_DATABASE==os.environ['TEST_MYSQL_DATABASE']
@@ -35,15 +72,19 @@ class Target:
         self.sync_engine=create_engine(settings.SYNC_DATABASE_URL,pool_pre_ping=True)
         with self.sync_engine.connect() as connection:
             assert str(connection.execute(text('SELECT VERSION()')).scalar_one()).split('-')[0]=='8.4.6'
-            assert connection.execute(text('SELECT version_num FROM alembic_version')).scalar_one()=='1b3d5f7a9c20'
+            if phase:
+                assert connection.execute(text('SELECT @@server_uuid')).scalar_one()==os.environ['ARCH_BE012_B_SERVER_UUID']
+            assert connection.execute(text('SELECT version_num FROM alembic_version')).scalar_one()==revision
             from app.module_registry import import_model_packages
             import_model_packages()
             from app.user.models.user import User
             from app.user.models.token_blacklist import TokenBlacklist
             from app.control_agent.models.gate_token import ControlAgentGateToken
             from database import Base
-            assert len(Base.metadata.tables)==75
-            assert set(inspect(connection).get_table_names())==set(Base.metadata.tables)|{'alembic_version'}
+            v2_tables={'plc_facts_samples_v2','plc_facts_latest_points_v2'}
+            assert len(Base.metadata.tables)==77
+            expected_tables=set(Base.metadata.tables) if revision=='2c4e6a8b0d12' else set(Base.metadata.tables)-v2_tables
+            assert set(inspect(connection).get_table_names())==expected_tables|{'alembic_version'}
         from sqlalchemy.ext.asyncio import create_async_engine,async_sessionmaker
         self.engine=create_async_engine(settings.DATABASE_URL,pool_pre_ping=True)
         self.sessions=async_sessionmaker(self.engine,expire_on_commit=False,autoflush=False)
@@ -86,6 +127,23 @@ class Target:
             sourceRevision=os.environ['BE010_SOURCE_REVISION_ACK'],ownerApprovalRef='synthetic-B:'+os.environ['BE010_MYSQL_EXECUTION_ACK'])
         return evidence
 
+    async def reject_previous_evidence(self):
+        """后继目标上逐 owner 确认旧 revision 凭据失配。"""
+        from importlib import import_module
+        from common.exceptions import BusinessException
+        from common.integration.storage import validate_adoption_probe
+        async with self.sessions() as db:
+            for owner,index in (('equipment',0),('performance',3),('monitor',7)):
+                probe=await import_module('app.'+owner+'.crud.async_integration').probe_storage(db)
+                evidence=await self.adoption(owner,db)
+                evidence['schemaRevision']='1b3d5f7a9c20'
+                try:validate_adoption_probe(evidence,probe)
+                except ValueError:pass
+                else:raise AssertionError('previous evidence accepted on successor')
+                try:await self.receive(index,self.payload(index,'stale-'+owner),session=db,evidence_override=evidence)
+                except BusinessException as exc:assert exc.code==503
+                else:raise AssertionError('owner accepted previous evidence on successor')
+
     def payload(self,index,event=None):
         from tests.test_business_integration_contract import example
         payload=example(index)
@@ -94,12 +152,12 @@ class Target:
         if 'coilNo' in payload['data']:payload['data']['coilNo']=self.prefix
         return payload
 
-    async def receive(self,index,payload,parent_id=None,session=None):
+    async def receive(self,index,payload,parent_id=None,session=None,evidence_override=None):
         from tests.test_business_integration_contract import REQUESTS,RESOURCES
         owners=('equipment',)*3+('performance',)*4+('monitor',)
         from importlib import import_module
         async def invoke(db):
-            evidence=await self.adoption(owners[index],db)
+            evidence=evidence_override if evidence_override is not None else await self.adoption(owners[index],db)
             request=REQUESTS[index].model_validate(payload)
             if index<3:return await import_module('app.equipment.services.async_integration').receive_sample(db,request,evidence,RESOURCES[index])
             if index==3:return await import_module('app.performance.services.async_integration_observation').receive_observation(db,request,evidence)
@@ -185,6 +243,8 @@ class Target:
 async def run(suite):
     target=Target()
     try:
+        if os.environ.get('BE010_R4_PHASE')=='successor':
+            await target.reject_previous_evidence()
         if suite=='retained':await target.retained()
         else:
             parent=await target.business()

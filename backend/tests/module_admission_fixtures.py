@@ -25,6 +25,23 @@ def sha256(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def historical_backend():
+    """Explicit pre-retirement source for frozen C0/C2 and BE010 A0 profiles."""
+    path = os.environ.get("ARCH_ACQ002_HISTORICAL_BACKEND")
+    if not path or not (Path(path) / "app/system/crud/async_projection_mapping.py").is_file():
+        raise RuntimeError("ARCH_ACQ002_HISTORICAL_BACKEND must identify the preserved pre-retirement backend")
+    return Path(path).resolve()
+
+
+def historical_examples():
+    """Explicit preserved public examples for the frozen BE010 A0 profile."""
+    path = os.environ.get("ARCH_ACQ002_HISTORICAL_EXAMPLES")
+    if not path or any(not (Path(path) / name).is_file() for name in
+                       (".env.example", ".env.docker.dev.example", ".env.docker.prod.example")):
+        raise RuntimeError("ARCH_ACQ002_HISTORICAL_EXAMPLES must identify preserved public examples")
+    return Path(path).resolve()
+
+
 def public_environment():
     """公开占位参数；禁writer/mock/bootstrap；无秘密，无env文件。"""
     return dict(APP_NAME="Admission fixture", APP_VERSION="1.0.0", DEBUG="False", TESTING="True",
@@ -63,7 +80,7 @@ def generate_core_profile(destination, source_root=None):
         output.write_bytes(data)
         records[rel] = dict(source="C0", sha256=sha256(data))
     for rel in CORE_PATCH:
-        data = (source_root / rel).read_bytes()
+        data = (historical_backend() / rel).read_bytes()
         previous_path = destination / rel
         previous = previous_path.read_bytes() if previous_path.exists() else b""
         patch = "".join(difflib.unified_diff(previous.decode().splitlines(True), data.decode().splitlines(True), fromfile="a/"+rel, tofile="b/"+rel))
@@ -117,7 +134,7 @@ def generate_mapping_business_profile(destination, source_root=None):
 
 def generate_business_integration_profile(destination, source_root=None):
     """BE010-A0：68 metadata/84公开配置；models-only，不冒充冻结 BE006 profile。"""
-    result = generate_full_profile(destination, source_root, profile_name="BE010-A0",
+    result = generate_full_profile(destination, historical_backend(), profile_name="BE010-A0",
                                    expected_table_count=68, target_revision=None)
     path = result / "profile.json"
     metadata = json.loads(path.read_text())
@@ -125,8 +142,8 @@ def generate_business_integration_profile(destination, source_root=None):
     # Runtime implementation source is current; this does not claim an old binary snapshot.
     for filename in (".env.example",".env.docker.dev.example",".env.docker.prod.example"):
         env = result/filename
+        shutil.copyfile(historical_examples()/filename, env)
         env.write_text("\n".join(line for line in env.read_text().splitlines() if not line.startswith(("PLC_FACTS_","EQUIPMENT_INTEGRATION_ADOPTION_FILE=","PERFORMANCE_INTEGRATION_ADOPTION_FILE=","MONITOR_INTEGRATION_ADOPTION_FILE=")))+"\n")
-    import shutil
     shutil.rmtree(result/"app/plc_facts",ignore_errors=True)
     for migration in (result/"alembic/versions").glob("20261104_*.py"):
         if "0a2c4e6f8b10" in migration.name or "1b3d5f7a9c20" in migration.name:

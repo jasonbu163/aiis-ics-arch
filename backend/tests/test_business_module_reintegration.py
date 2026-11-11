@@ -3,7 +3,6 @@ import ast
 from pathlib import Path
 import pytest
 from app.module_registry import get_module_manifests
-from core.registrar import create_app
 from database import Base
 from common.error_codes import ErrorCode
 
@@ -19,7 +18,9 @@ def test_f_has_exact_58_tables_and_price_has_one_owner():
             continue
         module=load(path);module.op=recorder;module.upgrade()
     assert len(recorder.metadata.tables)==58
-    assert set(recorder.metadata.tables).issubset(Base.metadata.tables)
+    retired={"plc_db_block_raw_snapshots", "plc_db_block_latest_snapshots"}
+    assert (set(recorder.metadata.tables)-retired).issubset(Base.metadata.tables)
+    assert retired.isdisjoint(Base.metadata.tables)
     from app.energy.models import EnergyPrice,EnergyPriceHour
     assert EnergyPrice.__module__=='app.energy.models.energy_price'
     assert EnergyPriceHour.__module__=='app.energy.models.energy_price_hour'
@@ -43,7 +44,12 @@ def test_all_active_global_errorcode_references_are_closed():
 
 
 def test_eight_sync_descriptors_stay_local_and_uniquely_owned():
-    handlers=create_app(testing=True).state.projection_registry.handlers
+    from importlib import import_module
+    handlers=[import_module("app." + name).projection_handler for name in (
+        "equipment.services.sync_drive", "equipment.services.sync_temperature",
+        "equipment.services.sync_production_parameters", "performance.services.sync_production_record",
+        "performance.services.sync_process_temperature", "performance.services.sync_process_tension",
+        "performance.services.sync_process_speed", "monitor.services.sync_process_curve")]
     expected={
         'equipment.sync_drive','equipment.sync_temperature','equipment.sync_production_parameters',
         'performance.sync_production_record','performance.sync_process_temperature','performance.sync_process_tension','performance.sync_process_speed','monitor.sync_process_curve'}

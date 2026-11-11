@@ -4,7 +4,7 @@
 主要功能:
     - 锁定默认 disabled manifest 与受控 discovery 语义
     - 验证隔离 enabled override 的 ping 响应合同
-    - 验证空模型包、无副作用导入、Projection 排除与文档结构
+    - 验证空模型包、无副作用导入与文档结构
 """
 from __future__ import annotations
 
@@ -26,7 +26,6 @@ from app.module_registry import (
 )
 from core.registrar import create_app
 from database import Base
-from projection.registry import build_projection_registry
 
 
 pytestmark = pytest.mark.no_db
@@ -95,8 +94,8 @@ def test_aiis_demo_manifest_is_exact_and_default_disabled():
     assert "aiis_demo" not in enabled
 
 
-def test_default_app_openapi_and_projection_exclude_aiis_demo():
-    """Default composition excludes the disabled route and Projection owner."""
+def test_default_app_openapi_excludes_aiis_demo():
+    """Default composition excludes the disabled route."""
     schema = create_app(testing=True).openapi()
     assert "/api/v1/aiis-demo/ping" not in schema["paths"]
 
@@ -104,8 +103,6 @@ def test_default_app_openapi_and_projection_exclude_aiis_demo():
 
     assert "/aiis-demo/ping" not in {route.path for route in application_router.routes}
 
-    projection_registry = build_projection_registry()
-    assert all(handler.owner_module != "aiis_demo" for handler in projection_registry.handlers)
     assert not list((MODULE_DIR / "services").glob("sync_*.py"))
 
 

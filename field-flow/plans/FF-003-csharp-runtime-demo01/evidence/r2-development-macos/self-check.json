@@ -1,0 +1,314 @@
+{
+  "task": "FF-003",
+  "revision": "r2",
+  "spec_sha256": "e83cf7653b9a2d5407ebb0be3a83b0d474bade2d09d0c5c83ffbbe717a8d4893",
+  "scope": "Development auxiliary macOS self-check; native Windows gate not run",
+  "environment": {
+    "os": "Darwin 24.6.0",
+    "architecture": "arm64",
+    "sdk": "10.0.403",
+    "runtime": "10.0.14"
+  },
+  "candidate_files": 53,
+  "formal_and_independent_copy_equal_sha256": true,
+  "static": {
+    "json_parse": "pass",
+    "local_markdown_links": "pass",
+    "cs_headers": "pass",
+    "locale_keys_equal": true,
+    "trailing_whitespace": "none"
+  },
+  "macos_test_results": [
+    {
+      "name": "AcceptedS7CatalogLoadsWithoutTranslation",
+      "outcome": "Passed"
+    },
+    {
+      "name": "AppliedWriteWithoutAckStaysUnknownAcrossRestart",
+      "outcome": "Passed"
+    },
+    {
+      "name": "ClockJumpLatchesUntilNewRuntime",
+      "outcome": "Passed"
+    },
+    {
+      "name": "DefaultDryRunReadsWithoutWriting",
+      "outcome": "Passed"
+    },
+    {
+      "name": "DuplicateJsonKeyFailsClosed",
+      "outcome": "Passed"
+    },
+    {
+      "name": "ExecuteDeduplicatesAndReadbackRetainsAdjacentBytes",
+      "outcome": "Passed"
+    },
+    {
+      "name": "InFlightRecoversAsUnknownAndBlocksOverlappingWrite",
+      "outcome": "Passed"
+    },
+    {
+      "name": "Int16FramesMatchIndependentCapture",
+      "outcome": "Passed"
+    },
+    {
+      "name": "MismatchedAckCannotConfirm",
+      "outcome": "Passed"
+    },
+    {
+      "name": "MismatchedStateDoesNotChangeDatabaseOrKeepLock",
+      "outcome": "Passed"
+    },
+    {
+      "name": "QueueDeadlineCoversWaitingBehindInFlightRead",
+      "outcome": "Passed"
+    },
+    {
+      "name": "ShortAckCannotConfirm",
+      "outcome": "Passed"
+    },
+    {
+      "name": "SlowHttpDoesNotBlockAnotherFlow",
+      "outcome": "Passed"
+    },
+    {
+      "name": "StopBeforeReadyRecordsCanceledWithoutWrite",
+      "outcome": "Passed"
+    },
+    {
+      "name": "StrictCommandAcceptsValidAndRejectsDuplicateOrExpired",
+      "outcome": "Passed"
+    },
+    {
+      "name": "SymlinkInMainConfigPathFailsBeforeReading",
+      "outcome": "Passed"
+    },
+    {
+      "name": "WindowsAmbiguousPathFailsBeforeReading (\"'plcs/s7-a.json '\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "WindowsAmbiguousPathFailsBeforeReading (\"../s7-a.json\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "WindowsAmbiguousPathFailsBeforeReading (\"plcs/.. /s7-a.json\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "WindowsAmbiguousPathFailsBeforeReading (\"plcs/NUL.txt\")",
+      "outcome": "Passed"
+    },
+    {
+      "name": "WrongReferenceAndTruncationCannotConfirmWrite",
+      "outcome": "Passed"
+    }
+  ],
+  "copy_macos_test_result": {
+    "passed": 21,
+    "failed": 0,
+    "skipped": 0
+  },
+  "win_x64_locked_restore_and_cross_build_on_macos": "exit 0; not Windows native, not publish",
+  "process_cases": [
+    {
+      "case": "dry",
+      "before_restart": {
+        "mode": "normal",
+        "readDelayMs": 0,
+        "gets": 1,
+        "reads": 1,
+        "writes": 0,
+        "sessions": 1,
+        "slow_in_flight": 0,
+        "db1": "A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5",
+        "db2": "A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5"
+      },
+      "fixture": {
+        "mode": "normal",
+        "readDelayMs": 0,
+        "gets": 1,
+        "reads": 1,
+        "writes": 0,
+        "sessions": 1,
+        "slow_in_flight": 0,
+        "db1": "A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5",
+        "db2": "A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5"
+      },
+      "state": {
+        "simulated": 1
+      },
+      "pids_reaped": 2,
+      "ports_rebound": [
+        34102,
+        34880
+      ]
+    },
+    {
+      "case": "normal",
+      "before_restart": {
+        "mode": "normal",
+        "readDelayMs": 0,
+        "gets": 10,
+        "reads": 0,
+        "writes": 1,
+        "sessions": 1,
+        "slow_in_flight": 0,
+        "db1": "002AA5A5A5A5A5A5A5A5A5A5A5A5A5A5",
+        "db2": "A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5"
+      },
+      "fixture": {
+        "mode": "normal",
+        "readDelayMs": 0,
+        "gets": 11,
+        "reads": 0,
+        "writes": 1,
+        "sessions": 2,
+        "slow_in_flight": 0,
+        "db1": "002AA5A5A5A5A5A5A5A5A5A5A5A5A5A5",
+        "db2": "A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5"
+      },
+      "state": {
+        "confirmed": 1
+      },
+      "pids_reaped": 3,
+      "ports_rebound": [
+        34102,
+        34880
+      ]
+    },
+    {
+      "case": "drop-ack",
+      "before_restart": {
+        "mode": "drop_ack",
+        "readDelayMs": 0,
+        "gets": 1,
+        "reads": 0,
+        "writes": 1,
+        "sessions": 2,
+        "slow_in_flight": 0,
+        "db1": "002AA5A5A5A5A5A5A5A5A5A5A5A5A5A5",
+        "db2": "A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5"
+      },
+      "fixture": {
+        "mode": "drop_ack",
+        "readDelayMs": 0,
+        "gets": 2,
+        "reads": 0,
+        "writes": 1,
+        "sessions": 3,
+        "slow_in_flight": 0,
+        "db1": "002AA5A5A5A5A5A5A5A5A5A5A5A5A5A5",
+        "db2": "A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5"
+      },
+      "state": {
+        "unknown": 1
+      },
+      "pids_reaped": 3,
+      "ports_rebound": [
+        34102,
+        34880
+      ]
+    },
+    {
+      "case": "bad-ref",
+      "before_restart": {
+        "mode": "bad_ref",
+        "readDelayMs": 0,
+        "gets": 1,
+        "reads": 0,
+        "writes": 1,
+        "sessions": 2,
+        "slow_in_flight": 0,
+        "db1": "002AA5A5A5A5A5A5A5A5A5A5A5A5A5A5",
+        "db2": "A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5"
+      },
+      "fixture": {
+        "mode": "bad_ref",
+        "readDelayMs": 0,
+        "gets": 2,
+        "reads": 0,
+        "writes": 1,
+        "sessions": 3,
+        "slow_in_flight": 0,
+        "db1": "002AA5A5A5A5A5A5A5A5A5A5A5A5A5A5",
+        "db2": "A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5"
+      },
+      "state": {
+        "unknown": 1
+      },
+      "pids_reaped": 3,
+      "ports_rebound": [
+        34102,
+        34880
+      ]
+    },
+    {
+      "case": "stop-before-ready",
+      "before_restart": {
+        "mode": "normal",
+        "readDelayMs": 0,
+        "gets": 1,
+        "reads": 0,
+        "writes": 0,
+        "sessions": 1,
+        "slow_in_flight": 0,
+        "db1": "A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5",
+        "db2": "A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5"
+      },
+      "fixture": {
+        "mode": "normal",
+        "readDelayMs": 0,
+        "gets": 1,
+        "reads": 0,
+        "writes": 0,
+        "sessions": 1,
+        "slow_in_flight": 0,
+        "db1": "A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5",
+        "db2": "A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5"
+      },
+      "state": {
+        "canceled": 1
+      },
+      "pids_reaped": 2,
+      "ports_rebound": [
+        34102,
+        34880
+      ]
+    }
+  ],
+  "cli_cases": [
+    {
+      "args": [],
+      "exit": 0,
+      "stdout_json": true,
+      "stderr_json": false
+    },
+    {
+      "args": [
+        "--help",
+        "--lang",
+        "en-US"
+      ],
+      "exit": 0,
+      "stdout_json": true,
+      "stderr_json": false
+    },
+    {
+      "args": [
+        "--lang",
+        "invalid"
+      ],
+      "exit": 2,
+      "stdout_json": false,
+      "stderr_json": true
+    },
+    {
+      "case": "invalid-target-preflight",
+      "exit": 2,
+      "state_hash_unchanged": true,
+      "new_files": false
+    }
+  ],
+  "windows_native_test_and_publish": "not run - required host unavailable"
+}

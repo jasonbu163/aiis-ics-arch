@@ -8,7 +8,7 @@ from app.performance.schemas.production_observation_in import ProductionObservat
 from app.performance.schemas.process_sample_in import ProcessTemperatureIn,ProcessTensionIn,ProcessSpeedIn
 from app.monitor.schemas.process_curve_in import ProcessCurveIn
 from app.equipment.mapping_domain import float_number,fingerprint
-from tests.test_mapping_service import identity
+from tests.mapping_fixtures import identity
 pytestmark=pytest.mark.no_db
 
 @pytest.mark.parametrize("value",[True,"1",None,float("inf"),float("nan"),Decimal("1e-100"),Decimal("1e-40"),Decimal("3.5e38")])

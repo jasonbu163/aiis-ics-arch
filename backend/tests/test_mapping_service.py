@@ -9,14 +9,13 @@ from app.equipment.schemas.drive_sample_in import DriveSampleIn
 from app.equipment.services import async_drive_sample as equipment
 from app.performance.schemas.production_observation_in import ProductionObservationIn
 from app.performance.schemas.process_sample_in import ProcessTemperatureIn
-from app.performance.services import async_production_observation as production, async_process_sample as process
+production = process = None  # Historical performance mapping was retired by ARCH-TASK-001.
 from app.monitor.schemas.process_curve_in import ProcessCurveIn
 from app.monitor.services import async_process_curve_sample as monitor
 
 pytestmark = pytest.mark.no_db
 
-def identity(**changes):
-    return dict(dict(equipmentId="line-A", sampleId="sample-A", sampledAt="2026-10-16T10:00:00.123Z", quality="good"), **changes)
+from tests.mapping_fixtures import identity
 
 class MemoryTransactions:
     def __init__(self):
@@ -49,7 +48,6 @@ class MemoryTransactions:
         return row
     def install(self, monkeypatch):
         from app.equipment.crud import async_mapping_ingest as er, async_drive_sample as ed, async_production_parameter_sample as ep
-        from app.performance.crud import async_mapping_ingest as pr, async_production_observation as po, async_process_sample as pc
         from app.monitor.crud import async_mapping_ingest as mr, async_process_curve_sample as mc
         async def receipt(db,actor,equipment,stream,sample_id):
             return db.receipts.get((actor,equipment,stream,sample_id))
@@ -60,7 +58,7 @@ class MemoryTransactions:
             row = SimpleNamespace(**values)
             db.receipts[key] = row
             return row
-        for module in (er,pr):
+        for module in (er,):
             monkeypatch.setattr(module,"get_receipt",receipt)
             monkeypatch.setattr(module,"add_receipt",add_receipt)
         async def monitor_receipt(db,actor,equipment,sample_id):
@@ -78,34 +76,6 @@ class MemoryTransactions:
                 return row
             monkeypatch.setattr(access,"get_business_record",get)
             monkeypatch.setattr(access,"add_record",add)
-        async def state(db,equipment):
-            if equipment not in db.states:
-                db.states[equipment]=SimpleNamespace(equipment_id=equipment,last_sampled_at=None,fingerprint=None,performance_id=None,result=None)
-            return db.states[equipment]
-        async def applied(db,equipment,at):
-            return next((r for r in db.receipts.values() if r.stream=="production_observation" and r.equipment_id==equipment and r.sampled_at==at and r.outcome!="stale"),None)
-        async def by_coil(db,equipment,coil):
-            return next((r for (s,_),r in db.rows.items() if s=="production" and r.equipment_id==equipment and r.coil_no==coil),None)
-        async def by_id(db,equipment,record_id,lock=False):
-            r=db.rows.get(("production",record_id))
-            return r if r is not None and r.equipment_id==equipment else None
-        async def active(db,equipment):
-            return [r for (s,_),r in db.rows.items() if s=="production" and r.equipment_id==equipment and r.observation_status in ("in_production","unknown")]
-        async def add_production(db,**values):
-            defaults=dict(start_time=None,end_time=None,reported_start_time=None,reported_end_time=None,collected_weight=None,
-                manual_override_weight=None,effective_weight=None,effective_weight_source=None,observation_status=None,
-                weight=None,total_length=None,diameter=None,density=None,grade=None,spec=None,remark=None)
-            defaults.update(values)
-            return db.add_row("production",defaults)
-        for name,fn in (("state_for_update",state),("by_coil",by_coil),("by_id",by_id),("active_records",active),("add_record",add_production)):
-            monkeypatch.setattr(po,name,fn)
-        monkeypatch.setattr(pr,"get_applied_event",applied)
-        async def exists(db,record_id):return ("production",record_id) in db.rows
-        monkeypatch.setattr(po,"parent_id_exists",exists)
-        async def child(db,kind,parent,sample):
-            return next((r for (s,_),r in db.rows.items() if s==kind and r.equipment_id==sample.equipment_id and r.performance_id==parent and r.zone==sample.zone and r.record_time==sample.record_time),None)
-        async def add_child(db,kind,**values):return db.add_row(kind,values)
-        monkeypatch.setattr(pc,"get_record",child);monkeypatch.setattr(pc,"add_record",add_child)
         async def get_curve(db,equipment,at):
             return next((r for (s,_),r in db.rows.items() if s=="curve" and r.equipment_id==equipment and r.sampled_at==at),None)
         async def add_curve(db,**values):return db.add_row("curve",values)
@@ -140,6 +110,7 @@ async def test_partial_failure_no_success_receipt(store,failure):
     assert not store.rows and not store.receipts and store.rollbacks==1
 
 @pytest.mark.asyncio
+@pytest.mark.skip(reason="retired performance mapping; historical BE-006 evidence")
 async def test_production_lifecycle_watermark_stale_reactivation_and_manual_zero(store):
     def observation(at,status="in_production",coil="A",**values):
         p=identity(**values);p.update(sampleId=at,sampledAt=f"2026-10-16T{at}:00.123Z",observationStatus=status)
@@ -167,6 +138,7 @@ async def test_production_lifecycle_watermark_stale_reactivation_and_manual_zero
     assert error.value.error_code.value.endswith("mapping_observation_time_conflict")
 
 @pytest.mark.asyncio
+@pytest.mark.skip(reason="retired performance mapping; historical BE-006 evidence")
 async def test_empty_inactive_watermark_prevents_old_start_and_process_parent_retry(store):
     p=identity(observationStatus="unknown")
     await production.receive_observation(store,ProductionObservationIn.model_validate(p),1)
@@ -191,7 +163,7 @@ async def test_curve_immutable_time_and_presence(store):
     with pytest.raises(BusinessException) as error:await monitor.receive_sample(store,ProcessCurveIn.model_validate(p),3)
     assert error.value.error_code.value.endswith("mapping_sample_time_conflict") and len(store.rows)==1
 
-@pytest.mark.parametrize('owner',[equipment,production,monitor])
+@pytest.mark.parametrize('owner',[equipment,monitor])
 @pytest.mark.parametrize('message',["Duplicate entry 'x' for key 'unrelated_unique'","Duplicate entry 'uq_equipment_mapping_delivery' for key 'other'"])
 def test_only_named_unique_errors_are_races(owner,message):
     from sqlalchemy.exc import IntegrityError
@@ -203,6 +175,7 @@ def test_only_named_unique_errors_are_races(owner,message):
     ((None,None),(0,3),(0,4),'reported_time',3),
     ((None,None),(None,None),(0,4),'external_observed',4),
     ((None,None),(None,None),(None,None),'unavailable',None)])
+@pytest.mark.skip(reason="retired performance mapping; historical BE-006 evidence")
 def test_duration_priority(manual,reported,observed,expected,seconds):
     def at(second):return datetime(2026,10,16,10,0,second) if second is not None else None
     row=SimpleNamespace(start_time=at(manual[0]),end_time=at(manual[1]),reported_start_time=at(reported[0]),reported_end_time=at(reported[1]),first_observed_at=at(observed[0]),last_observed_at=at(observed[1]))
@@ -260,6 +233,7 @@ class ObservationReadView:
 @pytest.mark.asyncio
 @pytest.mark.parametrize('changed',[False,True])
 @pytest.mark.parametrize('first_state_race',[False,True])
+@pytest.mark.skip(reason="retired performance mapping; historical BE-006 evidence")
 async def test_locked_watermark_history_starts_a_new_rr_view(changed,first_state_race):
     original=ProductionObservationIn.model_validate(identity(sampleId='original',sampledAt='2026-10-16T10:00:00Z',observationStatus='in_production',coilNo='A',weight=1))
     digest=production.fingerprint(original,'production_observation')
@@ -318,6 +292,7 @@ async def test_business_lock_wait_preserves_delivery_conflict_priority(stream):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('stream',['production_observation','process_temperature','process_tension','process_speed'])
+@pytest.mark.skip(reason="retired performance mapping; historical BE-006 evidence")
 async def test_every_performance_stream_rechecks_committed_delivery_on_rejection(monkeypatch,stream):
     from app.performance.crud import async_mapping_ingest as receipts
     from app.performance.mapping_error_codes import MappingError
@@ -349,7 +324,7 @@ async def test_curve_business_rejection_rechecks_delivery_with_a_fresh_view(monk
     assert error.value.error_code.value=='monitor.mapping_sample_id_conflict' and calls==2 and db.commits==0
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('owner,args',[(equipment,(1,'line-A','drive','same','digest')),(production,(1,'line-A','process_speed','same','digest')),(monitor,(1,'line-A','same','digest'))])
+@pytest.mark.parametrize('owner,args',[(equipment,(1,'line-A','drive','same','digest')),(monitor,(1,'line-A','same','digest'))])
 @pytest.mark.parametrize('failure',['read-system','read-dbapi','commit'])
 async def test_rejection_delivery_recovery_failures_never_return_success(monkeypatch,owner,args,failure):
     from sqlalchemy.exc import DBAPIError
@@ -366,7 +341,7 @@ async def test_rejection_delivery_recovery_failures_never_return_success(monkeyp
     assert error.value.code==(500 if failure=='read-system' else 503) and db.commits==0 and db.rollbacks==1 and calls==1
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('owner,args',[(equipment,(1,'line-A','drive','same','digest')),(production,(1,'line-A','process_speed','same','digest')),(monitor,(1,'line-A','same','digest'))])
+@pytest.mark.parametrize('owner,args',[(equipment,(1,'line-A','drive','same','digest')),(monitor,(1,'line-A','same','digest'))])
 async def test_rejection_recovery_same_content_returns_stable_original_id(monkeypatch,owner,args):
     monkeypatch.setattr(owner.receipts,'get_receipt',AsyncMock(return_value=SimpleNamespace(fingerprint='digest',result={'record_id':7,'outcome':'created'})))
     db=MemoryTransactions()
@@ -375,6 +350,7 @@ async def test_rejection_recovery_same_content_returns_stable_original_id(monkey
 
 
 @pytest.mark.asyncio
+@pytest.mark.skip(reason="retired performance mapping; historical BE-006 evidence")
 async def test_initial_read_view_rollback_failure_is_not_recovered_as_success(monkeypatch):
     calls=0
     async def receipt(*args):

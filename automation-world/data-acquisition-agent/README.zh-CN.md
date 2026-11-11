@@ -52,7 +52,7 @@ DAA-007 r2将已完成的迁入退出普通bootstrap、engine、reload和保存�
 
 ## 隔离验证边界
 
-DAA-008 r1 当前为 A-only 候选，已确认 hot-journal 恢复阻碍，精确失败与未闭合门禁见[tasks](plans/DAA-008-reliable-facts-upload/tasks.md)。不要删 journal 或改版本绕过。实际 HTTP/DS/MySQL/Docker、原生视觉及完整阶段 C 均未获本轮运行授权/验证。[阶段 C 手册](STAGE_C_GUIDE.zh-CN.md)区分这些门禁，并说明未来显式操作顺序。
+DAA-008 r2 在 A-only 候选中新增已批准的新建 Unix sealed profile 受控恢复机制。[tasks](plans/DAA-008-reliable-facts-upload/tasks.md)保留 r1 hot-journal 原失败与本轮增量自检；r2 独立核验另行记录。既有 profile 不补封或迁移。不要删 journal/marker、改版本或用旧二进制打开 sealed profile。实际 HTTP/DS/MySQL/Docker、原生视觉及完整阶段 C 均未获本轮运行授权/验证。[阶段 C 手册](STAGE_C_GUIDE.zh-CN.md)说明恢复限度及未来显式操作顺序。
 
 `pnpm build --config vite.validation.config.ts --outDir <绝对临时dist> --emptyOutDir` 继续隔离 env。非默认 debug `local-validation` 保留原固定fixture、绝对tmp路径/owner marker/继承env拒绝/release编译拒绝；不会自动发现源码根 YAML。原CLI/二进制及必需参数保持，不能真实传输、执行任意SQL或ACK。DAA-003历史原生迁入/保存重开证据使用其自有tmp env/profile和read gate=false；r2已退役普通迁入，browser/fixture不替代它。本次受控DS范围之外，真实PLC/实际profile迁移、Backend/SMA、C阶段、自动启动策略、生产DB/API、现场切换、Docker/Git/发布/部署及跨平台签名另行批准。
 
@@ -82,6 +82,6 @@ DAA机器身份仍是opaque `point.id`，历史样本字典亦按ID。`name`现�
 
 [联调手册](JOINT_TEST_GUIDE.zh-CN.md)随2026-10-30最终验收在本次受控DS范围定稿。[tasks](plans/DAA-007-ds-joint-validation-and-time-contract/tasks.md)保留实际开发/Owner/闭库事实，[checklist](plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2)记录AC01–AC22独立核验、8590份样本/4295轮完整重开比较与真实Owner决定。历史checkpoint缺失和15:27来源未明继续跟踪；原联调profile及SQLite配置/历史保留，阶段C/自动启动/现场另项。
 
-DAA-007 阶段 B 当时只初始化新空 profile：两库user_version/metadata/schema_migrations=2，time_profile=`asia-shanghai-rfc3339-ms-v1`；样本及manifest=2，配置/context及IPC envelope仍为1。日历时间固定上海毫秒`+08:00`，savedAt为同轮持久化事务内生成时间；stdout保留纳秒、文件日志保留毫秒。旧UTC v1、未知/缺失合同、单库或身份异常在profile锁、RW连接、恢复、迁入及持久日志之前只读拒绝；合格v2/新空才取得锁并复核，漂移拒绝可能已留下锁文件，但未RW业务库。拒绝诊断壳给出`time_profile_unsupported`，业务动作不可用。原配置/历史不迁移、不旁建替代库；旧profile继续使用原兼容版本，迁移与降级另批。
+已接受的阶段 B 基线当时初始化两库 v2；DAA-008 现在仅为新空 profile 建 config2/runtime3。time_profile 仍为 `asia-shanghai-rfc3339-ms-v1`，样本/manifest=2，配置/context及IPC envelope=1。日历时间固定上海毫秒 `+08:00`，savedAt 为同轮持久化事务内生成时间；stdout 保留纳秒、文件日志保留毫秒。未知/旧 UTC 合同、单库或身份异常在业务写入前拒绝。唯一恢复例外是凭据有效的新 sealed profile、SQLite 原始扩展错误精确776，在原 profile 锁下原生恢复后全量只读核账；sealed cold 也执行同等级后检。原配置/历史不迁移、不旁建替代库，迁移、重绑及降级另批。
 
 历史、陈旧快照和最老待传时间按上海`YYYY-MM-DD HH:mm:ss`显示。历史筛选以上海墙上时间解释，终止秒包含`.999`，原详情JSON/SHA保持。当前历史、样本与投递表提供普通列拖拽、最小宽、横滚、本机应用/表/稳定字段隔离偏好和恢复默认，不写SQLite业务配置。联调沿用手册原Owner合成profile，由Owner一次手工填写应用根.env，之后正常短命令启动；默认profile不属于本次操作范围。

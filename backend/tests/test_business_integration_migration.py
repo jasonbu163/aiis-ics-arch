@@ -4,11 +4,11 @@ from sqlalchemy import ForeignKeyConstraint, UniqueConstraint
 from sqlalchemy.dialects.mysql import dialect
 from sqlalchemy.schema import CreateTable
 from app.equipment.models.integration import EquipmentIntegrationReceipt
-from app.performance.models.integration import PerformanceIntegrationReceipt, PerformanceIntegrationObservationEvent
 from app.monitor.models.integration import MonitorIntegrationReceipt
 
 pytestmark = pytest.mark.no_db
-MODELS = (EquipmentIntegrationReceipt, PerformanceIntegrationReceipt, MonitorIntegrationReceipt, PerformanceIntegrationObservationEvent)
+MODELS = (EquipmentIntegrationReceipt, MonitorIntegrationReceipt)
+HISTORICAL_TABLES = {"equipment_integration_receipts", "performance_integration_receipts", "monitor_integration_receipts", "performance_integration_observation_events"}
 
 
 @pytest.mark.parametrize("model", MODELS)
@@ -40,8 +40,8 @@ def test_exact_chained_64_71_75_stages_and_four_table_parity():
     from tests.test_mapping_migration import Recorder
     recorder=Recorder()
     paths=sorted(VERSIONS_DIR.glob('*.py'))
-    assert len(paths)==8
-    migrations=[load(path) for path in paths]
+    migrations=[load(path) for path in paths[:8]]
+    by_revision={load(path).revision: load(path) for path in paths}
     assert migrations[-2].revision=='0a2c4e6f8b10' and migrations[-2].down_revision=='f6a8c0e2b4d6'
     assert migrations[-1].revision=='1b3d5f7a9c20' and migrations[-1].down_revision=='0a2c4e6f8b10'
     for migration in migrations[:6]:migration.op=recorder;migration.upgrade()
@@ -49,12 +49,36 @@ def test_exact_chained_64_71_75_stages_and_four_table_parity():
     old={name:_table_signature(table) for name,table in recorder.metadata.tables.items()}
     facts=migrations[-2];facts.op=recorder;facts.upgrade()
     assert len(recorder.metadata.tables)==71
-    assert not {model.__tablename__ for model in MODELS}.intersection(recorder.metadata.tables)
+    assert not HISTORICAL_TABLES.intersection(recorder.metadata.tables)
     integration=migrations[-1];integration.op=recorder;integration.upgrade()
     assert len(recorder.metadata.tables)==75
+    assert HISTORICAL_TABLES <= set(recorder.metadata.tables)
     for model in MODELS:
         assert _table_signature(recorder.metadata.tables[model.__tablename__])==_table_signature(model.__table__)
     for name,signature in old.items():assert _table_signature(recorder.metadata.tables[name])==signature
+    successor=by_revision['2c4e6a8b0d12']
+    assert successor.revision=='2c4e6a8b0d12' and successor.down_revision=='1b3d5f7a9c20'
+    successor.op=recorder;successor.upgrade()
+    assert len(recorder.metadata.tables)==77
+    from app.plc_facts.models.v2 import SampleV2,LatestPointV2
+    assert _table_signature(recorder.metadata.tables['plc_facts_latest_points_v2'])==_table_signature(LatestPointV2.__table__)
+    old_history=_table_signature(recorder.metadata.tables['plc_facts_samples_v2'])
+    new_history=_table_signature(SampleV2.__table__)
+    old_columns={column[0]:column for column in old_history['columns']}
+    new_columns={column[0]:column for column in new_history['columns']}
+    assert set(new_columns)==set(old_columns)|{'source_type'}
+    for name,old_column in old_columns.items():
+        new_column=new_columns[name]
+        if name in {'group_id','config_revision'}:
+            assert old_column[:2]==new_column[:2] and old_column[2] is False and new_column[2] is True
+            assert old_column[3:]==new_column[3:]
+        else: assert old_column==new_column
+    assert old_history['indexes']==new_history['indexes']
+    retirement=by_revision['3d5f7a9c1e23']
+    assert retirement.revision=='3d5f7a9c1e23' and retirement.down_revision==successor.revision
+    final=by_revision['4e6a8b0d2f14']
+    assert final.revision=='4e6a8b0d2f14' and final.down_revision==retirement.revision
+    assert by_revision['5f7a9c1e3b25'].down_revision == final.revision
 
 
 def test_downgrade_refuses_any_nonempty_new_table_without_deletion():

@@ -1,23 +1,15 @@
 """
 File Path: /backend/projection/registry.py
-Description: Controlled Projection handler registry.
+Description: Shared Projection handler descriptor types.
 Main Features:
-    - Aggregates only explicit descriptors from owner sync services
     - Validates fixed snapshot source and typed handler inputs
-    - Rejects malformed, duplicate, or failed handler discovery
+    - Validates shared handler descriptors
 """
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable, Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
-from importlib import import_module
-from typing import Any, Literal, TYPE_CHECKING
-import pkgutil
-
-from app.module_registry import get_enabled_module_manifests
-
-if TYPE_CHECKING:
-    from projection.policy_catalog import SnapshotPolicyCatalog
+from typing import Any, Literal
 
 
 SnapshotSource = Literal["raw", "latest"]
@@ -207,7 +199,7 @@ class ProjectionHandlerDescriptor:
     def resolved_auxiliary_group_identities(
         self,
         *,
-        catalog: "SnapshotPolicyCatalog | None" = None,
+        catalog: "Any | None" = None,
     ) -> tuple[ProjectionHandlerGroupIdentity, ...]:
         """Return explicit plus policy-derived auxiliary latest groups."""
         identities = list(self.auxiliary_group_identities)
@@ -242,7 +234,7 @@ class ProjectionHandlerDescriptor:
         plc_key: str,
         db_number: int,
         group_name: str,
-        catalog: "SnapshotPolicyCatalog | None" = None,
+        catalog: "Any | None" = None,
     ) -> bool:
         """Return whether the group may provide optional latest inputs."""
         return any(
@@ -264,7 +256,7 @@ class ProjectionHandlerDescriptor:
         db_number: int,
         group_name: str,
         primary_group_identity: ProjectionHandlerGroupIdentity,
-        catalog: "SnapshotPolicyCatalog | None" = None,
+        catalog: "Any | None" = None,
     ) -> SnapshotSource | None:
         """Return the fact source a binding may use, or None when disallowed."""
         input_definition = self.input_definition(input_key)
@@ -286,99 +278,3 @@ class ProjectionHandlerDescriptor:
         ):
             return "latest"
         return None
-
-
-class ProjectionRegistry:
-    """An immutable lookup over descriptors discovered from approved modules."""
-
-    def __init__(self, descriptors: Iterable[ProjectionHandlerDescriptor]):
-        by_key: dict[str, ProjectionHandlerDescriptor] = {}
-        for descriptor in descriptors:
-            if not isinstance(descriptor, ProjectionHandlerDescriptor):
-                raise ProjectionRegistryError("registry descriptors must be ProjectionHandlerDescriptor instances")
-            if descriptor.handler_key in by_key:
-                raise ProjectionRegistryError(f"duplicate handler_key: {descriptor.handler_key}")
-            by_key[descriptor.handler_key] = descriptor
-        self._handlers = tuple(by_key[key] for key in sorted(by_key))
-        self._by_key = by_key
-
-    @classmethod
-    def from_descriptors(
-        cls,
-        descriptors: Iterable[ProjectionHandlerDescriptor],
-    ) -> "ProjectionRegistry":
-        return cls(descriptors)
-
-    @property
-    def handlers(self) -> tuple[ProjectionHandlerDescriptor, ...]:
-        return self._handlers
-
-    def get(self, handler_key: str) -> ProjectionHandlerDescriptor:
-        descriptor = self.get_optional(handler_key)
-        if descriptor is None:
-            raise ProjectionRegistryError(f"unknown handler_key: {handler_key}")
-        return descriptor
-
-    def get_optional(self, handler_key: str) -> ProjectionHandlerDescriptor | None:
-        return self._by_key.get(handler_key)
-
-
-def build_projection_registry(
-    module_names: Iterable[str] | None = None,
-) -> ProjectionRegistry:
-    """Build a registry by scanning only enabled module service packages."""
-    selected_names = (
-        tuple(module_names)
-        if module_names is not None
-        else tuple(manifest.name for manifest in get_enabled_module_manifests())
-    )
-    descriptors: list[ProjectionHandlerDescriptor] = []
-    for module_name in sorted(selected_names):
-        descriptors.extend(_discover_module_descriptors(module_name))
-    return ProjectionRegistry.from_descriptors(descriptors)
-
-
-def _discover_module_descriptors(module_name: str) -> tuple[ProjectionHandlerDescriptor, ...]:
-    services_package_path = f"app.{module_name}.services"
-    try:
-        services_package = import_module(services_package_path)
-    except ModuleNotFoundError as exc:
-        if exc.name == services_package_path:
-            return ()
-        raise ProjectionRegistryError(
-            f"failed to import Projection services package: {services_package_path}"
-        ) from exc
-    except Exception as exc:
-        raise ProjectionRegistryError(
-            f"failed to import Projection services package: {services_package_path}"
-        ) from exc
-
-    package_paths = getattr(services_package, "__path__", None)
-    if package_paths is None:
-        raise ProjectionRegistryError(f"Projection services path is not a package: {services_package_path}")
-
-    descriptors: list[ProjectionHandlerDescriptor] = []
-    module_infos = sorted(pkgutil.iter_modules(package_paths), key=lambda item: item.name)
-    for module_info in module_infos:
-        if not module_info.name.startswith("sync_"):
-            continue
-        service_module_path = f"{services_package_path}.{module_info.name}"
-        try:
-            service_module = import_module(service_module_path)
-        except Exception as exc:
-            raise ProjectionRegistryError(
-                f"failed to import Projection handler module: {service_module_path}"
-            ) from exc
-        descriptor = getattr(service_module, "projection_handler", None)
-        if descriptor is None:
-            continue
-        if not isinstance(descriptor, ProjectionHandlerDescriptor):
-            raise ProjectionRegistryError(
-                f"{service_module_path}.projection_handler must be a ProjectionHandlerDescriptor"
-            )
-        if descriptor.owner_module != module_name:
-            raise ProjectionRegistryError(
-                f"{service_module_path}.projection_handler owner_module must be {module_name!r}"
-            )
-        descriptors.append(descriptor)
-    return tuple(descriptors)

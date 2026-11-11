@@ -4,7 +4,11 @@ use crate::domain::business_time as time;
 use std::collections::BTreeMap;
 fn owned() -> PathBuf {
     let root = std::env::temp_dir().canonicalize().unwrap();
-    assert!(root.starts_with("/private/tmp") && root.to_string_lossy().contains("daa-008-r1-a-"));
+    assert!(
+        root.starts_with("/private/tmp")
+            && (root.to_string_lossy().contains("daa-008-r1-a-")
+                || root.to_string_lossy().contains("daa-008-r2-a-"))
+    );
     let dir = root.join(format!("time-contract-{}", id()));
     std::fs::create_dir_all(&dir).unwrap();
     dir
@@ -47,14 +51,23 @@ fn boot(profile: PathBuf) -> Bootstrap {
 }
 fn reject_unchanged(profile: &Path) {
     let before = tree(profile);
+    let had_lock = profile.join(".daa-runtime.lock").exists();
+    let sealed = profile
+        .join("local-acquisition-v1/profile-contract.json")
+        .exists();
     let error = match LocalEngine::open(boot(profile.into())) {
         Ok(_) => panic!("unsupported accepted"),
         Err(e) => e,
     };
-    assert!(error.starts_with("time_profile_unsupported:"), "{error}");
+    assert!(
+        error.starts_with("time_profile_unsupported:")
+            || (sealed && error == "profile_contract_invalid"),
+        "{error}"
+    );
     assert_eq!(before, tree(profile));
-    assert!(!profile.join(".daa-runtime.lock").exists());
+    assert_eq!(profile.join(".daa-runtime.lock").exists(), had_lock);
 }
+
 #[test]
 fn time_contract_legacy_unknown_single_and_identity_reject_before_lock() {
     for variant in [
@@ -390,39 +403,16 @@ fn time_contract_cross_day_milliseconds_offsets_and_logging_precision() {
 
 #[test]
 fn v2_keeps_schema_configuration_history_ids_sequence_and_pending() {
-    use crate::infrastructure::local_store::delivery_tests::{fresh, seed};
-    let mut s = fresh();
+    use crate::infrastructure::local_store::delivery_tests::{legacy, seed};
+    let mut s = legacy(2);
     let dir = s.dir.clone();
     s.clean_exit().unwrap();
     drop(s);
-    std::fs::remove_file(dir.join("runtime.sqlite")).unwrap();
-    std::fs::remove_dir_all(dir.join("logs")).unwrap();
-    let config = rusqlite::Connection::open(dir.join("config.sqlite")).unwrap();
-    let instance: String = config
-        .query_row("SELECT instance_id FROM instance_metadata", [], |r| {
-            r.get(0)
-        })
-        .unwrap();
-    drop(config);
-    let runtime = rusqlite::Connection::open(dir.join("runtime.sqlite")).unwrap();
-    runtime
-        .execute_batch(
-            "PRAGMA page_size=4096;PRAGMA auto_vacuum=INCREMENTAL;PRAGMA journal_mode=DELETE;",
-        )
-        .unwrap();
-    runtime.execute_batch(&schema::runtime_sql()).unwrap();
-    runtime
-        .execute(
-            "INSERT INTO runtime_metadata VALUES(1,?1,2,1,NULL,'asia-shanghai-rfc3339-ms-v1')",
-            [instance],
-        )
-        .unwrap();
-    runtime
-        .execute_batch(&format!(
-            "PRAGMA application_id={};PRAGMA user_version=2",
-            schema::RUNTIME_APP
-        ))
-        .unwrap();
+    let runtime = rusqlite::Connection::open_with_flags(
+        dir.join("runtime.sqlite"),
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
+    )
+    .unwrap();
     let before = runtime
         .prepare("SELECT name,sql FROM sqlite_master ORDER BY name")
         .unwrap()

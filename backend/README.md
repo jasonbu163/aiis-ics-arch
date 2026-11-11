@@ -2,17 +2,17 @@
 
 Chinese version: [README.zh-CN.md](README.zh-CN.md)
 
-This directory is the reusable FastAPI/SQLAlchemy Core. It owns authentication, system administration, module discovery, schema maintenance, projection control and project-neutral monitor facts. Consuming projects add business modules without editing the Core composition root.
+This directory is the reusable FastAPI/SQLAlchemy Core. It owns authentication, system administration, module discovery, schema maintenance, collector status and project-neutral business APIs. Consuming projects add business modules without editing the Core composition root.
 
 ## Core modules
 
 ~~~text
 app/
 ├── user/             # authentication and account APIs
-├── system/           # dictionaries and projection control-plane APIs
+├── system/           # dictionary APIs
 ├── control_agent/    # backend-side CA authorization contract
 ├── schema_maintenance/
-├── monitor/          # legacy collector/raw/latest plus owned business integrations
+├── monitor/          # collector status plus owned business integrations
 ├── plc_facts/        # independent anonymous facts provider
 ├── auxiliary/        # shifts and stop records
 ├── energy/           # unique price owner
@@ -22,12 +22,12 @@ app/
 
 Every ordinary module opts in with app/<module>/manifest.py. enabled=False hides its API routes; Registry discovery never creates tables. New tables require an explicit Alembic revision or approved schema-maintenance action. user and control_agent remain explicit security/runtime boundaries in app/router.py.
 
-The monitor Core surface returns collector health and project-neutral PLC DB-block raw/latest facts. The public monitor history queries require the separate monitor-business-read key; HMI and customer-specific rules/data remain in consuming projects. Public modules may own reusable domain Models / Schemas / Services / CRUD and business APIs; [energy](app/energy/README.md) owns prices and auxiliary owns shifts/stop records, without customer data or rules.
+The monitor Core surface returns collector health; the old PLC DB-block raw/latest endpoint is retired. The public monitor history queries require the separate monitor-business-read key; HMI and customer-specific rules/data remain in consuming projects. Public modules may own reusable domain Models / Schemas / Services / CRUD and business APIs; [energy](app/energy/README.md) owns prices and auxiliary owns shifts/stop records, without customer data or rules.
 
 ## Runtime boundaries
 
 - FastAPI request handlers call async Service/CRUD layers and never poll a PLC.
-- DAA owns new local PLC acquisition; its HTTP uploader is not connected yet. Frozen control-agent retains the old direct-database snapshot/Projection compatibility path. Field Flow is an independent field-process runtime under its own scope.
+- DAA owns new local PLC acquisition; its HTTP uploader is not connected yet. The frozen control-agent remains unchanged but its old direct-database snapshot path is incompatible with an upgraded schema. Field Flow is an independent field-process runtime under its own scope.
 - Celery, Redis, Beat, Flower and Python Worker runtime are not dependencies of this Core.
 - The Core baseline is the single `d4e6f8a0b2c4` Alembic root for fourteen Core tables. Its upgrade operations and
   fourteen-table SQLAlchemy metadata subset are mechanically checked by `tests/test_core_migration_baseline.py`; private project
@@ -38,7 +38,7 @@ The monitor Core surface returns collector health and project-neutral PLC DB-blo
 
 [BE-009 facts](../contracts/published/http-api/plc-facts-v1/README.md) and [BE-010 typed business integration](../contracts/published/http-api/business-integration-v1/README.md) have passed independently approved isolated MySQL A+B verification. Owner final acceptance, actual target adoption and DAA/SMA wiring remain pending. Normal default-off/empty-scope/unadopted admission remains; anonymous routes do not remove existing route authentication or permissions.
 
-The API-only `plc_facts` owner adds seven independent tables; old monitor raw/latest and Projection inputs are preserved. BE-010 adds four owner business/receipt tables and bounded 13-table/41-column time compatibility, with the source order `f6a8c0e2b4d6` → `0a2c4e6f8b10` → `1b3d5f7a9c20`. Schema existence is not target adoption. Isolated synthetic time adoption did not convert real history. See the [facts maintenance guide](scripts/plc_facts_maintenance/README.md), [business-time adoption guide](scripts/business_time_adoption/README.md) and owning task records; this README does not authorize running those operations.
+The API-only `plc_facts` owner exposes v2 sample ingestion and scoped reads. The source successor `3d5f7a9c1e23` retires the seven v1 facts and two old snapshot tables; it preserves v2 and Projection metadata. BE-010 adds four owner business/receipt tables and bounded 13-table/41-column time compatibility, with the source order `f6a8c0e2b4d6` → `0a2c4e6f8b10` → `1b3d5f7a9c20`. Schema existence is not target adoption. Isolated synthetic time adoption did not convert real history. See the [facts maintenance guide](scripts/plc_facts_maintenance/README.md), [business-time adoption guide](scripts/business_time_adoption/README.md) and owning task records; this README does not authorize running those operations.
 
 ## Local checks
 
@@ -85,16 +85,14 @@ Operator's **original configured keys must be a subset of supervisor's original 
 explicitly contain each operator grant; supervisor is never automatically granted a missing key. This is
 checked before unknown/disabled filtering, so even an unknown or disabled operator-only key prevents startup.
 Admin needs no array and bypasses `require_permissions()`; authentication, parameter validation, user-management
-actor/target rules, Projection state/contract validation and CA gate-token rules still apply. Empty arrays
+actor/target rules and CA gate-token rules still apply. Empty arrays
 do not change authenticated-only APIs or admin-only guards. Granting one key never implies another key.
 
 | Key | Current API surface and boundary |
 | --- | --- |
 | `system` | Explicit user-management reads and writes; independent actor/target restrictions remain. It is not all system-module access. |
 | `system-dict` | System dictionary queries **and maintenance** share this key. |
-| `projection-mapping` | Projection handler/policy catalogs and mapping queries. |
-| `projection-mapping-manage` | Mapping draft, validation, publish, copy and rollback permission guards; Service state/contract validation remains, with no additional role/admin guard today. |
-| `monitor` | Collector and raw/latest field facts; excludes customer business curves and frontend monitor-page access. |
+| `monitor` | Collector status; excludes customer business curves and frontend monitor-page access. |
 | `control-agent-read` | CA action-scope catalog queries. |
 | `control-agent` | Gate-token issuance permission guard; does not remotely execute device actions and retains independent role restrictions. |
 | `energy-price-read` | Energy GET current/history only; independent from manage. |
@@ -102,8 +100,6 @@ do not change authenticated-only APIs or admin-only guards. Granting one key nev
 | `equipment-temperature-read` | New complete sample GET only; every caller also needs the one configured equipment scope. |
 | `equipment-temperature-ingest` | New complete sample POST only; admin-only and equipment-scoped, with no implicit read grant. |
 | `aiis_demo` | Default-disabled reference manifest; a configured grant warns and is ignored. The array does not enable it. |
-
-Projection management routes pass `actor_user_id` to record the actor; this is not a role check.
 
 `schema_maintenance` has no configurable permission key: it uses an admin-only guard. CA authorization verify
 uses its gate-token contract. These independent boundaries cannot be replaced by the arrays.
@@ -165,7 +161,7 @@ change passwords. Keep using the [host-source initialization tutorial](../INITIA
 
 ## Configuration reference
 
-These tables describe the historical 69-key BE003 configuration surface. Current public examples contain 91 assignments: 69 baseline + 3 BE006 mapping scopes + 12 r1 A0 integration keys + 4 BE009 facts keys + 3 r2 adoption paths (detailed below). Source defaults come from Settings; required fields fail configuration loading when absent. Template values show distinct public host/dev/prod values, merging equal entries; passwords/secrets are shown only as placeholder. Templates are not local effective configuration. Use True/False for booleans, single or double quotes for strings, and outer single quotes with inner double quotes for JSON arrays.
+These tables describe the historical 69-key BE003 configuration surface. Public examples omit retired v1 and Projection runner settings; current defaults are described below. Source defaults come from Settings; required fields fail configuration loading when absent. Template values show distinct public host/dev/prod values, merging equal entries; passwords/secrets are shown only as placeholder. Templates are not local effective configuration. Use True/False for booleans, single or double quotes for strings, and outer single quotes with inner double quotes for JSON arrays.
 
 ### App/API
 
@@ -179,16 +175,13 @@ These tables describe the historical 69-key BE003 configuration surface. Current
 | `BACKEND_PORT` | Uvicorn listening port, positive integer. (int) | `8000` | `8000` |
 | `BACKEND_WORKERS` | Production Uvicorn worker count; development and packaged entry force one. (int) | `1` | `1` / `4` |
 
-### Runtime/Projection
+### Runtime
 
 | Key | Purpose/type | Source default | Public template value |
 | --- | --- | --- | --- |
 | `DEBUG` | Enable diagnostic error detail; disable for production. (bool) | Required; no source default | `True` / `False` |
-| `TESTING` | Use the separate MySQL test database and disable the Projection runtime. (bool) | `False` | `False` |
+| `TESTING` | Use the separate MySQL test database. (bool) | `False` | `False` |
 | `BACKEND_MOCK_ENABLED` | Allow module Service mock providers or explicit sample seeds. (bool) | `False` | `False` |
-| `PROJECTION_RUNNER_ENABLED` | Enable the lifespan Projection runner only on one designated writer host. (bool) | `False` | `False` |
-| `PROJECTION_RUNNER_INTERVAL_SECONDS` | Projection polling interval in seconds, positive number. (float) | `1.0` | `1.0` |
-| `PROJECTION_RUNNER_BATCH_SIZE` | Maximum raw facts per Projection batch, positive integer. (int) | `100` | `100` |
 | `TZ` | Process timezone; restart to apply, without changing database timezone. (str) | `'Asia/Shanghai'` | `Asia/Shanghai` |
 
 ### Auth/permissions
@@ -291,9 +284,7 @@ accounts in an existing volume.
 `TESTING=True` switches MySQL application URLs to the separate test database (source default name
 `aiis_ics_architecture_test`), not a universal sandbox for every engine. Database tests can create/clear
 that database and require an explicitly isolated approved target; use `no_db` tests for static checks.
-The public templates keep TESTING, business mock mode and the Projection runner off. Projection reads CA
-raw facts, never polls PLCs, and must have one active writer: enable only on a designated host with one worker,
-not the ordinary multi-worker API deployment. Its interval and batch size affect polling/work batches.
+The public templates keep TESTING and business mock mode off. The old Projection runner is not assembled.
 `TZ` configures process time only; it does not migrate database timestamps or the database server timezone.
 
 All 18 bootstrap fields above apply only to explicit `main.py --maintenance bootstrap-users`, never ordinary
@@ -305,8 +296,7 @@ Grant arrays neither create accounts nor update their passwords. Maintenance is 
 own operational authorization; its entry first performs the permission configuration checks documented above.
 
 A generic current-module grant set is supervisor `["monitor","system","control-agent-read"]` and operator
-`["monitor"]`. The current monitor router includes only GET `/monitor/collector/status` and
-GET `/monitor/realtime/latest`: operator receives those fact queries. `system` includes user-management
+`["monitor"]`. The `monitor` permission provides GET `/monitor/collector/status`; the retired realtime snapshot path is absent. `system` includes user-management
 writes with independent actor restrictions; `control-agent-read` covers action-scope queries. This is an
 explicit grant choice, not the public templates' safe `[]` defaults. The approved local three-environment
 migration adds monitor for host/prod operator and adds all three supervisor keys plus monitor for dev operator;
@@ -359,7 +349,7 @@ recovery. Unknown commits return retryable failure; retry the same sampleId. No 
 
 ## Anonymous business integration source
 
-[ARCH-BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/spec.md) wires eight typed anonymous POST routes to owner-local async Service/CRUD and existing business tables. [The closed provider](../contracts/published/http-api/business-integration-v1/README.md) defines strict JSON numbers, typed success/failure envelopes, both digests, presence/units and permanent minimal receipts. Existing JWT/admin/permission/scope and Projection transaction/cursor/audit boundaries stay intact. Producer/source declarations are admission claims, not authentication.
+[ARCH-BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/spec.md) wires eight typed anonymous POST routes to owner-local async Service/CRUD and existing business tables. [The closed provider](../contracts/published/http-api/business-integration-v1/README.md) defines strict JSON numbers, typed success/failure envelopes, both digests, presence/units and permanent minimal receipts. Existing JWT/admin/permission/scope and owner-local business time boundaries stay intact. Producer/source declarations are admission claims, not authentication.
 
 All module switches default off, device/producer scopes empty and storage profiles `unadopted`. Default old entrypoints use the original time path without reading adoption evidence or probing a target; admitted new requests return 503 before the database dependency. `shanghai-v1` requires an explicit valid external adopted manifest plus a matching per-transaction UUID/schema/revision/clock probe. Unknown profiles, retained file paths with unadopted, missing/invalid evidence or wrong targets reject writes. A profile string alone never enables writing.
 
@@ -367,14 +357,24 @@ All module switches default off, device/producer scopes empty and storage profil
 | --- | --- | --- | --- |
 | `EQUIPMENT_INTEGRATION_ADOPTION_FILE` | Absolute external equipment business-time evidence path; empty means unadopted. (str) | empty | `""` |
 | `PERFORMANCE_INTEGRATION_ADOPTION_FILE` | Absolute external production/process evidence path, including manual time bases. (str) | empty | `""` |
-| `MONITOR_INTEGRATION_ADOPTION_FILE` | Absolute external business-curve evidence path; independent of facts/raw/latest. (str) | empty | `""` |
+| `MONITOR_INTEGRATION_ADOPTION_FILE` | Absolute external business-curve evidence path; independent of v2 facts. (str) | empty | `""` |
 
 The fixed compatibility profile covers 13 old tables / 41 calendar columns. Aware values preserve their instant; naive values require explicit finite basis evidence. Pure DATE/durations, old UTC wire/fingerprints/JSON results and manual zero priority retain their semantics. The four new tables use explicit Shanghai DATETIME(3) times and no automatic UTC defaults. The unique source migration chain is f6 → BE009 `0a2c4e6f8b10` (71 application tables) → BE010 `1b3d5f7a9c20` (75). Migration source does not establish an adopted database. Nonempty integration tables prohibit destructive downgrade.
 
 [The finite read-only tool](scripts/business_time_adoption/README.md) produces candidates only. Actual historical investigation/conversion, writer isolation, backup/recovery, target adoption, database/Docker/B and deployment remain separately approved operations; unknown or unclassifiable mixed history keeps G-T closed. This source state does not prove any business row is persisted in a real target.
 
-## Bounded PLC facts source
+## PLC facts v2 and retirement
 
-[plc_facts](app/plc_facts/README.md) owns three anonymous integration routes and seven independent facts tables. `PLC_FACTS_ENABLED=False` disables admission; `PLC_FACTS_PLC_IDS_JSON='[]'` denies every PLC; `PLC_FACTS_STORAGE_PROFILE=unadopted` keeps storage unadopted; `PLC_FACTS_CURSOR_HMAC_KEY=''` provides no cursor signing key. These module-local keys are independent of login, permissions and business integration. A configured profile alone cannot bypass schema/source/time adoption.
+[plc_facts](app/plc_facts/README.md) provides v2 sample ingestion and five authorized acquisition-data GETs. It defaults to closed admission. The historical v1 provider contract remains published for its fixed old source only.
 
-The explicit `0a2c4e6f8b10` successor of `f6a8c0e2b4d6` contains only seven facts tables (71 migrated application tables, excluding `alembic_version`). Full source metadata also includes four BE010 tables, yielding 75. `BE009-A`/`BE009-B` are named profiles, distinct from the historical fixture/table/config counts above. [Maintenance](scripts/plc_facts_maintenance/README.md) is a bounded explicit CLI with no scheduler. Source checks do not authorize migration, adoption or database access.
+`3d5f7a9c1e23` follows `2c4e6a8b0d12` and is forward-only. Its online MySQL migration requires the explicitly checked `ACQ_RETIREMENT_EXPECTED_SERVER_UUID` and `ACQ_RETIREMENT_EXPECTED_SCHEMA` environment values, the complete expected table set, nine empty InnoDB tables, and no visible dependencies. It takes a bounded write lock on those tables before rechecking and dropping them. External preflight must establish complete dependency visibility, exclusive maintenance and a restoration record; the migration cannot prove those external facts. A partial or uncertain DDL state requires the recovery procedure in the [approved task](../plans/ARCH-ACQ-002-legacy-projection-retirement/spec.md); a revision-registration-only retry requires confirmed evidence and an unchanged protected-data audit. Source changes alone do not establish database migration or adoption.
+
+The successor `4e6a8b0d2f14` renames the two facts tables and adds nullable history metadata. Its target, maintenance window, staged recovery and exact-source adoption procedure are defined by [ARCH-ACQ-003 r2](../plans/ARCH-ACQ-003-acquisition-data-optional-filters/spec.md).
+
+## Generic task workflow candidate
+
+ARCH-TASK-001 r1 replaces the coil Plan/Performance surfaces with the [generic task workflow](../contracts/published/http-api/generic-task-workflow-v1/README.md). `app/task` owns field versions, integration eligibility and `task.*` errors; Plan owns dispatch and action evidence; Performance owns complete snapshots and calls Plan within the same transaction. The old reports and dashboard routes and old Performance model imports are retired. Independent quality, acquisition, equipment and monitor remain separate.
+
+The candidate successor `5f7a9c1e3b25` requires exact predecessor `4e6a8b0d2f14`, an explicitly identified target and online empty-table/dependency preflight. Its MySQL DDL is not transactional and has no automatic downgrade. Read the approved task's cutover and recovery procedure before any operation. Source changes and OpenAPI generation do not authorize DDL, a process restart or real configuration changes.
+
+A private project profile at `TASK_INTEGRATION_PROFILE_FILE` registers target/version dispatch fields, PLC sequence bounds and producers. `TASK_INTEGRATION_ENABLED` defaults false and controls anonymous integration; project mapping remains necessary for logged-in plan creation when it is false. Preserve mappings and automatic producer identity for all in-use versions; new streams use a new version. See the contract for sample versions, role grants, error semantics and the MES/CA/FF/DAA/SMA flow.

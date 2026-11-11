@@ -1,5 +1,2 @@
-"""仅导出本owner七张表；不连接数据库。"""
-from .state import StreamState, SourceBinding
-from .receipts import BatchReceipt, SampleReceipt
-from .facts import RawSample, Cycle, LatestPoint
-TABLES=(StreamState.__table__,SourceBinding.__table__,BatchReceipt.__table__,SampleReceipt.__table__,RawSample.__table__,Cycle.__table__,LatestPoint.__table__)
+"""仅导出本 owner 的 v2 模型；不连接数据库。"""
+from .v2 import SampleV2, LatestPointV2

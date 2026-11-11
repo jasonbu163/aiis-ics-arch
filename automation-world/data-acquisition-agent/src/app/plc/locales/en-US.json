@@ -131,6 +131,30 @@
     "lengthEditHint": "Length edits remain unsaved in the draft. After closing, use Save draft in the configuration bar. Closing does not save.",
     "lengths": "Configured DB length: {current} bytes · Calculated length: {calculated} bytes"
   },
+  "diagnosis": {
+    "hint": "Read the point once using the active configuration and current PLC connection.",
+    "waiting": "Waiting for the diagnostic result…",
+    "success": "Read succeeded",
+    "failed": "Point diagnosis failed",
+    "blocked": "Point diagnosis is blocked",
+    "unavailable": "No valid result was returned for this point",
+    "timeout": "No diagnostic result received within {seconds} seconds",
+    "observedAt": "Read time (Shanghai)",
+    "close": "Close"
+  },
+  "connectionTest": {
+    "waiting": "Waiting for the connection test result…",
+    "success": "Connection test passed",
+    "failed": "Connection test failed",
+    "blocked": "Connection test is blocked",
+    "unavailable": "No valid result was returned for this connection test",
+    "timeout": "No connection test result received within {seconds} seconds",
+    "method": "Test method",
+    "reused": "Reused the existing connection without a new handshake",
+    "temporary": "Attempted a temporary connection and cleaned it up after the test",
+    "testedAt": "Test time (Shanghai)",
+    "connectFailed": "Could not open a temporary connection. Check the endpoint in the active configuration and the PLC status."
+  },
   "naming": {
     "technicalName": "Technical name",
     "sourcePath": "Original path",

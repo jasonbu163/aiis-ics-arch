@@ -2,17 +2,31 @@
 import { computed, watch, onMounted, onUnmounted, reactive, ref, type InjectionKey } from 'vue';
 import { ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
-import { bootstrap, localCall, LocalCommandError, type Configuration, type ConfigurationView, type Snapshot, type ImportPreview, type Source, type Offset, type Point, type History, type RawSample, type LogRow, type Identification, type BlockMapping, type NameRequest, type NamePreview, previewPointNames, confirmPointNames } from '../../services/localAcquisition';
+import { bootstrap, localCall, LocalCommandError, type Configuration, type ConfigurationView, type Snapshot, type ImportPreview, type Source, type Offset, type Point, type Operation, type History, type RawSample, type LogRow, type Identification, type BlockMapping, type NameRequest, type NamePreview, previewPointNames, confirmPointNames } from '../../services/localAcquisition';
 import * as facts from '../../services/factsDelivery';
 import { historyBoundary } from '../time';
 export const localConsoleKey: InjectionKey<LocalConsole> = Symbol('daa-local-owner');
 export type LocalConsole = ReturnType<typeof useLocalAcquisitionConsole>;
+export const diagnosticWaitSeconds = 15;
+export const diagnosticTone = { waiting: 'info', success: 'success', failed: 'error', blocked: 'warning', unavailable: 'warning', timeout: 'warning' } as const;
+type DiagnosticStatus = Exclude<keyof typeof diagnosticTone, 'success'> | 'applied';
+interface PlcDiagnostic {
+    action: 'test' | 'diagnose';
+    plcId: string;
+    pointId: string | null;
+    revision: string;
+    target: string;
+    operationId: string | null;
+    status: DiagnosticStatus;
+    reason: string | null;
+    result: unknown;
+}
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 export function useLocalAcquisitionConsole() {
     const { t, te } = useI18n();
     const available = bootstrap.localStorage && ['native', 'fixture'].includes(bootstrap.origin);
     const view = ref<ConfigurationView | null>(null), draft = ref<Configuration | null>(null), snapshot = ref<Snapshot | null>(null), busy = ref(false), error = ref(''), notice = ref(''), selectedPlc = ref(''), selectedDb = ref(''), query = ref(''), pointPage = ref(1), preview = ref<ImportPreview | null>(null), offsets = ref<Offset[]>([]), sources = ref<Source[]>([]), history = ref<History | null>(null), raw = ref<RawSample | null>(null), logs = ref<LogRow[]>([]);
-    const factsReadMode = ref('test'), factsReadFrom = ref(''), factsReadTo = ref(''), factsReadPage = ref(0);
+    const factsReadMode = ref('test'), factsReadFrom = ref(''), factsReadTo = ref(''), factsReadPage = ref(0), factsReadError = ref('');
     const deliveryKind = ref<'batches' | 'events'>('batches');
     const delivery = ref<facts.DeliverySnapshot | null>(null), deliverySettings = ref<facts.DeliverySettings | null>(null), deliveryPage = ref<facts.DeliveryPage | null>(null), deliveryPageSize = ref(20), deliveryPageNumber = ref(1), deliveryCursors = ref<Array<number | null>>([null]), deliveryDialog = ref<'settings' | 'detail' | 'source' | 'preview' | 'read' | null>(null), deliveryDetail = ref<Record<string, unknown> | null>(null), sourceMaterial = ref<facts.SourceMaterial | null>(null);
     async function loadDeliveries(direction: 'reset' | 'next' | 'previous' = 'reset', size = deliveryPageSize.value) {
@@ -27,8 +41,45 @@ export function useLocalAcquisitionConsole() {
     async function inspectDelivery(batchId: string) { await perform(async () => { deliveryDetail.value = await facts.getDelivery(batchId); deliveryDialog.value = 'detail'; }); }
     async function showSourceMaterial() { await perform(async () => { sourceMaterial.value = await facts.getFactsSourceMaterial(); deliveryDetail.value = sourceMaterial.value as unknown as Record<string, unknown>; deliveryDialog.value = 'source'; }); }
     async function previewFacts() { await perform(async () => { const cycleId = history.value?.items[0]?.cycleId; if (!cycleId) throw new Error('delivery_no_cycle'); deliveryDetail.value = await facts.previewDelivery(cycleId); deliveryDialog.value = 'preview'; }); }
-    function openFactsRead() { deliveryDetail.value = null; factsReadPage.value = 0; deliveryDialog.value = 'read'; }
-    async function testFacts(continued = false, newBudget = false) { await perform(async () => { if (!selectedPlc.value) throw new Error('unknown_plc'); const range = ['range','original'].includes(factsReadMode.value); const cursor = continued ? String(deliveryDetail.value?.nextCursor ?? '') : null; const page = continued && !newBudget ? factsReadPage.value + 1 : 1; if (page > 20 || continued && !cursor) throw new Error('query_limits'); deliveryDetail.value = await facts.testFactsEndpoint(selectedPlc.value, { mode: factsReadMode.value, from: range ? historyBoundary(factsReadFrom.value, false) : null, to: range ? historyBoundary(factsReadTo.value, false) : null, cursor, page }); factsReadPage.value = page; deliveryDialog.value = 'read'; }); }
+    function clearFactsReadResult() {
+        deliveryDetail.value = null;
+        factsReadPage.value = 0;
+        factsReadError.value = '';
+    }
+    function openFactsRead() {
+        clearFactsReadResult();
+        deliveryDialog.value = 'read';
+    }
+    watch([selectedPlc, factsReadMode, factsReadFrom, factsReadTo], () => {
+        if (deliveryDialog.value === 'read') clearFactsReadResult();
+    });
+    async function testFacts(continued = false, newBudget = false) {
+        if (deliveryDialog.value !== 'read') return;
+        await perform(async () => {
+            if (!continued) clearFactsReadResult();
+            factsReadError.value = '';
+            try {
+                if (!selectedPlc.value) throw new Error('unknown_plc');
+                const range = ['range', 'original'].includes(factsReadMode.value);
+                const cursor = continued ? String(deliveryDetail.value?.nextCursor ?? '') : null;
+                const page = continued && !newBudget ? factsReadPage.value + 1 : 1;
+                if (page > 20 || continued && !cursor) throw new Error('query_limits');
+                const response = await facts.testFactsEndpoint(selectedPlc.value, {
+                    mode: factsReadMode.value,
+                    from: range ? historyBoundary(factsReadFrom.value, false) : null,
+                    to: range ? historyBoundary(factsReadTo.value, false) : null,
+                    cursor,
+                    page,
+                });
+                if (typeof response?.status !== 'number') throw new Error('invalid_read_response');
+                if (deliveryDialog.value !== 'read') return;
+                deliveryDetail.value = response;
+                factsReadPage.value = page;
+            } catch (e) {
+                if (deliveryDialog.value === 'read') factsReadError.value = String(e instanceof Error ? e.message : e);
+            }
+        });
+    }
     watch([factsReadMode, factsReadFrom, factsReadTo, selectedPlc], () => { if (deliveryDialog.value === 'read') { deliveryDetail.value = null; factsReadPage.value = 0; } });
     const conflictVersion = ref(''), snapshotError = ref('');
     const identification = ref<Identification | null>(null), mappings = ref<BlockMapping[]>([]), importPage = ref(1), importPageSize = ref(10);
@@ -217,12 +268,64 @@ export function useLocalAcquisitionConsole() {
                 p.enabled = false;
             }
     }
-    async function control(command: 'daa_set_connection' | 'daa_set_collection' | 'daa_test_connection' | 'daa_diagnose_point', ids: string[], desired = false, pointId?: string) {
+    const plcDiagnostic = ref<PlcDiagnostic | null>(null);
+    let diagnosticTimer: ReturnType<typeof setTimeout> | undefined;
+    function closeDiagnostic() {
+        clearTimeout(diagnosticTimer);
+        diagnosticTimer = undefined;
+        plcDiagnostic.value = null;
+    }
+    function finishDiagnostic(current: PlcDiagnostic, status: Exclude<DiagnosticStatus, 'waiting'>, reason: string | null = null, result: unknown = null) {
+        if (plcDiagnostic.value !== current || current.status !== 'waiting') return;
+        clearTimeout(diagnosticTimer);
+        diagnosticTimer = undefined;
+        current.reason = reason;
+        current.result = result;
+        current.status = status;
+    }
+    function applyDiagnosticOperation(current: PlcDiagnostic, operation: Operation) {
+        if (operation.phase === 'pending') return;
+        const status = operation.phase === 'applied' || operation.phase === 'failed' || operation.phase === 'blocked'
+            ? operation.phase : 'unavailable';
+        finishDiagnostic(current, status, operation.reason, operation.result);
+    }
+    function checkDiagnosticSnapshot() {
+        const current = plcDiagnostic.value;
+        if (current?.status !== 'waiting' || !current.operationId) return;
+        const operation = snapshot.value?.operations.find(op =>
+            op.operationId === current.operationId && op.plcId === current.plcId && op.action === current.action
+        );
+        if (operation) applyDiagnosticOperation(current, operation);
+    }
+    watch(() => snapshot.value?.operations, checkDiagnosticSnapshot);
+    async function startDiagnostic(action: PlcDiagnostic['action'], plcId: string, target: string, pointId: string | null = null) {
+        const revision = view.value?.active;
+        if (!revision || busy.value || editing.value || plcDiagnostic.value) return;
+        notice.value = '';
+        plcDiagnostic.value = { action, plcId, pointId, revision, target, operationId: null, status: 'waiting', reason: null, result: null };
+        const current = plcDiagnostic.value;
+        diagnosticTimer = setTimeout(() => finishDiagnostic(current, 'timeout'), diagnosticWaitSeconds * 1000);
+        try {
+            const command = action === 'test' ? 'daa_test_connection' : 'daa_diagnose_point';
+            const response = await localCall<{ items: Operation[] }>(command, { plcId, pointId, expectedActiveRevision: revision });
+            if (plcDiagnostic.value !== current || current.status !== 'waiting') return;
+            const operation = response?.items?.[0];
+            if (!operation?.operationId || operation.plcId !== plcId || operation.action !== action) {
+                finishDiagnostic(current, 'unavailable');
+                return;
+            }
+            current.operationId = operation.operationId;
+            applyDiagnosticOperation(current, operation);
+            checkDiagnosticSnapshot();
+        } catch (e) {
+            finishDiagnostic(current, 'failed', e instanceof Error ? e.message : String(e));
+        }
+    }
+    async function control(command: 'daa_set_connection' | 'daa_set_collection', ids: string[], desired = false) {
         await perform(async () => {
             if (!view.value?.active)
                 throw new Error('active_missing');
-            const request = command === 'daa_test_connection' || command === 'daa_diagnose_point' ? { plcId: ids[0], pointId: pointId ?? null, expectedActiveRevision: view.value.active } : { plcIds: ids, desired, expectedActiveRevision: view.value.active };
-            await localCall(command, request);
+            await localCall(command, { plcIds: ids, desired, expectedActiveRevision: view.value.active });
             notice.value = 'pending';
         });
         await refresh();
@@ -367,6 +470,7 @@ export function useLocalAcquisitionConsole() {
         if (timer)
             clearInterval(timer);
         if (nameTimer) clearTimeout(nameTimer);
+        closeDiagnostic();
     });
-    return reactive({ factsReadMode, factsReadFrom, factsReadTo, factsReadPage, openFactsRead, deliveryKind, delivery, deliverySettings, deliveryPage, deliveryPageSize, deliveryPageNumber, deliveryCursors, deliveryDialog, deliveryDetail, sourceMaterial, loadDeliveries, deliveryControl, editDelivery, saveDelivery, inspectDelivery, showSourceMaterial, previewFacts, testFacts, selectedPoints, preparePointEdit, finishPointEdit, selectedNameIds, namePreview, namePreviewOpen, namePreviewBusy, namePage, namePageSize, pagedNames, pointPageSize, closeNames, invalidateNames, toggleNamePoint, previewNames, stagePointEdit, confirmNames, sourcePreviewOpen, offsetPreviewOpen, sourceStructureOpen, identification, mappings, importPage, importPageSize, importRows, pagedImportRows, invalidateImport, changeImportTarget, available, editing, dirty, confirmAction, conflictVersion, snapshotError, selectedTargets, bootstrap, view, draft, snapshot, busy, error, notice, selectedPlc, selectedDb, query, pointPage, preview, offsets, sources, history, historyFilter, historyPage, historyPageSize, historyPreviousAvailable, historyNextAvailable, historyPreviousBounded, raw, rawSampleId, logs, label, plcs, dbs, groups, points, pagedPoints, perform, refresh, reload, save, saveCandidate, activate, addPlc, removePlc, addGroup, removeGroup, control, readFiles, importSources, infer, address, manual, bulk, loadHistory, inspect, loadLogs, state, formatBytes });
+    return reactive({ factsReadMode, factsReadFrom, factsReadTo, factsReadPage, factsReadError, openFactsRead, deliveryKind, delivery, deliverySettings, deliveryPage, deliveryPageSize, deliveryPageNumber, deliveryCursors, deliveryDialog, deliveryDetail, sourceMaterial, loadDeliveries, deliveryControl, editDelivery, saveDelivery, inspectDelivery, showSourceMaterial, previewFacts, testFacts, selectedPoints, preparePointEdit, finishPointEdit, selectedNameIds, namePreview, namePreviewOpen, namePreviewBusy, namePage, namePageSize, pagedNames, pointPageSize, closeNames, invalidateNames, toggleNamePoint, previewNames, stagePointEdit, confirmNames, sourcePreviewOpen, offsetPreviewOpen, sourceStructureOpen, identification, mappings, importPage, importPageSize, importRows, pagedImportRows, invalidateImport, changeImportTarget, available, editing, dirty, confirmAction, conflictVersion, snapshotError, selectedTargets, bootstrap, view, draft, snapshot, busy, error, notice, selectedPlc, selectedDb, query, pointPage, preview, offsets, sources, history, historyFilter, historyPage, historyPageSize, historyPreviousAvailable, historyNextAvailable, historyPreviousBounded, raw, rawSampleId, logs, label, plcs, dbs, groups, points, pagedPoints, perform, refresh, reload, save, saveCandidate, activate, addPlc, removePlc, addGroup, removeGroup, plcDiagnostic, startDiagnostic, closeDiagnostic, control, readFiles, importSources, infer, address, manual, bulk, loadHistory, inspect, loadLogs, state, formatBytes });
 }

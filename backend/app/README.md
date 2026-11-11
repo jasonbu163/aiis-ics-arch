@@ -20,9 +20,9 @@ The backend uses controlled package-aware discovery instead of unrestricted dire
 
 - [module_registry.py](module_registry.py) enumerates only immediate child packages of the imported `app` package.
 - A module opts in only when `app.<module>.manifest` directly exports a typed `manifest: ModuleManifest` whose `name` exactly matches the package name.
-- A package without `manifest.py` is skipped and contributes no routes, models or Projection handlers; malformed manifests and internal manifest imports fail visibly.
+- A package without `manifest.py` is skipped and contributes no routes or models; malformed manifests and internal manifest imports fail visibly.
 - [router.py](router.py) keeps router creation and route aggregation centralized.
-- Enabled manifests provide ordinary routers and Projection owners. Disabled manifests provide neither, but their declared model package is still imported for SQLAlchemy metadata and migration inspection.
+- Enabled manifests provide ordinary routers. Disabled manifests do not provide them, but their declared model package is still imported for SQLAlchemy metadata and migration inspection.
 - Alembic and explicit schema-maintenance actions remain the only schema-change paths; model import does not execute DDL or migrations.
 
 Security and field-runtime boundaries stay explicit:
@@ -53,8 +53,7 @@ Some older or special modules may contain additional files, but new ordinary bus
 
 [`aiis_demo/`](aiis_demo/README.md) is the preferred project-local copy source when a
 new module needs to learn the current package shape. It is reference-only and remains
-`enabled=False`; normal composition therefore does not expose its route or Projection
-owner. Its empty model package is imported for metadata discovery but declares no table.
+`enabled=False`; normal composition therefore does not expose its route. Its empty model package is imported for metadata discovery but declares no table.
 Do not treat it as a business template, an authorization grant, or an AIIS shared
 skill/template. Copying it requires deliberate replacement of every demo name and
 payload, a new business permission design, and a separate Alembic migration whenever
@@ -219,9 +218,9 @@ The four new Model declarations describe three module-owned permanent minimal re
 
 ## PLC facts owner
 
-[plc_facts](plc_facts/README.md) is an API-only ordinary module (`order=36`, no permissions/exports/dependencies). Its anonymous provider uses module-local HTTP/typed schemas and seven independent tables, leaving monitor/CA/Projection sources intact. The new source and schema/source-adoption gates are specified in [ARCH-BE-009 r1](../../plans/ARCH-BE-009-backend-facts-integration/spec.md).
+[plc_facts](plc_facts/README.md) is an API-only ordinary module (`order=36`) with the `plc-facts-read` permission and v2 sample/read routes. The historical v1 provider and old snapshot/Projection runtime are retired by [ARCH-ACQ-002 r2](../../plans/ARCH-ACQ-002-legacy-projection-retirement/spec.md).
 
 
 ## BE010 r2 source boundary
 
-Eight owner-local async business entrypoints now have a closed [provider](../../contracts/published/http-api/business-integration-v1/README.md), permanent minimal receipts and the explicit 1b3 successor after BE009 0a2. Default state remains unadopted. The 13-table/41-column old-time adapter and external adoption manifest require real target evidence before writing. Existing authenticated/Projection surfaces keep their original default time behavior. Source/fixture counts and pure public/owner maintenance exports are described in [MODULE_CONTRACT](MODULE_CONTRACT.md). Database/Docker/B, historical conversion and actual adoption are separate gates.
+Eight owner-local async business entrypoints now have a closed [provider](../../contracts/published/http-api/business-integration-v1/README.md), permanent minimal receipts and the explicit 1b3 successor after BE009 0a2. Default state remains unadopted. The 13-table/41-column old-time adapter and external adoption manifest require real target evidence before writing. Existing authenticated surfaces and retained owner-local time adapters keep their default time behavior. Source/fixture counts and pure public/owner maintenance exports are described in [MODULE_CONTRACT](MODULE_CONTRACT.md). Database/Docker/B, historical conversion and actual adoption are separate gates.

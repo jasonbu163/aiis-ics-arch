@@ -1,13 +1,19 @@
 # 本地采集与事实投递双库
 
-本适配层拥有本地 SQLite schema 与 SQL。DAA-008 只为新空 config-v2/runtime-v3 增加投递元数据；既有 v2/v2 保持本地行为且无投递 DDL。当前自检与 hot-journal 阻碍见[DAA-008](../../../../plans/DAA-008-reliable-facts-upload/tasks.md)，历史本地证据仍归 DAA-002/007。
+本适配层拥有本地 SQLite schema 与 SQL。DAA-008 只为新空 config-v2/runtime-v3 增加投递元数据，r2 受控恢复仅适用于新 sealed Unix profile；既有 v2/v2 保持本地行为且无投递 DDL。当前自检与保留的 r1 hot-journal 原失败见[DAA-008](../../../../plans/DAA-008-reliable-facts-upload/tasks.md)，历史本地证据仍归 DAA-002/007。
 
 | 库 | 表与责任 |
 | --- | --- |
 | `config.sqlite` | `schema_migrations`、`instance_metadata`、内容去重 `source_documents`、CAS `configuration_draft`、不可变 `configuration_revisions`、`active_selection`、可恢复 `activation_intents` |
 | `runtime.sqlite` | `schema_migrations`、`runtime_metadata`、稳定 `plc_sources`、不可变 `configuration_contexts`、`activation_journal`、完整 `collection_cycles`、自描述 `samples`、独立 `sample_delivery` / `sample_references`、有限 `runtime_events` |
 
-新库只在空 local-acquisition-v1 同时建立 config2/runtime3，身份/时间合同匹配并核完整性。已知 v2/v2 不转换；缺库、未知/损坏/schema/身份不符、symlink 或 WAL/SHM 均拒绝，profile 锁保持。r1 还会在 RO preflight 拒绝真实 hot rollback journal，受控恢复需另批 Revision；不删 journal、不用 immutable 绕过、不升级旧库。
+新库只在空 local-acquisition-v1 同时建立 config2/runtime3，身份/时间合同匹配并核完整性。已知 v2/v2 不转换；缺库、未知/损坏/schema/身份不符、链接或 WAL/SHM 均拒绝。`Stores::open` 持原父 profile OS 锁直到双库 SQLite 连接关闭；进程内路径/目录身份占用登记避免 raw FD close 破坏同进程另一活跃库的锁。产品 locator 仍为显式 profile/local-acquisition-v1；历史 private p/store 调用共用同一工厂，不是恢复旁路。不删 journal、不用 immutable 绕过、不升级旧库。
+
+`profile_contract.rs` 负责原字节严格凭据、canonical Unix 文件身份、sentinel/staging no-replace 封存与唯一原生回滚例外；`schema.rs` 负责已知 DDL 指纹和有界完整账本后检（稳定索引每页≤100 key，一次一份 body/response）；`capacity.rs` 仅用 metadata 统计辅助分配。初始化 256KiB 子预算位于既有额外 32MiB 内：实际 auxiliary allocated 加入已用物理量，同时从剩余预留等额扣减。本地 Configuration/context 沿用本地有效性边界；provider wire 限额只核冻结投递材料，不将合法未冻结/blocked 原轮判成整个 profile 损坏。
+
+仅原始 `SqliteFailure.extended_code=776`、新 sealed 有效凭据、未漂移的已知头/身份/SHA 候选、单个对应 journal、完整核过的同伴库及真实锁同时成立，才一次 READ_WRITE|NO_MUTEX、无 CREATE 打开；固定 `PRAGMA schema_version` 让默认 SQLite 执行自己的 rollback。raw DB/journal FD 全在 SQLite 前关闭。检查 native 连接 close 后，先全量 RO 核 integrity/FK/DDL/原文/activation/冻结请求/ACK，再进入原正常恢复、业务日志和 actor。sealed cold 同等级全检。native 失败提示恢复写可能发生；native 后检失败明确已恢复写而业务准入拒绝。准入前只有 stdout 诊断，采集/上传仍停态。
+
+sentinel/staging 存在即拒绝，坏凭据不降级；末次目录 fsync 失败当次拒绝，下次完整可见凭据且无 marker 可以独立 sealed cold 全检，不追认前次同步成功。三个辅助文件全无且无 hot 的合法 v2/unsealed v3 保持 r1 cold 且不补封；格式不能识别启动前外部彻底删 marker 的历史，运维仍禁止删除降级。路径/inode 替换或复制/移动拒绝自动重绑；SHA/inode 不是针对恶意原地编辑或伪造 journal 的认证。非 Unix 保持 unsealed cold 并拒绝 Unix 凭据；macOS A1 不证明 Linux/Windows 或掉电耐久。回退用原兼容 profile/版本，不用旧二进制打开新 sealed 数据。
 
 逐连接回读验证 `page_size=4096`、增量 auto-vacuum、`journal_mode=DELETE`、`synchronous=EXTRA(3)`、`foreign_keys=ON`、`busy_timeout=1000`；另设 `mmap_size=0`、trusted_schema 关闭。使用本机默认 VFS。hot journal 由 SQLite 恢复，应用不删 journal、不转换异常 WAL。硬件和文件系统行为仍影响耐久性。
 
@@ -60,6 +66,6 @@ Point.name为ASCII技术名，sourcePath原路径与稳定ID分开；唯一可�
 
 只对新空profile完整CREATE v2，schema_migrations直接记录version2及上海applied_at；不运行旧库ALTER/UPDATE/ledger回填。instance_metadata/runtime_metadata均schema_version=2且time_profile固定`asia-shanghai-rfc3339-ms-v1`；samples/样本payload/manifest=2，configuration_revisions/contexts与其JSON=1，history/raw等IPC envelope保持1。目录名local-acquisition-v1只作定位。
 
-锁前preflight仅探测本次显式profile：SQLite头部/WAL材料、RO元数据与双库身份、时间合同及原文件摘要。RO不使用immutable，也不进行hot-journal恢复；无法无写读取则拒绝。合格v2或新空才取原锁，再在任何RW前复核。旧UTC/未知/缺失/不匹配直接`time_profile_unsupported`且不创建锁/日志/旁库；锁后漂移分支允许已有锁文件，业务库未RW。原有合格v2的SQLite普通恢复仍在准入通过后进行。
+此历史 v2 规则继续用于 unsealed profile：preflight 只探测本次显式 profile 的头/WAL、RO 元数据、身份/时间与原文件摘要，不使用 immutable。旧 UTC/未知/缺失/不匹配在业务写入前拒绝；锁后拒绝可留锁文件。r2 唯一新增的新 sealed 精确776例外与完整后检见上文，不授权旧 profile 恢复或补封。
 
 business_time统一now/外部RFC3339规范化/SQLite时间表达式/滚动days cutoff。查询先转同一上海毫秒串，再比较闭区间，非法或逆序拒绝；retention、配置created_at排序、事件和receipt沿同合同，pending/incomplete/reference与资源预算保护保持。历史返回原UTF-8字节/SHA，不重写旧UTC数据。stdout的FormatTime使用上海纳秒，JSONL文件at保留毫秒，轮转/锁/失败锁存/level不变。定向DEV自检不是Owner原生或阶段B/C接受。

@@ -2,12 +2,11 @@
 
 [English version](README.md)
 
-Core collector/status与realtime/latest保留原三Model和monitor权限。
-app.monitor.models:PlcDbBlockRawSnapshot是提供给显式model_requires消费者的只读Model出口，不公开采集writer或新API。
+Core 保留 collector/status 和 monitor 权限；旧 realtime/latest 路由及两张快照 Model 已退役。
 独立/monitor/temperature、/monitor/energy两GET只需monitor-business-read，两个key不相互授权。
 查询读取两张业务历史表，不持久化诊断样本，即使业务mock配置开启亦不写入；空曲线保持空。
 过程曲线同步Projection descriptor保留本地调用方事务，发现不会启动运行或发布mapping。
-仅HistoryProcessCurve、HistoryEnergyConsumption补充Core三模型，不包含旧12个HMI/deprecated/报警/tracking模型。
+HistoryProcessCurve、HistoryEnergyConsumption 保留为业务模型，不包含旧12个HMI/deprecated/报警/tracking模型。
 详见[公共合同](../MODULE_CONTRACT.zh-CN.md)。显式后继与源码检查之后仍需MySQL/真实运行gate，不隐含CA/PLC操作。
 
 
@@ -20,7 +19,7 @@ POST逐样本不可变追加，既有33指标至少提供1项，其中12温度�
 GET必需equipmentId与精确YYYY-MM-DD上海自然日，将边界转UTC过滤sampled_at；可选recordId与1–1000的limit（默认1000），
 先取最近样本再升序输出完整items/trends/latest。空结果为[]/[]/{}，四图缺测保留断点/缺测符号。
 曲线页URL保存legacy/http与设备，HTTP scope/空态/故障不fallback。旧温度GET只读设备键NULL域，沿原created_at日期语义；
-collector/raw/latest及energy来源与权限保持。
+collector 及 energy 来源与权限保持。
 
 
 ## 匿名业务集成准备
@@ -32,6 +31,6 @@ collector/raw/latest及energy来源与权限保持。
 
 ## 有界业务集成（r2）
 
-匿名integration Service/CRUD接入本owner既有业务表，连同永久最小回执及typed [provider](../../../contracts/published/http-api/business-integration-v1/README.zh-CN.md)。默认关闭/空scope/未采用；有效外部凭据及事务内UUID/schema/revision/DB时钟匹配缺一不可。显式schema后继为BE009 0a2后的BE010 1b3。旧HTTP/Projection时间适配局限owner固定列，unadopted走原路径。真实历史转换/目标采用及数据库/Docker/B仍需另批，不改变raw/latest保留或PLC writer。
+匿名integration Service/CRUD接入本owner既有业务表，连同永久最小回执及typed [provider](../../../contracts/published/http-api/business-integration-v1/README.zh-CN.md)。默认关闭/空scope/未采用；有效外部凭据及事务内UUID/schema/revision/DB时钟匹配缺一不可。显式schema后继为BE009 0a2后的BE010 1b3。旧HTTP/Projection时间适配局限owner固定列，unadopted走原路径。真实历史转换/目标采用及数据库/Docker/B仍需另批，不改变 PLC writer。
 
 既有曲线created_at同时承载系统/Projection来源时间，旧读接口没有可靠逐行wire基准判别。本实现对monitor的legacyNaive与systemWire不相等明确拒绝采用，不凭equipment/device的NULL推测。更细来源标签/cohort须另立范围。

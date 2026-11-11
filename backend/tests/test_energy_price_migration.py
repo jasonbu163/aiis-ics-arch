@@ -27,8 +27,10 @@ def test_successor_operations_match_full_sixteen_table_metadata():
     hour=load_price(VERSIONS_DIR/"20261013_1600_b8d0f2a4c6e8_add_energy_price_hours.py");hour.op=recorder;hour.upgrade()
     assert recorder.operations[-2:]==[("create_table","energy_price_hours"),("create_index","ix_energy_price_hours_observed_at_id","energy_price_hours",("observed_at","id"),False)]
     assert set(recorder.metadata.tables)==EXPECTED_CORE_TABLES|{"energy_prices","energy_price_hours"}
-    assert set(recorder.metadata.tables).issubset(Base.metadata.tables)
-    for name in recorder.metadata.tables:
+    retired={"plc_db_block_raw_snapshots", "plc_db_block_latest_snapshots"}
+    assert (set(recorder.metadata.tables)-retired).issubset(Base.metadata.tables)
+    assert retired.isdisjoint(Base.metadata.tables)
+    for name in set(recorder.metadata.tables)-retired:
         assert _table_signature(recorder.metadata.tables[name])==_table_signature(Base.metadata.tables[name]),name
     table=Base.metadata.tables["energy_prices"]
     assert len([c for c in table.constraints if c.__class__.__name__=="CheckConstraint"])==7

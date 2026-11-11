@@ -8,4 +8,3 @@
 
 export * from './user'
 export * from './dict'
-export * from './projectionMapping'

@@ -15,12 +15,14 @@ This plan tracks the rollout of the project-level contract hub.
 
 | Contract line | Actual scope and next gate |
 | --- | --- |
+| [ARCH-ACQ-003 r2](../plans/ARCH-ACQ-003-acquisition-data-optional-filters/spec.md) | `owner_accepted`. Human Owner accepted the revised upload contract on 2026-11-11. DAA-010 takes the acquisition r2 artifacts as its provider handoff. |
+| [PLC facts v2](published/http-api/plc-facts-v2/README.md) | ARCH-BE-012 r4 source implementation and isolated verification in progress. |
 | [PLC facts provider](published/http-api/plc-facts-v1/README.md) | BE-009 source and isolated MySQL A+B QA passed; Owner final/provider-ready and real adoption pending. |
 | [Typed business provider](published/http-api/business-integration-v1/README.md) | BE-010 r2 eight operations and isolated A+B QA passed; real schema/time adoption and final acceptance pending. |
 | [AW demand](demands/automation-world-facts-integration.md) | Proposed document; AW008 document QA2 passed, Owner document acceptance pending. Provider evidence is separate. |
 | Old CA authorization | Original demand/provider/preflight records remain historical inputs, not proof of new CA field readiness. |
 
-The K0–K3 material below is an early contract-hub snapshot. Its old MySQL-root blocker, migration head `b4c5d6e7f8a9` and pre-relocation paths are historical, not the current schema head or blockers for BE-009/010. Current source migrations include BE-009 `0a2c4e6f8b10` then BE-010 `1b3d5f7a9c20`; this says nothing about a real database revision. The frozen CA path is now `automation-world/control-agent/`. The new provider QA does not accept old CA field execution.
+The K0–K3 material below is an early contract-hub snapshot. Its old MySQL-root blocker, migration head `b4c5d6e7f8a9` and pre-relocation paths are historical, not the current schema head or blockers for BE-009/010. Source migrations continue from BE-009 `0a2c4e6f8b10` through BE-010 `1b3d5f7a9c20` to BE-012 `2c4e6a8b0d12`; this does not establish a real database revision. The frozen CA path is now `automation-world/control-agent/`. The new provider QA does not accept old CA field execution.
 
 ## Historical K0–K3 record
 

@@ -21,7 +21,7 @@ Python定位为熟悉语言、练手及快速原型，本轮不做打包；Rust�
 
 [Rust 工程说明](field-flow-rust/README.zh-CN.md)和 [Python 工程说明](field-flow-python/README.zh-CN.md)分别提供独立构建、启动及验证命令。两版已实现 demo01 本地 HTTP GET → PLC INT 闭环，并通过独立本地 QA；现场验证和长期运行验收归后续阶段。
 
-[FF-004 r2](plans/FF-004-plc-json-catalog-and-multi-plc/spec.md)：新的fresh-context QA通过精确r2 A的AC01–AC14，旧驱动限制与失败历史保留；Human Owner最终验收待定，后续能力与现场gate独立。 该切片约定每PLC一个JSON、YAML v2、点位句柄与多PLC读取；Modbus仅结构校验，Python/C#加载和DS导出各有后续gate。
+[FF-004 r2](plans/FF-004-plc-json-catalog-and-multi-plc/spec.md)：QA3 在 macOS arm64 回环环境通过 AC01–AC14，Human Owner 于 2026-11-10 最终验收精确 r2 A。旧驱动限制与失败历史保留，现场验证仍属后续。 该切片约定每PLC一个JSON、YAML v2、点位句柄与多PLC读取；Modbus仅结构校验，Python/C#加载和DS导出各有后续gate。
 
 ## 手写流程
 

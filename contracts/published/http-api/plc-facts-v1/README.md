@@ -1,5 +1,7 @@
 # PLC facts v1 source contract
 
+**Historical contract:** current Core after ARCH-ACQ-002 r2 does not expose these v1 routes or tables. Use the preserved pre-retirement source for historical verification; the artifacts below are retained unchanged.
+
 Direction: DAA original local samples → Backend facts provider → future SMA facts consumer. `ARCH-BE-009 r1` source and approved isolated MySQL A+B passed independent QA, with [current verification evidence](../../../../plans/ARCH-BE-009-backend-facts-integration/checklist.md). Owner final/provider-ready, actual target adoption, DAA uploader, joint validation and deployment remain pending separate gates. The directory name does not imply publication to an external service.
 
 Versions: `plc-facts/v1`, `daa-local/v2`, `pf-json/v1`, `pf-cursor/v1`.
@@ -14,4 +16,4 @@ Anonymous declarations may be impersonated. Default-off flags/empty PLC scope re
 
 Compared with [AW008](../../../../plans/ARCH-AW-008-stage-c-facts-contract/spec.md), the approved provider refines seven independent tables, original v2 text, fixed part identities, nine-digit facts time, 4 MiB input, explicit source adoption, singleton publication order, finite rejection proofs and cursor gaps. Source generation switches increment sourceEpoch; unchanged point definitions preserve valid latest across unrelated context/revision changes. Three natural months is the maximum logical retention; all reads enforce expiry even when physical cleanup stops. A bounded one-shot maintenance tick has no scheduler or business cascade.
 
-Source truth: [typed schemas](../../../../backend/app/plc_facts/schemas/), [module implementation](../../../../backend/app/plc_facts/README.md), [explicit migration](../../../../backend/alembic/versions/20261104_1200_0a2c4e6f8b10_add_plc_facts_integration.py), [approved spec](../../../../plans/ARCH-BE-009-backend-facts-integration/spec.md), [Development evidence](../../../../plans/ARCH-BE-009-backend-facts-integration/tasks.md). Machine JSON is generated from the typed runtime and independent vectors; it is not a runtime configuration file.
+Source truth: [historical machine artifacts](openapi.json), [explicit migration](../../../../backend/alembic/versions/20261104_1200_0a2c4e6f8b10_add_plc_facts_integration.py), [approved spec](../../../../plans/ARCH-BE-009-backend-facts-integration/spec.md), [Development evidence](../../../../plans/ARCH-BE-009-backend-facts-integration/tasks.md). Machine JSON is generated from the typed runtime and independent vectors; it is not a runtime configuration file.

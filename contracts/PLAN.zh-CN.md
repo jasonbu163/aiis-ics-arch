@@ -15,12 +15,14 @@
 
 | 合同线索 | 实际范围与下一gate |
 | --- | --- |
+| [ARCH-ACQ-003 r2](../plans/ARCH-ACQ-003-acquisition-data-optional-filters/spec.md) | `owner_accepted`。Human Owner 于 2026-11-11 验收新版上报合同。DAA-010 接续使用采集 r2 合同工件。 |
+| [PLC facts v2](published/http-api/plc-facts-v2/README.zh-CN.md) | ARCH-BE-012 r4 源码实施与隔离验证进行中。 |
 | [PLC事实provider](published/http-api/plc-facts-v1/README.zh-CN.md) | BE-009源码及隔离MySQL A+B QA通过，Owner终验/provider-ready及真实采用待定。 |
 | [typed业务provider](published/http-api/business-integration-v1/README.zh-CN.md) | BE-010 r2八路及隔离A+B QA通过，真实schema/时间采用及终验待定。 |
 | [AW需求](demands/automation-world-facts-integration.zh-CN.md) | 文档仍proposed；AW008文档QA2通过、Owner文档终验待定，provider证据独立。 |
 | 旧CA授权 | 原需求/provider/前置gate保留为历史输入，不证明新CA现场就绪。 |
 
-下方K0–K3是早期契约中枢快照。旧MySQL root阻塞、migration head `b4c5d6e7f8a9`及迁移前路径属于历史，不是BE-009/010当前schema head或阻塞。现行源码迁移包含BE-009 `0a2c4e6f8b10`再接BE-010 `1b3d5f7a9c20`，不据此断言实际数据库revision。冻结CA当前路径为`automation-world/control-agent/`；新provider QA不替旧CA授予现场执行接受。
+下方K0–K3是早期契约中枢快照。旧MySQL root阻塞、migration head `b4c5d6e7f8a9`及迁移前路径属于历史，不是BE-009/010当前schema head或阻塞。源码迁移从 BE-009 `0a2c4e6f8b10` 经 BE-010 `1b3d5f7a9c20` 接至 BE-012 `2c4e6a8b0d12`，不据此断言实际数据库 revision。冻结CA当前路径为`automation-world/control-agent/`；新provider QA不替旧CA授予现场执行接受。
 
 ## 历史K0–K3记录
 

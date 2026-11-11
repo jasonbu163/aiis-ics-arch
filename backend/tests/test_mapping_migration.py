@@ -34,7 +34,7 @@ def signature(table):
 
 def test_six_revision_60_to_64_model_parity_and_53_protection():
     create_app(testing=True)
-    migrations=[load(p) for p in sorted(VERSIONS_DIR.glob('*.py'))]
+    migrations=[load(p) for p in sorted(VERSIONS_DIR.glob('*.py'))[:6]]
     assert [m.revision for m in migrations]==['d4e6f8a0b2c4','a6c8e0f2b4d6','b8d0f2a4c6e8','d2f4a6b8c0e2','e4f6a8b0c2d4','f6a8c0e2b4d6']
     recorder=Recorder()
     for m in migrations[:-1]:m.op=recorder;m.upgrade()
@@ -44,8 +44,10 @@ def test_six_revision_60_to_64_model_parity_and_53_protection():
     assert len(recorder.metadata.tables)==64
     assert set(recorder.metadata.tables)-set(before)==NEW
     assert len(set(before)-CHANGED)==53
+    retired={"plc_db_block_raw_snapshots", "plc_db_block_latest_snapshots"}
     for name,table in recorder.metadata.tables.items():
-        assert signature(table)==signature(Base.metadata.tables[name]),name
+        if name not in retired:
+            assert signature(table)==signature(Base.metadata.tables[name]),name
         str(CreateTable(table).compile(dialect=mysql.dialect()))
         for index in table.indexes:str(CreateIndex(index).compile(dialect=mysql.dialect()))
         if name in set(before)-CHANGED:assert signature(table)==before[name]
@@ -56,7 +58,7 @@ def test_six_revision_60_to_64_model_parity_and_53_protection():
     for table, key in [('equipment_production_parameters','http_coil_key'),('performance_main','http_coil_key'),('performance_process_temperature','http_zone_key')]:
         assert isinstance(recorder.metadata.tables[table].c[key].type.dialect_impl(mysql.dialect()),mysql.VARBINARY)
         assert 'VARBINARY(200)' in str(CreateTable(recorder.metadata.tables[table]).compile(dialect=mysql.dialect()))
-    assert ScriptDirectory.from_config(Config('alembic.ini')).get_heads()==['f6a8c0e2b4d6']
+    assert ScriptDirectory.from_config(Config('alembic.ini')).get_heads()==['4e6a8b0d2f14']
 
 def test_downgrade_offline_refuses_without_any_mutation(monkeypatch):
     final=load(VERSIONS_DIR/'20261016_1900_f6a8c0e2b4d6_expand_mapping_business_api.py')

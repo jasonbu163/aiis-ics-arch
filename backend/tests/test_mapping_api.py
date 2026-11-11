@@ -8,32 +8,25 @@ from httpx import ASGITransport,AsyncClient
 from sqlalchemy.exc import DBAPIError
 from core.deps import get_current_user
 from database import get_db
-from tests.test_mapping_service import MemoryTransactions,identity
+from tests.test_mapping_service import MemoryTransactions
+from tests.mapping_fixtures import identity
 from app.equipment.api.mapping_samples import router as equipment_router
-from app.performance.api.mapping_observations import router as production_router
-from app.performance.api.process_samples import router as process_router
-from app.performance.api.routes import router as legacy_router
 from app.monitor.api.process_curve_samples import router as monitor_router
 from app.equipment.mapping_config import MappingConfig as EquipmentConfig,get_mapping_config as equipment_config
-from app.performance.mapping_config import MappingConfig as PerformanceConfig,get_mapping_config as performance_config
 from app.monitor.mapping_config import MappingConfig as MonitorConfig,get_mapping_config as monitor_config
-from app.performance.services import async_mapping_query
 pytestmark=pytest.mark.no_db
 
 @pytest.fixture
 def harness(monkeypatch):
     db=MemoryTransactions();db.install(monkeypatch)
     app=FastAPI(debug=True)
-    for router in (equipment_router,production_router,process_router,legacy_router,monitor_router):app.include_router(router,prefix='/api/v1')
+    for router in (equipment_router,monitor_router):app.include_router(router,prefix='/api/v1')
     actor=SimpleNamespace(id=1,role='admin',is_active=True)
     app.state.role_api_permissions={'supervisor':(),'operator':()}
-    app.state.performance_mapping_config=PerformanceConfig(PERFORMANCE_MAPPING_INGEST_ID='line-A',_env_file=None)
     app.dependency_overrides[get_current_user]=lambda:actor
     app.dependency_overrides[get_db]=lambda:db
     app.dependency_overrides[equipment_config]=lambda:EquipmentConfig(EQUIPMENT_MAPPING_INGEST_ID='line-A',_env_file=None)
-    app.dependency_overrides[performance_config]=lambda:PerformanceConfig(PERFORMANCE_MAPPING_INGEST_ID='line-A',_env_file=None)
     app.dependency_overrides[monitor_config]=lambda:MonitorConfig(MONITOR_MAPPING_INGEST_ID='line-A',_env_file=None)
-    monkeypatch.setattr(async_mapping_query,'read_records',AsyncMock(return_value=dict(items=[],total=0,page=1,page_size=20)))
     return app,db,actor
 
 async def request(app,path,method='POST',payload=None,raw=None,headers=None):
@@ -42,6 +35,7 @@ async def request(app,path,method='POST',payload=None,raw=None,headers=None):
             headers=headers if headers is not None else {'Authorization':'Bearer synthetic-override','Content-Type':'application/json'})
 
 @pytest.mark.asyncio
+@pytest.mark.skip(reason="retired performance mapping route; historical BE-006 evidence")
 async def test_real_route_dispatch_static_before_dynamic(harness):
     response=await request(harness[0],'/performances/mapping-records?equipmentId=line-A','GET')
     assert response.status_code==200 and response.json()['data']['items']==[]
@@ -49,7 +43,6 @@ async def test_real_route_dispatch_static_before_dynamic(harness):
 @pytest.mark.asyncio
 @pytest.mark.parametrize('path,payload',[
  ('/equipment/drive-samples',identity(tv=0)),('/equipment/production-parameter-samples',identity(coilNo='A',width=0)),
- ('/performances/production-observations',identity(coilNo='A',observationStatus='in_production',weight=0)),
  ('/monitor/process-curve-samples',identity(z1TempAct=0))])
 async def test_write_camelcase_and_identity(harness,path,payload):
     response=await request(harness[0],path,payload=payload)
@@ -65,7 +58,7 @@ async def test_write_camelcase_and_identity(harness,path,payload):
  ('/equipment/drive-samples',json.dumps(identity(tv=None))),
  ('/equipment/drive-samples',json.dumps(identity(tv=0,tv_set=1))),
  ('/monitor/process-curve-samples',json.dumps(identity(z1TempSet=1.1))),
- ('/performances/production-observations',json.dumps(identity(observationStatus='unknown',weight=0)))])
+])
 async def test_raw_strict_rejection(harness,path,raw):
     response=await request(harness[0],path,raw=raw)
     assert response.status_code==422 and response.json()['code']==422 and response.json()['data'] is None
@@ -73,7 +66,7 @@ async def test_raw_strict_rejection(harness,path,raw):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('path,payload',[
- ('/equipment/drive-samples',identity(tv=0)),('/performances/production-observations',identity(observationStatus='unknown')),
+ ('/equipment/drive-samples',identity(tv=0)),
  ('/monitor/process-curve-samples',identity(z1TempAct=0))])
 async def test_missing_auth_cross_scope_and_nonadmin(harness,path,payload):
     app,db,actor=harness
@@ -84,7 +77,7 @@ async def test_missing_auth_cross_scope_and_nonadmin(harness,path,payload):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('path,payload',[
- ('/equipment/drive-samples',identity(tv=0)),('/performances/production-observations',identity(observationStatus='unknown')),
+ ('/equipment/drive-samples',identity(tv=0)),
  ('/monitor/process-curve-samples',identity(z1TempAct=0))])
 @pytest.mark.parametrize('failure',['system','dbapi'])
 async def test_dependency_exit_before_success_and_debug_redaction(harness,path,payload,failure):
@@ -104,6 +97,7 @@ async def test_dependency_exit_before_success_and_debug_redaction(harness,path,p
     assert retry.status_code==200 and retry.json()['data']['outcome']=='duplicate'
 
 @pytest.mark.asyncio
+@pytest.mark.skip(reason="retired performance mapping route; historical BE-006 evidence")
 async def test_http_manual_branch_is_strict_scoped_and_delete_protected(harness,monkeypatch):
     from app.performance.services.async_performance import async_performance_service
     app,db,actor=harness
@@ -120,7 +114,7 @@ async def test_http_manual_branch_is_strict_scoped_and_delete_protected(harness,
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('path,payload',[
- ('/equipment/drive-samples',identity(tv=0)),('/performances/production-observations',identity(observationStatus='unknown')),
+ ('/equipment/drive-samples',identity(tv=0)),
  ('/monitor/process-curve-samples',identity(z1TempAct=0))])
 @pytest.mark.parametrize('kind',['missing','basic','bad','expired','refresh','revoked','inactive'])
 async def test_real_jwt_dependency_401_for_all_new_owners(harness,monkeypatch,path,payload,kind):
@@ -145,6 +139,7 @@ async def test_real_jwt_dependency_401_for_all_new_owners(harness,monkeypatch,pa
 
 
 @pytest.mark.asyncio
+@pytest.mark.skip(reason="retired performance mapping route; historical BE-006 evidence")
 async def test_production_read_view_reset_does_not_access_expired_authenticated_user(harness,monkeypatch):
     """Unbound ORM Session expires a loaded User on rollback; no connection/DB is created."""
     from sqlalchemy import inspect

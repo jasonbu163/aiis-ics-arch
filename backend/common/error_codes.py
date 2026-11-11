@@ -21,14 +21,6 @@ class ErrorCode(StrEnum):
     CANNOT_DELETE_SELF = "cannot_delete_self"
     CANNOT_OPERATE_SELF = "cannot_operate_self"
     TARGET_USER_NOT_MANAGEABLE = "target_user_not_manageable"
-    PROJECTION_MAPPING_HANDLER_NOT_FOUND = "projection_mapping_handler_not_found"
-    PROJECTION_MAPPING_HANDLER_PROVENANCE_NOT_ALLOWED = "projection_mapping_handler_provenance_not_allowed"
-    PROJECTION_MAPPING_SET_NOT_FOUND = "projection_mapping_set_not_found"
-    PROJECTION_MAPPING_SET_ALREADY_EXISTS = "projection_mapping_set_already_exists"
-    PROJECTION_MAPPING_REVISION_NOT_FOUND = "projection_mapping_revision_not_found"
-    PROJECTION_MAPPING_REVISION_IMMUTABLE = "projection_mapping_revision_immutable"
-    PROJECTION_MAPPING_INVALID_TRANSITION = "projection_mapping_invalid_transition"
-    PROJECTION_MAPPING_VALIDATION_FAILED = "projection_mapping_validation_failed"
 
     # 本批旧源码兼容错误；未来模块自有命名空间StrEnum。
     PERFORMANCE_INVALID_TIME_RANGE = 'performance_invalid_time_range'

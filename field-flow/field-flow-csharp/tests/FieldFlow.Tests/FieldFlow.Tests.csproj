@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsTestProject>true</IsTestProject>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="4.5.1" />
+    <PackageReference Include="MSTest.TestAdapter" Version="4.5.1" />
+    <ProjectReference Include="../../src/FieldFlow/FieldFlow.csproj" />
+    <ProjectReference Include="../FieldFlow.Fixture/FieldFlow.Fixture.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="../../config/demo01.yaml" Link="config/demo01.yaml" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../config/plcs/*.json" Link="config/plcs/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

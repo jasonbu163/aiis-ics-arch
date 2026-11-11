@@ -21,6 +21,6 @@ uv run --offline --frozen --no-sync python scripts/business_time_adoption/main.p
 
 `plan`离线运行。`business-time-classification/v1`须精确覆盖调查的每个`table.column`，记录basis（utc_wall/shanghai_wall/known_offset/unknown）、与调查相等的coveredRows和指向私有来源证据的evidenceRef。这些声明不能自动变成历史证明；计划始终为state=candidate、adoptionEligible=false。`verify`比较同一目标/profile、行数和时间列摘要；摘要变化不证明转换正确，也不替代ID/值/FK/pair守恒。旧HTTP/Projection兼容、writer隔离、备份、明确获批的data-only转换及Owner目标采用决定仍须独立证明。
 
-运行凭据 `business-time-adoption/v1` 是另一份运维工件：精确module/profile/schemaRevision=1b3d5f7a9c20、目标UUID/schema、固定列摘要、sourceRevision、完整be010.fixed-basis/v1、调查/转换/校验报告digest/reference、备份和Owner批准引用、上海verifiedAt及state=adopted。工具不把candidate提升为该凭据。外部私有材料由部署方保护，原子替换须保留旧摘要，不进入公开仓。
+运行凭据 `business-time-adoption/v1` 是另一份运维工件：精确 module/profile/schemaRevision（`1b3d5f7a9c20`、`2c4e6a8b0d12`、`3d5f7a9c1e23` 或 `4e6a8b0d2f14`，必须匹配实际数据库）、目标UUID/schema、固定列摘要、sourceRevision、完整be010.fixed-basis/v1、调查/转换/校验报告digest/reference、备份和Owner批准引用、上海verifiedAt及state=adopted。工具不把candidate提升为该凭据。外部私有材料由部署方保护，原子替换须保留旧摘要，不进入公开仓。
 
 终端输出JSON Lines started/complete/failed，报告仅写入显式指定的新文件，不覆盖已有文件。不默认创建inputs/outputs、持久日志、打包工件或独立可执行文件。使用项目uv环境，独立打包不在本任务范围。源码检查不授权任何目标操作。

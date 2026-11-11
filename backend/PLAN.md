@@ -4,6 +4,11 @@ Chinese version: [PLAN.zh-CN.md](PLAN.zh-CN.md)
 
 ## Current baseline
 
+- [ARCH-ACQ-003 r2](../plans/ARCH-ACQ-003-acquisition-data-optional-filters/spec.md): `owner_accepted`. The specified dev schema is at `4e6a8b0d2f14`. Both renamed tables preserve their original rows. Human Owner accepted the r2 provider and the verified dev scope on 2026-11-11.
+
+- ARCH-ACQ-002 r2 passed independent QA. Revision `3d5f7a9c1e23` retired nine empty tables in the specified 3307 dev schema and preserved both v2 tables. Human Owner acceptance is pending. [QA record](../plans/ARCH-ACQ-002-legacy-projection-retirement/checklist.md)
+- ARCH-BE-012 r4 introduced the sample API and two v2 tables at `2c4e6a8b0d12`. Independent source verification and dev functional checks passed. Its original isolated matrix and final acceptance are pending. [QA record](../plans/ARCH-BE-012-simplified-plc-facts/checklist.md)
+
 - [ARCH-BE-009 r1](../plans/ARCH-BE-009-backend-facts-integration/spec.md): `owner_accepted`; 9 formal MySQL cases and 42 expanded Dev scenarios; fresh QA independently passed 9 formal, 47 named expanded scenarios, 181 focused and 44 legacy tests (9 deselected) passed; A/failure histories retained. Two containers/volumes/networks, eight dedicated schemas and 27 temporary credential/config files were cleaned and independently observed absent. Human Owner accepted the approved source and isolated A+B delivery on 2026-11-05; live adoption, DAA/SMA integration and production SLA remain separate; existing databases/history were not operated on.
 
 - [ARCH-BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/spec.md): `owner_accepted`; both real MySQL/ASGI/time/concurrency/disconnect rounds, 161 affected source regressions in each, and permanent business receipts after facts cleanup passed; A/failure histories retained. Two containers/volumes/networks, eight dedicated schemas and 27 temporary credential/config files were cleaned and independently observed absent. Human Owner accepted the approved source and isolated A+B delivery on 2026-11-05; live adoption, DAA/SMA integration and production SLA remain separate; existing databases/history were not operated on.
@@ -19,7 +24,7 @@ Chinese version: [PLAN.zh-CN.md](PLAN.zh-CN.md)
 
 - Core modules: user, system, control_agent, schema_maintenance, monitor and aiis_demo.
 - Module route discovery is manifest opt-in; security/runtime boundary modules remain explicit.
-- Monitor Core is limited to collector/raw/latest field facts.
+- Monitor Core exposes collector status. The old raw/latest snapshot tables and their Core query are retired.
 - `ARCH-MIG-001 r1` now has a single `d4e6f8a0b2c4` Core root for fourteen tables; the operation/metadata parity,
   downgrade and single-head evidence passed fresh-context Verification and received Human Owner final acceptance.
 - `ARCH-DOCKER-001 r1` empty-volume runtime proof is owner-accepted. `ARCH-001 r3` Development restored the
@@ -28,4 +33,4 @@ Chinese version: [PLAN.zh-CN.md](PLAN.zh-CN.md)
 
 Detailed work records live in the root architecture task bundle and in any separately approved backend task. This index does not carry project business backlog.
 
-The API-only `plc_facts` owner uses seven independent tables and does not replace old monitor raw/latest or Projection inputs. BE-010 owns four business-integration tables and bounded time compatibility; the source migration order is BE-009 `0a2c4e6f8b10` → BE-010 `1b3d5f7a9c20`. Human Owner accepted both approved source and isolated A+B delivery scopes on 2026-11-05; actual target adoption and DAA/SMA integration remain separate.
+The API-only `plc_facts` owner writes v2 samples and serves scoped queries from the history and latest-point tables. The historical migration order includes BE-009 `0a2c4e6f8b10` → BE-010 `1b3d5f7a9c20`. BE-010 owns four business-integration tables and bounded time compatibility. Human Owner accepted the approved BE-009 and BE-010 source and isolated A+B delivery scopes on 2026-11-05. Their target adoption and DAA/SMA integration remain separate.

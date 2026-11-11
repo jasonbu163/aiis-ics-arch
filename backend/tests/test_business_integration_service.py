@@ -26,7 +26,7 @@ class DB:
 
 @pytest.fixture
 def world(monkeypatch):
-    stores={owner:dict(receipts={},records={},events={},state=None,next=1) for owner in ("equipment","performance","monitor")}
+    stores={owner:dict(receipts={},records={},events={},state=None,next=1) for owner in ("equipment","monitor")}
     for owner,store in stores.items():
         crud=importlib.import_module(f"app.{owner}.crud.async_integration")
         async def probe(db,adoption):return source_time("2026-11-04T10:01:00.123+08:00")
@@ -57,23 +57,6 @@ def world(monkeypatch):
         row=next(row for row in stores["monitor"]["records"].values()if row.id==record_id)
         return {field:getattr(row,field)for field in monitor._FLOAT_FIELDS}
     monkeypatch.setattr(monitor,"get_record",get_curve);monkeypatch.setattr(monitor,"add_record",add_curve);monkeypatch.setattr(monitor,"stored_float_values",curve_floats)
-    perf=importlib.import_module("app.performance.crud.async_integration")
-    async def state(db,equipment,now):
-        store=stores["performance"]
-        if store["state"] is None:store["state"]=SimpleNamespace(last_sampled_at=None,created_at=now,updated_at=now)
-        return store["state"]
-    async def event(db,equipment,time):return stores["performance"]["events"].get((equipment,time))
-    async def add_event(db,**values):
-        row=SimpleNamespace(**values);stores["performance"]["events"][(values["equipment_id"],values["sampled_at"])]=row;return row
-    async def active(db,equipment,target_coil=None):return sorted([r for r in stores["performance"]["records"].values() if isinstance(r,perf.Performance) and r.equipment_id==equipment and (r.observation_status in ("in_production","unknown") or r.coil_no==target_coil)],key=lambda row:row.id)
-    async def add_perf(db,**values):
-        row=perf.Performance(id=101+len(stores["performance"]["records"]),**values);stores["performance"]["records"][row.id]=row;return row
-    async def parent(db,parent_id):return stores["performance"]["records"].get(parent_id)
-    async def parent_event(db,equipment,parent_id):return next((1 for e in stores["performance"]["events"].values() if e.equipment_id==equipment and e.performance_id==parent_id and e.observation_status=="in_production"),None)
-    async def get_process(db,kind,parent_id,data,time):return stores["performance"]["records"].get((kind,parent_id,data.zone,time))
-    async def add_process(db,kind,**values):
-        row=perf.MODELS[kind](id=201+len(stores["performance"]["records"]),**values);stores["performance"]["records"][(kind,values["performance_id"],values["zone"],values["record_time"])]=row;return row
-    for name,fn in dict(state_for_update=state,get_event=event,add_event=add_event,active_records=active,add_performance=add_perf,parent=parent,parent_event=parent_event,get_process=get_process,add_process=add_process).items():monkeypatch.setattr(perf,name,fn)
     return stores
 
 
@@ -93,7 +76,7 @@ async def receive(index,payload,db):
     return await receive_sample(db,request,manifest("monitor"))
 
 
-@pytest.mark.parametrize("index",range(8))
+@pytest.mark.parametrize("index",(0,1,2,7))
 async def test_all_eight_real_service_targets_and_stable_receipt(index,world):
     db=DB()
     if index in (4,5,6):await receive(3,example(3),db)
@@ -127,13 +110,9 @@ async def test_partial_null_fill_and_process_post_merge_range(world):
     payload["eventId"]="fill";payload["data"].pop("tv");payload["data"]["km"]=0
     filled=await receive(1,payload,db)
     assert filled.outcome=="updated" and filled.changed_fields==["km"] and filled.record_id==first.record_id
-    await receive(3,example(3),db)
-    payload=example(4);payload["eventId"]="min";payload["data"]={**payload["data"],"minTemp":10};await receive(4,payload,db)
-    payload["eventId"]="max";payload["data"].pop("minTemp");payload["data"]["maxTemp"]=5
-    with pytest.raises(BusinessException) as caught:await receive(4,payload,db)
-    assert caught.value.code==422
 
 
+@pytest.mark.skip(reason="retired coil performance integration; historical BE-010 evidence")
 async def test_production_history_stale_zero_active_and_manual_zero(world):
     db=DB();first=await receive(3,example(3),db)
     row=world["performance"]["records"][101];row.manual_override_weight=Decimal(0);row.effective_weight=Decimal(0);row.weight=Decimal(0)
@@ -152,8 +131,6 @@ async def test_production_history_stale_zero_active_and_manual_zero(world):
 
 async def test_missing_parent_and_commit_unknown_without_blind_retry(world):
     db=DB()
-    with pytest.raises(BusinessException) as missing:await receive(4,example(4),db)
-    assert missing.value.code==404 and not world["performance"]["receipts"]
     db.fail_commit=True
     with pytest.raises(BusinessException) as unknown:await receive(1,example(1),db)
     assert unknown.value.code==503 and str(unknown.value.error_code).endswith("commit_unknown") and db.commits==1
@@ -169,6 +146,7 @@ async def test_failed_cleanup_cannot_erase_commit_unknown(world):
 
 
 
+@pytest.mark.skip(reason="retired coil performance integration; historical BE-010 evidence")
 async def test_reactivation_locks_inactive_target_with_active_rows(world):
     db=DB();first=await receive(3,example(3),db)
     payload=example(3);payload["eventId"]="switch";payload["data"]["coilNo"]="next";payload["data"]["sampledAt"]="2026-11-04T10:00:01.123+08:00"
@@ -182,7 +160,6 @@ async def test_reactivation_locks_inactive_target_with_active_rows(world):
 
 @pytest.mark.parametrize('owner,index,resource,request_type,receipt_type,filename',[
     ('equipment',1,'drive','DriveRequest','DriveReceipt','async_integration'),
-    ('performance',4,'process_temperature','ProcessTemperatureRequest','ProcessTemperatureReceipt','async_integration_observation'),
     ('monitor',7,'process_curve','ProcessCurveRequest','ProcessCurveReceipt','async_integration'),
 ])
 @pytest.mark.parametrize('mode,failures,number,attempts,status',[
@@ -213,6 +190,7 @@ async def test_precommit_named_unique_recovery_remains_bounded(owner,index,resou
     assert calls[:2]==['probe','read']
 
 
+@pytest.mark.skip(reason="retired coil performance integration; historical BE-010 evidence")
 async def test_new_performance_explicitly_refreshes_mysql_expression_defaults_before_rules():
     """B真实MySQL MissingGreenlet回归：规则访问前显式await刷新SQL表达式NULL列。"""
     from app.performance.crud.async_integration import add_performance

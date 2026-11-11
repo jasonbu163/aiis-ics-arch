@@ -20,6 +20,22 @@ def manifest(owner):
         backupRef="private:backup",ownerApprovalRef="fixture-approved-target",verifiedAt="2026-11-04T10:00:00.000+08:00",state="adopted")
 
 
+@pytest.mark.parametrize('owner', ('equipment', 'performance', 'monitor'))
+@pytest.mark.parametrize('revision', ('3d5f7a9c1e23', '4e6a8b0d2f14', '5f7a9c1e3b25'))
+def test_successor_requires_matching_fresh_adoption(owner, revision):
+    old = manifest(owner)
+    new = deepcopy(old)
+    new['schemaRevision'] = revision
+    assert parse_adoption_manifest(new, owner) == new
+    probe = StorageProbe('fixture-server', 'fixture_schema', revision, datetime(2026, 11, 4, 2))
+    with pytest.raises(ValueError):
+        validate_adoption_probe(old, probe)
+    assert validate_adoption_probe(new, probe).manifest == new
+    new['schemaRevision'] = 'unrecognized'
+    with pytest.raises(ValueError):
+        parse_adoption_manifest(new, owner)
+
+
 @pytest.mark.parametrize("owner",("equipment","performance","monitor"))
 def test_exact_profile_and_adoption_rejection(owner,tmp_path):
     module=importlib.import_module(f"app.{owner}.integration_config")
@@ -54,7 +70,7 @@ def test_fixed_13_tables_41_columns_and_aware_naive_inverse():
     with pytest.raises(ValueError):to_storage_time(utc,"unknown")
 
 
-@pytest.mark.parametrize("owner",("equipment","performance","monitor"))
+@pytest.mark.parametrize("owner",("equipment",pytest.param("performance", marks=pytest.mark.skip(reason="retired performance integration probe; historical BE-010 evidence")),"monitor"))
 async def test_async_and_sync_probe_use_only_passed_session(owner):
     queries=[]
     class Result:
@@ -79,11 +95,10 @@ async def test_async_and_sync_probe_use_only_passed_session(owner):
 
 def test_owner_legacy_views_do_not_dirty_original_and_select_fixed_basis():
     from app.equipment.models import EquipmentDrive,EquipmentProductionParameters
-    from app.performance.models import Performance,ProcessTemperature,ProcessTension,ProcessSpeed
     from app.monitor.models import HistoryProcessCurve
     from database import Base
     physical=datetime(2026,11,4,1,0,0,123000)
-    for owner in ('equipment','performance','monitor'):
+    for owner in ('equipment','monitor'):
         module=importlib.import_module(f'app.{owner}.integration_storage')
         evidence=manifest(owner)
         evidence['basisProfile']['legacyNaive']='shanghai_wall'
@@ -111,6 +126,7 @@ def test_monitor_refuses_unselectable_mixed_created_at_wire_basis(tmp_path):
 
 
 
+@pytest.mark.skip(reason="retired coil production integration; historical BE-010 evidence")
 async def test_production_locks_active_and_inactive_target_in_one_sorted_current_read():
     from app.performance.crud.async_integration import active_records
     from sqlalchemy.dialects.mysql import dialect
@@ -130,6 +146,7 @@ async def test_production_locks_active_and_inactive_target_in_one_sorted_current
     ('shanghai_wall','utc_wall','shanghai_wall','utc_wall'),
     ('utc_wall','shanghai_wall','utc_wall','shanghai_wall'),
 ])
+@pytest.mark.skip(reason="retired coil performance GET; historical BE-010 evidence")
 async def test_adopted_old_get_preserves_known_utc_and_other_proven_bases(source,legacy_basis,system_basis,manual_basis,audit_basis,monkeypatch):
     """旧受保护GET实际DTO/serializer；预期由来源事实独立给定，不调用被测basis选择器。"""
     from datetime import date

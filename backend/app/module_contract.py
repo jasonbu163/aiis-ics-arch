@@ -78,10 +78,7 @@ LEGACY_PUBLIC_COMPATIBILITY = {'auxiliary': ('common.data_keys:normalize_downtim
              'common.data_keys:normalize_target_type',
              'common.data_keys:period_type_storage_values',
              'common.data_keys:target_type_storage_values'),
- 'system': ('common.error_codes:ErrorCode',
-            'projection.policy_catalog:SnapshotPolicyCatalog',
-            'projection.provenance_contract:PILOT_PLC_DEVICE_IDENTITIES',
-            'projection.registry:ProjectionRegistry')}
+ 'system': ('common.error_codes:ErrorCode',)}
 LEGACY_SETTINGS_COMPATIBILITY = {'schema_maintenance': ('MSSQL_DATABASE',
                         'MSSQL_HOST',
                         'MSSQL_PORT',

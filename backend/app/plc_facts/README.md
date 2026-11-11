@@ -1,13 +1,21 @@
 # PLC facts owner
 
-This API-only owner provides `POST /api/v1/integration/plc-facts/batches` and GET `latest`/`history`, using `plc-facts/v1`, `daa-local/v2` and `pf-json/v1`. Anonymous source declarations can be impersonated; PLC scope is admission policy.
+## v2 sample endpoint
 
-Default-off/empty-scope/unadopted/keyless requests fail before the DB dependency. Eligible requests still require explicit MySQL 8.4 schema, Shanghai clock and source adoption; no request creates tables or adopts a source. Disabling the manifest removes only these routes after composition. Seven tables follow f6→0a2; BE010 separately owns the 1b3 successor. Both known runtime profiles require the same F7 and explicit schema-only revalidation after upgrade.
+`ARCH-BE-012 r4` adds one PLC/DB sample write, per-point latest values, history and detail. `PLC_FACTS_V2_ENABLED` defaults to `False` and `PLC_FACTS_V2_PROFILE_FILE` defaults to an empty value. Before enablement, place a private JSON file outside the repository and set its path in the process environment or backend runtime configuration. This synthetic structure uses a placeholder digest.
 
-Original UTF-8 v2 payload/manifest/context and their SHA values remain intact. Fixed greedy parts, complete expected membership and content/cycle/request digests are checked independently. The Service owns transactions and allocates publication serials under the singleton lock. Success is sent after commit and complete yield-dependency exit. Stable original outcomes replay first; finite receipt/parent rejection proofs expire after 120 days without renewal. Uncertain commits return unknown.
+```json
+{
+  "target": {"alias": "dev-example", "serverUuid": "00000000-0000-4000-8000-000000000001", "schema": "fixture_schema", "schemaRevision": "4e6a8b0d2f14"},
+  "instances": [{"instanceId": "daa-a", "sourceType": "daa"}],
+  "credentials": [{"instanceId": "daa-a", "tokenSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}],
+  "sources": [{"plcId": "PLC-A", "instanceId": "daa-a", "sourceGeneration": "gen-a", "dbNumbers": [21]}],
+  "readScopes": {"admin": [{"plcId": "PLC-A", "dbNumbers": [21]}]}
+}
+```
 
-Latest compares sourceSeq per point within the current sourceEpoch; bad replaces good. Source switching removes previous latest; unchanged definitions preserve valid results across context/revision changes. Changes scans publication positions; range freezes H and filters original observedAt using half-open bounds. Filtered projections carry separate digests and expired values produce gaps. Cursor TTLs are 24 hours/15 minutes/30 seconds; key rotation requires an explicit new baseline.
+Each registered instance has source type `daa` or `external` and a separate random credential. The file stores only the lowercase SHA-256 digest. Removing a credential revokes writes while retaining the instance and active source permits authorized latest queries. A DAA must supply group and configuration revision; an external producer may omit either or send null. Historical source type is stored at ingestion; older, unverified sources remain null. Read scopes are configured per role, including admin. Non-admin roles also need `plc-facts-read`. Reload every backend process during a coordinated source or configuration change. See the [v2 contract](../../../contracts/published/http-api/plc-facts-v2/README.md).
 
-Values default to three natural months, optionally one or two, from original point observation with nanoseconds preserved. Every read checks expiry. Original payload expires conservatively at its earliest point; latest expires per point. No scheduler is created. The [maintenance CLI](../../scripts/plc_facts_maintenance/README.md) performs bounded ticks against seven tables only; physical cleanup requires separately approved runtime verification. No business records cascade from raw/proof cleanup.
+To preserve the original decimal precision, both v2 JSON value fields internally store a `good` REAL as validated numeric text. Reads validate it by `dataType` and emit a JSON number. Other point types retain their JSON types. This representation preserves negative zero and scientific notation without expanding very small exponents.
 
-See the [machine contract](../../../contracts/published/http-api/plc-facts-v1/README.md) and [approved spec](../../../plans/ARCH-BE-009-backend-facts-integration/spec.md). Source implementation does not establish provider readiness, adoption, DAA upload or deployment. A runs no database, Docker or migration operations; runtime gates and actual evidence belong to the task bundle.
+`2c4e6a8b0d12` introduced the tables; `4e6a8b0d2f14` is the new exact head and retains one complete sample per row in `plc_facts_history` and one latest point per row in `plc_facts_latest`. The profile and database revision must match exactly. The [v1 contract](../../../contracts/published/http-api/plc-facts-v1/README.md) remains historical; its routes, seven tables and maintenance commands are retired. BE-010 credentials remain separately scoped and must match their target revision. See [ARCH-ACQ-003](../../../plans/ARCH-ACQ-003-acquisition-data-optional-filters/spec.md) and [v2 maintenance](../../scripts/plc_facts_maintenance/README.md). Source changes do not prove deployment or adoption.

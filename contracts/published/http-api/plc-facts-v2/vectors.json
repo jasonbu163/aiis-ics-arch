@@ -1,0 +1,98 @@
+{
+  "sample": {
+    "contractVersion": "plc-facts/v2",
+    "instanceId": "daa-a",
+    "sampleId": "sample-102-db21",
+    "plcId": "PLC-A",
+    "dbNumber": 21,
+    "groupId": "temperature",
+    "configRevision": "rev-12",
+    "sourceGeneration": "gen-a",
+    "sourceSeq": "102",
+    "points": [
+      {
+        "pointId": "furnace_temp",
+        "name": "炉温",
+        "dataType": "REAL",
+        "value": 820.5,
+        "quality": "good",
+        "observedAt": "2026-11-10T10:00:02.120+08:00"
+      },
+      {
+        "pointId": "heating_ready",
+        "name": "加热就绪",
+        "dataType": "BOOL",
+        "value": false,
+        "quality": "good",
+        "observedAt": "2026-11-10T10:00:02.125+08:00"
+      }
+    ]
+  },
+  "created": {
+    "code": 200,
+    "message": "success",
+    "data": {
+      "contractVersion": "plc-facts/v2",
+      "instanceId": "daa-a",
+      "sampleId": "sample-102-db21",
+      "status": "committed",
+      "outcome": "created"
+    }
+  },
+  "duplicate": {
+    "code": 200,
+    "message": "success",
+    "data": {
+      "contractVersion": "plc-facts/v2",
+      "instanceId": "daa-a",
+      "sampleId": "sample-102-db21",
+      "status": "committed",
+      "outcome": "duplicate"
+    }
+  },
+  "failures": [
+    {
+      "httpStatus": 401,
+      "errorCode": "plc_facts_v2.invalid_credential"
+    },
+    {
+      "httpStatus": 403,
+      "errorCode": "plc_facts_v2.scope_rejected"
+    },
+    {
+      "httpStatus": 409,
+      "errorCode": "plc_facts_v2.sample_content_conflict"
+    },
+    {
+      "httpStatus": 410,
+      "errorCode": "plc_facts_v2.expired_unconfirmed"
+    },
+    {
+      "httpStatus": 413,
+      "errorCode": "plc_facts_v2.payload_too_large"
+    },
+    {
+      "httpStatus": 415,
+      "errorCode": "plc_facts_v2.media_type"
+    },
+    {
+      "httpStatus": 422,
+      "errorCode": "plc_facts_v2.invalid_request"
+    },
+    {
+      "httpStatus": 503,
+      "errorCode": "plc_facts_v2.not_ready"
+    },
+    {
+      "httpStatus": 503,
+      "errorCode": "plc_facts_v2.commit_outcome_unknown"
+    }
+  ],
+  "boundaries": {
+    "minimumPoints": 1,
+    "maximumPoints": 512,
+    "maximumBodyBytes": 524288,
+    "acceptedBodyBytes": 524288,
+    "rejectedBodyBytes": 524289
+  }
+}

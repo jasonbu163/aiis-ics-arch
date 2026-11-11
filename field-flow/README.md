@@ -21,7 +21,7 @@ Each implementation must be independently copyable, buildable and runnable. Neit
 
 The [Rust project guide](field-flow-rust/README.md) and [Python project guide](field-flow-python/README.md) provide each project's independent build/start/validation commands. Both implement demo01's local HTTP GET → PLC INT loop and passed independent local QA. Field validation and long-running acceptance remain later stages.
 
-[FF-004 r2](plans/FF-004-plc-json-catalog-and-multi-plc/spec.md): New fresh-context QA passed AC01–AC14 for exact r2 A. Known driver limits and failure history remain recorded. Human Owner final acceptance is pending; later capabilities and field gates stay separate. The slice covers one JSON per PLC, YAML v2, point handles and multi-PLC reads; Modbus is format-only, while Python/C# loading and DS export have separate gates.
+[FF-004 r2](plans/FF-004-plc-json-catalog-and-multi-plc/spec.md): The Human Owner accepted exact r2 A on 2026-11-10 after QA3 passed AC01–AC14 on macOS arm64 loopback. Driver limits and earlier QA failures remain recorded. Field validation is a separate gate. The slice covers one JSON per PLC, YAML v2, point handles and multi-PLC reads; Modbus is format-only, while Python/C# loading and DS export have separate gates.
 
 ## Handwritten flows
 

@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="src/FieldFlow/FieldFlow.csproj" />
+  <Folder Name="/tests/">
+    <Project Path="tests/FieldFlow.Fixture/FieldFlow.Fixture.csproj" />
+    <Project Path="tests/FieldFlow.Tests/FieldFlow.Tests.csproj" />
+  </Folder>
+</Solution>

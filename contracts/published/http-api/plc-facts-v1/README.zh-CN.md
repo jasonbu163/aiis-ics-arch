@@ -1,5 +1,7 @@
 # PLC事实v1源码合同
 
+**历史合同：** ARCH-ACQ-002 r2 后的当前 Core 不再提供这些 v1 路由或表。历史验证使用保全的清退前源码；以下机器工件保持不变。
+
 方向：DAA原本地样本 → Backend事实provider → 后续SMA事实消费者。`ARCH-BE-009 r1`源码及获批隔离MySQL A+B已通过独立QA，见[当前核验](../../../../plans/ARCH-BE-009-backend-facts-integration/checklist.md)。Owner终验/provider-ready、实际目标采用、DAA上传器、联合验证和部署仍分别待定。目录名不代表已发布到外部服务。
 
 固定版本：`plc-facts/v1`、`daa-local/v2`、`pf-json/v1`、`pf-cursor/v1`。
@@ -14,4 +16,4 @@
 
 相对[AW008](../../../../plans/ARCH-AW-008-stage-c-facts-contract/spec.md)，获批provider细化独立七表、原v2文本、固定片身份、9位事实时间、4MiB输入、显式来源采用、单例门闩发布序、有限拒绝proof及游标gap。切换来源递增sourceEpoch；无关context/revision变化而点定义不变时保留有效latest。逻辑原值最多三自然月；物理清理停机也须读时拒绝过期原值。一次性有界维护tick无调度器，无业务级联。
 
-源真相：[typed schemas](../../../../backend/app/plc_facts/schemas/)、[模块实现](../../../../backend/app/plc_facts/README.zh-CN.md)、[显式迁移](../../../../backend/alembic/versions/20261104_1200_0a2c4e6f8b10_add_plc_facts_integration.py)、[获批spec](../../../../plans/ARCH-BE-009-backend-facts-integration/spec.md)、[Development证据](../../../../plans/ARCH-BE-009-backend-facts-integration/tasks.md)。机器JSON由typed源码与独立向量生成，不是运行配置。
+源真相：[历史机器工件](openapi.json)、[显式迁移](../../../../backend/alembic/versions/20261104_1200_0a2c4e6f8b10_add_plc_facts_integration.py)、[获批spec](../../../../plans/ARCH-BE-009-backend-facts-integration/spec.md)、[Development证据](../../../../plans/ARCH-BE-009-backend-facts-integration/tasks.md)。机器JSON由typed源码与独立向量生成，不是运行配置。

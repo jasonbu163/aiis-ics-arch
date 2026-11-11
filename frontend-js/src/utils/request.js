@@ -47,7 +47,7 @@ request.interceptors.response.use(
     if (res.code !== 200) {
       const handledByLoginPage = isLoginRequest(response.config)
 
-      if (!handledByLoginPage) {
+      if (!handledByLoginPage && !response.config?.suppressErrorMessage) {
         ElMessage.error(res.message || '请求失败')
       }
       
@@ -95,7 +95,7 @@ request.interceptors.response.use(
       message = '无法连接到服务器，请检查后端服务是否启动'
     }
     
-    ElMessage.error(message)
+    if (!error.config?.suppressErrorMessage) ElMessage.error(message)
     return Promise.reject(error)
   }
 )

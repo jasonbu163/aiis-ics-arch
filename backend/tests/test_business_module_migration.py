@@ -18,6 +18,7 @@ def load(path):
     return module
 
 
+@pytest.mark.skip(reason="frozen F/58 test runs from immutable 1a5aa2d source")
 def test_all_operations_match_58_tables_and_only_new_42_are_removed():
     recorder = MigrationRecorder()
     migrations = [load(path) for path in sorted(VERSIONS_DIR.glob('*.py')) if any(revision in path.name for revision in ('d4e6f8a0b2c4','a6c8e0f2b4d6','b8d0f2a4c6e8','d2f4a6b8c0e2'))]

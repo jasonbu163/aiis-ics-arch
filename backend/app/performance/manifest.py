@@ -11,22 +11,14 @@ from app.module_registry import ModuleManifest
 
 manifest = ModuleManifest(
     core_contract="aiis.backend-module/v1",
-    requires=(),
+    requires=('task', 'plan'),
     model_requires=('plan',),
-    exports=("app.performance.integration_storage:BUSINESS_TIME_COLUMN_PROFILE", "app.performance.crud.sync_integration:probe_storage", 'app.performance.models:Performance',),
+    exports=('app.performance.models:Performance',),
     error_codes=('performance.integration_scope_rejected', 'performance.integration_parent_not_found', 'performance.integration_event_conflict', 'performance.integration_value_conflict', 'performance.integration_observation_time_conflict', 'performance.integration_parent_mismatch', 'performance.integration_payload_too_large', 'performance.integration_media_type', 'performance.integration_invalid_request', 'performance.integration_not_ready', 'performance.integration_unavailable', 'performance.integration_commit_unknown', 'performance.integration_internal_error', 'performance.mapping_unauthenticated', 'performance.mapping_forbidden', 'performance.mapping_invalid_sample', 'performance.mapping_sample_id_conflict', 'performance.mapping_value_conflict', 'performance.mapping_sample_time_conflict', 'performance.mapping_observation_time_conflict', 'performance.mapping_parent_not_found', 'performance.mapping_parent_mismatch', 'performance.mapping_delete_forbidden', 'performance.mapping_unavailable', 'performance.mapping_internal_error'),
     name="performance",
     enabled=True,
     order=30,
-    routers=(
-        "app.performance.api.integration:router",
-        "app.performance.api.mapping_observations:router",
-        "app.performance.api.process_samples:router",
-        "app.performance.api.routes:router",
-        "app.performance.api.lineage_routes:transform_router",
-        "app.performance.api.lineage_routes:performance_lineage_router",
-        "app.performance.api.split_routes:router",
-    ),
+    routers=('app.performance.api.routes:router',),
     models_package="app.performance.models",
-    permissions=("performance", "performance-mapping-read", "performance-mapping-ingest"),
+    permissions=("performance",),
 )

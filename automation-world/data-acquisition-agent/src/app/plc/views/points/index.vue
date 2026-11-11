@@ -1,4 +1,4 @@
-<!-- DAA点位：勾选统一用于命名/分组；保存草稿后编辑，预览/CAS与状态仍归唯一local owner。 -->
+<!-- DAA点位：支持选点命名与分组、保存草稿后编辑，并显示本次只读诊断结果。 -->
 <template>
   <template v-if="local">
 
@@ -23,10 +23,38 @@
           <el-table-column :label="t('common.local.addressSummary')" min-width="145"><template #default="{ row }"><span v-if="row.address?.confirmed">DB{{ local.draft?.dbs.find(d => d.id === row.dbId)?.number }} / {{ row.address.offset }}<template v-if="row.address.bit !== null">.{{ row.address.bit }}</template></span><el-tag v-else type="warning" effect="plain">{{ t('common.local.addressUnconfirmed') }}</el-tag><small v-if="row.address?.origin === 'manual'" class="muted-cell">{{ t('common.local.protected') }}</small></template></el-table-column>
           <el-table-column :label="t('common.local.group')" min-width="135"><template #default="{ row }">{{ local.draft?.groups.find(g => g.id === row.groupId)?.name ?? t('common.local.unassigned') }}</template></el-table-column>
           <el-table-column :label="t('common.local.enabled')" width="90"><template #default="{ row }"><el-tag :type="row.enabled ? 'success' : 'info'" effect="plain">{{ local.label(String(row.enabled)) }}</el-tag></template></el-table-column>
-          <el-table-column :label="t('common.local.actions')" width="260"><template #default="{ row }"><div class="row-actions"><ConsoleActionButton size="small" :label-key="local.dirty ? 'common.local.saveAndEdit' : 'common.local.edit'" :disabled="local.busy || local.editing || !!pointEditor" @click="editLocalPoint(row)" /><ConsoleActionButton size="small" label-key="common.local.diagnose" :disabled="local.busy || !local.view?.active" @click="local.control('daa_diagnose_point', [row.plcId], false, row.id)" /></div></template></el-table-column>
+          <el-table-column :label="t('common.local.actions')" width="260">
+            <template #default="{ row }">
+              <div class="row-actions">
+                <ConsoleActionButton size="small" :label-key="local.dirty ? 'common.local.saveAndEdit' : 'common.local.edit'" :disabled="local.busy || local.editing || !!pointEditor" @click="editLocalPoint(row)" />
+                <ConsoleActionButton size="small" label-key="common.local.diagnose" :disabled="local.busy || local.editing || !!pointDiagnosis || !local.view?.active" @click="startPointDiagnosis(row)" />
+              </div>
+            </template>
+          </el-table-column>
         </el-table>
       </ConsoleTableShell>
       <Teleport to="#daa-feedback">
+        <ElDialog :model-value="!!pointDiagnosis" :title="t('common.local.diagnose')" :append-to-body="false" :close-on-click-modal="false" width="min(520px, calc(100vw - 32px))" class="daa-name-dialog" @update:model-value="$event || closePointDiagnosis()">
+          <div v-if="pointDiagnosis" class="console-stack">
+            <strong class="daa-confirm-message">{{ pointDiagnosis.target }}</strong>
+            <p class="daa-capability-note">{{ t('plc.diagnosis.hint') }}</p>
+            <ElAlert
+              :title="t('plc.diagnosis.' + pointDiagnosis.status, { seconds: diagnosticWaitSeconds })"
+              :type="diagnosticTone[pointDiagnosis.status]"
+              :description="pointDiagnosis.reason ? local.label(pointDiagnosis.reason) : undefined"
+              :closable="false"
+              show-icon
+            />
+            <dl v-if="pointDiagnosis.reading" class="daa-local-facts">
+              <dt>{{ t('plc.value') }}</dt><dd><code>{{ pointDiagnosis.reading.value }}</code></dd>
+              <dt>{{ t('common.local.addressSummary') }}</dt><dd>{{ pointDiagnosis.reading.address }}</dd>
+              <dt>{{ t('common.local.type') }}</dt><dd>{{ pointDiagnosis.reading.dataType }}</dd>
+              <dt>{{ t('common.local.quality') }}</dt><dd>{{ local.label(pointDiagnosis.reading.quality) }}</dd>
+              <dt>{{ t('plc.diagnosis.observedAt') }}</dt><dd>{{ formatBusinessTime(pointDiagnosis.reading.observedAt) }}</dd>
+            </dl>
+          </div>
+          <template #footer><div class="console-action-group"><ConsoleActionButton label-key="plc.diagnosis.close" @click="closePointDiagnosis" /></div></template>
+        </ElDialog>
         <ElDialog :model-value="!!pointEditor" :title="t('common.local.editPoint') + ' · ' + (pointEditor?.sourcePath ?? '')" :append-to-body="false" :close-on-click-modal="false" :close-on-press-escape="!local.busy" :show-close="!local.busy" width="min(780px, calc(100vw - 32px))" class="daa-name-dialog" @update:model-value="$event || cancelLocalPoint()">
           <div v-if="pointEditor && pointEditor.address" class="console-stack">
             <el-alert v-if="local.error" :title="local.label(local.error)" type="error" :closable="false" show-icon />
@@ -78,13 +106,15 @@
 
 <script setup lang="ts">
 import { ref, watch, onUnmounted, nextTick } from 'vue';
-import { ElCheckbox, ElDialog, ElForm, ElFormItem, ElInput, ElInputNumber, ElSelect, ElOption, ElSwitch, ElCollapse, ElCollapseItem, ElTree } from 'element-plus';
+import { ElAlert, ElCheckbox, ElDialog, ElForm, ElFormItem, ElInput, ElInputNumber, ElSelect, ElOption, ElSwitch, ElCollapse, ElCollapseItem, ElTree } from 'element-plus';
 import SourceImportPanel from '../../components/SourceImportPanel.vue';
 import PointNamePreviewDialog from '../../components/PointNamePreviewDialog.vue';
 import type { Point } from '../../../../services/localAcquisition';
+import { sampleValue } from '../../../../console/sampleDetails';
+import { formatBusinessTime } from '../../../../console/time';
 
 import { inject } from 'vue';
-import { localConsoleKey } from '../../../../console/composables/useLocalAcquisitionConsole';
+import { diagnosticTone, diagnosticWaitSeconds, localConsoleKey } from '../../../../console/composables/useLocalAcquisitionConsole';
 const local = inject(localConsoleKey);
 import { computed } from 'vue';
 import { Refresh } from '@element-plus/icons-vue';
@@ -107,6 +137,58 @@ async function removeLocalGroup(id: string) {
 }
 
 const pointEditor = ref<Point | null>(null);
+interface DiagnosisFact {
+    definition: Pick<Point, 'id' | 'plcId' | 'address' | 'dataType'>;
+    value: unknown;
+    quality: string;
+    reason: string | null;
+    observedAt: string;
+}
+interface PointDiagnosis {
+    target: string;
+    operationId: string | null;
+    status: keyof typeof diagnosticTone;
+    reason: string | null;
+    reading: { value: string; address: string; dataType: string; quality: string; observedAt: string } | null;
+}
+const pointDiagnosis = computed<PointDiagnosis | null>(() => {
+    const current = local?.plcDiagnostic;
+    if (current?.action !== 'diagnose') return null;
+    const view = { target: current.target, operationId: current.operationId, reason: current.reason, reading: null };
+    if (current.status !== 'applied') return { ...view, status: current.status };
+    // applied 只表示操作完成，实际读数是否成功由点位质量决定。
+    const result = current.result as { diagnosticId: string; revision: string; points: Record<string, Record<string, DiagnosisFact>> } | null;
+    if (current.pointId && result?.diagnosticId === current.operationId && result.revision === current.revision) {
+        for (const [dbNumber, points] of Object.entries(result.points ?? {})) {
+            const fact: DiagnosisFact | undefined = points?.[current.pointId];
+            if (fact?.definition?.id !== current.pointId || fact.definition.plcId !== current.plcId || !fact.quality) continue;
+            const address = fact.definition.address;
+            const good = fact.quality === 'good';
+            return {
+                ...view,
+                status: good ? (fact.value == null ? 'unavailable' : 'success') : 'failed',
+                reason: good ? null : fact.reason ?? fact.quality,
+                reading: {
+                    value: good ? sampleValue(fact.value) : '—',
+                    address: address?.confirmed ? `DB${dbNumber} / ${address.offset}${address.bit == null ? '' : '.' + address.bit}` : '—',
+                    dataType: fact.definition.dataType,
+                    quality: fact.quality,
+                    observedAt: fact.observedAt,
+                },
+            };
+        }
+    }
+    return { ...view, status: 'unavailable' };
+});
+function closePointDiagnosis() {
+    if (pointDiagnosis.value) local?.closeDiagnostic();
+}
+function startPointDiagnosis(point: Point) {
+    if (!local) return;
+    const plcName = local.plcs.find(plc => plc.id === point.plcId)?.name ?? point.plcId;
+    return local.startDiagnostic('diagnose', point.plcId, `${plcName} · ${point.name || point.sourcePath || point.id}`, point.id);
+}
+
 function changePointScope() { if (local) { local.selectedDb = ''; local.pointPage = 1; local.sources = []; local.identification = null; local.mappings = []; local.preview = null; local.offsets = []; } pointEditor.value = null; }
 async function editLocalPoint(p: Point) {
     const copy = await local?.preparePointEdit(p.id);
@@ -125,5 +207,8 @@ async function applyLocalPoint() {
 watch(() => [local?.view, local?.selectedPlc, local?.selectedDb], cancelLocalPoint, { flush: 'sync' });
 
 watch(pointEditor, v => { if (local) { local.editing = !!v; local.stagePointEdit(v); } }, { deep: true, flush: 'sync' });
-onUnmounted(cancelLocalPoint);
+onUnmounted(() => {
+    closePointDiagnosis();
+    cancelLocalPoint();
+});
 </script>

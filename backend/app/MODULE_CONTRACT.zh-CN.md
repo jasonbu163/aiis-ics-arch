@@ -24,7 +24,7 @@
 | 可选CRUD | common.async_crud_base:BaseService、common.sync_crud_base:SyncBaseCRUD；既有get/list/create/update/delete及不commit语义 |
 | 可选Projection | projection.registry的ProjectionHandlerDescriptor、ProjectionHandlerInput、ProjectionHandlerGroupIdentity、ProjectionInvocationContext；本地同步声明，不公开runner/runtime内部 |
 
-API只用异步Session；本地Projection只用调用方同步Session，保留business/cursor/audit同事务。
+API 只用异步 Session；保留的 owner 本地同步适配器使用调用方 Session，Core 不再发现或启动旧 Projection runner。
 模块不得持有全局Session、依赖engine内部或读取私有Settings。第三方包必须已在消费方获批锁文件/环境内。
 common.data_keys、15个补回全局错误、既有lineage错误和两个schema维护错误仅为本批旧owner的有界兼容。
 精确符号和归属列在机器清单；未来模块状态/规则放自有domain/data_keys，错误用自有StrEnum及
@@ -73,7 +73,7 @@ Model/FK/关系、公共Core符号及Settings访问。动态业务import/exec不
 
 [fixture生成器](../tests/module_admission_fixtures.py)从不可变C0
 363b297bffe65e020108f5504766b4fb1ec3b381叠加五个窄合同patch，以及r3 system manifest/import和C0 monitor
-manifest overlay构造C2。C0公开占位snapshot policy仅为测试配置，monitor事实路由/模型仍来自C0，无真实env。
+manifest overlay 构造历史 C2，并通过 `ARCH_ACQ002_HISTORICAL_BACKEND` 显式指定保全的清退前源码。C0公开占位snapshot policy仅为测试配置，monitor事实路由/模型仍来自C0，无真实env。
 C2保留14表并运行原Core sanitization断言；core-files.json记录来源/overlay SHA256并冻结。
 E只加入admission_probe（独立15表）和admission_summary（组合16表）、显式合成revision及自有key/错误/权限，
 Core指纹不变。F是本任务58表完整回迁profile，保护旧16表并新增42表后继。

@@ -6,6 +6,11 @@ pub(crate) mod delivery;
 pub(crate) mod delivery_tests;
 #[cfg(test)]
 mod point_naming_tests;
+mod profile_contract;
+#[cfg(test)]
+pub(crate) use profile_contract::preflight;
+#[cfg(all(test, unix))]
+mod profile_contract_tests;
 mod runtime;
 mod schema;
 #[cfg(test)]
@@ -49,6 +54,7 @@ pub(crate) struct Stores {
     pub busy_count: u64,
     pub cleanup_cursor: i64,
     pub last_maintenance: std::time::Instant,
+    _profile_lock: LockedProfile,
     #[cfg(test)]
     pub test_after_cleanup_free: Option<u64>,
     #[cfg(test)]
@@ -57,137 +63,175 @@ pub(crate) struct Stores {
         Arc<std::sync::atomic::AtomicU64>,
     )>,
 }
-/// 无持久写的合同探测；RO连接不使用immutable，也不允许SQLite恢复异常journal。
-#[derive(Debug, PartialEq, Eq)]
-pub(crate) struct ProfilePreflight(Vec<(PathBuf, String)>);
+#[derive(Debug)]
+pub(super) enum ProbeFailure {
+    Sqlite(&'static str, rusqlite::Error),
+    Other(String),
+}
+impl ProbeFailure {
+    pub fn message(self) -> String {
+        match self {
+            Self::Sqlite(_, e) => unsupported(e),
+            Self::Other(s) => s,
+        }
+    }
+}
 fn unsupported(reason: impl std::fmt::Display) -> String {
     format!("time_profile_unsupported:{reason}")
 }
-pub(crate) fn preflight(dir: &Path) -> LocalResult<ProfilePreflight> {
-    use sha2::{Digest, Sha256};
-    use std::io::Read;
-    if dir.is_symlink() {
-        return Err(unsupported("profile_symlink"));
-    }
-    if !dir.exists() {
-        return Ok(ProfilePreflight(vec![]));
-    }
-    let a = dir.join("config.sqlite");
-    let b = dir.join("runtime.sqlite");
-    if !a.exists() && !b.exists() {
-        if std::fs::read_dir(dir)
-            .map_err(unsupported)?
-            .next()
-            .is_some()
+/// 只记录本进程在用profile，避免重入hash的close释放同进程SQLite锁；OS排他仍归原ProfileLock。
+pub(super) struct ProcessClaim(PathBuf);
+static PROCESS_PROFILES: std::sync::OnceLock<
+    Mutex<std::collections::BTreeMap<PathBuf, Option<(u64, u64)>>>,
+> = std::sync::OnceLock::new();
+impl ProcessClaim {
+    fn identity(path: &Path) -> Option<(u64, u64)> {
+        #[cfg(unix)]
         {
-            return Err(unsupported("directory_not_empty"));
+            use std::os::unix::fs::MetadataExt;
+            let m = std::fs::symlink_metadata(path).ok()?;
+            if m.is_dir() && !m.file_type().is_symlink() {
+                Some((m.dev(), m.ino()))
+            } else {
+                None
+            }
         }
-        return Ok(ProfilePreflight(vec![]));
+        #[cfg(not(unix))]
+        {
+            let _ = path;
+            None
+        }
     }
-    if a.exists() != b.exists() {
-        return Err(unsupported("missing_database"));
+    fn new(profile: &Path) -> LocalResult<Self> {
+        let identity = Self::identity(profile);
+        let mut profiles = PROCESS_PROFILES
+            .get_or_init(Default::default)
+            .lock()
+            .map_err(|_| "profile_locked")?;
+        if profiles.contains_key(profile)
+            || (identity.is_some() && profiles.values().any(|v| *v == identity))
+        {
+            return Err("profile_locked".into());
+        }
+        profiles.insert(profile.into(), identity);
+        Ok(Self(profile.into()))
     }
-    let mut identities = vec![];
-    let mut files = vec![];
-    for (path, app, table) in [
-        (&a, schema::CONFIG_APP, "instance_metadata"),
-        (&b, schema::RUNTIME_APP, "runtime_metadata"),
-    ] {
-        for suffix in ["", "-journal", "-wal", "-shm"] {
-            let file = PathBuf::from(format!("{}{suffix}", path.display()));
-            if file.is_symlink() {
-                return Err(unsupported("profile_symlink"));
-            }
-            if !file.exists() {
-                continue;
-            }
-            if suffix == "-wal" || suffix == "-shm" {
-                return Err(unsupported("unexpected_wal_material"));
-            }
-            let mut reader = std::fs::File::open(&file).map_err(unsupported)?;
-            let mut hash = Sha256::new();
-            let mut buffer = [0u8; 65536];
-            loop {
-                let n = reader.read(&mut buffer).map_err(unsupported)?;
-                if n == 0 {
-                    break;
-                }
-                hash.update(&buffer[..n]);
-            }
-            files.push((file, format!("{:x}", hash.finalize())));
+    fn refresh(&self) -> LocalResult<()> {
+        let identity = Self::identity(&self.0);
+        let mut profiles = PROCESS_PROFILES
+            .get_or_init(Default::default)
+            .lock()
+            .map_err(|_| "profile_locked")?;
+        if identity.is_some()
+            && profiles
+                .iter()
+                .any(|(path, id)| path != &self.0 && *id == identity)
+        {
+            return Err("profile_locked".into());
         }
-        // SQLite read-only WAL connections may create shared-memory sidecars. Reject the
-        // WAL header before SQLite sees the file; do not rely only on sidecar existence.
-        let mut header = [0u8; 100];
-        std::fs::File::open(path)
-            .map_err(unsupported)?
-            .read_exact(&mut header)
-            .map_err(unsupported)?;
-        if &header[..16] != b"SQLite format 3\0" || header[18] != 1 || header[19] != 1 {
-            return Err(unsupported("unsupported_database_header"));
+        profiles.insert(self.0.clone(), identity);
+        Ok(())
+    }
+}
+impl Drop for ProcessClaim {
+    fn drop(&mut self) {
+        if let Ok(mut profiles) = PROCESS_PROFILES.get_or_init(Default::default).lock() {
+            profiles.remove(&self.0);
         }
-        let c = Connection::open_with_flags(
-            path,
-            rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
-        )
-        .map_err(unsupported)?;
-        for (key, want) in [("application_id", app)] {
-            let got: i64 = c
-                .query_row(&format!("PRAGMA {key}"), [], |r| r.get(0))
-                .map_err(unsupported)?;
-            if got != want {
-                return Err(unsupported(format!("{key}_mismatch")));
-            }
-        }
-        let user_version: i64 = c
+    }
+}
+pub(super) struct LockedProfile {
+    _os: crate::infrastructure::local_profile_lock::ProfileLock,
+    _process: ProcessClaim,
+}
+pub(super) fn inspect_one(dir: &Path, role: &'static str) -> Result<(String, u32), ProbeFailure> {
+    let c = Connection::open_with_flags(
+        dir.join(format!("{role}.sqlite")),
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
+    )
+    .map_err(|e| ProbeFailure::Sqlite(role, e))?;
+    let checked = (|| {
+        let sql = |e| ProbeFailure::Sqlite(role, e);
+        let bad = |s: &str| ProbeFailure::Other(unsupported(s));
+        c.busy_timeout(Duration::from_millis(1000)).map_err(sql)?;
+        c.execute_batch("PRAGMA trusted_schema=OFF; PRAGMA query_only=ON;")
+            .map_err(sql)?;
+        let app: i64 = c
+            .query_row("PRAGMA application_id", [], |r| r.get(0))
+            .map_err(sql)?;
+        let version: u32 = c
             .query_row("PRAGMA user_version", [], |r| r.get(0))
-            .map_err(unsupported)?;
-        if (app == schema::CONFIG_APP && user_version != 2)
-            || (app == schema::RUNTIME_APP && ![2, 3].contains(&user_version))
+            .map_err(sql)?;
+        if (role == "config" && (app != schema::CONFIG_APP || version != 2))
+            || (role == "runtime" && (app != schema::RUNTIME_APP || ![2, 3].contains(&version)))
         {
-            return Err(unsupported("user_version_mismatch"));
+            return Err(bad("schema_version_mismatch"));
         }
-        let (identity, version, profile): (String, i64, String) = c
+        let table = if role == "config" {
+            "instance_metadata"
+        } else {
+            "runtime_metadata"
+        };
+        let (instance, v, time): (String, u32, String) = c
             .query_row(
                 &format!("SELECT instance_id,schema_version,time_profile FROM {table} WHERE id=1"),
                 [],
                 |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
             )
-            .map_err(unsupported)?;
-        if version != user_version
-            || profile != crate::domain::business_time::TIME_PROFILE
-            || !crate::domain::local_configuration::valid_id(&identity)
-        {
-            return Err(unsupported("metadata_mismatch"));
-        }
-        let ledger: i64 = c
+            .map_err(sql)?;
+        let migration: u32 = c
             .query_row("SELECT max(version) FROM schema_migrations", [], |r| {
                 r.get(0)
             })
-            .map_err(unsupported)?;
-        if ledger != version {
-            return Err(unsupported("schema_ledger_mismatch"));
+            .map_err(sql)?;
+        if v != version
+            || migration != version
+            || time != crate::domain::business_time::TIME_PROFILE
+            || !crate::domain::local_configuration::valid_id(&instance)
+        {
+            return Err(bad("metadata_mismatch"));
         }
-        if app == schema::CONFIG_APP {
-            schema::verify_structure(&c, &schema::config_sql()).map_err(unsupported)?;
+        let ddl = if role == "config" {
+            schema::config_sql()
+        } else if version == 3 {
+            schema::runtime_v3_sql()
+        } else {
+            schema::runtime_sql()
+        };
+        schema::verify_structure(&c, &ddl).map_err(|e| ProbeFailure::Other(unsupported(e)))?;
+        if role == "runtime" && version == 3 {
+            delivery::verify_schema(&c).map_err(|e| ProbeFailure::Other(unsupported(e)))?;
         }
-        if app == schema::RUNTIME_APP && version == 3 {
-            delivery::verify_schema(&c).map_err(unsupported)?;
-        }
-        identities.push(identity);
-    }
-    if identities[0] != identities[1] {
-        return Err(unsupported("instance_mismatch"));
-    }
-    Ok(ProfilePreflight(files))
+        Ok((instance, version))
+    })();
+    let closed = c.close().map_err(|(_, e)| ProbeFailure::Sqlite(role, e));
+    let value = checked?;
+    closed?;
+    Ok(value)
 }
-impl ProfilePreflight {
-    pub(crate) fn recheck(&self, dir: &Path) -> LocalResult<()> {
-        if &preflight(dir)? != self {
-            return Err(unsupported("profile_changed"));
+pub(super) fn inspect_sql(dir: &Path) -> Result<Option<String>, ProbeFailure> {
+    let a = dir.join("config.sqlite");
+    let b = dir.join("runtime.sqlite");
+    if !a.exists() && !b.exists() {
+        if dir.exists()
+            && std::fs::read_dir(dir)
+                .map_err(|e| ProbeFailure::Other(unsupported(e)))?
+                .next()
+                .is_some()
+        {
+            return Err(ProbeFailure::Other(unsupported("directory_not_empty")));
         }
-        Ok(())
+        return Ok(None);
     }
+    if a.exists() != b.exists() {
+        return Err(ProbeFailure::Other(unsupported("missing_database")));
+    }
+    let config = inspect_one(dir, "config")?;
+    let runtime = inspect_one(dir, "runtime")?;
+    if config.0 != runtime.0 {
+        return Err(ProbeFailure::Other(unsupported("instance_mismatch")));
+    }
+    Ok(Some(config.0))
 }
 fn connect(p: &Path, new: bool, app: i64) -> LocalResult<Connection> {
     for suffix in ["-wal", "-shm"] {
@@ -195,7 +239,11 @@ fn connect(p: &Path, new: bool, app: i64) -> LocalResult<Connection> {
             return Err("unexpected_wal_material".into());
         }
     }
-    let c = Connection::open(p).map_err(sql_error)?;
+    let c = Connection::open_with_flags(
+        p,
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_WRITE | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
+    )
+    .map_err(sql_error)?;
     if new {
         c.execute_batch(
             "PRAGMA page_size=4096; PRAGMA auto_vacuum=INCREMENTAL; PRAGMA journal_mode=DELETE;",
@@ -249,72 +297,77 @@ fn connect(p: &Path, new: bool, app: i64) -> LocalResult<Connection> {
     }
     Ok(c)
 }
+pub(super) fn initialize_pair(dir: &Path) -> LocalResult<()> {
+    let a = dir.join("config.sqlite");
+    let b = dir.join("runtime.sqlite");
+    let new = true;
+    let mut config = connect(&a, new, schema::CONFIG_APP)?;
+    let mut runtime = match connect(&b, new, schema::RUNTIME_APP) {
+        Ok(c) => c,
+        Err(e) => {
+            config.close().map_err(|(_, e)| sql_error(e))?;
+            return Err(e);
+        }
+    };
+    let initialized: LocalResult<()> = (|| {
+        let instance = id();
+        let payload = encode(&Configuration::default())?;
+        let tx = config.transaction().map_err(sql_error)?;
+        tx.execute_batch(&schema::config_sql()).map_err(sql_error)?;
+        tx.execute(
+            "INSERT INTO instance_metadata VALUES(1,?1,2,'asia-shanghai-rfc3339-ms-v1')",
+            [&instance],
+        )
+        .map_err(sql_error)?;
+        tx.execute(
+            "INSERT INTO configuration_draft VALUES(1,?1,?2,'[]')",
+            rusqlite::params![id(), payload],
+        )
+        .map_err(sql_error)?;
+        tx.execute_batch(&format!(
+            "PRAGMA application_id={}; PRAGMA user_version=2;",
+            schema::CONFIG_APP
+        ))
+        .map_err(sql_error)?;
+        tx.commit().map_err(sql_error)?;
+        profile_contract::checkpoint("config_committed", dir)?;
+        let tx = runtime.transaction().map_err(sql_error)?;
+        tx.execute_batch(&schema::runtime_v3_sql())
+            .map_err(sql_error)?;
+        tx.execute(
+            "INSERT INTO runtime_metadata VALUES(1,?1,3,1,NULL,'asia-shanghai-rfc3339-ms-v1')",
+            [&instance],
+        )
+        .map_err(sql_error)?;
+        tx.execute_batch(&format!(
+            "PRAGMA application_id={}; PRAGMA user_version=3;",
+            schema::RUNTIME_APP
+        ))
+        .map_err(sql_error)?;
+        let settings = crate::domain::local_delivery::DeliverySettings::default();
+        tx.execute(
+            "INSERT INTO delivery_settings(id,settings_revision,payload) VALUES(1,?1,?2)",
+            rusqlite::params![settings.settings_revision, encode(&settings)?],
+        )
+        .map_err(sql_error)?;
+        tx.commit().map_err(sql_error)?;
+        profile_contract::checkpoint("runtime_committed", dir)?;
+        Ok(())
+    })();
+    let config_closed = config.close().map_err(|(_, e)| sql_error(e));
+    let runtime_closed = runtime.close().map_err(|(_, e)| sql_error(e));
+    initialized?;
+    config_closed?;
+    runtime_closed?;
+    profile_contract::checkpoint("sqlite_close", dir)?;
+    Ok(())
+}
 impl Stores {
     pub fn open(dir: &Path) -> LocalResult<Self> {
-        let before = preflight(dir)?;
-        before.recheck(dir)?;
-        std::fs::create_dir_all(dir).map_err(|_| "profile_io")?;
-        let a = dir.join("config.sqlite");
-        let b = dir.join("runtime.sqlite");
-        if a.exists() != b.exists() {
-            return Err("missing_database".into());
-        }
-        if dir.is_symlink() || a.is_symlink() || b.is_symlink() {
-            return Err("profile_symlink".into());
-        }
-        let new = !a.exists();
-        if new
-            && std::fs::read_dir(dir)
-                .map_err(|_| "profile_io")?
-                .next()
-                .is_some()
-        {
-            return Err("directory_not_empty".into());
-        }
-        let mut config = connect(&a, new, schema::CONFIG_APP)?;
-        let mut runtime = connect(&b, new, schema::RUNTIME_APP)?;
-        if new {
-            let instance = id();
-            let payload = encode(&Configuration::default())?;
-            let tx = config.transaction().map_err(sql_error)?;
-            tx.execute_batch(&schema::config_sql()).map_err(sql_error)?;
-            tx.execute(
-                "INSERT INTO instance_metadata VALUES(1,?1,2,'asia-shanghai-rfc3339-ms-v1')",
-                [&instance],
-            )
-            .map_err(sql_error)?;
-            tx.execute(
-                "INSERT INTO configuration_draft VALUES(1,?1,?2,'[]')",
-                rusqlite::params![id(), payload],
-            )
-            .map_err(sql_error)?;
-            tx.execute_batch(&format!(
-                "PRAGMA application_id={}; PRAGMA user_version=2;",
-                schema::CONFIG_APP
-            ))
-            .map_err(sql_error)?;
-            tx.commit().map_err(sql_error)?;
-            let tx = runtime.transaction().map_err(sql_error)?;
-            tx.execute_batch(&schema::runtime_v3_sql())
-                .map_err(sql_error)?;
-            tx.execute(
-                "INSERT INTO runtime_metadata VALUES(1,?1,3,1,NULL,'asia-shanghai-rfc3339-ms-v1')",
-                [&instance],
-            )
-            .map_err(sql_error)?;
-            tx.execute_batch(&format!(
-                "PRAGMA application_id={}; PRAGMA user_version=3;",
-                schema::RUNTIME_APP
-            ))
-            .map_err(sql_error)?;
-            let settings = crate::domain::local_delivery::DeliverySettings::default();
-            tx.execute(
-                "INSERT INTO delivery_settings(id,settings_revision,payload) VALUES(1,?1,?2)",
-                rusqlite::params![settings.settings_revision, encode(&settings)?],
-            )
-            .map_err(sql_error)?;
-            tx.commit().map_err(sql_error)?;
-        }
+        let lock = profile_contract::admit(dir)?;
+        let dir = profile_contract::canonical(dir)?;
+        let config = connect(&dir.join("config.sqlite"), false, schema::CONFIG_APP)?;
+        let runtime = connect(&dir.join("runtime.sqlite"), false, schema::RUNTIME_APP)?;
         let instance: String = config
             .query_row(
                 "SELECT instance_id FROM instance_metadata WHERE id=1",
@@ -338,11 +391,12 @@ impl Stores {
             )?),
             config,
             runtime,
-            dir: dir.into(),
+            dir: dir.clone(),
             instance,
             busy_count: 0,
             cleanup_cursor: 0,
             last_maintenance: std::time::Instant::now(),
+            _profile_lock: lock,
             #[cfg(test)]
             test_after_cleanup_free: None,
             #[cfg(test)]
@@ -723,5 +777,50 @@ impl Stores {
             .map_err(sql_error)?;
         }
         tx.commit().map_err(sql_error)
+    }
+}
+
+use rusqlite::ToSql;
+use serde_json::json;
+pub(super) fn str_at(row: &Value, index: usize) -> LocalResult<&str> {
+    row[index]
+        .as_str()
+        .ok_or_else(|| "profile_ledger_invalid".into())
+}
+pub(super) fn number(row: &Value, index: usize) -> LocalResult<i64> {
+    row[index]
+        .as_i64()
+        .ok_or_else(|| "profile_ledger_invalid".into())
+}
+pub(super) fn record(c: &Connection, sql: &str, args: &[&dyn ToSql]) -> LocalResult<Value> {
+    c.query_row(sql, args, |r| {
+        let mut fields = vec![];
+        for i in 0..r.as_ref().column_count() {
+            fields.push(match r.get_ref(i)? {
+                rusqlite::types::ValueRef::Null => Value::Null,
+                rusqlite::types::ValueRef::Integer(n) => json!(n),
+                rusqlite::types::ValueRef::Text(_) => json!(r.get::<_, String>(i)?),
+                v => {
+                    return Err(rusqlite::Error::InvalidColumnType(
+                        i,
+                        String::new(),
+                        v.data_type(),
+                    ))
+                }
+            });
+        }
+        Ok(Value::Array(fields))
+    })
+    .map_err(sql_error)
+}
+pub(super) fn count(c: &Connection, sql: &str, args: &[&dyn ToSql]) -> LocalResult<i64> {
+    number(&record(c, sql, args)?, 0)
+}
+
+pub(super) fn require(ok: bool) -> LocalResult<()> {
+    if ok {
+        Ok(())
+    } else {
+        Err("profile_ledger_invalid".into())
     }
 }

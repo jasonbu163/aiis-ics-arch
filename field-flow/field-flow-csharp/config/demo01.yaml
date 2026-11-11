@@ -1,0 +1,17 @@
+schema_version: 2
+instance_id: ff-csharp-demo01
+plc_files: [plcs/s7-a.json]
+plc_runtime:
+  - {device_id: s7_a, connect_timeout_ms: 3000, io_timeout_ms: 5000, queue_capacity: 16, queue_wait_ms: 2000, ready_wait_ms: 3000}
+flows:
+  - id: demo01
+    kind: demo01
+    business_name: synthetic_command_to_int
+    interval_ms: 500
+    device_ids: [s7_a]
+    source_id: demo01-feed
+    get_url: http://127.0.0.1:34880/demo01/command
+    input_max_age_ms: 10000
+    target: {device_id: s7_a, point_id: value}
+http: {connect_timeout_ms: 500, total_timeout_ms: 1500, pool_wait_ms: 500, max_connections: 8, max_body_bytes: 4096}
+shutdown_timeout_ms: 15000

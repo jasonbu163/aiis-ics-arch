@@ -48,17 +48,6 @@ export async function getEnergyData() {
   }
 }
 
-export async function getRealtimeLatest() {
-  const apiName = 'monitor.getRealtimeLatest'
-  const payload = createRealtimePayload()
-  return {
-    ...createMockMarker(apiName),
-    updatedAt: mockNow(),
-    payload,
-    data: payload
-  }
-}
-
 export async function getCollectorStatus() {
   const apiName = 'monitor.getCollectorStatus'
   return {

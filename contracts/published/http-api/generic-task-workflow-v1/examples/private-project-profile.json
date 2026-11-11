@@ -1,0 +1,55 @@
+{
+  "targets": {
+    "LINE-01": {
+      "mes": [
+        "mes-01"
+      ],
+      "executors": [
+        "ff-01"
+      ],
+      "versions": {
+        "1": {
+          "dispatch": [],
+          "plcSeqMax": 65535,
+          "automatic": {
+            "producerId": "sma-01",
+            "recordSource": "sma"
+          }
+        },
+        "2": {
+          "dispatch": [
+            "productCode",
+            "targetLength"
+          ],
+          "plcSeqMax": 65535,
+          "automatic": {
+            "producerId": "sma-01",
+            "recordSource": "sma"
+          }
+        },
+        "3": {
+          "dispatch": [
+            "productCode",
+            "targetLength"
+          ],
+          "plcSeqMax": 65535,
+          "automatic": {
+            "producerId": "sma-01",
+            "recordSource": "sma"
+          }
+        },
+        "4": {
+          "dispatch": [
+            "productCode",
+            "targetLength"
+          ],
+          "plcSeqMax": 65535,
+          "automatic": {
+            "producerId": "sma-01",
+            "recordSource": "sma"
+          }
+        }
+      }
+    }
+  }
+}

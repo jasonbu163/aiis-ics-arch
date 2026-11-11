@@ -4,9 +4,12 @@ Chinese version: [PLAN.zh-CN.md](PLAN.zh-CN.md)
 
 ## Current baseline
 
+- [ARCH-ACQ-003 r2](../plans/ARCH-ACQ-003-acquisition-data-optional-filters/spec.md): `owner_accepted`. Both dev pages load authorized lists by default, with optional filters and PLC, DB and source columns. Human Owner accepted the verified r2 dev scope on 2026-11-11.
+
 - [ARCH-BE-004 r2](../plans/ARCH-BE-004-energy-price-hourly-history/spec.md): `owner_accepted`; observedAt hourly upsert, daily history and add dialog independently verified, F-001 closed; Human Owner accepted on 2026-10-13 after successful manual use, live data migration separately gated.
 
-- Core pages: login, system/user and system/dict.
+- Core pages include login and `system/user`. ARCH-ACQ-002 retired the mapping settings page at `system/dict`. [QA record](../plans/ARCH-ACQ-002-legacy-projection-retirement/checklist.md)
+- ARCH-FE-005 r2 adds a top-level Acquisition Data menu with Realtime Data and Acquisition History. QA5 verified both pages' filter alignment after PLC selection, title help and dev reads. Human Owner acceptance is pending. [QA record](../plans/ARCH-FE-005-acquisition-data-module/checklist.md)
 - Route, navigation, default entry and locale assembly share the normalized module Registry.
 - ARCH-FE-002 adds the approved dashboard/plan pilot with page IDs `dashboard.home` and `plan.list`; remaining business modules require the subsequent 003 migration task.
 - [ARCH-FE-001 r3](../plans/ARCH-FE-001-frontend-module-auto-assembly/spec.md): `qa_passed`; the second fresh-context Verification passed r3 and independently closed the first-round findings, with history retained. Human Owner final acceptance and a separate release-version decision remain pending.

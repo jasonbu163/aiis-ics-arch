@@ -1,0 +1,10 @@
+{
+  "dispatchId": "00000000-0000-4000-8000-000000000001",
+  "taskNo": "GT1-RUN-A",
+  "targetKey": "LINE-01",
+  "producerId": "ff-01",
+  "outcome": "plc_accepted",
+  "requestSeq": 41,
+  "ackSeq": 41,
+  "ackObservedAt": "2026-11-11T10:00:00+08:00"
+}

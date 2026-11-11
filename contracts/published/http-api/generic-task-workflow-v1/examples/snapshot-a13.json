@@ -1,0 +1,16 @@
+{
+  "producerId": "sma-01",
+  "taskNo": "GT1-RUN-A",
+  "targetKey": "LINE-01",
+  "fieldConfigVersion": 3,
+  "productionStatus": "completed",
+  "observationSeq": 13,
+  "observedAt": "2026-11-11T10:00:20+08:00",
+  "syncValues": {
+    "completedLength": 1200
+  },
+  "localValues": {
+    "currentSpeed": 0
+  },
+  "completedAt": "2026-11-11T10:00:20+08:00"
+}

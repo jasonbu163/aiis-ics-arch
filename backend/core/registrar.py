@@ -5,7 +5,7 @@
     - 集中管理 FastAPI 应用初始化逻辑
     - 注册中间件（CORS、错误处理等）
     - 自动注册路由模块
-    - 在应用组合期建立角色权限策略、注册 Projection handler 与点位 catalog
+    - 在应用组合期建立角色权限策略
     - 应用生命周期管理
 """
 from contextlib import asynccontextmanager
@@ -72,46 +72,13 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(router, prefix=settings.API_V1_PREFIX)
 
 
-def register_projection_control_plane(app: FastAPI) -> None:
-    """Build read-only Projection catalogs once during application composition."""
-    from projection.policy_catalog import load_snapshot_policy_catalog
-    from projection.registry import build_projection_registry
-
-    app.state.projection_registry = build_projection_registry()
-    app.state.snapshot_policy_catalog = load_snapshot_policy_catalog()
-
-
-def build_projection_runtime(app: FastAPI):
-    """Compose the first headless raw Projection runtime from app-owned catalogs."""
-    from projection.runner import ProjectionRunner
-    from projection.runtime import ProjectionRuntime
-
-    runner = ProjectionRunner(
-        registry=app.state.projection_registry,
-        catalog=app.state.snapshot_policy_catalog,
-        batch_size=settings.PROJECTION_RUNNER_BATCH_SIZE,
-    )
-    return ProjectionRuntime(
-        runner=runner,
-        interval_seconds=settings.PROJECTION_RUNNER_INTERVAL_SECONDS,
-    )
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """应用生命周期管理"""
-    runtime = None
     try:
-        if app.state.projection_runtime_enabled:
-            runtime = build_projection_runtime(app)
-            runtime.start()
-            app.state.projection_runtime = runtime
         yield
     finally:
-        if runtime is not None:
-            await runtime.stop()
         await cleanup()
-
 
 async def cleanup() -> None:
     """清理资源"""
@@ -163,12 +130,6 @@ def create_app(testing: bool | None = None) -> FastAPI:
     )
     app.state.role_api_permissions = policy
     app.state.testing = is_testing
-    app.state.projection_runtime_enabled = (
-        not is_testing and settings.PROJECTION_RUNNER_ENABLED
-    )
-    app.state.projection_runtime = None
-    register_projection_control_plane(app)
-    
     register_middleware(app)
     register_exception_handlers(app)
     register_routers(app)

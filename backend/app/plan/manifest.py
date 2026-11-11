@@ -1,24 +1,12 @@
-"""
-文件路径: /backend/app/plan/manifest.py
-功能描述: Plan 模块注册元数据
-主要功能:
-    - 声明计划管理 API 路由入口
-    - 声明计划管理模型包入口
-    - 支持后端模块 registry 统一加载
-"""
+"""通用计划模块注册与公开的计划同步接口。"""
 from app.module_registry import ModuleManifest
 
-
 manifest = ModuleManifest(
-    core_contract="aiis.backend-module/v1",
-    requires=(),
-    model_requires=('performance',),
-    exports=('app.plan.models:Plan',),
-    error_codes=(),
-    name="plan",
-    enabled=True,
-    order=30,
-    routers=("app.plan.api.routes:router",),
-    models_package="app.plan.models",
-    permissions=("plan",),
+    name='plan', enabled=True, order=30, core_contract='aiis.backend-module/v1',
+    requires=('task',), model_requires=('performance',),
+    exports=('app.plan.models:Plan', 'app.plan.services.async_workflow:lock_plan',
+             'app.plan.services.async_workflow:upsert_plan', 'app.plan.services.async_workflow:plan_wire',
+             'app.plan.services.async_workflow:sync_plan'),
+    error_codes=(), routers=('app.plan.api.routes:router',),
+    models_package='app.plan.models', permissions=('plan',),
 )

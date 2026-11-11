@@ -1,0 +1,52 @@
+{
+  "module": "performance",
+  "fieldConfigVersion": 2,
+  "configRevision": "2",
+  "changes": [
+    {
+      "scope": "shared_sync",
+      "slotNo": 1,
+      "performanceVisible": true
+    },
+    {
+      "scope": "shared_sync",
+      "slotNo": 2,
+      "performanceVisible": true
+    },
+    {
+      "scope": "shared_sync",
+      "slotNo": 3,
+      "performanceVisible": true
+    },
+    {
+      "scope": "performance_local",
+      "slotNo": 1,
+      "name": "currentSpeed",
+      "type": "number",
+      "labels": {
+        "zh-CN": "当前速度",
+        "en-US": "Current speed"
+      },
+      "unit": "m/min",
+      "performanceOwner": "automated",
+      "enabled": true,
+      "performanceVisible": true
+    },
+    {
+      "scope": "performance_local",
+      "slotNo": 2,
+      "name": "inspectionPassed",
+      "type": "boolean",
+      "labels": {
+        "zh-CN": "检验通过",
+        "en-US": "Inspection passed"
+      },
+      "unit": null,
+      "performanceOwner": "manual",
+      "enabled": true,
+      "isNullable": true,
+      "performanceEditable": true,
+      "performanceVisible": true
+    }
+  ]
+}

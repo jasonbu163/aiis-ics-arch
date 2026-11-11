@@ -1,0 +1,4 @@
+{
+  "help": "Field Flow：config validate --config 路径 | state init --synthetic --mode dry_run|execute --state-dir 路径 --instance-id ID | state inspect --state-dir 路径 | run --config 路径 --state-dir 路径 [--execute]。可选：--lang en-US|zh-CN",
+  "error": "命令无法完成。"
+}

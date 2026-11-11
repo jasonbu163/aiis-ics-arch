@@ -18,7 +18,6 @@ from settings import settings
 
 
 LOG_FORMAT = "{message}"
-PROJECTION_RUNNER_LOG_CHANNEL = "projection_runner"
 
 
 def _should_enqueue_logs() -> bool:
@@ -70,24 +69,6 @@ def log_event(level: str, event: str, **fields: object) -> None:
     logger.bind(event=event, **fields).log(level.upper(), event)
 
 
-def log_projection_event(level: str, event: str, **fields: object) -> None:
-    """Emit a runner event through the shared logger's dedicated channel."""
-    logger.bind(
-        channel=PROJECTION_RUNNER_LOG_CHANNEL,
-        event=event,
-        **fields,
-    ).log(level.upper(), event)
-
-
-def _is_projection_runner_record(record: dict[str, object]) -> bool:
-    extra = record["extra"]
-    return extra.get("channel") == PROJECTION_RUNNER_LOG_CHANNEL
-
-
-def _is_default_record(record: dict[str, object]) -> bool:
-    return not _is_projection_runner_record(record)
-
-
 def setup_logger(
     process_name: str = "api",
     *,
@@ -127,7 +108,6 @@ def setup_logger(
         enqueue=enqueue_logs,
         backtrace=False,
         diagnose=False,
-        filter=_is_default_record,
     )
     logger.add(
         log_path / f"{process_name}-error.log",
@@ -140,32 +120,5 @@ def setup_logger(
         enqueue=enqueue_logs,
         backtrace=True,
         diagnose=False,
-        filter=_is_default_record,
-    )
-    logger.add(
-        log_path / "projection-runner.log",
-        level=log_level,
-        format=LOG_FORMAT,
-        serialize=True,
-        rotation=max_file_bytes,
-        retention=file_backup_count,
-        encoding="utf-8",
-        enqueue=enqueue_logs,
-        backtrace=False,
-        diagnose=False,
-        filter=_is_projection_runner_record,
-    )
-    logger.add(
-        log_path / "projection-runner-error.log",
-        level="ERROR",
-        format=LOG_FORMAT,
-        serialize=True,
-        rotation=max_file_bytes,
-        retention=file_backup_count,
-        encoding="utf-8",
-        enqueue=enqueue_logs,
-        backtrace=True,
-        diagnose=False,
-        filter=_is_projection_runner_record,
     )
     _configure_standard_logging(log_level)

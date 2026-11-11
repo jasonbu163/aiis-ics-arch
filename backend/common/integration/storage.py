@@ -5,6 +5,7 @@ import json
 from common.integration.envelope import BUSINESS_TIMEZONE, source_time
 
 SCHEMA_REVISION = "1b3d5f7a9c20"
+ALLOWED_SCHEMA_REVISIONS = (SCHEMA_REVISION, "2c4e6a8b0d12", "3d5f7a9c1e23", "4e6a8b0d2f14", "5f7a9c1e3b25")
 BASIS_PROFILE = "be010.fixed-basis/v1"
 
 
@@ -46,7 +47,7 @@ def validate_adoption(document, module, columns):
     if not isinstance(document, dict) or set(document) != required:
         raise ValueError("invalid adoption evidence")
     if any(document[k] != v for k, v in {"version":"business-time-adoption/v1", "profile":"shanghai-v1",
-            "module":module, "schemaRevision":SCHEMA_REVISION, "fixedColumnDigest":column_digest(columns), "state":"adopted"}.items()):
+            "module":module, "fixedColumnDigest":column_digest(columns), "state":"adopted"}.items()) or document["schemaRevision"] not in ALLOWED_SCHEMA_REVISIONS:
         raise ValueError("adoption profile mismatch")
     for key in ("serverUuid", "schema", "sourceRevision", "backupRef", "ownerApprovalRef"):
         if not isinstance(document[key], str) or not document[key].strip() or len(document[key]) > 512:

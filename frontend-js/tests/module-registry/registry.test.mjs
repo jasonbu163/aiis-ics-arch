@@ -249,16 +249,10 @@ test('invalid schema, dynamic visible route and incomplete bilingual title fail'
 test('actual source preserves Core route identity, shell locales and default-disabled demo', async () => {
   const root = fileURLToPath(new URL('../../', import.meta.url))
   const registry = await loadRegistry(root)
-  assert.deepEqual(registry.activeModuleNames, ['dashboard', 'plan', 'performance', 'monitor', 'equipment', 'auxiliary', 'quality', 'system', 'maintenance'])
-  assert.deepEqual(registry.routes.map(route => [route.name, route.path, route.meta.pageId]), [
-    ['Dashboard', 'dashboard/home', 'dashboard.home'],
-    [undefined, 'dashboard', undefined],
+  assert.deepEqual(registry.activeModuleNames.filter(name => name !== 'acquisition-data'), ['plan', 'performance', 'monitor', 'equipment', 'auxiliary', 'quality', 'system', 'maintenance'])
+  assert.deepEqual(registry.routes.filter(route => !route.path.startsWith('acquisition-data/')).map(route => [route.name, route.path, route.meta.pageId]), [
     ['PlanList', 'plan/list', 'plan.list'],
     ['PerformanceList', 'performance/list', 'performance.list'],
-    ['PerformanceSplit', 'performance/split', 'performance.split'],
-    ['PerformancePrint', 'performance/print', 'performance.print'],
-    ['PerformanceEfficiency', 'performance/efficiency', 'performance.efficiency'],
-    ['PerformanceQuality', 'performance/quality/:id', 'performance.quality'],
     ['MonitorRealtime', 'monitor/realtime', 'monitor.realtime'],
     ['MonitorTemperature', 'monitor/temperature', 'monitor.temperature'],
     ['MonitorEnergy', 'monitor/energy', 'monitor.energy'],
@@ -272,16 +266,18 @@ test('actual source preserves Core route identity, shell locales and default-dis
     ['QualitySPC', 'quality/spc', 'quality.spc'],
     ['QualityControl', 'quality/control/:id', 'quality.control'],
     ['SystemUser', 'system/user', 'system.user'],
-    ['SystemProjectionMapping', 'system/dict', 'system.projection-mapping'],
     ['MaintenanceLog', 'maintenance/log', 'maintenance.log']
   ])
   assert.equal(registry.modules.find(module => module.name === 'aiis_demo').enabled, false)
+  assert.equal(registry.modules.find(module => module.name === 'dashboard').enabled, false)
+  for (const id of ['performance.split','performance.print','performance.efficiency','performance.quality']) assert.equal(registry.routeRecords.some(route => route.meta.pageId === id), false)
   for (const locale of ['en-US', 'zh-CN']) {
     for (const key of ['system.title', 'system.user', 'system.roles.admin', 'user.profile', 'user.logout']) {
       assert.equal(typeof resolveMessage(registry.messages[locale], key), 'string', `${locale}:${key}`)
     }
     assert.equal(registry.messages[locale].aiis_demo, undefined)
   }
+  assert.equal(registry.routes.some(route => route.path === 'system/dict'), false)
   assert.equal(defaultAuthenticatedPath(registry, access('system.projection-mapping')), '/login')
   const demo = await readFile(new URL('../../src/app/aiis_demo/views/example/index.vue', import.meta.url), 'utf8')
   assert.doesNotMatch(demo, /fetch\(|axios|setInterval|WebSocket|https?:\/\//)
@@ -296,7 +292,7 @@ test('actual source preserves Core route identity, shell locales and default-dis
 })
 
 
-test('five adapted modules retain order, owned bilingual titles and thirteen visible leaves', async () => {
+test('five adapted modules retain order, owned bilingual titles and ten visible leaves', async () => {
   const registry = await loadRegistry(fileURLToPath(new URL('../../', import.meta.url)))
   const groups = [
     ['performance', 30, 'DataLine'], ['monitor', 40, 'Monitor'],
@@ -304,9 +300,6 @@ test('five adapted modules retain order, owned bilingual titles and thirteen vis
   ]
   const pages = [
     ['performance.list', 'performance.list', 10, 'List'],
-    ['performance.split', 'performance.split', 20, 'Scissor'],
-    ['performance.print', 'performance.print', 30, 'Printer'],
-    ['performance.efficiency', 'performance.modules.efficiency', 40, 'TrendCharts'],
     ['monitor.realtime', 'monitor.realtime.menu', 10, 'Monitor'],
     ['monitor.temperature', 'monitor.temperature', 20, 'TrendCharts'],
     ['monitor.energy', 'monitor.energy', 30, 'Cpu'],
@@ -337,7 +330,7 @@ test('five adapted modules retain order, owned bilingual titles and thirteen vis
   }
   const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/', children: registry.routes }] })
   for (const [id, titleKey] of [
-    ['performance.quality', 'performance.modules.qualityControl'], ['quality.control', 'quality.control.routeTitle']
+    ['quality.control', 'quality.control.routeTitle']
   ]) {
     const route = registry.routeRecords.find(route => route.meta.pageId === id)
     assert.equal(route.meta.titleKey, titleKey)

@@ -35,12 +35,12 @@ AIIS ICS Architecture 是可复用工业信息系统架构的公开源码基线�
 
 ```text
 frontend-js -> FastAPI 业务 API -> 所属业务数据库
-冻结兼容：PLC -> 旧 control-agent -> monitor raw/latest -> Projection
+仅供历史参考：旧 control-agent -> 已退役的 Core 快照 / Projection
 当前 DAA：受控 DS/S7 -> 本地 SQLite（阶段 B 已接受）；上传/ACK 未接通
 目标链：DAA -> plc_facts API -> SMA -> typed 业务 API -> 业务记录
 ```
 
-截至2026-11-05，[PLC事实服务](contracts/published/http-api/plc-facts-v1/README.zh-CN.md)与[八类typed业务集成入口](contracts/published/http-api/business-integration-v1/README.zh-CN.md)已通过独立获批的隔离MySQL验证。Owner终验、目标schema/时间采用及DAA/SMA接线仍分别推进，准入保持默认关闭/未采用。SMA已拥有本地SQLite配置与纯预览，当前配置阶段关闭正常投递，见[SMA说明](automation-world/semantic-mapping-agent/README.zh-CN.md)和所属任务。
+当前源码保留[PLC事实 v2](contracts/published/http-api/plc-facts-v2/README.zh-CN.md)与[八类 typed 业务集成入口](contracts/published/http-api/business-integration-v1/README.zh-CN.md)。[v1 合同](contracts/published/http-api/plc-facts-v1/README.zh-CN.md)及其隔离证据保留为历史；当前 Core 撤下 v1 路由、旧快照和 Projection runner，旧 DAA 上传及冻结的直库 control-agent 需分别处理切换。目标采用及 DAA/SMA 接线另行推进，准入保持默认关闭/未采用。SMA已拥有本地SQLite配置与纯预览，当前配置阶段关闭正常投递，见[SMA说明](automation-world/semantic-mapping-agent/README.zh-CN.md)和所属任务。
 
 后端 Registry 只发现声明了启用 manifest 的模块。Registry 负责暴露路由和 metadata，不负责创建数据表；表结构变化必须走显式迁移任务。`control-agent` 始终是独立的运行时和交付边界。
 
@@ -90,4 +90,4 @@ AW 的归属、CA冻结、DAA/SMA独立启动与后续边界见 [Automation Worl
 
 独立的 [C# Plan 首期学习切片](backend-dotnet/README.zh-CN.md)直接写 MySQL，仅三个 API、无登录，不替代 Python；QA2已通过，实际证据与待Human Owner最终验收的状态归 [ARCH-BE-008](plans/ARCH-BE-008-csharp-backend-plan-slice/tasks.md)。
 
-[FF-005](field-flow/plans/FF-005-basic-and-advanced-examples/spec.md)基础案例已获Owner接受。[FF-004 r2 A](field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/spec.md)的Rust每PLC JSON/YAML v2及有界多PLC S7 int16调用通过QA3，最终验收待定。Modbus结构校验不代表通信、DS导出或Python/C#目录加载已交付；原完整`hold_ack`强收及旧UTC限制继续保留。
+[FF-005](field-flow/plans/FF-005-basic-and-advanced-examples/spec.md)基础案例已获Owner接受。[FF-004 r2 A](field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/spec.md)的Rust每PLC JSON/YAML v2及有界多PLC S7 int16调用通过 QA3，并于 2026-11-10 获 Human Owner 最终验收。Modbus结构校验不代表通信、DS导出或Python/C#目录加载已交付；原完整`hold_ack`强收及旧UTC限制继续保留。

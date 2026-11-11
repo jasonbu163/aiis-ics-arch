@@ -22,36 +22,36 @@ test('role arrays reject missing, broken, duplicate, forbidden and non-subset co
   assert.deepEqual(parseRolePageAccess(env(), registry), { supervisor: [], operator: [] })
   for (const role of ['SUPERVISOR', 'OPERATOR']) {
     const key = `VITE_${role}_PAGE_ACCESS_JSON`
-    for (const raw of [undefined, '', '{broken', '{}', 'null', '[null]', '[4]', '["bad"]', '["/plan/list"]', '["plan.list","plan.list"]']) {
+    for (const raw of [undefined, '', '{broken', '{}', 'null', '[null]', '[4]', '["bad"]', '["/plan/list"]', '["performance.list","performance.list"]']) {
       assert.throws(() => parseRolePageAccess({ ...env(), [key]: raw }, registry), new RegExp(key))
     }
   }
   assert.throws(() => parseRolePageAccess({ ...env(), VITE_ROLE_PAGE_ACCESS_JSON: '{}' }, registry), /retired/)
   assert.throws(() => parseRolePageAccess(env(['missing.list']), registry), /unknown pageId missing.list/)
   assert.throws(() => parseRolePageAccess(env(['aiis_demo.example']), registry), /disabled pageId aiis_demo.example/)
-  assert.throws(() => parseRolePageAccess(env(['system.projection-mapping']), registry), /admin-only/)
-  assert.throws(() => parseRolePageAccess(env(['dashboard.home'], ['plan.list']), registry), /absent from VITE_SUPERVISOR/)
-  assert.deepEqual(parseRolePageAccess(env(['dashboard.home', 'plan.list'], ['dashboard.home']), registry).operator, ['dashboard.home'])
+  assert.throws(() => parseRolePageAccess(env(['system.projection-mapping']), registry), /unknown pageId/)
+  for (const retired of ['dashboard.home','performance.split','performance.print','performance.efficiency','performance.quality']) assert.throws(() => parseRolePageAccess(env([retired]), registry), /unknown pageId|disabled pageId/)
+  assert.throws(() => parseRolePageAccess(env(['plan.list'], ['performance.list']), registry), /absent from VITE_SUPERVISOR/)
+  assert.deepEqual(parseRolePageAccess(env(['plan.list', 'performance.list'], ['plan.list']), registry).operator, ['plan.list'])
 })
 
 test('admin, supervisor, operator and unknown share route/menu/default decisions', () => {
-  const grants = parseRolePageAccess(env(['dashboard.home', 'plan.list'], ['dashboard.home']), registry)
+  const grants = parseRolePageAccess(env(['plan.list', 'performance.list'], ['plan.list']), registry)
   const matrix = {
     admin: { paths: [
-      '/dashboard/home', '/plan/list', '/performance/list', '/performance/split', '/performance/print',
-      '/performance/efficiency', '/performance/quality/:id', '/monitor/realtime', '/monitor/temperature',
+      '/plan/list', '/performance/list', '/monitor/realtime', '/monitor/temperature',
       '/monitor/energy', '/equipment/production-parameters', '/equipment/drive', '/equipment/temperature',
       '/auxiliary/stop', '/auxiliary/shift', '/auxiliary/price', '/quality/list', '/quality/spc',
-      '/quality/control/:id', '/system/user', '/system/dict', '/maintenance/log'
-    ], menus: ['dashboard', 'plan', 'performance', 'monitor', 'equipment', 'auxiliary', 'quality', 'system', 'maintenance'], entry: '/dashboard/home' },
-    supervisor: { paths: ['/dashboard/home', '/plan/list'], menus: ['dashboard', 'plan'], entry: '/dashboard/home' },
-    operator: { paths: ['/dashboard/home'], menus: ['dashboard'], entry: '/dashboard/home' },
+      '/quality/control/:id', '/system/user', '/maintenance/log'
+    ], menus: ['plan', 'performance', 'monitor', 'equipment', 'auxiliary', 'quality', 'system', 'maintenance'], entry: '/plan/list' },
+    supervisor: { paths: ['/plan/list', '/performance/list'], menus: ['plan', 'performance'], entry: '/plan/list' },
+    operator: { paths: ['/plan/list'], menus: ['plan'], entry: '/plan/list' },
     unknown: { paths: [], menus: [], entry: '/login' }
   }
   for (const [role, expected] of Object.entries(matrix)) {
     const access = { isAdmin: role === 'admin', hasPageAccess: id => (grants[role] || []).includes(id) }
-    assert.deepEqual(registry.routeRecords.filter(route => canAccessRoute(route, access)).map(route => route.path), expected.paths)
-    assert.deepEqual(accessibleNavigation(registry, access).map(group => group.name), expected.menus)
+    assert.deepEqual(registry.routeRecords.filter(route => !route.path.startsWith('/acquisition-data/') && canAccessRoute(route, access)).map(route => route.path), expected.paths)
+    assert.deepEqual(accessibleNavigation(registry, access).filter(group => group.name !== 'acquisition-data').map(group => group.name), expected.menus)
     assert.equal(defaultAuthenticatedPath(registry, access), expected.entry)
     assert.equal(registry.routes.some(route => route.name === 'AiisDemoExample'), false)
   }
@@ -67,16 +67,16 @@ test('Vite shared env, local/mode and process priority feed the same checker', a
     await cp(join(root, 'src/app'), join(fixture, 'src/app'), { recursive: true })
     await cp(join(root, 'src/locales'), join(fixture, 'src/locales'), { recursive: true })
     await writeFile(join(fixture, 'package.json'), '{"type":"module"}')
-    await writeFile(join(fixture, '.env'), "VITE_SUPERVISOR_PAGE_ACCESS_JSON='[\"dashboard.home\",\"plan.list\"]'\nVITE_OPERATOR_PAGE_ACCESS_JSON='[]'\n")
+    await writeFile(join(fixture, '.env'), "VITE_SUPERVISOR_PAGE_ACCESS_JSON='[\"plan.list\",\"performance.list\"]'\nVITE_OPERATOR_PAGE_ACCESS_JSON='[]'\n")
     for (const mode of ['development', 'production']) assert.deepEqual((await checkPageAccess(fixture, mode)).grants.operator, [])
-    await writeFile(join(fixture, '.env.local'), "VITE_OPERATOR_PAGE_ACCESS_JSON='[\"dashboard.home\"]'\n")
-    assert.deepEqual((await checkPageAccess(fixture, 'development')).grants.operator, ['dashboard.home'])
-    await writeFile(join(fixture, '.env.production'), "VITE_OPERATOR_PAGE_ACCESS_JSON='[\"plan.list\"]'\n")
-    assert.deepEqual((await checkPageAccess(fixture, 'production')).grants.operator, ['plan.list'])
-    await writeFile(join(fixture, '.env.production.local'), "VITE_OPERATOR_PAGE_ACCESS_JSON='[\"dashboard.home\",\"plan.list\"]'\n")
+    await writeFile(join(fixture, '.env.local'), "VITE_OPERATOR_PAGE_ACCESS_JSON='[\"plan.list\"]'\n")
+    assert.deepEqual((await checkPageAccess(fixture, 'development')).grants.operator, ['plan.list'])
+    await writeFile(join(fixture, '.env.production'), "VITE_OPERATOR_PAGE_ACCESS_JSON='[\"performance.list\"]'\n")
+    assert.deepEqual((await checkPageAccess(fixture, 'production')).grants.operator, ['performance.list'])
+    await writeFile(join(fixture, '.env.production.local'), "VITE_OPERATOR_PAGE_ACCESS_JSON='[\"plan.list\",\"performance.list\"]'\n")
     assert.equal((await checkPageAccess(fixture, 'production')).grants.operator.length, 2)
-    process.env.VITE_OPERATOR_PAGE_ACCESS_JSON = '["dashboard.home"]'
-    assert.deepEqual((await checkPageAccess(fixture, 'production')).grants.operator, ['dashboard.home'])
+    process.env.VITE_OPERATOR_PAGE_ACCESS_JSON = '["plan.list"]'
+    assert.deepEqual((await checkPageAccess(fixture, 'production')).grants.operator, ['plan.list'])
     process.env.VITE_OPERATOR_PAGE_ACCESS_JSON = '["missing.list"]'
     assert.throws(() => parseRolePageAccess(loadEnv('production', fixture, 'VITE_'), registry), /unknown pageId/)
     // 实际 Vite config 必须在启动 dev 和构建前拒绝进程覆盖的未知授权。
@@ -112,15 +112,14 @@ test('pilot literal i18n keys resolve in both assembled languages', async () => 
       }
     }
   }
-  await walk(join(root, 'src/app/dashboard'))
   await walk(join(root, 'src/app/plan'))
 })
 
 
 test('current host and Docker grant shapes never gain pages from enabled modules', () => {
   for (const [configuration, expected] of [
-    [env(['dashboard.home', 'plan.list', 'system.user'], ['dashboard.home', 'plan.list']), {
-      supervisor: ['dashboard.home', 'plan.list', 'system.user'], operator: ['dashboard.home', 'plan.list']
+    [env(['plan.list', 'performance.list', 'system.user'], ['plan.list', 'performance.list']), {
+      supervisor: ['plan.list', 'performance.list', 'system.user'], operator: ['plan.list', 'performance.list']
     }],
     [env(), { supervisor: [], operator: [] }]
   ]) {
@@ -131,16 +130,16 @@ test('current host and Docker grant shapes never gain pages from enabled modules
         .map(route => route.meta.pageId), expected[role] || [])
       assert.deepEqual(accessibleNavigation(registry, provider).flatMap(group => group.children)
         .map(leaf => leaf.route.meta.pageId), expected[role] || [])
-      assert.equal(defaultAuthenticatedPath(registry, provider), (expected[role] || []).length ? '/dashboard/home' : '/login')
+      assert.equal(defaultAuthenticatedPath(registry, provider), (expected[role] || []).length ? '/plan/list' : '/login')
     }
   }
 })
 
 test('public new-page grants align menu, route and default; parameter details stay hidden', () => {
-  for (const pageId of ['performance.list', 'performance.split', 'performance.print', 'performance.efficiency',
+  for (const pageId of ['performance.list',
     'monitor.realtime', 'monitor.temperature', 'monitor.energy', 'equipment.production-parameters',
     'equipment.drive', 'equipment.temperature', 'quality.list', 'quality.spc', 'maintenance.log',
-    'performance.quality', 'quality.control']) {
+    'quality.control']) {
     const grants = parseRolePageAccess(env([pageId], [pageId]), registry)
     const route = registry.routeRecords.find(route => route.meta.pageId === pageId)
     for (const role of ['supervisor', 'operator']) {

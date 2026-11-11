@@ -20,7 +20,7 @@ The machine source is [module_contract.py](module_contract.py), including `CORE_
 | Optional CRUD helpers | `common.async_crud_base:BaseService`, `common.sync_crud_base:SyncBaseCRUD`; existing get/list/create/update/delete and no-commit semantics |
 | Optional Projection declarations | `projection.registry:ProjectionHandlerDescriptor`, `ProjectionHandlerInput`, `ProjectionHandlerGroupIdentity`, `ProjectionInvocationContext`; local synchronous declarations, no runner/runtime internals |
 
-APIs use asynchronous sessions. Local Projection uses synchronous caller-owned sessions and its existing business/cursor/audit transaction. A module must not retain a global session, import engines or read private Settings. Third-party libraries must already exist in the approved consumer lock/environment.
+APIs use asynchronous sessions. Retained owner-local synchronous adapters use caller-owned sessions; Core no longer discovers or starts the old Projection runner. A module must not retain a global session, import engines or read private Settings. Third-party libraries must already exist in the approved consumer lock/environment.
 
 `common.data_keys`, the fifteen restored global legacy errors, legacy lineage errors and the two existing schema-maintenance errors are frozen compatibility for the listed old owners. Their exact symbols/owners are enumerated in the machine inventory. Future modules put states/rules in their own domain/data_keys and use their own `StrEnum` with errors such as `sample.invalid_value`. Do not add business enums or errors to Core.
 
@@ -65,7 +65,7 @@ Normal discovery shares these checks. Before readiness, object checks reject dup
 
 ## Reproducible source profiles
 
-The [fixture generator](../tests/module_admission_fixtures.py) builds C2 from immutable C0 `363b297bffe65e020108f5504766b4fb1ec3b381`, the five narrow contract patches and the r3 system manifest/import plus C0 monitor-manifest overlay. The public C0 placeholder snapshot policy supplies test configuration; monitor facts/routes/models remain C0. No real env is copied.
+The [fixture generator](../tests/module_admission_fixtures.py) builds historical C2 using the explicit preserved pre-retirement backend (`ARCH_ACQ002_HISTORICAL_BACKEND`) and immutable C0 `363b297bffe65e020108f5504766b4fb1ec3b381`, the five narrow contract patches and the r3 system manifest/import plus C0 monitor-manifest overlay. The public C0 placeholder snapshot policy supplies test configuration; monitor facts/routes/models remain C0. No real env is copied.
 
 C2 retains fourteen tables and executes the original Core sanitization assertions. Its `core-files.json` freezes source and overlay SHA256. E only adds synthetic admission_probe (fifteen tables) and admission_summary (sixteen combined), their explicit fixture revisions and independent keys/errors/permissions; Core fingerprints must stay unchanged. F is this task's complete reintegration profile (58 tables), with a 42-table successor after the protected original sixteen. These counts belong to these fixtures, not to a permanent global module/table allowlist.
 

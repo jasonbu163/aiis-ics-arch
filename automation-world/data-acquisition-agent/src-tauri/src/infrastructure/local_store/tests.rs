@@ -45,7 +45,7 @@ fn source(p: &str, name: &str, text: &str, n: Option<u16>) -> SourceDocument {
         lineage_id: None,
     }
 }
-fn configuration() -> Configuration {
+pub(super) fn configuration() -> Configuration {
     let mut c = Configuration::default();
     c.plcs = vec![plc(31001), plc(31002)];
     for p in c.plcs.clone() {
@@ -132,7 +132,7 @@ fn seed_engine(
     }
     e.save(v.draft, v.etag).unwrap()
 }
-fn activated(s: &mut Stores, c: &Configuration) -> String {
+pub(super) fn activated(s: &mut Stores, c: &Configuration) -> String {
     let v = s.configuration().unwrap();
     s.save_draft(c, &v.etag).unwrap();
     let v = s.configuration().unwrap();
@@ -144,7 +144,7 @@ fn activated(s: &mut Stores, c: &Configuration) -> String {
     s.finish_activation(&t).unwrap();
     r
 }
-fn cycle(c: &Configuration, r: &str) -> CycleInput {
+pub(super) fn cycle(c: &Configuration, r: &str) -> CycleInput {
     let f: FixtureSet = serde_json::from_str(include_str!(
         "../../../tests/fixtures/local-acquisition/transport.json"
     ))

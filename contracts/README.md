@@ -58,9 +58,17 @@ Each contract should use one of these statuses:
 | [Control-agent preflight gate](gates/control-agent-preflight.md) | project delivery | backend + `control-agent` | `proposed` |
 | [AW facts integration](demands/automation-world-facts-integration.md) · [中文](demands/automation-world-facts-integration.zh-CN.md) | DAA / SMA / HTTP consumers | Backend facts + typed business modules | `proposed`; ARCH-AW-008 document scope only |
 
+## PLC facts provider v2
+
+[PLC facts v2](published/http-api/plc-facts-v2/README.md) defines one complete PLC/DB sample per request and authorized acquisition-data reads. Its source and isolated verification are tracked under [ARCH-BE-012 r4](../plans/ARCH-BE-012-simplified-plc-facts/tasks.md).
+
 ## PLC facts provider v1
 
-[PLC facts v1](published/http-api/plc-facts-v1/README.md) fixes the anonymous batch/latest/history source contract, strict Decimal JSON, durable outcomes, publication cursors and finite retention. The fixed source contract and approved isolated MySQL A+B verification are recorded in [BE-009](../plans/ARCH-BE-009-backend-facts-integration/checklist.md). Owner acceptance/provider-ready, actual database adoption, DAA integration and deployment remain separate.
+[PLC facts v1](published/http-api/plc-facts-v1/README.md) is a historical contract for the retired anonymous batch/latest/history source; it fixes strict Decimal JSON, durable outcomes, publication cursors and finite retention. The fixed source contract and approved isolated MySQL A+B verification are recorded in [BE-009](../plans/ARCH-BE-009-backend-facts-integration/checklist.md). Owner acceptance/provider-ready, actual database adoption, DAA integration and deployment remain separate.
 
 
 [Business integration v1](published/http-api/business-integration-v1/README.md) publishes the eight typed anonymous business operations, closed schemas, examples and digest vectors. [BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/checklist.md) passed approved isolated A+B verification; Owner acceptance, real target/time adoption and DAA/SMA wiring remain pending. Defaults stay closed/unadopted. The AW demand remains proposed as its own document status; it is not a claim that these providers do not exist.
+
+## Generic task workflow candidate
+
+[Generic task workflow v1](published/http-api/generic-task-workflow-v1/README.md) contains the registered Plan/Performance source contract and synthetic A/B examples for ARCH-TASK-001 r1. The four historical performance operations in business integration v1 retire with this candidate; equipment and monitor operations remain. Deployment, verification and Owner acceptance are separate.

@@ -1,9 +1,9 @@
 Task ID: FF-004
 Revision: r2
-Status: qa_passed
+Status: owner_accepted
 Owner Role: QA / Verification
 Allowed Writers: QA / Verification, Human Owner
-Handoff: QA3 -> Human Owner final acceptance for exact FF-004 r2 A rework2; F-QA2-001/002 independently closed; QA1/QA2 failure history retained; Human Owner final acceptance pending
+Handoff: Human Owner accepted exact FF-004 r2 A rework2 on 2026-11-10 after QA3 passed AC01–AC14; QA1/QA2 failure history retained; coordinator resource inventory recorded with zero removals
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch
@@ -12,7 +12,7 @@ Capability: 每PLC独立JSON合同、Rust首切片的S7 int16目录加载与多P
 Owner: Field Flow
 Acceptance Chain Reference: FF-004 r2 exact A scope approval -> Development -> fresh-context QA / Verification -> Human Owner final acceptance
 
-当前有效结论为文末 QA3：`qa_passed`（AC01–AC14；F-QA2-001/002关闭），Human Owner最终验收待定；以下 QA1/QA2 从原QA1主标题至QA2末尾的全部正文及失败、输入、数量、指纹与资源历史完整原样保留。
+Human Owner 已于 2026-11-10（Asia/Shanghai）最终验收精确 FF-004 r2 A/rework2，当前为 `owner_accepted`。下方 QA1/QA2 的 `qa_failed`、QA3 的 `qa_passed`（AC01–AC14）及其中的 Owner pending 均保留为各轮结束时的记录。验收范围与资源盘点见文末登记。
 
 # FF-004 r2 A 独立 Verification QA1
 
@@ -567,3 +567,30 @@ Q3约2.64GiB，保留74文件copy、四个release target与formal-test、自有�
 | `reports/auxiliary-failures.json` | `9cf01a31b9f69d9ef8f6aceb9469ec0fef5e750fd513db2af7d45032993dab29` |
 
 QA3结束记录时间：`2026-11-04T19:00:10+08:00`（Asia/Shanghai）。本轮qa_passed，Owner终验pending；到此停止QA3仓库写入。
+
+## 2026-11-10 Human Owner 最终验收登记
+
+2026-11-10（Asia/Shanghai），主协调向 Human Owner 交付了精确 FF-004 r2 A/rework2 的 QA3 结果（AC01–AC14），说明范围为 Rust 每 PLC 一个 JSON、主 YAML v2 和本机合成 S7 INT16 多 PLC 调用。Human Owner 紧接着回复原话：
+
+> 验收通过 FF-004 r2 A。
+
+主协调将这项决定交给新的命名 Verification 角色 `/root/ff004_owner_receipt_r2` 登记。该决定结束精确候选的 Human Owner 最终验收 gate。此前 PM 规格的 `owner_approved`、Development 的 `developer_handoff` 和三轮独立 QA 各自保留为当时的结论。本次登记只做静态核对。
+
+| 绑定对象 | 精确依据 |
+| --- | --- |
+| 批准规格 | [spec.md](spec.md)，SHA256 `a7418cfe8f34515719beb50d9d901f42d7a283e2b33c61a2a57b129104a7870e` |
+| Development rework2 交接 | [tasks.md](tasks.md)，SHA256 `f477ad1cc5050fb07ff2204514ae10fda794c4f3a2a3bd6f4ec8b38fd3ece3d2`；[handoff.json](evidence/r2-development-rework2/handoff.json)，SHA256 `5aba304b866faf4613fbfc6a8a3d79dae828f968e8e44ccb6482671b80ae556e` |
+| Owner 决定前的 QA3 checklist | SHA256 `f08d3d70c698863782d331ea25341cb9b84df197969dc35bed4d688b57ba1c6b`；AC01–AC14 通过，F-QA2-001/002 关闭，QA1/QA2 的失败历史保留 |
+| 交付树候选 | 当前 HEAD `bcafa89fa31bdf62329bced89baebc193323a739`；[实施清单](evidence/r2-development-rework2/implementation-manifest.json)的 38 项文件与 QA3 候选 SHA256 逐项吻合。[候选清单](evidence/r2-development-rework2/candidate-manifest.json)的 12 处差异均为导航文档，[证据清单](evidence/r2-development-rework2/evidence-files.json)的 49 项指纹均吻合。 |
+
+验收范围为 macOS arm64 固定 loopback 合成环境下的 Rust A 切片。每 PLC 独立 JSON、YAML v2、稳定点位句柄、`demo01` 与有界的跨 PLC `read_points` 纳入本次接受。Modbus 仅校验结构，运行前整体拒绝含 Modbus 的配置。已验收的本地状态语义保留旧身份和 schema，写入经原 Execution，`unknown` 继续阻断冲突写入，读回相同值或进程正常退出均不解除它。B-off 的 bootstrap 强收与非零退出仍为旧故障分类，FF-005 的完整 `hold_ack` 强收限制、旧 UTC 外层和 SQLite 时间生产语义继续保留。
+
+FF-004 B/C、Python/C# 目录加载、FF-003、DS 导出、Modbus 通信和其他 S7 类型继续走各自的批准与验收。Windows/Linux 原生验证、真实 PLC/API/数据库、历史状态或时间迁移、现场/托管/容量/长稳、打包/签名、发布及部署各有独立 gate。当前记录的授权范围以该 A 切片为限。
+
+### 资源盘点与保留
+
+主协调盘点了历史列出的五个精确根目录，`/private/tmp/ff-004-r2-coordinator-6ejzumcp`、`/private/tmp/ff-004-r2-dev-IVyzcc`、`/private/tmp/ff-004-r2-qa-vy1d8rsr`、`/private/tmp/ff-004-r2-qa2-2jnzhw3m`、`/private/tmp/ff-004-r2-qa3-cagszupy` 均存在。Q3 的 `raw/` 和 `reports/` 当前为空，C 中先前的协调记录 JSON 已缺失。沙箱拒绝 `ps`，当前进程归属和占用未能独立确认。上方的 QA3 退出、PID 与证据指纹属于历史记录。本次以仓库中的 3MD 和 rework2 交接证据绑定验收。
+
+本次回收 0 项。主协调保留现有目录内容及先前逐项登记的 FF-001 前缀路径。后续处理前须确认精确路径归属、当前未被使用、没有后续任务依赖，并先持久保存仍需追溯的证据。这个盘点限制单独记录，当前状态为 `owner_accepted`。
+
+文档审计在正式树使用系统 Python 3（macOS 15.7.7 arm64）核对三文件 SHA256、交接指纹、QA1 至 QA3 正文逐字保留及 Markdown 本地链接，并执行 `git diff --check -- field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/checklist.md`，均通过。主协调可据本登记机械同步导航。

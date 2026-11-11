@@ -36,12 +36,12 @@ deployment, or production readiness. Publication of those Git refs is a separate
 
 ```text
 frontend-js -> FastAPI business API -> owning business database
-Frozen compatibility: PLC -> old control-agent -> monitor raw/latest -> Projection
+Historical only: old control-agent -> retired Core snapshots / Projection
 Current DAA: controlled DS/S7 -> local SQLite (Stage B accepted); upload/ACK unconnected
 Target chain: DAA -> plc_facts API -> SMA -> typed business API -> business records
 ```
 
-As of 2026-11-05, [PLC facts](contracts/published/http-api/plc-facts-v1/README.md) and [eight typed business integration operations](contracts/published/http-api/business-integration-v1/README.md) have passed independently approved isolated MySQL verification. Owner final acceptance, target schema/time adoption and DAA/SMA integration remain separate; their default admission remains closed/unadopted. SMA owns local SQLite configuration and pure previews; normal delivery is disabled in its current configuration stage. See [SMA](automation-world/semantic-mapping-agent/README.md) and the owning task records.
+The current source retains [PLC facts v2](contracts/published/http-api/plc-facts-v2/README.md) and [eight typed business integration operations](contracts/published/http-api/business-integration-v1/README.md). The [v1 contract](contracts/published/http-api/plc-facts-v1/README.md) and its earlier isolated evidence remain historical. The current Core retires the v1 routes, old snapshots and Projection runner; the old DAA uploader and frozen direct-database control-agent require separate transition work. Target adoption and DAA/SMA integration remain separate, with default admission closed/unadopted. SMA owns local SQLite configuration and pure previews; normal delivery is disabled in its current configuration stage. See [SMA](automation-world/semantic-mapping-agent/README.md) and the owning task records.
 
 The backend module registry discovers only modules that provide an enabled manifest. Registry discovery exposes routes and metadata; it does not create database tables. Schema changes require an explicit migration task. The `control-agent` remains a separate runtime and artifact boundary.
 
@@ -91,4 +91,4 @@ See [Field Flow](field-flow/README.md) for independent Rust/Python field runtime
 
 See [C# Plan learning slice](backend-dotnet/README.md) for the independent, direct-MySQL three-API prototype. It has no login and does not replace Python; QA2 has passed; actual evidence and the pending Human Owner final acceptance belong to [ARCH-BE-008](plans/ARCH-BE-008-csharp-backend-plan-slice/tasks.md).
 
-[FF-005](field-flow/plans/FF-005-basic-and-advanced-examples/spec.md) basic examples are owner-accepted. [FF-004 r2 A](field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/spec.md) passed QA3 for Rust per-PLC JSON/YAML v2 and bounded multi-PLC S7 int16 calls; final acceptance is pending. Modbus structure validation does not provide Modbus transport, DS export or Python/C# catalog loading. The recorded full `hold_ack` forced-recovery and legacy UTC limitations remain.
+[FF-005](field-flow/plans/FF-005-basic-and-advanced-examples/spec.md) basic examples are owner-accepted. [FF-004 r2 A](field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/spec.md) passed QA3 for Rust per-PLC JSON/YAML v2 and bounded multi-PLC S7 int16 calls and was accepted by the Human Owner on 2026-11-10. Modbus structure validation does not provide Modbus transport, DS export or Python/C# catalog loading. The recorded full `hold_ack` forced-recovery and legacy UTC limitations remain.

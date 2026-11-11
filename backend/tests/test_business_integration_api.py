@@ -37,7 +37,7 @@ def local_app(owner, enabled=False, devices='["line-demo"]', producers='["sma-de
     return app
 
 
-@pytest.mark.parametrize("index", range(8))
+@pytest.mark.parametrize("index", (0,1,2,7))
 @pytest.mark.parametrize("enabled,devices,producers,profile,status,suffix", [
     (False,'["line-demo"]','["sma-demo"]',"unadopted",403,"scope_rejected"),
     (True,'[]','["sma-demo"]',"unadopted",403,"scope_rejected"),
@@ -60,7 +60,7 @@ async def test_eight_routes_fail_closed_without_credentials_or_db(index, enabled
     assert response.json() == {"code":status,"message":error,"data":None,"errorCode":error}
 
 
-@pytest.mark.parametrize("index", range(8))
+@pytest.mark.parametrize("index", (0,1,2,7))
 @pytest.mark.parametrize("case,status,suffix", [
     ("128", 503, "not_ready"),
     ("129", 413, "payload_too_large"),
@@ -155,7 +155,7 @@ async def test_registry_disables_new_and_old_whole_group(owner, monkeypatch):
                     assert response.status_code == 404
 
 
-@pytest.mark.parametrize("index",range(8))
+@pytest.mark.parametrize("index",(0,1,2,7))
 async def test_old_posts_still_require_authentication(index):
     app = FastAPI()
     app.include_router(composed_router(), prefix="/api/v1")
@@ -192,7 +192,7 @@ def test_receipt_replay_preserves_original_commit_and_explicit_aliases():
     with pytest.raises(ValidationError): IntegrationReceipt.model_validate(value)
 
 
-@pytest.mark.parametrize('index', (1,3,7))
+@pytest.mark.parametrize('index', (1,7))
 @pytest.mark.parametrize('commit_kind,exit_kind,expected_suffix,expected_status', [
     ('dbapi','none','commit_unknown',503), ('dbapi','runtime','commit_unknown',503),
     ('dbapi','dbapi','commit_unknown',503), ('value','none','commit_unknown',503),
@@ -276,3 +276,14 @@ async def test_commit_unknown_retained_through_both_yield_scopes(scope,cleanup):
         response=await client.post('/exit',json={})
     assert response.status_code==503 and response.json()['errorCode']=='equipment.integration_commit_unknown'
     assert calls==['exit']
+
+
+@pytest.mark.parametrize('index', (3,4,5,6))
+async def test_retired_performance_integration_never_executes_old_handler(index):
+    from core.registrar import create_app
+    app = create_app(testing=True)
+    path = '/api/v1/integration/' + PATHS[index]
+    assert path not in app.openapi()['paths']
+    async with AsyncClient(transport=ASGITransport(app=app), base_url='http://fixture') as client:
+        response = await client.post(path, json=example(index))
+    assert response.status_code in (404, 405)

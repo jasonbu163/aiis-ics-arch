@@ -1,9 +1,19 @@
 # PLC facts维护CLI
 
+## v2 到期清理
+
+`cleanup-v2` 需要显式选择 `--plan` 或 `--apply`，并提供目标 alias、schema、server UUID、revision、操作批准引用及确认人。目标必须与仓库外 v2 私有配置和实际数据库一致。预览示例使用合成目标。
+
+```bash
+uv run --offline --frozen --no-sync python scripts/plc_facts_maintenance/main.py cleanup-v2 --plan --target-alias dev-example --schema fixture_schema --expected-server-uuid 00000000-0000-4000-8000-000000000001 --expected-schema-revision 4e6a8b0d2f14 --operation-approval fixture-approval --confirmed-by fixture-operator
+```
+
+清理字节预算包括可空的历史 `source_type`；`plc_facts_history` 按整份样本删除，`plc_facts_latest` 清除值并保留顺序水位。
+
+执行时设置 `PLC_FACTS_MAINTENANCE_ENABLED=True`，将 `--plan` 换为 `--apply`，并提供 `--confirm APPLY:cleanup-v2:<alias>:<schema>:<server-uuid>:<revision>`。计划和执行输出 JSON Lines，结果含行数、字节、最早积压及完成时刻。每事务最多 200 行和 2 MiB，每次最多 2000 行、20 MiB 和 2 秒处理预算。外部调度每分钟调用，按完成时刻与最早积压配置告警。历史整行删除，latest 保留实例、代次和序号水位。
+
+每个事务在目标锁探针前设置有界行锁和元数据锁等待。若预算耗尽而未完成积压查询，结果中的 `oldestKnown` 为 `false`，监控应将该次积压状态视为未知。完成时刻使用无表锁的数据库时钟查询，连接读写也有超时。
+
 使用现有项目环境：`uv run --offline --frozen --no-sync python scripts/plc_facts_maintenance/main.py`只显示帮助，不加载settings/数据库。`--help`同样无副作用。本工具无默认输入目录、输出文件、目标、seed、DDL、调度器或打包产物。
 
-显式命令为`status`、`adopt --plan/--apply`、`cleanup --plan/--apply`；全部DB访问包括status/plan需要另批G-B目标。必须指定target-alias、schema、expected-schema-revision、expected-storage-epoch、operation-approval、confirmed-by；apply还需`PLC_FACTS_MAINTENANCE_ENABLED=True`及`--confirm APPLY:<action>:<target-alias>:<schema>:<storageEpoch>`。
-
-adopt选来源时明确plc/instance/generation/config、context-file及SHA、expected-binding-revision/new seq-from；切换须old-seq-through、窗口最多8。`adopt --revalidate-schema-only`只核已知0a2/1b3/F7并CAS更新采用凭据，禁止同时传source参数。已有控制行需expected-adoption-id及原epoch；不改变历史proof或TTL。
-
-配置优先级CLI > OS env > 本工具.env > backend.env > 安全默认。示例开关关闭，不提交实际配置或凭据。默认stdout为start/dry-run/commit/failed/complete JSON Lines；显式`--output-log`才写文件，失败非零且脱敏。cleanup每事务200行/2MiB/100ms、每tick10事务/2000行/20MiB/2s，锁NOWAIT，正常写优先；不清业务/非owner数据。运行频率和24小时物理SLA须独立安排及验证，A未运行。
+旧 v1 `status`、`adopt` 和 `cleanup` 命令已退役。实际清理仍需单独授权并限定目标。

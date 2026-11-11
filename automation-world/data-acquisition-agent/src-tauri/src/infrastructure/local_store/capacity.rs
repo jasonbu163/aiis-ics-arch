@@ -103,6 +103,13 @@ impl Stores {
                 c.delivery_metadata_bytes,
             ) = self.delivery_bytes()?;
         }
+        // 辅助文件allocated计入runtime物理quota；256KiB子预算已经包含在原额外32MiB中。
+        let (aux_logical, aux_allocated) = auxiliary_bytes(&self.dir)?;
+        c.main_bytes = c.main_bytes.saturating_add(aux_allocated);
+        if self.delivery_available()? {
+            c.reserved_bytes = c.reserved_bytes.saturating_sub(aux_allocated);
+        }
+        c.delivery_metadata_bytes = c.delivery_metadata_bytes.saturating_add(aux_logical);
         c.pending_count = self
             .runtime
             .query_row(
@@ -138,4 +145,69 @@ impl Stores {
         .into();
         Ok(c)
     }
+}
+
+use super::profile_contract::{Snapshot, AUX_BUDGET, CREDENTIAL, SENTINEL, STAGING};
+#[cfg(unix)]
+use std::os::unix::fs::MetadataExt;
+/// 只用metadata计辅助文件；同inode安装双名字不重复算allocated，逻辑量仍逐名字计。
+pub(super) fn auxiliary_bytes(dir: &Path) -> LocalResult<(u64, u64)> {
+    let (mut logical, mut allocated) = (0, 0);
+    let mut seen = std::collections::BTreeSet::new();
+    for name in [CREDENTIAL, SENTINEL, STAGING] {
+        let path = dir.join(name);
+        let m = match std::fs::symlink_metadata(&path) {
+            Ok(m) => m,
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => continue,
+            Err(_) => return Err("profile_contract_invalid".into()),
+        };
+        if !m.is_file()
+            || m.file_type().is_symlink()
+            || m.len() > if name == SENTINEL { 8192 } else { 32768 }
+        {
+            return Err("profile_contract_invalid".into());
+        }
+        logical += m.len();
+        let st = super::profile_contract::stat(&m);
+        #[cfg(unix)]
+        let blocks = m.blocks() * 512;
+        #[cfg(not(unix))]
+        let blocks = m.len();
+        if seen.insert((st.identity.dev, st.identity.ino)) {
+            allocated += blocks;
+        }
+    }
+    if logical > 73728 || allocated > AUX_BUDGET {
+        return Err("profile_initialization_capacity".into());
+    }
+    Ok((logical, allocated))
+}
+pub(super) fn physical_budget(s: &Snapshot) -> LocalResult<()> {
+    // 256KiB辅助分配是32MiB ACK预留中的子预算。旧页另预留，不挪用普通90%门禁阻塞恢复。
+    let pages = s
+        .files
+        .iter()
+        .filter(|m| m.name.ends_with(".sqlite"))
+        .map(|m| m.stat.len.div_ceil(4096))
+        .sum::<u64>();
+    let old = pages.saturating_mul(4096 + 8 + 65536) + 65536;
+    let config = s
+        .files
+        .iter()
+        .filter(|m| m.name.starts_with("config.sqlite"))
+        .map(|m| m.stat.len)
+        .sum::<u64>();
+    let (_, allocated) = auxiliary_bytes(&s.store)?;
+    let need = 512 * 1024 * 1024 + old + 96 * 1024 * 1024 - allocated
+        + 96 * 1024 * 1024
+        + config.saturating_mul(2);
+    let free = fs2::available_space(s.store.parent().ok_or("profile_contract_invalid")?)
+        .map_err(|_| "profile_space_meter")?;
+    #[cfg(all(test, unix))]
+    let free = super::profile_contract_tests::available_space(free);
+    if free <= need {
+        return Err("profile_initialization_capacity".into());
+    }
+    auxiliary_bytes(&s.store)?;
+    Ok(())
 }

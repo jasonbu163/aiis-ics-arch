@@ -1,14 +1,9 @@
-/**
- * 文件路径: /frontend-next-js/src/app/performance/api/index.js
- * 功能描述: 实绩模块 API facade，聚合可见实绩页面所需接口
- * 主要功能:
- *   - 暴露实绩、分卷、打印和效率相关 API
- *   - 隐藏模块内 API 文件拆分，供页面统一从 @/app/performance/api 导入
- */
-
-export * from './performance'
-export * from './split'
-export * from './print'
-export * from './efficiency'
-export * from './transform'
-export * from './lineage'
+/** 通用实绩、人工字段和补建计划 API。 */
+import request from '@/utils/request'
+const options = { suppressErrorMessage: true }
+export const list = params => request.get('/performances', { ...options, params })
+export const detail = id => request.get(`/performances/${id}`, options)
+export const upsert = body => request.post('/performances/upsert', body, options)
+export const supplement = (id, body) => request.post(`/performances/${id}/actions/supplement-plan`, body, options)
+export const getConfig = (module, version) => request.get('/task-field-configs', { ...options, params: { module, fieldConfigVersion: version } })
+export const saveConfig = body => request.put('/task-field-configs', body, options)

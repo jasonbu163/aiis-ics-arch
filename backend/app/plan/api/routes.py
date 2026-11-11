@@ -1,250 +1,95 @@
-"""
-文件路径: /backend/app/plan/api/routes.py
-功能描述: 生产计划管理 API 路由
-主要功能:
-    - 提供计划创建、查询、更新与删除
-    - 计划只表达人工或 XLSX 导入的生产意图
-    - 不暴露设备执行、任务中断或 Worker 状态接口
-"""
-from io import BytesIO
-
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
-from fastapi.responses import StreamingResponse
+"""通用计划页面和 MES / CA-FF 的 HTTP 入口。"""
+from typing import Literal
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.plan.schemas.plan import PlanCreate, PlanLinkRequest, PlanResponse, PlanUpdate
-from app.plan.services.async_service import async_plan_service
-from app.plan.services.xlsx_io import XLSX_MEDIA_TYPE
-from common.response import SuccessResponse
-from core.deps import require_permissions
 from database import get_db
+from app.task.eligibility import admit, admit_read_target, get_profile
+from app.task.errors import TaskError, TaskErrorCode
+from app.task.http import TaskRoute, actor, audit_event, authorize, commit, response
+from app.task.schemas.fields import Envelope, ErrorEnvelope, TaskDateTime
+from app.plan.schemas.workflow import PlanUpsert, PlanAction, Claim, Report
+from app.plan.services.async_workflow import upsert_plan, plan_wire, plan_by_id, plan_by_task, list_plans, claim, report, action as apply_action
+
+router = APIRouter(route_class=TaskRoute, tags=['Plan'], responses={code: {'model': ErrorEnvelope} for code in (401,403,404,409,422,503)})
 
 
-router = APIRouter(prefix="/plans", tags=["Plan"])
+@router.get('/plans', response_model=Envelope)
+async def plans(request: Request, page: int = Query(1, ge=1), pageSize: int = Query(20, ge=1, le=100),
+                taskNo: str | None = None, targetKey: str | None = None, productionStatus: str | None = None,
+                dispatchStatus: str | None = None, createdFrom: TaskDateTime | None = None, createdTo: TaskDateTime | None = None,
+                sortOrder: Literal['asc','desc'] = 'desc', db: AsyncSession = Depends(get_db), user=Depends(actor)):
+    authorize(request, user, 'plan')
+    return response(await list_plans(db, dict(page=page, pageSize=pageSize, taskNo=taskNo, targetKey=targetKey,
+                    productionStatus=productionStatus, dispatchStatus=dispatchStatus, createdFrom=createdFrom,
+                    createdTo=createdTo, sortOrder=sortOrder)))
 
 
-@router.get("", response_model=SuccessResponse)
-async def get_plan_list(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100, alias="pageSize"),
-    coil_no: str | None = Query(None, alias="coilNo"),
-    grade: str | None = None,
-    material_status: str | None = Query(None, alias="materialStatus"),
-    status: str | None = None,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(require_permissions("plan")),
-):
-    """获取生产计划列表。"""
-    result = await async_plan_service.list_plans(
-        db,
-        page=page,
-        page_size=page_size,
-        coil_no=coil_no,
-        grade=grade,
-        material_status=material_status,
-        status=status,
-    )
-    items = [
-        PlanResponse.model_validate(plan).model_dump(by_alias=True)
-        for plan in result["items"]
-    ]
-    return SuccessResponse(
-        data={
-            "items": items,
-            "total": result["total"],
-            "page": result["page"],
-            "pageSize": result["page_size"],
-            "totalPages": result["total_pages"],
-        }
-    )
+@router.post('/plans/upsert', response_model=Envelope)
+async def save_plan(request: Request, body: PlanUpsert, db: AsyncSession = Depends(get_db), user=Depends(actor)):
+    authorize(request, user, 'plan', roles=('admin','supervisor'))
+    data = body.model_dump(exclude_unset=True)
+    if 'producerId' in data or 'eventId' in data:
+        raise TaskError(TaskErrorCode.INVALID_REQUEST, 422)
+    outcome, plan = await upsert_plan(db, data, human=True)
+    result = await plan_wire(db, plan, detail=True, sensitive=True, current=True)
+    await commit(db)
+    audit_event('generic_task_plan_upsert', source='human', actor_id=str(user.id), task_no=plan.task_no, outcome=outcome)
+    return response({'outcome': outcome, 'plan': result})
 
 
-@router.post("", response_model=SuccessResponse)
-async def create_plan(
-    plan_data: PlanCreate,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(require_permissions("plan")),
-):
-    """创建生产计划。"""
-    try:
-        plan = await async_plan_service.create_plan(db, plan_data)
-        return SuccessResponse(
-            message="创建成功",
-            data=PlanResponse.model_validate(plan).model_dump(by_alias=True),
-        )
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+@router.post('/plans/{id}/actions/{action}', response_model=Envelope)
+async def plan_action(request: Request, id: int, action: str, body: PlanAction,
+                      db: AsyncSession = Depends(get_db), user=Depends(actor)):
+    authorize(request, user, 'plan', roles=('admin','supervisor'))
+    result = await apply_action(db, id, action, body.model_dump(exclude_unset=True), user.id)
+    await commit(db)
+    audit_event('generic_task_plan_action', actor_id=str(user.id), task_no=result['taskNo'], action=action, outcome=result['outcome'])
+    return response(result)
 
 
-@router.get("/xlsx/template")
-async def download_plan_xlsx_template(
-    current_user=Depends(require_permissions("plan")),
-):
-    """下载计划 XLSX 导入模板。"""
-    content = async_plan_service.build_xlsx_template()
-    return StreamingResponse(
-        BytesIO(content),
-        media_type=XLSX_MEDIA_TYPE,
-        headers={
-            "Content-Disposition": 'attachment; filename="plan-import-template.xlsx"',
-        },
-    )
+@router.get('/plans/{id}', response_model=Envelope)
+async def plan_detail(request: Request, id: int, db: AsyncSession = Depends(get_db), user=Depends(actor)):
+    authorize(request, user, 'plan')
+    plan = await plan_by_id(db, id)
+    return response(await plan_wire(db, plan, detail=True, sensitive=user.role in ('admin','supervisor')))
 
 
-@router.get("/xlsx/export")
-async def export_plan_xlsx(
-    plan_ids: list[int] | None = Query(None, alias="planIds"),
-    coil_no: str | None = Query(None, alias="coilNo"),
-    grade: str | None = None,
-    material_status: str | None = Query(None, alias="materialStatus"),
-    status: str | None = None,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(require_permissions("plan")),
-):
-    """按当前筛选或选中 ID 导出计划 XLSX。"""
-    content = await async_plan_service.build_xlsx_export(
-        db,
-        plan_ids=plan_ids,
-        coil_no=coil_no,
-        grade=grade,
-        material_status=material_status,
-        status=status,
-        operator_id=current_user.id,
-    )
-    return StreamingResponse(
-        BytesIO(content),
-        media_type=XLSX_MEDIA_TYPE,
-        headers={
-            "Content-Disposition": 'attachment; filename="plans-export.xlsx"',
-        },
-    )
+@router.post('/integration/plans/upsert', response_model=Envelope)
+async def integration_upsert(body: PlanUpsert, db: AsyncSession = Depends(get_db)):
+    get_profile()
+    data = body.model_dump(exclude_unset=True)
+    if not data.get('producerId'):
+        raise TaskError(TaskErrorCode.FORBIDDEN, 403)
+    outcome, plan = await upsert_plan(db, data, human=False)
+    result = await plan_wire(db, plan, detail=True, current=True)
+    await commit(db)
+    audit_event('generic_task_plan_upsert', source='mes', task_no=plan.task_no, producer_id=data['producerId'], event_id=data.get('eventId'), outcome=outcome)
+    return response({'outcome': outcome, 'plan': result})
 
 
-@router.post("/xlsx/import", response_model=SuccessResponse)
-async def import_plan_xlsx(
-    file: UploadFile = File(...),
-    dry_run: bool = Query(True, alias="dryRun"),
-    conflict_strategy: str = Query("reject", alias="conflictStrategy"),
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(require_permissions("plan")),
-):
-    """导入计划 XLSX，默认 dry-run 只校验不写入。"""
-    result = await async_plan_service.import_xlsx(
-        db,
-        content=await file.read(),
-        dry_run=dry_run,
-        conflict_strategy=conflict_strategy,
-        operator_id=current_user.id,
-    )
-    return SuccessResponse(data=result)
+@router.post('/integration/plans/dispatch/claim', response_model=Envelope)
+async def integration_claim(body: Claim, db: AsyncSession = Depends(get_db)):
+    data = body.model_dump()
+    admit(data['targetKey'], data['producerId'], 'executors')
+    result = await claim(db, data)
+    await commit(db)
+    audit_event('generic_task_dispatch_claim', target_key=data['targetKey'], producer_id=data['producerId'], outcome=result['outcome'])
+    return response(result)
 
 
-@router.get("/linkage/performances/{performance_id}/candidates", response_model=SuccessResponse)
-async def get_plan_link_candidates(
-    performance_id: int,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(require_permissions("plan")),
-):
-    """获取某条实绩可手动关联的计划候选。"""
-    result = await async_plan_service.get_link_candidates(
-        db,
-        performance_id=performance_id,
-    )
-    return SuccessResponse(data=result)
+@router.post('/integration/plans/dispatch/report', response_model=Envelope)
+async def integration_report(body: Report, db: AsyncSession = Depends(get_db)):
+    data = body.model_dump(exclude_unset=True)
+    admit(data['targetKey'], data['producerId'], 'executors')
+    result = await report(db, data)
+    await commit(db)
+    audit_event('generic_task_dispatch_report', task_no=result['taskNo'], producer_id=data['producerId'], dispatch_id=result['dispatchId'], outcome=result['outcome'])
+    return response(result)
 
 
-@router.post("/linkage/performances/{performance_id}/sync-observation", response_model=SuccessResponse)
-async def sync_plan_observation(
-    performance_id: int,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(require_permissions("plan")),
-):
-    """按实绩料卷号同步已有计划观测状态；无计划时不自动创建。"""
-    result = await async_plan_service.sync_observation(
-        db,
-        performance_id=performance_id,
-        operator_id=current_user.id,
-    )
-    return SuccessResponse(data=result)
-
-
-@router.post("/linkage/performances/{performance_id}/link", response_model=SuccessResponse)
-async def link_existing_plan_to_performance(
-    performance_id: int,
-    link_data: PlanLinkRequest,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(require_permissions("plan")),
-):
-    """把未计划实绩手动关联到同料卷号计划。"""
-    result = await async_plan_service.link_existing_plan(
-        db,
-        performance_id=performance_id,
-        plan_id=link_data.plan_id,
-        operator_id=current_user.id,
-    )
-    return SuccessResponse(data=result)
-
-
-@router.post("/linkage/performances/{performance_id}/backfill", response_model=SuccessResponse)
-async def backfill_plan_from_performance(
-    performance_id: int,
-    plan_data: PlanCreate,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(require_permissions("plan")),
-):
-    """基于未计划实绩回补同料卷号计划，并立即关联为 observed。"""
-    result = await async_plan_service.backfill_plan_from_performance(
-        db,
-        performance_id=performance_id,
-        plan_data=plan_data,
-        operator_id=current_user.id,
-    )
-    return SuccessResponse(data=result)
-
-
-@router.get("/{plan_id}", response_model=SuccessResponse)
-async def get_plan(
-    plan_id: int,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(require_permissions("plan")),
-):
-    """获取单个生产计划。"""
-    plan = await async_plan_service.get_plan(db, plan_id)
-    if not plan:
-        raise HTTPException(status_code=404, detail="计划不存在")
-    return SuccessResponse(data=PlanResponse.model_validate(plan).model_dump(by_alias=True))
-
-
-@router.put("/{plan_id}", response_model=SuccessResponse)
-async def update_plan(
-    plan_id: int,
-    plan_data: PlanUpdate,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(require_permissions("plan")),
-):
-    """更新生产计划。"""
-    try:
-        plan = await async_plan_service.update_plan(db, plan_id, plan_data)
-        if not plan:
-            raise HTTPException(status_code=404, detail="计划不存在")
-        return SuccessResponse(
-            message="更新成功",
-            data=PlanResponse.model_validate(plan).model_dump(by_alias=True),
-        )
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-
-@router.delete("/{plan_id}", response_model=SuccessResponse)
-async def delete_plan(
-    plan_id: int,
-    db: AsyncSession = Depends(get_db),
-    current_user=Depends(require_permissions("plan")),
-):
-    """软删除生产计划。"""
-    try:
-        if not await async_plan_service.delete_plan(db, plan_id):
-            raise HTTPException(status_code=404, detail="计划不存在")
-        return SuccessResponse(message="删除成功")
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+@router.get('/integration/plans/by-task/{taskNo}', response_model=Envelope)
+async def integration_plan(taskNo: str, db: AsyncSession = Depends(get_db)):
+    get_profile()
+    plan = await plan_by_task(db, taskNo)
+    admit_read_target(plan.target_key)
+    return response(await plan_wire(db, plan, detail=True))

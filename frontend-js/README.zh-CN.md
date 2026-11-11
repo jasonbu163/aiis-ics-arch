@@ -2,7 +2,7 @@
 
 English version: [README.md](README.md)
 
-这是 JavaScript 形态的 Vue 3 + Vite Core 前端模板，包含登录、认证壳层、系统页面、dashboard/plan 首批接入模块和共享基础设施。使用方项目在 src/app/<module>/ 下增加业务模块。
+这是 JavaScript 形态的 Vue 3 + Vite Core 前端模板，包含登录、认证壳层、系统页面、通用计划/实绩页面和共享基础设施。使用方项目在 src/app/<module>/ 下增加业务模块。
 
 ## 稳定边界
 
@@ -32,15 +32,15 @@ Docker dev 沿用 `.env.docker.dev`；复制对应 example 后调整项目值。
 `dev` 默认 development、`build` 默认 production；已有 mode/local 文件仍按此规则生效。
 
 ```dotenv
-VITE_SUPERVISOR_PAGE_ACCESS_JSON='["dashboard.home","plan.list"]'
-VITE_OPERATOR_PAGE_ACCESS_JSON='["dashboard.home"]'
+VITE_SUPERVISOR_PAGE_ACCESS_JSON='["plan.list","performance.list"]'
+VITE_OPERATOR_PAGE_ACCESS_JSON='["performance.list"]'
 ```
 
 数组填写 manifest 的 `meta.pageId`；operator 必须是 supervisor 子集。`[]` 不授权页面，
 admin 内置且不在 env 配置。仅允许已启用的有效 leaf 页面，重复、未知、未启用、admin 专属页面、
 非法 JSON 或缺失数组均明确失败；未知角色拒绝访问。配置只控制菜单、路由与默认入口，API 仍须后端授权。
 模块 `enabled` 控制装配，`navigation` 和 leaf `visible` 控制菜单；模块 `order` 控制组顺序，
-leaf `navigation.order` 控制组内顺序。当前 dashboard 10、plan 20、system 80，aiis_demo 保持关闭。
+leaf `navigation.order` 控制组内顺序。当前 plan 20、performance 30、system 80，dashboard 和 aiis_demo 保持关闭。有计划页面权限时优先进入计划，否则按现有可访问页回退。退役 dashboard 与旧卷材实绩 pageId 须在另获批准的切换中从活动授权移除。
 
 旧 `VITE_ROLE_PAGE_ACCESS_JSON` 对象要将 supervisor/operator 数组原样迁到两个新变量，保留成员、
 顺序和其他设置。旧 JSON 在 README 历史节留档，实际 env 只保留活动配置与用途说明。不能同时保留活动旧 key；checker 会明确报迁移错误。
@@ -150,10 +150,7 @@ ARG/ENV 使用中性图片、center 对齐和 light/accent/accent 光晕默认�
 ### 旧角色配置历史记录
 
 以下是 Owner 提供的仅含 pageId 的旧 JSON 对象，从实际 env 注释移入文档。它们仅为历史参考，
-**当前应用不读取这些记录**；活动配置仍只使用两个新数组。为测试当前模块，Owner 已授权将旧数组与已启用、非 admin 专属
-leaf 页面取交集并保留顺序：宿主机 supervisor 当前 3 项（dashboard.home、plan.list、system.user），
-operator 当前 2 项（dashboard.home、plan.list）；Docker dev 保持空数组。下方历史 20/14 对象
-保持不变。当前宿主机配置通过严格 checker，未来授权仍需对应有效模块。不要把旧对象恢复为活动旧变量，也不要未经模块
+**当前应用不读取这些记录**；活动配置仍只使用两个新数组。早期模块测试曾按当时启用的页面取交集。下方历史 20/14 对象保持不变；ARCH-TASK-001 退出旧 dashboard 和卷材实绩 pageId，切换时应按当前 registry 复核活动授权。不要把旧对象恢复为活动旧变量，也不要未经模块
 可用性核对就把不支持的授权复制到可运行项目配置。
 
 宿主机开发 / 正式构建（`.env`）历史：
@@ -226,10 +223,9 @@ runtime。runtime 不挂载源码或 `node_modules`，`/api/v1` 反向代理到 
 
 ## 业务观测来源选择
 
-设备三看板、实绩列表/过程弹窗及monitor曲线页通过URL保存`dataSource=legacy|http`和`equipmentId`。
+设备三看板及 monitor 曲线页通过 URL 保存`dataSource=legacy|http`和`equipmentId`。
 默认legacy并说明旧数据未标识业务设备；HTTP必须显式填写获scope批准的业务键。
 非法来源、空设备、空数据、403及故障均不切换来源或使用诊断mock。切换清空前数据，请求代次阻止晚响应覆盖新选择。
 缺测保持缺测/曲线断点，真实0正常显示。
 
-HTTP实绩人工编辑沿原PUT且显式附来源/设备，仅提交weight及可选原因，其他字段只读。采集重量不覆盖人工重量（包括0）。
-后端按人工时间→来源报告时间→外部观察区间计算有效总用时。浏览器/API/数据库运行证明仍为另批验证gate。
+旧卷材实绩来源选择、重量编辑、过程弹窗、分卷、打印与效率页面已退出。通用[计划/实绩流程](../contracts/published/http-api/generic-task-workflow-v1/README.zh-CN.md)按任务绑定版本读取字段，沿用列表路径、上海业务时间及本机列宽和草稿偏好。浏览器/API/数据库运行证明仍为另批验证 gate。

@@ -22,8 +22,8 @@ from database import Base
 pytestmark = pytest.mark.no_db
 
 
-CORE_MODULES = {"auxiliary", "monitor", "schema_maintenance", "system", "aiis_demo", "dashboard", "energy", "equipment", "hr", "maintenance", "performance", "plan", "project", "quality", "reports"}
-ENABLED_MODULES = CORE_MODULES - {"hr", "aiis_demo"}
+CORE_MODULES = {"auxiliary", "monitor", "schema_maintenance", "system", "aiis_demo", "dashboard", "energy", "equipment", "hr", "maintenance", "performance", "plan", "project", "quality", "reports", "task"}
+ENABLED_MODULES = CORE_MODULES - {"hr", "aiis_demo", "dashboard", "reports"}
 
 
 def test_discovery_uses_only_manifest_opted_in_core_modules():
@@ -46,7 +46,8 @@ def test_disabled_demo_manifest_is_not_exposed_or_imported_as_router():
     include_module_routers(app_router)
     route_paths = {route.path for route in app_router.routes}
     assert "/ping" not in route_paths
-    assert "/monitor/realtime/latest" in route_paths
+    assert "/monitor/realtime/latest" not in route_paths
+    assert "/monitor/collector/status" in route_paths
     assert "/schema-maintenance/status" in route_paths
 
 

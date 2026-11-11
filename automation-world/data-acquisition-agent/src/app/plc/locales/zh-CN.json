@@ -131,6 +131,30 @@
     "lengthEditHint": "这里修改的是未保存草稿。关闭弹窗后，请使用配置栏的“保存草稿”；关闭不会保存。",
     "lengths": "当前 DB 长度：{current} 字节 · 理论长度：{calculated} 字节"
   },
+  "diagnosis": {
+    "hint": "使用已激活的配置，通过当前 PLC 连接试读一次。",
+    "waiting": "等待诊断结果…",
+    "success": "读取成功",
+    "failed": "单点诊断失败",
+    "blocked": "暂时无法诊断",
+    "unavailable": "未取得该点位的有效诊断结果",
+    "timeout": "{seconds} 秒内未收到诊断结果",
+    "observedAt": "读取时间（上海）",
+    "close": "关闭"
+  },
+  "connectionTest": {
+    "waiting": "等待连接测试结果…",
+    "success": "连接测试通过",
+    "failed": "连接测试失败",
+    "blocked": "暂时无法测试连接",
+    "unavailable": "未取得本次连接测试的有效结果",
+    "timeout": "{seconds} 秒内未收到连接测试结果",
+    "method": "测试方式",
+    "reused": "复用已有连接，未重新握手",
+    "temporary": "尝试临时连接，测试后已清理",
+    "testedAt": "测试时间（上海）",
+    "connectFailed": "无法建立临时连接，请核对已激活配置中的端点及 PLC 状态。"
+  },
   "naming": {
     "technicalName": "技术名称",
     "sourcePath": "原始路径",

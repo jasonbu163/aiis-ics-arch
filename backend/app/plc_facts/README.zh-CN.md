@@ -1,13 +1,21 @@
 # PLC事实owner
 
-本模块提供`POST /api/v1/integration/plc-facts/batches`及GET `latest`/`history`。版本`plc-facts/v1`、来源`daa-local/v2`、摘要`pf-json/v1`。匿名来源可被冒用，PLC scope是数据准入，不是身份认证。
+## v2 样本入口
 
-默认关闭、空PLC scope、unadopted profile、空HMAC key在DB依赖前拒绝。有效准入仍需显式已采用的MySQL 8.4 schema/上海时钟/来源binding；不创建表或接管来源。模块disabled重组后移除本三路，不影响旧monitor。七表接链f6→0a2；BE010另管1b3四表。两有限运行profile共享七表F7，后继升级后须显式schema-only再核验。
+`ARCH-BE-012 r4` 新增单 PLC/DB 样本写入、逐点最新值、历史列表及详情。默认 `PLC_FACTS_V2_ENABLED=False`，`PLC_FACTS_V2_PROFILE_FILE` 为空。启用前在仓库外准备私有 JSON，并在进程环境或后端运行配置中显式指定文件。以下只是合成配置结构，摘要是占位值。
 
-原v2 payload/manifest/context保持UTF-8原文和SHA；固定贪心分片、完整expected集合与content/cycle/request摘要分别校验。Service拥有事务，持stream singleton锁分配commitSerial；只有真实commit且yield依赖完整退出才发送成功。原批重放优先恢复稳定结果，拒绝proof/父token有限120天不续期；不明提交返回unknown。
+```json
+{
+  "target": {"alias": "dev-example", "serverUuid": "00000000-0000-4000-8000-000000000001", "schema": "fixture_schema", "schemaRevision": "4e6a8b0d2f14"},
+  "instances": [{"instanceId": "daa-a", "sourceType": "daa"}],
+  "credentials": [{"instanceId": "daa-a", "tokenSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}],
+  "sources": [{"plcId": "PLC-A", "instanceId": "daa-a", "sourceGeneration": "gen-a", "dbNumbers": [21]}],
+  "readScopes": {"admin": [{"plcId": "PLC-A", "dbNumbers": [21]}]}
+}
+```
 
-latest按当前sourceEpoch逐点比较sourceSeq，bad替换good；维护切换来源清旧latest，定义不变的context/revision变化保留旧有效值。history changes按发布位置，range冻结H并按原observedAt半开筛选；过滤投影有独立摘要，过期有显式gap。游标分别24小时/15分钟/30秒，HMAC轮换要求显式重新基线。
+每个登记实例指定 `daa` 或 `external` 类型并使用独立随机凭据，配置文件只存凭据的 SHA-256 小写十六进制摘要。吊销凭据时可保留实例登记和活跃来源，供获准用户读取现有最新值。DAA 必须提交采集组和配置版本，外部程序可以分别省略或传 null。历史来源类型按入库时保存，尚未核实的旧来源保持 null。所有角色（含 admin）的读范围均单独配置；非 admin 还需 `plc-facts-read`。配置变更由所有后端进程在协调切换后重新加载。见 [v2 合同](../../../contracts/published/http-api/plc-facts-v2/README.zh-CN.md)。
 
-原值默认保留3自然月，可采用1或2月；点观察时间+月，保留纳秒。所有读执行expiry guard；原payload按最早成员保守到期，latest按点到期。无自动清理调度。[维护CLI](../../scripts/plc_facts_maintenance/README.zh-CN.md)每tick有界删除，只触七表；物理清理SLA必须由另批运行验证。raw/proof删除无业务级联。
+为保留 REAL 的原始十进制精度，v2 两张 JSON 值字段在内部把 `good` REAL 保存为经过校验的数字文本。读取时按 `dataType` 验证并编码回 JSON number，其他类型保持原 JSON 类型。该内部表示保留负零和科学计数法，不展开极小指数。
 
-[固定机器合同](../../../contracts/published/http-api/plc-facts-v1/README.zh-CN.md)及[获批规格](../../../plans/ARCH-BE-009-backend-facts-integration/spec.md)为审阅入口。源码存在不等于provider-ready、数据库采用、DAA上传或部署。A阶段没有执行任何数据库、Docker或迁移；运行gate及真实结果只归任务bundle。
+`2c4e6a8b0d12` 引入两表；新精确 head 为 `4e6a8b0d2f14`。`plc_facts_history` 每行一份完整样本，`plc_facts_latest` 每行一个点的最新值。私有配置与数据库 revision 必须精确一致。[v1 合同](../../../contracts/published/http-api/plc-facts-v1/README.zh-CN.md)保留为历史，其路由、七表与维护命令已退役。BE-010 凭据独立管理并须精确匹配目标 revision。见 [ARCH-ACQ-003](../../../plans/ARCH-ACQ-003-acquisition-data-optional-filters/spec.md) 和 [v2 维护](../../scripts/plc_facts_maintenance/README.zh-CN.md)。源码变化不证明部署或采用。

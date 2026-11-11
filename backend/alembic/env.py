@@ -10,11 +10,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.control_agent.models.gate_token import ControlAgentGateToken
 from app.module_registry import import_model_packages
-from app.monitor.models import (
-    MonitorCollectorState,
-    PlcDbBlockLatestSnapshot,
-    PlcDbBlockRawSnapshot,
-)
+from app.monitor.models import MonitorCollectorState
 from app.system.models import (
     ProjectionMappingAuditEvent,
     ProjectionMappingBinding,

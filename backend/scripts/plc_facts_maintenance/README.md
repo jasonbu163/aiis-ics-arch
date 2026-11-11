@@ -1,9 +1,19 @@
 # PLC facts maintenance CLI
 
+## v2 expiry cleanup
+
+`cleanup-v2` requires an explicit `--plan` or `--apply`, target alias, schema, server UUID, revision, operation approval reference and confirmer. The target must match the private v2 profile and the live database. This preview uses synthetic target values.
+
+```bash
+uv run --offline --frozen --no-sync python scripts/plc_facts_maintenance/main.py cleanup-v2 --plan --target-alias dev-example --schema fixture_schema --expected-server-uuid 00000000-0000-4000-8000-000000000001 --expected-schema-revision 4e6a8b0d2f14 --operation-approval fixture-approval --confirmed-by fixture-operator
+```
+
+The cleanup byte budget includes the nullable history `source_type`; history cleanup removes whole samples from `plc_facts_history`, while latest cleanup clears values and preserves the ordering watermark in `plc_facts_latest`.
+
+For execution, set `PLC_FACTS_MAINTENANCE_ENABLED=True`, replace `--plan` with `--apply`, and provide `--confirm APPLY:cleanup-v2:<alias>:<schema>:<server-uuid>:<revision>`. Plan and apply emit JSON Lines with row and byte counts, oldest backlog and completion time. Each transaction processes at most 200 rows and 2 MiB. Each tick processes at most 2000 rows and 20 MiB with a two-second processing budget. An external scheduler invokes the command every minute and monitors completion and backlog. History rows are deleted while latest rows retain their instance, generation and sequence watermark.
+
+Each transaction sets bounded row-lock and metadata-lock waits before the target lock probe. If the budget prevents a backlog query, `oldestKnown` is `false` and monitoring should treat that backlog state as unknown. Completion time comes from a database clock query without table locks, and connection reads and writes have timeouts.
+
 Use the existing project environment: `uv run --offline --frozen --no-sync python scripts/plc_facts_maintenance/main.py` prints help before settings/database imports, as does `--help`. There is no default input/output file, target, seed, DDL, scheduler or packaged artifact.
 
-Commands are `status`, `adopt --plan/--apply`, and `cleanup --plan/--apply`. Every DB operation, including status/plan, requires separate G-B target approval. Explicit target-alias, schema, expected-schema-revision, expected-storage-epoch, operation-approval and confirmed-by are required. Apply also requires `PLC_FACTS_MAINTENANCE_ENABLED=True` and `--confirm APPLY:<action>:<target-alias>:<schema>:<storageEpoch>`.
-
-Source adoption specifies PLC/instance/generation/config, context-file/SHA, expected-binding-revision and new seq-from. Switching requires old-seq-through and at most eight windows. `adopt --revalidate-schema-only` checks only known 0a2/1b3/F7 and CAS-refreshes credentials; source arguments are forbidden. Existing state requires its expected-adoption-id and original epoch; proofs and TTLs remain intact.
-
-Precedence is CLI > OS environment > tool .env > backend .env > safe defaults. The example flag is off; never commit credentials. Stdout emits start/dry-run/commit/failed/complete JSON Lines; only explicit `--output-log` writes a file. Errors are redacted and nonzero. Cleanup limits each transaction to 200 rows/2 MiB/100 ms and each tick to ten transactions/2000 rows/20 MiB/two seconds, using NOWAIT locks. It touches no business/other-owner data. Scheduling and the conditional 24-hour physical SLA require separate adoption and verification; A has not run them.
+The old v1 `status`, `adopt` and `cleanup` commands are retired. Actual cleanup remains separately authorized and target-scoped.

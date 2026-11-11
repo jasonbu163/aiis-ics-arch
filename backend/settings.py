@@ -37,9 +37,6 @@ class Settings(BaseSettings):
     TZ: str = "Asia/Shanghai"
     DEBUG: bool
     TESTING: bool = False
-    PROJECTION_RUNNER_ENABLED: bool = False
-    PROJECTION_RUNNER_INTERVAL_SECONDS: float = 1.0
-    PROJECTION_RUNNER_BATCH_SIZE: int = 100
     
     # Backend business mock mode: True allows module Service mock providers / sample seeds.
     BACKEND_MOCK_ENABLED: bool = False
@@ -240,7 +237,6 @@ class Settings(BaseSettings):
     @field_validator(
         'DEBUG',
         'TESTING',
-        'PROJECTION_RUNNER_ENABLED',
         'BACKEND_MOCK_ENABLED',
         'MYSQL_ENABLED',
         'POSTGRES_ENABLED',
@@ -270,13 +266,11 @@ class Settings(BaseSettings):
     @field_validator(
         'BACKEND_PORT',
         'BACKEND_WORKERS',
-        'PROJECTION_RUNNER_INTERVAL_SECONDS',
-        'PROJECTION_RUNNER_BATCH_SIZE',
     )
     @classmethod
-    def validate_projection_runtime_limits(cls, value):
+    def validate_server_limits(cls, value):
         if value <= 0:
-            raise ValueError("Projection runtime limits must be positive")
+            raise ValueError("Server limits must be positive")
         return value
 
 

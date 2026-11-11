@@ -4,6 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 import pytest
 from common.exceptions import BusinessException
+pytest.skip("retired coil performance mapping; historical BE-006 evidence", allow_module_level=True)
 from app.performance.services.async_performance import PerformanceService
 from app.performance.services.async_production_observation import apply_duration
 pytestmark=pytest.mark.no_db

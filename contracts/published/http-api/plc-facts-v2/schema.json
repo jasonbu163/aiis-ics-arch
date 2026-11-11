@@ -1,0 +1,154 @@
+{
+  "$defs": {
+    "PointV2In": {
+      "additionalProperties": false,
+      "properties": {
+        "pointId": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Pointid",
+          "type": "string",
+          "x-utf8-max-bytes": 128
+        },
+        "name": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Name",
+          "type": "string",
+          "x-utf8-max-bytes": 100
+        },
+        "dataType": {
+          "pattern": "^(?:BOOL|BYTE|USINT|INT|UINT|WORD|DINT|UDINT|DWORD|REAL|CHAR|STRING\\[(?:[1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-4])\\])$",
+          "title": "Datatype",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value"
+        },
+        "quality": {
+          "enum": [
+            "good",
+            "bad"
+          ],
+          "title": "Quality",
+          "type": "string"
+        },
+        "observedAt": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?\\+08:00$",
+          "title": "Observedat",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason",
+          "x-utf8-max-bytes": 128
+        }
+      },
+      "required": [
+        "pointId",
+        "dataType",
+        "value",
+        "quality",
+        "observedAt"
+      ],
+      "title": "PointV2In",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": {
+      "const": "plc-facts/v2",
+      "title": "Contractversion",
+      "type": "string"
+    },
+    "instanceId": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Instanceid",
+      "type": "string",
+      "x-utf8-max-bytes": 128
+    },
+    "sampleId": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Sampleid",
+      "type": "string",
+      "x-utf8-max-bytes": 128
+    },
+    "plcId": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Plcid",
+      "type": "string",
+      "x-utf8-max-bytes": 128
+    },
+    "dbNumber": {
+      "maximum": 65535,
+      "minimum": 1,
+      "title": "Dbnumber",
+      "type": "integer"
+    },
+    "groupId": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Groupid",
+      "type": "string",
+      "x-utf8-max-bytes": 128
+    },
+    "configRevision": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Configrevision",
+      "type": "string",
+      "x-utf8-max-bytes": 128
+    },
+    "sourceGeneration": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Sourcegeneration",
+      "type": "string",
+      "x-utf8-max-bytes": 128
+    },
+    "sourceSeq": {
+      "maxLength": 19,
+      "pattern": "^[1-9][0-9]*$",
+      "title": "Sourceseq",
+      "type": "string"
+    },
+    "points": {
+      "items": {
+        "$ref": "#/$defs/PointV2In"
+      },
+      "maxItems": 512,
+      "minItems": 1,
+      "title": "Points",
+      "type": "array"
+    }
+  },
+  "required": [
+    "contractVersion",
+    "instanceId",
+    "sampleId",
+    "plcId",
+    "dbNumber",
+    "groupId",
+    "configRevision",
+    "sourceGeneration",
+    "sourceSeq",
+    "points"
+  ],
+  "title": "SampleV2In",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Structural input schema. UTF-8 byte lengths, typed point values, time and source rules are also enforced as described in README."
+}

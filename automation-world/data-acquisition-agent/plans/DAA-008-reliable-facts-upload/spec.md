@@ -1,19 +1,23 @@
 Task ID: DAA-008
-Revision: r2
-Status: draft
+Revision: r4
+Status: owner_approved
 Owner Role: PM
 Allowed Writers: PM, Human Owner
-Handoff: PM -> Human Owner精确r2 A0/A1范围与恢复写入例外批准pending；r1 QA2仍qa_failed，F-QA1-001开放；当前只修订spec，不继续实现，B实际HTTP/DS/MySQL/Docker及完整阶段C终验另批
+Handoff: Human Owner 已精确批准 r4 第19节（第20节） -> 唯一主协调/root -> Development 复用现有 B01 隔离环境完成剩余准备与就绪复核 -> Owner 收到普通原生启动命令及 M01 步骤后手动操作。
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch
 Classification: root
 Capability: DAA本地事实的有界定时上传、可靠回执、补传与重启恢复及受控阶段C端到端验收
 Owner: Automation World / Data Acquisition Agent
-Acceptance Chain Reference: 本spec第13/15节；PM -> Human Owner精确r2及阶段/恢复风险批准 -> Development -> 新fresh-context Verification -> Human Owner最终验收；r1批准原文仅作第14节历史
+Acceptance Chain Reference: 第18节保留 r3 与 B-RUN-01 的批准。第19节仅修订 B-RUN-01 固定 F7，待 Human Owner 精确批准 r4 后由 Development 复核并交 Owner M01。实际 B 交接、fresh-context Verification 与 Human Owner 最终验收沿冻结方案。
 Depends On: aiis-ics-arch::ARCH-BE-009 r1 owner_accepted固定事实provider；aiis-ics-arch::DAA-007 r2 owner_accepted本地采集基线
 Related Task: aiis-ics-arch::ARCH-AW-008 r1；aiis-ics-arch::ARCH-BE-010 r2；aiis-ics-arch::DAA-002 r2；aiis-ics-arch::DAA-006 r3
 Created: 2026-11-05 Asia/Shanghai
+
+> 当前入口为 r4 draft，仅提出修订 [第19节](#r4-b01-f7-pin) 的 B-RUN-01 固定 F7。第1至18节是原 r3 正文与批准历史，原批准全文另有逐字归档。当前准备仍停在 F7 门禁，待 r4 精确批准。
+
+> 当前入口为r3 draft，唯一新增待批范围见[第17节](#r3-ds-env-exception)。第1至16节逐字保留已批r2正文与历史收据；其中“当前/待批”等旧措辞按原登记时点理解。r2 AC02对B普通DS自身.env读取的唯一拟议例外由第17节明确限定，尚未生效。tasks/checklist现有r2身份与事实不改写为r3实施、QA或批准。
 
 # DAA阶段C：可靠事实上传与新profile受控热回滚恢复
 
@@ -509,3 +513,143 @@ Human Owner对精确`aiis-ics-arch::DAA-008 r1`的明确原话，由唯一主协
 > 批准 DAA-008 r2，按 STD 仅完成本 spec 新增的新空 profile 初始化凭据和受控 SQLite 原生热回滚恢复，并执行第 11.1 节有限合成 SQLite 增量验证及新的独立核验。明确接受 R02 所列有限例外：只对凭据、文件身份、已知头及精确错误 776 均符合的新封存 profile，原生恢复写入可以先于 SQL 元数据重新读取；恢复后必须完整核验，本地凭据不构成认证或完整防篡改证明。已有 SQLite 配置、历史、原联调 profile 及 r1 未封存/失败夹具不迁移、不封存、不清理、不覆盖；沿用未变 r1/QA2 有效证据，不重复阶段 B 或整套测试。实际 HTTP／DS／MySQL 联调环境与 Docker 操作另提具体方案批准；自动启动、旧历史上传、SMA、真实现场及完整阶段 C 最终验收仍另行推进。
 
 PM本轮只写spec，不改只读r1 archive、tasks/checklist、源码/配置/索引；主协调负责四处索引机械同步及无依赖资源收尾，必要旧hot/原文/候选证据保持且不复用。文档工具首次UTF-8输入失败、首次补丁上下文未匹配均未写文件，随后用apply_patch完成；不当作产品失败或新增验证。最终文档自检只核文字/链接/SHA/范围/元数据及第14节逐字保持，不称产品或独立QA；真实结果在handoff固定。
+
+## 16. r2精确批准收据与Development交接（2026-11-06）
+
+Human Owner对精确`aiis-ics-arch::DAA-008 r2`的明确原话，由唯一主协调`/root`转交本实际PM登记：
+
+> 批准 DAA-008 r2，接受 R02 所列受控恢复例外，按 spec 完成新增实现、第 11.1 节有限增量验证及独立核验。已有配置、历史和原 profile 不动，实际联调另批。
+
+批准对象是登记前完整`Revision: r2 / Status: draft`，83711字节，SHA-256为`4029dfedfda0dd8523e4fe9bee0fa5df3536f274c88ecb4a3dd89bc8ebdfb524`。登记仅更新顶部Status/Handoff并追加本收据；全部获批正文、需求、allowlist、参数、AC、平台限制及风险保持原字节，r1 archive与第14节历史不改。前文“尚未批准/待批/当前草案”保留为r2起草时点事实，当前批准效力以本收据和顶部状态为准，不回写历史。
+
+已明确批准的范围为本r2新增受控恢复实现，以及第11.1节新建`/private/tmp/daa-008-r2-a-<随机后缀>/`中的有限合成SQLite增量验证和相应独立核验；R02所列“仅新封存、凭据/文件身份/已知头/精确776符合时，可先native恢复写再完整SQL重验”的风险例外获Owner明确接受。旧v2、未封存r1 v3、原联调profile和既有失败夹具不认领、不补封、不恢复、不清理、不迁移或覆盖；相同源码/条件下有效的r1/QA2证据可复用，不重复阶段B或整套测试。
+
+下一实际角色为Development，经唯一主协调顺序交接，按第10节有限写面在正式源码树完成新增机制，记录确切r2候选/diff、命令/结果、durable before/after及资源归属，保留他人更改和r1失败历史。当前HEAD为`bcafa89fa31bdf62329bced89baebc193323a739`；它不替代第2.3节精确候选SHA或provider pins。完成developer_handoff后必须启动新的fresh-context Verification；F-QA1-001只能由相应实际新证据核验关闭，本登记不提供实现完成或QA通过结论。
+
+**B实际联调仍未批准。** HTTP/loopback监听、DS/MySQL目标与schema/source采用、Docker及原生环境操作按第11.2节另提具体方案。自动启动、旧历史上传、SMA、真实PLC/现场及生产部署仍排除；新增恢复A0/A1通过也不代表完整阶段C完成或Owner最终接受。
+
+本PM复读当前根AGENTS/README/PLAN、最近DAA文档、canonical workflow/pm角色并核完整bundle与批准稿SHA，仅登记本spec；不修改tasks/checklist、archive、源码或索引，不运行产品/测试/数据库/HTTP，不发邮件或另启notifier。stdlib原稿恢复/精确diff、角色文档与archive SHA、链接/表格/空白及git diff检查只作为文档自检，最终SHA与真实结果在外部handoff固定，避免自引用。
+
+<a id="r3-ds-env-exception"></a>
+
+## 17. r3待批：仅B普通DS读取自身.env的有限例外（2026-11-06）
+
+### 17.1 当前效力、r2历史与唯一差异
+
+**r3为draft，Human Owner尚未批准；B-RUN-01也未批准，本轮仅编辑公开文档。** Owner本轮授权先出B具体方案和手册，并明确“先只改文档，批准后再准备环境和联调”。B01静态核对发现：普通DS即使有非空进程DS_PROFILE_DIR，仍先读取自身根.env。第3节R01的“不改用户.env/default profile选择”可保持，但第12节AC02的“不读取真实profile或env”没有A-only或程序读取例外，不能以Agent不人工读取代替。因此由唯一主协调/root交实际PM提交最小r3，让Owner审阅这个明确差异；不追认过去发生过读取，也不将本次文档授权写成r3批准。
+
+Root已将完整已批r2逐字固定为[evidence/r2-approved-spec.txt](evidence/r2-approved-spec.txt)，86546字节、SHA-256 `2d9ffde6e3166216af9c157285e5819b9612db93c13637ee060db78f85ac69de`；r1归档与两份原批准收据原样保留。本次只更新顶部Revision/Status/Handoff/Acceptance Chain Reference，增加入口说明及本节；第1至16节原文、AC02原行及第14/16节收据不改。原r2批准及QA3仍按其真实范围有效，不成为本r3或B的运行批准。
+
+本r3唯一新增需求是下列R3-E01。若获精确批准，它仅为原AC02增加“本B普通DS读取自身根.env”的具名有限例外；原AC02对其他真实env、旧profile及历史的保护继续有效。没有DS/DAA/后端源码、启动命令、wire、schema、R02恢复信任边界、权限模型、依赖或验收链变更。
+
+### 17.2 R3-E01：待批准的读取对象、前置与失败关闭
+
+| 边界 | 唯一允许的未来行为及门禁 |
+| --- | --- |
+| 两项批准 | 仅在Human Owner精确批准本r3有限例外，且批准[tasks B01](tasks.md#b01-proposal)中冻结的B-RUN-01资源/动作后，才可按该提案启动普通DS。r3批准本身不允许准备环境、冲突检查、启动程序或操作数据库/设备。 |
+| 全新目标 | 每次启动前，进程DS_PROFILE_DIR必须为非空、合法绝对字面路径，固定指向B01获批的本轮DS最终profile；首次必须按获批前检确认为新空目录、无路径冲突/穿越/symlink，后续只使用本轮创建的同一目录和身份。不得选择、打开、复制或迁移旧profile；不改用户.env或持久默认profile选择。 |
+| 真实读取 | 仅允许既有普通DS bootstrap按现有逻辑只读其自身源码根`automation-world/device-simulator/.env`。程序确实可能将完整UTF-8正文读入内存并解析首个DS_PROFILE_DIR，不能声称只读键名或完全避读env。非空合法进程值必须决定本轮profile，文件值不得成为profile选择；不source整份文件、不将其他文件键注入进程环境或作shell执行。 |
+| Agent及证据 | Agent不人工打开、展示、复制、改写或散列真实.env正文，不转储进程全部环境，不将任何.env正文/秘密写入日志、导出、公开收据或仓库。运行证据仅记必要键名、获批新profile身份及停止/错误结果，不以读取旧.env证明“未读取/未修改”。 |
+| 拒绝与不存在 | 自身.env不可读、非普通文件、symlink或非法UTF-8等现有读取错误，进程值缺失/空白/非法、新路径冲突或身份漂移，均停止并交责任方；不回退文件/default、不自动修复或重写。自身.env不存在时按既有逻辑无正文可读，但仍必须有合法非空进程值；不得为本次自动创建该文件。现有parser会忽略不认识的行，不能宣称新增了通用dotenv语法验证。 |
+| 产品保持 | 入口仍是普通`pnpm tauri dev`，沿用Tauri现有native-s7；不改DS，不增加DS_ENV_FILE、feature或启动别名，不用test-automation、临时源码副本或隐藏读取来绕过上述事实。 |
+| 不扩其他env | DAA继续显式DAA_ENV_FILE选择本次新私有技术文件，并以明确进程profile指向本轮新目录；不读取其旧根.env。后端仍须在任何项目导入前同时阻止Pydantic dotenv来源和显式dotenv_values/load_dotenv读取，只使用B01的新私有配置；该临时隔离夹具的具体生成/运行仍归B-RUN-01另批，不由本例外授权。 |
+
+上述门禁属于未来B具体运行的必要前置，不代表现在已核验任何路径、端口、文件存在性、依赖、进程或数据库。文件读取错误不得通过移走/改名真实.env或更换源码求过。当前实现不能满足这些门禁，或还需其他真实env读取、产品改动时，停止该部分并交PM明确新的范围，不顺手扩大本r3。
+
+### 17.3 公开源码依据与固定SHA
+
+以下仅静态读取公开源码，不读取或探测真实.env。普通DS的ordinary_profile先执行自身.env的symlink_metadata/read_to_string及parse_profile，再处理进程值并选择非空process优先；所以进程profile不能阻止前面的读取/错误。DS没有DS_ENV_FILE selector。路径resolver拒绝非绝对路径、父目录穿越及symlink；Vite为envDir=false，Tauri普通配置提供native-s7。这些是当前源码事实，不是本机启动或新profile验证结果。
+
+| 根目录相对公开源码 | SHA-256 / 本r3相关事实 |
+| --- | --- |
+| [DS bootstrap](../../../device-simulator/src-tauri/src/config/bootstrap.rs) | `1d22521a0079a523507f3a7517162a73a1aefea8325c431672dbe7e22d3df06c`；先读自身.env，再process优先；读取错误直接返回。 |
+| [DS profile resolver](../../../device-simulator/runtime/src/config/profile.rs) | `6da9b3a33fa8988011fc7ea18561ddd31871ceda0e35ace368535d19204b0a61`；绝对路径/父穿越/symlink门禁，不能据env空值当新目录。 |
+| [DS Tauri配置](../../../device-simulator/src-tauri/tauri.conf.json) | `867a67f735f67aaaec354202b43348943b37ee05523872be927db0112d5f289d`；普通入口及native-s7保持。 |
+| [DS Vite配置](../../../device-simulator/vite.config.ts) | `b2e804f16bee8199f9cae2ce673278b01bf1694f615bcc0af52e03ba48b238d3`；envDir=false，不把Rust自身读取泛化成浏览器.env注入。 |
+| [DAA配置入口](../../src-tauri/src/config/mod.rs) | `376f7c32a8e29ad7849e7b8bd3db86b795e7719485c2a4ea735af1a63c8bd921`；显式DAA_ENV_FILE选择能力仍用原实现，不新增DAA读取例外。 |
+| [Backend Settings](../../../../backend/settings.py) | `b8d30d4fdb252de5b69d8e386574b6b68ce4d8d8fb9e07055117f9b5a08aefd5`；原dotenv来源不能因进程值或uv --env-file而被假定未读。 |
+| [FactsSettings](../../../../backend/app/plc_facts/config.py) | `7f498a16a316d94a21cf28dd1572b3c044883910c0e16de2ca0ac79c40374577`；同样锚定原dotenv，B01必须同时隔离。 |
+| [Maintenance入口](../../../../backend/scripts/plc_facts_maintenance/main.py) | `5edbd02e113ac97d648dbe07b790d85f01c7e5ba50cff56b92abbf4538b99e66`；另有显式dotenv合并，不因阻止Pydantic来源就获得隔离证明。 |
+
+后端/DS完整候选及B01额外公开pins、具体资源/端口/账号/schema、临时runner/relay/observer、source采用与收尾仍由tasks B01-1至B01-6唯一维护。本spec不复制第二份资源表，不授予helper生成或运行许可；任何相应公开源码漂移须在B准备前停止并复核。
+
+### 17.4 r3有限验收与r2证据复用
+
+| 编号 | 需证明的结果 | 证据归属与当前限制 |
+| --- | --- | --- |
+| R3-AC01 文档差异 | r2归档SHA/86546字节正确，恢复四处顶部原行并移除新增说明/本节后与归档逐字相等；r1归档、第1至16节和原AC02行保持。r3为draft，无Owner批准。 | PM仅静态文档自检；新的fresh文档Verification独立核对，不冒称运行QA。 |
+| R3-AC02 源证及范围 | 第17.3节八项公开源码SHA/链接匹配，普通DS先读取.env的事实和唯一例外完整公开；其他env读取未放宽，B01/双语手册不宣称已准备或运行。 | 只查公开文件/引用和角色差异；本轮不执行产品、导入项目、检查真实env或环境。 |
+| R3-AC03 复用边界 | 原QA3的54项候选scope仍为`26cebdb087c5aa4be93fd431bec1a54d253e104ca57fd5ee1d0b3a4e9aa57b7c`；本轮两指南另做doc-only变更，其余52项原SHA不变。 | QA3 manifest SHA `ebfa1abaca2d87f5f1d0ba13a018c9d07e89da93ef6b1c2dccadba84c8132e0c`；52项path+NUL+SHA+LF scope为`ca942975d851184d20987cee4c2af461eb3a72e231a79ae06553791e106e89f8`。这是52项非指南表面，含文档/索引/锁文件，不冒称52个纯代码文件。r2 A0/A1及QA3有效证据沿用，不重跑AA或阶段B，不写成r3重新实施/已通过。 |
+| R3-AC04 后批DS操作 | 实际B前有精确r3及B-RUN-01双批准，process profile非空合法且指向本轮新目录；普通DS读取仅自身.env、文件值不决定profile，读取错误/路径冲突/身份漂移立停，无旧数据采用或秘密转储。 | **待B实际证据**：Owner普通原生启动、受控新profile身份及脱敏操作/错误收据；静态源码或文档QA不能将本项记运行通过。 |
+| R3-AC05 分阶段交付 | tasks/checklist当前保留r2实施/QA及B01文档事实；新的fresh文档核验只验证本r3草案引用一致性及文档范围，不是r3实施QA。将来B有实际Development交接、新fresh对应B核验及Owner最终决定。 | 当前r3批准、B运行、AC18至20、原生视觉和完整阶段C均开放；r2 QA3不自动接受新指南、B或本例外。 |
+
+R3-AC04是未来B额外的有限核验条件；原AC18/19/20、M01至M05及R02/上传合同要求不降低。旧并发失败原因未定、r1/r2全部失败与限定关闭结论继续保留。没有新代码需要以重跑Stage B/AA证明本文件的文字变化；实际B发现产品缺陷则按真实finding、精确候选及新的fresh Verification处理。
+
+### 17.5 风险、开放门禁与写面
+
+本例外改变了“不读取真实env”的既有验收边界：DS按既有代码可能先把自身.env正文读入进程，随后才用进程值选择新profile。PM没有查看其内容，不能声称该文件无秘密、所有语法被完整验证或环境已经就绪。Owner须明确接受这项有限读取；它不授予修改、迁移、清理或秘密外发。非空process只能阻止文件值选择profile，不能阻止前面的文件读取/读取错误；坏文件必须停止，不改文件或绕过启动链。
+
+本轮PM唯一仓库写面仍为本spec；不写tasks/checklist/两指南/四索引/archive/源码/测试/配置，也不执行环境存在/冲突检查、程序、数据库、HTTP、DS、Docker或端口/进程动作。PM公开文本收据可保留在`/private/tmp/daa-008-r2-b-doc-rd8ex0t7/pm-r3/`，归Root在文档QA/Owner证据依赖解除后收尾，不把该目录当运行profile。所有环境操作及资源停止/删除的具体范围继续以B01待批提案为准；本r3不新增资源操作或删除许可。
+
+下一gate为Root固定精确r3 draft及B01/两指南文档收据，完成新的fresh文档核验后交Owner审阅。Owner可在同一句话分别批准r3有限例外与精确B-RUN-01；未收到两项明确批准前不得准备或运行。将来获批后才由相应实际角色按真实时序续记B，不能提前把当前r2 tasks/checklist改成r3实施、QA或批准。本r3不豁免后端双dotenv隔离、source/schema采用、Owner手动原生操作、后续独立B核验或最终接受。
+
+### 17.6 建议联合批准语句（尚未发生的批准）
+
+> 批准 DAA-008 精确 r3（以本次冻结的spec draft SHA为准）第17节的唯一有限例外：仅获批B普通DS按既有实现只读自身根.env，合法非空进程DS_PROFILE_DIR固定本轮新profile；不人工读取、展示、复制、改写或转储.env，不采用文件值/旧profile，读取错误、路径冲突或身份漂移立即停，不fallback或绕过。DAA显式新DAA_ENV_FILE及后端双dotenv禁止保持。并批准另行冻结的tasks B01-1至B01-6及双语STAGE_C_GUIDE所列B-RUN-01具体资源和动作；原生GUI由我手动执行，保留已有配置/历史/原profile及全部失败证据，不重复阶段B或AA。此批准不等于B通过、完整阶段C最终验收、生产/现场/发布部署或未列删除动作授权。
+
+该语句必须连同具体B01参数及冻结文档审阅，不能只批准本节就推断B已获准。r3未批准时本节仅是可审阅提案。最终SHA、原r2恢复比较、公开源证/52项保护、链接/表格/空白及差异自检的真实结果在正式spec外handoff固定，避免自引用；PM自检不冒充独立QA。
+
+<a id="r3-b-run-01-owner-approval"></a>
+
+## 18. r3 与 B-RUN-01 精确批准收据及环境准备交接（2026-11-07）
+
+Human Owner 对 `aiis-ics-arch::DAA-008 r3` 第17节和 `B-RUN-01` 的明确原话，由唯一主协调 `/root` 转交本实际 PM 登记：
+
+> 可以，批准 DAA-008 r3 第 17 节的 DS `.env` 有限只读例外，以及 B-RUN-01。按方案准备好 `daa-launch.env` 和隔离联调环境，已有配置、历史和原 profile 不动，不重复阶段 B。准备好后告诉我怎么启动，原生操作我自己来。
+
+批准对象是登记前完整 `Revision: r3 / Status: draft`，SHA-256 `0a6bbc4d5f0b6868e994b6dee2752d9876edca4577c01f02dc20752bb3352416`，以及 [tasks B01-1 至 B01-6](tasks.md#b01-proposal) 的具体 `B-RUN-01` 方案（冻结 tasks SHA-256 `ed3a3172c7d3b180d1f678755cfb5fbf9a16e4aa8d76673a75090d04de9cfb08`）。冻结双语手册 SHA-256 分别为 EN `948f335a9e04cdc136d1a8559c0ffa96b3618bdfd2bd07ffc6b7f1d603c094ac`、ZH `2c3395f25136329cc284c0e1955fda18d8e4bda97b1fd97844d5d5cbc69926ab`，对应 [DQA1 文档核验](checklist.md#30-dqa1b01文档及r3草案一致性独立核验2026-11-06)。现工作树中文手册 SHA-256 `dd48028411f2c79e680ebc7f9dadf4e9d92b72f150dd9d89834a52f4ff674ec3` 的差异仅为两张 Markdown 表格的单元格对齐空格和分隔线长度。表格格式归一后逐行一致，执行仍以冻结方案为准，保留工作树手册现状。
+
+本次登记仅更新顶部 Status、Handoff 并追加本节。第1至17节原正文、历史收据及需求、验收、allowlist、参数和风险均保持原字节。前文的 draft、待批和文档起草时点表述保留为历史，当前批准效力以本节为准。
+
+由唯一主协调将精确批准交实际 Development。当前先按冻结 B01 核对候选和资源前置条件，准备专用 `daa-launch.env`、隔离 profile 与获批的联调目标，给 Owner 提供可执行启动命令。原生启动及操作由 Owner 手动执行，源采用与后续联调按 B01 的实际前置和顺序推进。R3-E01 仅适用于本轮普通 DS 启动的具名读取，固定合法的非空进程 `DS_PROFILE_DIR` 指向本轮新目录。保护已有配置、历史和原 profile，沿用有效既有证据，不重复阶段 B。保留冻结 B01 所列停止条件、资源边界和条件收尾。
+
+本节是范围批准记录与 Development 准备交接。环境就绪、Owner 原生操作、R3-AC04、实际 B/AC18–20、新 fresh-context Verification 和最终验收仍按实际证据记录。PM 只登记本规格，环境操作由相应实际角色执行。
+
+<a id="r4-b01-f7-pin"></a>
+
+## 19. r4 待批：校正 B-RUN-01 固定 F7（2026-11-07）
+
+### 19.1 停止点与依据
+
+[第18节](#r3-b-run-01-owner-approval) 已登记 Human Owner 对 r3 第17节和 B-RUN-01 的精确批准。[获批 r3 全文归档](evidence/r3-approved-spec.txt) 为 102174 字节，SHA-256 `a60e92309b1108038a374196d5dc700a084bde4b447ce54be6cd9d03512a3db7`。第1至18节正文在本稿中逐字保留。r4 当前为 draft，准备仍停在 B01 的 F7 门禁。
+
+[冻结 B01](tasks.md#b01-proposal) 及[中文手册](../../STAGE_C_GUIDE.zh-CN.md)、[英文手册](../../STAGE_C_GUIDE.md) 把 `sha256:28edcba4298a164389965c6f7d05b29e8e6494a1ace48d141d83c5edbd1d8e2e` 写为精确就绪值。[已验收的 BE009 核验记录](../../../../plans/ARCH-BE-009-backend-facts-integration/checklist.md) 明确该值属于 QA1 旧候选，当前候选的有效值为 `sha256:1ba978ead14cd258b2b8a6d751997bd9c22cd2f55037caf421682ba9da20e0ed`。[BE009 Development 记录](../../../../plans/ARCH-BE-009-backend-facts-integration/tasks.md) 另载后续 live 反射命中同一有效值。
+
+本次 Development 已创建 B01 的 D/S/O 与 `daa-launch.env`，并将专用 MySQL 8.4.6 迁移到 `0a2c4e6f8b10`。原 F7 等值检查失败，保留失败记录和当前新资源。后续对专用库 `daa008_app`、`daa008_maint` 的两次只读诊断均由正式 `verify_profile` 确认 provider 与反射 F7 相同，均为 `sha256:1ba978ead14cd258b2b8a6d751997bd9c22cd2f55037caf421682ba9da20e0ed`。两角色均为 BE009-B、71 张应用表另含 `alembic_version`、`REPEATABLE-READ`、上海 `+08:00`、时钟偏移 `28800` 秒及 73 条精确授权。七张事实表均为 0 行，migrator 已锁定。脱敏证据为本轮 O 下 `evidence/preparation-blocked-receipt.json`，SHA-256 `226b44826d5174840073621976e43975875e39953a5a8647b7f71c167b7e5f62`。该收据时只有 MySQL `127.0.0.1:13381` 监听，API、relay 和原生应用均未启动，M01 未交接。
+
+### 19.2 唯一修订与执行门禁
+
+| 项 | r4 待批内容 |
+| --- | --- |
+| 唯一变更 | 仅把冻结 B01 和双语手册的运行就绪及采用门禁中固定 F7 预期从 `sha256:28edcba4298a164389965c6f7d05b29e8e6494a1ace48d141d83c5edbd1d8e2e` 校正为 `sha256:1ba978ead14cd258b2b8a6d751997bd9c22cd2f55037caf421682ba9da20e0ed`。获批后以本节覆盖旧字面值。正式 `verify_profile` 和对新固定值的严格等值检查均须通过。 |
+| 唯一目标 | 原冻结候选的同一 B-RUN-01 专用新库 `daa008_r2_b01`，MySQL 8.4.6 / `127.0.0.1:13381` / `0a2c4e6f8b10` / BE009-B / 71 张应用表加 `alembic_version` / RR / `+08:00`。已登记 `daa008-r2-b01-mysql`，容器 ID `9819614cd5f8c7074ccdec379c71d534fc8d0e2e029e469578a3b6e3f00222ff`，网络 ID `aa0f45ecfdf65e05f1bcc36592f79f460baa2625a52e0a3c552ef182c98bfa03`，卷 `daa008-r2-b01-data`，归属标签 `aiis.task=DAA-008-r2-b01`。沿用现有 D/S/O、已登记资源和端口。身份、候选、端口、schema、时钟、权限或新 F7 不符即停。 |
+| 剩余准备 | Human Owner 精确批准本 r4 后，实际 Development 只更新本轮私有 helper 中用于 B01 就绪比较的 F7 期待值，记录 SHA 及增量 diff。使用原专用库两个角色做一次有界只读复核，确认精确预期及原门禁。通过后按冻结 B01 完成剩余准备，核对专用 `daa-launch.env` 与空 profile，按原方式验证 API 关闭事实功能及空 scope 的启动态和固定 relay 连通性，登记本轮就绪收据。复用已迁移的隔离库，保留原失败及证据。 |
+| M01 交接 | 前置均通过后只交 Owner 普通原生启动命令与 M01。原生由 Owner 手动启动和操作，沿用 r3 第17节有限 DS `.env` 读取边界。M01 提交本次新接入材料前停在未采用、未上报状态。后续源采用、M02–M05、实际 B/AC18–20、fresh-context Verification 和最终验收各按冻结 B01 与真实证据接续。 |
+
+验收只核本节预期值与已验收 provider、两份本轮只读诊断的一致性，以及获批后的同目标就绪复核与 M01 交接。保留 r3 的既有配置、历史、原 profile 和资源保护。r4 范围限于 F7 就绪值及该准备交接，不含产品或数据库结构变更、再次迁移或重跑阶段 B，冻结 B01 的其余条件持续适用。
+
+供 Human Owner 复制的本节批准语句（待确认）：
+
+> 批准 DAA-008 r4 第19节，仅将 B-RUN-01 的固定 F7 校正为 `sha256:1ba978ead14cd258b2b8a6d751997bd9c22cd2f55037caf421682ba9da20e0ed`。沿用当前专用隔离环境完成剩余准备并交接 M01。已有配置、历史和原 profile 不动，不重新迁移或重跑阶段 B。原生启动和操作由我手动执行。
+
+<a id="r4-b01-f7-owner-approval"></a>
+
+## 20. r4 精确批准收据及 M01 准备交接（2026-11-07）
+
+Human Owner 对 `aiis-ics-arch::DAA-008 r4` [第19节](#r4-b01-f7-pin) 的明确原话，由唯一主协调 `/root` 转交本实际 PM 登记：
+
+> 批准 DAA-008 r4 第19节，仅将 B-RUN-01 的固定 F7 校正为 `sha256:1ba978ead14cd258b2b8a6d751997bd9c22cd2f55037caf421682ba9da20e0ed`。沿用当前隔离环境完成剩余准备，准备好后给我启动命令和 M01 步骤。已有配置、历史和原 profile 不动，不重新迁移或重跑阶段 B，原生操作我自己来。
+
+批准对象为登记前完整 `Revision: r4 / Status: draft`，SHA-256 `585ee4197d7dc95bd8bfb32c862d6b7914a62c92771891d011e5a885e8e38317`。本次登记只更新顶部 Status、Handoff 并追加本节。第1至19节正文、历史批准与归档均保留原字节。前文的待批表述保留为起草时点事实，现行批准以本节为准。
+
+由唯一主协调将精确批准交实际 Development。依第19节，在同一个已建 B-RUN-01 隔离目标上使用校正后的固定 F7，核对原门禁并完成剩余准备。就绪核验通过后向 Owner 交接普通原生启动命令和 M01 步骤。当前准备交接到此为止，原生启动及操作由 Owner 手动执行。继续保护已有配置、历史和原 profile，复用已迁移的专用库及适用既有证据，保留原门禁失败及诊断记录。后续来源采用、实际联调与验收依各自的实证与冻结 B01 门禁记录。

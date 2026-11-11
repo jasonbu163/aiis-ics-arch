@@ -1,4 +1,4 @@
-<!-- PLC配置：SQLite草稿与显式连接测试；迁入历史归配置栏详情，保存不连接。 -->
+<!-- PLC配置：SQLite草稿与显式连接测试；本次测试结果在弹窗展示，保存不连接。 -->
 <template>
   <template v-if="local">
     <ConsoleCard title-key="common.local.plcConfiguration" body-class="console-card__body--table">
@@ -10,11 +10,38 @@
           <el-table-column :label="t('common.local.endpoint')" min-width="220"><template #default="{ row }"><span>{{ row.host || '—' }}:{{ row.port }}</span><small class="muted-cell">{{ t('common.local.rack') }} {{ row.rack }} · {{ t('common.local.slot') }} {{ row.slot }}</small></template></el-table-column>
           <el-table-column :label="t('common.local.enabled')" width="95"><template #default="{ row }"><el-tag :type="row.enabled ? 'success' : 'info'" effect="plain">{{ local.label(String(row.enabled)) }}</el-tag></template></el-table-column>
           <el-table-column :label="t('common.local.state')" min-width="130"><template #default="{ row }"><el-tag :type="local.state(row.id)?.connected ? 'success' : 'info'" effect="plain">{{ local.snapshot ? local.label(local.state(row.id)?.phase ?? 'stopped') : '—' }}</el-tag></template></el-table-column>
-          <el-table-column :label="t('common.local.actions')" width="220"><template #default="{ row }"><div class="row-actions"><ConsoleActionButton size="small" label-key="common.local.edit" :disabled="local.busy || !!plcEditor" @click="editLocalPlc(row)" /><ConsoleActionButton size="small" label-key="common.local.testConnection" :disabled="local.busy || !local.view?.active" @click="local.control('daa_test_connection', [row.id])" /></div></template></el-table-column>
+          <el-table-column :label="t('common.local.actions')" width="220">
+            <template #default="{ row }">
+              <div class="row-actions">
+                <ConsoleActionButton size="small" label-key="common.local.edit" :disabled="local.busy || !!plcEditor" @click="editLocalPlc(row)" />
+                <ConsoleActionButton size="small" label-key="common.local.testConnection" :disabled="local.busy || local.editing || !!connectionTest || !local.view?.active" @click="startConnectionTest(row)" />
+              </div>
+            </template>
+          </el-table-column>
         </el-table>
       </ConsoleTableShell>
       <p class="daa-capability-note">{{ t('common.local.testActiveHint') }}</p>
       <Teleport to="#daa-feedback">
+        <ElDialog :model-value="!!connectionTest" :title="t('common.local.testConnection')" :append-to-body="false" :close-on-click-modal="false" width="min(520px, calc(100vw - 32px))" class="daa-name-dialog" @update:model-value="$event || closeConnectionTest()">
+          <div v-if="connectionTest" class="console-stack">
+            <strong class="daa-confirm-message">{{ connectionTest.target }}</strong>
+            <p class="daa-capability-note">{{ t('common.local.testActiveHint') }}</p>
+            <ElAlert
+              :title="t('plc.connectionTest.' + connectionStatus, { seconds: diagnosticWaitSeconds })"
+              :type="diagnosticTone[connectionStatus]"
+              :description="connectionDescription"
+              :closable="false"
+              show-icon
+            />
+            <dl v-if="connectionResult" class="daa-local-facts">
+              <dt>{{ t('plc.connectionTest.method') }}</dt>
+              <dd>{{ t(connectionResult.connected ? 'plc.connectionTest.reused' : 'plc.connectionTest.temporary') }}</dd>
+              <dt>{{ t('plc.connectionTest.testedAt') }}</dt>
+              <dd>{{ formatBusinessTime(connectionResult.testedAt) }}</dd>
+            </dl>
+          </div>
+          <template #footer><div class="console-action-group"><ConsoleActionButton label-key="plc.diagnosis.close" @click="closeConnectionTest" /></div></template>
+        </ElDialog>
         <ElDialog :model-value="!!plcEditor" :title="t('common.local.editPlc') + ' · ' + (plcEditor?.name ?? '')" :append-to-body="false" :close-on-click-modal="false" :close-on-press-escape="!local.busy" :show-close="!local.busy" width="min(780px, calc(100vw - 32px))" @update:model-value="$event || cancelLocalEdit()">
           <div v-if="plcEditor" class="console-stack">
             <el-alert v-if="local.error" :title="local.label(local.error)" type="error" :closable="false" show-icon />
@@ -38,13 +65,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue';
-import { ElDialog, ElForm, ElFormItem, ElInput, ElInputNumber, ElSwitch } from 'element-plus';
+import { computed, ref, watch, onUnmounted } from 'vue';
+import { ElAlert, ElDialog, ElForm, ElFormItem, ElInput, ElInputNumber, ElSwitch } from 'element-plus';
 import ConsoleTableShell from '../../../../components/console/ConsoleTableShell.vue';
 import type { Plc } from '../../../../services/localAcquisition';
+import { formatBusinessTime } from '../../../../console/time';
 
 import { inject } from 'vue';
-import { localConsoleKey } from '../../../../console/composables/useLocalAcquisitionConsole';
+import { diagnosticTone, diagnosticWaitSeconds, localConsoleKey } from '../../../../console/composables/useLocalAcquisitionConsole';
 const local = inject(localConsoleKey);
 import { Cpu } from '@element-plus/icons-vue';
 import { useI18n } from 'vue-i18n';
@@ -52,6 +80,42 @@ import ConsoleCard from '../../../../components/console/ConsoleCard.vue';
 import ConsoleActionButton from '../../../../components/console/ConsoleActionButton.vue';
 const emit = defineEmits<{ 'open-points': [] }>();
 const { t } = useI18n();
+
+interface ConnectionTestResult {
+    testId: string;
+    testedAt: string;
+    success: boolean;
+    reason: string | null;
+    restorationPhase: string;
+    connected: boolean;
+}
+const connectionTest = computed(() => local?.plcDiagnostic?.action === 'test' ? local.plcDiagnostic : null);
+const connectionResult = computed(() => {
+    const current = connectionTest.value;
+    if (current?.status !== 'applied') return null;
+    const result = current.result as ConnectionTestResult | null;
+    if (!result || result.testId !== current.operationId || typeof result.success !== 'boolean'
+        || typeof result.connected !== 'boolean' || result.restorationPhase !== 'applied') return null;
+    return result;
+});
+const connectionStatus = computed<keyof typeof diagnosticTone>(() => {
+    const status = connectionTest.value?.status;
+    if (status !== 'applied') return status ?? 'waiting';
+    if (!connectionResult.value) return 'unavailable';
+    return connectionResult.value.success ? 'success' : 'failed';
+});
+const connectionDescription = computed(() => {
+    const reason = connectionResult.value?.reason ?? connectionTest.value?.reason;
+    if (reason === 'connection_failed') return t('plc.connectionTest.connectFailed');
+    return reason ? local?.label(reason) : undefined;
+});
+function startConnectionTest(plc: Plc) {
+    return local?.startDiagnostic('test', plc.id, plc.name);
+}
+function closeConnectionTest() {
+    if (connectionTest.value) local?.closeDiagnostic();
+}
+
 async function removeLocalPlc(id: string) { if (await local?.confirmAction('common.local.removeConfirm')) { local?.removePlc(id); plcEditor.value = null; addedPlcId.value = ''; } }
 
 const plcEditor = ref<Plc | null>(null);
@@ -75,5 +139,8 @@ async function applyLocalEdit() {
 
 watch(plcEditor, v => { if (local) local.editing = !!v; });
 watch(() => local?.view, () => { plcEditor.value = null; addedPlcId.value = ''; });
-onUnmounted(() => { if (local) local.editing = false; });
+onUnmounted(() => {
+    closeConnectionTest();
+    if (local) local.editing = false;
+});
 </script>

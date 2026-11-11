@@ -4,7 +4,7 @@
  * 主要功能:
  *   - 温度数据监控
  *   - 能耗数据监控
- *   - 实时采集 latest snapshot 与 collector 状态查询
+ *   - collector 状态查询
  */
 import request from '@/utils/request'
 import { callApi } from '@/api/mockMode'
@@ -31,15 +31,6 @@ export async function getTemperatureData(params = {}) {
  */
 export async function getEnergyData(params) {
   return callApi(() => mockApi.getEnergyData(params), () => request.get('/monitor/energy', { params }), 'monitor.getEnergyData')
-}
-
-/**
- * 获取实时采集 latest snapshot
- * @param {Object} params - 查询参数
- * @returns {Promise<Object>} 实时采集快照
- */
-export async function getRealtimeLatest(params) {
-  return callApi(() => mockApi.getRealtimeLatest(params), () => request.get('/monitor/realtime/latest', { params }), 'monitor.getRealtimeLatest')
 }
 
 /**

@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 
 from common import log as log_module
-from common.log import log_event, log_projection_event, logger, setup_logger
+from common.log import log_event, logger, setup_logger
 
 
 pytestmark = pytest.mark.no_db
@@ -107,55 +107,6 @@ def test_structured_event_and_standard_logging_are_jsonl(tmp_path):
         setup_logger("api")
 
 
-def test_projection_runner_channel_uses_separate_jsonl_file_sinks(tmp_path):
-    """Runner records are isolated from API files while stdout remains shared."""
-    api_info = "api channel info"
-    api_error = "api channel error"
-    runner_info = "projection runner channel info"
-    runner_warning = "projection runner channel warning"
-    runner_error = "projection runner channel error"
-
-    try:
-        setup_logger("api", log_dir=tmp_path, level="INFO", max_bytes=1024 * 1024, backup_count=1)
-        logger.info(api_info)
-        logger.error(api_error)
-        log_projection_event("info", runner_info, batch_count=1)
-        log_projection_event("warning", runner_warning, skipped_snapshot_count=1)
-        log_projection_event("error", runner_error, error_code="test_error")
-        flush_logger()
-
-        api_records = read_jsonl_records(tmp_path / "api.log")
-        api_error_records = read_jsonl_records(tmp_path / "api-error.log")
-        runner_records = read_jsonl_records(tmp_path / "projection-runner.log")
-        runner_error_records = read_jsonl_records(tmp_path / "projection-runner-error.log")
-
-        assert {api_info, api_error}.issubset(record_messages(api_records))
-        assert runner_info not in record_messages(api_records)
-        assert runner_error not in record_messages(api_error_records)
-        assert runner_info in record_messages(runner_records)
-        assert runner_warning in record_messages(runner_records)
-        assert runner_error in record_messages(runner_records)
-        assert runner_error in record_messages(runner_error_records)
-        assert all(
-            record["record"]["extra"].get("channel") == "api"
-            for record in api_records
-        )
-        assert all(
-            record["record"]["extra"].get("channel") == "projection_runner"
-            for record in runner_records
-        )
-        assert all(
-            record["record"]["extra"].get("event") in {
-                runner_info,
-                runner_warning,
-                runner_error,
-            }
-            for record in runner_records
-        )
-    finally:
-        setup_logger("api")
-
-
 def test_sqlalchemy_stays_warning_when_generic_logging_is_debug(tmp_path):
     """Generic DEBUG must not enable SQLAlchemy statement logging."""
     try:
@@ -165,29 +116,6 @@ def test_sqlalchemy_stays_warning_when_generic_logging_is_debug(tmp_path):
             assert logging.getLogger(logger_name).level == logging.WARNING
     finally:
         setup_logger("api")
-
-
-def test_projection_runner_stdout_remains_jsonl_with_its_channel(tmp_path, capsys):
-    """Channel filtering must not remove runner records from the shared stdout sink."""
-    event = "projection_runner_stdout_jsonl_test"
-
-    try:
-        setup_logger("api", log_dir=tmp_path, level="INFO", max_bytes=1024 * 1024, backup_count=1)
-        log_projection_event("info", event, tick_count=1)
-        flush_logger()
-
-        records = [
-            json.loads(line)
-            for line in capsys.readouterr().out.splitlines()
-            if line.strip()
-        ]
-        runner_record = next(
-            record for record in records if record["record"]["message"] == event
-        )
-        assert runner_record["record"]["extra"]["channel"] == "projection_runner"
-    finally:
-        with capsys.disabled():
-            setup_logger("api")
 
 
 def test_uvicorn_access_stdout_is_jsonl(tmp_path, capsys):

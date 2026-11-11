@@ -2,7 +2,7 @@
 
 Chinese version: [README.zh-CN.md](README.zh-CN.md)
 
-This is the JavaScript Vue 3 + Vite Core frontend template. It contains login, the authenticated shell, system pages, the dashboard/plan onboarding pilot and shared infrastructure. Consuming projects add business modules under src/app/<module>/.
+This is the JavaScript Vue 3 + Vite Core frontend template. It contains login, the authenticated shell, system pages, the generic Plan/Performance pages and shared infrastructure. Consuming projects add business modules under src/app/<module>/.
 
 ## Stable boundaries
 
@@ -33,8 +33,8 @@ process variables have priority. Default modes are development for dev and produ
 mode/local files still follow this precedence.
 
 ```dotenv
-VITE_SUPERVISOR_PAGE_ACCESS_JSON='["dashboard.home","plan.list"]'
-VITE_OPERATOR_PAGE_ACCESS_JSON='["dashboard.home"]'
+VITE_SUPERVISOR_PAGE_ACCESS_JSON='["plan.list","performance.list"]'
+VITE_OPERATOR_PAGE_ACCESS_JSON='["performance.list"]'
 ```
 
 Arrays contain manifest `meta.pageId` values. Operator must be a subset of supervisor. `[]` grants no pages;
@@ -42,7 +42,7 @@ admin is built in and is not configured in env. Only enabled valid leaf pages ca
 unknown/disabled/admin-only pages, malformed JSON and missing arrays fail explicitly; unknown roles deny access.
 These grants control menus, routes and default entry; backend API authorization is still required.
 Module `enabled` controls assembly; `navigation` and leaf `visible` control menus. Module `order` sorts groups;
-leaf `navigation.order` sorts entries inside a group. Dashboard is 10, plan 20, system 80; aiis_demo stays disabled.
+leaf `navigation.order` sorts entries inside a group. Plan is 20, performance 30, system 80; dashboard and aiis_demo stay disabled. An authorized plan list is the first entry, otherwise the existing accessible-page fallback applies. Retired dashboard and coil-performance pageIds must be removed from active grants during the separately approved cutover.
 
 Migrate the old `VITE_ROLE_PAGE_ACCESS_JSON` object's supervisor/operator arrays unchanged into the two new
 variables, preserving membership, order and all other settings. Keep the historical JSON in the README history section; the local env files now contain only active configuration and usage comments.
@@ -168,10 +168,7 @@ keys uses the same source defaults. Production Nginx still serves the prebuilt h
 
 These are the Owner-provided old pageId-only JSON objects, moved from local env comments. They are historical
 references and are **not read by the current application**. The active configuration still uses only the two
-new arrays. For the current module test, the Owner authorized intersecting the old grants with enabled
-non-admin leaf pages, preserving order: host supervisor now has 3 grants (dashboard.home, plan.list, system.user),
-operator has 2 (dashboard.home, plan.list); Docker dev keeps empty arrays. The historical 20/14 objects below
-are unchanged. Current host configuration passes the strict checker; future grants still require valid modules. Do not restore these objects as an active legacy variable or copy unsupported
+new arrays. The earlier module test used an intersection of these grants with then-enabled pages. The historical 20/14 objects below are unchanged. ARCH-TASK-001 retires the old dashboard and coil-performance pageIds; active project grants must be reviewed against the current registry at cutover. Do not restore these objects as an active legacy variable or copy unsupported
 grants into a working project configuration without reviewing module availability.
 
 Host development / production build (`.env`) history:
@@ -244,14 +241,11 @@ The root `docker-compose.prod.yml` uses pinned Nginx with this directory's exist
 
 ## Business observation source selection
 
-Equipment's three dashboards, the performance list/process dialog and the monitor curve page persist
+Equipment's three dashboards and the monitor curve page persist
 `dataSource=legacy|http` and `equipmentId` in their URL. Default legacy preserves historical behavior and states
 that legacy rows have no business equipment identity. HTTP requires an explicit scoped key; invalid source,
 empty key, empty data, 403 and service failure never select another source or diagnostic mock. Switching clears
 previous data; request generations prevent late responses from repopulating the new selection. Missing values
 remain missing, including chart gaps and zero-valued real observations.
 
-HTTP performance edits use the existing PUT with explicit source/equipment and only weight plus optional reason;
-other fields are read-only. Collected weight never overrides manual weight (including 0). Effective duration is
-computed by the backend from manual times, reported times or external observation interval in that priority.
-Browser/API/database runtime proof remains a separately approved verification gate.
+The old coil performance source selector, weight edit, process dialog, split, print and efficiency pages are retired. Generic [Plan/Performance workflow](../contracts/published/http-api/generic-task-workflow-v1/README.md) uses task-bound definitions, the existing list paths, Shanghai business times, local table widths and draft preservation. Browser/API/database runtime proof remains a separately approved verification gate.

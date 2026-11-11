@@ -1,0 +1,4 @@
+{
+  "help": "Field Flow: config validate --config PATH | state init --synthetic --mode dry_run|execute --state-dir PATH --instance-id ID | state inspect --state-dir PATH | run --config PATH --state-dir PATH [--execute]. Optional: --lang en-US|zh-CN",
+  "error": "The command could not be completed."
+}

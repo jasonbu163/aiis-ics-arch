@@ -9,6 +9,8 @@
 | 文档 | 用途 |
 | --- | --- |
 | [多项目开发指南](multi-project-pm.md) | Core、复用模块仓和项目仓之间的长期边界与治理指引。 |
+| [计划与实绩通用任务机制讨论稿](generic-task-workflow-discussion.zh-CN.md) · [English](generic-task-workflow-discussion.md) | 整理 MES → CA/FF → PLC → DAA → SMA → 实绩 → 计划回写的讨论口径、建议与待定项，包含流程/状态/ER示意图、项目约定的PLC写入条件、字段、页面和接口示例；不作为实施spec或已发布合同。 |
+| [设备状态与过程监控讨论稿](equipment-status-process-monitoring.zh-CN.md) · [English](equipment-status-process-monitoring.md) | ARCH-OBS-001 r6 审阅指南，涵盖两张值表、SMA 或第三方上报到落库和展示，以及[第三方哪些字段能省略或传 null](equipment-status-process-monitoring.zh-CN.md#third-party-ingest)。 |
 | [AW 白皮书与演进路线](AIIS_AW_Whitepaper_Roadmap_v0.4.md) | 角色与分阶段路线；ARCH-AW-008对齐事实到业务的生命周期，不授权软件。 |
 | [AW 运行原理与详细设计](AIIS_AW_Runtime_Design.md) | 采集、配置与执行边界；匿名事实集成及独立业务确认；中文设计正文。 |
 | [DAA 详细设计](AIIS_DAA_Detailed_Design.md) | 已接受的受控阶段B基线；阶段C不可变双SQLite事实、有界最新优先上传、可靠回执与Backend读取／保留需求。 |

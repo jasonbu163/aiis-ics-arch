@@ -8,17 +8,91 @@ use crate::domain::{
 use rusqlite::params;
 use serde_json::{json, Value};
 pub(crate) fn fresh() -> Stores {
+    legacy(3)
+}
+// Historical public-vector fixtures omit the complete local activation/source graph.
+// Build unsealed legacy schemas directly under the real lock; never unseal a new profile.
+pub(crate) fn legacy(version: u32) -> Stores {
+    assert!([2, 3].contains(&version));
     let root = std::env::temp_dir()
         .canonicalize()
         .expect("explicit TMPDIR");
-    assert!(root.starts_with("/private/tmp") && root.to_string_lossy().contains("daa-008-r1-a-"));
-    let dir = root.join(format!(
-        "store-{}",
+    assert!(
+        root.starts_with("/private/tmp")
+            && (root.to_string_lossy().contains("daa-008-r1-a-")
+                || root.to_string_lossy().contains("daa-008-r2-a-"))
+    );
+    let profile = root.join(format!(
+        "legacy-profile-{}",
         crate::domain::local_configuration::id()
     ));
-    assert!(!dir.exists());
+    let dir = profile.join("local-acquisition-v1");
+    let lock = crate::infrastructure::local_profile_lock::ProfileLock::acquire(&profile).unwrap();
     std::fs::create_dir(&dir).unwrap();
-    assert!(!dir.is_symlink());
+    let instance = crate::domain::local_configuration::id();
+    for role in ["config", "runtime"] {
+        let path = dir.join(format!("{role}.sqlite"));
+        std::fs::File::create(&path).unwrap();
+        let c = connect(
+            &path,
+            true,
+            if role == "config" {
+                schema::CONFIG_APP
+            } else {
+                schema::RUNTIME_APP
+            },
+        )
+        .unwrap();
+        if role == "config" {
+            c.execute_batch(&schema::config_sql()).unwrap();
+            c.execute(
+                "INSERT INTO instance_metadata VALUES(1,?1,2,'asia-shanghai-rfc3339-ms-v1')",
+                [&instance],
+            )
+            .unwrap();
+            c.execute(
+                "INSERT INTO configuration_draft VALUES(1,?1,?2,'[]')",
+                params![
+                    crate::domain::local_configuration::id(),
+                    encode(&Configuration::default()).unwrap()
+                ],
+            )
+            .unwrap();
+            c.execute_batch(&format!(
+                "PRAGMA application_id={};PRAGMA user_version=2",
+                schema::CONFIG_APP
+            ))
+            .unwrap();
+        } else {
+            c.execute_batch(&if version == 3 {
+                schema::runtime_v3_sql()
+            } else {
+                schema::runtime_sql()
+            })
+            .unwrap();
+            c.execute(
+                "INSERT INTO runtime_metadata VALUES(1,?1,?2,1,NULL,'asia-shanghai-rfc3339-ms-v1')",
+                params![instance, version],
+            )
+            .unwrap();
+            if version == 3 {
+                let settings = DeliverySettings::default();
+                c.execute(
+                    "INSERT INTO delivery_settings(id,settings_revision,payload) VALUES(1,?1,?2)",
+                    params![settings.settings_revision, encode(&settings).unwrap()],
+                )
+                .unwrap();
+            }
+            c.execute_batch(&format!(
+                "PRAGMA application_id={};PRAGMA user_version={version}",
+                schema::RUNTIME_APP
+            ))
+            .unwrap();
+        }
+        c.close().unwrap();
+    }
+    drop(lock);
+    assert!(!dir.join("profile-contract.json").exists());
     Stores::open(&dir).unwrap()
 }
 pub(crate) fn seed(s: &mut Stores, seq: i64) -> BuiltCycle {
@@ -289,7 +363,7 @@ fn crash_child_uncommitted_ack() {
     unsafe { libc::_exit(86) }
 }
 #[test]
-fn crash_real_hot_journal_recovers_atomic_state() {
+fn unsealed_hot_journal_is_refused_without_recovery_authority() {
     let mut s = fresh();
     let b = seed(&mut s, 1);
     adopt(&mut s, &b);
@@ -317,27 +391,13 @@ fn crash_real_hot_journal_recovers_atomic_state() {
     assert_eq!(status.code(), Some(86));
     let journal = path.join("runtime.sqlite-journal");
     assert!(std::fs::metadata(&journal).unwrap().len() > 512);
-    let s = Stores::open(&path)
-        .expect("known v3 hot-journal recovery must preserve complete prior ledger");
-    assert_eq!(original(&s), before);
-    assert_eq!(
-        s.runtime
-            .query_row::<String, _, _>("SELECT state FROM sample_delivery", [], |r| r.get(0))
-            .unwrap(),
-        "pending"
-    );
-    assert_eq!(
-        s.runtime
-            .query_row::<u32, _, _>("SELECT count(*) FROM delivery_receipts", [], |r| r.get(0))
-            .unwrap(),
-        0
-    );
-    assert_eq!(
-        s.runtime
-            .query_row::<String, _, _>("SELECT state FROM delivery_batches", [], |r| r.get(0))
-            .unwrap(),
-        "unknown"
-    );
+    let journal_before = std::fs::read(&journal).unwrap();
+    let error = Stores::open(&path)
+        .err()
+        .expect("unsealed hot must be refused");
+    assert!(error.starts_with("time_profile_unsupported:"), "{error}");
+    assert_eq!(std::fs::read(&journal).unwrap(), journal_before);
+    assert!(!path.join("profile-contract.json").exists());
 }
 #[test]
 fn settings_cas_and_never_frozen_source_recheck() {

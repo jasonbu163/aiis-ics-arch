@@ -1,0 +1,14 @@
+{
+  "producerId": "mes-01",
+  "taskNo": "GT1-RUN-A",
+  "targetKey": "LINE-01",
+  "fieldConfigVersion": 3,
+  "priority": 1,
+  "syncValues": {
+    "productCode": "PRODUCT-A",
+    "targetLength": 1200
+  },
+  "localValues": {
+    "customerOrderNo": "MES-ORDER-001"
+  }
+}

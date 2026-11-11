@@ -5,7 +5,6 @@ use crate::{
     domain::{local_configuration::*, local_runtime::*},
     infrastructure::{
         local_logging::LocalLog,
-        local_profile_lock::ProfileLock,
         local_store::{StoreHandle, Stores},
         managed_s7::{ManagedS7, Transport},
     },
@@ -45,7 +44,6 @@ pub(crate) struct LocalEngine {
     pub activation: Mutex<()>,
     pub stopped: AtomicBool,
     pub log: Arc<LocalLog>,
-    _lock: ProfileLock,
     pub active_io: Mutex<BTreeMap<String, (Instant, u64)>>,
     pub cached_snapshot: Mutex<Option<(Instant, Value)>>,
     pub import_preview: Mutex<
@@ -82,10 +80,6 @@ impl LocalEngine {
             return Err("time_profile_unsupported:profile_symlink".into());
         }
         let dir = bootstrap.profile.join("local-acquisition-v1");
-        let before = crate::infrastructure::local_store::preflight(&dir)?;
-        let lock = ProfileLock::acquire(&bootstrap.profile)?;
-        before.recheck(&dir)?;
-        let dir = lock.profile.join("local-acquisition-v1");
         let stores = Stores::open(&dir)?;
         if !bootstrap.ignored_keys.is_empty() {
             stores.log.event(
@@ -129,7 +123,6 @@ impl LocalEngine {
             activation: Mutex::new(()),
             stopped: AtomicBool::new(false),
             log,
-            _lock: lock,
             import_preview: Mutex::new(None),
             offset_preview: Mutex::new(None),
             name_preview: Mutex::new(None),

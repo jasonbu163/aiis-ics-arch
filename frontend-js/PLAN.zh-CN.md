@@ -4,9 +4,12 @@ English version: [PLAN.md](PLAN.md)
 
 ## 当前基线
 
+- [ARCH-ACQ-003 r2](../plans/ARCH-ACQ-003-acquisition-data-optional-filters/spec.md)：`owner_accepted`。dev 两页已启用默认授权列表、可选筛选及 PLC、DB 和来源列。Human Owner 于 2026-11-11 验收 r2 dev 范围。
+
 - [ARCH-BE-004 r2](../plans/ARCH-BE-004-energy-price-hourly-history/spec.md)：`owner_accepted`；记录时间小时覆盖、选日历史与新增弹窗已独立验证，F-001 已关闭；Human Owner 于 2026-10-13 完成人工试用并接受，真实数据迁移另行授权。
 
-- Core 页面：login、system/user、system/dict。
+- Core 页面包括 login 和 `system/user`。ARCH-ACQ-002 已清退 `system/dict` 映射设置页。 [QA 记录](../plans/ARCH-ACQ-002-legacy-projection-retirement/checklist.md)
+- ARCH-FE-005 r2 新增一级菜单「采集数据」，下设「实时数据」和「采集历史」。QA5 通过两页 PLC 选中后的筛选对齐、标题帮助及 dev 实读复验，待 Human Owner 最终验收。 [QA 记录](../plans/ARCH-FE-005-acquisition-data-module/checklist.md)
 - 路由、导航、默认入口和文案共同消费规范化模块 Registry。
 - ARCH-FE-002 已接入获批的 dashboard/plan 首批模块及 `dashboard.home`、`plan.list` 页面；其余业务模块由后续 003 迁移任务处理。
 - [ARCH-FE-001 r3](../plans/ARCH-FE-001-frontend-module-auto-assembly/spec.md)：`qa_passed`；第二轮fresh-context Verification已通过r3并独立关闭首轮finding，历史保留。Human Owner最终验收及独立版本决定待定。

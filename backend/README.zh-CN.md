@@ -2,17 +2,17 @@
 
 English version: [README.md](README.md)
 
-本目录是可复用的 FastAPI/SQLAlchemy Core。它负责认证、系统管理、模块发现、Schema maintenance、Projection 控制面和项目无关的 monitor 现场事实。使用方项目只需按约定增加业务模块，不修改 Core 组合根。
+本目录是可复用的 FastAPI/SQLAlchemy Core。它负责认证、系统管理、模块发现、Schema maintenance、collector 状态和项目无关的业务 API。使用方项目只需按约定增加业务模块，不修改 Core 组合根。
 
 ## Core 模块
 
 ~~~text
 app/
 ├── user/             # 认证与账号 API
-├── system/           # 字典与 Projection 控制面 API
+├── system/           # 字典 API
 ├── control_agent/    # 后端侧 CA 授权合同
 ├── schema_maintenance/
-├── monitor/          # 旧collector/raw/latest及自身业务集成
+├── monitor/          # collector 状态及自身业务集成
 ├── plc_facts/        # 独立匿名事实provider
 ├── auxiliary/        # 班次与停机记录
 ├── energy/           # 能源价唯一owner
@@ -22,12 +22,12 @@ app/
 
 普通模块通过 app/<module>/manifest.py opt-in。enabled=False 会隐藏模块 API；Registry 不会创建数据表。新增表必须走显式 Alembic revision 或获批的 schema-maintenance 动作。user 与 control_agent 是安全/运行时边界，继续在 app/router.py 显式挂载。
 
-monitor Core 只返回 collector 健康状态和项目无关的 PLC DB-block raw/latest 事实。公共monitor历史查询使用独立monitor-business-read权限；客户专属HMI、规则与真实数据仍归消费项目。公共模块允许包含可复用领域 Model / Schema / Service / CRUD 与业务 API；[energy](app/energy/README.zh-CN.md) 唯一归属能源价，auxiliary归属班次/停机记录，不包含客户数据或独有规则。
+monitor Core 保留 collector 健康状态，旧 PLC DB-block raw/latest 接口已退役。公共monitor历史查询使用独立monitor-business-read权限；客户专属HMI、规则与真实数据仍归消费项目。公共模块允许包含可复用领域 Model / Schema / Service / CRUD 与业务 API；[energy](app/energy/README.zh-CN.md) 唯一归属能源价，auxiliary归属班次/停机记录，不包含客户数据或独有规则。
 
 ## 运行边界
 
 - FastAPI handler 调用 async Service/CRUD，不能轮询 PLC。
-- DAA承接新本地PLC采集，HTTP上传器尚未接通；冻结control-agent保留原直库快照/Projection兼容链。Field Flow为按自身范围交付的独立现场流程runtime。
+- DAA承接新本地PLC采集，HTTP上传器尚未接通；冻结 control-agent 保持原样，但其旧直库快照路径与升级后的 schema 不兼容。Field Flow为按自身范围交付的独立现场流程runtime。
 - Celery、Redis、Beat、Flower 和 Python Worker runtime 不是 Core 依赖。
 - Core baseline 现在是只包含十四张 Core 表的单一 `d4e6f8a0b2c4` Alembic root。其 upgrade 实际操作与十四表
   SQLAlchemy metadata 子集由 `tests/test_core_migration_baseline.py` 机械核对；私有项目仓继续保留自己的历史
@@ -39,7 +39,7 @@ monitor Core 只返回 collector 健康状态和项目无关的 PLC DB-block raw
 
 [BE-009事实](../contracts/published/http-api/plc-facts-v1/README.zh-CN.md)和[BE-010 typed业务集成](../contracts/published/http-api/business-integration-v1/README.zh-CN.md)已通过独立获批的隔离MySQL A+B验证。Owner终验、实际目标采用及DAA/SMA接线待定，默认关闭/空scope/未采用准入保持；匿名新路由不删除既有接口认证或权限。
 
-API-only `plc_facts` owner新增独立七表，旧monitor raw/latest和Projection输入保留。BE-010新增四张所属业务/回执表及有限13表41时间列兼容，源码接链`f6a8c0e2b4d6`→`0a2c4e6f8b10`→`1b3d5f7a9c20`。表存在不等于目标采用，隔离合成时间采用没有转换真实历史。操作说明归[事实维护手册](scripts/plc_facts_maintenance/README.zh-CN.md)、[业务时间采用手册](scripts/business_time_adoption/README.zh-CN.md)及所属任务；本README不授权执行这些操作。
+API-only `plc_facts` owner 提供 v2 样本写入与授权查询。源码后继 `3d5f7a9c1e23` 清退 v1 七表和旧快照两表，保留 v2 与 Projection 元数据。BE-010新增四张所属业务/回执表及有限13表41时间列兼容，源码接链`f6a8c0e2b4d6`→`0a2c4e6f8b10`→`1b3d5f7a9c20`。表存在不等于目标采用，隔离合成时间采用没有转换真实历史。操作说明归[事实维护手册](scripts/plc_facts_maintenance/README.zh-CN.md)、[业务时间采用手册](scripts/business_time_adoption/README.zh-CN.md)及所属任务；本README不授权执行这些操作。
 
 ## 本地检查
 
@@ -85,16 +85,14 @@ operator 的**原始配置集合必须是 supervisor 原始配置集合的子集
 必须在两数组中显式填写，不自动给 supervisor 补权限。先做此校验再过滤 unknown/disabled，
 所以 operator 独有的未知或已关闭 key 也会阻止启动。
 admin 无需数组，直接通过 `require_permissions()`；认证、参数校验、用户管理 actor/目标用户
-约束、Projection 状态/合同校验及 CA gate-token 规则仍然执行。空数组不改变仅登录接口或
+约束及 CA gate-token 规则仍然执行。空数组不改变仅登录接口或
 admin-only guard；授予一个 key 不会自动授予另一个 key。
 
 | key | 当前接口表面与边界 |
 | --- | --- |
 | `system` | 显式用户管理查询与写入；actor/目标用户限制仍独立执行，不等于整个 system 模块权限。 |
 | `system-dict` | 系统字典查询**和维护**共用该 key。 |
-| `projection-mapping` | Projection handler/policy catalog 与 mapping 查询。 |
-| `projection-mapping-manage` | mapping 草稿、校验、发布、复制与回滚 permission guard；Service 保留状态/合同校验，目前没有额外 role/admin 门槛。 |
-| `monitor` | collector 与 raw/latest 现场事实；不包含客户业务曲线或前端 monitor 页面授权。 |
+| `monitor` | collector 状态；不包含客户业务曲线或前端 monitor 页面授权。 |
 | `control-agent-read` | CA action-scope 目录查询。 |
 | `control-agent` | gate-token 签发 permission guard；不会远程执行设备动作，仍有独立角色限制。 |
 | `energy-price-read` | energy 现价/历史 GET；独立于 manage。 |
@@ -102,8 +100,6 @@ admin-only guard；授予一个 key 不会自动授予另一个 key。
 | `equipment-temperature-read` | 仅新完整样本GET；所有caller另须唯一配置设备scope。 |
 | `equipment-temperature-ingest` | 仅新完整样本POST；admin-only且设备scope约束，不隐含read。 |
 | `aiis_demo` | 默认关闭示例 manifest；配置后告警并忽略，数组不会启用该模块。 |
-
-Projection 管理路由传入 `actor_user_id` 记录操作者；此字段不构成角色校验。
 
 `schema_maintenance` 没有配置型 permission，使用 admin-only guard；CA authorization verify
 使用其 gate-token 合同。两个数组不能代替这些独立边界。
@@ -160,7 +156,7 @@ Bootstrap 继续是显式账号维护动作：数组不会创建/删除账号或
 
 ## 配置逐项说明
 
-以下表格描述历史BE003的69项配置面。当前公开example共91项：原69+BE006映射scope3+A0集成配置12+BE009事实配置4+r2采用路径3（逐项采用路径说明见下文）。源码缺省来自 Settings；“必填”表示缺失会在配置加载时失败。模板列列出 host/dev/prod 的公开值差异（相同值合并），口令/秘密只标为 placeholder；公开模板不是本机实际配置。bool 使用 True/False，字符串可单/双引号包裹；JSON 数组用外层单引号、内部双引号。
+以下表格描述历史BE003的69项配置面。当前公开 example 已移除旧 Projection runner 与 v1 事实配置；其余配置见下文。源码缺省来自 Settings；“必填”表示缺失会在配置加载时失败。模板列列出 host/dev/prod 的公开值差异（相同值合并），口令/秘密只标为 placeholder；公开模板不是本机实际配置。bool 使用 True/False，字符串可单/双引号包裹；JSON 数组用外层单引号、内部双引号。
 
 ### 应用/API
 
@@ -174,16 +170,13 @@ Bootstrap 继续是显式账号维护动作：数组不会创建/删除账号或
 | `BACKEND_PORT` | Uvicorn 监听端口，正整数。 (int) | `8000` | `8000` |
 | `BACKEND_WORKERS` | 生产 Uvicorn worker 数；开发和打包入口固定为一个。 (int) | `1` | `1` / `4` |
 
-### 运行/Projection
+### 运行
 
 | key | 用途/类型 | 源码缺省 | 公开模板值 |
 | --- | --- | --- | --- |
 | `DEBUG` | 启用诊断错误详情；生产应关闭。 (bool) | 必填，无源码缺省 | `True` / `False` |
-| `TESTING` | 使用独立 MySQL 测试数据库并关闭 Projection runtime。 (bool) | `False` | `False` |
+| `TESTING` | 使用独立 MySQL 测试数据库。 (bool) | `False` | `False` |
 | `BACKEND_MOCK_ENABLED` | 允许模块 Service mock provider 或显式示例 seed。 (bool) | `False` | `False` |
-| `PROJECTION_RUNNER_ENABLED` | 仅在指定唯一 writer 宿主启用 lifespan Projection runner。 (bool) | `False` | `False` |
-| `PROJECTION_RUNNER_INTERVAL_SECONDS` | Projection 轮询间隔，秒，正数。 (float) | `1.0` | `1.0` |
-| `PROJECTION_RUNNER_BATCH_SIZE` | 每批 Projection 处理的 raw facts 上限，正整数。 (int) | `100` | `100` |
 | `TZ` | 进程时区；重启生效，不修改数据库时区。 (str) | `'Asia/Shanghai'` | `Asia/Shanghai` |
 
 ### 认证/权限
@@ -281,9 +274,7 @@ MySQL root 维护通过 `MYSQL_ROOT_USER`/`MYSQL_ROOT_PASSWORD` 和 `MYSQL_HOST`
 
 `TESTING=True` 将 MySQL 应用 URL 切到独立测试库（源码默认库名
 `aiis_ics_architecture_test`），不是所有数据库引擎的通用沙盒。数据库测试可能建/清该库，必须
-显式使用获批隔离目标；静态检查使用 `no_db` 测试。公开模板关闭 TESTING、业务 mock 和 Projection
-runner。Projection 读取 CA raw facts，不轮询 PLC，必须只有一个活动 writer：仅在指定单 worker
-宿主开启，不能在普通多 worker API 部署中开启。间隔和批量上限影响轮询/工作批次。
+显式使用获批隔离目标；静态检查使用 `no_db` 测试。公开模板关闭 TESTING 和业务 mock，旧 Projection runner 已退出组合。
 `TZ` 只设置进程时区，不迁移数据库时间戳或数据库服务端时区。
 
 上方全部 18 个 bootstrap 字段仅用于显式 `main.py --maintenance bootstrap-users`，不用于普通
@@ -294,8 +285,7 @@ runner。Projection 读取 CA raw facts，不轮询 PLC，必须只有一个活�
 会先执行上方说明的权限配置校验。
 
 通用当前模块授权示例为 supervisor `["monitor","system","control-agent-read"]`、operator
-`["monitor"]`。当前 monitor router 仅包含 GET `/monitor/collector/status` 和
-GET `/monitor/realtime/latest`，operator 获得的是这两个事实查询。`system` 包含用户管理写入，
+`["monitor"]`。`monitor` 权限提供 GET `/monitor/collector/status`；旧 realtime 快照路径已退役。`system` 包含用户管理写入，
 仍受独立 actor 限制；`control-agent-read` 是 action-scope 查询。这是显式授权选择，不是公开模板
 安全 `[]` 缺省。本轮获批本机三环境迁移为 host/prod operator 新增 monitor，dev supervisor 新增
 三项且 operator 新增 monitor；不是单纯等值变量改名。未来在同 key 下新增接口需要重新审查。
@@ -316,7 +306,7 @@ GET `/monitor/realtime/latest`，operator 获得的是这两个事实查询。`s
 | --- | --- | --- | --- |
 | `EQUIPMENT_TEMPERATURE_PILOT_ID` | 新样本API唯一精确业务设备key；空/非法值拒绝所有caller含admin。模块本地BaseSettings，重启采用。 (str) | `''` | `''` |
 
-BE003历史检查点新增后每公开env example共69项；当前91项分组见下文，原十一组英文标题及全部旧值/grants保留。合成文档使用temperature-pilot-01。源码/冻结/Docker dotenv路径沿既有公开helper；process覆盖dotenv、显式注入覆盖process。该key不授予permission、不改旧GET。[独立MySQL入口](tests_mysql/test_equipment_temperature.py)只准备另批可丢弃验证，不使用共享破坏性conftest。
+BE003历史检查点新增后每公开env example共69项；当前分组见下文，原十一组英文标题及保留值/grants 保持。合成文档使用temperature-pilot-01。源码/冻结/Docker dotenv路径沿既有公开helper；process覆盖dotenv、显式注入覆盖process。该key不授予permission、不改旧GET。[独立MySQL入口](tests_mysql/test_equipment_temperature.py)只准备另批可丢弃验证，不使用共享破坏性conftest。
 
 
 ## HTTP映射业务观测
@@ -341,7 +331,7 @@ Numeric保持声明的小数位；FLOAT采用有界binary32规范化，相对误
 
 ## 匿名业务集成源码
 
-[ARCH-BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/spec.md)把八路typed匿名POST接入owner本地async Service/CRUD及既有业务表。[闭合provider](../contracts/published/http-api/business-integration-v1/README.zh-CN.md)定义严格JSON number、typed成功/错误壳、双摘要、存在集合/单位与永久最小回执。旧JWT/admin/permission/scope及Projection事务/cursor/audit边界保留。producer/source只是准入声明，不是身份认证。
+[ARCH-BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/spec.md)把八路typed匿名POST接入owner本地async Service/CRUD及既有业务表。[闭合provider](../contracts/published/http-api/business-integration-v1/README.zh-CN.md)定义严格JSON number、typed成功/错误壳、双摘要、存在集合/单位与永久最小回执。旧 JWT/admin/permission/scope 及 owner 本地业务时间边界保留。producer/source只是准入声明，不是身份认证。
 
 三个开关默认关闭、设备/producer列表默认空、storage profile默认unadopted。默认旧入口直接使用原时间路径，不读取凭据或探库；新入口通过scope后仍在数据库依赖前503。shanghai-v1同时要求显式外部adopted凭据及每事务匹配UUID/schema/revision/时钟。未知profile、unadopted残留非空路径、缺失/非法凭据、错目标均拒绝写入，单改profile不能就绪。
 
@@ -349,14 +339,24 @@ Numeric保持声明的小数位；FLOAT采用有界binary32规范化，相对误
 | --- | --- | --- | --- |
 | EQUIPMENT_INTEGRATION_ADOPTION_FILE | equipment业务时间凭据的外部绝对路径；空表示未采用。str | 空 | `""` |
 | PERFORMANCE_INTEGRATION_ADOPTION_FILE | 生产/过程采用凭据外部绝对路径，包含人工时间basis。str | 空 | `""` |
-| MONITOR_INTEGRATION_ADOPTION_FILE | 业务曲线采用凭据外部绝对路径，与事实/raw/latest独立。str | 空 | `""` |
+| MONITOR_INTEGRATION_ADOPTION_FILE | 业务曲线采用凭据外部绝对路径，与 v2 事实独立。str | 空 | `""` |
 
 固定兼容面为13张旧表41个日历时间列；aware保留同瞬间，naive需要明确有限basis证据。DATE/耗时、旧UTC wire/摘要/JSON结果和人工0优先级保持。四张新表仅使用显式上海DATETIME(3)，无自动UTC默认。唯一迁移源码链为f6→BE009 0a2c4e6f8b10（71应用表）→BE010 1b3d5f7a9c20（75）。源码不等于真实库已迁移/采用；非空新表禁止破坏性downgrade。
 
 [有限只读工具](scripts/business_time_adoption/README.zh-CN.md)仅输出candidate。真实历史调查/转换、writer隔离、备份/回退、目标采用、数据库/Docker/B和部署仍须具体批准；unknown或无法按来源判定的混合历史继续阻止G-T解除。本源码状态不证明真实目标已保存业务行。
 
-## 有界PLC事实源码
+## PLC 事实 v2 与清退
 
-[plc_facts](app/plc_facts/README.zh-CN.md)拥有三路匿名集成入口和七张独立事实表。模块本地`PLC_FACTS_ENABLED=False`关闭准入；`PLC_FACTS_PLC_IDS_JSON='[]'`拒绝全部PLC；`PLC_FACTS_STORAGE_PROFILE=unadopted`保持未采用；`PLC_FACTS_CURSOR_HMAC_KEY=''`没有游标签名key。这四项独立于登录、权限和业务集成，填写profile不能绕过schema/source/时间采用。
+[plc_facts](app/plc_facts/README.zh-CN.md)提供 v2 样本写入和五路授权采集数据 GET，默认关闭准入。v1 provider 合同只作为固定旧源码的历史工件保留。
 
-显式`0a2c4e6f8b10`接`f6a8c0e2b4d6`只增加七张事实表（已迁移应用71表，不计`alembic_version`）；完整源码metadata另含BE010四表，共75。命名`BE009-A`/`BE009-B`不同于上文冻结历史fixture和配置计数。[维护CLI](scripts/plc_facts_maintenance/README.zh-CN.md)显式有界且无调度器。源码检查不授权迁移、采用或数据库访问。
+`3d5f7a9c1e23` 接续 `2c4e6a8b0d12`，只允许前向迁移。在线 MySQL 迁移要求显式提供并精确核对 `ACQ_RETIREMENT_EXPECTED_SERVER_UUID` 与 `ACQ_RETIREMENT_EXPECTED_SCHEMA`，核实完整表清单、九张 InnoDB 空表和无可见依赖；同连接有界获取九表写锁，再复核并清退。完整依赖可见性、独占维护窗口和恢复材料必须外部预检，迁移本身无法证明。部分或不确定 DDL 状态按[获批任务](../plans/ARCH-ACQ-002-legacy-projection-retirement/spec.md)的恢复流程处理；仅登记 revision 的受控重跑须有已确认的证据和未变的保留数据对账。源码变更不代表数据库已迁移或采用。
+
+后继 `4e6a8b0d2f14` 为两张事实表改名并扩展可空历史元数据；目标、维护窗口、分阶段恢复及来源采用按 [ARCH-ACQ-003 r2](../plans/ARCH-ACQ-003-acquisition-data-optional-filters/spec.md) 执行。
+
+## 通用任务流程候选
+
+ARCH-TASK-001 r1 用[通用任务流程](../contracts/published/http-api/generic-task-workflow-v1/README.zh-CN.md)替换旧卷材计划与实绩入口。`app/task` 拥有字段版本、集成资格和 `task.*` 错误；计划拥有下发及动作证据；实绩拥有完整快照，并在同事务调用计划回写。旧报表、首页路由及旧实绩模型导入退出；独立质量、采集、设备和监控保持各自边界。
+
+候选后继 `5f7a9c1e3b25` 要求精确前驱 `4e6a8b0d2f14`、显式目标身份和在线空表/依赖预检。MySQL DDL 不具事务回滚，迁移不提供自动 downgrade。实际操作前须阅读已批准任务的切换与恢复方案；源码和 OpenAPI 生成不授权 DDL、重启或更改真实配置。
+
+私有 `TASK_INTEGRATION_PROFILE_FILE` 登记目标/版本的下发字段、PLC 序号上限和来源。`TASK_INTEGRATION_ENABLED` 默认关闭，只控制免前端 token 的集成入口；关闭时登录用户创建计划仍需已登记的项目映射。保留所有在用版本的目标映射和自动来源，变更流使用新版本。样例版本、角色授予、错误及 MES/CA/FF/DAA/SMA 全流程见合同。

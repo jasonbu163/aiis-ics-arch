@@ -20,9 +20,9 @@
 
 - [module_registry.py](module_registry.py) 只枚举已导入 `app` package 的直接子 package。
 - 只有 `app.<module>.manifest` 直接导出类型为 `ModuleManifest` 且 `name` 严格匹配 package 名的 `manifest` 才 opt in。
-- 没有 `manifest.py` 的 package 会被跳过，不提供 route、model 或 Projection；manifest 内部 import、导出类型错误和名称错误都会显式失败。
+- 没有 `manifest.py` 的 package 会被跳过，不提供 route 或 model；manifest 内部 import、导出类型错误和名称错误都会显式失败。
 - [router.py](router.py) 继续集中负责 router 创建和路由汇总。
-- enabled manifest 进入普通 router 与 Projection owner discovery；disabled manifest 不进入二者，但仍导入其 model package 供 SQLAlchemy metadata 与 migration 检查。
+- enabled manifest 进入普通 router；disabled manifest 不进入 router，但仍导入其 model package 供 SQLAlchemy metadata 与 migration 检查。
 - Alembic 与显式 schema-maintenance action 仍是唯一 Schema 变更入口；model import 不执行 DDL 或 migration。
 
 安全与现场 runtime 边界保持显式：
@@ -53,7 +53,7 @@ backend/app/<module>/
 
 当新模块需要对照当前 package 结构时，优先使用项目本地的
 [`aiis_demo/`](aiis_demo/README.zh-CN.md)。它只作 reference，且固定为
-`enabled=False`；因此正常组合不会暴露其 route 或 Projection owner。它的空 models package
+`enabled=False`；因此正常组合不会暴露其 route。它的空 models package
 会为 metadata discovery 导入，但不声明任何 table。不要把它当作业务模板、授权授予或 AIIS
 shared skill/template。复制它时必须有意识地替换所有 demo 名称和 payload，重新设计业务权限；
 一旦引入真实持久化，必须另行新增 Alembic migration。
@@ -208,9 +208,9 @@ Numeric保持声明的小数位；FLOAT采用有界binary32规范化，相对误
 
 ## PLC事实owner
 
-[plc_facts](plc_facts/README.zh-CN.md)是仅API的普通模块（order=36，无权限/exports/依赖）。匿名provider使用模块本地HTTP/typed Schema和七张独立表，保留monitor/CA/Projection来源。[ARCH-BE-009 r1](../../plans/ARCH-BE-009-backend-facts-integration/spec.md)定义源码及schema/source采用gate。
+[plc_facts](plc_facts/README.zh-CN.md)是仅 API 的普通模块（order=36），提供 `plc-facts-read` 权限及 v2 样本/查询路由。历史 v1 provider 和旧快照/Projection runtime 按 [ARCH-ACQ-002 r2](../../plans/ARCH-ACQ-002-legacy-projection-retirement/spec.md)退出当前源码。
 
 
 ## BE010 r2源码边界
 
-八路owner本地async业务入口已具备[闭合provider](../../contracts/published/http-api/business-integration-v1/README.zh-CN.md)、永久最小回执及接BE009 0a2的显式1b3后继。默认仍未采用；13表41列旧时间adapter与外部凭据须在实际写入前具备真实目标证据。旧认证/Projection默认时间行为保留。源码/fixture计数及纯公共原语、owner维护export见[MODULE_CONTRACT](MODULE_CONTRACT.zh-CN.md)。数据库/Docker/B、历史转换及实际采用仍分别受gate约束。
+八路owner本地async业务入口已具备[闭合provider](../../contracts/published/http-api/business-integration-v1/README.zh-CN.md)、永久最小回执及接BE009 0a2的显式1b3后继。默认仍未采用；13表41列旧时间adapter与外部凭据须在实际写入前具备真实目标证据。旧认证入口与保留的 owner 本地时间适配行为保持。源码/fixture计数及纯公共原语、owner维护export见[MODULE_CONTRACT](MODULE_CONTRACT.zh-CN.md)。数据库/Docker/B、历史转换及实际采用仍分别受gate约束。
