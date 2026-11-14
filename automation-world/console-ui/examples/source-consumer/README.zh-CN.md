@@ -65,6 +65,8 @@ import '@aw-ui-styles'
 
 `ThemeToggle` 接收 `theme: UiTheme` 和翻译后的目标动作 `label`；`LanguageSwitch` 接收 `locale: 'zh-CN' | 'en-US'`、翻译后的 `zhLabel` / `enLabel`（通常为“中” / “EN”）及目标动作 `label`。二者均仅发出 `toggle`，不修改状态或写入 storage。label 同时提供原生 tooltip 与可访问名称，主题按钮还表达当前暗色状态。通过 `@aw-ui` 导入并放在公共样式作用域内，由宿主处理事件和更新 props。CU 保留既有 UI 偏好，消费者拥有独立状态且不持久化；消费者构建产物无需 CU 在线。
 
+圆形语言控件只显示目标语言：中文界面为 `EN`，英文界面为 `中`。圆形纯图标动作向 `ConsoleActionButton` 传入 `round-icon`、`icon` 和翻译后的 `label`；label 用作可访问名称，未指定 `title` 时也用作提示。加载和禁用行为保持不变；不传 `round-icon` 时仍为普通文字按钮。
+
 6. 执行 `pnpm build`，停止 CU，然后 `pnpm preview`。编译后的 JS/CSS 全在自己的 dist，无 chunk 指向 CU dist 或开发端口。实际 Agent 接入、发布与业务配置属于另行批准工作。
 
 归属见 [CU README](../../README.zh-CN.md)，本基础任务由 [CU PLAN](../../PLAN.zh-CN.md) 索引。

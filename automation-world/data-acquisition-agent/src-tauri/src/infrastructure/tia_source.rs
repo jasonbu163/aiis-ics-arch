@@ -4,7 +4,9 @@ mod reconcile;
 #[cfg(test)]
 mod tests;
 pub(crate) use crate::domain::source_import::ImportPreview;
-pub(crate) use reconcile::{identify, legacy_import, plan, verify_db};
+pub(crate) use reconcile::{identify, legacy_import_for_runtime, plan_for_runtime, verify_db};
+#[cfg(test)]
+pub(crate) use reconcile::{legacy_import, plan};
 // 旧单DB纯函数调用保持兼容；多DB必须使用显式映射。
 #[cfg(test)]
 pub(crate) use reconcile::legacy_import as import;

@@ -1,6 +1,25 @@
 //! 本地状态与IPC v1 DTO：意图、实态、准入、持久版本和有限查询分别表达。
 use super::local_configuration::{Configuration, Issue};
 use serde::{Deserialize, Serialize};
+pub(crate) const STARTUP_PRIVATE_NAME: &str = "__daa_startup_settings_v1__";
+pub(crate) const STARTUP_PRIVATE_ID: &str = "0daa0150-0000-4000-8000-000000000001";
+/// 启动偏好独立于采集配置版本；缺少历史记录时两项均关闭。
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(crate) struct StartupSettings {
+    pub schema_version: u32,
+    pub auto_collect: bool,
+    pub auto_report: bool,
+}
+impl Default for StartupSettings {
+    fn default() -> Self {
+        Self {
+            schema_version: 1,
+            auto_collect: false,
+            auto_report: false,
+        }
+    }
+}
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct ConfigurationView {

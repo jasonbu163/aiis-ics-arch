@@ -48,6 +48,8 @@ The consumer creates/mounts its own Vue app, provides the `theme` prop (`light`/
 
 `ThemeToggle` accepts `theme: UiTheme` and a translated target-action `label`; `LanguageSwitch` accepts `locale: 'zh-CN' | 'en-US'`, translated `zhLabel` / `enLabel` (normally “中” / “EN”) and a translated target-action `label`. Both emit `toggle` without changing state or writing storage. The label supplies the native tooltip and accessible name; the theme button also exposes its current dark state. Import both from `@aw-ui`, keep them inside the public style scope, and let your host handle the event and update props. CU keeps its existing UI preferences; the consumer owns separate state and does not persist it. The built consumer needs no running CU.
 
+The round language control displays only the target: `EN` in Chinese and `中` in English. For a round icon-only action, pass `round-icon`, an `icon` and a translated `label` to `ConsoleActionButton`; the label supplies its accessible name and, unless `title` is provided, its tooltip. Loading and disabled behavior are retained. Without `round-icon`, the ordinary text button is unchanged.
+
 After source compilation, the consumer serves its **own** `dist`. Running built output needs no CU process, source checkout or CU node_modules. This first version provides source exports, not an npm publication, root workspace, online CU service or actual integration into another Agent. See [source layers](src/app/README.md) and [approved scope](plans/CU-001-workbench-foundation/spec.md).
 
 ## Flat and grouped navigation

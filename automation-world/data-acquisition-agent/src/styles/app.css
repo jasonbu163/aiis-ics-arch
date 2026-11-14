@@ -121,3 +121,72 @@ h1,h2,h3,p { margin-top:0; }
 .daa-delivery-source { padding-block: 12px; border-top: 1px solid var(--el-border-color); }
 .daa-delivery-dialog .el-form-item { margin-bottom: 16px; }
 .daa-delivery-dialog dd { overflow-wrap: anywhere; }
+.daa-delivery-help { position: relative; display: inline-flex; }
+.daa-help-button { width: 24px; height: 24px; border: 1px solid var(--el-border-color); border-radius: 50%; color: var(--agent-text-muted); background: transparent; cursor: pointer; }
+.daa-help-text { position: absolute; z-index: 20; left: 0; top: 30px; width: min(320px, 75vw); padding: 10px; border: 1px solid var(--el-border-color); border-radius: 6px; background: var(--el-bg-color-overlay); color: var(--el-text-color-primary); box-shadow: var(--el-box-shadow-light); }
+
+/* 上报摘要和存储使用现有主题语义；窄窗保留可读统计与表格横滚。 */
+.daa-reporting-status { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
+.daa-reporting-status__pill,.daa-storage-state { display:inline-flex; align-items:center; border-radius:999px; padding:4px 10px; background:var(--el-fill-color-light); color:var(--agent-text-muted); font-weight:600; }
+.daa-reporting-status__pill.is-running { color:var(--el-color-success); background:var(--el-color-success-light-9); }
+.daa-reporting-status__pill.is-warning { color:var(--el-color-warning); background:var(--el-color-warning-light-9); }
+.daa-reporting-destination { display:grid; grid-template-columns:max-content minmax(0,1fr); align-items:baseline; gap:6px 10px; margin-top:12px; color:var(--agent-text-muted); font-size:13px; }
+.daa-reporting-destination strong { color:var(--agent-text); overflow-wrap:anywhere; font-weight:600; }
+.daa-reporting-stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin:20px 0 12px; }
+.daa-reporting-stat { min-width:0; display:grid; align-content:start; gap:8px; padding-left:16px; border-left:1px solid var(--agent-border); }
+.daa-reporting-stat:first-child { padding-left:0; border-left:0; }
+.daa-reporting-stat__label { display:flex; flex-wrap:wrap; align-items:center; gap:6px; color:var(--agent-text-muted); }
+.daa-reporting-stat strong { font-size:24px; line-height:1.2; font-variant-numeric:tabular-nums; }
+.daa-reporting-stat:last-child .daa-help-text { left:auto; right:0; }
+.daa-startup-heading { display:flex; align-items:center; gap:10px; }
+.daa-startup-title,.daa-startup-collapse { border:0; background:transparent; color:inherit; cursor:pointer; }
+.daa-startup-title { padding:0; font:inherit; font-weight:inherit; }
+.daa-startup-collapse { display:inline-flex; align-items:center; padding:6px; }
+.daa-startup-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.daa-startup-option { display:flex; align-items:center; justify-content:space-between; gap:16px; min-width:0; font-weight:600; }
+.daa-startup-option + .daa-startup-option { border-left:1px solid var(--agent-border); padding-left:16px; }
+.daa-startup .el-alert { margin-top:10px; }
+@media(max-width:640px) { .daa-startup-options { grid-template-columns:1fr; } .daa-startup-option + .daa-startup-option { border-left:0; border-top:1px solid var(--agent-border); padding:12px 0 0; } }
+.daa-reporting-filter { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+@media(max-width:640px) { .daa-reporting-stats { grid-template-columns:repeat(2,minmax(0,1fr)); } .daa-reporting-stat:nth-child(3) { padding-left:0; border-left:0; } }
+/* 本地存储始终保留四栏；长日期和数值在各自栏内换行，不裁掉内容。 */
+.daa-storage-stats { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.daa-storage-stat > span { color:var(--agent-text-muted); min-height:2.6em; line-height:1.3; overflow-wrap:anywhere; }
+.daa-storage-stat > strong { font-size:20px; overflow-wrap:anywhere; }
+.daa-storage-stats .daa-storage-stat:nth-child(3) { padding-left:16px; border-left:1px solid var(--agent-border); }
+
+/* 逐 PLC 上报身份：窄窗横向滚动，保留现有主题和控件。 */
+.daa-delivery-settings-dialog { max-height:calc(100vh - 32px); margin:16px auto !important; display:flex; flex-direction:column; }
+.daa-delivery-settings-dialog .el-dialog__body { overflow-y:auto; }
+/* 上报确认只调整此类弹窗：来源和长标识可滚动，标题与动作始终可见。 */
+.daa-reporting-confirm.el-message-box { --el-messagebox-padding-primary:var(--agent-card-padding); width:min(880px, calc(100vw - 32px)); max-width:calc(100vw - 32px); max-height:calc(100vh - 32px); display:inline-flex; flex-direction:column; border:1px solid var(--agent-border); border-radius:var(--agent-card-radius-compact); box-shadow:var(--agent-shadow); }
+.daa-reporting-confirm .el-message-box__header,.daa-reporting-confirm .el-message-box__btns { flex:none; }
+.daa-reporting-confirm .el-message-box__btns { gap:var(--agent-action-gap); }
+.daa-reporting-confirm .el-message-box__btns .el-button { height:40px; padding:0 18px; border-radius:var(--agent-control-radius); box-shadow:none; font-weight:590; }
+.daa-reporting-confirm .el-message-box__btns .el-button + .el-button { margin-left:0; }
+.daa-reporting-confirm .el-message-box__content { display:flex; flex:1 1 auto; flex-direction:column; min-height:0; overflow:hidden; }
+.daa-reporting-confirm .el-message-box__container,.daa-reporting-confirm .el-message-box__message { display:flex; flex:1 1 auto; min-width:0; min-height:0; }
+.daa-reporting-confirm .el-message-box__container { align-items:stretch; }
+.daa-confirm-scroll { flex:1 1 auto; min-width:0; min-height:0; overflow:auto; padding-right:4px; }
+.daa-confirm-scroll:focus-visible { outline:2px solid var(--agent-accent-strong); outline-offset:-2px; }
+.daa-confirm-section + .daa-confirm-section { margin-top:18px; }
+.daa-confirm-section h3 { margin:0 0 10px; color:var(--agent-text); font-size:14px; font-weight:600; }
+.daa-confirm-targets,.daa-confirm-source__fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 20px; margin:0; }
+.daa-confirm-field { min-width:0; }
+.daa-confirm-field dt { color:var(--agent-text-muted); font-size:12px; line-height:1.4; }
+.daa-confirm-field dd { margin:3px 0 0; color:var(--agent-text); font-family:ui-monospace,monospace; font-size:13px; line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
+.daa-confirm-hint { margin:0 0 8px; color:var(--agent-text-muted); font-size:13px; line-height:1.55; }
+.daa-confirm-sources { margin:0; padding:0; list-style:none; }
+.daa-confirm-source { padding:10px 0; border-top:1px solid var(--agent-border); }
+.daa-confirm-source__title { display:block; margin-bottom:8px; color:var(--agent-text); font-size:13px; }
+.daa-confirm-note { margin:14px 0 0; padding:10px 12px; border:1px solid var(--agent-border); border-radius:var(--agent-control-radius-small); background:var(--agent-surface-muted); color:var(--agent-text); font-size:13px; line-height:1.55; overflow-wrap:anywhere; }
+.daa-confirm-scroll > .daa-confirm-note:first-child { margin:0 0 14px; }
+@media(max-width:600px) { .daa-confirm-targets,.daa-confirm-source__fields { grid-template-columns:1fr; } }
+.daa-reporting-source-scroll { min-width:0; overflow-x:auto; }
+.daa-reporting-source-table { width:100%; min-width:850px; table-layout:fixed; border-collapse:collapse; }
+.daa-reporting-source-table th,.daa-reporting-source-table td { padding:8px 5px; text-align:left; vertical-align:middle; border-bottom:1px solid var(--agent-border); }
+.daa-reporting-source-table th { font-size:12px; overflow-wrap:anywhere; }
+.daa-reporting-source-table th:first-child { width:170px; }
+.daa-reporting-source-table th:nth-child(2) { width:90px; }
+.daa-reporting-source-table th:last-child { width:90px; }
+.daa-reporting-paste { margin-top:12px; }

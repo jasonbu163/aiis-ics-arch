@@ -1,5 +1,9 @@
 {
   "zh": "中文",
   "en": "English",
-  "switch": "切换语言"
+  "switch": "切换语言",
+  "switchToEnglishShort": "EN",
+  "switchToChineseShort": "中",
+  "switchToEnglish": "切换到英语",
+  "switchToChinese": "切换到中文"
 }

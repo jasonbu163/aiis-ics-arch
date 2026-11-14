@@ -9,12 +9,14 @@
             <StatusCapsule :label="t('workbench.sample')" />
             <ThemeToggle :theme="theme" :label="theme === 'light' ? t('workbench.switchToDark') : t('workbench.switchToLight')" @toggle="toggleTheme" />
             <LanguageSwitch :locale="locale === 'zh-CN' ? 'zh-CN' : 'en-US'" :zh-label="t('workbench.zhLabel')" :en-label="t('workbench.enLabel')" :label="locale === 'zh-CN' ? t('workbench.switchToEnglish') : t('workbench.switchToChinese')" @toggle="toggleLocale" />
+            <ConsoleActionButton round-icon :label="t('workbench.refresh')" :icon="Refresh" @click="refreshEvents++" />
           </template>
         </AgentTopbar>
       </template>
       <div class="workbench-page">
         <PageSamples v-if="section === 'pages'" :theme="theme" :preview-variables="previewVariables" />
         <div class="workbench-notice"><strong>{{ t('workbench.sample') }}</strong><span>{{ t('workbench.sampleNote') }}</span></div>
+        <p v-if="refreshEvents" class="workbench-feedback" role="status">{{ t('workbench.refreshSample', { count: refreshEvents }) }}</p>
         <ConsoleCard v-if="section === 'shell'" :title="t('workbench.shellTitle')" :icon="Monitor">
           <p>{{ t('workbench.shellNote') }}</p>
           <dl class="workbench-facts"><div><dt>{{ t('workbench.contract') }}</dt><dd><code>src/ui/index.ts</code><br /><code>src/ui/styles/index.css</code></dd></div><div><dt>{{ t('workbench.source') }}</dt><dd>{{ t('workbench.sourceNote') }}</dd></div></dl>
@@ -83,7 +85,7 @@ import { useI18n } from 'vue-i18n'
 import { ElConfigProvider, ElForm, ElFormItem, ElInput, ElRadio, ElRadioGroup, ElSwitch } from 'element-plus'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import en from 'element-plus/es/locale/lang/en'
-import { Grid, Monitor, Operation } from '@element-plus/icons-vue'
+import { Grid, Monitor, Operation, Refresh } from '@element-plus/icons-vue'
 import { AgentLayout, AgentSidebar, AgentTopbar, ConsoleCard, ConsoleActionButton, StatusCapsule, ThemeToggle, LanguageSwitch, type UiTone, type UiTheme, type NavigationItem } from '../ui'
 const { t, locale } = useI18n()
 const storedTheme = localStorage.getItem('cu.theme')
@@ -107,6 +109,7 @@ const tone = ref<UiTone>('success')
 const compact = ref(false)
 const customLabel = ref('')
 const actionShown = ref(false)
+const refreshEvents = ref(0)
 const tones: UiTone[] = ['neutral', 'success', 'warning', 'danger']
 const navigation = computed(() => [{ id: 'shell', label: t('workbench.shell'), icon: Monitor }, { id: 'components', label: t('workbench.components'), icon: Grid }, { id: 'parameters', label: t('workbench.parameters'), icon: Operation }, { id: 'pages', label: t('workbench.pageSamples.pages'), icon: Grid }])
 const sampleActive = ref('panel-a')

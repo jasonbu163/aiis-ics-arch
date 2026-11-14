@@ -1,12 +1,74 @@
 //! 配置草稿CAS、不可变版本与可恢复跨库token；数据库逻辑只存在本适配层。
 use super::{sql_error, Stores};
 use crate::domain::{
-    local_configuration::{id, validate, Configuration, LocalResult},
-    local_runtime::ConfigurationView,
+    local_configuration::{id, validate_for_runtime, Configuration, LocalResult},
+    local_runtime::{ConfigurationView, StartupSettings, STARTUP_PRIVATE_ID, STARTUP_PRIVATE_NAME},
     local_sample::{digest, encode, now},
 };
 use rusqlite::{params, OptionalExtension};
 impl Stores {
+    /// 复用配置库的受保护私有记录，避免改写草稿、活动版本或旧库 DDL。
+    pub fn startup_settings(&self) -> LocalResult<StartupSettings> {
+        let mut stmt = self.config.prepare(
+            "SELECT id,name,content,sha256,diagnostics FROM source_documents WHERE id=?1 OR name=?2 LIMIT 2",
+        ).map_err(sql_error)?;
+        let rows = stmt
+            .query_map(params![STARTUP_PRIVATE_ID, STARTUP_PRIVATE_NAME], |r| {
+                Ok((
+                    r.get::<_, String>(0)?,
+                    r.get::<_, String>(1)?,
+                    r.get::<_, String>(2)?,
+                    r.get::<_, String>(3)?,
+                    r.get::<_, String>(4)?,
+                ))
+            })
+            .map_err(sql_error)?
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(sql_error)?;
+        if rows.is_empty() {
+            return Ok(StartupSettings::default());
+        }
+        if rows.len() != 1 {
+            return Err("startup_settings_corrupt".into());
+        }
+        let (id, name, content, sha, diagnostics) = &rows[0];
+        if id != STARTUP_PRIVATE_ID
+            || name != STARTUP_PRIVATE_NAME
+            || *sha != digest(content)
+            || diagnostics != "[]"
+        {
+            return Err("startup_settings_corrupt".into());
+        }
+        let settings: StartupSettings =
+            serde_json::from_str(content).map_err(|_| "startup_settings_corrupt")?;
+        if settings.schema_version != 1 {
+            return Err("startup_settings_corrupt".into());
+        }
+        Ok(settings)
+    }
+    pub fn save_startup_settings(
+        &mut self,
+        settings: StartupSettings,
+    ) -> LocalResult<StartupSettings> {
+        if settings.schema_version != 1 {
+            return Err("invalid_request".into());
+        }
+        self.startup_settings()?;
+        if settings.auto_report && self.runtime_version()? != 4 {
+            return Err("delivery_profile_upgrade_required".into());
+        }
+        let raw = encode(&settings)?;
+        let tx = self.config.transaction().map_err(sql_error)?;
+        tx.execute("INSERT INTO source_documents(id,name,content,sha256,diagnostics) VALUES(?1,?2,?3,?4,'[]') ON CONFLICT(id) DO UPDATE SET content=excluded.content,sha256=excluded.sha256 WHERE name=excluded.name",
+            params![STARTUP_PRIVATE_ID, STARTUP_PRIVATE_NAME, raw, digest(&raw)]).map_err(sql_error)?;
+        tx.commit().map_err(sql_error)?;
+        Ok(settings)
+    }
+    pub fn runtime_version(&self) -> LocalResult<u32> {
+        self.runtime
+            .query_row("PRAGMA user_version", [], |r| r.get(0))
+            .map_err(sql_error)
+    }
     pub fn pending_activation(&self) -> LocalResult<Option<(String, String)>> {
         self.config.query_row("SELECT token,new_revision FROM activation_intents WHERE phase!='applied' ORDER BY created_at,token LIMIT 1",[],|r|Ok((r.get(0)?,r.get(1)?))).optional().map_err(sql_error)
     }
@@ -39,7 +101,7 @@ impl Stores {
             .map_err(sql_error)?;
         Ok(ConfigurationView {
             schema_version: 1,
-            issues: validate(&draft),
+            issues: validate_for_runtime(&draft, self.runtime_version()?),
             draft,
             etag,
             loaded: None,
@@ -57,6 +119,8 @@ impl Stores {
         if c.sources.iter().any(|s| {
             s.name
                 .starts_with(crate::domain::yaml_migration::PRIVATE_NAME)
+                || s.name.starts_with(STARTUP_PRIVATE_NAME)
+                || s.id == STARTUP_PRIVATE_ID
         }) {
             return Err("yaml_private_source".into());
         }
@@ -84,7 +148,7 @@ impl Stores {
         if payload.len() > 16 * 1024 * 1024 {
             return Err("configuration_limits".into());
         }
-        let issues = encode(&validate(c))?;
+        let issues = encode(&validate_for_runtime(c, self.runtime_version()?))?;
         let tx = self.config.transaction().map_err(sql_error)?;
         let changed=tx.execute("UPDATE configuration_draft SET etag=?1,payload=?2,issues=?3 WHERE id=1 AND etag=?4",params![id(),payload,issues,expected]).map_err(sql_error)?;
         if changed != 1 {
@@ -154,7 +218,7 @@ impl Stores {
         } else {
             view.draft
         };
-        if !validate(&c).is_empty() {
+        if !validate_for_runtime(&c, self.runtime_version()?).is_empty() {
             return Err("configuration_invalid".into());
         }
         let payload = encode(&c)?;
@@ -369,9 +433,9 @@ impl Stores {
         }
         let old = self
             .config
-            .prepare("SELECT sha256 FROM source_documents WHERE substr(name,1,25) != '__daa_yaml_migration_v1__'")
+            .prepare("SELECT sha256 FROM source_documents WHERE substr(name,1,25) != '__daa_yaml_migration_v1__' AND id != ?1")
             .map_err(sql_error)?
-            .query_map([], |r| r.get::<_, String>(0))
+            .query_map([STARTUP_PRIVATE_ID], |r| r.get::<_, String>(0))
             .map_err(sql_error)?
             .collect::<Result<Vec<_>, _>>()
             .map_err(sql_error)?;

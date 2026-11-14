@@ -125,6 +125,8 @@ pub fn run() {
             commands::local_acquisition::daa_test_connection,
             commands::local_acquisition::daa_diagnose_point,
             commands::local_acquisition::daa_get_local_snapshot,
+            commands::local_acquisition::daa_get_startup_settings,
+            commands::local_acquisition::daa_save_startup_settings,
             commands::local_acquisition::daa_list_history,
             commands::local_acquisition::daa_get_sample,
             commands::local_acquisition::daa_get_logs,

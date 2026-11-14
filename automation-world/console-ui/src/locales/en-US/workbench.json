@@ -8,6 +8,8 @@
   "components": "Components",
   "parameters": "Parameters",
   "sidebar": "Toggle sidebar",
+  "refresh": "Refresh",
+  "refreshSample": "Sample refresh events: {count}",
   "light": "Light",
   "dark": "Dark",
   "shellTitle": "Shared shell composition",

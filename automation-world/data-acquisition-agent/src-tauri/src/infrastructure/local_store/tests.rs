@@ -105,9 +105,31 @@ fn seed_engine(
     base.points.clear();
     base.sources.clear();
     let v = e.configuration().unwrap();
-    let v = e.save(base, v.etag).unwrap();
-    e.import(c.sources.clone(), v.etag.clone(), false).unwrap();
-    e.import(c.sources.clone(), v.etag, true).unwrap();
+    e.save(base, v.etag).unwrap();
+    // 导入新 profile 的来源必须由该 profile 分配身份，不能伪造另一配置的 source ID。
+    let sources = c
+        .sources
+        .iter()
+        .cloned()
+        .map(|mut source| {
+            source.db_number = c
+                .dbs
+                .iter()
+                .find(|db| db.source_id == source.id)
+                .map(|db| db.number);
+            source.id.clear();
+            source.lineage_id = None;
+            source
+        })
+        .collect::<Vec<_>>();
+    for source in sources {
+        let v = e.configuration().unwrap();
+        let preview = e
+            .import(vec![source.clone()], v.etag.clone(), false)
+            .unwrap();
+        assert!(preview.can_confirm, "{:?}", preview.issues);
+        e.import(vec![source], v.etag, true).unwrap();
+    }
     let mut v = e.configuration().unwrap();
     for point in &mut v.draft.points {
         let number = v
@@ -318,7 +340,8 @@ fn draft_cas_atomic_round_raw_hash_and_restart() {
                 .unwrap(),
             2
         );
-        assert_eq!(s.capacity(c.storage.quota_bytes).unwrap().pending_count, 2);
+        // New runtime4 profiles remain local-only until a reporting identity is saved.
+        assert_eq!(s.capacity(c.storage.quota_bytes).unwrap().pending_count, 0);
         let hist = s
             .history(HistoryQuery {
                 limit: Some(1),
@@ -327,6 +350,7 @@ fn draft_cas_atomic_round_raw_hash_and_restart() {
             .unwrap();
         id = hist["items"][0]["sampleId"].as_str().unwrap().to_string();
         raw = s.sample(&id).unwrap();
+        assert_eq!(raw["deliveryState"], "local_only");
         assert_eq!(digest(raw["payload"].as_str().unwrap()), raw["sha256"]);
         let payload: SamplePayload =
             serde_json::from_str(raw["payload"].as_str().unwrap()).unwrap();
@@ -383,16 +407,18 @@ fn recovery_selected_token_and_identity_fail_closed() {
         s.clean_exit().unwrap();
     }
     std::fs::write(dir.join("runtime.sqlite-wal"), []).unwrap();
-    assert!(matches!(Stores::open(&dir),Err(e)if e=="unexpected_wal_material"));
+    assert!(
+        matches!(Stores::open(&dir),Err(e)if e=="time_profile_unsupported:unexpected_wal_material")
+    );
     std::fs::remove_file(dir.join("runtime.sqlite-wal")).unwrap();
     std::fs::remove_file(dir.join("runtime.sqlite")).unwrap();
-    assert!(matches!(Stores::open(&dir),Err(e)if e=="missing_database"));
+    assert!(matches!(Stores::open(&dir),Err(e)if e=="time_profile_unsupported:missing_database"));
     std::fs::remove_dir_all(p).unwrap();
 }
 #[test]
 fn pending_protection_ack_cursor_and_capacity() {
-    let p = profile();
-    let mut s = Stores::open(&p.join("local-acquisition-v1")).unwrap();
+    let mut s = super::delivery_tests::legacy(3);
+    let p = s.dir.parent().unwrap().to_path_buf();
     let c = configuration();
     let r = activated(&mut s, &c);
     for _ in 0..10 {
@@ -996,9 +1022,30 @@ fn public_save_cannot_forge_source_proof_and_preview_ids_match_confirm() {
         e.save(forged, v.etag.clone()).unwrap_err(),
         "source_derived_conflict"
     );
+    let point = v.draft.points[0].id.clone();
+    let mut forged = v.draft.clone();
+    forged.points[0].name = "Editable_name".into();
+    assert_eq!(
+        e.save(forged, v.etag.clone()).unwrap_err(),
+        "name_preview_required"
+    );
+    let request = crate::domain::point_naming::NameRequest {
+        expected_etag: v.etag,
+        plc_id: plc,
+        point_ids: vec![point.clone()],
+        intent: "edit".into(),
+        patch: Some(serde_json::from_value(json!({"name":"Editable_name"})).unwrap()),
+    };
+    let preview = e.preview_point_names(request.clone()).unwrap();
+    assert!(preview.can_confirm);
+    let v = e
+        .confirm_point_names(crate::domain::point_naming::NameConfirmation {
+            input: request,
+            preview_token: preview.preview_token,
+            input_digest: preview.input_digest,
+        })
+        .unwrap();
     let mut editable = v.draft.clone();
-    let point = editable.points[0].id.clone();
-    editable.points[0].name = "Editable name".into();
     editable.points[0].comment = "Editable comment".into();
     editable.points[0].address = Some(Address {
         offset: 0,
@@ -1010,7 +1057,8 @@ fn public_save_cannot_forge_source_proof_and_preview_ids_match_confirm() {
     editable.points[0].address.as_mut().unwrap().reason = "explicit manual review".into();
     let v = e.save(editable, v.etag).unwrap();
     assert_eq!(v.draft.points[0].id, point);
-    assert_eq!(v.draft.points[0].name, "Editable name");
+    assert_eq!(v.draft.points[0].name, "Editable_name");
+    assert_eq!(v.draft.points[0].comment, "Editable comment");
     assert!(v.draft.dbs[0].complete);
     let failure = crate::commands::local_acquisition::failure(&e, "draft_conflict".into());
     assert_eq!(failure.error_code, "draft_conflict");
@@ -1296,7 +1344,7 @@ fn unknown_fixture_plc_can_activate_without_connecting_or_blocking_known_plcs() 
         .all(|id| e.states.lock().unwrap()[id].saved_cycles >= 2));
     let sample_id = h["items"][0]["sampleId"].as_str().unwrap().to_string();
     let raw = e.sample(sample_id).unwrap();
-    assert_eq!(raw["deliveryState"], "pending");
+    assert_eq!(raw["deliveryState"], "local_only");
     e.shutdown();
     drop(e);
     std::fs::remove_dir_all(p).unwrap();
@@ -1305,7 +1353,7 @@ fn unknown_fixture_plc_can_activate_without_connecting_or_blocking_known_plcs() 
 // 私有维护反例种子和完整账本比较；不编入产品或local-validation命令。
 fn maintenance_rows(s: &Stores) -> Value {
     let mut out = serde_json::Map::new();
-    for table in [
+    let mut tables = vec![
         "plc_sources",
         "configuration_contexts",
         "activation_journal",
@@ -1313,7 +1361,19 @@ fn maintenance_rows(s: &Stores) -> Value {
         "samples",
         "sample_delivery",
         "sample_references",
-    ] {
+    ];
+    let version: u32 = s
+        .runtime
+        .pragma_query_value(None, "user_version", |r| r.get(0))
+        .unwrap();
+    if version == 4 {
+        tables.extend([
+            "sample_uploads",
+            "sample_upload_attempts",
+            "sample_upload_rebindings",
+        ]);
+    }
+    for table in tables {
         let mut stmt = s
             .runtime
             .prepare(&format!("SELECT * FROM {table} ORDER BY rowid"))
@@ -1410,8 +1470,8 @@ fn protected_raw(s: &Stores, ids: &[Vec<String>]) -> Vec<Value> {
 }
 #[test]
 fn acknowledged_overlapping_references_and_incomplete_cycles_are_protected() {
-    let p = profile();
-    let mut s = Stores::open(&p.join("local-acquisition-v1")).unwrap();
+    let mut s = super::delivery_tests::legacy(3);
+    let p = s.dir.parent().unwrap().to_path_buf();
     let c = configuration();
     let revision = activated(&mut s, &c);
     let ids = maintenance_seed(&mut s, &c, &revision, 0);
@@ -1474,8 +1534,8 @@ fn acknowledged_overlapping_references_and_incomplete_cycles_are_protected() {
 fn periodic_maintenance_rechecks_current_space_before_cleanup_and_vacuum() {
     use std::sync::atomic::{AtomicU64, Ordering};
     for deny_after_cleanup in [false, true] {
-        let p = profile();
-        let mut s = Stores::open(&p.join("local-acquisition-v1")).unwrap();
+        let mut s = super::delivery_tests::legacy(3);
+        let p = s.dir.parent().unwrap().to_path_buf();
         let c = configuration();
         let revision = activated(&mut s, &c);
         let ids = maintenance_seed(&mut s, &c, &revision, 0);
@@ -1575,7 +1635,7 @@ fn maintenance_busy_rolls_back_and_releases_worker_for_following_writes() {
         .unwrap();
     handle
         .call(true, |s| Ok(s.capacity(1024 * 1024 * 1024)?.pending_count))
-        .map(|v| assert_eq!(v, 2))
+        .map(|v| assert_eq!(v, 0))
         .unwrap();
     handle.shutdown();
     std::fs::remove_dir_all(p).unwrap();
@@ -1610,12 +1670,18 @@ fn maintenance_child_profile() -> PathBuf {
         p.parent().unwrap(),
         std::env::temp_dir().canonicalize().unwrap()
     );
-    assert!(p
-        .file_name()
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .starts_with("daa-002-r2-test-"));
+    assert!(
+        p.file_name()
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .starts_with("daa-002-r2-test-")
+            || p.file_name()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .starts_with("legacy-profile-")
+    );
     assert_eq!(
         std::fs::read_to_string(p.join(".daa-local-validation-owner")).unwrap(),
         "DAA-002-r2-owned\n"
@@ -1711,13 +1777,14 @@ fn maintenance_fault_child() {
     }
 }
 #[test]
-fn maintenance_faults_recover_original_protected_ledger() {
+fn maintenance_faults_preserve_legacy_ledger_and_refuse_unsealed_hot_recovery() {
     use std::os::unix::process::ExitStatusExt;
     for stage in ["cleanup", "vacuum"] {
         for mode in ["write-failure", "kill"] {
-            let p = profile();
-            let dir = p.join("local-acquisition-v1");
-            let mut s = Stores::open(&dir).unwrap();
+            let mut s = super::delivery_tests::legacy(3);
+            let dir = s.dir.clone();
+            let p = dir.parent().unwrap().to_path_buf();
+            std::fs::write(p.join(".daa-local-validation-owner"), "DAA-002-r2-owned\n").unwrap();
             let c = configuration();
             let r = activated(&mut s, &c);
             let ids = maintenance_seed(&mut s, &c, &r, if stage == "vacuum" { 80 } else { 0 });
@@ -1776,6 +1843,13 @@ fn maintenance_faults_recover_original_protected_ledger() {
             let output = child.wait_with_output().unwrap();
             if mode == "kill" {
                 assert_eq!(output.status.signal(), Some(libc::SIGKILL));
+                // An unsealed predecessor cannot authorize native rollback. Preserve every
+                // database/journal byte and refuse admission; sealed runtime4 is covered below.
+                let untouched = super::profile_contract::capture(&dir).unwrap();
+                assert!(untouched.get("runtime.sqlite-journal").is_some());
+                assert!(matches!(Stores::open(&dir), Err(error) if error.contains("readonly")));
+                assert_eq!(super::profile_contract::capture(&dir).unwrap(), untouched);
+                continue;
             } else {
                 assert!(
                     output.status.success(),
@@ -1828,6 +1902,230 @@ fn maintenance_faults_recover_original_protected_ledger() {
     }
 }
 
+// Shift the entire synthetic clock context before freezing, preserving relative
+// times and recomputing all hashes; neither the host clock nor user data changes.
+#[cfg(unix)]
+fn age_v4_fixture(s: &mut Stores) {
+    fn shift(v: &mut Value, key: &str) {
+        let dt = chrono::DateTime::parse_from_rfc3339(v[key].as_str().unwrap()).unwrap();
+        v[key] =
+            json!((dt - chrono::Duration::days(14))
+                .to_rfc3339_opts(chrono::SecondsFormat::Millis, false));
+    }
+    let cycles: Vec<(String, String)> = s
+        .runtime
+        .prepare("SELECT id,manifest FROM collection_cycles ORDER BY rowid")
+        .unwrap()
+        .query_map([], |r| Ok((r.get(0)?, r.get(1)?)))
+        .unwrap()
+        .collect::<Result<_, _>>()
+        .unwrap();
+    for (cycle_id, raw_manifest) in cycles {
+        let mut manifest: Value = serde_json::from_str(&raw_manifest).unwrap();
+        for key in ["startedAt", "finishedAt", "savedAt"] {
+            shift(&mut manifest, key);
+        }
+        for read in manifest["reads"].as_array_mut().unwrap() {
+            for key in ["startedAt", "finishedAt"] {
+                shift(read, key);
+            }
+        }
+        let samples: Vec<(String, String)> = s
+            .runtime
+            .prepare("SELECT id,payload FROM samples WHERE cycle_id=?1 ORDER BY rowid")
+            .unwrap()
+            .query_map([&cycle_id], |r| Ok((r.get(0)?, r.get(1)?)))
+            .unwrap()
+            .collect::<Result<_, _>>()
+            .unwrap();
+        for (id, raw) in samples {
+            let mut payload: Value = serde_json::from_str(&raw).unwrap();
+            for key in ["startedAt", "finishedAt", "savedAt"] {
+                shift(&mut payload, key);
+            }
+            for point in payload["points"].as_object_mut().unwrap().values_mut() {
+                shift(point, "observedAt");
+            }
+            let saved = payload["savedAt"].as_str().unwrap().to_owned();
+            let encoded = serde_json::to_string(&payload).unwrap();
+            let sha = digest(&encoded);
+            s.runtime.execute("UPDATE samples SET saved_at=?1,payload=?2,sha256=?3,payload_bytes=?4 WHERE id=?5", rusqlite::params![saved,encoded,sha,encoded.len(),id]).unwrap();
+            let member = manifest["samples"]
+                .as_array_mut()
+                .unwrap()
+                .iter_mut()
+                .find(|m| m["sampleId"] == id)
+                .unwrap();
+            member["sha256"] = json!(sha);
+        }
+        let encoded = serde_json::to_string(&manifest).unwrap();
+        s.runtime.execute("UPDATE collection_cycles SET started_at=?1,finished_at=?2,saved_at=?3,manifest=?4,sha256=?5 WHERE id=?6", rusqlite::params![manifest["startedAt"].as_str().unwrap(),manifest["finishedAt"].as_str().unwrap(),manifest["savedAt"].as_str().unwrap(),encoded,digest(&encoded),cycle_id]).unwrap();
+    }
+}
+
+#[cfg(unix)]
+fn seed_v4_maintenance(
+    s: &mut Stores,
+    c: &Configuration,
+    revision: &str,
+) -> (Vec<String>, Vec<String>) {
+    use crate::{domain::sample_upload::Reply, infrastructure::facts_http::Response};
+    super::sample_upload_tests::bind_legacy_fixture(s, c);
+    for _ in 0..3 {
+        s.commit_cycle(cycle(c, revision)).unwrap();
+    }
+    age_v4_fixture(s);
+    let old = s.sample_upload_settings().unwrap();
+    let mut settings = old.clone();
+    settings.origin = Some("http://127.0.0.1:38117".into());
+    s.save_sample_upload_settings(settings, old.settings_revision)
+        .unwrap();
+    let bindings = s.sample_upload_bindings().unwrap();
+    let target = "http://127.0.0.1:38117/api/v1/integration/plc-facts/samples";
+    let mut acknowledged = Vec::new();
+    for _ in 0..4 {
+        let f = s
+            .next_sample_upload(target, &bindings, false)
+            .unwrap()
+            .unwrap();
+        let attempt = s.mark_sample_upload_attempt(&f).unwrap();
+        let body = json!({"code":200,"message":"success","data":{"contractVersion":"plc-facts/v2","instanceId":f.instance_id,"sampleId":f.sample_id,"status":"committed","outcome":"created"}}).to_string().into_bytes();
+        let response = Response {
+            status: 200,
+            media_type: "application/json".into(),
+            retry_after: None,
+            body,
+        };
+        assert_eq!(
+            s.record_sample_upload_response(&f, Ok(response), attempt)
+                .unwrap()
+                .0,
+            Reply::Committed
+        );
+        acknowledged.push(f.sample_id);
+    }
+    s.runtime
+        .execute(
+            "INSERT INTO sample_references VALUES(?1,'protected-v4')",
+            [&acknowledged[2]],
+        )
+        .unwrap();
+    let pending: Vec<String> = s.runtime.prepare("SELECT s.id FROM samples s LEFT JOIN sample_uploads u ON u.sample_id=s.id WHERE u.sample_id IS NULL ORDER BY s.id").unwrap().query_map([], |row| row.get(0)).unwrap().collect::<Result<_,_>>().unwrap();
+    assert_eq!(pending.len(), 2);
+    (acknowledged, pending)
+}
+
+// v4 uses matching v2 receipts, a complete sealed ledger and the real 7-day cutoff.
+#[cfg(unix)]
+#[test]
+fn v4_maintenance_fault_recovery_keeps_receipts_and_protected_samples() {
+    use std::os::unix::process::ExitStatusExt;
+    for mode in ["write-failure", "kill"] {
+        let p = profile();
+        let dir = p.join("local-acquisition-v1");
+        let mut s = Stores::open(&dir).unwrap();
+        let c = configuration();
+        let revision = activated(&mut s, &c);
+        let (acknowledged, pending) = seed_v4_maintenance(&mut s, &c, &revision);
+        let protected: Vec<_> = acknowledged[2..]
+            .iter()
+            .chain(pending.iter())
+            .map(|id| (id.clone(), s.sample(id).unwrap()))
+            .collect();
+        let before = maintenance_rows(&s);
+        s.clean_exit().unwrap();
+        drop(s);
+        std::thread::sleep(Duration::from_millis(20));
+
+        let mut child = std::process::Command::new(std::env::current_exe().unwrap())
+            .args([
+                "--exact",
+                "infrastructure::local_store::tests::maintenance_fault_child",
+                "--ignored",
+                "--nocapture",
+            ])
+            .env("DAA002_MAINT_CHILD_PROFILE", &p)
+            .env("DAA002_MAINT_CHILD_STAGE", "cleanup")
+            .env("DAA002_MAINT_CHILD_MODE", mode)
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .unwrap();
+        if mode == "kill" {
+            let at = Instant::now();
+            while !p.join("maintenance-ready.json").exists() {
+                if let Some(status) = child.try_wait().unwrap() {
+                    let output = child.wait_with_output().unwrap();
+                    panic!(
+                        "child exited before cleanup journal {status}: {} {}",
+                        String::from_utf8_lossy(&output.stdout),
+                        String::from_utf8_lossy(&output.stderr)
+                    );
+                }
+                if at.elapsed() > Duration::from_secs(10) {
+                    child.kill().unwrap();
+                    let _ = child.wait();
+                    panic!("cleanup marker timeout");
+                }
+                thread::sleep(Duration::from_millis(10));
+            }
+            child.kill().unwrap();
+        }
+        let output = child.wait_with_output().unwrap();
+        if mode == "kill" {
+            assert_eq!(output.status.signal(), Some(libc::SIGKILL));
+        } else {
+            assert!(
+                output.status.success(),
+                "{} {}",
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+
+        let mut recovered = Stores::open(&dir).unwrap();
+        assert_eq!(maintenance_rows(&recovered), before);
+        for (id, original) in &protected {
+            assert_eq!(&recovered.sample(id).unwrap(), original);
+        }
+        assert_eq!(
+            recovered
+                .runtime
+                .query_row("PRAGMA integrity_check", [], |r| r.get::<_, String>(0))
+                .unwrap(),
+            "ok"
+        );
+        assert_eq!(
+            recovered
+                .cleanup_acknowledged(7, c.storage.quota_bytes)
+                .unwrap(),
+            2
+        );
+        for id in &acknowledged[..2] {
+            assert!(recovered.sample(id).is_err());
+        }
+        for (id, original) in &protected {
+            assert_eq!(&recovered.sample(id).unwrap(), original);
+        }
+        assert_eq!(
+            recovered
+                .capacity(c.storage.quota_bytes)
+                .unwrap()
+                .pending_count,
+            2
+        );
+        recovered.clean_exit().unwrap();
+        drop(recovered);
+        let mut reopened = Stores::open(&dir).unwrap();
+        for (id, original) in &protected {
+            assert_eq!(&reopened.sample(id).unwrap(), original);
+        }
+        reopened.clean_exit().unwrap();
+        drop(reopened);
+        std::fs::remove_dir_all(p).unwrap();
+    }
+}
+
 // Read the actual bounded product file, not a wrapper's captured stdout.
 fn maintenance_log_records(profile: &std::path::Path) -> Vec<Value> {
     let text =
@@ -1845,8 +2143,9 @@ fn maintenance_log_records(profile: &std::path::Path) -> Vec<Value> {
 }
 #[test]
 fn periodic_maintenance_ioerr_reaches_product_log_and_stdout() {
-    let p = profile();
-    let mut s = Stores::open(&p.join("local-acquisition-v1")).unwrap();
+    let mut s = super::delivery_tests::legacy(3);
+    let p = s.dir.parent().unwrap().to_path_buf();
+    std::fs::write(p.join(".daa-local-validation-owner"), "DAA-002-r2-owned\n").unwrap();
     let c = configuration();
     let r = activated(&mut s, &c);
     let ids = maintenance_seed(&mut s, &c, &r, 0);
@@ -1898,9 +2197,205 @@ fn periodic_maintenance_ioerr_reaches_product_log_and_stdout() {
         json!({"case":"worker_ioerr_parent","profile":p,"stdoutRecord":record,"productLogRecords":maintenance_log_records(&p),"originalLedgerAndPayloadHashesUnchanged":true,"childExited":true})
     );
 }
+
+#[cfg(unix)]
+#[test]
+fn v4_periodic_maintenance_ioerr_preserves_ledger_and_reports_failure() {
+    let p = profile();
+    let dir = p.join("local-acquisition-v1");
+    let mut s = Stores::open(&dir).unwrap();
+    let c = configuration();
+    let revision = activated(&mut s, &c);
+    let (acknowledged, pending) = seed_v4_maintenance(&mut s, &c, &revision);
+    let protected: Vec<_> = acknowledged[2..]
+        .iter()
+        .chain(pending.iter())
+        .map(|id| (id.clone(), s.sample(id).unwrap()))
+        .collect();
+    let before = maintenance_rows(&s);
+    s.clean_exit().unwrap();
+    drop(s);
+    let output = std::process::Command::new(std::env::current_exe().unwrap())
+        .args([
+            "--exact",
+            "infrastructure::local_store::tests::maintenance_fault_child",
+            "--ignored",
+            "--nocapture",
+        ])
+        .env("DAA002_MAINT_CHILD_PROFILE", &p)
+        .env("DAA002_MAINT_CHILD_STAGE", "cleanup")
+        .env("DAA002_MAINT_CHILD_MODE", "worker-write-failure")
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{} {}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    let record = stdout
+        .lines()
+        .filter_map(|line| serde_json::from_str::<Value>(line).ok())
+        .find(|line| line["fields"]["event"] == "maintenance_failed")
+        .unwrap();
+    assert_eq!(record["fields"]["error_code"], "storage_error");
+    assert_eq!(record["fields"]["persistence"], "persisted");
+    let records = maintenance_log_records(&p);
+    assert_eq!(records.len(), 1);
+    assert_eq!(records[0]["error_code"], "storage_error");
+    let mut reopened = Stores::open(&dir).unwrap();
+    assert_eq!(maintenance_rows(&reopened), before);
+    for (id, original) in &protected {
+        assert_eq!(&reopened.sample(id).unwrap(), original);
+    }
+    assert_eq!(
+        reopened
+            .capacity(c.storage.quota_bytes)
+            .unwrap()
+            .pending_count,
+        2
+    );
+    reopened.clean_exit().unwrap();
+    drop(reopened);
+    std::fs::remove_dir_all(p).unwrap();
+}
+
+#[cfg(unix)]
+#[test]
+fn v4_periodic_maintenance_log_failure_retains_history_and_stops_safely() {
+    let p = profile();
+    std::fs::write(
+        p.join("fixture.json"),
+        include_str!("../../../tests/fixtures/local-acquisition/transport.json"),
+    )
+    .unwrap();
+    let e = LocalEngine::open(Bootstrap {
+        mode: "local_sqlite".into(),
+        profile: p.clone(),
+        read_allowed: true,
+        validation: true,
+        migration: None,
+        ignored_keys: vec![],
+        fixture: Some(p.join("fixture.json")),
+    })
+    .unwrap();
+    let view = seed_engine(&e, &configuration());
+    e.activate(view.etag, view.active, false).unwrap();
+    let loaded = e.loaded.lock().unwrap().as_ref().unwrap().clone();
+    let c = loaded.configuration.clone();
+    e.storage
+        .call(false, move |s| {
+            seed_v4_maintenance(s, &loaded.configuration, &loaded.revision);
+            Ok(())
+        })
+        .unwrap();
+    let before = e.storage.call(true, |s| Ok(maintenance_rows(s))).unwrap();
+    let log = e.log.clone();
+    assert!(e
+        .storage
+        .call(true, move |s| Ok(Arc::ptr_eq(&s.log, &log)))
+        .unwrap());
+    let path = p.join("local-acquisition-v1/logs/runtime.jsonl");
+    std::fs::rename(&path, p.join("before-unwritable-runtime.jsonl")).unwrap();
+    std::fs::create_dir(&path).unwrap();
+    e.storage
+        .call(false, |s| {
+            s.test_meter = Some((
+                Arc::new(std::sync::atomic::AtomicU64::new(0)),
+                Arc::new(std::sync::atomic::AtomicU64::new(0)),
+            ));
+            s.last_maintenance = Instant::now() - Duration::from_secs(61);
+            Ok(())
+        })
+        .unwrap();
+    assert_eq!(
+        e.storage.call(true, |s| Ok(maintenance_rows(s))).unwrap(),
+        before
+    );
+    assert_eq!(e.log.health().unwrap_err(), "log_io_unknown_interval");
+    assert_eq!(
+        e.storage.call(false, |_| Ok(())).unwrap_err(),
+        "log_io_unknown_interval"
+    );
+    assert_eq!(
+        e.history(Default::default()).unwrap()["items"]
+            .as_array()
+            .unwrap()
+            .len(),
+        6
+    );
+    assert_eq!(e.logs(0, 20).unwrap_err(), "log_io_unknown_interval");
+    e.storage
+        .call(true, |s| {
+            s.test_meter
+                .as_ref()
+                .unwrap()
+                .0
+                .store(u64::MAX, std::sync::atomic::Ordering::SeqCst);
+            s.last_maintenance = Instant::now() - Duration::from_secs(61);
+            Ok(())
+        })
+        .unwrap();
+    assert_eq!(
+        e.storage.call(true, |s| Ok(maintenance_rows(s))).unwrap(),
+        before
+    );
+    let snapshot = e.snapshot().unwrap();
+    assert!(snapshot["plcs"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .all(|s| s["admission"] == "storage_fault" && s["error"] == "log_io_unknown_interval"));
+    let revision = e.loaded.lock().unwrap().as_ref().unwrap().revision.clone();
+    let ids = c.plcs.iter().map(|p| p.id.clone()).collect::<Vec<_>>();
+    assert_eq!(
+        e.request(ids.clone(), "collection", true, &revision, None)
+            .unwrap_err(),
+        "log_io_unknown_interval"
+    );
+    let stop = e
+        .request(ids, "collection", false, &revision, None)
+        .unwrap();
+    let at = Instant::now();
+    loop {
+        let operations = e.operations.lock().unwrap();
+        if stop["items"].as_array().unwrap().iter().all(|item| {
+            operations.iter().any(|o| {
+                o.operation_id == item["operationId"].as_str().unwrap() && o.phase == "applied"
+            })
+        }) {
+            break;
+        }
+        assert!(at.elapsed() < Duration::from_secs(3));
+        drop(operations);
+        thread::sleep(Duration::from_millis(10));
+    }
+    assert_eq!(
+        e.storage.call(true, |s| Ok(maintenance_rows(s))).unwrap(),
+        before
+    );
+    e.shutdown();
+    std::fs::remove_dir(&path).unwrap();
+    let mut reopened = Stores::open(&p.join("local-acquisition-v1")).unwrap();
+    assert_eq!(maintenance_rows(&reopened), before);
+    assert_eq!(
+        reopened
+            .capacity(c.storage.quota_bytes)
+            .unwrap()
+            .pending_count,
+        2
+    );
+    reopened.clean_exit().unwrap();
+    drop(reopened);
+    std::fs::remove_dir_all(p).unwrap();
+}
 #[test]
 fn periodic_maintenance_log_failure_keeps_history_stop_and_shutdown_available() {
-    let p = profile();
+    let mut legacy = super::delivery_tests::legacy(3);
+    let p = legacy.dir.parent().unwrap().to_path_buf();
+    legacy.clean_exit().unwrap();
+    drop(legacy);
     std::fs::write(
         p.join("fixture.json"),
         include_str!("../../../tests/fixtures/local-acquisition/transport.json"),
@@ -2032,6 +2527,67 @@ fn periodic_maintenance_log_failure_keeps_history_stop_and_shutdown_available() 
     );
 }
 
+#[cfg(unix)]
+#[test]
+fn snapshot_storage_policy_follows_active_revision_not_saved_draft() {
+    let p = profile();
+    std::fs::write(
+        p.join("fixture.json"),
+        include_str!("../../../tests/fixtures/local-acquisition/transport.json"),
+    )
+    .unwrap();
+    let e = LocalEngine::open(Bootstrap {
+        mode: "local_sqlite".into(),
+        profile: p.clone(),
+        read_allowed: true,
+        validation: true,
+        migration: None,
+        ignored_keys: vec![],
+        fixture: Some(p.join("fixture.json")),
+    })
+    .unwrap();
+    assert!(e.snapshot().unwrap()["activeStorage"].is_null());
+    let draft = seed_engine(&e, &configuration());
+    e.activate(draft.etag, draft.active, false).unwrap();
+    *e.cached_snapshot.lock().unwrap() = None;
+    let before = e.snapshot().unwrap();
+    assert_eq!(before["activeStorage"]["retentionDays"], 7);
+    assert_eq!(
+        before["activeStorage"]["revision"],
+        before["configuration"]["active"]
+    );
+    let view = e.configuration().unwrap();
+    let mut changed = view.draft.clone();
+    changed.storage.retention_days = 8;
+    let saved = e.save(changed, view.etag).unwrap();
+    *e.cached_snapshot.lock().unwrap() = None;
+    let pending = e.snapshot().unwrap();
+    assert_eq!(
+        pending["configuration"]["draft"]["storage"]["retentionDays"],
+        8
+    );
+    assert_eq!(pending["activeStorage"]["retentionDays"], 7);
+    assert_eq!(
+        pending["activeStorage"]["revision"],
+        before["activeStorage"]["revision"]
+    );
+    e.activate(saved.etag, saved.active, false).unwrap();
+    *e.cached_snapshot.lock().unwrap() = None;
+    let active = e.snapshot().unwrap();
+    assert_eq!(active["activeStorage"]["retentionDays"], 8);
+    assert_eq!(
+        active["activeStorage"]["revision"],
+        active["configuration"]["active"]
+    );
+    assert_ne!(
+        active["activeStorage"]["revision"],
+        before["activeStorage"]["revision"]
+    );
+    e.shutdown();
+    drop(e);
+    std::fs::remove_dir_all(p).unwrap();
+}
+
 #[path = "time_contract_tests.rs"]
 mod time_contract_tests;
 
@@ -2080,4 +2636,695 @@ fn resident_retirement_active_configuration_reopens_stopped_with_native_admissio
     e.shutdown();
     drop(e);
     std::fs::remove_dir_all(p).unwrap();
+}
+
+#[cfg(unix)]
+#[test]
+fn startup_settings_keep_old_profile_and_draft_and_fail_closed_on_bad_values() {
+    use crate::domain::local_runtime::{StartupSettings, STARTUP_PRIVATE_ID};
+    use crate::infrastructure::local_store::sample_upload_tests::sealed_fixture;
+    for version in [3, 4] {
+        let p = sealed_fixture(version);
+        let dir = p.join("local-acquisition-v1");
+        let mut s = Stores::open(&dir).unwrap();
+        let original = s.configuration().unwrap();
+        assert_eq!(s.startup_settings().unwrap(), StartupSettings::default());
+        let empty = s.yaml_empty().unwrap();
+        let settings = StartupSettings {
+            schema_version: 1,
+            auto_collect: true,
+            auto_report: false,
+        };
+        s.save_startup_settings(settings.clone()).unwrap();
+        assert_eq!(s.configuration().unwrap().etag, original.etag);
+        assert_eq!(s.yaml_empty().unwrap(), empty);
+        s.prune_config().unwrap();
+        assert_eq!(s.startup_settings().unwrap(), settings);
+        s.config.execute_batch("CREATE TEMP TRIGGER startup_write_fail BEFORE UPDATE ON source_documents WHEN NEW.name='__daa_startup_settings_v1__' BEGIN SELECT RAISE(ABORT,'synthetic write failure'); END;").unwrap();
+        assert!(s
+            .save_startup_settings(StartupSettings {
+                auto_collect: false,
+                ..settings.clone()
+            })
+            .is_err());
+        assert_eq!(s.startup_settings().unwrap(), settings);
+        s.config
+            .execute_batch("DROP TRIGGER startup_write_fail")
+            .unwrap();
+        if version == 3 {
+            assert_eq!(
+                s.save_startup_settings(StartupSettings {
+                    auto_report: true,
+                    ..settings.clone()
+                })
+                .unwrap_err(),
+                "delivery_profile_upgrade_required"
+            );
+        }
+        s.clean_exit().unwrap();
+        drop(s);
+        let mut s = Stores::open(&dir).unwrap();
+        assert_eq!(s.startup_settings().unwrap(), settings);
+        assert_eq!(s.configuration().unwrap().etag, original.etag);
+        let invalid = "{\"schemaVersion\":99,\"autoCollect\":true,\"autoReport\":false}";
+        s.config
+            .execute(
+                "UPDATE source_documents SET content=?1,sha256=?2 WHERE id=?3",
+                rusqlite::params![invalid, digest(invalid), STARTUP_PRIVATE_ID],
+            )
+            .unwrap();
+        assert_eq!(
+            s.startup_settings().unwrap_err(),
+            "startup_settings_corrupt"
+        );
+        s.clean_exit().unwrap();
+        drop(s);
+        let e = crate::services::local_recovery::open(Bootstrap {
+            mode: "local_sqlite".into(),
+            profile: p.clone(),
+            read_allowed: true,
+            validation: false,
+            migration: None,
+            ignored_keys: vec![],
+            fixture: None,
+        })
+        .unwrap();
+        assert_eq!(
+            e.startup_errors
+                .lock()
+                .unwrap()
+                .get("settings")
+                .map(String::as_str),
+            Some("startup_settings_corrupt")
+        );
+        assert!(e.configuration().is_ok());
+        e.shutdown();
+        drop(e);
+        std::fs::remove_dir_all(p).unwrap();
+    }
+}
+
+#[test]
+fn startup_four_combinations_reconnect_and_manual_pause() {
+    use crate::{
+        domain::local_runtime::StartupSettings,
+        services::{local_recovery, local_supervisor::fail_startup_connections},
+    };
+    for (collect, report) in [(false, false), (false, true), (true, false), (true, true)] {
+        let p = profile();
+        std::fs::write(
+            p.join("fixture.json"),
+            include_str!("../../../tests/fixtures/local-acquisition/transport.json"),
+        )
+        .unwrap();
+        let b = Bootstrap {
+            mode: "local_sqlite".into(),
+            profile: p.clone(),
+            read_allowed: true,
+            validation: false,
+            migration: None,
+            ignored_keys: vec![],
+            fixture: Some(p.join("fixture.json")),
+        };
+        let e = LocalEngine::open(b.clone()).unwrap();
+        let c = configuration();
+        let saved = seed_engine(&e, &c);
+        let revision = e.activate(saved.etag, None, false).unwrap()["active"]
+            .as_str()
+            .unwrap()
+            .to_string();
+        let before = e.configuration().unwrap().etag;
+        e.save_startup_settings(StartupSettings {
+            schema_version: 1,
+            auto_collect: collect,
+            auto_report: report,
+        })
+        .unwrap();
+        assert_eq!(e.configuration().unwrap().etag, before);
+        thread::sleep(Duration::from_millis(100));
+        assert!(e
+            .states
+            .lock()
+            .unwrap()
+            .values()
+            .all(|s| !s.desired_connection && !s.desired_collection));
+        e.shutdown();
+        drop(e);
+        if collect && !report {
+            fail_startup_connections(&c.plcs[0].id, 1);
+        }
+        let e = local_recovery::open(b.clone()).unwrap();
+        assert_eq!(
+            e.startup_errors.lock().unwrap().contains_key("report"),
+            report
+        );
+        if collect {
+            if !report {
+                let deadline = Instant::now() + Duration::from_secs(2);
+                loop {
+                    let states = e.states.lock().unwrap();
+                    if states[&c.plcs[1].id].saved_cycles > 0 && !states[&c.plcs[0].id].connected {
+                        break;
+                    }
+                    assert!(Instant::now() < deadline);
+                    drop(states);
+                    thread::sleep(Duration::from_millis(20));
+                }
+            }
+            let deadline = Instant::now() + Duration::from_secs(5);
+            loop {
+                if e.states
+                    .lock()
+                    .unwrap()
+                    .values()
+                    .all(|s| s.saved_cycles > 0)
+                {
+                    break;
+                }
+                assert!(Instant::now() < deadline);
+                thread::sleep(Duration::from_millis(25));
+            }
+            e.request(
+                vec![c.plcs[0].id.clone()],
+                "collection",
+                false,
+                &revision,
+                None,
+            )
+            .unwrap();
+            e.request(
+                vec![c.plcs[1].id.clone()],
+                "connection",
+                false,
+                &revision,
+                None,
+            )
+            .unwrap();
+            thread::sleep(Duration::from_millis(1200));
+            let states = e.states.lock().unwrap();
+            assert!(!states[&c.plcs[0].id].desired_collection);
+            assert!(
+                !states[&c.plcs[1].id].desired_collection
+                    && !states[&c.plcs[1].id].desired_connection
+            );
+            drop(states);
+        } else {
+            thread::sleep(Duration::from_millis(100));
+            assert!(e
+                .states
+                .lock()
+                .unwrap()
+                .values()
+                .all(|s| !s.desired_connection && !s.desired_collection));
+        }
+        e.shutdown();
+        drop(e);
+        if collect {
+            if !report {
+                fail_startup_connections(&c.plcs[0].id, 3);
+            }
+            let e = local_recovery::open(b).unwrap();
+            if !report {
+                let deadline = Instant::now() + Duration::from_secs(2);
+                loop {
+                    if e.states.lock().unwrap()[&c.plcs[0].id].error.as_deref()
+                        == Some("connection_failed")
+                    {
+                        break;
+                    }
+                    assert!(Instant::now() < deadline);
+                    thread::sleep(Duration::from_millis(10));
+                }
+                e.request(
+                    vec![c.plcs[0].id.clone()],
+                    "connection",
+                    false,
+                    &revision,
+                    None,
+                )
+                .unwrap();
+                thread::sleep(Duration::from_millis(1400));
+                let states = e.states.lock().unwrap();
+                assert!(
+                    !states[&c.plcs[0].id].desired_connection
+                        && !states[&c.plcs[0].id].desired_collection
+                        && states[&c.plcs[0].id].saved_cycles == 0
+                );
+                assert!(states[&c.plcs[1].id].saved_cycles > 0);
+                drop(states);
+                e.shutdown();
+                drop(e);
+                std::fs::remove_dir_all(p).unwrap();
+                continue;
+            }
+            let deadline = Instant::now() + Duration::from_secs(4);
+            while !e
+                .states
+                .lock()
+                .unwrap()
+                .values()
+                .all(|s| s.saved_cycles > 0)
+            {
+                assert!(Instant::now() < deadline);
+                thread::sleep(Duration::from_millis(25));
+            }
+            e.shutdown();
+            drop(e);
+        }
+        std::fs::remove_dir_all(p).unwrap();
+    }
+}
+
+#[test]
+fn startup_offline_pause_and_manual_connection_intents() {
+    use crate::{
+        domain::local_runtime::StartupSettings,
+        services::{local_recovery, local_supervisor::fail_startup_connections},
+    };
+    let p = profile();
+    let fixture = p.join("fixture.json");
+    let fixture_data = include_str!("../../../tests/fixtures/local-acquisition/transport.json");
+    std::fs::write(&fixture, fixture_data).unwrap();
+    let b = Bootstrap {
+        mode: "local_sqlite".into(),
+        profile: p.clone(),
+        read_allowed: true,
+        validation: false,
+        migration: None,
+        ignored_keys: vec![],
+        fixture: Some(fixture.clone()),
+    };
+    let e = LocalEngine::open(b.clone()).unwrap();
+    let c = configuration();
+    let saved = seed_engine(&e, &c);
+    let revision = e.activate(saved.etag, None, false).unwrap()["active"]
+        .as_str()
+        .unwrap()
+        .to_string();
+    e.save_startup_settings(StartupSettings {
+        schema_version: 1,
+        auto_collect: true,
+        auto_report: false,
+    })
+    .unwrap();
+    e.shutdown();
+    drop(e);
+    let first = c.plcs[0].id.clone();
+    let second = c.plcs[1].id.clone();
+
+    // QA1 F-001：首次自动连接失败后暂停，不再发起该自动意图的重试。
+    fail_startup_connections(&first, 1);
+    let e = local_recovery::open(b.clone()).unwrap();
+    let deadline = Instant::now() + Duration::from_secs(2);
+    loop {
+        let states = e.states.lock().unwrap();
+        if states[&first].error.as_deref() == Some("connection_failed")
+            && states[&second].saved_cycles > 0
+        {
+            break;
+        }
+        assert!(Instant::now() < deadline);
+        drop(states);
+        thread::sleep(Duration::from_millis(10));
+    }
+    e.request(vec![first.clone()], "collection", false, &revision, None)
+        .unwrap();
+    thread::sleep(Duration::from_millis(1400));
+    {
+        let states = e.states.lock().unwrap();
+        assert!(!states[&first].desired_connection && !states[&first].connected);
+        assert!(!states[&first].desired_collection && states[&first].saved_cycles == 0);
+        assert!(states[&second].saved_cycles > 0);
+    }
+    e.shutdown();
+    drop(e);
+
+    // 未连接时手动启动采集失败，不得取消仍有效的自动重试与采集意图。
+    fail_startup_connections(&first, 1);
+    let e = local_recovery::open(b.clone()).unwrap();
+    let deadline = Instant::now() + Duration::from_secs(2);
+    while e.states.lock().unwrap()[&first].error.as_deref() != Some("connection_failed") {
+        assert!(Instant::now() < deadline);
+        thread::sleep(Duration::from_millis(10));
+    }
+    e.request(vec![first.clone()], "collection", true, &revision, None)
+        .unwrap();
+    let deadline = Instant::now() + Duration::from_secs(2);
+    while e.states.lock().unwrap()[&first].error.as_deref() != Some("connection_required") {
+        assert!(Instant::now() < deadline);
+        thread::sleep(Duration::from_millis(10));
+    }
+    let deadline = Instant::now() + Duration::from_secs(4);
+    while e.states.lock().unwrap()[&first].saved_cycles == 0 {
+        assert!(Instant::now() < deadline);
+        thread::sleep(Duration::from_millis(20));
+    }
+    e.request(vec![first.clone()], "collection", false, &revision, None)
+        .unwrap();
+    thread::sleep(Duration::from_millis(100));
+    {
+        let states = e.states.lock().unwrap();
+        assert!(states[&first].connected && states[&first].desired_connection);
+        assert!(!states[&first].desired_collection);
+    }
+    e.shutdown();
+    drop(e);
+
+    // 用户另行手动连接，即使连接仍失败，暂停采集也不撤销该人工连接意图。
+    let mut f: Value = serde_json::from_str(fixture_data).unwrap();
+    f["endpoints"]["127.0.0.1:31001:0/1"]["connectFailure"] = json!(true);
+    std::fs::write(&fixture, serde_json::to_vec(&f).unwrap()).unwrap();
+    let e = local_recovery::open(b).unwrap();
+    let deadline = Instant::now() + Duration::from_secs(2);
+    while e.states.lock().unwrap()[&first].error.as_deref() != Some("connection_failed") {
+        assert!(Instant::now() < deadline);
+        thread::sleep(Duration::from_millis(10));
+    }
+    e.request(vec![first.clone()], "connection", true, &revision, None)
+        .unwrap();
+    e.request(vec![first.clone()], "collection", false, &revision, None)
+        .unwrap();
+    thread::sleep(Duration::from_millis(1400));
+    {
+        let states = e.states.lock().unwrap();
+        assert!(states[&first].desired_connection && !states[&first].connected);
+        assert!(!states[&first].desired_collection && states[&first].saved_cycles == 0);
+    }
+    e.shutdown();
+    drop(e);
+    std::fs::remove_dir_all(p).unwrap();
+}
+
+#[test]
+fn startup_pending_activation_respects_connection_ownership() {
+    use crate::{
+        domain::local_runtime::StartupSettings,
+        services::{local_recovery, local_supervisor::fail_startup_connections},
+    };
+    use std::sync::atomic::{AtomicU64, Ordering};
+    // 新端点、显式手动连接、同端点以及禁用后重启用分别验证。
+    for (changed_endpoint, manual_connection, disabled) in [
+        (true, false, false),
+        (true, true, false),
+        (false, false, false),
+        (false, false, true),
+    ] {
+        let p = profile();
+        let fixture = p.join("fixture.json");
+        let mut fixtures: Value = serde_json::from_str(include_str!(
+            "../../../tests/fixtures/local-acquisition/transport.json"
+        ))
+        .unwrap();
+        fixtures["endpoints"]["127.0.0.1:31003:0/1"] =
+            fixtures["endpoints"]["127.0.0.1:31001:0/1"].clone();
+        std::fs::write(&fixture, serde_json::to_vec(&fixtures).unwrap()).unwrap();
+        let b = Bootstrap {
+            mode: "local_sqlite".into(),
+            profile: p.clone(),
+            read_allowed: true,
+            validation: false,
+            migration: None,
+            ignored_keys: vec![],
+            fixture: Some(fixture),
+        };
+        let c = configuration();
+        let first = c.plcs[0].id.clone();
+        let e = LocalEngine::open(b.clone()).unwrap();
+        let saved = seed_engine(&e, &c);
+        let revision = e.activate(saved.etag, None, false).unwrap()["active"]
+            .as_str()
+            .unwrap()
+            .to_string();
+        e.save_startup_settings(StartupSettings {
+            schema_version: 1,
+            auto_collect: true,
+            auto_report: false,
+        })
+        .unwrap();
+        e.shutdown();
+        drop(e);
+
+        // 延迟首次连接，确保低容量注入发生在自动采集准入前。
+        fail_startup_connections(&first, 1);
+        let e = local_recovery::open(b).unwrap();
+        let free = Arc::new(AtomicU64::new(0));
+        let meter = free.clone();
+        e.storage
+            .call(false, move |s| {
+                s.test_meter = Some((meter, Arc::new(AtomicU64::new(100000))));
+                Ok(())
+            })
+            .unwrap();
+        let deadline = Instant::now() + Duration::from_secs(4);
+        loop {
+            let states = e.states.lock().unwrap();
+            if states[&first].connected
+                && states[&first].error.as_deref() == Some("capacity_paused")
+            {
+                break;
+            }
+            assert!(Instant::now() < deadline);
+            drop(states);
+            thread::sleep(Duration::from_millis(10));
+        }
+        if manual_connection {
+            let result = e
+                .request(vec![first.clone()], "connection", true, &revision, None)
+                .unwrap();
+            let op = result["items"][0]["operationId"].as_str().unwrap();
+            let deadline = Instant::now() + Duration::from_secs(2);
+            loop {
+                if e.operations
+                    .lock()
+                    .unwrap()
+                    .iter()
+                    .any(|o| o.operation_id == op && o.phase == "applied")
+                {
+                    break;
+                }
+                assert!(Instant::now() < deadline);
+                thread::sleep(Duration::from_millis(10));
+            }
+        }
+        free.store(10 * 1024 * 1024 * 1024, Ordering::SeqCst);
+        let view = e.configuration().unwrap();
+        let mut next = view.draft;
+        if changed_endpoint {
+            next.plcs[0].port = 31003;
+        }
+        if disabled {
+            next.plcs[0].enabled = false;
+        }
+        if !changed_endpoint && !disabled {
+            next.plcs[0].name.push_str(" updated");
+        }
+        let saved = e.save(next, view.etag).unwrap();
+        let new_revision = e.activate(saved.etag, Some(revision), false).unwrap()["active"]
+            .as_str()
+            .unwrap()
+            .to_string();
+        thread::sleep(Duration::from_millis(1500));
+        {
+            let states = e.states.lock().unwrap();
+            let first_state = &states[&first];
+            let retain_connection = manual_connection || (!changed_endpoint && !disabled);
+            assert_eq!(first_state.desired_connection, retain_connection);
+            assert_eq!(first_state.connected, retain_connection);
+            assert!(!first_state.desired_collection && first_state.saved_cycles == 0);
+        }
+        if disabled {
+            let view = e.configuration().unwrap();
+            let mut next = view.draft;
+            next.plcs[0].enabled = true;
+            let saved = e.save(next, view.etag).unwrap();
+            e.activate(saved.etag, Some(new_revision), false).unwrap();
+            thread::sleep(Duration::from_millis(1200));
+            let states = e.states.lock().unwrap();
+            assert!(!states[&first].desired_connection && !states[&first].connected);
+        }
+        e.shutdown();
+        drop(e);
+        std::fs::remove_dir_all(p).unwrap();
+    }
+}
+
+#[test]
+fn startup_connection_origin_survives_same_endpoint_activation_and_pause() {
+    use crate::{
+        domain::local_runtime::StartupSettings,
+        services::{local_recovery, local_supervisor::fail_startup_connections},
+    };
+    use std::sync::atomic::{AtomicU64, Ordering};
+    for scenario in [
+        "pending",
+        "paused",
+        "manual_connection",
+        "disabled",
+        "collecting",
+        "collecting_manual_connection",
+    ] {
+        let p = profile();
+        let fixture = p.join("fixture.json");
+        let mut fixtures: Value = serde_json::from_str(include_str!(
+            "../../../tests/fixtures/local-acquisition/transport.json"
+        ))
+        .unwrap();
+        fixtures["endpoints"]["127.0.0.1:31003:0/1"] =
+            fixtures["endpoints"]["127.0.0.1:31001:0/1"].clone();
+        std::fs::write(&fixture, serde_json::to_vec(&fixtures).unwrap()).unwrap();
+        let b = Bootstrap {
+            mode: "local_sqlite".into(),
+            profile: p.clone(),
+            read_allowed: true,
+            validation: false,
+            migration: None,
+            ignored_keys: vec![],
+            fixture: Some(fixture),
+        };
+        let c = configuration();
+        let first = c.plcs[0].id.clone();
+        let e = LocalEngine::open(b.clone()).unwrap();
+        let saved = seed_engine(&e, &c);
+        let revision = e.activate(saved.etag, None, false).unwrap()["active"]
+            .as_str()
+            .unwrap()
+            .to_string();
+        e.save_startup_settings(StartupSettings {
+            schema_version: 1,
+            auto_collect: true,
+            auto_report: false,
+        })
+        .unwrap();
+        e.shutdown();
+        drop(e);
+
+        fail_startup_connections(&first, 1);
+        let e = local_recovery::open(b).unwrap();
+        let free = Arc::new(AtomicU64::new(0));
+        let meter = free.clone();
+        e.storage
+            .call(false, move |s| {
+                s.test_meter = Some((meter, Arc::new(AtomicU64::new(100000))));
+                Ok(())
+            })
+            .unwrap();
+        let deadline = Instant::now() + Duration::from_secs(4);
+        loop {
+            let states = e.states.lock().unwrap();
+            if states[&first].connected
+                && states[&first].error.as_deref() == Some("capacity_paused")
+            {
+                break;
+            }
+            assert!(Instant::now() < deadline, "{scenario}");
+            drop(states);
+            thread::sleep(Duration::from_millis(10));
+        }
+        if scenario == "paused" || scenario == "manual_connection" {
+            let action = if scenario == "paused" {
+                "collection"
+            } else {
+                "connection"
+            };
+            let result = e
+                .request(
+                    vec![first.clone()],
+                    action,
+                    scenario == "manual_connection",
+                    &revision,
+                    None,
+                )
+                .unwrap();
+            let op = result["items"][0]["operationId"].as_str().unwrap();
+            let deadline = Instant::now() + Duration::from_secs(2);
+            loop {
+                if e.operations
+                    .lock()
+                    .unwrap()
+                    .iter()
+                    .any(|o| o.operation_id == op && o.phase == "applied")
+                {
+                    break;
+                }
+                assert!(Instant::now() < deadline, "{scenario}");
+                thread::sleep(Duration::from_millis(10));
+            }
+        }
+        free.store(10 * 1024 * 1024 * 1024, Ordering::SeqCst);
+        if scenario == "collecting" || scenario == "collecting_manual_connection" {
+            let deadline = Instant::now() + Duration::from_secs(4);
+            while e.states.lock().unwrap()[&first].saved_cycles == 0 {
+                assert!(Instant::now() < deadline);
+                thread::sleep(Duration::from_millis(20));
+            }
+        }
+        if scenario == "collecting_manual_connection" {
+            let result = e.request(vec![first.clone()], "connection", true, &revision, None).unwrap();
+            let op = result["items"][0]["operationId"].as_str().unwrap();
+            let deadline = Instant::now() + Duration::from_secs(2);
+            loop {
+                if e.operations.lock().unwrap().iter().any(|o| o.operation_id == op && o.phase == "applied") { break; }
+                assert!(Instant::now() < deadline);
+                thread::sleep(Duration::from_millis(10));
+            }
+        }
+        let view = e.configuration().unwrap();
+        let mut same = view.draft;
+        same.plcs[0].name.push_str(" updated");
+        let saved = e.save(same, view.etag).unwrap();
+        let next_revision = e.activate(saved.etag, Some(revision), false).unwrap()["active"]
+            .as_str()
+            .unwrap()
+            .to_string();
+        {
+            let states = e.states.lock().unwrap();
+            assert!(
+                states[&first].connected && states[&first].desired_connection,
+                "{scenario}"
+            );
+            assert_eq!(
+                states[&first].desired_collection,
+                scenario == "collecting" || scenario == "collecting_manual_connection",
+                "{scenario}"
+            );
+        }
+        let view = e.configuration().unwrap();
+        let mut next = view.draft;
+        if scenario == "disabled" {
+            next.plcs[0].enabled = false;
+        } else {
+            next.plcs[0].port = 31003;
+        }
+        let saved = e.save(next, view.etag).unwrap();
+        let last_revision = e.activate(saved.etag, Some(next_revision), false).unwrap()["active"]
+            .as_str()
+            .unwrap()
+            .to_string();
+        let cycles_after_activation = e.states.lock().unwrap()[&first].saved_cycles;
+        thread::sleep(Duration::from_millis(1500));
+        {
+            let states = e.states.lock().unwrap();
+            let state = &states[&first];
+            let manual = scenario == "manual_connection" || scenario == "collecting_manual_connection";
+            assert_eq!(state.desired_connection, manual, "{scenario}");
+            assert_eq!(state.connected, manual, "{scenario}");
+            assert!(
+                !state.desired_collection && state.saved_cycles == cycles_after_activation,
+                "{scenario}"
+            );
+        }
+        if scenario == "disabled" {
+            let view = e.configuration().unwrap();
+            let mut next = view.draft;
+            next.plcs[0].enabled = true;
+            let saved = e.save(next, view.etag).unwrap();
+            e.activate(saved.etag, Some(last_revision), false).unwrap();
+            thread::sleep(Duration::from_millis(1200));
+            let states = e.states.lock().unwrap();
+            assert!(!states[&first].desired_connection && !states[&first].connected);
+        }
+        e.shutdown();
+        drop(e);
+        std::fs::remove_dir_all(p).unwrap();
+    }
 }

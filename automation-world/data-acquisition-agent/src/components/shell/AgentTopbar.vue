@@ -8,8 +8,6 @@
     @toggle-sidebar="emit('toggle-sidebar')"
   >
     <template #actions>
-      <RuntimeStatusCapsule :status-text="modeStatusText" />
-      <StatusCapsule :label="backendStatusText" tone="neutral" />
       <ThemeToggle
         :theme="isDarkTheme?'dark':'light'"
         :label="themeSwitchLabel"
@@ -25,6 +23,7 @@
       <CuAction
         :label="t('common.actions.refresh')"
         :icon="Refresh"
+        round-icon
         :loading="refreshBusy"
         :disabled="refreshBusy"
         @click="emit('refresh-runtime')"
@@ -35,17 +34,14 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { Refresh } from '@element-plus/icons-vue'
-import { AgentTopbar as CuTopbar, ThemeToggle, LanguageSwitch, StatusCapsule, ConsoleActionButton as CuAction } from '@aw-ui'
+import { AgentTopbar as CuTopbar, ThemeToggle, LanguageSwitch, ConsoleActionButton as CuAction } from '@aw-ui'
 import type { ConsoleSectionManifest } from '../../console/types'
-import RuntimeStatusCapsule from './RuntimeStatusCapsule.vue'
 defineProps<{
   activeSection: ConsoleSectionManifest
-  backendStatusText: string
   isDarkTheme: boolean
   isSidebarHidden: boolean
   localeSwitchLabel: string
   appLocale: 'zh-CN' | 'en-US'
-  modeStatusText: string
   themeSwitchLabel: string
   refreshBusy: boolean
 }>()

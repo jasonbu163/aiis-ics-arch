@@ -37,7 +37,7 @@ pnpm tauri dev
 
 **可选：一次配置源码开发profile。** 在本工程根目录，手工复制 `.env.example` 为 `.env`；已有文件先检查，只编辑自己的活动键，不覆盖。可填 `DS_PROFILE_DIR` 为自己拥有的绝对目录；留空使用原默认。进程非空值 > 自身.env非空值 > 默认，重复键首项生效。仅简单KEY=VALUE，允许一层成对引号，不展开`~`、`$VAR`/`${VAR}`或执行shell，不扫描父目录/其他应用。相对路径、父目录穿越、symlink、非UTF-8/不可读.env会在锁/开库/日志前拒绝，不退回默认建旁库。安装包.env发现/分发不在本次承诺内。
 
-如曾在当前终端export `DS_PROFILE_DIR`，它会覆盖.env；Owner一次核对并按需`unset DS_PROFILE_DIR`。之后每次仅 `pnpm tauri dev`，正常重开复用同一profile。不要source整份.env。一个profile键只选存储根，PLC/点位/策略由UI+SQLite管理，运行启停走工作台；保存/加载不自动启动，connected/运行意图不恢复。不要删除默认库来制造空白教程。DAA-007联调仅沿用[联调手册](../data-acquisition-agent/JOINT_TEST_GUIDE.zh-CN.md)指定的原Owner合成profile，不复制DEV测试库。
+如曾在当前终端export `DS_PROFILE_DIR`，它会覆盖.env；Owner一次核对并按需`unset DS_PROFILE_DIR`。之后每次仅 `pnpm tauri dev`，正常重开复用同一profile。不要source整份.env。一个profile键只选存储根，PLC/点位/策略由UI+SQLite管理，运行启停走工作台；保存/加载不自动启动，connected/运行意图不恢复。不要删除默认库来制造空白教程。DAA-007联调仅沿用[联调手册](../data-acquisition-agent/plans/DAA-007-ds-joint-validation-and-time-contract/tasks.md)指定的原Owner合成profile，不复制DEV测试库。
 
 若提示 pnpm store 不匹配，核对 `pnpm store path` 与本工程 `node_modules/.modules.yaml` 的 `storeDir`；使用既定 pnpm 重装本工程锁定依赖，不能把旧任务临时 store 当产品依赖。端口占用时查占用事实并由所有者处理，不结束未知进程。`profile_in_use` 应正常关闭持锁的自有实例，不能删除锁抢占。
 

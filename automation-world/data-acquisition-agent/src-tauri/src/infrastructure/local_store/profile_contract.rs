@@ -93,9 +93,25 @@ pub(super) fn decode(raw: &[u8], profile: &Path, store: &Path) -> LocalResult<Co
     {
         return Err(invalid());
     }
+    let runtime_version = value.stores[1].schema_version;
+    let runtime_ddl = match runtime_version {
+        3 => schema::runtime_v3_sql(),
+        4 if value.stores[1].schema_fingerprint
+            == schema::fingerprint(&schema::runtime_v4_switches_sql())? =>
+        {
+            schema::runtime_v4_switches_sql()
+        }
+        4 if value.stores[1].schema_fingerprint
+            == schema::fingerprint(&schema::runtime_v4_extended_sql())? =>
+        {
+            schema::runtime_v4_extended_sql()
+        }
+        4 => schema::runtime_v4_sql(),
+        _ => return Err(invalid()),
+    };
     for (index, (role, app, version, ddl)) in [
         ("config", schema::CONFIG_APP, 2, schema::config_sql()),
-        ("runtime", schema::RUNTIME_APP, 3, schema::runtime_v3_sql()),
+        ("runtime", schema::RUNTIME_APP, runtime_version, runtime_ddl),
     ]
     .into_iter()
     .enumerate()
@@ -360,6 +376,9 @@ fn reject_incomplete(s: &Snapshot) -> LocalResult<()> {
 }
 pub(super) fn cold_materials(s: &Snapshot) -> LocalResult<()> {
     reject_incomplete(s)?;
+    if s.get("config.sqlite").is_some() != s.get("runtime.sqlite").is_some() {
+        return Err(unsupported("missing_database"));
+    }
     if s.files
         .iter()
         .filter(|m| m.name.ends_with("-journal"))
@@ -383,7 +402,7 @@ pub(super) fn cold_materials(s: &Snapshot) -> LocalResult<()> {
     }
     Ok(())
 }
-fn bind(c: &Contract, s: &Snapshot) -> LocalResult<()> {
+pub(super) fn bind(c: &Contract, s: &Snapshot) -> LocalResult<()> {
     if s.profile_identity.as_ref() != Some(&c.profile_identity)
         || s.store_identity.as_ref() != Some(&c.store_identity)
         || s.store_mode != 0o700
@@ -420,7 +439,7 @@ pub(super) fn checkpoint(stage: &str, dir: &Path) -> LocalResult<()> {
     let _ = (stage, dir);
     Ok(())
 }
-fn sync_dir(dir: &Path) -> LocalResult<()> {
+pub(super) fn sync_dir(dir: &Path) -> LocalResult<()> {
     checkpoint("directory_sync", dir)?;
     let mut options = OpenOptions::new();
     options.read(true);
@@ -435,7 +454,7 @@ fn sync_dir(dir: &Path) -> LocalResult<()> {
     synced?;
     closed
 }
-fn create_sync(path: &Path, bytes: &[u8]) -> LocalResult<()> {
+pub(super) fn create_sync(path: &Path, bytes: &[u8]) -> LocalResult<()> {
     let dir = path.parent().ok_or_else(invalid)?;
     let mut options = OpenOptions::new();
     options.write(true).create_new(true);
@@ -505,7 +524,12 @@ fn initialize(dir: &Path) -> LocalResult<(Snapshot, Contract)> {
     }
     let stores = [
         ("config", schema::CONFIG_APP, 2, schema::config_sql()),
-        ("runtime", schema::RUNTIME_APP, 3, schema::runtime_v3_sql()),
+        (
+            "runtime",
+            schema::RUNTIME_APP,
+            4,
+            schema::runtime_v4_switches_sql(),
+        ),
     ]
     .into_iter()
     .map(|(role, app, v, ddl)| {
@@ -633,7 +657,7 @@ pub(super) fn admit(dir: &Path) -> LocalResult<super::LockedProfile> {
     {
         return Err("profile_initialization_incomplete".into());
     }
-    let before = capture(dir)?;
+    let mut before = capture(dir)?;
     cold_materials(&before)?;
     let mut credential = before
         .get(CREDENTIAL)
@@ -662,6 +686,38 @@ pub(super) fn admit(dir: &Path) -> LocalResult<super::LockedProfile> {
         return Err(unsupported("profile_changed"));
     }
     checkpoint("before_lock", dir)?;
+    if before.profile_identity.is_none() {
+        // 只对确实不存在的 profile 原子创建最终目录；竞争者抢先创建时保留原状并拒绝。
+        let parent = before.profile.parent().ok_or_else(invalid)?;
+        std::fs::create_dir_all(parent).map_err(|_| "profile_io")?;
+        if canonical(&before.profile)? != before.profile {
+            return Err(unsupported("profile_changed"));
+        }
+        match std::fs::create_dir(&before.profile) {
+            Ok(()) => {}
+            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
+                return Err(unsupported("profile_changed"));
+            }
+            Err(_) => return Err("profile_io".into()),
+        }
+        let meta = std::fs::symlink_metadata(&before.profile).map_err(unsupported)?;
+        if !meta.is_dir() || meta.file_type().is_symlink() {
+            return Err(unsupported("profile_changed"));
+        }
+        let identity = stat(&meta).identity;
+        checkpoint("after_profile_directory_created", dir)?;
+        let created = capture(dir)?;
+        let mut expected = before.clone();
+        expected.profile_identity = Some(identity);
+        if created != expected {
+            return Err(unsupported("profile_changed"));
+        }
+        before = created;
+        checkpoint("after_profile_creation", dir)?;
+    }
+    if capture(dir)? != before {
+        return Err(unsupported("profile_changed"));
+    }
     let lock = crate::infrastructure::local_profile_lock::ProfileLock::acquire(&before.profile)?;
     if canonical(&lock.profile)? != before.profile || capture(dir)? != before {
         return Err(unsupported("profile_changed"));
@@ -756,12 +812,36 @@ pub(super) fn admit(dir: &Path) -> LocalResult<super::LockedProfile> {
         let instance = super::inspect_sql(dir)
             .map_err(super::ProbeFailure::message)?
             .ok_or_else(invalid)?;
+        let version = super::inspect_one(dir, "runtime")
+            .map_err(super::ProbeFailure::message)?
+            .1;
+        #[cfg(unix)]
+        if version == 4 && credential.is_none() {
+            return Err("profile_contract_missing".into());
+        }
         // 全检义务来自本次preflight/初始化的原凭据，绝不按当前marker重新决定。
         if let Some(c) = credential.as_ref() {
             bind(c, &baseline)?;
             if c.instance_id != instance {
                 return Err(invalid());
             }
+            if version == 4 {
+                let db = rusqlite::Connection::open_with_flags(
+                    dir.join("runtime.sqlite"),
+                    rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY
+                        | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
+                )
+                .map_err(super::sql_error)?;
+                let actual = schema::runtime_v4_schema(&db)?;
+                db.close().map_err(|(_, e)| super::sql_error(e))?;
+                if c.stores[1].schema_fingerprint != schema::fingerprint(&actual)? {
+                    return Err("profile_upgrade_incomplete".into());
+                }
+            }
+            schema::full_check(dir, &instance)?;
+        }
+        #[cfg(not(unix))]
+        if version == 4 && credential.is_none() {
             schema::full_check(dir, &instance)?;
         }
         // native后的新基线是显式建立的；sealed cold也执行同一完整后检，不能只认metadata。
@@ -775,7 +855,7 @@ pub(super) fn admit(dir: &Path) -> LocalResult<super::LockedProfile> {
         }
         Ok(())
     })();
-    if checked.is_err() {
+    if let Err(error) = checked {
         tracing::error!(
             event = "profile_recovery_business_admission_failed",
             process = "daa-local",
@@ -783,6 +863,9 @@ pub(super) fn admit(dir: &Path) -> LocalResult<super::LockedProfile> {
             result = "rejected",
             recovery_write_completed = recovered
         );
+        if error == "profile_upgrade_incomplete" {
+            return Err(error);
+        }
         return Err(if recovered {
             "profile_recovery_business_admission_failed"
         } else {
@@ -802,6 +885,165 @@ pub(super) fn admit(dir: &Path) -> LocalResult<super::LockedProfile> {
         _os: lock,
         _process: claim,
     })
+}
+
+/// 已封存的 runtime4 通过完整检查且持锁后，原地添加独立上报身份表。
+/// 任何跨数据库与凭据提交的中断均保留 staging，使下次打开安全拒绝。
+pub(super) fn upgrade_reporting(dir: &Path) -> LocalResult<()> {
+    let before = capture(dir)?;
+    cold_materials(&before)?;
+    let mut contract = before
+        .get(CREDENTIAL)
+        .map(|m| decode(&m.small, &before.profile, &before.store))
+        .transpose()?;
+    let db = rusqlite::Connection::open_with_flags(
+        dir.join("runtime.sqlite"),
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
+    )
+    .map_err(super::sql_error)?;
+    let version: u32 = db
+        .query_row("PRAGMA user_version", [], |r| r.get(0))
+        .map_err(super::sql_error)?;
+    if version != 4 {
+        db.close().map_err(|(_, e)| super::sql_error(e))?;
+        return Ok(());
+    }
+    let actual = schema::runtime_v4_schema(&db)?;
+    db.close().map_err(|(_, e)| super::sql_error(e))?;
+    let original = schema::runtime_v4_sql();
+    if let Some(c) = contract.as_ref() {
+        bind(c, &before)?;
+        if c.stores[1].schema_fingerprint != schema::fingerprint(&actual)? {
+            return Err("profile_upgrade_incomplete".into());
+        }
+    }
+    if actual != original {
+        return Ok(());
+    }
+    if capture(dir)? != before {
+        return Err(unsupported("profile_changed"));
+    }
+    #[cfg(unix)]
+    {
+        let c = contract.as_mut().ok_or("profile_contract_missing")?;
+        c.stores[1].schema_fingerprint = schema::fingerprint(&schema::runtime_v4_extended_sql())?;
+        create_sync(&dir.join(STAGING), &encode(c)?)?;
+        sync_dir(dir)?;
+        checkpoint("reporting_upgrade_staged", dir)?;
+    }
+    let mut db = super::connect(&dir.join("runtime.sqlite"), false, schema::RUNTIME_APP)?;
+    let tx = db
+        .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)
+        .map_err(super::sql_error)?;
+    tx.execute_batch(schema::REPORTING_SOURCES)
+        .map_err(super::sql_error)?;
+    tx.execute(
+        "INSERT INTO reporting_identity SELECT 1,instance_id FROM runtime_metadata WHERE id=1",
+        [],
+    )
+    .map_err(super::sql_error)?;
+    tx.execute(
+        "INSERT INTO reporting_bindings SELECT plc_id,plc_id,generation FROM plc_sources",
+        [],
+    )
+    .map_err(super::sql_error)?;
+    tx.execute("INSERT INTO reporting_generations SELECT p.plc_id,p.generation,m.instance_id,p.plc_id,p.generation FROM plc_sources p CROSS JOIN runtime_metadata m WHERE m.id=1", []).map_err(super::sql_error)?;
+    tx.commit().map_err(super::sql_error)?;
+    db.close().map_err(|(_, e)| super::sql_error(e))?;
+    checkpoint("reporting_upgrade_committed", dir)?;
+    let instance = super::inspect_sql(dir)
+        .map_err(super::ProbeFailure::message)?
+        .ok_or_else(invalid)?;
+    schema::full_check(dir, &instance)?;
+    #[cfg(unix)]
+    {
+        let after = capture(dir)?;
+        if after.profile_identity != before.profile_identity
+            || after.store_identity != before.store_identity
+            || after.get(CREDENTIAL) != before.get(CREDENTIAL)
+            || after.get("config.sqlite") != before.get("config.sqlite")
+            || after.get("runtime.sqlite").map(|m| &m.stat.identity)
+                != before.get("runtime.sqlite").map(|m| &m.stat.identity)
+        {
+            return Err(unsupported("profile_changed"));
+        }
+        std::fs::rename(dir.join(STAGING), dir.join(CREDENTIAL)).map_err(|_| "profile_io")?;
+        sync_dir(dir)?;
+    }
+    Ok(())
+}
+
+/// 为已有 runtime4 追加逐 PLC 的暂停设置；先验证旧账本，提交后再替换结构凭据。
+pub(super) fn upgrade_reporting_switches(dir: &Path) -> LocalResult<()> {
+    let before = capture(dir)?;
+    cold_materials(&before)?;
+    let mut contract = before
+        .get(CREDENTIAL)
+        .map(|m| decode(&m.small, &before.profile, &before.store))
+        .transpose()?;
+    let db = rusqlite::Connection::open_with_flags(
+        dir.join("runtime.sqlite"),
+        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
+    )
+    .map_err(super::sql_error)?;
+    let version: u32 = db
+        .query_row("PRAGMA user_version", [], |r| r.get(0))
+        .map_err(super::sql_error)?;
+    if version != 4 {
+        db.close().map_err(|(_, e)| super::sql_error(e))?;
+        return Ok(());
+    }
+    let actual = schema::runtime_v4_schema(&db)?;
+    db.close().map_err(|(_, e)| super::sql_error(e))?;
+    if let Some(c) = contract.as_ref() {
+        bind(c, &before)?;
+        if c.stores[1].schema_fingerprint != schema::fingerprint(&actual)? {
+            return Err("profile_upgrade_incomplete".into());
+        }
+    }
+    if actual == schema::runtime_v4_switches_sql() {
+        return Ok(());
+    }
+    if actual != schema::runtime_v4_extended_sql() || capture(dir)? != before {
+        return Err(unsupported("profile_changed"));
+    }
+    #[cfg(unix)]
+    {
+        let c = contract.as_mut().ok_or("profile_contract_missing")?;
+        c.stores[1].schema_fingerprint = schema::fingerprint(&schema::runtime_v4_switches_sql())?;
+        create_sync(&dir.join(STAGING), &encode(c)?)?;
+        sync_dir(dir)?;
+        checkpoint("reporting_switches_upgrade_staged", dir)?;
+    }
+    let mut db = super::connect(&dir.join("runtime.sqlite"), false, schema::RUNTIME_APP)?;
+    let tx = db
+        .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)
+        .map_err(super::sql_error)?;
+    tx.execute_batch(schema::REPORTING_SWITCHES)
+        .map_err(super::sql_error)?;
+    tx.commit().map_err(super::sql_error)?;
+    db.close().map_err(|(_, e)| super::sql_error(e))?;
+    checkpoint("reporting_switches_upgrade_committed", dir)?;
+    let instance = super::inspect_sql(dir)
+        .map_err(super::ProbeFailure::message)?
+        .ok_or_else(invalid)?;
+    schema::full_check(dir, &instance)?;
+    #[cfg(unix)]
+    {
+        let after = capture(dir)?;
+        if after.profile_identity != before.profile_identity
+            || after.store_identity != before.store_identity
+            || after.get(CREDENTIAL) != before.get(CREDENTIAL)
+            || after.get("config.sqlite") != before.get("config.sqlite")
+            || after.get("runtime.sqlite").map(|m| &m.stat.identity)
+                != before.get("runtime.sqlite").map(|m| &m.stat.identity)
+        {
+            return Err(unsupported("profile_changed"));
+        }
+        std::fs::rename(dir.join(STAGING), dir.join(CREDENTIAL)).map_err(|_| "profile_io")?;
+        sync_dir(dir)?;
+    }
+    Ok(())
 }
 
 /// 本地结构沿用serde原递归边界；不套provider depth20/decimal规范限制，但拒绝重复键/尾随/BOM。

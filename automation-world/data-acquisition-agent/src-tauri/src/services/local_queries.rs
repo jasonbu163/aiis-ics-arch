@@ -11,6 +11,21 @@ impl LocalEngine {
             }
         }
         let configuration = self.configuration()?;
+        // Maintenance uses the selected active revision, not the editable draft.
+        // If selection changes between the two reads, omit it until the next snapshot.
+        let selected = configuration.active.clone();
+        let active_storage = self.storage.call(true, move |s| {
+            if s.configuration()?.active.as_deref() != selected.as_deref() {
+                return Ok(None);
+            }
+            match selected {
+                Some(revision) => {
+                    let policy = s.revision(&revision)?.storage;
+                    Ok(Some(json!({"revision":revision,"quotaBytes":policy.quota_bytes,"retentionDays":policy.retention_days})))
+                }
+                None => Ok(None),
+            }
+        })?;
         let capacity = self.capacity()?;
         let mut states = self
             .states
@@ -44,7 +59,7 @@ impl LocalEngine {
             .iter()
             .cloned()
             .collect::<Vec<_>>();
-        let value = json!({"schemaVersion":1,"mode":"local_sqlite","origin":if self.bootstrap.validation{"fixture"}else{"local"},"generatedAt":crate::domain::local_sample::now(),"configuration":configuration,"plcs":states,"capacity":capacity,"operations":operations});
+        let value = json!({"schemaVersion":1,"mode":"local_sqlite","origin":if self.bootstrap.validation{"fixture"}else{"local"},"generatedAt":crate::domain::local_sample::now(),"configuration":configuration,"activeStorage":active_storage,"plcs":states,"capacity":capacity,"operations":operations});
         *cache = Some((std::time::Instant::now(), value.clone()));
         Ok(value)
     }

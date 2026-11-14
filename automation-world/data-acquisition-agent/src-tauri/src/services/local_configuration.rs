@@ -163,10 +163,15 @@ impl LocalEngine {
                 cached.2
             } else {
                 *self.import_preview.lock().unwrap() = None;
+                let runtime_version = self.storage.call(true, |s| s.runtime_version())?;
                 let mut p = if r.stage.is_some() {
-                    tia_source::plan(&view.draft, &r)?
+                    tia_source::plan_for_runtime(&view.draft, &r, runtime_version)?
                 } else {
-                    tia_source::legacy_import(&view.draft, r.sources.clone())?
+                    tia_source::legacy_import_for_runtime(
+                        &view.draft,
+                        r.sources.clone(),
+                        runtime_version,
+                    )?
                 };
                 p.preview_token = Some(id());
                 p.input_digest = hash.clone();

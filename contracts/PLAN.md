@@ -15,7 +15,7 @@ This plan tracks the rollout of the project-level contract hub.
 
 | Contract line | Actual scope and next gate |
 | --- | --- |
-| [ARCH-ACQ-003 r2](../plans/ARCH-ACQ-003-acquisition-data-optional-filters/spec.md) | `owner_accepted`. Human Owner accepted the revised upload contract on 2026-11-11. DAA-010 takes the acquisition r2 artifacts as its provider handoff. |
+| [ARCH-ACQ-003 r2](../plans/ARCH-ACQ-003-acquisition-data-optional-filters/spec.md) | `owner_accepted` on 2026-11-11. DAA-010 uses the current development upload contract without Bearer. [Development OpenAPI](published/http-api/plc-facts-v2/openapi-acquisition-dev.json) |
 | [PLC facts v2](published/http-api/plc-facts-v2/README.md) | ARCH-BE-012 r4 source implementation and isolated verification in progress. |
 | [PLC facts provider](published/http-api/plc-facts-v1/README.md) | BE-009 source and isolated MySQL A+B QA passed; Owner final/provider-ready and real adoption pending. |
 | [Typed business provider](published/http-api/business-integration-v1/README.md) | BE-010 r2 eight operations and isolated A+B QA passed; real schema/time adoption and final acceptance pending. |

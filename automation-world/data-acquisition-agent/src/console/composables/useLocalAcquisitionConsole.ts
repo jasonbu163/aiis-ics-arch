@@ -1,8 +1,8 @@
 /** 本地模式唯一页面owner：共享点位选择、草稿/CAS/编辑准入/激活与1Hz轮询。 */
-import { computed, watch, onMounted, onUnmounted, reactive, ref, type InjectionKey } from 'vue';
+import { computed, h, watch, onMounted, onUnmounted, reactive, ref, type InjectionKey } from 'vue';
 import { ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
-import { bootstrap, localCall, LocalCommandError, type Configuration, type ConfigurationView, type Snapshot, type ImportPreview, type Source, type Offset, type Point, type Operation, type History, type RawSample, type LogRow, type Identification, type BlockMapping, type NameRequest, type NamePreview, previewPointNames, confirmPointNames } from '../../services/localAcquisition';
+import { bootstrap, localCall, LocalCommandError, type Configuration, type ConfigurationView, type Snapshot, type StartupState, type ImportPreview, type Source, type Offset, type Point, type Operation, type History, type RawSample, type LogRow, type Identification, type BlockMapping, type NameRequest, type NamePreview, previewPointNames, confirmPointNames } from '../../services/localAcquisition';
 import * as facts from '../../services/factsDelivery';
 import { historyBoundary } from '../time';
 export const localConsoleKey: InjectionKey<LocalConsole> = Symbol('daa-local-owner');
@@ -26,19 +26,88 @@ export function useLocalAcquisitionConsole() {
     const { t, te } = useI18n();
     const available = bootstrap.localStorage && ['native', 'fixture'].includes(bootstrap.origin);
     const view = ref<ConfigurationView | null>(null), draft = ref<Configuration | null>(null), snapshot = ref<Snapshot | null>(null), busy = ref(false), error = ref(''), notice = ref(''), selectedPlc = ref(''), selectedDb = ref(''), query = ref(''), pointPage = ref(1), preview = ref<ImportPreview | null>(null), offsets = ref<Offset[]>([]), sources = ref<Source[]>([]), history = ref<History | null>(null), raw = ref<RawSample | null>(null), logs = ref<LogRow[]>([]);
+    const startup = ref<StartupState | null>(null), startupBusy = ref(false), startupError = ref(''), startupSaved = ref(false);
+    async function loadStartup() {
+        if (startupBusy.value) return;
+        startupBusy.value = true;
+        try { startup.value = await localCall<StartupState>('daa_get_startup_settings'); startupError.value = ''; }
+        catch (e) { startup.value = null; startupError.value = String(e instanceof Error ? e.message : e); }
+        finally { startupBusy.value = false; }
+    }
+    async function saveStartup(field: 'autoCollect' | 'autoReport', value: boolean) {
+        if (!startup.value || startupBusy.value) return;
+        startupBusy.value = true; startupError.value = ''; startupSaved.value = false;
+        try {
+            const settings = { ...startup.value.settings, [field]: value };
+            startup.value = await localCall<StartupState>('daa_save_startup_settings', settings);
+            startupSaved.value = true;
+        } catch (e) {
+            startupError.value = String(e instanceof Error ? e.message : e);
+            if (startupError.value === 'storage_pending') { startup.value = null; startupError.value = 'startup_settings_pending'; }
+        }
+        finally { startupBusy.value = false; }
+    }
     const factsReadMode = ref('test'), factsReadFrom = ref(''), factsReadTo = ref(''), factsReadPage = ref(0), factsReadError = ref('');
-    const deliveryKind = ref<'batches' | 'events'>('batches');
+    const deliveryKind = ref<'batches' | 'events'>('batches'), deliveryState = ref(''), deliverySaveError = ref(''), deliverySnapshotError = ref('');
     const delivery = ref<facts.DeliverySnapshot | null>(null), deliverySettings = ref<facts.DeliverySettings | null>(null), deliveryPage = ref<facts.DeliveryPage | null>(null), deliveryPageSize = ref(20), deliveryPageNumber = ref(1), deliveryCursors = ref<Array<number | null>>([null]), deliveryDialog = ref<'settings' | 'detail' | 'source' | 'preview' | 'read' | null>(null), deliveryDetail = ref<Record<string, unknown> | null>(null), sourceMaterial = ref<facts.SourceMaterial | null>(null);
+    let deliveryEpoch = 0;
+    function invalidateDelivery() {
+        deliveryEpoch++;
+        deliverySnapshotError.value = 'delivery_snapshot_unavailable';
+        return deliveryEpoch;
+    }
+    function acceptDelivery(value: facts.DeliverySnapshot, epoch: number) {
+        if (epoch !== deliveryEpoch) return;
+        delivery.value = value;
+        deliverySnapshotError.value = '';
+    }
+    function failDelivery(e: unknown, epoch: number) {
+        if (epoch !== deliveryEpoch) return;
+        deliverySnapshotError.value = String(e instanceof Error ? e.message : e) || 'delivery_snapshot_unavailable';
+    }
+    async function mutateDelivery(action: () => Promise<facts.DeliverySnapshot>) {
+        const epoch = invalidateDelivery();
+        try { acceptDelivery(await action(), epoch); }
+        catch (e) { failDelivery(e, epoch); throw e; }
+    }
     async function loadDeliveries(direction: 'reset' | 'next' | 'previous' = 'reset', size = deliveryPageSize.value) {
         await perform(async () => { if (!bootstrap.uploadAvailable) return; const cursors = direction === 'reset' ? [null] : [...deliveryCursors.value]; let number = direction === 'reset' ? 1 : deliveryPageNumber.value;
             if (direction === 'next') { if (!deliveryPage.value?.nextCursor) return; cursors.push(deliveryPage.value.nextCursor); number++; if (cursors.length > 64) cursors.shift(); }
             if (direction === 'previous') { if (cursors.length <= 1) return; cursors.pop(); number--; }
-            deliveryPage.value = await facts.listDeliveries(cursors[cursors.length - 1], size, deliveryKind.value); deliveryCursors.value = cursors; deliveryPageNumber.value = number; deliveryPageSize.value = size; });
+            deliveryPage.value = await facts.listDeliveries(cursors[cursors.length - 1], size, deliveryKind.value, deliveryKind.value === 'batches' ? deliveryState.value : undefined); deliveryCursors.value = cursors; deliveryPageNumber.value = number; deliveryPageSize.value = size; });
     }
-    async function deliveryControl(action: 'start' | 'pause' | 'resume') { await perform(async () => { delivery.value = await facts.setDelivery(action); }); }
-    async function editDelivery() { await perform(async () => { deliverySettings.value = await facts.getDeliverySettings(); sourceMaterial.value = await facts.getFactsSourceMaterial(); deliveryDialog.value = 'settings'; }); }
-    async function saveDelivery(settings: facts.DeliverySettings) { await perform(async () => { deliverySettings.value = await facts.saveDeliverySettings(settings, deliverySettings.value!.settingsRevision); deliveryDialog.value = null; delivery.value = await facts.getDeliverySnapshot(); }); }
-    async function inspectDelivery(batchId: string) { await perform(async () => { deliveryDetail.value = await facts.getDelivery(batchId); deliveryDialog.value = 'detail'; }); }
+    async function deliveryControl(action: 'start' | 'pause' | 'resume') { await perform(async () => {
+        if (action === 'pause') { await mutateDelivery(() => facts.setDelivery(action)); return; }
+        if (deliverySnapshotError.value || !delivery.value) throw new Error('delivery_snapshot_unavailable');
+        const settings = await facts.getDeliverySettings(), material = await facts.getFactsSourceMaterial();
+        if (settings.identityMode !== 'per_plc') throw new Error('delivery_profile_upgrade_required');
+        if (!settings.origin) throw new Error('target_missing');
+        if (!material.sources.length) throw new Error('source_adoption_required');
+        if (!await confirmDelivery(action, settings.origin + settings.path, material)) return;
+        if (deliverySnapshotError.value || !delivery.value) throw new Error('delivery_snapshot_unavailable');
+        await mutateDelivery(() => facts.setDelivery(action, settings.settingsRevision, material.sources));
+    }); }
+    async function editDelivery() { await perform(async () => { deliverySaveError.value = ''; deliverySettings.value = await facts.getDeliverySettings(); if (deliverySettings.value.identityMode !== 'per_plc') throw new Error('delivery_profile_upgrade_required'); sourceMaterial.value = await facts.getFactsSourceMaterial(); deliveryDialog.value = 'settings'; }); }
+    async function saveDelivery(settings: facts.DeliverySettings) { await perform(async () => {
+        deliverySaveError.value = '';
+        const epoch = invalidateDelivery();
+        try { deliverySettings.value = await facts.saveDeliverySettings(settings, deliverySettings.value!.settingsRevision); }
+        catch (e) { failDelivery(e, epoch); deliverySaveError.value = String(e instanceof Error ? e.message : e); return; }
+        deliveryDialog.value = null;
+        try { acceptDelivery(await facts.getDeliverySnapshot(), epoch); }
+        catch (e) { failDelivery(e, epoch); throw e; }
+    }); }
+    async function inspectDelivery(batchId: string) { await perform(async () => { deliveryDetail.value = await facts.getDelivery(batchId); deliverySettings.value = await facts.getDeliverySettings(); deliveryDialog.value = 'detail'; }); }
+    async function rebindDelivery() { await perform(async () => {
+        const sampleId = String(deliveryDetail.value?.batchId ?? ''), oldUrl = String(deliveryDetail.value?.origin ?? '');
+        const settings = await facts.getDeliverySettings(), material = await facts.getFactsSourceMaterial();
+        if (settings.identityMode !== 'per_plc') throw new Error('delivery_profile_upgrade_required');
+        if (!settings.origin || !sampleId || !oldUrl) throw new Error('invalid_target');
+        const newUrl = settings.origin + settings.path;
+        if (!await confirmDelivery('rebind', newUrl, material, oldUrl)) return;
+        await mutateDelivery(() => facts.rebindDelivery(sampleId, oldUrl, settings.settingsRevision, material.sources));
+        deliveryDetail.value = await facts.getDelivery(sampleId);
+    }); }
     async function showSourceMaterial() { await perform(async () => { sourceMaterial.value = await facts.getFactsSourceMaterial(); deliveryDetail.value = sourceMaterial.value as unknown as Record<string, unknown>; deliveryDialog.value = 'source'; }); }
     async function previewFacts() { await perform(async () => { const cycleId = history.value?.items[0]?.cycleId; if (!cycleId) throw new Error('delivery_no_cycle'); deliveryDetail.value = await facts.previewDelivery(cycleId); deliveryDialog.value = 'preview'; }); }
     function clearFactsReadResult() {
@@ -146,6 +215,45 @@ export function useLocalAcquisitionConsole() {
         return draft.value?.points.filter(p => p.plcId === selectedPlc.value && ids.has(p.id)) ?? [];
     });
     const dirty = computed(() => !!draft.value && !!view.value && JSON.stringify(draft.value) !== JSON.stringify(view.value.draft));
+    // 上报确认直接展示已读取的结构化来源，避免把合法标识拼接后再解析。
+    async function confirmDelivery(action: 'start' | 'resume' | 'rebind', target: string, material: facts.SourceMaterial, oldUrl = '') {
+        const field = (label: string, value: string) => h('div', { class: 'daa-confirm-field' }, [
+            h('dt', t('common.delivery.' + label)), h('dd', value),
+        ]);
+        const targetFields = action === 'rebind'
+            ? [field('oldUrl', oldUrl), field('newUrl', target)]
+            : [field('confirmTarget', target)];
+        targetFields.push(field('confirmContract', material.contractVersion));
+        const sourceRows = material.sources.map((source, index) => h('li', { class: 'daa-confirm-source', key: index }, [
+            h('strong', { class: 'daa-confirm-source__title' }, t('common.delivery.confirmSourceNumber', { number: index + 1 })),
+            h('dl', { class: 'daa-confirm-source__fields' }, [
+                field('sourceInstance', source.instanceId), field('sourcePlc', source.plcId),
+                field('db', `DB${source.dbNumber}`), field('sourceGeneration', source.sourceGeneration),
+            ]),
+        ]));
+        const content = h('div', { class: 'daa-confirm-scroll', tabindex: 0 }, [
+            action === 'rebind' ? h('p', { class: 'daa-confirm-note' }, t('common.delivery.confirmSameTarget')) : null,
+            h('section', { class: 'daa-confirm-section' }, [
+                h('h3', t('common.delivery.confirmTargetHeading')),
+                h('dl', { class: 'daa-confirm-targets' }, targetFields),
+            ]),
+            h('section', { class: 'daa-confirm-section' }, [
+                h('h3', t('common.delivery.confirmSourcesHeading', { count: material.sources.length })),
+                h('p', { class: 'daa-confirm-hint' }, t('common.delivery.confirmRegistration')),
+                h('ol', { class: 'daa-confirm-sources' }, sourceRows),
+            ]),
+            h('p', { class: 'daa-confirm-note' }, t('common.delivery.' + (action === 'rebind' ? 'confirmRetryNote' : 'confirmQueueNote'))),
+        ]);
+        const title = action === 'rebind' ? 'confirmRebindTitle' : action === 'resume' ? 'confirmResumeTitle' : 'confirmStartTitle';
+        const button = action === 'rebind' ? 'confirmRebindAction' : action;
+        try {
+            await ElMessageBox.confirm(content, t('common.delivery.' + title), {
+                confirmButtonText: t('common.delivery.' + button), cancelButtonText: t('common.operationDialog.cancel'),
+                appendTo: document.querySelector('#daa-feedback') as HTMLElement, closeOnClickModal: false, customClass: 'daa-reporting-confirm',
+            });
+            return true;
+        } catch { return false; }
+    }
     async function confirmAction(key: string, params: Record<string, string | number> = {}) {
         try {
             await ElMessageBox.confirm(t(key, params), t('common.operationDialog.title'), { confirmButtonText: t('common.operationDialog.confirm'), cancelButtonText: t('common.operationDialog.cancel'), appendTo: document.querySelector('#daa-feedback') as HTMLElement, closeOnClickModal: false });
@@ -184,18 +292,33 @@ export function useLocalAcquisitionConsole() {
             selectedDb.value = '';
         selectedNameIds.value = selectedNameIds.value.filter(id => v.draft.points.some(p => p.id === id && p.plcId === selectedPlc.value));
     }
+    let refreshing = false;
     async function refresh() {
-        if (!available || busy.value)
+        if (!available || busy.value || refreshing)
             return;
+        refreshing = true;
+        const epoch = deliveryEpoch;
         try {
-            snapshot.value = await localCall<Snapshot>('daa_get_local_snapshot');
-            if (bootstrap.uploadAvailable) delivery.value = await facts.getDeliverySnapshot();
-            snapshotError.value = '';
-            if (!draft.value)
-                accept(snapshot.value.configuration);
+            try {
+                snapshot.value = await localCall<Snapshot>('daa_get_local_snapshot');
+                snapshotError.value = '';
+                if (!draft.value)
+                    accept(snapshot.value.configuration);
+            }
+            catch (e) {
+                snapshotError.value = String(e instanceof Error ? e.message : e);
+            }
+            if (bootstrap.uploadAvailable) {
+                try {
+                    acceptDelivery(await facts.getDeliverySnapshot(), epoch);
+                }
+                catch (e) {
+                    failDelivery(e, epoch);
+                }
+            }
         }
-        catch (e) {
-            snapshotError.value = String(e instanceof Error ? e.message : e);
+        finally {
+            refreshing = false;
         }
     }
     async function reload() { invalidateNames(); await perform(async () => { accept(await localCall<ConfigurationView>('daa_get_configuration')); preview.value = null; offsets.value = []; }); }
@@ -462,6 +585,7 @@ export function useLocalAcquisitionConsole() {
     const formatBytes = (n: number | undefined) => n === undefined ? '—' : (n / 1048576).toFixed(2) + ' MiB';
     onMounted(() => {
         if (available) {
+            void loadStartup();
             void reload().then(refresh);
             timer = setInterval(() => { void refresh(); }, 1000);
         }
@@ -472,5 +596,5 @@ export function useLocalAcquisitionConsole() {
         if (nameTimer) clearTimeout(nameTimer);
         closeDiagnostic();
     });
-    return reactive({ factsReadMode, factsReadFrom, factsReadTo, factsReadPage, factsReadError, openFactsRead, deliveryKind, delivery, deliverySettings, deliveryPage, deliveryPageSize, deliveryPageNumber, deliveryCursors, deliveryDialog, deliveryDetail, sourceMaterial, loadDeliveries, deliveryControl, editDelivery, saveDelivery, inspectDelivery, showSourceMaterial, previewFacts, testFacts, selectedPoints, preparePointEdit, finishPointEdit, selectedNameIds, namePreview, namePreviewOpen, namePreviewBusy, namePage, namePageSize, pagedNames, pointPageSize, closeNames, invalidateNames, toggleNamePoint, previewNames, stagePointEdit, confirmNames, sourcePreviewOpen, offsetPreviewOpen, sourceStructureOpen, identification, mappings, importPage, importPageSize, importRows, pagedImportRows, invalidateImport, changeImportTarget, available, editing, dirty, confirmAction, conflictVersion, snapshotError, selectedTargets, bootstrap, view, draft, snapshot, busy, error, notice, selectedPlc, selectedDb, query, pointPage, preview, offsets, sources, history, historyFilter, historyPage, historyPageSize, historyPreviousAvailable, historyNextAvailable, historyPreviousBounded, raw, rawSampleId, logs, label, plcs, dbs, groups, points, pagedPoints, perform, refresh, reload, save, saveCandidate, activate, addPlc, removePlc, addGroup, removeGroup, plcDiagnostic, startDiagnostic, closeDiagnostic, control, readFiles, importSources, infer, address, manual, bulk, loadHistory, inspect, loadLogs, state, formatBytes });
+    return reactive({ startup, startupBusy, startupError, startupSaved, loadStartup, saveStartup, factsReadMode, factsReadFrom, factsReadTo, factsReadPage, factsReadError, openFactsRead, deliveryKind, deliveryState, deliverySaveError, deliverySnapshotError, delivery, deliverySettings, deliveryPage, deliveryPageSize, deliveryPageNumber, deliveryCursors, deliveryDialog, deliveryDetail, sourceMaterial, loadDeliveries, deliveryControl, editDelivery, saveDelivery, inspectDelivery, rebindDelivery, showSourceMaterial, previewFacts, testFacts, selectedPoints, preparePointEdit, finishPointEdit, selectedNameIds, namePreview, namePreviewOpen, namePreviewBusy, namePage, namePageSize, pagedNames, pointPageSize, closeNames, invalidateNames, toggleNamePoint, previewNames, stagePointEdit, confirmNames, sourcePreviewOpen, offsetPreviewOpen, sourceStructureOpen, identification, mappings, importPage, importPageSize, importRows, pagedImportRows, invalidateImport, changeImportTarget, available, editing, dirty, confirmAction, conflictVersion, snapshotError, selectedTargets, bootstrap, view, draft, snapshot, busy, error, notice, selectedPlc, selectedDb, query, pointPage, preview, offsets, sources, history, historyFilter, historyPage, historyPageSize, historyPreviousAvailable, historyNextAvailable, historyPreviousBounded, raw, rawSampleId, logs, label, plcs, dbs, groups, points, pagedPoints, perform, refresh, reload, save, saveCandidate, activate, addPlc, removePlc, addGroup, removeGroup, plcDiagnostic, startDiagnostic, closeDiagnostic, control, readFiles, importSources, infer, address, manual, bulk, loadHistory, inspect, loadLogs, state, formatBytes });
 }

@@ -43,6 +43,10 @@ impl Stores {
         }
     }
     pub fn capacity(&self, quota: u64) -> LocalResult<Capacity> {
+        let version: u32 = self
+            .runtime
+            .query_row("PRAGMA user_version", [], |r| r.get(0))
+            .map_err(sql_error)?;
         let p = self.dir.join("runtime.sqlite");
         let a = self.dir.join("config.sqlite");
         let page_count = self
@@ -91,35 +95,55 @@ impl Stores {
         }
         // Each old page is journaled at most once; allow one sector header per page plus record overhead.
         // Four maximum encoded cycles reserve 16x bytes for B-trees/index pages, plus 32MiB maintenance.
+        let cycle_budget = if version == 4 {
+            4 * 1024 * 1024
+        } else {
+            MAX_CYCLE
+        };
         c.reserved_bytes = page_count.saturating_mul(4096 + 8 + sector)
             + sector
-            + 4 * MAX_CYCLE * 16
+            + 4 * cycle_budget * 16
             + 32 * 1024 * 1024;
-        if self.delivery_available()? {
+        if version >= 3 {
             c.reserved_bytes = c.reserved_bytes.saturating_add(32 * 1024 * 1024);
             (
                 c.delivery_request_bytes,
                 c.delivery_receipt_bytes,
                 c.delivery_metadata_bytes,
             ) = self.delivery_bytes()?;
+            if version == 4 {
+                let (req, ack, metadata): (u64,u64,u64) = self.runtime.query_row("SELECT coalesce(sum(length(CAST(body AS BLOB))),0),coalesce(sum(length(CAST(receipt AS BLOB))),0),coalesce(sum(length(sample_id)+length(instance_id)+length(plc_id)+length(source_generation)+coalesce(length(origin),0)+length(state)+coalesce(length(last_error),0)),0) FROM sample_uploads", [], |r| Ok((r.get(0)?,r.get(1)?,r.get(2)?))).map_err(sql_error)?;
+                c.delivery_request_bytes = c.delivery_request_bytes.saturating_add(req);
+                c.delivery_receipt_bytes = c.delivery_receipt_bytes.saturating_add(ack);
+                c.delivery_metadata_bytes = c.delivery_metadata_bytes.saturating_add(metadata);
+                let audit: u64 = self.runtime.query_row("SELECT (SELECT coalesce(sum(length(sample_id)+length(target_url)+length(started_at)+16),0) FROM sample_upload_attempts)+(SELECT coalesce(sum(length(sample_id)+length(old_url)+length(new_url)+length(confirmed_at)+16),0) FROM sample_upload_rebindings)", [], |r| r.get(0)).map_err(sql_error)?;
+                c.delivery_metadata_bytes = c.delivery_metadata_bytes.saturating_add(audit);
+            }
         }
         // 辅助文件allocated计入runtime物理quota；256KiB子预算已经包含在原额外32MiB中。
         let (aux_logical, aux_allocated) = auxiliary_bytes(&self.dir)?;
         c.main_bytes = c.main_bytes.saturating_add(aux_allocated);
-        if self.delivery_available()? {
+        if version >= 3 {
             c.reserved_bytes = c.reserved_bytes.saturating_sub(aux_allocated);
         }
         c.delivery_metadata_bytes = c.delivery_metadata_bytes.saturating_add(aux_logical);
-        c.pending_count = self
-            .runtime
-            .query_row(
-                "SELECT count(*) FROM sample_delivery WHERE state='pending'",
-                [],
-                |r| r.get(0),
-            )
-            .map_err(sql_error)?;
-        c.pending_bytes=self.runtime.query_row("SELECT coalesce(sum(samples.payload_bytes),0) FROM samples JOIN sample_delivery ON sample_delivery.sample_id=samples.id WHERE sample_delivery.state='pending'",[],|r|r.get(0)).map_err(sql_error)?;
-        c.oldest_pending=self.runtime.query_row("SELECT min(samples.saved_at) FROM samples JOIN sample_delivery ON sample_delivery.sample_id=samples.id WHERE sample_delivery.state='pending'",[],|r|r.get(0)).map_err(sql_error)?;
+        if version == 4 {
+            let (count, bytes, oldest) = super::sample_upload::pending_usage(&self.runtime)?;
+            c.pending_count = count;
+            c.pending_bytes = bytes;
+            c.oldest_pending = oldest;
+        } else {
+            c.pending_count = self
+                .runtime
+                .query_row(
+                    "SELECT count(*) FROM sample_delivery WHERE state='pending'",
+                    [],
+                    |r| r.get(0),
+                )
+                .map_err(sql_error)?;
+            c.pending_bytes=self.runtime.query_row("SELECT coalesce(sum(samples.payload_bytes),0) FROM samples JOIN sample_delivery ON sample_delivery.sample_id=samples.id WHERE sample_delivery.state='pending'",[],|r|r.get(0)).map_err(sql_error)?;
+            c.oldest_pending=self.runtime.query_row("SELECT min(samples.saved_at) FROM samples JOIN sample_delivery ON sample_delivery.sample_id=samples.id WHERE sample_delivery.state='pending'",[],|r|r.get(0)).map_err(sql_error)?;
+        }
         for base in [&p, &a] {
             for suffix in ["-wal", "-shm"] {
                 let n = bytes(&std::path::PathBuf::from(format!(

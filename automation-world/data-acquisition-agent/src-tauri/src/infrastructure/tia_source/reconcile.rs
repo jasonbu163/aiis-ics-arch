@@ -394,7 +394,15 @@ fn old_types(c: &Configuration, old: Option<&Db>) -> LocalResult<BTreeMap<String
     }
     Ok(out)
 }
+#[cfg(test)]
 pub(crate) fn plan(c: &Configuration, r: &ImportRequest) -> LocalResult<ImportPreview> {
+    plan_for_runtime(c, r, 3)
+}
+pub(crate) fn plan_for_runtime(
+    c: &Configuration,
+    r: &ImportRequest,
+    runtime_version: u32,
+) -> LocalResult<ImportPreview> {
     let ss = sources(c, r)?;
     let ds = scans(&ss)?;
     if r.mappings.len() > 128 {
@@ -713,7 +721,7 @@ pub(crate) fn plan(c: &Configuration, r: &ImportRequest) -> LocalResult<ImportPr
         issues.extend(es)
     }
     // Existing activation/readiness issues remain advisory. Structural/identity limits are fatal.
-    for i in validate(&next) {
+    for i in validate_for_runtime(&next, runtime_version) {
         if [
             "configuration_limits",
             "plc_limits",
@@ -746,7 +754,7 @@ pub(crate) fn plan(c: &Configuration, r: &ImportRequest) -> LocalResult<ImportPr
             )
         })
         .collect();
-    let readiness = validate(&next);
+    let readiness = validate_for_runtime(&next, runtime_version);
     let can_confirm = issues.is_empty();
     if !can_confirm {
         next = c.clone();
@@ -766,9 +774,17 @@ pub(crate) fn plan(c: &Configuration, r: &ImportRequest) -> LocalResult<ImportPr
         etag: r.expected_etag.clone(),
     })
 }
+#[cfg(test)]
 pub(crate) fn legacy_import(
     c: &Configuration,
     sources: Vec<SourceDocument>,
+) -> LocalResult<ImportPreview> {
+    legacy_import_for_runtime(c, sources, 3)
+}
+pub(crate) fn legacy_import_for_runtime(
+    c: &Configuration,
+    sources: Vec<SourceDocument>,
+    runtime_version: u32,
 ) -> LocalResult<ImportPreview> {
     let mut r = ImportRequest {
         sources,
@@ -800,5 +816,5 @@ pub(crate) fn legacy_import(
             });
         }
     }
-    plan(c, &r)
+    plan_for_runtime(c, &r, runtime_version)
 }

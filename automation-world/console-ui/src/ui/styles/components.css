@@ -75,16 +75,16 @@
 
 /* 主题与语言公共工具控件；仅消费现有 CU tokens。 */
 .aw-ui .aw-theme-toggle, .aw-ui .aw-language-switch { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; height: 44px; border: 1px solid var(--agent-border); border-radius: 999px; background: var(--agent-card-bg); color: var(--agent-text-muted); cursor: pointer; user-select: none; transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s; }
-.aw-ui .aw-theme-toggle { width: 44px; padding: 0; }
+.aw-ui .aw-theme-toggle, .aw-ui .aw-language-switch { width: 44px; padding: 0; }
 .aw-ui .aw-theme-toggle:hover, .aw-ui .aw-language-switch:hover { border-color: var(--agent-border-strong); color: var(--agent-text); box-shadow: var(--agent-card-shadow); }
 .aw-ui .aw-theme-toggle.is-dark { background: var(--agent-accent); border-color: var(--agent-accent); color: var(--agent-on-accent); }
 .aw-ui .aw-theme-toggle.is-dark:hover { background: var(--agent-accent-strong); border-color: var(--agent-accent-strong); }
-.aw-ui .aw-language-switch { gap: 4px; padding: 0 16px; font-size: 13px; font-weight: 510; }
+.aw-ui .aw-language-switch { font-size: 13px; font-weight: 590; }
 .aw-ui .aw-language-switch:hover { background: var(--agent-surface-muted); }
-.aw-ui .aw-language-switch__text { padding: 2px 4px; border-radius: 4px; color: var(--agent-text-muted); }
-.aw-ui .aw-language-switch__text.is-active { color: var(--agent-accent-strong); font-weight: 590; }
-.aw-ui .aw-language-switch__divider { color: var(--agent-text-muted); font-weight: 400; }
-.aw-ui .aw-theme-toggle:focus-visible, .aw-ui .aw-language-switch:focus-visible { outline: 2px solid var(--agent-accent-strong); outline-offset: 3px; }
+.aw-ui .console-action-button--round-icon.el-button { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 44px; width: 44px; height: 44px; padding: 0; border: 1px solid var(--agent-border); border-radius: 999px; background: var(--agent-card-bg); color: var(--agent-text-muted); }
+.aw-ui .console-action-button--round-icon.el-button:hover:not(.is-disabled) { border-color: var(--agent-border-strong); background: var(--agent-surface-muted); color: var(--agent-text); box-shadow: var(--agent-card-shadow); }
+.aw-ui .console-action-button--round-icon.el-button.is-disabled { opacity: 0.6; }
+.aw-ui .aw-theme-toggle:focus-visible, .aw-ui .aw-language-switch:focus-visible, .aw-ui .console-action-button--round-icon.el-button:focus-visible { outline: 2px solid var(--agent-accent-strong); outline-offset: 3px; }
 
 /* 原生 Element Plus 组合语义；布局由各宿主负责。 */
 .aw-ui .aw-data-table { --el-table-bg-color: var(--agent-surface); --el-table-tr-bg-color: var(--agent-surface); --el-table-header-bg-color: var(--agent-table-label-bg); --el-table-row-hover-bg-color: var(--agent-table-row-hover); --el-table-border-color: var(--agent-table-grid); --el-table-text-color: var(--agent-text); --el-table-header-text-color: var(--agent-text-muted); }

@@ -27,6 +27,18 @@ export const acquisitionDataModule = {
         parentTitleKey: 'acquisition-data.title',
         navigation: { visible: true, order: 20, icon: 'Clock' }
       }
+    },
+    {
+      path: 'acquisition-data/sources',
+      name: 'AcquisitionDataSources',
+      component: () => import('./views/sources/index.vue'),
+      meta: {
+        titleKey: 'acquisition-data.sources',
+        pageId: 'acquisition-data.sources',
+        parentTitleKey: 'acquisition-data.title',
+        requiresAdmin: true,
+        navigation: { visible: true, order: 30, icon: 'Setting' }
+      }
     }
   ]
 }

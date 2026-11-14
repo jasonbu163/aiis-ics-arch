@@ -83,13 +83,17 @@ def test_single_head_and_metadata_retire_only_nine_tables():
     module = migration()
     import_model_packages()
     graph = ScriptDirectory.from_config(Config('alembic.ini'))
-    assert graph.get_heads() == ['4e6a8b0d2f14']
+    assert graph.get_heads() == ['7b9d1f3a5c7e']
+    assert graph.get_revision('7b9d1f3a5c7e').down_revision == '6a8c0e2b4d16'
+    assert graph.get_revision('6a8c0e2b4d16').down_revision == '5f7a9c1e3b25'
     assert graph.get_revision('4e6a8b0d2f14').down_revision == module.revision
     assert graph.get_revision(module.revision).down_revision == module.down_revision
     assert len(module.EXPECTED_TABLES) == 77 and len(module.RETIRED_TABLES) == 9
     original = module.EXPECTED_TABLES - set(module.RETIRED_TABLES)
     expected = (original - {'plc_facts_samples_v2', 'plc_facts_latest_points_v2'}) | {
         'plc_facts_history', 'plc_facts_latest'}
+    task_revision = graph.get_revision('5f7a9c1e3b25').module
+    expected = (expected - set(task_revision.OLD_TABLES)) | set(task_revision.NEW_ONLY) | {'performance_main', 'plc_source_registry'}
     assert set(Base.metadata.tables) == expected
 
 

@@ -20,10 +20,15 @@ wire!(Batch{contract_version:String,source_profile:String,digest_profile:String,
 pub(crate) struct BuiltCycle {
     pub cycle: Cycle,
     pub parts: Vec<Part>,
+    #[cfg(test)]
     pub plc_id: String,
+    #[cfg(test)]
     pub group_id: String,
+    #[cfg(test)]
     pub source_seq: i64,
+    #[cfg(test)]
     pub definition_set_digest: String,
+    #[cfg(test)]
     pub source_generation: String,
 }
 pub(crate) fn text<'a>(v: &'a Value, key: &str) -> Result<&'a str> {
@@ -432,6 +437,7 @@ pub(crate) fn build_cycle(
     let plc = text(&m, "plcId")?;
     let group = text(&m, "groupId")?;
     let cycle_id = text(&m, "cycleId")?;
+    #[cfg(test)]
     let generation = text(&m, "sourceGeneration")?;
     let seq = text(&m, "sourceSeq")?;
     let source_seq = seq.parse::<i64>().map_err(|_| "invalid_source")?;
@@ -487,7 +493,7 @@ pub(crate) fn build_cycle(
             return Err("invalid_source".into());
         }
     }
-    let (defs, definition_set_digest) = definitions(&context, plc)?;
+    let (defs, _definition_set_digest) = definitions(&context, plc)?;
     let expected = defs
         .iter()
         .filter(|(_, (d, _, ge))| *ge && d["enabled"] == true && d["groupId"] == group)
@@ -655,10 +661,15 @@ pub(crate) fn build_cycle(
             transport_manifest: transport,
         },
         parts,
+        #[cfg(test)]
         plc_id: plc.into(),
+        #[cfg(test)]
         group_id: group.into(),
+        #[cfg(test)]
         source_seq,
-        definition_set_digest,
+        #[cfg(test)]
+        definition_set_digest: _definition_set_digest,
+        #[cfg(test)]
         source_generation: generation.into(),
     })
 }

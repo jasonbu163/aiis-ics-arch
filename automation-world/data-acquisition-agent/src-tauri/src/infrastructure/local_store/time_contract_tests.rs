@@ -217,13 +217,13 @@ fn query(from: Option<&str>, to: Option<&str>) -> HistoryQuery {
     }
 }
 #[test]
-fn time_contract_new_config2_runtime3_payload_sha_query_and_retention() {
+fn time_contract_new_config2_runtime4_and_legacy3_payload_sha_query_retention() {
     let profile = owned();
     let dir = profile.join("local-acquisition-v1");
     let mut s = Stores::open(&dir).unwrap();
     for (c, table, expected) in [
         (&s.config, "instance_metadata", 2),
-        (&s.runtime, "runtime_metadata", 3),
+        (&s.runtime, "runtime_metadata", 4),
     ] {
         assert_eq!(
             c.query_row("PRAGMA user_version", [], |r| r.get::<_, i64>(0))
@@ -249,6 +249,13 @@ fn time_contract_new_config2_runtime3_payload_sha_query_and_retention() {
         assert_eq!(v, expected);
         assert_eq!(at, time::normalize(&at).unwrap());
     }
+    s.clean_exit().unwrap();
+    drop(s);
+    std::fs::remove_dir_all(profile).unwrap();
+    // 后续旧 sample_delivery ACK 与保留规则在真实合成 runtime3 上验证。
+    let mut s = super::delivery_tests::legacy(3);
+    let dir = s.dir.clone();
+    let profile = dir.parent().unwrap().to_path_buf();
     let c = configuration();
     let r = activated(&mut s, &c);
     for table in ["configuration_revisions", "activation_intents"] {

@@ -11,6 +11,8 @@ export interface Bootstrap {
     readAllowed: boolean;
     uploadAvailable: boolean;
 }
+export interface StartupSettings { schemaVersion: 1; autoCollect: boolean; autoReport: boolean; }
+export interface StartupState { settings: StartupSettings; errors: Record<string, string>; }
 export let bootstrap: Bootstrap = { schemaVersion: 1, mode: 'local_sqlite', origin: 'browser', localStorage: false, readAllowed: false, uploadAvailable: false, ignoredKeys: [] };
 export let bootstrapError = '';
 export async function initializeBootstrap() {
@@ -173,6 +175,7 @@ export interface Snapshot {
     origin: string;
     generatedAt: string;
     configuration: ConfigurationView;
+    activeStorage?: { revision: string; quotaBytes: number; retentionDays: number } | null;
     plcs: PlcState[];
     operations: Operation[];
     capacity: Capacity;
@@ -207,6 +210,7 @@ export interface RawSample {
     contextBytes: number;
     contextSha256: string;
     deliveryState: string;
+    sampleUpload?: { protocol: string; state: string; attempt: number; lastError: string | null; bodySha256: string | null; origin: string | null; dispatchedAt: string | null; acknowledgedAt: string | null; receiptSha256: string | null; instanceId: string; plcId: string; sourceGeneration: string } | null;
     deliveries?: Array<{ part: number; parts: number; state: string; batchId: string | null; receiptId: string | null; lastError: string | null }>;
 }
 export interface LogRow {

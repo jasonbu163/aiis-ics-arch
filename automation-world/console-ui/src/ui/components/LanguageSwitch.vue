@@ -1,9 +1,7 @@
-<!-- 公共语言控件：高亮宿主语言，标签和目标提示由宿主翻译提供。 -->
+<!-- 公共语言控件：显示目标语言，标签和目标提示由宿主翻译提供。 -->
 <template>
   <button class="aw-language-switch" type="button" :title="label" :aria-label="label" @click="emit('toggle')">
-    <span class="aw-language-switch__text" :class="{ 'is-active': locale === 'zh-CN' }">{{ zhLabel }}</span>
-    <span class="aw-language-switch__divider" aria-hidden="true">/</span>
-    <span class="aw-language-switch__text" :class="{ 'is-active': locale === 'en-US' }">{{ enLabel }}</span>
+    {{ locale === 'zh-CN' ? enLabel : zhLabel }}
   </button>
 </template>
 <script setup lang="ts">

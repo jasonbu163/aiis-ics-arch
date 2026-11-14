@@ -23,8 +23,8 @@ fn confirmed(r: NameRequest, p: &NamePreview) -> NameConfirmation {
 }
 #[test]
 fn old_json_selected_cancel_cas_modes_and_history_bytes() {
-    let p = profile("daa006-names");
-    let mut s = Stores::open(&p.join("local-acquisition-v1")).unwrap();
+    let mut s = super::delivery_tests::legacy(2);
+    let p = s.dir.parent().unwrap().to_path_buf();
     let original = old_seed(&mut s, &p);
     let raw: String = s
         .config

@@ -398,8 +398,8 @@ pub(super) fn old_seed(s: &mut Stores, p: &Path) -> Configuration {
 }
 #[test]
 fn old_v1_raw_decode_history_receipt_and_unselected_protected() {
-    let p = profile("old-history");
-    let mut s = Stores::open(&p.join("local-acquisition-v1")).unwrap();
+    let mut s = super::delivery_tests::legacy(2);
+    let p = s.dir.parent().unwrap().to_path_buf();
     let old = old_seed(&mut s, &p);
     let payload: String = s
         .config

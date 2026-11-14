@@ -17,6 +17,9 @@ def parser():
         sub.add_argument('--'+name,required=True)
     sub.add_argument('--confirm')
     sub.add_argument('--output-log',type=Path)
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from scripts.plc_facts_maintenance.source_registry import configure_parser
+    configure_parser(subs)
     return p
 
 
@@ -25,6 +28,10 @@ def main(argv=None):
     if not args.action: p.print_help(); return 0
     # Import only after explicit command/target; these commands all need separate runtime approval.
     backend=Path(__file__).resolve().parents[2]; sys.path.insert(0,str(backend))
+    if args.action in ('import-sources', 'export-sources'):
+        print(json.dumps({'event': 'legacy-source-command', 'status': 'failed',
+                          'message': 'Use the frozen r2 maintenance source before the r3 migration.'}))
+        return 1
     from pydantic_settings import BaseSettings,SettingsConfigDict
     class ToolSettings(BaseSettings):
         model_config=SettingsConfigDict(env_file=(backend/'.env',Path(__file__).resolve().parent/'.env'),extra='ignore')

@@ -1,17 +1,17 @@
-"""PLC 事实 v2 机器写入和登录用户只读 HTTP 入口。"""
-from fastapi import APIRouter, Depends, Query, Request, Security
+"""PLC 事实 v2 的样本写入与按 PLC/DB 范围读取入口。"""
+from typing import Literal
+
+from fastapi import APIRouter, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.routing import APIRoute
-from fastapi.security import HTTPBearer
 from starlette.exceptions import HTTPException
 from starlette.responses import JSONResponse, Response
 
 from common.log import log_event
-from core.deps import require_permissions
 from database import get_db_session
 from ..services import async_v2 as service
 from ..schemas.v2 import DetailOut, FailureOut, HistoryOut, LatestBrowseOut, LatestOut, OptionsOut, ReceiptOut, SampleV2In
-from ..v2_config import admit_source, authenticate, get_profile
+from ..v2_config import get_profile
 from ..v2_domain import MAX_BODY, V2Error, identifier, json_bytes, parse_sample, parse_time
 
 
@@ -21,13 +21,11 @@ class V2Route(APIRoute):
         async def wrapped(request):
             request.state.plc_facts_v2 = {}
             try:
+                validate_query(request)
                 if request.method == 'POST':
                     profile = get_profile()
-                    instance = authenticate(profile, request.headers.get('authorization'))
-                    validate_query(request)
                     raw = await body_bytes(request)
                     sample, document, digest = parse_sample(raw)
-                    admit_source(profile, instance, sample)
                     request._body = raw
                     request._json = document
                     request.state.plc_facts_v2.update(profile=profile, sample=sample, document=document, digest=digest)
@@ -48,14 +46,13 @@ class V2Route(APIRoute):
 
 
 router = APIRouter(route_class=V2Route, tags=['plc-facts-v2'])
-reader = require_permissions('plc-facts-read')
-machine_bearer = HTTPBearer(auto_error=False, scheme_name='V2MachineBearer')
 ERROR_RESPONSES = {status: {'model': FailureOut, 'description': 'PLC facts v2 failure'}
-                   for status in (401, 403, 409, 410, 413, 415, 422, 503)}
-READ_RESPONSES = {401: {'description': 'Login required'}, 403: {'description': 'Permission or scope denied'},
+                   for status in (403, 409, 410, 413, 415, 422, 503)}
+READ_RESPONSES = {403: {'description': 'PLC is not registered'},
                   404: {'model': FailureOut, 'description': 'Sample not found'},
                   422: {'model': FailureOut, 'description': 'Invalid query'},
                   503: {'model': FailureOut, 'description': 'Target unavailable'}}
+HISTORY_RESPONSES = {status: response for status, response in READ_RESPONSES.items() if status != 403}
 
 
 def success(data):
@@ -65,11 +62,6 @@ def success(data):
 def validate_query(request):
     if any(len(request.query_params.getlist(key)) != 1 for key in request.query_params):
         raise V2Error('invalid_request', 422)
-
-
-async def authorized_reader(request: Request, user=Depends(reader)):
-    validate_query(request)
-    return user
 
 
 def emit(event, **fields):
@@ -96,7 +88,7 @@ async def body_bytes(request):
 
 
 @router.post('/integration/plc-facts/samples', operation_id='plc_facts_v2_sample', response_model=ReceiptOut, responses=ERROR_RESPONSES)
-async def create_sample(request: Request, body: SampleV2In, credential=Security(machine_bearer)):
+async def create_sample(request: Request, body: SampleV2In):
     boundary = request.state.plc_facts_v2
     db = await get_db_session()
     try:
@@ -109,25 +101,25 @@ async def create_sample(request: Request, body: SampleV2In, credential=Security(
 
 
 @router.get('/acquisition-data/options', operation_id='plc_facts_v2_options', response_model=OptionsOut, responses=READ_RESPONSES)
-async def options(user=Depends(authorized_reader)):
+async def options(view: Literal['history'] | None = Query(None)):
     profile = get_profile()
     db = await get_db_session()
     try:
-        return success(await service.options(db, profile, user.role))
+        return success(await service.options(db, profile, view))
     finally:
         await db.close()
 
 
 @router.get('/acquisition-data/latest', operation_id='plc_facts_v2_latest', response_model=LatestOut, responses=READ_RESPONSES)
 async def latest(plc_id: str = Query(alias='plcId'), db_number: int = Query(alias='dbNumber', ge=1, le=65535),
-                 point_id: str | None = Query(None, alias='pointId'), user=Depends(authorized_reader)):
+                 point_id: str | None = Query(None, alias='pointId')):
     profile = get_profile()
     identifier(plc_id)
     if point_id is not None:
         identifier(point_id)
     db = await get_db_session()
     try:
-        return Response(json_bytes(success(await service.latest(db, profile, user.role, plc_id, db_number, point_id))),
+        return Response(json_bytes(success(await service.latest(db, profile, plc_id, db_number, point_id))),
                         media_type='application/json')
     finally:
         await db.close()
@@ -138,8 +130,7 @@ async def latest(plc_id: str = Query(alias='plcId'), db_number: int = Query(alia
 async def latest_browse(plc_id: str | None = Query(None, alias='plcId'),
                         db_number: int | None = Query(None, alias='dbNumber', ge=1, le=65535),
                         point_search: str | None = Query(None, alias='pointSearch'),
-                        page: int = Query(1, ge=1), page_size: int = Query(50, alias='pageSize', ge=1, le=100),
-                        user=Depends(authorized_reader)):
+                        page: int = Query(1, ge=1), page_size: int = Query(50, alias='pageSize', ge=1, le=100)):
     profile = get_profile()
     if plc_id is not None:
         identifier(plc_id)
@@ -149,35 +140,35 @@ async def latest_browse(plc_id: str | None = Query(None, alias='plcId'),
     db = await get_db_session()
     try:
         return Response(json_bytes(success(await service.browse_latest(
-            db, profile, user.role, plc_id, db_number, search, page, page_size))), media_type='application/json')
+            db, profile, plc_id, db_number, search, page, page_size))), media_type='application/json')
     finally:
         await db.close()
 
 
-@router.get('/acquisition-data/history', operation_id='plc_facts_v2_history', response_model=HistoryOut, responses=READ_RESPONSES)
+@router.get('/acquisition-data/history', operation_id='plc_facts_v2_history', response_model=HistoryOut, responses=HISTORY_RESPONSES)
 async def history(start: str = Query(alias='from'), end: str = Query(alias='to'),
                   plc_id: str | None = Query(None, alias='plcId'),
                   db_number: int | None = Query(None, alias='dbNumber', ge=1, le=65535), page: int = Query(1, ge=1),
-                  page_size: int = Query(50, alias='pageSize', ge=1, le=100), user=Depends(authorized_reader)):
+                  page_size: int = Query(50, alias='pageSize', ge=1, le=100)):
     profile = get_profile()
     if plc_id is not None:
         identifier(plc_id)
     start_time, end_time = parse_time(start), parse_time(end)
     db = await get_db_session()
     try:
-        return success(await service.history(db, profile, user.role, plc_id, db_number, start_time, end_time, page, page_size))
+        return success(await service.history(db, profile, plc_id, db_number, start_time, end_time, page, page_size))
     finally:
         await db.close()
 
 
-@router.get('/acquisition-data/history/{id}', operation_id='plc_facts_v2_history_detail', response_model=DetailOut, responses=READ_RESPONSES, response_model_exclude_unset=True)
-async def detail(id: str, user=Depends(authorized_reader)):
+@router.get('/acquisition-data/history/{id}', operation_id='plc_facts_v2_history_detail', response_model=DetailOut, responses=HISTORY_RESPONSES, response_model_exclude_unset=True)
+async def detail(id: str):
     if not id.isascii() or not id.isdigit() or id.startswith('0') or len(id) > 19 or int(id) > 9223372036854775807:
         raise V2Error('not_found', 404)
     profile = get_profile()
     db = await get_db_session()
     try:
-        return Response(json_bytes(success(await service.detail(db, profile, user.role, int(id)))),
+        return Response(json_bytes(success(await service.detail(db, profile, int(id)))),
                         media_type='application/json')
     finally:
         await db.close()

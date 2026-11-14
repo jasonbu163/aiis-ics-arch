@@ -36,7 +36,6 @@ class RealNumber:
 
 
 class V2ErrorCode(StrEnum):
-    INVALID_CREDENTIAL = 'plc_facts.v2.invalid_credential'
     SCOPE_REJECTED = 'plc_facts.v2.scope_rejected'
     SAMPLE_CONTENT_CONFLICT = 'plc_facts.v2.sample_content_conflict'
     EXPIRED_UNCONFIRMED = 'plc_facts.v2.expired_unconfirmed'

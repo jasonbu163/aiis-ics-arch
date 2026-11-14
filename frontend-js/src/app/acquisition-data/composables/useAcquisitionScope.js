@@ -8,7 +8,7 @@ export const rawValue = value => value === undefined ? '—' : JSON.stringify(va
 export const qualityKey = point => point.quality === 'bad' ? (point.reason === 'missing' ? 'missing' : 'bad') : 'good'
 export const sourceKey = source => ['daa', 'external'].includes(source) ? source : 'unrecorded'
 
-export function useAcquisitionScope() {
+export function useAcquisitionScope(view) {
   const pageRoot = ref(null)
   const pagePadding = ref(0)
   const options = ref([])
@@ -45,7 +45,7 @@ export function useAcquisitionScope() {
     dbNumber.value = null
     optionsState.value = 'loading'
     try {
-      const data = await getOptions()
+      const data = await getOptions(view ? { view } : undefined)
       if (current !== sequence) return
       options.value = data.items
       optionsState.value = 'ready'

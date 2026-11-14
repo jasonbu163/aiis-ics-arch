@@ -3,8 +3,8 @@
   <el-config-provider :locale="elementLocale">
     <Teleport to="body"><div class="aw-ui aw-sample-overlays" :data-aw-theme="agentTheme"><div id="daa-feedback"></div></div></Teleport>
     <AgentLayout :active-section="activeSection" :app-locale="appLocale" :refresh-busy="local.busy"
-      :backend-status-text="t('common.local.uploadPending')" :is-dark-theme="isDarkTheme"
-      :locale-switch-label="localeSwitchLabel" :mode-status-text="t('common.local.mode')"
+      :is-dark-theme="isDarkTheme"
+      :locale-switch-label="localeSwitchLabel"
       :identity-detail="identityDetail" :sections="consoleSections" :theme-switch-label="themeSwitchLabel"
       @refresh-runtime="local.refresh()" @select-section="selectConsoleSection" @toggle-locale="toggleLocale" @toggle-theme="toggleTheme">
       <div class="console-stack">
@@ -12,7 +12,7 @@
           :description="bootstrapError ? local.label(bootstrapError) : t('common.local.desktopPreviewHelp')" :closable="false" :type="bootstrapError ? 'error' : 'info'" show-icon />
         <el-alert v-if="bootstrap.ignoredKeys.length" :title="t('common.local.retiredKeys')" :description="bootstrap.ignoredKeys.join(', ')" type="info" :closable="false" />
         <template v-if="local.available">
-          <ConfigRevisionBar />
+          <ConfigRevisionBar v-if="activeSection !== 'workbench'" />
           <template v-if="activeSection === 'workbench'"><RuntimeOverviewView /><CollectionStatusView /></template>
           <PlcDiagnosticsView v-else-if="activeSection === 'plc-config'" @open-points="selectConsoleSection('points-groups')" />
           <PlcPointsView v-else-if="activeSection === 'points-groups'" />

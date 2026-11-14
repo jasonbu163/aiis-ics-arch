@@ -28,9 +28,13 @@ test('assembly, ordering, bilingual titles, single grants and original default',
   assert.equal(module.order, 100)
   assert.deepEqual(module.routeRecords.map(route => [route.name, route.path, route.meta.pageId, route.meta.navigation.order]), [
     ['AcquisitionDataRealtime', '/acquisition-data/realtime', pageIds[0], 10],
-    ['AcquisitionDataHistory', '/acquisition-data/history', pageIds[1], 20]
+    ['AcquisitionDataHistory', '/acquisition-data/history', pageIds[1], 20],
+    ['AcquisitionDataSources', '/acquisition-data/sources', 'acquisition-data.sources', 30]
   ])
   const admin = { isAdmin: true, isLoggedIn: true }
+  const sources = module.routeRecords.find(route => route.meta.pageId === 'acquisition-data.sources')
+  assert.equal(canAccessRoute(sources, admin), true)
+  assert.equal(canAccessRoute(sources, access(['acquisition-data.sources'])), false)
   assert.equal(defaultAuthenticatedPath(registry, admin), '/plan/list')
   assert.equal(defaultAuthenticatedPath(registry, access(['plan.list', ...pageIds])), '/plan/list')
   for (const id of pageIds) {
@@ -43,7 +47,7 @@ test('assembly, ordering, bilingual titles, single grants and original default',
   assert.equal(accessibleNavigation(registry, access(['plan.list'])).some(group => group.name === 'acquisition-data'), false)
   assert.equal(canAccessRoute(module.routeRecords[0], { ...admin, isLoggedIn: false }), false)
   for (const locale of ['en-US', 'zh-CN']) {
-    for (const key of ['acquisition-data.title', ...pageIds, 'acquisition-data.forbidden', 'acquisition-data.unavailable']) {
+    for (const key of ['acquisition-data.title', ...pageIds, 'acquisition-data.sources', 'acquisition-data.forbidden', 'acquisition-data.unavailable']) {
       assert.equal(typeof resolveMessage(registry.messages[locale], key), 'string', `${locale}:${key}`)
     }
   }
@@ -105,7 +109,7 @@ test('column widths isolate tables, restore valid fields and ignore stale or inv
 
 // 执行实际的 SFC setup 和 scope composable，替换网络与生命周期；不复制页面业务逻辑。
 const scopeSource = await readFile(`${root}/src/app/acquisition-data/composables/useAcquisitionScope.js`, 'utf8')
-const sfcSources = Object.fromEntries(await Promise.all(['realtime', 'history'].map(async name => [name,
+const sfcSources = Object.fromEntries(await Promise.all(['realtime', 'history', 'sources'].map(async name => [name,
   await readFile(`${root}/src/app/acquisition-data/views/${name}/index.vue`, 'utf8')
 ])))
 const importsToDeps = source => source.replace(/^import\s+(.+?)\s+from\s+['"](.+?)['"];?$/gm, (_line, binding, module) => {
@@ -126,10 +130,10 @@ const deferred = () => {
 const options = [{ plcId: 'PLC-A', dbNumbers: [1, 21] }, { plcId: 'PLC-B', dbNumbers: [2, 21] }]
 const tick = async () => { await vue.nextTick(); await Promise.resolve(); await vue.nextTick() }
 function acquisitionPage(name, handlers = {}) {
-  const hooks = [], unmounts = [], calls = []
+  const hooks = [], unmounts = [], calls = [], optionCalls = []
   const customVue = { ...vue, onMounted: hook => hooks.push(hook), onBeforeUnmount: hook => unmounts.push(hook) }
   const api = {
-    getOptions: () => handlers.options ? handlers.options() : Promise.resolve({ items: options }),
+    getOptions: params => { optionCalls.push(params); return handlers.options ? handlers.options(params) : Promise.resolve({ items: options }) },
     browseLatest: params => { calls.push(params); return handlers.list ? handlers.list(params) : Promise.resolve({ items: [], total: 0 }) },
     getHistory: params => { calls.push(params); return handlers.list ? handlers.list(params) : Promise.resolve({ items: [], total: 0 }) },
     getHistoryDetail: id => handlers.detail ? handlers.detail(id) : Promise.resolve({ id, points: [] })
@@ -145,13 +149,14 @@ function acquisitionPage(name, handlers = {}) {
   }
   const effect = vue.effectScope()
   const state = effect.run(() => component(deps).setup({}, { expose() {} }))
-  return { state, calls, template, mount: async () => { hooks.forEach(fn => fn()); await tick() },
+  return { state, calls, optionCalls, template, mount: async () => { hooks.forEach(fn => fn()); await tick() },
     unmount: () => { unmounts.forEach(fn => fn()); effect.stop() } }
 }
 
 test('actual realtime setup queries all first, preserves compatible DB and makes one request per selection', async () => {
   const p = acquisitionPage('realtime')
   await p.mount()
+  assert.deepEqual(p.optionCalls, [undefined])
   assert.deepEqual(p.calls, [{ page: 1, pageSize: 50 }])
   assert.deepEqual(p.state.dbNumbers.value, [1, 2, 21])
   p.state.dbNumber.value = 21; await tick()
@@ -216,6 +221,7 @@ test('empty authorized scope still makes the default list request and exposes fa
 test('actual history setup queries 24h, filters independently and only submits valid edited times', async () => {
   const p = acquisitionPage('history')
   await p.mount()
+  assert.deepEqual(p.optionCalls, [{ view: 'history' }])
   assert.equal(p.calls.length, 1)
   assert.equal(p.calls[0].page, 1)
   assert.equal(p.calls[0].pageSize, 50)
@@ -241,6 +247,26 @@ test('actual history setup queries 24h, filters independently and only submits v
   p.unmount()
 })
 
+test('history date selection and typed input preserve Shanghai wall time and seconds', async () => {
+  const p = acquisitionPage('history')
+  await p.mount()
+  p.state.selectDateTime('from', { target: { value: '2026-03-08T02:30:42' } })
+  p.state.selectDateTime('to', { target: { value: '2026-03-08T03:30' } })
+  assert.equal(p.state.from.value, '2026-03-08 02:30:42')
+  assert.equal(p.state.to.value, '2026-03-08 03:30:00')
+  assert.equal(p.state.toNativeDateTime(p.state.from.value), '2026-03-08T02:30:42')
+  p.state.to.value = '2026-03-08 03:35:12' // 也支持直接输入
+  p.state.submit(); await tick()
+  assert.equal(p.calls.at(-1).from, '2026-03-08T02:30:42+08:00')
+  assert.equal(p.calls.at(-1).to, '2026-03-08T03:35:12+08:00')
+  let focused = false
+  p.state.openDateTimePicker({ showPicker() { throw new Error('unsupported') }, focus() { focused = true } }, 'to')
+  await tick()
+  assert.equal(p.state.pickerFallback.value, 'to')
+  assert.equal(focused, true)
+  p.unmount()
+})
+
 test('history input change invalidates in-flight list and detail; missing source has a bilingual label', async () => {
   const oldList = deferred(), oldDetail = deferred()
   let count = 0
@@ -260,5 +286,129 @@ test('history input change invalidates in-flight list and detail; missing source
   for (const locale of ['en-US', 'zh-CN']) {
     for (const type of ['daa', 'external', 'unrecorded']) assert.equal(typeof resolveMessage(registry.messages[locale], `acquisition-data.source.${type}`), 'string')
   }
+  p.unmount()
+})
+
+function sourcesPage(handlers = {}) {
+  const calls = [], successes = [], confirms = [], errors = [], loads = []
+  const customVue = { ...vue, onMounted: () => {}, onBeforeUnmount: () => {} }
+  const api = {
+    getSources: async () => { loads.push(true); return { items: [], total: 0 } },
+    createSource: async body => { calls.push(['POST', body]); return handlers.save?.(body) },
+    updateSource: async body => { calls.push(['PATCH', body]); return handlers.save?.(body) }
+  }
+  const deps = {
+    vue: customVue,
+    'element-plus': { ElMessage: { success: message => successes.push(message), warning() {}, error: message => errors.push(message) },
+      ElMessageBox: { confirm: async (...args) => { confirms.push(args); return handlers.confirm?.(...args) } } },
+    'vue-i18n': { useI18n: () => ({ t: key => key }) },
+    '@/components/common/ActionButton.vue': {}, '@/components/common/BaseCard.vue': {},
+    '@/utils/date': { formatShanghaiDateTime }, '@/utils/tableColumnWidths': { useTableColumnWidths },
+    '../../api/index': api
+  }
+  const { component, template } = makePage('sources')
+  const effect = vue.effectScope()
+  const state = effect.run(() => component(deps).setup({}, { expose() {} }))
+  return { state, template, calls, successes, confirms, errors, loads, unmount: () => effect.stop() }
+}
+
+test('deleting a source requires confirmation and submits its displayed revision', async () => {
+  const row = { plcId: 'plc-a', sourceType: 'daa', instanceId: 'inst',
+    sourceGeneration: 'gen', registrationRevision: 'rev' }
+  const cancelled = sourcesPage({ confirm: () => { throw Error('cancel') } })
+  await cancelled.state.removeSource(row)
+  assert.deepEqual(cancelled.calls, [])
+  cancelled.unmount()
+  const confirmed = sourcesPage()
+  await confirmed.state.removeSource(row)
+  assert.deepEqual(confirmed.calls, [['PATCH', { action: 'delete', plcId: 'plc-a',
+    expected: { instanceId: 'inst', sourceGeneration: 'gen', registrationRevision: 'rev' }, confirmDelete: true }]])
+  assert.equal(confirmed.confirms.length, 1)
+  confirmed.unmount()
+  const conflict = sourcesPage({ save: async () => { throw { response: { status: 409 } } } })
+  await conflict.state.removeSource(row)
+  assert.deepEqual(conflict.errors, ['acquisition-data.sourceConfig.conflict'])
+  assert.equal(conflict.loads.length, 1)
+  conflict.unmount()
+})
+
+test('source form saves four fields, copies committed identities and confirms takeover', async () => {
+  const p = sourcesPage()
+  const row = { plcId: 'plc/中文', sourceType: 'external', instanceId: 'old',
+    sourceGeneration: 'old-gen', registrationRevision: 'rev' }
+  p.state.showParameters(row)
+  assert.deepEqual(JSON.parse(p.state.parameters.value), { instanceId: 'old', plcId: 'plc/中文', sourceGeneration: 'old-gen' })
+  p.state.openEdit(row)
+  p.state.draft.sourceType = 'daa'
+  await p.state.save()
+  assert.equal(p.confirms.length, 0)
+  assert.deepEqual(p.calls[0], ['PATCH', { action: 'edit', plcId: 'plc/中文',
+    expected: { instanceId: 'old', sourceGeneration: 'old-gen', registrationRevision: 'rev' }, sourceType: 'daa' }])
+  p.state.openEdit(row)
+  p.state.draft.sourceGeneration = 'new-gen'
+  await p.state.save()
+  assert.equal(p.confirms.length, 1)
+  assert.deepEqual(p.calls[1], ['PATCH', { action: 'takeover', plcId: 'plc/中文',
+    expected: { instanceId: 'old', sourceGeneration: 'old-gen', registrationRevision: 'rev' },
+    replacement: { sourceType: 'external', instanceId: 'old', sourceGeneration: 'new-gen' }, confirmTakeover: true }])
+  p.state.openNew()
+  Object.assign(p.state.draft, { sourceType: 'external', plcId: 'plc/new', instanceId: 'inst', sourceGeneration: 'new' })
+  await p.state.save()
+  assert.deepEqual(p.calls[2], ['POST', { sourceType: 'external', plcId: 'plc/new', instanceId: 'inst', sourceGeneration: 'new' }])
+  assert.doesNotMatch(p.template, /readDbNumbers|dbNumbers/)
+  p.unmount()
+})
+
+test('source save feedback distinguishes unknown commit, unavailable service and each 409 conflict', async () => {
+  const cases = [
+    [503, 'commit_outcome_unknown', 'saveFailed'], [503, 'not_ready', 'notReady'],
+    [409, 'generation_reused', 'generationReused'],
+    [409, 'source_conflict', 'sourceConflict'], [409, 'revision_conflict', 'conflict']
+  ]
+  for (const [status, code, message] of cases) {
+    const p = sourcesPage({ save: async () => { throw { response: { status, data: { errorCode: `acquisition_sources.${code}` } } } } })
+    p.state.openEdit({ plcId: 'plc', sourceType: 'external', instanceId: 'inst', sourceGeneration: 'gen',
+      registrationRevision: 'rev', dbNumbers: [21], readDbNumbers: [] })
+    await p.state.save()
+    assert.equal(p.state.formError.value, `acquisition-data.sourceConfig.${message}`)
+    assert.equal(p.state.visible.value, true)
+    assert.equal(p.calls.length, 1)
+    assert.equal(p.successes.length, 0)
+    for (const locale of ['en-US', 'zh-CN']) {
+      assert.equal(typeof resolveMessage(registry.messages[locale], `acquisition-data.sourceConfig.${message}`), 'string')
+    }
+    p.unmount()
+  }
+})
+
+test('source registration and edit preserve valid Unicode identities and reject invalid UTF-8 or edge whitespace', async () => {
+  const p = sourcesPage()
+  const legal = ['\uFEFFPLC', 'PLC\uFEFF', 'PLC\u0085middle', '😀'.repeat(32)]
+  const illegal = ['\u0085PLC', 'PLC\u0085', '\u00a0PLC', 'PLC\u2003', '\uD800PLC', 'PLC\uDC00', '😀'.repeat(33), 'a\u007fb']
+  for (const field of ['plcId', 'instanceId', 'sourceGeneration']) {
+    for (const value of legal) {
+      p.state.openNew()
+      Object.assign(p.state.draft, { sourceType: 'external', plcId: 'plc', instanceId: 'inst', sourceGeneration: 'gen', dbText: '21', [field]: value })
+      const before = p.calls.length
+      await p.state.save()
+      assert.equal(p.calls.length, before + 1, `${field}: ${JSON.stringify(value)}`)
+      assert.equal(p.calls.at(-1)[1][field], value)
+    }
+    for (const value of illegal) {
+      p.state.openNew()
+      Object.assign(p.state.draft, { sourceType: 'external', plcId: 'plc', instanceId: 'inst', sourceGeneration: 'gen', dbText: '21', [field]: value })
+      const before = p.calls.length
+      await p.state.save()
+      assert.equal(p.calls.length, before, `${field}: ${JSON.stringify(value)}`)
+      assert.equal(p.state.formError.value, 'acquisition-data.sourceConfig.invalid')
+    }
+  }
+  const plcId = '\uFEFFPLC'
+  p.state.openEdit({ plcId, sourceType: 'external', instanceId: 'inst', sourceGeneration: 'gen',
+    registrationRevision: 'rev' })
+  await p.state.save()
+  assert.equal(p.calls.at(-1)[0], 'PATCH')
+  assert.equal(p.calls.at(-1)[1].plcId, plcId)
+  assert.equal(p.calls.at(-1)[1].action, 'edit')
   p.unmount()
 })

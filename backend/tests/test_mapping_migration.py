@@ -33,7 +33,9 @@ def signature(table):
     s=_table_signature(table);s['columns']=frozenset(s['columns']);return s
 
 def test_six_revision_60_to_64_model_parity_and_53_protection():
+    from app.module_registry import import_model_packages
     create_app(testing=True)
+    import_model_packages()
     migrations=[load(p) for p in sorted(VERSIONS_DIR.glob('*.py'))[:6]]
     assert [m.revision for m in migrations]==['d4e6f8a0b2c4','a6c8e0f2b4d6','b8d0f2a4c6e8','d2f4a6b8c0e2','e4f6a8b0c2d4','f6a8c0e2b4d6']
     recorder=Recorder()
@@ -44,7 +46,8 @@ def test_six_revision_60_to_64_model_parity_and_53_protection():
     assert len(recorder.metadata.tables)==64
     assert set(recorder.metadata.tables)-set(before)==NEW
     assert len(set(before)-CHANGED)==53
-    retired={"plc_db_block_raw_snapshots", "plc_db_block_latest_snapshots"}
+    task_migration = load(VERSIONS_DIR/'20261111_1400_5f7a9c1e3b25_generic_task.py')
+    retired={"plc_db_block_raw_snapshots", "plc_db_block_latest_snapshots"} | set(task_migration.OLD_TABLES)
     for name,table in recorder.metadata.tables.items():
         if name not in retired:
             assert signature(table)==signature(Base.metadata.tables[name]),name
@@ -58,7 +61,10 @@ def test_six_revision_60_to_64_model_parity_and_53_protection():
     for table, key in [('equipment_production_parameters','http_coil_key'),('performance_main','http_coil_key'),('performance_process_temperature','http_zone_key')]:
         assert isinstance(recorder.metadata.tables[table].c[key].type.dialect_impl(mysql.dialect()),mysql.VARBINARY)
         assert 'VARBINARY(200)' in str(CreateTable(recorder.metadata.tables[table]).compile(dialect=mysql.dialect()))
-    assert ScriptDirectory.from_config(Config('alembic.ini')).get_heads()==['4e6a8b0d2f14']
+    graph = ScriptDirectory.from_config(Config('alembic.ini'))
+    assert graph.get_heads()==['7b9d1f3a5c7e']
+    assert graph.get_revision('7b9d1f3a5c7e').down_revision=='6a8c0e2b4d16'
+    assert graph.get_revision('6a8c0e2b4d16').down_revision=='5f7a9c1e3b25'
 
 def test_downgrade_offline_refuses_without_any_mutation(monkeypatch):
     final=load(VERSIONS_DIR/'20261016_1900_f6a8c0e2b4d6_expand_mapping_business_api.py')

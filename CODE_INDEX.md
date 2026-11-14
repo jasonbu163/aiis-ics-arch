@@ -31,11 +31,15 @@ source topology or important entrypoints change.
 - `backend/alembic/versions/20261013_1200_a6c8e0f2b4d6_add_public_energy_prices.py` — one-table successor to the unchanged Core root.
 - `backend/tests/test_energy_price_api.py` / `test_energy_price_service.py` / `test_energy_price_migration.py` — no-DB HTTP, transaction, SQL and metadata checks.
 - `backend/app/monitor/` — collector health, monitoring queries and typed business integration.
-- `backend/app/plc_facts/api/v2.py` — sample upload, exact point reads, authorized realtime browsing and sample history.
+- `backend/app/plc_facts/api/v2.py` — sample upload, exact point reads, scoped realtime browsing and sample history.
+- `backend/app/plc_facts/{api,schemas,models}/source_registry.py` and `{crud,services}/async_source_registry.py` — single-table registry, transactional admission, takeover and confirmed deletion.
+- `backend/app/plc_facts/services/sync_source_registry_import.py` / `backend/scripts/plc_facts_maintenance/source_registry.py` — historical r2 source import and recovery export, used from the frozen predecessor.
+- `backend/alembic/versions/20261113_0800_6a8c0e2b4d16_acquisition_source_registry.py` — historical guarded six-table registry successor.
+- `backend/alembic/versions/20261113_1600_7b9d1f3a5c7e_plc_source_registry_single.py` — guarded one-table registry migration and fact reconciliation.
 - `backend/app/plc_facts/models/v2.py` — `plc_facts_history` stores complete samples; `plc_facts_latest` stores the latest value of each point.
 - `backend/alembic/versions/20261111_1030_4e6a8b0d2f14_finalize_plc_facts_tables.py` — guarded forward migration for the two fact tables and historical source type.
 - `backend/tests/test_acquisition_data_browse.py` / `test_acquisition_facts_migration.py` and `backend/tests_mysql/test_acquisition_facts_r2.py` — acquisition query, contract, migration and recovery checks.
-- [Acquisition r2 contract](contracts/published/http-api/plc-facts-v2/openapi-acquisition-r2.json) — updated read and sample contracts for the existing v2 machine protocol.
+- [Acquisition development OpenAPI](contracts/published/http-api/plc-facts-v2/openapi-acquisition-dev.json) — current v2 sample uploads and scoped reads without Bearer credentials. [Accepted r2 snapshot](contracts/published/http-api/plc-facts-v2/openapi-acquisition-r2.json)
 - `backend/projection/registry.py` — shared handler descriptors used by current business modules.
 - `backend/alembic/` — single `d4e6f8a0b2c4` Core root migration for fourteen tables plus static parity coverage.
 - `backend/scripts/` — generic maintenance and smoke helpers.
@@ -55,6 +59,7 @@ source topology or important entrypoints change.
 - `frontend-js/src/components/navigation/ModuleNavigation.vue` — generic group/leaf menu and icon fallback.
 - `frontend-js/src/app/plan/` / `frontend-js/src/app/performance/` — generic task list, detail, field settings and actions; old dashboard is disabled.
 - `frontend-js/src/app/acquisition-data/` — paginated realtime PLC points and DB sample history with optional filters, source labels and sample details.
+- `frontend-js/src/app/acquisition-data/views/sources/index.vue` — administrator source list, copyable parameters, confirmed takeover and deletion.
 - `frontend-js/src/utils/tableColumnWidths.js` — shared local column-width preferences keyed by table and field.
 - `frontend-js/src/config/systemName.js` — independent bilingual build-time system names and optional login descriptions consumed through global i18n.
 - `frontend-js/src/App.vue` — root view and reactive system-name browser title.
@@ -148,18 +153,20 @@ documentation initialization in this repository.
 - `automation-world/data-acquisition-agent/` — independent DAA runtime; CU public-source shell, workbench plus PLC/points/storage leaves, one local owner, pure preference/navigation shell and local PLAN; legacy YAML/direct-DB/headless graph retired.
 - `automation-world/data-acquisition-agent/src-tauri/src/config/local_bootstrap.rs` — SQLite-only ordinary startup, explicit UI read permission with a process-only deny override, retired-key provenance and the unchanged owned debug validation factory; no resident YAML discovery.
 - `automation-world/data-acquisition-agent/src-tauri/src/domain/local_{configuration,sample,runtime}.rs` — configuration/context/envelope v1, sample/manifest v2, stable IDs, group/read budgets and self-describing runtime DTOs.
-- `automation-world/data-acquisition-agent/src-tauri/src/domain/{facts_canonical,facts_wire,local_delivery}.rs` — DAA-008 lossless pf-json, original-cycle transport, strict receipts, source settings and fixed manual-read DTOs.
-- `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/{facts_http.rs,local_store/delivery.rs}` / `services/local_delivery.rs` / `commands/local_delivery.rs` — fixed bounded HTTP, v3 delivery ledger, explicit single worker, monotonic retry and nine named IPC commands; r1 failure history retained in DAA-008.
-- `automation-world/data-acquisition-agent/src/services/factsDelivery.ts` / `components/console/{FactsDeliveryPanel,FactsDeliveryDialog}.vue` — real Workbench/storage delivery controls, source/CAS dialog, bounded queue/events/manual reads and read-only originals.
+- `automation-world/data-acquisition-agent/src-tauri/src/domain/{facts_canonical,facts_wire,local_delivery,sample_upload}.rs` — historical v1 wire rules and v2 single-DB sample encoding, receipt validation and configurable target URL.
+- `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/{facts_http.rs,local_store/delivery.rs,local_store/sample_upload.rs}` / `services/local_delivery.rs` / `commands/local_delivery.rs` — bounded HTTP, separate v1/v2 ledgers, explicit worker, retry timing and named IPC; DAA-008 retains historical evidence.
+- `automation-world/data-acquisition-agent/src/services/factsDelivery.ts` / `components/console/{FactsDeliveryPanel,FactsDeliveryDialog}.vue` — runtime reporting controls, address/path settings, sample records, source confirmation and explicit unresolved-target review.
 - `automation-world/data-acquisition-agent/src-tauri/src/{domain/facts_canonical_tests.rs,infrastructure/facts_http_tests.rs,infrastructure/local_store/delivery_tests.rs,services/local_delivery_tests.rs}` / `tests/facts-delivery.test.mjs` — fixed provider vectors, transport substitutes, owned synthetic SQLite transactions/crashes and focused UI contracts; no actual HTTP/DS proof.
 - `automation-world/data-acquisition-agent/src-tauri/src/domain/business_time.rs` — centralized Shanghai calendar timestamps, canonical millisecond parsing and retention boundaries; monotonic scheduling remains separate.
-- `automation-world/data-acquisition-agent/src-tauri/src/services/local_{configuration,activation,supervisor,scheduler,storage,queries,recovery}.rs` — protected derived configuration/CAS, token activation, unique PLC actors, fair groups, admission, bounded history and stopped recovery.
-- `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/` — new config2/runtime3 and legacy v2/v2 admission, DELETE/EXTRA, serial work, immutable cycles and same-runtime delivery transactions with protected capacity; paired schema READMEs.
+- `automation-world/data-acquisition-agent/src-tauri/src/services/local_{configuration,activation,supervisor,scheduler,storage,queries,recovery,startup}.rs` — protected derived configuration/CAS, token activation, PLC actors, admission, bounded history and optional application-start automation.
+- `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/` — new config2/runtime4 and legacy runtime2/3 admission, DELETE/EXTRA, serial work, immutable cycles and separate v2 delivery transactions with protected capacity; paired schema READMEs.
 - `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/{profile_contract,profile_contract_tests}.rs` — r2 strict original-byte credentials, Unix no-replace sealing and exact-776 native rollback under the real profile lock; schema bounded full ledger postchecks and capacity auxiliary sub-budget; owned new-profile crash/fault evidence only.
 - `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/{tia_source,plc_layout,local_decode,managed_s7,local_profile_lock,local_logging,local_fixture}.rs` — full bounded source expansion, verified standard nested layout inference, typed values, persistent S7, OS lock, bounded logs and compile-gated owned fixtures.
 - `automation-world/data-acquisition-agent/src-tauri/src/commands/local_{acquisition,validation}.rs` / `src/bin/daa-local-validation.rs` — named local IPC and nondefault debug JSON Lines adapter; no ACK/upload/SQL executor.
 - `automation-world/data-acquisition-agent/src/services/localAcquisition.ts` / `src/console/composables/useLocalAcquisitionConsole.ts` — bootstrap-first IPC contract, local edit-base CAS and one runtime refresh owner; normal reload/save no longer query or retry YAML migration.
 - `automation-world/data-acquisition-agent/src/components/console/{ConfigRevisionBar,LocalHistoryPanel,LocalLogPanel}.vue` — draft/active/loaded/used version facts and bounded immutable history/events; ordinary pages have no YAML migration fault/retry entry.
+- `automation-world/data-acquisition-agent/src/components/console/StartupSettings.vue` — independent next-start collection/reporting switches and accessible contextual help.
+- `automation-world/data-acquisition-agent/tests/startup-settings.test.mjs` — synthetic startup-switch IPC and bilingual component rendering checks.
 - `automation-world/data-acquisition-agent/src/components/console/LocalSampleDetail.vue` — immutable sample summary, paged point facts and collapsed formatted JSON; upload state is separate from read quality.
 - `automation-world/data-acquisition-agent/src/console/sampleDetails.ts` — read-only frozen-context labels, point values and whitespace-only JSON formatting without rewriting stored originals or hashes.
 - `automation-world/data-acquisition-agent/src/console/time.ts` — host-independent Shanghai wall-time inputs, second-level views and inclusive millisecond history boundaries.
@@ -283,8 +290,8 @@ documentation initialization in this repository.
 
 ## PLC acquisition data
 
-- `backend/app/plc_facts/manifest.py` — v2 route registration and the acquisition read permission.
-- `backend/app/plc_facts/{v2_config,v2_domain}.py`, `api/v2.py`, `schemas/v2.py` — machine admission, strict sample rules, write and authorized read surfaces.
+- `backend/app/plc_facts/manifest.py` — v2 route, model and error code registration.
+- `backend/app/plc_facts/{v2_config,v2_domain}.py`, `api/v2.py`, `schemas/v2.py` — source admission, strict sample rules, write and scoped read surfaces.
 - `backend/app/plc_facts/models/v2.py`, `crud/{async_v2,sync_v2_maintenance}.py`, `services/{async_v2,sync_v2_maintenance}.py` — two value tables, atomic sample/latest persistence and bounded cleanup.
 - `backend/scripts/plc_facts_maintenance/main.py` — explicit `cleanup-v2` command with JSON Lines evidence.
 - `backend/alembic/versions/20261104_1200_0a2c4e6f8b10_add_plc_facts_integration.py` — historical migration that introduced seven v1 tables.

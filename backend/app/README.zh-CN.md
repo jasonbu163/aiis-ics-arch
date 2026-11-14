@@ -208,7 +208,7 @@ Numeric保持声明的小数位；FLOAT采用有界binary32规范化，相对误
 
 ## PLC事实owner
 
-[plc_facts](plc_facts/README.zh-CN.md)是仅 API 的普通模块（order=36），提供 `plc-facts-read` 权限及 v2 样本/查询路由。历史 v1 provider 和旧快照/Projection runtime 按 [ARCH-ACQ-002 r2](../../plans/ARCH-ACQ-002-legacy-projection-retirement/spec.md)退出当前源码。
+[plc_facts](plc_facts/README.zh-CN.md)是仅 API 的普通模块（order=36），提供 v2 样本上报和查询路由。当前开发阶段，调用者可免 Bearer 按登记来源上报，并按配置的 PLC/DB 范围读取。历史 v1 provider 和旧快照/Projection runtime 按 [ARCH-ACQ-002 r2](../../plans/ARCH-ACQ-002-legacy-projection-retirement/spec.md)退出当前源码。
 
 
 ## BE010 r2源码边界

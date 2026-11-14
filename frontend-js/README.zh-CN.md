@@ -229,3 +229,5 @@ runtime。runtime 不挂载源码或 `node_modules`，`/api/v1` 反向代理到 
 缺测保持缺测/曲线断点，真实0正常显示。
 
 旧卷材实绩来源选择、重量编辑、过程弹窗、分卷、打印与效率页面已退出。通用[计划/实绩流程](../contracts/published/http-api/generic-task-workflow-v1/README.zh-CN.md)按任务绑定版本读取字段，沿用列表路径、上海业务时间及本机列宽和草稿偏好。浏览器/API/数据库运行证明仍为另批验证 gate。
+
+管理员可参阅[计划与实绩字段设置使用说明](FIELD_SETTINGS_GUIDE.zh-CN.md)，了解字段组、勾选项、版本、停用和现场映射的关系。

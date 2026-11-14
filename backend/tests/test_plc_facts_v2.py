@@ -1,4 +1,4 @@
-"""PLC 事实 v2 离线合同、鉴权、事务和清理预算回归。"""
+"""PLC 事实 v2 离线合同、来源准入、事务和清理预算回归。"""
 from copy import deepcopy
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -22,7 +22,6 @@ from app.plc_facts.services import sync_v2_maintenance as maintenance
 
 pytestmark = pytest.mark.no_db
 NOW = datetime(2026, 11, 10, 10, 0, 3)
-TOKEN = 'fixture-token-with-at-least-32-characters'
 
 
 def sample(count=2):
@@ -43,9 +42,20 @@ def profile():
                        'serverUuid': '00000000-0000-4000-8000-000000000001',
                        'schemaRevision': '5f7a9c1e3b25'},
             'instances': [{'instanceId': 'daa-a', 'sourceType': 'daa'}],
-            'credentials': [{'instanceId': 'daa-a', 'tokenSha256': hashlib.sha256(TOKEN.encode()).hexdigest()}],
             'sources': [{'plcId': 'PLC-A', 'instanceId': 'daa-a', 'sourceGeneration': 'gen-a', 'dbNumbers': [21]}],
             'readScopes': {'admin': [{'plcId': 'PLC-A', 'dbNumbers': [21]}]}}
+
+
+def install_registry_fixture(monkeypatch, value):
+    """离线测试在登记访问边界注入同一份已登记事实，保留实际准入断言。"""
+    async def initialized(_db): pass
+    async def admit(_db, body):
+        v2_config.admit_source(value, body)
+        return value['instances'][body.instance_id]
+    async def read(_db, _target):
+        return {**value, 'sourceTypes': {plc: value['instances'][source[0]] for plc, source in value['sources'].items()}}
+    monkeypatch.setattr(service.registry, 'admit', admit)
+    monkeypatch.setattr(service.registry, 'read_profile', read)
 
 
 @pytest.mark.parametrize('count', [400, 512])
@@ -152,29 +162,20 @@ def test_migration_refuses_nonempty_or_unreadable_downgrade():
         assert operation.dropped == []
 
 
-def test_identity_limits_and_profile_credentials():
+def test_identity_limits_and_profile_source_binding():
     value = v2_config.parse_profile(profile())
-    assert v2_config.authenticate(value, 'Bearer ' + TOKEN) == 'daa-a'
     parsed, _, _ = v2_domain.parse_sample(encoded(sample()))
-    v2_config.admit_source(value, 'daa-a', parsed)
+    v2_config.admit_source(value, parsed)
     with pytest.raises(v2_domain.V2Error) as wrong:
-        v2_config.admit_source(value, 'different', parsed)
+        v2_config.admit_source(value, parsed.model_copy(update={'instance_id': 'different'}))
     assert wrong.value.status == 403
     document = profile()
-    document['credentials'].append({'instanceId': 'daa-b', 'tokenSha256': document['credentials'][0]['tokenSha256']})
-    with pytest.raises(ValueError):
-        v2_config.parse_profile(document)
+    document['credentials'] = [{'instanceId': 'daa-a', 'tokenSha256': 'a' * 64}]
+    assert v2_config.parse_profile(document) == value
     document = profile()
     document['target']['serverUuid'] = []
     with pytest.raises(ValueError):
         v2_config.parse_profile(document)
-    document = profile()
-    document['credentials'] = []
-    revoked = v2_config.parse_profile(document)
-    assert revoked['sources']['PLC-A'][:2] == ('daa-a', 'gen-a')
-    with pytest.raises(v2_domain.V2Error) as rejected:
-        v2_config.authenticate(revoked, 'Bearer ' + TOKEN)
-    assert rejected.value.status == 401
     assert len(v2_domain.identifier('温' * 42).encode()) == 126
     with pytest.raises(v2_domain.V2Error):
         v2_domain.identifier('温' * 43)
@@ -182,6 +183,7 @@ def test_identity_limits_and_profile_credentials():
 
 @pytest.mark.asyncio
 async def test_success_ack_occurs_after_commit_and_unknown_is_not_success(monkeypatch):
+    install_registry_fixture(monkeypatch, v2_config.parse_profile(profile()))
     parsed, document, digest = v2_domain.parse_sample(encoded(sample()))
     events = []
     async def now(*_): return NOW
@@ -206,6 +208,7 @@ async def test_success_ack_occurs_after_commit_and_unknown_is_not_success(monkey
 
 @pytest.mark.asyncio
 async def test_unique_conflict_reopens_transaction_for_duplicate_or_conflict(monkeypatch):
+    install_registry_fixture(monkeypatch, v2_config.parse_profile(profile()))
     parsed, document, digest = v2_domain.parse_sample(encoded(sample()))
     async def now(*_): return NOW
     async def collision(*_): raise IntegrityError('synthetic', {}, Exception('duplicate'))
@@ -226,6 +229,7 @@ async def test_unique_conflict_reopens_transaction_for_duplicate_or_conflict(mon
 
 @pytest.mark.asyncio
 async def test_duplicate_and_new_sample_recheck_clock_after_wait(monkeypatch):
+    install_registry_fixture(monkeypatch, v2_config.parse_profile(profile()))
     parsed, document, digest = v2_domain.parse_sample(encoded(sample()))
     before = datetime(2027, 2, 9, 10, 0, 2, 119999)
     cutoff = before + timedelta(microseconds=1)
@@ -258,6 +262,7 @@ async def test_duplicate_and_new_sample_recheck_clock_after_wait(monkeypatch):
 @pytest.mark.asyncio
 async def test_target_checks_uuid_schema_revision_version_and_db_clock():
     target = profile()['target']
+    target['schemaRevision'] = v2_config.REVISION
     class Result:
         def __init__(self, value): self.value = value
         def one(self): return self.value
@@ -265,7 +270,7 @@ async def test_target_checks_uuid_schema_revision_version_and_db_clock():
     class Session:
         def __init__(self):
             self.row = (target['serverUuid'], target['schema'], '8.4.6', NOW, 28800)
-            self.revisions = ['5f7a9c1e3b25']
+            self.revisions = [v2_config.REVISION]
         def get_bind(self): return SimpleNamespace(dialect=SimpleNamespace(name='mysql'))
         async def execute(self, statement):
             return Result(self.revisions if 'alembic_version' in str(statement) else self.row)
@@ -286,24 +291,26 @@ async def test_target_checks_uuid_schema_revision_version_and_db_clock():
 
 
 @pytest.mark.asyncio
-async def test_read_scope_is_independent_and_detail_hides_out_of_scope(monkeypatch):
+async def test_history_detail_independent_from_current_registration(monkeypatch):
     document = profile()
     document['sources'][0]['dbNumbers'] = []
     value = v2_config.parse_profile(document)
+    install_registry_fixture(monkeypatch, value)
     calls = []
     async def now(*_): return NOW
     async def latest(*args): calls.append(args); return []
-    async def detail(*_): return SimpleNamespace(plc_id=b'PLC-Z', db_number=21)
+    async def detail(*_):
+        return SimpleNamespace(id=1, instance_id=b'old', sample_id=b'sample', plc_id=b'PLC-Z',
+            db_number=21, group_id=None, config_revision=None, source_type=None,
+            source_generation=b'old-gen', source_seq=1, sampled_at=NOW, stored_at=NOW, points_json=[])
     monkeypatch.setattr(async_v2, 'target_now', now)
     monkeypatch.setattr(async_v2, 'latest', latest)
     monkeypatch.setattr(async_v2, 'detail', detail)
-    assert await service.latest(object(), value, 'admin', 'PLC-A', 21) == {'items': []}
+    assert await service.latest(object(), value, 'PLC-A', 21) == {'items': []}
     assert len(calls) == 1
-    with pytest.raises(v2_domain.V2Error) as missing:
-        await service.detail(object(), value, 'admin', 1)
-    assert missing.value.status == 404
+    assert (await service.detail(object(), value, 1))['plcId'] == 'PLC-Z'
     with pytest.raises(v2_domain.V2Error) as denied:
-        await service.latest(object(), value, 'admin', 'PLC-Z', 21)
+        await service.latest(object(), value, 'PLC-Z', 21)
     assert denied.value.status == 403
 
 
@@ -371,6 +378,7 @@ async def test_real_numeric_tokens_roundtrip_storage_and_http(monkeypatch):
     with pytest.raises(v2_domain.V2Error):
         v2_domain.parse_sample(encoded(bad).replace(b'"value":0', b'"value":1.25'))
     profile_value = v2_config.parse_profile(profile())
+    install_registry_fixture(monkeypatch, profile_value)
     row = SimpleNamespace(id=1, instance_id=b'daa-a', sample_id=b'sample-102-db21', plc_id=b'PLC-A',
                           db_number=21, group_id=b'temperature', config_revision=b'rev-12', source_type='daa',
                           source_generation=b'gen-a', source_seq=102, sampled_at=NOW, stored_at=NOW,
@@ -397,10 +405,9 @@ async def test_real_numeric_tokens_roundtrip_storage_and_http(monkeypatch):
     monkeypatch.setattr(async_v2, 'detail', detail)
     app = FastAPI()
     app.include_router(api.router, prefix='/api/v1')
-    app.dependency_overrides[api.reader] = lambda: SimpleNamespace(role='admin')
     async with AsyncClient(transport=ASGITransport(app=app), base_url='http://fixture', trust_env=False) as client:
         post = await client.post('/api/v1/integration/plc-facts/samples', content=raw,
-                                 headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN})
+                                 headers={'Content-Type': 'application/json'})
         assert post.status_code == 200 and received == list(tokens)
         for path in ('/api/v1/acquisition-data/latest?plcId=PLC-A&dbNumber=21', '/api/v1/acquisition-data/history/1'):
             response = await client.get(path)
@@ -416,23 +423,15 @@ async def test_real_numeric_tokens_roundtrip_storage_and_http(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_duplicate_query_parameters_follow_authentication(monkeypatch):
-    from fastapi import HTTPException
+async def test_duplicate_query_parameters_without_authentication():
     app = FastAPI()
     app.include_router(api.router, prefix='/api/v1')
     path = '/api/v1/acquisition-data/latest?plcId=PLC-A&plcId=PLC-A&dbNumber=21'
     async with AsyncClient(transport=ASGITransport(app=app), base_url='http://fixture', trust_env=False) as client:
-        assert (await client.get(path)).status_code == 401
-        assert (await client.get(path, headers={'Authorization': 'Bearer invalid'})).status_code == 401
-        def denied(): raise HTTPException(status_code=403)
-        app.dependency_overrides[api.reader] = denied
-        assert (await client.get(path)).status_code == 403
-        app.dependency_overrides[api.reader] = lambda: SimpleNamespace(role='admin')
         assert (await client.get(path)).status_code == 422
-        monkeypatch.setattr(api, 'get_profile', lambda: v2_config.parse_profile(profile()))
+        assert (await client.get(path, headers={'Authorization': 'Bearer invalid'})).status_code == 422
         machine = '/api/v1/integration/plc-facts/samples?x=1&x=1'
-        assert (await client.post(machine, content=encoded(sample()), headers={'Content-Type': 'application/json', 'Authorization': 'Bearer wrong'})).status_code == 401
-        assert (await client.post(machine, content=encoded(sample()), headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN})).status_code == 422
+        assert (await client.post(machine, json=sample())).status_code == 422
 
 
 @pytest.mark.asyncio
@@ -722,36 +721,46 @@ async def test_b_http_clients_ignore_proxy_environment(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_http_auth_body_limit_and_detail_path(monkeypatch):
+async def test_http_source_scope_body_limit_and_detail_path(monkeypatch):
     profile_value = v2_config.parse_profile(profile())
     monkeypatch.setattr(api, 'get_profile', lambda: profile_value)
+    class Session:
+        async def close(self): pass
+    async def session(): return Session()
+    async def write(_db, _profile, body, _document, _digest, _boundary):
+        v2_config.admit_source(profile_value, body)
+        return service.receipt(body, 'created')
+    monkeypatch.setattr(service, 'write_sample', write)
     async def no_session(): raise AssertionError('bad request must not obtain a session')
-    monkeypatch.setattr(api, 'get_db_session', no_session)
+    monkeypatch.setattr(api, 'get_db_session', session)
     app = FastAPI()
     app.include_router(api.router, prefix='/api/v1')
     specification = app.openapi()
     assert '/api/v1/acquisition-data/history/{id}' in specification['paths']
     post = specification['paths']['/api/v1/integration/plc-facts/samples']['post']
     assert post['requestBody']['content']['application/json']['schema']['$ref'].endswith('/SampleV2In')
-    assert set(('200', '401', '403', '409', '410', '413', '415', '422', '503')) <= set(post['responses'])
+    assert not specification['components'].get('securitySchemes')
+    for path in specification['paths'].values():
+        for operation in path.values():
+            assert not operation.get('security') and '401' not in operation['responses']
+    assert set(post['responses']) == {'200', '403', '409', '410', '413', '415', '422', '503'}
     async with AsyncClient(transport=ASGITransport(app=app), base_url='http://fixture') as client:
-        response = await client.post('/api/v1/integration/plc-facts/samples', content=encoded(sample()),
-                                     headers={'Content-Type': 'application/json', 'Authorization': 'Bearer wrong'})
-        assert response.status_code == 401
-        assert response.json()['errorCode'] == 'plc_facts_v2.invalid_credential'
+        wrong_source = dict(sample(), instanceId='unregistered')
+        response = await client.post('/api/v1/integration/plc-facts/samples', json=wrong_source)
+        assert response.status_code == 403
+        assert response.json()['errorCode'] == 'plc_facts_v2.scope_rejected'
+        monkeypatch.setattr(api, 'get_db_session', no_session)
         response = await client.post('/api/v1/integration/plc-facts/samples', content=b' ' * 524289,
-                                     headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN})
+                                     headers={'Content-Type': 'application/json'})
         assert response.status_code == 413
         assert response.json()['data'] is None
         malformed = sample()
         malformed['dbNumber'] = True
-        response = await client.post('/api/v1/integration/plc-facts/samples', content=encoded(malformed),
-                                     headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN})
+        response = await client.post('/api/v1/integration/plc-facts/samples', json=malformed)
         assert response.status_code == 422
         assert response.json()['errorCode'] == 'plc_facts_v2.invalid_request'
         monkeypatch.setattr(api, 'get_profile', lambda: (_ for _ in ()).throw(v2_domain.V2Error('not_ready', 503)))
-        response = await client.post('/api/v1/integration/plc-facts/samples', content=encoded(sample()),
-                                     headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN})
+        response = await client.post('/api/v1/integration/plc-facts/samples', json=sample())
         assert response.status_code == 503
         assert response.json()['errorCode'] == 'plc_facts_v2.not_ready'
 
@@ -778,7 +787,7 @@ async def test_http_success_uses_frozen_body_and_reports_close_failure(monkeypat
     app = FastAPI()
     app.include_router(api.router, prefix='/api/v1')
     raw = encoded(sample()) + b' '
-    headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN}
+    headers = {'Content-Type': 'application/json'}
     async with AsyncClient(transport=ASGITransport(app=app), base_url='http://fixture') as client:
         response = await client.post('/api/v1/integration/plc-facts/samples', content=raw, headers=headers)
         assert response.status_code == 200 and response.json()['data']['outcome'] == 'created'
@@ -789,12 +798,10 @@ async def test_http_success_uses_frozen_body_and_reports_close_failure(monkeypat
         assert response.json()['errorCode'] == 'plc_facts_v2.commit_outcome_unknown'
 
 
-def test_normal_app_registers_routes_and_permission():
+def test_normal_app_registers_acquisition_without_authentication():
     import sys
     import app as app_package
-    from app.module_registry import get_module_manifests
     from core.registrar import create_app
-    from core.role_permissions import build_role_api_permissions
     previous = sys.modules.pop('app.router', None)
     old_attribute = getattr(app_package, 'router', None)
     try:
@@ -804,11 +811,9 @@ def test_normal_app_registers_routes_and_permission():
                 '/api/v1/integration/plc-facts/history'}.isdisjoint(paths)
         assert '/api/v1/integration/plc-facts/samples' in paths
         assert '/api/v1/acquisition-data/history/{id}' in paths
-        permissions = build_role_api_permissions('["plc-facts-read"]', '[]', get_module_manifests(), warn=lambda **_: None)
-        assert 'plc-facts-read' in permissions['supervisor']
-        assert 'plc-facts-read' not in permissions['operator']
-        defaults = build_role_api_permissions('[]', '[]', get_module_manifests(), warn=lambda **_: None)
-        assert 'plc-facts-read' not in defaults['supervisor'] | defaults['operator']
+        operations = app.openapi()['paths']
+        assert not operations['/api/v1/acquisition-data/history/{id}']['get'].get('security')
+        assert operations['/api/v1/auth/me']['get']['security'] == [{'HTTPBearer': []}]
     finally:
         sys.modules.pop('app.router', None)
         if previous is not None:
@@ -825,7 +830,7 @@ def test_published_contract_matches_runtime_models():
     contract = Path(__file__).resolve().parents[2] / 'contracts/published/http-api/plc-facts-v2'
     app = FastAPI(title='PLC Facts v2', version='2')
     app.include_router(api.router, prefix='/api/v1')
-    assert json.loads((contract / 'openapi-acquisition-r2.json').read_text()) == app.openapi()
+    assert json.loads((contract / 'openapi-acquisition-dev-r4.json').read_text()) == app.openapi()
     expected = SampleV2In.model_json_schema(by_alias=True)
     published = json.loads((contract / 'schema-acquisition-r2.json').read_text())
     published.pop('$schema')

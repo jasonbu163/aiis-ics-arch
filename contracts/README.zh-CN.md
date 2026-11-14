@@ -60,7 +60,7 @@
 
 ## PLC事实provider v2
 
-[PLC facts v2](published/http-api/plc-facts-v2/README.zh-CN.md)定义每次提交一个 PLC/DB 完整样本及授权原值查询。源码和隔离验证由 [ARCH-BE-012 r4](../plans/ARCH-BE-012-simplified-plc-facts/tasks.md)记录。
+PLC 事实 v2 定义 DAA 和外部程序的原值上报及按 PLC/DB 范围读取。合同包含字段用途、请求和回执 JSON，以及 Swagger 手工测试步骤。 [PLC 事实 v2](published/http-api/plc-facts-v2/README.zh-CN.md) · [手工测试](published/http-api/plc-facts-v2/README.zh-CN.md#swagger-手工测试) · [开发 OpenAPI](published/http-api/plc-facts-v2/openapi-acquisition-dev.json)
 
 ## PLC事实provider v1
 

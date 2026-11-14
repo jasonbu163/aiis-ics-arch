@@ -249,3 +249,5 @@ previous data; request generations prevent late responses from repopulating the 
 remain missing, including chart gaps and zero-valued real observations.
 
 The old coil performance source selector, weight edit, process dialog, split, print and efficiency pages are retired. Generic [Plan/Performance workflow](../contracts/published/http-api/generic-task-workflow-v1/README.md) uses task-bound definitions, the existing list paths, Shanghai business times, local table widths and draft preservation. Browser/API/database runtime proof remains a separately approved verification gate.
+
+Administrators can consult the [Plan and Performance field settings guide (Chinese)](FIELD_SETTINGS_GUIDE.zh-CN.md) for field groups, options, versions, retirement and integration mappings.

@@ -4,6 +4,7 @@ pub(crate) mod local_configuration;
 pub(crate) mod local_queries;
 pub(crate) mod local_recovery;
 pub(crate) mod local_scheduler;
+pub(crate) mod local_startup;
 pub(crate) mod local_storage;
 pub(crate) mod local_supervisor;
 pub(crate) mod local_yaml_migration;

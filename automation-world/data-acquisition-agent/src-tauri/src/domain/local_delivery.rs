@@ -332,25 +332,37 @@ pub(crate) fn valid_failure(v: &Value, status: u16) -> Result<()> {
 }
 #[derive(Clone, Debug)]
 pub(crate) enum Reply {
-    Committed(Value),
+    Committed(#[cfg(test)] Value),
     Rejected {
+        #[cfg(test)]
         envelope: Value,
+        #[cfg(test)]
         eligible: Vec<(String, u32)>,
     },
     Failure {
+        #[cfg(test)]
         state: String,
+        #[cfg(test)]
         error: String,
+        #[cfg(test)]
         delay: u32,
+        #[cfg(test)]
         pause: bool,
+        #[cfg(test)]
         protocol: bool,
     },
 }
 fn protocol() -> Reply {
     Reply::Failure {
+        #[cfg(test)]
         state: "unknown".into(),
+        #[cfg(test)]
         error: "invalid_receipt".into(),
+        #[cfg(test)]
         delay: 1,
+        #[cfg(test)]
         pause: false,
+        #[cfg(test)]
         protocol: true,
     }
 }
@@ -508,15 +520,16 @@ pub(crate) fn classify(
     status: u16,
     media: &str,
     body: &[u8],
-    retry_after: Option<&str>,
-    attempt: u32,
-    jitter: u32,
+    _retry_after: Option<&str>,
+    _attempt: u32,
+    _jitter: u32,
 ) -> Reply {
     use super::{
         facts_canonical as pf,
         facts_wire::{text, time, RECEIPT_MAX},
     };
-    let delay = retry_delay(attempt, retry_after, jitter);
+    #[cfg(test)]
+    let delay = retry_delay(_attempt, _retry_after, _jitter);
     if media.split(';').next().map(str::trim) != Some("application/json") {
         return protocol();
     }
@@ -532,14 +545,22 @@ pub(crate) fn classify(
                 .unwrap_or(true)
             {
                 Reply::Failure {
+                    #[cfg(test)]
                     state: "needs_review".into(),
+                    #[cfg(test)]
                     error: "proof_expired".into(),
+                    #[cfg(test)]
                     delay: 1,
+                    #[cfg(test)]
                     pause: false,
+                    #[cfg(test)]
                     protocol: false,
                 }
             } else {
-                Reply::Committed(value)
+                Reply::Committed(
+                    #[cfg(test)]
+                    value,
+                )
             }
         } else {
             protocol()
@@ -560,7 +581,7 @@ pub(crate) fn classify(
     {
         return protocol();
     }
-    let error = match text(&value, "errorCode") {
+    let _error = match text(&value, "errorCode") {
         Ok(s) if s.len() <= 128 => s.rsplit('.').next().unwrap_or(s).to_string(),
         _ => return protocol(),
     };
@@ -598,6 +619,7 @@ pub(crate) fn classify(
             _ => return protocol(),
         };
         let mut seen = std::collections::BTreeSet::new();
+        #[cfg(test)]
         let mut eligible = vec![];
         for diagnosis in diagnostics {
             let sid = match text(diagnosis, "sampleId") {
@@ -620,7 +642,10 @@ pub(crate) fn classify(
                 return protocol();
             }
             match diagnosis["diagnosis"].as_str() {
-                Some("eligible") => eligible.push((sid.into(), part)),
+                Some("eligible") => {
+                    #[cfg(test)]
+                    eligible.push((sid.into(), part));
+                }
                 Some("duplicate_proven") => {
                     let proof = &diagnosis["historicalProof"];
                     if proof["sampleId"] != sid
@@ -634,6 +659,7 @@ pub(crate) fn classify(
                     {
                         return protocol();
                     }
+                    #[cfg(test)]
                     eligible.push((sid.into(), part));
                 }
                 Some("expired_unproven" | "conflict" | "source_rejected") => {}
@@ -641,7 +667,9 @@ pub(crate) fn classify(
             }
         }
         return Reply::Rejected {
+            #[cfg(test)]
             envelope: value,
+            #[cfg(test)]
             eligible,
         };
     }
@@ -652,7 +680,8 @@ pub(crate) fn classify(
     {
         return protocol();
     }
-    let (state, pause) = match (status, error.as_str(), persistence) {
+    #[cfg(test)]
+    let (state, pause) = match (status, _error.as_str(), persistence) {
         (_, _, "unknown") => ("unknown", false),
         (429, _, "none") => ("retry_wait", false),
         (503, "unavailable" | "capacity_exceeded" | "clock_invalid" | "not_ready", "none") => {
@@ -665,10 +694,15 @@ pub(crate) fn classify(
         _ => ("unknown", false),
     };
     Reply::Failure {
+        #[cfg(test)]
         state: state.into(),
-        error,
+        #[cfg(test)]
+        error: _error,
+        #[cfg(test)]
         delay,
+        #[cfg(test)]
         pause,
+        #[cfg(test)]
         protocol: false,
     }
 }
@@ -691,6 +725,7 @@ pub(crate) fn retry_delay(attempt: u32, retry_after: Option<&str>, jitter: u32) 
 }
 
 /// 独立手工读取的一页；20页预算由明确继续操作重开，不保存SMA checkpoint。
+#[cfg(test)]
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(crate) struct ReadQuery {
@@ -701,6 +736,7 @@ pub(crate) struct ReadQuery {
     pub cursor: Option<String>,
     pub page: Option<u32>,
 }
+#[cfg(test)]
 impl ReadQuery {
     pub fn parameters(&self) -> Result<(bool, String, bool, usize, Vec<(String, String)>)> {
         use super::facts_wire::{id, time, wire_time};
@@ -769,12 +805,14 @@ impl ReadQuery {
         Ok((latest, protocol.into(), original, limit, query))
     }
 }
+#[cfg(test)]
 #[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct Rotation {
     pub last_plc: String,
     pub groups: std::collections::BTreeMap<String, String>,
 }
+#[cfg(test)]
 impl Rotation {
     pub fn decode(raw: &str) -> Self {
         serde_json::from_str(raw).unwrap_or_default()

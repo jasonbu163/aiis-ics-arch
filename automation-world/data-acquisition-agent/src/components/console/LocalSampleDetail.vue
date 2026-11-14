@@ -32,6 +32,11 @@
       </ConsoleTableShell>
     </section>
 
+    <section v-if="raw.sampleUpload" class="daa-sample-section">
+      <h3>{{ t('common.delivery.v2Detail') }}</h3>
+      <dl class="daa-local-facts"><dt>{{ t('common.delivery.state') }}</dt><dd>{{ deliveryLabel }}</dd><dt>{{ t('common.delivery.sourceInstance') }}</dt><dd>{{ raw.sampleUpload.instanceId }}</dd><dt>{{ t('common.delivery.sourcePlc') }}</dt><dd>{{ raw.sampleUpload.plcId }}</dd><dt>{{ t('common.delivery.sourceGeneration') }}</dt><dd>{{ raw.sampleUpload.sourceGeneration }}</dd><dt>{{ t('common.delivery.attempt') }}</dt><dd>{{ raw.sampleUpload.attempt }}</dd><dt>{{ t('common.delivery.dispatchedAt') }}</dt><dd>{{ formatBusinessTime(raw.sampleUpload.dispatchedAt) }}</dd><dt>{{ t('common.delivery.confirmedAt') }}</dt><dd>{{ formatBusinessTime(raw.sampleUpload.acknowledgedAt) }}</dd><dt v-if="raw.sampleUpload.lastError">{{ t('common.delivery.reason') }}</dt><dd v-if="raw.sampleUpload.lastError">{{ label(raw.sampleUpload.lastError) }}</dd></dl>
+      <details class="daa-details"><summary>{{ t('common.delivery.diagnostics') }}</summary><dl class="daa-local-facts"><dt>{{ t('common.delivery.origin') }}</dt><dd>{{ raw.sampleUpload.origin }}</dd><dt>{{ t('common.delivery.bodyDigest') }}</dt><dd>{{ raw.sampleUpload.bodySha256 || '—' }}</dd><dt>{{ t('common.delivery.receipt') }}</dt><dd>{{ raw.sampleUpload.receiptSha256 || '—' }}</dd></dl></details>
+    </section>
     <section v-if="raw.deliveries?.length" class="daa-sample-section">
       <h3>{{ t('common.delivery.sampleLinks') }}</h3><dl v-for="part in raw.deliveries" :key="part.part" class="daa-local-facts"><dt>{{ t('common.delivery.part') }}</dt><dd>{{ part.part }} / {{ part.parts }}</dd><dt>{{ t('common.delivery.state') }}</dt><dd>{{ t('common.delivery.states.' + part.state) }}</dd><dt>{{ t('common.delivery.batch') }}</dt><dd>{{ part.batchId || '—' }}</dd><dt>{{ t('common.delivery.receipt') }}</dt><dd>{{ part.receiptId || '—' }}</dd><dt>{{ t('common.delivery.reason') }}</dt><dd>{{ part.lastError ? label(part.lastError) : '—' }}</dd></dl>
     </section>
@@ -64,7 +69,7 @@ const props = defineProps<{ raw: RawSample; sampleId: string }>()
 const { t, te } = useI18n()
 const label = (code: string) => code ? te(`common.local.codes.${code}`) ? t(`common.local.codes.${code}`) : code : '—'
 const details = computed(() => sampleDetails(props.raw))
-const deliveryLabel = computed(() => props.raw.deliveryState === 'pending' ? t('common.local.sampleView.pending') : props.raw.deliveryState === 'acknowledged' ? t('common.delivery.states.acknowledged') : label(props.raw.deliveryState))
+const deliveryLabel = computed(() => props.raw.sampleUpload ? (te(`common.delivery.states.${props.raw.sampleUpload.state}`) ? t(`common.delivery.states.${props.raw.sampleUpload.state}`) : label(props.raw.sampleUpload.state)) : props.raw.deliveryState === 'local_only' ? t('common.delivery.localOnly') : props.raw.deliveryState === 'acknowledged' ? t('common.delivery.legacyConfirmed') : props.raw.deliveryState === 'pending' ? t('common.local.sampleView.pending') : label(props.raw.deliveryState))
 const page = ref(1), pageSize = ref(20)
 const pagedRows = computed(() => details.value?.rows.slice((page.value - 1) * pageSize.value, page.value * pageSize.value) ?? [])
 watch(pageSize, () => { page.value = 1 })

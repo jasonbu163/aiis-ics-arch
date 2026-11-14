@@ -3,13 +3,58 @@ use super::profile_contract::*;
 use super::*;
 use serde_json::json;
 thread_local! {static FAILURE:std::cell::RefCell<Option<(String,usize,usize)>>=const{std::cell::RefCell::new(None)};}
+pub(super) fn inject_failure(stage: Option<&str>) {
+    FAILURE.with(|f| *f.borrow_mut() = stage.map(|value| (value.into(), 1, 0)));
+}
 thread_local! {static INSTALL_CONFLICT:std::cell::Cell<bool>=const{std::cell::Cell::new(false)};}
 thread_local! {static DRIFT:std::cell::RefCell<Option<String>>=const{std::cell::RefCell::new(None)};static FREE_BYTES:std::cell::Cell<Option<u64>>=const{std::cell::Cell::new(None)};}
 pub(super) fn available_space(real: u64) -> u64 {
     FREE_BYTES.with(|v| v.get().unwrap_or(real))
 }
 thread_local! {static REWORK_MUTATION:std::cell::RefCell<Option<(String,String)>>=const{std::cell::RefCell::new(None)};}
+thread_local! {static PROFILE_CREATE_RACE:std::cell::RefCell<Option<(String,String)>>=const{std::cell::RefCell::new(None)};}
 pub(super) fn checkpoint(stage: &str, dir: &Path) -> LocalResult<()> {
+    let race = PROFILE_CREATE_RACE.with(|v| {
+        let mut v = v.borrow_mut();
+        if v.as_ref().map(|(s, _)| s.as_str()) == Some(stage) {
+            v.take().map(|(_, action)| action)
+        } else {
+            None
+        }
+    });
+    if let Some(action) = race {
+        let profile = dir.parent().unwrap();
+        if action == "replace_with_symlink" {
+            use std::os::unix::fs::symlink;
+            std::fs::rename(profile, profile.with_file_name("displaced-profile")).unwrap();
+            let foreign = profile.with_file_name("foreign-profile");
+            std::fs::create_dir_all(foreign.join("local-acquisition-v1")).unwrap();
+            std::fs::write(
+                foreign.join("local-acquisition-v1/config.sqlite"),
+                b"foreign config",
+            )
+            .unwrap();
+            std::fs::write(
+                foreign.join("local-acquisition-v1/runtime.sqlite"),
+                b"foreign runtime",
+            )
+            .unwrap();
+            symlink(&foreign, profile).unwrap();
+            return Ok(());
+        }
+        if action == "replace_created_profile" || action == "replace_empty_profile" {
+            std::fs::rename(profile, profile.with_file_name("displaced-profile")).unwrap();
+        } else {
+            assert_eq!(action, "competing_historical_profile");
+        }
+        if action == "replace_empty_profile" {
+            std::fs::create_dir(profile).unwrap();
+        } else {
+            std::fs::create_dir_all(dir).unwrap();
+            std::fs::write(dir.join("config.sqlite"), b"synthetic historical config").unwrap();
+            std::fs::write(dir.join("runtime.sqlite"), b"synthetic historical runtime").unwrap();
+        }
+    }
     let action = REWORK_MUTATION.with(|v| {
         let mut v = v.borrow_mut();
         if v.as_ref().map(|(s, _)| s.as_str()) == Some(stage) {
@@ -255,6 +300,52 @@ fn owned_profile() -> PathBuf {
     std::fs::create_dir(&profile).unwrap();
     profile
 }
+
+#[test]
+fn profile_contract_reopens_partial_and_failed_points_without_rewriting_payload() {
+    let profile = owned_profile();
+    let dir = profile.join("local-acquisition-v1");
+    let mut store = Stores::open(&dir).unwrap();
+    let config = super::tests::configuration();
+    let revision = super::tests::activated(&mut store, &config);
+    let mut cycle = super::tests::cycle(&config, &revision);
+    let fact = cycle
+        .points
+        .values_mut()
+        .next()
+        .unwrap()
+        .values_mut()
+        .next()
+        .unwrap();
+    fact.quality = "bad_timeout".into();
+    fact.reason = Some("bad_timeout".into());
+    fact.value = Value::Null;
+    assert_eq!(store.commit_cycle(cycle).unwrap()["quality"], "partial");
+    let before: Vec<(String, String)> = store
+        .runtime
+        .prepare("SELECT payload,sha256 FROM samples ORDER BY id")
+        .unwrap()
+        .query_map([], |r| Ok((r.get(0)?, r.get(1)?)))
+        .unwrap()
+        .collect::<Result<_, _>>()
+        .unwrap();
+    store.clean_exit().unwrap();
+    drop(store);
+    let mut reopened = Stores::open(&dir).unwrap();
+    let after: Vec<(String, String)> = reopened
+        .runtime
+        .prepare("SELECT payload,sha256 FROM samples ORDER BY id")
+        .unwrap()
+        .query_map([], |r| Ok((r.get(0)?, r.get(1)?)))
+        .unwrap()
+        .collect::<Result<_, _>>()
+        .unwrap();
+    assert_eq!(before, after);
+    reopened.clean_exit().unwrap();
+    drop(reopened);
+    std::fs::remove_dir_all(profile).unwrap();
+}
+
 #[test]
 fn profile_contract_factory_initializes_and_cold_reopens() {
     let profile = owned_profile();
@@ -289,7 +380,7 @@ fn profile_contract_factory_initializes_and_cold_reopens() {
     );
     assert_eq!(
         capacity.reserved_bytes + allocated,
-        old_pages + 96 * 1024 * 1024
+        old_pages + 320 * 1024 * 1024
     );
     s.clean_exit().unwrap();
     let instance = s.instance.clone();
@@ -297,7 +388,10 @@ fn profile_contract_factory_initializes_and_cold_reopens() {
     let reopened = Stores::open(&dir).unwrap();
     assert_eq!(reopened.instance, instance);
     assert_eq!(std::fs::read(dir.join(CREDENTIAL)).unwrap(), credential);
-    assert_eq!(reopened.delivery_snapshot(false).unwrap()["running"], false);
+    assert_eq!(
+        reopened.sample_upload_snapshot(false).unwrap()["running"],
+        false
+    );
     drop(reopened);
     let evidence = json!({"profile":profile,"instance":instance,"credentialSha256":crate::domain::facts_canonical::sha(&credential),"auxiliaryLogicalBytes":logical,"auxiliaryAllocatedBytes":allocated,"initializationSubBudgetBytes":AUX_BUDGET,"reserveBytes":capacity.reserved_bytes,"oldPageJournalBytes":old_pages,"sectorBytes":sector,"remainingAckRecoveryBytes":32*1024*1024-allocated,"actualAuxPlusRemainingAckBytes":32*1024*1024});
     std::fs::write(
@@ -329,9 +423,21 @@ fn snapshot_json(s: &Snapshot) -> Value {
 }
 fn ledger(s: &Stores) -> Value {
     let mut all = serde_json::Map::new();
+    let version: u32 = s
+        .runtime
+        .pragma_query_value(None, "user_version", |r| r.get(0))
+        .unwrap();
     for (role, c, ddl) in [
         ("config", &s.config, schema::config_sql()),
-        ("runtime", &s.runtime, schema::runtime_v3_sql()),
+        (
+            "runtime",
+            &s.runtime,
+            if version == 4 {
+                schema::runtime_v4_sql()
+            } else {
+                schema::runtime_v3_sql()
+            },
+        ),
     ] {
         let mut tables = serde_json::Map::new();
         for (kind, name, _) in schema::ddl_records(&ddl).unwrap() {
@@ -365,7 +471,7 @@ fn ledger(s: &Stores) -> Value {
     Value::Object(all)
 }
 fn prepared_profile() -> PathBuf {
-    let profile = owned_profile();
+    let profile = super::sample_upload_tests::sealed_fixture(3);
     let mut s = Stores::open(&profile.join("local-acquisition-v1")).unwrap();
     let c = super::tests::configuration();
     let revision = super::tests::activated(&mut s, &c);
@@ -381,7 +487,7 @@ fn prepared_profile() -> PathBuf {
     drop(s);
     profile
 }
-fn ack(f: &delivery::Frozen) -> Value {
+pub(super) fn ack(f: &delivery::Frozen) -> Value {
     let mut value = super::delivery_tests::receipt(f);
     for result in value["data"]["results"].as_array_mut().unwrap() {
         let part = f
@@ -664,7 +770,7 @@ fn profile_contract_initialization_durable_process_exits() {
         assert!(!dir.join("logs").exists());
         if stage == "sentinel_removed" {
             let s = Stores::open(&dir).unwrap();
-            assert_eq!(s.delivery_snapshot(false).unwrap()["state"], "stopped");
+            assert_eq!(s.sample_upload_snapshot(false).unwrap()["state"], "stopped");
         } else {
             assert!(Stores::open(&dir).is_err());
         }
@@ -686,7 +792,10 @@ fn profile_contract_last_directory_sync_failure_is_not_retroactive_success() {
             && dir.join(CREDENTIAL).exists()
     );
     let next = Stores::open(&dir).unwrap();
-    assert_eq!(next.delivery_snapshot(false).unwrap()["state"], "stopped");
+    assert_eq!(
+        next.sample_upload_snapshot(false).unwrap()["state"],
+        "stopped"
+    );
     drop(next);
     durable(
         &profile.join("final-sync-failure-and-next-cold.json"),
@@ -725,7 +834,11 @@ fn profile_contract_recovery_three_process_exit_boundaries() {
             assert_eq!(after["runtime"][table], before["runtime"][table]);
         }
         assert_eq!(after["runtime"]["delivery_receipts"], json!([]));
-        assert_eq!(s.delivery_snapshot(false).unwrap()["counts"]["unknown"], 1);
+        assert_eq!(s.delivery_snapshot(false).unwrap()["counts"]["inflight"], 1);
+        assert_eq!(
+            after["runtime"]["delivery_batches"],
+            before["runtime"]["delivery_batches"]
+        );
         assert_eq!(s.delivery_snapshot(false).unwrap()["running"], false);
         drop(s);
         durable(&profile.join("r2-after.json"), &after);
@@ -1002,7 +1115,7 @@ fn profile_contract_real_ack_hot_rollback_and_committed_reopen() {
                 after["runtime"]["sample_references"],
                 before["runtime"]["sample_references"]
             );
-            assert_eq!(s.delivery_snapshot(false).unwrap()["counts"]["unknown"], 1);
+            assert_eq!(s.delivery_snapshot(false).unwrap()["counts"]["inflight"], 1);
             for index in [0, 1, 2, 3, 4, 5, 6, 7, 8, 10] {
                 assert_eq!(
                     after["runtime"]["delivery_batches"][0][index],
@@ -1169,7 +1282,7 @@ fn import_synthetic(
 }
 #[test]
 fn profile_contract_large_and_deep_valid_local_context_stays_local() {
-    let profile = owned_profile();
+    let profile = super::sample_upload_tests::sealed_fixture(3);
     let dir = profile.join("local-acquisition-v1");
     let mut s = Stores::open(&dir).unwrap();
     let mut c = super::tests::configuration();
@@ -1519,4 +1632,171 @@ fn profile_contract_rework_phase_material_continuity() {
     ] {
         rework_drift_case(stage, action, mode);
     }
+}
+
+// 新选 profile 目录原本不存在时验证实际工厂首启和重开。
+#[test]
+fn r5_missing_profile_directory_should_initialize_and_reopen() {
+    let owner = owned_profile();
+    let profile = owner.join("new-profile");
+    let dir = profile.join("local-acquisition-v1");
+    assert!(!profile.exists());
+    let mut store = Stores::open(&dir).unwrap();
+    let config: u32 = store
+        .config
+        .pragma_query_value(None, "user_version", |r| r.get(0))
+        .unwrap();
+    let runtime: u32 = store
+        .runtime
+        .pragma_query_value(None, "user_version", |r| r.get(0))
+        .unwrap();
+    assert_eq!((config, runtime), (2, 4));
+    assert!(matches!(Stores::open(&dir), Err(e) if e == "profile_locked"));
+    let instance = store.instance.clone();
+    store.clean_exit().unwrap();
+    drop(store);
+    let mut reopened = Stores::open(&dir).unwrap();
+    assert_eq!(reopened.instance, instance);
+    assert_eq!(
+        reopened.sample_upload_snapshot(false).unwrap()["running"],
+        false
+    );
+    reopened.clean_exit().unwrap();
+    drop(reopened);
+    std::fs::remove_dir_all(owner).unwrap();
+}
+
+#[test]
+fn r5_missing_profile_creation_refuses_races_without_touching_history() {
+    for (stage, action) in [
+        ("before_lock", "competing_historical_profile"),
+        ("after_profile_creation", "replace_created_profile"),
+    ] {
+        let owner = owned_profile();
+        let profile = owner.join("new-profile");
+        let dir = profile.join("local-acquisition-v1");
+        PROFILE_CREATE_RACE.with(|v| *v.borrow_mut() = Some((stage.into(), action.into())));
+        let error = Stores::open(&dir).err().expect("race must be refused");
+        PROFILE_CREATE_RACE.with(|v| *v.borrow_mut() = None);
+        assert_eq!(error, "time_profile_unsupported:profile_changed", "{stage}");
+        assert_eq!(
+            std::fs::read(dir.join("config.sqlite")).unwrap(),
+            b"synthetic historical config"
+        );
+        assert_eq!(
+            std::fs::read(dir.join("runtime.sqlite")).unwrap(),
+            b"synthetic historical runtime"
+        );
+        assert!(!profile.join(".daa-runtime.lock").exists());
+        assert!(!dir.join(SENTINEL).exists());
+        assert!(!dir.join(CREDENTIAL).exists());
+        if action == "replace_created_profile" {
+            assert!(owner.join("displaced-profile").is_dir());
+        }
+        std::fs::remove_dir_all(owner).unwrap();
+    }
+}
+
+#[test]
+fn r5_missing_profile_interrupted_initialization_remains_refused() {
+    let owner = owned_profile();
+    let profile = owner.join("new-profile");
+    let dir = profile.join("local-acquisition-v1");
+    FAILURE.with(|v| *v.borrow_mut() = Some(("sentinel_durable".into(), 1, 0)));
+    let error = Stores::open(&dir).err().expect("injected interruption");
+    FAILURE.with(|v| *v.borrow_mut() = None);
+    assert_eq!(error, "synthetic_profile_sentinel_durable");
+    assert!(dir.join(SENTINEL).exists());
+    assert!(!dir.join("logs").exists());
+    let before = capture(&dir).unwrap();
+    assert!(Stores::open(&dir).is_err());
+    assert_eq!(capture(&dir).unwrap(), before);
+    std::fs::remove_dir_all(owner).unwrap();
+}
+
+#[test]
+fn r5_missing_nested_profile_ancestors_are_supported() {
+    let owner = owned_profile();
+    let profile = owner
+        .join("missing-parent")
+        .join("nested")
+        .join("new-profile");
+    let dir = profile.join("local-acquisition-v1");
+    let mut store = Stores::open(&dir).unwrap();
+    assert_eq!(
+        store
+            .runtime
+            .pragma_query_value(None, "user_version", |r| r.get::<_, u32>(0))
+            .unwrap(),
+        4
+    );
+    store.clean_exit().unwrap();
+    drop(store);
+    std::fs::remove_dir_all(owner).unwrap();
+}
+
+#[test]
+fn r5_missing_profile_empty_directory_replacement_is_refused() {
+    let owner = owned_profile();
+    let profile = owner.join("new-profile");
+    let dir = profile.join("local-acquisition-v1");
+    PROFILE_CREATE_RACE.with(|v| {
+        *v.borrow_mut() = Some((
+            "after_profile_directory_created".into(),
+            "replace_empty_profile".into(),
+        ))
+    });
+    let error = Stores::open(&dir)
+        .err()
+        .expect("replacement must be refused");
+    PROFILE_CREATE_RACE.with(|v| *v.borrow_mut() = None);
+    assert_eq!(error, "time_profile_unsupported:profile_changed");
+    assert!(owner.join("displaced-profile").is_dir());
+    assert!(profile.is_dir());
+    assert!(!profile.join(".daa-runtime.lock").exists());
+    assert!(!dir.exists());
+    std::fs::remove_dir_all(owner).unwrap();
+}
+
+#[test]
+fn r5_missing_profile_crash_during_initialization_is_preserved() {
+    let owner = owned_profile();
+    let profile = owner.join("new-profile");
+    let dir = profile.join("local-acquisition-v1");
+    assert!(!profile.exists());
+    let output = child(&profile, "init", Some("sentinel_durable"));
+    assert_eq!(output.status.code(), Some(86));
+    assert!(dir.join(SENTINEL).exists());
+    assert!(!dir.join("logs").exists());
+    let before = capture(&dir).unwrap();
+    assert!(Stores::open(&dir).is_err());
+    assert_eq!(capture(&dir).unwrap(), before);
+    std::fs::remove_dir_all(owner).unwrap();
+}
+
+#[test]
+fn r5_missing_profile_symlink_replacement_never_opens_foreign_store() {
+    let owner = owned_profile();
+    let profile = owner.join("new-profile");
+    let dir = profile.join("local-acquisition-v1");
+    PROFILE_CREATE_RACE.with(|v| {
+        *v.borrow_mut() = Some((
+            "after_profile_directory_created".into(),
+            "replace_with_symlink".into(),
+        ))
+    });
+    let error = Stores::open(&dir).err().expect("symlink must be refused");
+    PROFILE_CREATE_RACE.with(|v| *v.borrow_mut() = None);
+    assert!(error.contains("profile_symlink"), "{error}");
+    let foreign = owner.join("foreign-profile");
+    assert_eq!(
+        std::fs::read(foreign.join("local-acquisition-v1/config.sqlite")).unwrap(),
+        b"foreign config"
+    );
+    assert_eq!(
+        std::fs::read(foreign.join("local-acquisition-v1/runtime.sqlite")).unwrap(),
+        b"foreign runtime"
+    );
+    assert!(!foreign.join(".daa-runtime.lock").exists());
+    std::fs::remove_dir_all(owner).unwrap();
 }

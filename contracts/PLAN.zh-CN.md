@@ -15,7 +15,7 @@
 
 | 合同线索 | 实际范围与下一gate |
 | --- | --- |
-| [ARCH-ACQ-003 r2](../plans/ARCH-ACQ-003-acquisition-data-optional-filters/spec.md) | `owner_accepted`。Human Owner 于 2026-11-11 验收新版上报合同。DAA-010 接续使用采集 r2 合同工件。 |
+| [ARCH-ACQ-003 r2](../plans/ARCH-ACQ-003-acquisition-data-optional-filters/spec.md) | 2026-11-11 `owner_accepted`。DAA-010 使用当前开发阶段免 Bearer 的上报合同。 [开发 OpenAPI](published/http-api/plc-facts-v2/openapi-acquisition-dev.json) |
 | [PLC facts v2](published/http-api/plc-facts-v2/README.zh-CN.md) | ARCH-BE-012 r4 源码实施与隔离验证进行中。 |
 | [PLC事实provider](published/http-api/plc-facts-v1/README.zh-CN.md) | BE-009源码及隔离MySQL A+B QA通过，Owner终验/provider-ready及真实采用待定。 |
 | [typed业务provider](published/http-api/business-integration-v1/README.zh-CN.md) | BE-010 r2八路及隔离A+B QA通过，真实schema/时间采用及终验待定。 |

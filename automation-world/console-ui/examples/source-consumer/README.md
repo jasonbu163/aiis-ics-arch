@@ -65,6 +65,8 @@ Language installation is entirely consumer-owned: create or reuse your vue-i18n 
 
 `ThemeToggle` accepts `theme: UiTheme` and a translated target-action `label`; `LanguageSwitch` accepts `locale: 'zh-CN' | 'en-US'`, translated `zhLabel` / `enLabel` (normally “中” / “EN”) and a translated target-action `label`. Both emit `toggle` without changing state or writing storage. The label supplies the native tooltip and accessible name; the theme button also exposes its current dark state. Import both from `@aw-ui`, keep them inside the public style scope, and let your host handle the event and update props. CU keeps its existing UI preferences; the consumer owns separate state and does not persist it. The built consumer needs no running CU.
 
+The round language control displays only the target: `EN` in Chinese and `中` in English. For a round icon-only action, pass `round-icon`, an `icon` and a translated `label` to `ConsoleActionButton`; the label supplies its accessible name and, unless `title` is provided, its tooltip. Loading and disabled behavior are retained. Without `round-icon`, the ordinary text button is unchanged.
+
 6. Run `pnpm build`, stop CU, then `pnpm preview`. The consumer's compiled JS/CSS are local to its dist. No code splitting chunk points to CU's dist or dev port. Actual Agent integration, publishing and business configuration are separate approved work.
 
 The [CU README](../../README.md) defines ownership and [CU PLAN](../../PLAN.md) indexes this foundation.

@@ -1,10 +1,10 @@
-//! Rust固定三API与有界HTTP adapter；禁止代理/redirect/cookie/自动retry，不提供任意URL执行。
+//! Rust 单样本有界 HTTP adapter；禁止代理、重定向、Cookie 和自动重试。
 use crate::domain::facts_canonical::Result;
-use reqwest::{blocking::Client, redirect::Policy, Url};
+use reqwest::{blocking::Client, redirect::Policy};
 use std::{io::Read, time::Duration};
+#[cfg(test)]
 pub(crate) const BATCHES: &str = "/api/v1/integration/plc-facts/batches";
-pub(crate) const LATEST: &str = "/api/v1/integration/plc-facts/latest";
-pub(crate) const HISTORY: &str = "/api/v1/integration/plc-facts/history";
+#[cfg(test)]
 pub(crate) use crate::domain::local_delivery::normalize_origin;
 #[derive(Clone, Debug)]
 pub(crate) struct Response {
@@ -14,8 +14,11 @@ pub(crate) struct Response {
     pub body: Vec<u8>,
 }
 pub(crate) trait Transport: Send + Sync {
+    #[cfg(test)]
     fn post(&self, origin: &str, body: &str) -> Result<Response>;
-    fn get(&self, origin: &str, path: &str, query: &[(String, String)]) -> Result<Response>;
+    fn post_sample(&self, _origin: &str, _body: &str) -> Result<Response> {
+        Err("sample_transport_unavailable".into())
+    }
 }
 pub(crate) struct FactsHttp {
     client: Client,
@@ -61,6 +64,7 @@ impl FactsHttp {
     }
 }
 impl Transport for FactsHttp {
+    #[cfg(test)]
     fn post(&self, origin: &str, body: &str) -> Result<Response> {
         if body.len() > 4 * 1024 * 1024 {
             return Err("payload_too_large".into());
@@ -75,24 +79,20 @@ impl Transport for FactsHttp {
             .map_err(|_| "transport_unknown")?;
         Self::read(response, 8 * 1024 * 1024)
     }
-    fn get(&self, origin: &str, path: &str, query: &[(String, String)]) -> Result<Response> {
-        if ![LATEST, HISTORY].contains(&path)
-            || query.len() > 12
-            || query.iter().any(|(k, v)| k.len() > 32 || v.len() > 8192)
-        {
-            return Err("invalid_request".into());
+    fn post_sample(&self, target: &str, body: &str) -> Result<Response> {
+        if body.len() > crate::domain::sample_upload::BODY_LIMIT {
+            return Err("payload_too_large".into());
         }
-        let origin = normalize_origin(origin)?;
-        let mut url = Url::parse(&format!("{origin}{path}")).map_err(|_| "invalid_target")?;
-        url.query_pairs_mut()
-            .extend_pairs(query.iter().map(|(k, v)| (k, v)));
+        let target = crate::domain::sample_upload::normalize_target(target)?;
         let response = self
             .client
-            .get(url)
-            .timeout(Duration::from_secs(8))
+            .post(target)
+            .header(reqwest::header::CONTENT_TYPE, "application/json")
+            .header(reqwest::header::CONTENT_ENCODING, "identity")
+            .body(body.to_string())
             .send()
             .map_err(|_| "transport_unknown")?;
-        Self::read(response, 2 * 1024 * 1024)
+        Self::read(response, 64 * 1024)
     }
 }
 #[cfg(test)]
@@ -122,6 +122,7 @@ fn read_body(reader: &mut impl Read, declared: Option<u64>, limit: usize) -> Res
 }
 
 // 固定ReadOut闭包在adapter边界严格解码；读取只能返回诊断，不能产生可靠ACK。
+#[cfg(test)]
 mod read_contract {
     use super::*;
     use serde::Deserialize;
@@ -526,6 +527,7 @@ mod read_contract {
         }
     }
 }
+#[cfg(test)]
 pub(crate) fn validate_read(
     value: &serde_json::Value,
     plc: &str,

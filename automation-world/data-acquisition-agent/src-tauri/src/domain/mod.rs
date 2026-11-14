@@ -13,3 +13,4 @@ pub(crate) mod business_time;
 pub(crate) mod facts_canonical;
 pub(crate) mod facts_wire;
 pub(crate) mod local_delivery;
+pub(crate) mod sample_upload;

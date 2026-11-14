@@ -1,0 +1,618 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AIIS Acquisition Sources Management",
+    "version": "2"
+  },
+  "paths": {
+    "/api/v1/admin/acquisition-sources": {
+      "get": {
+        "tags": [
+          "acquisition-sources"
+        ],
+        "summary": "Sources",
+        "operationId": "sources_api_v1_admin_acquisition_sources_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Pagesize"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Source registry failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Source registry failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Source registry failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Source registry failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "acquisition-sources"
+        ],
+        "summary": "Register",
+        "operationId": "register_api_v1_admin_acquisition_sources_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Source registry failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Source registry failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Source registry failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Source registry failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "acquisition-sources"
+        ],
+        "summary": "Update",
+        "operationId": "update_api_v1_admin_acquisition_sources_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Source registry failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Source registry failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Source registry failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Source registry failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ExpectedSource": {
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "title": "Instanceid"
+          },
+          "sourceGeneration": {
+            "type": "string",
+            "title": "Sourcegeneration"
+          },
+          "registrationRevision": {
+            "type": "string",
+            "title": "Registrationrevision"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "instanceId",
+          "sourceGeneration",
+          "registrationRevision"
+        ],
+        "title": "ExpectedSource"
+      },
+      "FailureOut": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "type": "null",
+            "title": "Data"
+          },
+          "errorCode": {
+            "type": "string",
+            "title": "Errorcode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "errorCode"
+        ],
+        "title": "FailureOut"
+      },
+      "PageData": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SourceOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "pageSize": {
+            "type": "integer",
+            "title": "Pagesize"
+          },
+          "totalPages": {
+            "type": "integer",
+            "title": "Totalpages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize",
+          "totalPages"
+        ],
+        "title": "PageData"
+      },
+      "PageOut": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "const": 200,
+            "title": "Code",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "const": "success",
+            "title": "Message",
+            "default": "success"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageData"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "PageOut"
+      },
+      "RegistrationData": {
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "created",
+              "extended",
+              "replaced",
+              "unchanged"
+            ],
+            "title": "Outcome"
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "outcome",
+          "source"
+        ],
+        "title": "RegistrationData"
+      },
+      "RegistrationIn": {
+        "properties": {
+          "sourceType": {
+            "type": "string",
+            "enum": [
+              "daa",
+              "external"
+            ],
+            "title": "Sourcetype"
+          },
+          "instanceId": {
+            "type": "string",
+            "title": "Instanceid"
+          },
+          "plcId": {
+            "type": "string",
+            "title": "Plcid"
+          },
+          "sourceGeneration": {
+            "type": "string",
+            "title": "Sourcegeneration"
+          },
+          "dbNumbers": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Dbnumbers"
+          },
+          "readDbNumbers": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Readdbnumbers"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sourceType",
+          "instanceId",
+          "plcId",
+          "sourceGeneration",
+          "dbNumbers"
+        ],
+        "title": "RegistrationIn"
+      },
+      "RegistrationOut": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "const": 200,
+            "title": "Code",
+            "default": 200
+          },
+          "message": {
+            "type": "string",
+            "const": "success",
+            "title": "Message",
+            "default": "success"
+          },
+          "data": {
+            "$ref": "#/components/schemas/RegistrationData"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "RegistrationOut"
+      },
+      "ReplacementSource": {
+        "properties": {
+          "sourceType": {
+            "type": "string",
+            "enum": [
+              "daa",
+              "external"
+            ],
+            "title": "Sourcetype"
+          },
+          "instanceId": {
+            "type": "string",
+            "title": "Instanceid"
+          },
+          "sourceGeneration": {
+            "type": "string",
+            "title": "Sourcegeneration"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sourceType",
+          "instanceId",
+          "sourceGeneration"
+        ],
+        "title": "ReplacementSource"
+      },
+      "SourceOut": {
+        "properties": {
+          "sourceType": {
+            "type": "string",
+            "enum": [
+              "daa",
+              "external"
+            ],
+            "title": "Sourcetype"
+          },
+          "instanceId": {
+            "type": "string",
+            "title": "Instanceid"
+          },
+          "plcId": {
+            "type": "string",
+            "title": "Plcid"
+          },
+          "sourceGeneration": {
+            "type": "string",
+            "title": "Sourcegeneration"
+          },
+          "registrationRevision": {
+            "type": "string",
+            "title": "Registrationrevision"
+          },
+          "dbNumbers": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Dbnumbers"
+          },
+          "readDbNumbers": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Readdbnumbers"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat"
+          },
+          "updatedAt": {
+            "type": "string",
+            "title": "Updatedat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sourceType",
+          "instanceId",
+          "plcId",
+          "sourceGeneration",
+          "registrationRevision",
+          "dbNumbers",
+          "readDbNumbers",
+          "createdAt",
+          "updatedAt"
+        ],
+        "title": "SourceOut"
+      },
+      "UpdateIn": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "extend",
+              "takeover"
+            ],
+            "title": "Action"
+          },
+          "plcId": {
+            "type": "string",
+            "title": "Plcid"
+          },
+          "expected": {
+            "$ref": "#/components/schemas/ExpectedSource"
+          },
+          "addDbNumbers": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Adddbnumbers"
+          },
+          "addReadDbNumbers": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Addreaddbnumbers"
+          },
+          "replacement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReplacementSource"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "confirmTakeover": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmtakeover"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "action",
+          "plcId",
+          "expected"
+        ],
+        "title": "UpdateIn"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

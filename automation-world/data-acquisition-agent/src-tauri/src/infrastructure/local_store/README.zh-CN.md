@@ -1,13 +1,21 @@
 # 本地采集与事实投递双库
 
-本适配层拥有本地 SQLite schema 与 SQL。DAA-008 只为新空 config-v2/runtime-v3 增加投递元数据，r2 受控恢复仅适用于新 sealed Unix profile；既有 v2/v2 保持本地行为且无投递 DDL。当前自检与保留的 r1 hot-journal 原失败见[DAA-008](../../../../plans/DAA-008-reliable-facts-upload/tasks.md)，历史本地证据仍归 DAA-002/007。
+两个软件启动开关保存在现有配置 SQLite 的受保护私有记录中，记录不存在时均关闭。保存事务不修改草稿版本或 DDL，也不重写样本和回执；记录损坏时自动启动停止，手动操作仍可用。配置清理会保留该记录；旧二进制重新打开变更后的 profile 尚未作为回退路径验证。
+
+逐 PLC 上报开关保存在现有运行库的 `reporting_disabled` 表中，既有绑定默认开启。通过锁和完整检查的 runtime4 profile 按原凭据暂存流程增加该表，不重写样本、冻结请求或回执。关闭时采集仍记录原上报身份；队列在选样和最终派发前核对开关，已派发请求可继续结算。未绑定时采集的样本仍只保存在本地。
+
+本适配层拥有本地 SQLite schema 与 SQL。DAA-010 候选新建 config2/runtime4，独立保存 v2 样本投递和历史 v1 账本；既有冷态 runtime2/3 保持原 schema 与本地行为，退役 v1 派发。当前自检与保留的 r1 hot-journal 原失败见[DAA-008](../../../../plans/DAA-008-reliable-facts-upload/tasks.md)，历史本地证据仍归 DAA-002/007。
 
 | 库 | 表与责任 |
 | --- | --- |
 | `config.sqlite` | `schema_migrations`、`instance_metadata`、内容去重 `source_documents`、CAS `configuration_draft`、不可变 `configuration_revisions`、`active_selection`、可恢复 `activation_intents` |
 | `runtime.sqlite` | `schema_migrations`、`runtime_metadata`、稳定 `plc_sources`、不可变 `configuration_contexts`、`activation_journal`、完整 `collection_cycles`、自描述 `samples`、独立 `sample_delivery` / `sample_references`、有限 `runtime_events` |
 
-新库只在空 local-acquisition-v1 同时建立 config2/runtime3，身份/时间合同匹配并核完整性。已知 v2/v2 不转换；缺库、未知/损坏/schema/身份不符、链接或 WAL/SHM 均拒绝。`Stores::open` 持原父 profile OS 锁直到双库 SQLite 连接关闭；进程内路径/目录身份占用登记避免 raw FD close 破坏同进程另一活跃库的锁。产品 locator 仍为显式 profile/local-acquisition-v1；历史 private p/store 调用共用同一工厂，不是恢复旁路。不删 journal、不用 immutable 绕过、不升级旧库。
+新库只在空 local-acquisition-v1 同时建立 config2/runtime4，身份/时间合同匹配并核完整性。已知冷态 runtime2/3 不原地转换；缺库、未知/损坏/schema/身份不符、链接或 WAL/SHM 均拒绝。`Stores::open` 持原父 profile OS 锁直到双库 SQLite 连接关闭；进程内路径/目录身份占用登记避免 raw FD close 破坏同进程另一活跃库的锁。产品 locator 仍为显式 profile/local-acquisition-v1；历史 private p/store 调用共用同一工厂，不是恢复旁路。不删 journal、不用 immutable 绕过；runtime4 的 r2 候选兼容路径见下。
+
+ARCH-ACQ-004 r2 候选在通过原凭据、原 DDL 指纹及全量账本检查后，持锁在同一 runtime4 原位新增 `reporting_identity`、`reporting_bindings`、`reporting_generations`、`reporting_cycles`。原样本、上下文、冻结正文和回执不重编码；旧轮无 marker 沿用原身份，新轮按开始时的绑定保存，空 marker 是仅本地记录。上报代次记录约束复用，不能用另一本机 PLC 或实例重置同一代次的序号。完整且无引用的过期仅本地轮按保留期回收，已进入队列但未确认的样本继续受保护。
+
+Unix 新指纹凭据先以 staging 写入并同步，同目录 DDL 使用原 DELETE/EXTRA 连接及事务；提交后复核新结构与旧账本，再替换凭据并同步目录。中断时保留 staging 或凭据/结构不匹配会拒绝打开；保留整个目录、原数据库、journal、sentinel 与 staging，留待独立核对和获批恢复，不手动删除 marker 或用新目录覆盖。本段是候选设计及合成验证范围，未证明真实 profile 或 Windows 采用。
 
 `profile_contract.rs` 负责原字节严格凭据、canonical Unix 文件身份、sentinel/staging no-replace 封存与唯一原生回滚例外；`schema.rs` 负责已知 DDL 指纹和有界完整账本后检（稳定索引每页≤100 key，一次一份 body/response）；`capacity.rs` 仅用 metadata 统计辅助分配。初始化 256KiB 子预算位于既有额外 32MiB 内：实际 auxiliary allocated 加入已用物理量，同时从剩余预留等额扣减。本地 Configuration/context 沿用本地有效性边界；provider wire 限额只核冻结投递材料，不将合法未冻结/blocked 原轮判成整个 profile 损坏。
 
@@ -21,11 +29,11 @@ sentinel/staging 存在即拒绝，坏凭据不降级；末次目录 fsync 失�
 
 统一串行 worker 最多接纳 4 个写入、1 个执行及 4 个排队短查询。查询 deadline 从入队前开始，过期未执行工作不再运行；执行中的 watchdog 按剩余 1000 ms 预算 interrupt，并在复用连接前 join。超时不保证能取消阻塞的 OS 磁盘 I/O。每 PLC actor 等完整轮提交结果才开始下一轮，全部读取/排队/提交在途最多 4 轮；最多 4 个连续写任务后给短查询机会。
 
-完整轮事务先核不可变 context 及精确预期成员，分配一个 cycle ID/每 DB 一个 sample ID，写入所有成功/失败/null 质量、原时刻、排序 point-ID 字典、完整 manifest、pending 和下一个源序号，并原子更新 used revision。序号以整数持久化、十进制字符串输出，组筛选自然跳号。mutable ACK 不进入样本/manifest 摘要。v3 只允许严格回执同库原子确认；v2 无上传器，两种版本均无人工 ACK 或清空队列入口。
+完整轮事务先核不可变 context 及精确预期成员，分配一个 cycle ID/每 DB 一个 sample ID，写入所有成功/失败/null 质量、原时刻、排序 point-ID 字典、完整 manifest、pending 和下一个源序号，并原子更新 used revision。序号以整数持久化、十进制字符串输出，组筛选自然跳号。mutable ACK 不进入样本/manifest 摘要。runtime2 无上传器，runtime3 保留 v1 证据且不派发；runtime4 的匹配 v2 回执与样本状态在独立账本事务内提交，不伪造 v1 样本/分片/回执。无人工 ACK 或清空队列入口。
 
 编码是 UTF-8 紧凑 serde JSON、固定 struct 字段顺序、BTreeMap 点字典与稳定 UUID key；有限 REAL 保留实际 f32 解码值的 f64 表示。新业务日历时刻统一固定上海毫秒`+08:00`，保存时间由SQLite在同轮事务内生成一次；不是PLC事件时间或精确COMMIT后时刻。SHA-256 覆盖原 payload 字节；历史不重新生成值。元数据每页最多 100 行。较大完整 context 通过同一 `daa_get_sample.contextOffset` 按 UTF-8 边界分段，每段最多 64KiB，带原 SHA、总字节数及 next offset；GUI 重组原上下文。跨调用不保留 statement/读事务。
 
-物理准入包括运行主库/journal、配置主库/journal、日志、卷余量和预留。旧页 journal 保守边界含记录/头/扇区；4 个 512KiB 轮按 16 倍 B-tree/索引增长并加 32MiB 维护预留。准备 context 另加编码大小 3 倍；配置写入保守核旧镜像/新正文低于 64MiB。80/90/70% 告警/停采/恢复，并要求 512MiB 卷余量及预留；不使用 max_page_count 设额度。普通存储故障暂停采集，须有界写健康探针成功且容量恢复后才继续；这不解除下述日志故障锁存。
+物理准入包括运行主库/journal、配置主库/journal、日志、卷余量和预留。旧页 journal 保守边界含记录/头/扇区；4 个在途轮按 16 倍 B-tree/索引增长并加 32MiB 维护预留，分别采用旧版 512KiB 或 runtime4 的 4MiB 轮上限。准备 context 另加编码大小 3 倍；配置写入保守核旧镜像/新正文低于 64MiB。80/90/70% 告警/停采/恢复，并要求 512MiB 卷余量及预留；不使用 max_page_count 设额度。普通存储故障暂停采集，须有界写健康探针成功且容量恢复后才继续；这不解除下述日志故障锁存。
 
 维护以有限批次前进游标扫描，保护 pending/不完整/有引用轮，后面的合格轮不会被旧 pending 饿死。实际每 60 秒 worker 分支在每个合格 DELETE 事务前，重核当前物理占用/卷余量、完整旧页 journal 上界、4 轮在途、维护和系统预留。cleanup 后，在独立的增量 vacuum 事务前再次读取预算；预算不足则延期，不将两个阶段宣称为整体原子。每批最多扫描 8 个候选 cycle、回收 64 页；失败或 busy 事务通过 rollback/drop 释放。私有 cfg(test) 覆盖交叠引用/不完整轮、两处预算边界、真实文件大小限制 I/O 失败和有效维护 hot journal 的 SIGKILL/重开；这些 hook 和 ACK 种子不进入产品/validation 构建。
 
@@ -33,7 +41,7 @@ sentinel/staging 存在即拒绝，坏凭据不降级；末次目录 fsync 失�
 
 ## SQLite 3.46.0 适用性
 
-新 v3 投递表为 `delivery_settings`、`delivery_cycles`、`delivery_parts`、`delivery_batches`、`delivery_receipts`、`delivery_events`。设置 CAS 不重写采集 context。冻结请求绑定完整轮原材料及固定片；未决/unknown/父依赖通过引用保护。只有严格回执在同 runtime 事务更新 receipt/parts/sample ACK/引用，原 payload/manifest/context、SHA 与源序号不改。确认整轮清理先在原保留事务中删除无依赖投递元数据，再删除样本。请求、回执、元数据及 journal 计入物理预算，另保留 32 MiB ACK 恢复空间。独立单 worker 与共享 HTTP 许可保持单在途；PLC/组轮转持久保存，重试采用单调 deadline，并在重开按 1–300 秒重建。GET 只写有界读取诊断。
+v3 的 `delivery_settings`、`delivery_cycles`、`delivery_parts`、`delivery_batches`、`delivery_receipts`、`delivery_events` 保留为 v1 历史。runtime4 新增 `sample_upload_settings`、`sample_uploads`、`sample_upload_source_blocks`、`sample_upload_attempts` 和 `sample_upload_rebindings`；每条 v2 冻结记录保留目标、原 UTF-8 正文、摘要及请求身份。匹配有效回执与 v2 状态同事务提交；unknown 和需处理记录持续受保护。单 worker 有界交替选择最老与最新样本；暂停阻止新派发，在途响应可继续收尾。请求、回执、元数据及 journal 计入物理预算，另保留 32 MiB ACK 恢复空间。provider/MySQL 故障矩阵及完整恢复检查仍按 DAA-010 待完成。
 
 下面的历史适用性说明不证明 r1 的 hot-journal 恢复；本次真实 ACK 崩溃在 RO preflight 失败，继续作为独立阻碍保留。
 
@@ -64,7 +72,7 @@ Point.name为ASCII技术名，sourcePath原路径与稳定ID分开；唯一可�
 
 ## DAA-007 新空时间合同
 
-只对新空profile完整CREATE v2，schema_migrations直接记录version2及上海applied_at；不运行旧库ALTER/UPDATE/ledger回填。instance_metadata/runtime_metadata均schema_version=2且time_profile固定`asia-shanghai-rfc3339-ms-v1`；samples/样本payload/manifest=2，configuration_revisions/contexts与其JSON=1，history/raw等IPC envelope保持1。目录名local-acquisition-v1只作定位。
+DAA-007 基线只对新空 profile 完整 CREATE v2，schema_migrations 当时记录 version2 及上海 applied_at；不运行旧库 ALTER/UPDATE/ledger 回填。基线 instance_metadata/runtime_metadata 均 schema_version=2；time_profile 固定 `asia-shanghai-rfc3339-ms-v1`，samples/样本 payload/manifest=2，configuration_revisions/contexts 与其 JSON=1，history/raw 等 IPC envelope 保持 1。目录名 local-acquisition-v1 只作定位。
 
 此历史 v2 规则继续用于 unsealed profile：preflight 只探测本次显式 profile 的头/WAL、RO 元数据、身份/时间与原文件摘要，不使用 immutable。旧 UTC/未知/缺失/不匹配在业务写入前拒绝；锁后拒绝可留锁文件。r2 唯一新增的新 sealed 精确776例外与完整后检见上文，不授权旧 profile 恢复或补封。
 

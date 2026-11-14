@@ -9,6 +9,7 @@
 | Document | Purpose |
 | --- | --- |
 | [Multi-Project Development Guide](multi-project-pm.md) | Durable boundaries and governance guidance for Core, reusable modules, and project repositories. |
+| [Acquisition data module guide](acquisition-data-guide.zh-CN.md) | Chinese guide to source registration, sample reporting, backend storage and reads for DAA and third parties. |
 | [Generic Plan/Performance task workflow discussion](generic-task-workflow-discussion.md) · [中文](generic-task-workflow-discussion.zh-CN.md) | Discussion baseline, proposals and open questions for MES → CA/FF → PLC → DAA → SMA → Performance → Plan, with workflow/state/ER-style diagrams, project-agreed PLC eligibility, fields, pages and API examples; not an implementation spec or published contract. |
 | [Equipment Status and Process Monitoring Discussion](equipment-status-process-monitoring.md) · [中文](equipment-status-process-monitoring.zh-CN.md) | ARCH-OBS-001 r6 review guide to the two value tables and the flow from SMA or third-party submission to storage and display, including [which fields can be omitted or null](equipment-status-process-monitoring.md#third-party-ingest). |
 | [AW Whitepaper and Roadmap](AIIS_AW_Whitepaper_Roadmap_v0.4.md) | Roles and phased direction; ARCH-AW-008 aligns the facts-to-business lifecycle without authorizing software. |

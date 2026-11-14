@@ -1,9 +1,13 @@
 //! 全轮事实、源序号、manifest和pending同事务提交；有界历史只返回原持久字节。
+#[cfg(test)]
 use super::delivery::{db_now, event, Frozen};
 use super::{sql_error, Stores};
+#[cfg(test)]
+use crate::domain::facts_wire::{Batch, Parent, RECEIPT_MAX};
+#[cfg(test)]
 use crate::domain::{
     facts_canonical as pf,
-    facts_wire::{text, time, Batch, Parent, RECEIPT_MAX},
+    facts_wire::{text, time},
 };
 use crate::domain::{
     local_configuration::{id, LocalResult},
@@ -12,10 +16,25 @@ use crate::domain::{
 };
 use rusqlite::{params, OptionalExtension};
 use serde_json::{json, Value};
+#[cfg(test)]
 use std::collections::BTreeSet;
 impl Stores {
-    pub fn commit_cycle(&mut self, mut input: CycleInput) -> LocalResult<Value> {
+    #[cfg(test)]
+    pub fn commit_cycle(&mut self, input: CycleInput) -> LocalResult<Value> {
+        let reporting = self.reporting_identity(&input.plc_id)?;
+        self.commit_cycle_with_reporting(input, reporting)
+    }
+
+    pub fn commit_cycle_with_reporting(
+        &mut self,
+        mut input: CycleInput,
+        reporting: Option<crate::domain::sample_upload::ReportingIdentity>,
+    ) -> LocalResult<Value> {
         use crate::domain::business_time;
+        let version: u32 = self
+            .runtime
+            .query_row("PRAGMA user_version", [], |r| r.get(0))
+            .map_err(sql_error)?;
         input.started_at = business_time::normalize(&input.started_at)?;
         input.finished_at = business_time::normalize(&input.finished_at)?;
         for points in input.points.values_mut() {
@@ -129,7 +148,11 @@ impl Stores {
             reads: input.reads,
         };
         let raw_manifest = encode(&manifest)?;
-        if raw_manifest.len() + packages.iter().map(|(_, p, _)| p.len()).sum::<usize>() > 512 * 1024
+        let total = raw_manifest.len() + packages.iter().map(|(_, p, _)| p.len()).sum::<usize>();
+        if (version == 4
+            && (total > 4 * 1024 * 1024
+                || packages.iter().any(|(_, p, _)| p.len() > 2 * 1024 * 1024)))
+            || (version != 4 && total > 512 * 1024)
         {
             return Err("encoding_budget".into());
         }
@@ -169,6 +192,9 @@ impl Stores {
             ],
         )
         .map_err(sql_error)?;
+        if version == 4 {
+            tx.execute("INSERT INTO reporting_cycles(cycle_id,instance_id,plc_id,source_generation) VALUES(?1,?2,?3,?4)", params![cycle, reporting.as_ref().map(|s| &s.instance_id), reporting.as_ref().map(|s| &s.plc_id), reporting.as_ref().map(|s| &s.source_generation)]).map_err(sql_error)?;
+        }
         for (s, raw, hash) in packages {
             tx.execute("INSERT INTO samples(id,cycle_id,db_number,plc_id,group_id,source_seq,revision,quality,saved_at,schema_version,payload,sha256,payload_bytes) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,2,?10,?11,?12)",params![s.sample_id,cycle,s.db_number,s.plc_id,s.group_id,seq,s.revision,quality,saved,raw,hash,raw.len() as i64]).map_err(sql_error)?;
             tx.execute(
@@ -248,7 +274,7 @@ impl Stores {
             .runtime
             .query_row(
                 "SELECT manifest,sha256 FROM collection_cycles WHERE id=?1",
-                [cycle],
+                [&cycle],
                 |r| Ok((r.get(0)?, r.get(1)?)),
             )
             .map_err(sql_error)?;
@@ -267,7 +293,16 @@ impl Stores {
         if context_offset > context_bytes || !context.is_char_boundary(context_offset) {
             return Err("query_limits".into());
         }
-        let available = (512usize * 1024)
+        let version: u32 = self
+            .runtime
+            .query_row("PRAGMA user_version", [], |r| r.get(0))
+            .map_err(sql_error)?;
+        let detail_budget = if version == 4 {
+            3usize * 1024 * 1024
+        } else {
+            512usize * 1024
+        };
+        let available = detail_budget
             .saturating_sub(raw.len() + manifest.len() + 4096)
             .min(64 * 1024);
         if available < 4 {
@@ -279,7 +314,7 @@ impl Stores {
         }
         let chunk = &context[context_offset..end];
         let next = if end < context_bytes { Some(end) } else { None };
-        let state: String = self
+        let mut state: String = self
             .runtime
             .query_row(
                 "SELECT state FROM sample_delivery WHERE sample_id=?1",
@@ -287,8 +322,19 @@ impl Stores {
                 |r| r.get(0),
             )
             .map_err(sql_error)?;
+        if version == 4 {
+            let local_only: bool = self.runtime.query_row("SELECT EXISTS(SELECT 1 FROM reporting_cycles WHERE cycle_id=?1 AND instance_id IS NULL)", [&cycle], |r| r.get(0)).map_err(sql_error)?;
+            if local_only {
+                state = "local_only".into();
+            }
+        }
+        let upload = if version == 4 {
+            self.runtime.query_row("SELECT state,attempt,last_error,body_sha,origin,dispatched_at,acknowledged_at,receipt_sha,instance_id,plc_id,source_generation FROM sample_uploads WHERE sample_id=?1", [id], |r| Ok(json!({"protocol":"plc-facts/v2","state":r.get::<_,String>(0)?,"attempt":r.get::<_,u32>(1)?,"lastError":r.get::<_,Option<String>>(2)?,"bodySha256":r.get::<_,Option<String>>(3)?,"origin":r.get::<_,Option<String>>(4)?,"dispatchedAt":r.get::<_,Option<String>>(5)?,"acknowledgedAt":r.get::<_,Option<String>>(6)?,"receiptSha256":r.get::<_,Option<String>>(7)?,"instanceId":r.get::<_,String>(8)?,"plcId":r.get::<_,String>(9)?,"sourceGeneration":r.get::<_,String>(10)?}))).optional().map_err(sql_error)?
+        } else {
+            None
+        };
         Ok(
-            json!({"schemaVersion":1,"payload":raw,"sha256":hash,"manifest":manifest,"manifestSha256":mhash,"context":chunk,"contextOffset":context_offset,"contextNextOffset":next,"contextBytes":context_bytes,"contextSha256":chash,"deliveryState":state,"deliveries":self.sample_deliveries(id)?}),
+            json!({"schemaVersion":1,"payload":raw,"sha256":hash,"manifest":manifest,"manifestSha256":mhash,"context":chunk,"contextOffset":context_offset,"contextNextOffset":next,"contextBytes":context_bytes,"contextSha256":chash,"deliveryState":state,"deliveries":self.sample_deliveries(id)?,"sampleUpload":upload}),
         )
     }
     pub fn logs(&self, cursor: i64, limit: u32) -> LocalResult<Value> {
@@ -306,6 +352,10 @@ impl Stores {
         Ok(json!({"items":rows,"cursorExpired":false}))
     }
     pub fn cleanup_acknowledged(&mut self, days: u32, quota: u64) -> LocalResult<usize> {
+        let version: u32 = self
+            .runtime
+            .query_row("PRAGMA user_version", [], |r| r.get(0))
+            .map_err(sql_error)?;
         let clock: String = self
             .runtime
             .query_row(crate::domain::business_time::SQL_NOW, [], |r| r.get(0))
@@ -318,6 +368,11 @@ impl Stores {
         let mut removed = 0;
         for (cursor, cycle, expected) in ids {
             self.cleanup_cursor = cursor;
+            let local_only = if version == 4 {
+                self.runtime.query_row("SELECT EXISTS(SELECT 1 FROM reporting_cycles WHERE cycle_id=?1 AND instance_id IS NULL)", [&cycle], |r| r.get::<_,bool>(0)).map_err(sql_error)?
+            } else {
+                false
+            };
             let samples = self
                 .runtime
                 .prepare("SELECT id FROM samples WHERE cycle_id=?1")
@@ -334,7 +389,11 @@ impl Stores {
                 let state: Option<String> = self
                     .runtime
                     .query_row(
-                        "SELECT state FROM sample_delivery WHERE sample_id=?1",
+                        if version == 4 {
+                            "SELECT state FROM sample_uploads WHERE sample_id=?1"
+                        } else {
+                            "SELECT state FROM sample_delivery WHERE sample_id=?1"
+                        },
                         [s],
                         |r| r.get(0),
                     )
@@ -348,13 +407,24 @@ impl Stores {
                         |r| r.get(0),
                     )
                     .map_err(sql_error)?;
-                if state.as_deref() != Some("acknowledged") || refs != 0 {
+                if (if local_only {
+                    state.is_some()
+                } else {
+                    state.as_deref() != Some("acknowledged")
+                }) || refs != 0
+                {
                     eligible = false;
                     break;
                 }
             }
             if !eligible {
                 continue;
+            }
+            if version == 4 {
+                let old_evidence: bool = self.runtime.query_row("SELECT EXISTS(SELECT 1 FROM delivery_cycles WHERE cycle_id=?1) OR EXISTS(SELECT 1 FROM delivery_parts WHERE cycle_id=?1)", [&cycle], |r| r.get(0)).map_err(sql_error)?;
+                if old_evidence {
+                    continue;
+                }
             }
             self.admit_maintenance(quota)?;
             let delivery = self.delivery_available()?;
@@ -363,11 +433,21 @@ impl Stores {
                 super::delivery::cleanup_cycle(&tx, &cycle)?;
             }
             for s in &samples {
+                if version == 4 && !local_only {
+                    let deleted = tx.execute("DELETE FROM sample_uploads WHERE sample_id=?1 AND state='acknowledged'", [s]).map_err(sql_error)?;
+                    if deleted != 1 {
+                        return Err("delivery_cleanup_referenced".into());
+                    }
+                }
                 tx.execute("DELETE FROM sample_delivery WHERE sample_id=?1", [s])
                     .map_err(sql_error)?;
             }
             tx.execute("DELETE FROM samples WHERE cycle_id=?1", [&cycle])
                 .map_err(sql_error)?;
+            if version == 4 {
+                tx.execute("DELETE FROM reporting_cycles WHERE cycle_id=?1", [&cycle])
+                    .map_err(sql_error)?;
+            }
             tx.execute("DELETE FROM collection_cycles WHERE id=?1", [cycle])
                 .map_err(sql_error)?;
             #[cfg(test)]
@@ -405,6 +485,7 @@ impl Stores {
 
 // Reliable receipts and sample delivery state share one runtime transaction.
 impl Stores {
+    #[cfg(test)]
     pub fn commit_delivery(
         &mut self,
         frozen: &Frozen,
@@ -507,6 +588,7 @@ impl Stores {
         )?;
         Ok(())
     }
+    #[cfg(test)]
     pub fn reject_delivery(
         &mut self,
         frozen: &Frozen,

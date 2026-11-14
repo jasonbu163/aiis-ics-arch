@@ -33,7 +33,8 @@ impl LocalEngine {
         } else {
             view.draft
         };
-        if !validate(&candidate).is_empty() {
+        let runtime_version = self.storage.call(true, |s| s.runtime_version())?;
+        if !validate_for_runtime(&candidate, runtime_version).is_empty() {
             return Err("configuration_invalid".into());
         }
         // Fixture coverage is checked only when this PLC is explicitly connected.

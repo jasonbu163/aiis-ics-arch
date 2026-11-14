@@ -20,6 +20,31 @@ use std::{
     thread,
     time::{Duration, Instant},
 };
+#[cfg(test)]
+static STARTUP_CONNECT_FAILURES: std::sync::OnceLock<Mutex<BTreeMap<String, usize>>> =
+    std::sync::OnceLock::new();
+#[cfg(test)]
+pub(crate) fn fail_startup_connections(id: &str, count: usize) {
+    STARTUP_CONNECT_FAILURES
+        .get_or_init(Default::default)
+        .lock()
+        .unwrap()
+        .insert(id.into(), count);
+}
+#[cfg(test)]
+fn startup_connect_failure(id: &str) -> bool {
+    let mut faults = STARTUP_CONNECT_FAILURES
+        .get_or_init(Default::default)
+        .lock()
+        .unwrap();
+    match faults.get_mut(id) {
+        Some(count) if *count > 0 => {
+            *count -= 1;
+            true
+        }
+        _ => false,
+    }
+}
 #[derive(Clone)]
 pub(crate) struct Loaded {
     pub revision: String,
@@ -56,6 +81,7 @@ pub(crate) struct LocalEngine {
     >,
     pub name_preview: Mutex<Option<crate::domain::point_naming::CachedNames>>,
     pub offset_preview: Mutex<Option<(String, String, String, Instant)>>,
+    pub startup_errors: Mutex<BTreeMap<String, String>>,
     #[cfg(any(test, feature = "local-validation"))]
     pub fixture: Option<Arc<crate::infrastructure::local_fixture::FixtureSet>>,
 }
@@ -66,6 +92,7 @@ struct Actor {
 pub(crate) enum Action {
     Connection(bool),
     Collection(bool),
+    StartupCollection,
     Test,
     Diagnose(String),
 }
@@ -125,6 +152,7 @@ impl LocalEngine {
             log,
             import_preview: Mutex::new(None),
             offset_preview: Mutex::new(None),
+            startup_errors: Mutex::new(BTreeMap::new()),
             name_preview: Mutex::new(None),
             active_io: Mutex::new(BTreeMap::new()),
             cached_snapshot: Mutex::new(None),
@@ -163,7 +191,8 @@ impl LocalEngine {
         let _ = self.storage.call(false, move |s| s.event(&e, &r, &v));
     }
     pub fn install(self: &Arc<Self>, loaded: Loaded) -> LocalResult<()> {
-        if !validate(&loaded.configuration).is_empty() {
+        let runtime_version = self.storage.call(true, |s| s.runtime_version())?;
+        if !validate_for_runtime(&loaded.configuration, runtime_version).is_empty() {
             return Err("configuration_invalid".into());
         }
         // Fixture coverage is checked only when this PLC is explicitly connected.
@@ -251,6 +280,7 @@ impl LocalEngine {
             let message = match action {
                 "connection" => Action::Connection(desired),
                 "collection" => Action::Collection(desired),
+                "startup_collection" => Action::StartupCollection,
                 "test" => Action::Test,
                 "diagnose" => Action::Diagnose(point.clone().ok_or("point_missing")?),
                 _ => return Err("operation_invalid".into()),
@@ -371,6 +401,10 @@ fn actor_loop(
     let mut capacity_paused = false;
     let mut storage_fault = false;
     let mut probe_due = Instant::now();
+    let mut startup_pending = false;
+    let mut startup_owned = false;
+    let mut startup_connection_owned = false;
+    let mut startup_probe_due = Instant::now();
     loop {
         if engine.stopped.load(Ordering::SeqCst) {
             break;
@@ -380,11 +414,29 @@ fn actor_loop(
             break;
         }
         if let Some(Message::Install(new, reply)) = message {
+            // 旧启动任务不得在之后激活的配置上继续发起采集。
             let p = new.configuration.plcs.iter().find(|p| p.id == id).cloned();
+            let disconnect = p
+                .as_ref()
+                .map(|p| p.endpoint() != plc.endpoint() || !p.enabled)
+                .unwrap_or(true);
+            if startup_owned
+                && (startup_pending || disconnect || (startup_connection_owned && !state.connected))
+            {
+                state.desired_collection = false;
+                startup_pending = false;
+                startup_owned = false;
+            }
+            if startup_connection_owned && (!state.connected || disconnect) {
+                state.desired_connection = false;
+                startup_connection_owned = false;
+            }
             if let Some(p) = p {
-                if p.endpoint() != plc.endpoint() || !p.enabled {
+                if disconnect {
                     transport.disconnect();
                     state.connected = false;
+                    state.phase = "disconnected".into();
+                    state.admission = "disconnected".into();
                 }
                 plc = p;
                 loaded = new;
@@ -476,20 +528,28 @@ fn actor_loop(
                         } else {
                             "s7"
                         };
-                        let result = engine
-                            .io(&id, u64::from(plc.deadline_ms), || {
-                                scheduler::collect(
-                                    &loaded.configuration,
-                                    &plc,
-                                    &groups[i].group,
-                                    &loaded.revision,
-                                    &mut *transport,
-                                    origin,
-                                )
-                            })
-                            .and_then(|cycle| {
-                                engine.storage.call(false, move |s| s.commit_cycle(cycle))
-                            });
+                        let source_plc = id.clone();
+                        let reporting = engine
+                            .storage
+                            .call(true, move |s| s.reporting_identity(&source_plc));
+                        let result = reporting.and_then(|reporting| {
+                            engine
+                                .io(&id, u64::from(plc.deadline_ms), || {
+                                    scheduler::collect(
+                                        &loaded.configuration,
+                                        &plc,
+                                        &groups[i].group,
+                                        &loaded.revision,
+                                        &mut *transport,
+                                        origin,
+                                    )
+                                })
+                                .and_then(|cycle| {
+                                    engine.storage.call(false, move |s| {
+                                        s.commit_cycle_with_reporting(cycle, reporting)
+                                    })
+                                })
+                        });
                         match result {
                             Ok(_) => {
                                 state.saved_cycles += 1;
@@ -536,7 +596,14 @@ fn actor_loop(
                 match action {
                     Action::Connection(want) => {
                         state.desired_connection = want;
+                        // 显式连接意图独立于启动采集，不由暂停采集撤销。
+                        startup_connection_owned = false;
                         if !want {
+                            if startup_owned {
+                                startup_pending = false;
+                                startup_owned = false;
+                                state.desired_collection = false;
+                            }
                             state.phase = "disconnecting".into();
                             engine
                                 .states
@@ -600,6 +667,12 @@ fn actor_loop(
                                 return Err("capacity_paused".into());
                             }
                         }
+                        if !want && startup_connection_owned && !state.connected {
+                            state.desired_connection = false;
+                            startup_connection_owned = false;
+                        }
+                        startup_pending = false;
+                        startup_owned = false;
                         state.desired_collection = want;
                         state.phase = if want {
                             "collecting"
@@ -611,6 +684,23 @@ fn actor_loop(
                         .into();
                         state.admission = if want { "ready" } else { "stopped" }.into();
                         Ok(json!({"desiredCollection":want}))
+                    }
+                    Action::StartupCollection => {
+                        if !plc.enabled || !engine.bootstrap.read_allowed {
+                            return Err("read_gate_closed".into());
+                        }
+                        if groups.is_empty() {
+                            return Err("members_missing".into());
+                        }
+                        if !state.desired_connection {
+                            startup_connection_owned = true;
+                        }
+                        state.desired_connection = true;
+                        startup_owned = true;
+                        startup_pending = true;
+                        reconnect = Instant::now();
+                        startup_probe_due = Instant::now();
+                        Ok(json!({"startupPending":true}))
                     }
                     Action::Test => {
                         if last_diag.elapsed() < Duration::from_secs(1) {
@@ -704,7 +794,13 @@ fn actor_loop(
             && Instant::now() >= reconnect
             && !engine.gate.lock().unwrap().closed
         {
-            match engine.io(&id, 1000, || transport.connect(&plc)) {
+            match engine.io(&id, 1000, || {
+                #[cfg(test)]
+                if startup_connect_failure(&id) {
+                    return Err("connection_failed".into());
+                }
+                transport.connect(&plc)
+            }) {
                 Ok(()) => {
                     state.connected = true;
                     state.phase = "connected".into();
@@ -720,6 +816,37 @@ fn actor_loop(
                     reconnect =
                         Instant::now() + Duration::from_millis(seconds * 1000 + seconds * jitter);
                     attempt += 1;
+                }
+            }
+        }
+        if startup_pending && state.connected && Instant::now() >= startup_probe_due {
+            startup_probe_due = Instant::now() + Duration::from_secs(1);
+            let quota = loaded.configuration.storage.quota_bytes;
+            let admission = engine.storage.call(true, move |s| s.capacity(quota));
+            match admission {
+                Ok(cap)
+                    if !engine.gate.lock().unwrap().closed
+                        && !storage_fault
+                        && crate::infrastructure::local_store::capacity::admit(
+                            &cap,
+                            quota,
+                            capacity_paused,
+                        ) =>
+                {
+                    state.desired_collection = true;
+                    state.phase = "collecting".into();
+                    state.admission = "ready".into();
+                    state.error = None;
+                    startup_pending = false;
+                    engine.event("startup_collection_started", &id, "running");
+                }
+                Ok(_) => {
+                    state.admission = "capacity_paused".into();
+                    state.error = Some("capacity_paused".into());
+                }
+                Err(error) => {
+                    state.error = Some(error);
+                    state.admission = "storage_fault".into();
                 }
             }
         }

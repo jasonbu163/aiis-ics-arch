@@ -22,6 +22,6 @@
 
 Point.name为ASCII技术名，sourcePath原路径与稳定ID分开；唯一可选JSON nameMode为缺失legacy或pending/auto_path/auto_address/manual。legacy读取零写回，转换需明确勾选及预览。pending为空且停用，既有地址确认原子成名。唯一owner持有选择/预览/token，私有分页PointNamePreviewDialog及原编辑/offset弹窗展示差异；无第二owner/DDL/key。普通save不能去除/伪造mode或绕过改名预览。历史JSON/receipt原bytes保持，旧binary降级另核。
 
-DAA-007由`console/time.ts`统一历史、陈旧快照及最老pending的上海墙上时间/秒显示。历史表和样本点位结果表消费`console/tableWidths.ts`，分别按稳定字段key设置最小宽、本机记忆与恢复，不更改业务配置/版本。原JSON精度和SHA保留。不支持的时间profile保留无engine原生诊断壳并显示具体bootstrap拒绝。新profile兼容边界及Owner原生步骤见[联调手册](../../JOINT_TEST_GUIDE.zh-CN.md)。
+DAA-007由`console/time.ts`统一历史、陈旧快照及最老pending的上海墙上时间/秒显示。历史表和样本点位结果表消费`console/tableWidths.ts`，分别按稳定字段key设置最小宽、本机记忆与恢复，不更改业务配置/版本。原JSON精度和SHA保留。不支持的时间profile保留无engine原生诊断壳并显示具体bootstrap拒绝。新profile兼容边界及Owner原生步骤见[联调手册](../../USER_GUIDE.zh-CN.md)。
 
 “查看样本”依次展示只读摘要、点位结果表（默认每页20条，可选10/20/50）及默认折叠的样本/manifest/配置JSON。`LocalSampleDetail.vue`从冻结配置上下文取名称，从原始点位事实取值、地址、质量和时间，不读取当前草稿补写历史。上报pending显示为“待上报”，与采集质量分开。`console/sampleDetails.ts`仅格式化JSON字符串以外的空白，保留数字词法及转义；显示的SHA-256仍对应原始字符串。展开后才渲染JSON正文。展示辅助不调用IPC、不写持久化数据，也不确认样本上传。

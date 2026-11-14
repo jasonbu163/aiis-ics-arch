@@ -1,7 +1,10 @@
 //! 本地IPC v1薄adapter：有名白名单命令、camelCase DTO、线程卸载；无SQL/驱动/调度实现。
 use crate::{
     config::local_bootstrap::Bootstrap,
-    domain::{local_configuration::*, local_runtime::HistoryQuery},
+    domain::{
+        local_configuration::*,
+        local_runtime::{HistoryQuery, StartupSettings},
+    },
     services::local_supervisor::LocalEngine,
 };
 use serde::Deserialize;
@@ -158,6 +161,10 @@ pub(crate) fn dispatch(
             )
         }
         "daa_get_local_snapshot" => engine.snapshot(),
+        "daa_get_startup_settings" => engine.startup_settings(),
+        "daa_save_startup_settings" => {
+            engine.save_startup_settings(parse::<StartupSettings>(request)?)
+        }
         "daa_list_history" => engine.history(parse::<HistoryQuery>(request)?),
         "daa_get_sample" => {
             let r: Sample = parse(request)?;
@@ -316,6 +323,20 @@ pub(crate) async fn daa_get_local_snapshot(
     request: Value,
 ) -> IpcResult {
     invoke(state, "daa_get_local_snapshot", request).await
+}
+#[tauri::command]
+pub(crate) async fn daa_get_startup_settings(
+    state: tauri::State<'_, LocalState>,
+    request: Value,
+) -> IpcResult {
+    invoke(state, "daa_get_startup_settings", request).await
+}
+#[tauri::command]
+pub(crate) async fn daa_save_startup_settings(
+    state: tauri::State<'_, LocalState>,
+    request: Value,
+) -> IpcResult {
+    invoke(state, "daa_save_startup_settings", request).await
 }
 #[tauri::command]
 pub(crate) async fn daa_list_history(

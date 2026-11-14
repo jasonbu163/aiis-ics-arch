@@ -21,7 +21,7 @@ fn config_empty(c: &Connection) -> LocalResult<bool> {
     if draft != Configuration::default() {
         return Ok(false);
     }
-    for sql in ["SELECT count(*) FROM configuration_revisions","SELECT count(*) FROM activation_intents","SELECT count(*) FROM active_selection WHERE active IS NOT NULL OR previous IS NOT NULL","SELECT count(*) FROM source_documents WHERE substr(name,1,25) != '__daa_yaml_migration_v1__'"] {
+    for sql in ["SELECT count(*) FROM configuration_revisions","SELECT count(*) FROM activation_intents","SELECT count(*) FROM active_selection WHERE active IS NOT NULL OR previous IS NOT NULL","SELECT count(*) FROM source_documents WHERE substr(name,1,25) != '__daa_yaml_migration_v1__' AND NOT(id='0daa0150-0000-4000-8000-000000000001' AND name='__daa_startup_settings_v1__')"] {
         let n:i64=c.query_row(sql,[],|r|r.get(0)).map_err(sql_error)?;if n!=0{return Ok(false);}
     }
     Ok(true)

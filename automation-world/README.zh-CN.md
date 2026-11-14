@@ -30,4 +30,4 @@ DAA/SMA只读取自身根`.env`或显式绝对`DAA_ENV_FILE` / `SMA_ENV_FILE`，
 
 CA 预览使用 `pnpm preview --strictPort`，在保留冻结源码的前提下使固定14190端口冲突时失败。DAA/SMA的dev/preview在自身Vite配置中固定strictPort。
 
-DAA按普通`pnpm tauri dev`进入SQLite新版；[2026-10-30最终验收](data-acquisition-agent/plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2)确认阶段B在本次受控DS联调范围完成。DAA-003一次性YAML迁入现为历史能力，DAA-007已退出普通迁入链，新空profile保持空配置，私有回执及历史保留。业务配置由UI+SQLite管理。实际边界见[DAA README](data-acquisition-agent/README.zh-CN.md)，步骤见[联调手册](data-acquisition-agent/JOINT_TEST_GUIDE.zh-CN.md)。历史证据限制和来源未明事项继续跟踪，阶段C、自动启动策略、Backend/SMA及真实现场另项。
+DAA按普通`pnpm tauri dev`进入SQLite新版；[2026-10-30最终验收](data-acquisition-agent/plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2)确认阶段B在本次受控DS联调范围完成。DAA-003一次性YAML迁入现为历史能力，DAA-007已退出普通迁入链，新空profile保持空配置，私有回执及历史保留。业务配置由UI+SQLite管理。实际边界见[DAA README](data-acquisition-agent/README.zh-CN.md)，步骤见[联调手册](data-acquisition-agent/USER_GUIDE.zh-CN.md)。历史证据限制和来源未明事项继续跟踪，阶段C、自动启动策略、Backend/SMA及真实现场另项。

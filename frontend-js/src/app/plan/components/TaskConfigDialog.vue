@@ -1,10 +1,22 @@
 <!-- 两个业务入口共同维护共享定义及当前模块本地定义。 -->
 <template>
-  <el-dialog v-model="open" :title="tr('fieldSettings')" width="92%" class="standard-form-dialog" @open="load">
-    <p>{{ tr('configVersion') }}: {{ config?.fieldConfigVersion }} / {{ tr('revision') }}: {{ config?.configRevision }}</p>
-    <div class="table-scroll">
-      <el-table :data="rows" border stripe class="vibe-table">
-        <el-table-column :label="tr('scope')" width="160">
+  <el-dialog v-model="open" :title="tr('fieldSettings')" width="calc(100% - 32px)" align-center class="standard-form-dialog task-field-config-dialog" @open="load">
+    <div class="config-toolbar">
+      <span>{{ tr('configVersion') }}: {{ config?.fieldConfigVersion }} / {{ tr('revision') }}: {{ config?.configRevision }}</span>
+      <el-button @click="columns.reset">{{ tr('resetConfigWidths') }}</el-button>
+    </div>
+    <p class="config-hint">{{ tr('configHint') }}</p>
+    <div class="config-table-wrap">
+      <el-table :key="columns.version.value" :data="rows" border stripe scrollbar-always-on max-height="min(52vh, 560px)" class="vibe-table config-table" @header-dragend="columns.onHeaderDragEnd">
+        <el-table-column prop="name" :label="tr('fieldName')" :width="columns.widths.name" :min-width="columnDefinitions.name.minWidth" :fixed="isNarrow ? false : 'left'">
+          <template #default="{ row }">
+            <div class="field-key-cell">
+              <el-input v-model="row.name" :disabled="!row._new" :title="row.name || undefined" />
+              <el-button v-if="row._new" link type="danger" @click="removeDraft(row)">{{ tr('removeDraft') }}</el-button>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="scope" :label="tr('scope')" :width="columns.widths.scope" :min-width="columnDefinitions.scope.minWidth">
           <template #default="{ row }">
             <el-select v-model="row.scope" :disabled="!row._new">
               <el-option :label="tr('shared')" value="shared_sync" />
@@ -12,29 +24,31 @@
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column :label="tr('slot')" width="95"><template #default="{ row }"><el-input-number v-model="row.slotNo" :min="1" :max="100" :disabled="!row._new" controls-position="right" /></template></el-table-column>
-        <el-table-column :label="tr('fieldName')" min-width="150"><template #default="{ row }"><el-input v-model="row.name" :disabled="!row._new" /></template></el-table-column>
-        <el-table-column :label="tr('type')" width="125"><template #default="{ row }"><el-select v-model="row.type" :disabled="!row._new"><el-option v-for="type in types" :key="type" :value="type" :label="tr(`types.${type}`)" /></el-select></template></el-table-column>
-        <el-table-column :label="tr('labelZh')" min-width="150"><template #default="{ row }"><el-input v-model="row.labels['zh-CN']" /></template></el-table-column>
-        <el-table-column :label="tr('labelEn')" min-width="150"><template #default="{ row }"><el-input v-model="row.labels['en-US']" /></template></el-table-column>
-        <el-table-column :label="tr('unit')" width="110"><template #default="{ row }"><el-input v-model="row.unit" :disabled="!row._new" /></template></el-table-column>
-        <el-table-column :label="tr('owner')" width="170"><template #default="{ row }"><el-select v-model="row.performanceOwner" :disabled="row.scope === 'plan_local'" clearable><el-option v-for="owner in owners" :key="owner" :value="owner" :label="tr(`owners.${owner}`)" /></el-select></template></el-table-column>
-        <el-table-column v-for="name in boolNames" :key="name" :label="tr(name)" width="105"><template #default="{ row }"><el-checkbox v-model="row[name]" /></template></el-table-column>
-        <el-table-column :label="tr('columnOrder')" width="130"><template #default="{ row }"><el-input-number v-model="row[orderName]" :min="0" :max="65535" controls-position="right" /></template></el-table-column>
+        <el-table-column prop="slotNo" :label="tr('slot')" :width="columns.widths.slotNo" :min-width="columnDefinitions.slotNo.minWidth"><template #default="{ row }"><el-input-number v-model="row.slotNo" :min="1" :max="100" :disabled="!row._new" controls-position="right" /></template></el-table-column>
+        <el-table-column prop="type" :label="tr('type')" :width="columns.widths.type" :min-width="columnDefinitions.type.minWidth"><template #default="{ row }"><el-select v-model="row.type" :disabled="!row._new"><el-option v-for="type in types" :key="type" :value="type" :label="tr(`types.${type}`)" /></el-select></template></el-table-column>
+        <el-table-column prop="labelZh" :label="tr('labelZh')" :width="columns.widths.labelZh" :min-width="columnDefinitions.labelZh.minWidth"><template #default="{ row }"><el-input v-model="row.labels['zh-CN']" /></template></el-table-column>
+        <el-table-column prop="labelEn" :label="tr('labelEn')" :width="columns.widths.labelEn" :min-width="columnDefinitions.labelEn.minWidth"><template #default="{ row }"><el-input v-model="row.labels['en-US']" /></template></el-table-column>
+        <el-table-column prop="unit" :label="tr('unit')" :width="columns.widths.unit" :min-width="columnDefinitions.unit.minWidth"><template #default="{ row }"><el-input v-model="row.unit" :disabled="!row._new" /></template></el-table-column>
+        <el-table-column prop="performanceOwner" :label="tr('owner')" :width="columns.widths.performanceOwner" :min-width="columnDefinitions.performanceOwner.minWidth"><template #default="{ row }"><el-select v-model="row.performanceOwner" :disabled="row.scope === 'plan_local'" clearable><el-option v-for="owner in owners" :key="owner" :value="owner" :label="tr(`owners.${owner}`)" /></el-select></template></el-table-column>
+        <el-table-column v-for="name in boolNames" :key="name" :prop="name" :label="tr(name)" :width="columns.widths[name]" :min-width="columnDefinitions[name].minWidth"><template #default="{ row }"><el-checkbox v-model="row[name]" /></template></el-table-column>
+        <el-table-column prop="columnOrder" :label="tr('columnOrder')" :width="columns.widths.columnOrder" :min-width="columnDefinitions.columnOrder.minWidth"><template #default="{ row }"><el-input-number v-model="row[orderName]" :min="0" :max="65535" :precision="0" :value-on-clear="null" :placeholder="tr('slotDefault')" controls-position="right" /></template></el-table-column>
       </el-table>
     </div>
     <template #footer>
-      <el-button @click="addRow">{{ tr('addField') }}</el-button>
-      <el-button @click="open = false">{{ $t('common.cancel') }}</el-button>
-      <el-button type="primary" :loading="saving" @click="save">{{ $t('common.save') }}</el-button>
+      <div class="config-footer">
+        <el-button @click="addRow">{{ tr('addField') }}</el-button>
+        <el-button @click="open = false">{{ $t('common.cancel') }}</el-button>
+        <el-button type="primary" :loading="saving" @click="save">{{ $t('common.save') }}</el-button>
+      </div>
     </template>
   </el-dialog>
 </template>
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store/user'
+import { useTableColumnWidths } from '@/utils/tableColumnWidths'
 const props = defineProps({ kind: { type: String, required: true }, api: { type: Object, required: true } })
 const emit = defineEmits(['saved'])
 const { t, te } = useI18n()
@@ -45,7 +59,19 @@ const rows = ref([])
 const original = ref([])
 const saving = ref(false)
 const hydrated = ref(false)
+const isNarrow = ref(false)
+let viewportQuery
+function updateViewport(event) { isNarrow.value = event.matches }
 const user = useUserStore()
+const columnDefinitions = {
+  name:{width:190,minWidth:150}, scope:{width:150,minWidth:120}, slotNo:{width:110,minWidth:90},
+  type:{width:130,minWidth:100}, labelZh:{width:160,minWidth:120}, labelEn:{width:160,minWidth:120},
+  unit:{width:110,minWidth:90}, performanceOwner:{width:170,minWidth:140},
+  enabled:{width:105,minWidth:85}, isNullable:{width:105,minWidth:85}, syncEnabled:{width:105,minWidth:85},
+  planEditable:{width:120,minWidth:95}, performanceEditable:{width:130,minWidth:105},
+  planVisible:{width:105,minWidth:85}, performanceVisible:{width:115,minWidth:95}, columnOrder:{width:160,minWidth:140}
+}
+const columns = useTableColumnWidths(`generic-task.field-settings.${props.kind}`, columnDefinitions)
 const draftKey = `aiis-ics:task-config-draft:${props.kind}:${user.username}`
 function readDraft() { try { return JSON.parse(localStorage.getItem(draftKey)) } catch { return null } }
 function clearDraft() { try { localStorage.removeItem(draftKey) } catch { /* 本机偏好不可用不影响业务。 */ } }
@@ -77,6 +103,11 @@ function addRow() {
     enabled: false, isNullable: false, syncEnabled: false, planEditable: false, performanceEditable: false,
     performanceOwner: props.kind === 'plan' ? null : 'manual', planVisible: false, performanceVisible: false, planOrder: null, performanceOrder: null })
 }
+function removeDraft(row) {
+  if (!row._new) return
+  const index = rows.value.indexOf(row)
+  if (index >= 0) rows.value.splice(index, 1)
+}
 async function save() {
   const fields = ['name','type','unit','enabled','isNullable','syncEnabled','planEditable','performanceEditable','performanceOwner',
     props.kind === 'plan' ? 'planVisible' : 'performanceVisible', orderName.value]
@@ -96,7 +127,38 @@ async function save() {
 }
 watch(rows, value => {
   if (!hydrated.value || !open.value || !config.value) return
-  try { localStorage.setItem(draftKey, JSON.stringify({ version: config.value.fieldConfigVersion, revision: config.value.configRevision, rows: value })) } catch { /* 本机偏好不可用不影响业务。 */ }
+  try {
+    if (JSON.stringify(value) === JSON.stringify(original.value)) localStorage.removeItem(draftKey)
+    else localStorage.setItem(draftKey, JSON.stringify({ version: config.value.fieldConfigVersion, revision: config.value.configRevision, rows: value }))
+  } catch { /* 本机偏好不可用不影响业务。 */ }
 }, { deep: true })
-onMounted(() => { if (user.isAdmin && readDraft()) open.value = true })
+onMounted(() => {
+  if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+    viewportQuery = window.matchMedia('(max-width: 600px)')
+    updateViewport(viewportQuery)
+    viewportQuery.addEventListener('change', updateViewport)
+  }
+  if (user.isAdmin && readDraft()) open.value = true
+})
+onBeforeUnmount(() => viewportQuery?.removeEventListener('change', updateViewport))
 </script>
+
+<style scoped>
+/* 宽表弹窗保留标准外壳，但独立限制尺寸和内部滚动。 */
+:global(.standard-form-dialog.task-field-config-dialog.el-dialog) { max-width: min(1400px, calc(100vw - 32px)); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); display: flex; flex-direction: column; }
+:global(.standard-form-dialog.task-field-config-dialog .el-dialog__header), :global(.standard-form-dialog.task-field-config-dialog .el-dialog__footer) { flex: 0 0 auto; }
+:global(.standard-form-dialog.task-field-config-dialog .el-dialog__body) { min-height: 0; overflow-y: auto; }
+.config-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.config-hint { margin: 12px 0; color: var(--text-secondary); line-height: 1.5; }
+.config-table-wrap { width: 100%; min-width: 0; overflow-x: auto; }
+.config-table :deep(.el-input-number), .config-table :deep(.el-select), .config-table :deep(.el-input) { width: 100%; max-width: 100%; }
+.field-key-cell { display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
+.field-key-cell :deep(.el-button) { align-self: flex-start; }
+.config-footer { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+.config-footer :deep(.el-button + .el-button) { margin-left: 0; }
+@media (max-width: 600px) {
+  :global(.standard-form-dialog.task-field-config-dialog .el-dialog__header) { min-height: 64px; padding: 20px 24px; }
+  :global(.standard-form-dialog.task-field-config-dialog .el-dialog__body) { padding: 16px; }
+  :global(.standard-form-dialog.task-field-config-dialog .el-dialog__footer) { padding: 16px; }
+}
+</style>

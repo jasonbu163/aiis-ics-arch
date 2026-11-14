@@ -218,7 +218,7 @@ The four new Model declarations describe three module-owned permanent minimal re
 
 ## PLC facts owner
 
-[plc_facts](plc_facts/README.md) is an API-only ordinary module (`order=36`) with the `plc-facts-read` permission and v2 sample/read routes. The historical v1 provider and old snapshot/Projection runtime are retired by [ARCH-ACQ-002 r2](../../plans/ARCH-ACQ-002-legacy-projection-retirement/spec.md).
+[plc_facts](plc_facts/README.md) is an API-only ordinary module (`order=36`) with v2 sample and read routes. In the current development stage, callers use the registered write source and the configured PLC/DB read scope without Bearer credentials. The historical v1 provider and old snapshot/Projection runtime are retired by [ARCH-ACQ-002 r2](../../plans/ARCH-ACQ-002-legacy-projection-retirement/spec.md).
 
 
 ## BE010 r2 source boundary

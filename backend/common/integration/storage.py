@@ -5,7 +5,7 @@ import json
 from common.integration.envelope import BUSINESS_TIMEZONE, source_time
 
 SCHEMA_REVISION = "1b3d5f7a9c20"
-ALLOWED_SCHEMA_REVISIONS = (SCHEMA_REVISION, "2c4e6a8b0d12", "3d5f7a9c1e23", "4e6a8b0d2f14", "5f7a9c1e3b25")
+ALLOWED_SCHEMA_REVISIONS = (SCHEMA_REVISION, "2c4e6a8b0d12", "3d5f7a9c1e23", "4e6a8b0d2f14", "5f7a9c1e3b25", "6a8c0e2b4d16", "7b9d1f3a5c7e")
 BASIS_PROFILE = "be010.fixed-basis/v1"
 
 

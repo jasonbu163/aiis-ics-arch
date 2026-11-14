@@ -18,6 +18,112 @@ fn exact_origins() {
 }
 
 #[test]
+fn v2_rejects_oversize_and_url_credentials_before_network() {
+    let http = FactsHttp::new().unwrap();
+    let oversized = "x".repeat(crate::domain::sample_upload::BODY_LIMIT + 1);
+    assert_eq!(
+        http.post_sample("http://127.0.0.1:1", &oversized)
+            .unwrap_err(),
+        "payload_too_large"
+    );
+    assert_eq!(
+        http.post_sample("http://user:pass@127.0.0.1:1", "{}")
+            .unwrap_err(),
+        "invalid_target"
+    );
+}
+
+#[test]
+fn v2_loopback_posts_original_utf8_to_sample_path_without_bearer() {
+    use std::io::{Read, Write};
+    use std::net::TcpListener;
+    use std::time::Duration;
+    let listener = TcpListener::bind(("127.0.0.1", 0)).unwrap();
+    let origin = format!("http://{}", listener.local_addr().unwrap());
+    let worker = std::thread::spawn(move || {
+        let mut seen = Vec::new();
+        for index in 0..2 {
+            let (mut stream, _) = listener.accept().unwrap();
+            stream
+                .set_read_timeout(Some(Duration::from_secs(5)))
+                .unwrap();
+            let mut bytes = Vec::new();
+            let mut buffer = [0u8; 16384];
+            let (head_end, length) = loop {
+                let n = stream.read(&mut buffer).unwrap();
+                assert!(n > 0);
+                bytes.extend_from_slice(&buffer[..n]);
+                if let Some(at) = bytes.windows(4).position(|w| w == b"\r\n\r\n") {
+                    let head = std::str::from_utf8(&bytes[..at]).unwrap();
+                    let length = head
+                        .lines()
+                        .find_map(|line| {
+                            line.to_ascii_lowercase()
+                                .strip_prefix("content-length:")
+                                .map(|v| v.trim().parse::<usize>().unwrap())
+                        })
+                        .unwrap();
+                    break (at + 4, length);
+                }
+            };
+            while bytes.len() - head_end < length {
+                let n = stream.read(&mut buffer).unwrap();
+                assert!(n > 0);
+                bytes.extend_from_slice(&buffer[..n]);
+            }
+            let head = std::str::from_utf8(&bytes[..head_end])
+                .unwrap()
+                .to_ascii_lowercase();
+            let path = if index == 0 {
+                "/api/v1/integration/plc-facts/samples"
+            } else {
+                "/compatible/samples"
+            };
+            assert!(head.starts_with(&format!("post {path} http/1.1\r\n")));
+            assert!(head.contains("content-type: application/json\r\n"));
+            assert!(head.contains("content-encoding: identity\r\n"));
+            assert!(!head.contains("authorization:"));
+            seen.push(bytes[head_end..head_end + length].to_vec());
+            stream.write_all(b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}").unwrap();
+        }
+        seen
+    });
+    let http = FactsHttp::new().unwrap();
+    let utf8 = "{\"point\":\"炉温\",\"value\":820.5}";
+    assert_eq!(
+        http.post_sample(
+            &format!("{origin}/api/v1/integration/plc-facts/samples"),
+            utf8
+        )
+        .unwrap()
+        .status,
+        200
+    );
+    let exact = format!(
+        "{{}}{}",
+        " ".repeat(crate::domain::sample_upload::BODY_LIMIT - 2)
+    );
+    assert_eq!(
+        http.post_sample(&format!("{origin}/compatible/samples"), &exact)
+            .unwrap()
+            .status,
+        200
+    );
+    assert_eq!(
+        http.post_sample(
+            &format!("{origin}/compatible/samples"),
+            &(exact.clone() + " ")
+        )
+        .unwrap_err(),
+        "payload_too_large"
+    );
+    let seen = worker.join().unwrap();
+    assert_eq!(seen[0], utf8.as_bytes());
+    assert_eq!(seen[1], exact.as_bytes());
+    assert_eq!(seen[1].len(), 524_288);
+}
+
+#[test]
 fn streamed_response_byte_bound_and_truncation() {
     let bytes = vec![b' '; 8 * 1024 * 1024];
     assert_eq!(

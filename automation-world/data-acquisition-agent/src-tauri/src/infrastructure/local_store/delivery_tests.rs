@@ -20,7 +20,8 @@ pub(crate) fn legacy(version: u32) -> Stores {
     assert!(
         root.starts_with("/private/tmp")
             && (root.to_string_lossy().contains("daa-008-r1-a-")
-                || root.to_string_lossy().contains("daa-008-r2-a-"))
+                || root.to_string_lossy().contains("daa-008-r2-a-")
+                || root.to_string_lossy().contains("daa010-r5-dev-private"))
     );
     let profile = root.join(format!(
         "legacy-profile-{}",
@@ -256,7 +257,7 @@ fn v3_freeze_ack_atomic_original_bytes() {
     s.commit_delivery(&f, &ack, &raw).unwrap();
 }
 #[test]
-fn unknown_reopen_same_identity_and_stopped() {
+fn legacy_inflight_reopen_preserves_identity_and_stays_stopped() {
     let mut s = fresh();
     let b = seed(&mut s, 1);
     adopt(&mut s, &b);
@@ -265,21 +266,29 @@ fn unknown_reopen_same_identity_and_stopped() {
     s.mark_dispatch(&f).unwrap();
     let dir = s.dir.clone();
     drop(s);
-    let mut s = Stores::open(&dir).unwrap();
+    let s = Stores::open(&dir).unwrap();
     assert_eq!(s.delivery_snapshot(false).unwrap()["running"], false);
     assert_eq!(
         s.runtime
             .query_row::<String, _, _>("SELECT state FROM delivery_batches", [], |r| r.get(0))
             .unwrap(),
-        "unknown"
+        "inflight"
     );
-    let recovered = s
-        .next_delivery_ready(vec![f.batch.batch_id.clone()])
-        .unwrap()
+    let retained: (String, String, String, i64) = s
+        .runtime
+        .query_row(
+            "SELECT batch_id,body,body_sha,attempt FROM delivery_batches",
+            [],
+            |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?)),
+        )
         .unwrap();
-    assert_eq!(recovered.batch.batch_id, f.batch.batch_id);
-    assert_eq!(recovered.body.as_bytes(), f.body.as_bytes());
-    assert_eq!(recovered.body_sha, f.body_sha);
+    assert_eq!(retained, (f.batch.batch_id, f.body, f.body_sha, 1));
+    assert_eq!(
+        s.runtime
+            .query_row::<u64, _, _>("SELECT count(*) FROM delivery_receipts", [], |r| r.get(0))
+            .unwrap(),
+        0
+    );
     assert_eq!(original(&s), before);
 }
 #[test]
@@ -693,7 +702,7 @@ fn durable_crash_positions_preserve_identity_and_stop_state() {
             match mode {
                 "after_freeze" => "prepared",
                 "after_ack_before_ui" => "acknowledged",
-                _ => "unknown",
+                _ => "inflight",
             }
         );
         let acknowledged: String = s

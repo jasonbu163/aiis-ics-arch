@@ -50,6 +50,45 @@ pub(super) fn runtime_v3_sql() -> String {
     );
     format!("{base}\n{DELIVERY}")
 }
+/// v4 保留 v1 证据表，另建互不覆盖的 v2 样本投递账本。
+pub(super) fn runtime_v4_sql() -> String {
+    let base = runtime_v3_sql().replace("VALUES(3,", "VALUES(4,").replace(
+        "CHECK(schema_version=3),clean_exit",
+        "CHECK(schema_version=4),clean_exit",
+    );
+    format!("{base}\n{}", super::sample_upload::SQL)
+}
+pub(super) const REPORTING_SOURCES: &str = r#"
+CREATE TABLE reporting_identity(id INTEGER PRIMARY KEY CHECK(id=1),instance_id TEXT);
+CREATE TABLE reporting_bindings(local_plc_id TEXT PRIMARY KEY,plc_id TEXT NOT NULL UNIQUE,source_generation TEXT NOT NULL);
+CREATE TABLE reporting_generations(plc_id TEXT NOT NULL,source_generation TEXT NOT NULL,instance_id TEXT NOT NULL,local_plc_id TEXT NOT NULL,local_generation TEXT NOT NULL,PRIMARY KEY(plc_id,source_generation));
+CREATE TABLE reporting_cycles(cycle_id TEXT PRIMARY KEY REFERENCES collection_cycles(id),instance_id TEXT,plc_id TEXT,source_generation TEXT,CHECK((instance_id IS NULL AND plc_id IS NULL AND source_generation IS NULL) OR (instance_id IS NOT NULL AND plc_id IS NOT NULL AND source_generation IS NOT NULL)));
+"#;
+pub(super) fn runtime_v4_extended_sql() -> String {
+    format!("{}\n{}", runtime_v4_sql(), REPORTING_SOURCES)
+}
+
+pub(super) const REPORTING_SWITCHES: &str = r#"
+CREATE TABLE reporting_disabled(local_plc_id TEXT PRIMARY KEY REFERENCES plc_sources(plc_id));
+"#;
+
+pub(super) fn runtime_v4_switches_sql() -> String {
+    format!("{}\n{}", runtime_v4_extended_sql(), REPORTING_SWITCHES)
+}
+
+pub(super) fn runtime_v4_schema(c: &rusqlite::Connection) -> Result<String, String> {
+    let switches = runtime_v4_switches_sql();
+    if verify_structure(c, &switches).is_ok() {
+        return Ok(switches);
+    }
+    let extended = runtime_v4_extended_sql();
+    if verify_structure(c, &extended).is_ok() {
+        return Ok(extended);
+    }
+    let original = runtime_v4_sql();
+    verify_structure(c, &original)?;
+    Ok(original)
+}
 pub(super) const DELIVERY: &str = r#"
 CREATE INDEX delivery_cycle_candidates ON collection_cycles(plc_id,group_id,source_seq);
 CREATE TABLE delivery_settings(id INTEGER PRIMARY KEY CHECK(id=1),settings_revision TEXT NOT NULL,payload TEXT NOT NULL,latest_streak INTEGER NOT NULL DEFAULT 0,latest_cursor TEXT NOT NULL DEFAULT '',history_cursor TEXT NOT NULL DEFAULT '');
@@ -169,6 +208,9 @@ fn context(r: &Connection, revision: &str) -> LocalResult<Configuration> {
     configuration(str_at(&row, 0)?)
 }
 fn core_check(c: &Connection, r: &Connection, instance: &str) -> LocalResult<()> {
+    let runtime_version: u32 = r
+        .query_row("PRAGMA user_version", [], |row| row.get(0))
+        .map_err(super::sql_error)?;
     for db in [c, r] {
         require(str_at(&record(db, "PRAGMA integrity_check", &[])?, 0)? == "ok")?;
         let mut q = db
@@ -222,9 +264,12 @@ fn core_check(c: &Connection, r: &Connection, instance: &str) -> LocalResult<()>
                     && number(&row, 2)? == 1
                     && digest(str_at(&row, 0)?) == str_at(&row, 1)?,
             )?;
+            let config = configuration(str_at(&row, 0)?)?;
             require(
-                crate::domain::local_configuration::validate(&configuration(str_at(&row, 0)?)?)
-                    .is_empty(),
+                crate::domain::local_configuration::validate(&config).is_empty()
+                    || (runtime_version == 4
+                        && crate::domain::local_configuration::validate_for_runtime(&config, 4)
+                            .is_empty()),
             )
         })?;
     }
@@ -356,6 +401,7 @@ fn core_check(c: &Connection, r: &Connection, instance: &str) -> LocalResult<()>
         let mut seen = std::collections::BTreeSet::new();
         let mut seen_db = std::collections::BTreeSet::new();
         let mut all_good = true;
+        let mut any_good = false;
         for sample in &manifest.samples {
             require(seen_db.insert(sample.db_number))?;
             let v=record(r,"SELECT payload,sha256,cycle_id,db_number,plc_id,group_id,source_seq,revision,saved_at,schema_version,payload_bytes FROM samples WHERE id=?1",&[&sample.sample_id])?;
@@ -366,7 +412,14 @@ fn core_check(c: &Connection, r: &Connection, instance: &str) -> LocalResult<()>
                     && number(&v, 9)? == 2
                     && number(&v, 10)? == raw.len() as i64,
             )?;
-            let parsed = local_json(raw, 512 * 1024)?;
+            let parsed = local_json(
+                raw,
+                if runtime_version == 4 {
+                    2 * 1024 * 1024
+                } else {
+                    512 * 1024
+                },
+            )?;
             let p: SamplePayload =
                 serde_json::from_value(parsed.clone()).map_err(|_| "profile_ledger_invalid")?;
             require(
@@ -411,12 +464,14 @@ fn core_check(c: &Connection, r: &Connection, instance: &str) -> LocalResult<()>
                 )?;
                 require(
                     (fact.quality == "good" && fact.reason.is_none())
-                        || (fact.quality == "bad"
+                        || (["bad", "bad_read", "bad_timeout", "bad_decode"]
+                            .contains(&fact.quality.as_str())
                             && fact.value.is_null()
                             && fact.reason.as_ref().map(|r| !r.is_empty()).unwrap_or(false)),
                 )?;
                 wire::time(&fact.observed_at)?;
                 all_good &= fact.quality == "good";
+                any_good |= fact.quality == "good";
             }
             for time in [&p.started_at, &p.finished_at, &p.saved_at] {
                 wire::time(time)?;
@@ -431,7 +486,14 @@ fn core_check(c: &Connection, r: &Connection, instance: &str) -> LocalResult<()>
         }
         require(
             seen.into_iter().collect::<Vec<_>>() == expected
-                && str_at(&row, 11)? == if all_good { "good" } else { "bad" },
+                && str_at(&row, 11)?
+                    == if all_good {
+                        "good"
+                    } else if any_good {
+                        "partial"
+                    } else {
+                        "bad"
+                    },
         )
     })?;
     Ok(())
@@ -791,7 +853,18 @@ pub(super) fn full_check(dir: &std::path::Path, instance: &str) -> LocalResult<(
                 .map_err(super::sql_error)?;
         }
         core_check(&config, &runtime, instance)?;
-        delivery_check(&runtime, instance)
+        let version: u32 = runtime
+            .query_row("PRAGMA user_version", [], |r| r.get(0))
+            .map_err(super::sql_error)?;
+        match version {
+            2 => Ok(()),
+            3 => delivery_check(&runtime, instance),
+            4 => {
+                delivery_check(&runtime, instance)?;
+                super::sample_upload::full_check(&runtime, instance)
+            }
+            _ => Err("profile_ledger_invalid".into()),
+        }
     })();
     let close_config = config.close().map_err(|(_, e)| super::sql_error(e));
     let close_runtime = runtime.close().map_err(|(_, e)| super::sql_error(e));

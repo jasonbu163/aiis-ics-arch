@@ -1,4 +1,4 @@
-"""采集数据 r2 来源准入、授权交集、字面搜索与分页合同。"""
+"""采集数据来源准入、读取范围、字面搜索与分页合同。"""
 from copy import deepcopy
 from datetime import datetime
 from types import SimpleNamespace
@@ -12,7 +12,7 @@ from app.plc_facts import v2_config, v2_domain
 from app.plc_facts.api import v2 as api
 from app.plc_facts.crud import async_v2 as crud
 from app.plc_facts.services import async_v2 as service
-from tests.test_plc_facts_v2 import TOKEN, encoded, profile, sample
+from tests.test_plc_facts_v2 import encoded, install_registry_fixture, profile, sample
 
 pytestmark = pytest.mark.no_db
 NOW = datetime(2026, 11, 10, 10, 0, 3)
@@ -24,7 +24,7 @@ def mixed_profile():
     doc['sources'].append({'plcId': 'PLC-B', 'instanceId': 'external-b',
                            'sourceGeneration': 'gen-b', 'dbNumbers': [22, 23]})
     doc['readScopes']['admin'] = [{'plcId': 'PLC-A', 'dbNumbers': [21, 22]},
-                                  {'plcId': 'PLC-B', 'dbNumbers': [22, 23]}]
+                                  {'plcId': 'PLC-B', 'dbNumbers': [22]}]
     doc['readScopes']['supervisor'] = [{'plcId': 'PLC-A', 'dbNumbers': [21]},
                                        {'plcId': 'PLC-B', 'dbNumbers': [23]}]
     doc['readScopes']['empty'] = []
@@ -32,7 +32,7 @@ def mixed_profile():
 
 
 @pytest.mark.parametrize('case', ['missing', 'duplicate', 'unknown_kind', 'trailing_space_kind', 'nul_kind',
-                                  'unregistered_credential', 'unregistered_source'])
+                                  'unregistered_source'])
 def test_profile_rejects_unregistered_or_invalid_instances(case):
     doc = mixed_profile()
     if case == 'missing': doc.pop('instances')
@@ -40,7 +40,6 @@ def test_profile_rejects_unregistered_or_invalid_instances(case):
     elif case == 'unknown_kind': doc['instances'][0]['sourceType'] = 'DAA'
     elif case == 'trailing_space_kind': doc['instances'][1]['sourceType'] = 'external '
     elif case == 'nul_kind': doc['instances'][0]['sourceType'] = 'daa\x00'
-    elif case == 'unregistered_credential': doc['credentials'][0]['instanceId'] = 'other'
     else: doc['sources'][0]['instanceId'] = 'other'
     with pytest.raises((ValueError, v2_domain.V2Error)):
         v2_config.parse_profile(doc)
@@ -48,19 +47,17 @@ def test_profile_rejects_unregistered_or_invalid_instances(case):
 
 @pytest.mark.parametrize('field', ['groupId', 'configRevision'])
 @pytest.mark.parametrize('form', ['omitted', 'null'])
-def test_metadata_depends_on_registered_source_and_raw_body(field, form):
+def test_optional_metadata_is_equal_for_both_source_types_and_raw_body(field, form):
     doc = mixed_profile()
     registered = v2_config.parse_profile(doc)
     body = sample(1)
     if form == 'omitted': body.pop(field)
     else: body[field] = None
     parsed, _, digest = v2_domain.parse_sample(encoded(body))
-    with pytest.raises(v2_domain.V2Error) as error:
-        v2_config.admit_source(registered, 'daa-a', parsed)
-    assert error.value.status == 422
+    v2_config.admit_source(registered, parsed)
     body.update(instanceId='external-b', plcId='PLC-B', dbNumber=22, sourceGeneration='gen-b')
     parsed, _, _ = v2_domain.parse_sample(encoded(body))
-    v2_config.admit_source(registered, 'external-b', parsed)
+    v2_config.admit_source(registered, parsed)
     alternate = dict(body)
     if field in alternate: alternate.pop(field)
     else: alternate[field] = None
@@ -78,17 +75,17 @@ def test_source_type_is_not_a_caller_controlled_field():
     assert error.value.status == 422
 
 
-def test_authorized_scope_intersection_does_not_create_cross_product():
+def test_registered_plc_scope_allows_any_db_and_rejects_unknown_plc():
     value = v2_config.parse_profile(mixed_profile())
-    assert service.matching_scope(value, 'supervisor', None, None) == {'PLC-A': {21}, 'PLC-B': {23}}
-    assert service.matching_scope(value, 'supervisor', None, 23) == {'PLC-B': {23}}
-    assert service.matching_scope(value, 'supervisor', 'PLC-A', None) == {'PLC-A': {21}}
-    assert service.matching_scope(value, 'empty', None, None) == {}
+    assert service.matching_scope(value, None, None) == {'PLC-A': None, 'PLC-B': None}
+    assert service.matching_scope(value, None, 23) == {'PLC-A': {23}, 'PLC-B': {23}}
+    assert service.matching_scope(value, 'PLC-A', None) == {'PLC-A': None}
+    assert service.matching_scope(value, 'PLC-A', 23) == {'PLC-A': {23}}
     with pytest.raises(v2_domain.V2Error) as denied:
-        service.matching_scope(value, 'supervisor', 'PLC-A', 23)
+        service.matching_scope(value, 'PLC-Z', 23)
     assert denied.value.status == 403
-    with pytest.raises(v2_domain.V2Error):
-        service.matching_scope(value, 'empty', None, 21)
+    empty = {**value, 'sources': {}}
+    assert service.matching_scope(empty, None, 21) == {}
 
 
 class QueryResult:
@@ -108,7 +105,7 @@ class SQLCapture:
 @pytest.mark.asyncio
 async def test_sql_scope_current_source_order_and_literal_search():
     value = v2_config.parse_profile(mixed_profile())
-    scope = service.matching_scope(value, 'supervisor', None, None)
+    scope = service.matching_scope(value, None, None)
     session = SQLCapture(total=25)
     total, rows = await crud.browse_latest(session, scope, value['sources'], r'_%\\Temp', 2, 10, NOW)
     assert total == 25 and rows == [] and len(session.statements) == 2
@@ -121,16 +118,19 @@ async def test_sql_scope_current_source_order_and_literal_search():
     assert r'%\_\%\\\\Temp%' in page.params.values()
     assert list(page.params.values()).count(10) >= 2
     history = SQLCapture()
-    await crud.history(history, scope, NOW.replace(hour=9), NOW, 1, 50, NOW)
+    await crud.history(history, None, None, NOW.replace(hour=9), NOW, 1, 50, NOW)
     hsql = str(history.statements[0].compile(dialect=dialect()))
-    assert 'plc_facts_history.plc_id' in hsql and 'plc_facts_history.db_number' in hsql and ' OR ' in hsql
+    assert 'plc_source_registry' not in hsql and 'plc_facts_history.plc_id' not in hsql
+    filtered = SQLCapture()
+    await crud.history(filtered, 'PLC-Z', 23, NOW.replace(hour=9), NOW, 1, 50, NOW)
+    hsql = str(filtered.statements[0].compile(dialect=dialect()))
+    assert 'plc_facts_history.plc_id' in hsql and 'plc_source_registry' not in hsql
 
 
 @pytest.mark.asyncio
-async def test_revocation_preserves_readable_source_and_exact_point(monkeypatch):
-    doc = mixed_profile()
-    doc['credentials'] = []
-    value = v2_config.parse_profile(doc)
+async def test_registered_source_and_exact_point_without_credentials(monkeypatch):
+    value = v2_config.parse_profile(mixed_profile())
+    install_registry_fixture(monkeypatch, value)
     row = SimpleNamespace(point_id=b'point-0', point_name=None, data_type='BOOL', value_json=False,
                           quality='good', reason=None, observed_at=NOW, instance_id=b'daa-a',
                           source_generation=b'gen-a', source_seq=1, sample_id=b's1')
@@ -141,18 +141,16 @@ async def test_revocation_preserves_readable_source_and_exact_point(monkeypatch)
         return [row] if point_id == 'point-0' else []
     monkeypatch.setattr(crud, 'target_now', now)
     monkeypatch.setattr(crud, 'latest', latest)
-    with pytest.raises(v2_domain.V2Error) as invalid:
-        v2_config.authenticate(value, 'Bearer ' + TOKEN)
-    assert invalid.value.status == 401
-    actual = await service.latest(object(), value, 'admin', 'PLC-A', 21, 'point-0')
+    actual = await service.latest(object(), value, 'PLC-A', 21, 'point-0')
     assert actual['items'][0]['sourceType'] == 'daa'
-    assert (await service.latest(object(), value, 'admin', 'PLC-A', 21, 'POINT-0'))['items'] == []
+    assert (await service.latest(object(), value, 'PLC-A', 21, 'POINT-0'))['items'] == []
     assert calls[0][3] == 'point-0'
 
 
 @pytest.mark.asyncio
 async def test_http_default_optional_filters_limits_and_nullable_history(monkeypatch):
     value = v2_config.parse_profile(mixed_profile())
+    install_registry_fixture(monkeypatch, value)
     monkeypatch.setattr(api, 'get_profile', lambda: value)
     calls = []
     class Session:
@@ -165,24 +163,36 @@ async def test_http_default_optional_filters_limits_and_nullable_history(monkeyp
     old = SimpleNamespace(id=1, instance_id=b'old', sample_id=b's1', plc_id=b'PLC-A', db_number=21,
                           group_id=None, config_revision=None, source_type=None, source_generation=b'g',
                           source_seq=1, sampled_at=NOW, stored_at=NOW)
-    async def history(_db, scope, *_):
-        calls.append(scope)
+    async def history(_db, plc, number, *_):
+        calls.append((plc, number))
         return 1, [(old, 1)]
     monkeypatch.setattr(api, 'get_db_session', session)
     monkeypatch.setattr(crud, 'target_now', now)
     monkeypatch.setattr(crud, 'browse_latest', browse)
     monkeypatch.setattr(crud, 'history', history)
+    async def options(_db, _now, view=None):
+        return [(b'PLC-Z', 24)] if view == 'history' else [(b'PLC-A', 21), (b'PLC-A', 22), (b'PLC-B', 22), (b'PLC-B', 23)]
+    monkeypatch.setattr(crud, 'options', options)
     app = FastAPI()
     app.include_router(api.router, prefix='/api/v1')
-    app.dependency_overrides[api.reader] = lambda: SimpleNamespace(role='supervisor')
     async with AsyncClient(transport=ASGITransport(app=app), base_url='http://fixture', trust_env=False) as client:
+        options = await client.get('/api/v1/acquisition-data/options')
+        assert options.status_code == 200
+        assert options.json()['data']['items'] == [{'plcId': 'PLC-A', 'dbNumbers': [21, 22]},
+                                                    {'plcId': 'PLC-B', 'dbNumbers': [22, 23]}]
+        history_options = await client.get('/api/v1/acquisition-data/options?view=history')
+        assert history_options.json()['data']['items'] == [{'plcId': 'PLC-Z', 'dbNumbers': [24]}]
+        assert (await client.get('/api/v1/acquisition-data/options?view=invalid')).status_code == 422
+        assert (await client.get('/api/v1/acquisition-data/options?view=history&view=history')).status_code == 422
         path = '/api/v1/acquisition-data/latest/browse'
         result = await client.get(path)
         assert result.status_code == 200 and result.json()['data']['pageSize'] == 50
-        assert calls[-1] == ({'PLC-A': {21}, 'PLC-B': {23}}, '', 1, 50)
+        assert calls[-1] == ({'PLC-A': None, 'PLC-B': None}, '', 1, 50)
         result = await client.get(path, params={'dbNumber': 23, 'pointSearch': '  %_  ', 'page': 2, 'pageSize': 10})
-        assert result.status_code == 200 and calls[-1] == ({'PLC-B': {23}}, '%_', 2, 10)
-        assert (await client.get(path, params={'plcId': 'PLC-A', 'dbNumber': 23})).status_code == 403
+        assert result.status_code == 200 and calls[-1] == ({'PLC-A': {23}, 'PLC-B': {23}}, '%_', 2, 10)
+        assert (await client.get(path, params={'plcId': 'PLC-A', 'dbNumber': 23})).status_code == 200
+        assert (await client.get(path, params={'plcId': 'PLC-Z', 'dbNumber': 23})).status_code == 403
+        assert (await client.get(path, params=[('dbNumber', 22), ('dbNumber', 23)])).status_code == 422
         assert (await client.get(path, params={'pointSearch': 'a' * 129})).status_code == 422
         assert (await client.get(path, params={'pageSize': 101})).status_code == 422
         history_path = '/api/v1/acquisition-data/history'
@@ -191,25 +201,23 @@ async def test_http_default_optional_filters_limits_and_nullable_history(monkeyp
         assert result.status_code == 200
         item = result.json()['data']['items'][0]
         assert item['groupId'] is None and item['configRevision'] is None and item['sourceType'] is None
-        assert calls[-1] == {'PLC-A': {21}, 'PLC-B': {23}}
+        assert calls[-1] == (None, None)
+        assert (await client.get(history_path, params={**params, 'plcId': 'PLC-Z'})).status_code == 200
+        assert calls[-1] == ('PLC-Z', None)
         params['from'] = '2026-11-02T10:00:03+08:00'
         assert (await client.get(history_path, params=params)).status_code == 422
 
 
 @pytest.mark.asyncio
-async def test_http_machine_sources_auth_and_raw_body_policy(monkeypatch):
-    import hashlib
-    doc = mixed_profile()
-    external_token = 'fixture-external-token-with-32-bytes'
-    doc['credentials'].append({'instanceId': 'external-b',
-                               'tokenSha256': hashlib.sha256(external_token.encode()).hexdigest()})
-    value = v2_config.parse_profile(doc)
+async def test_http_registered_sources_without_bearer_and_raw_body_policy(monkeypatch):
+    value = v2_config.parse_profile(mixed_profile())
     monkeypatch.setattr(api, 'get_profile', lambda: value)
     digests = []
     class Session:
         async def close(self): pass
     async def session(): return Session()
     async def write(_db, _profile, body, _document, digest, _boundary):
+        v2_config.admit_source(value, body)
         digests.append((body.instance_id, body.group_id, body.config_revision, digest))
         return service.receipt(body, 'created')
     monkeypatch.setattr(api, 'get_db_session', session)
@@ -217,34 +225,36 @@ async def test_http_machine_sources_auth_and_raw_body_policy(monkeypatch):
     app = FastAPI()
     app.include_router(api.router, prefix='/api/v1')
     path = '/api/v1/integration/plc-facts/samples'
-    headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN}
+    headers = {'Content-Type': 'application/json'}
     async with AsyncClient(transport=ASGITransport(app=app), base_url='http://fixture', trust_env=False) as client:
         daa = sample(1)
         assert (await client.post(path, content=encoded(daa), headers=headers)).status_code == 200
         for field in ('groupId', 'configRevision'):
             invalid = dict(daa)
             invalid.pop(field)
-            assert (await client.post(path, content=encoded(invalid), headers=headers)).status_code == 422
+            assert (await client.post(path, content=encoded(invalid), headers=headers)).status_code == 200
             invalid[field] = None
-            assert (await client.post(path, content=encoded(invalid), headers=headers)).status_code == 422
-        assert (await client.post(path, content=encoded(daa), headers={**headers, 'Authorization': 'Bearer wrong'})).status_code == 401
-        assert (await client.post(path, content=encoded(daa), headers={**headers, 'Authorization': 'Bearer ' + external_token})).status_code == 403
+            assert (await client.post(path, content=encoded(invalid), headers=headers)).status_code == 200
+        for field, wrong in (('instanceId', 'external-b'), ('plcId', 'PLC-B'),
+                             ('sourceGeneration', 'gen-b')):
+            response = await client.post(path, json={**daa, field: wrong})
+            assert response.status_code == 403
+            assert response.json()['errorCode'] == 'plc_facts_v2.scope_rejected'
+        assert (await client.post(path, json={**daa, 'dbNumber': 22})).status_code == 200
         external = dict(daa, instanceId='external-b', plcId='PLC-B', dbNumber=22, sourceGeneration='gen-b')
         external.pop('groupId')
         external.pop('configRevision')
-        ext_headers = {**headers, 'Authorization': 'Bearer ' + external_token}
-        assert (await client.post(path, content=encoded(external), headers=ext_headers)).status_code == 200
+        assert (await client.post(path, content=encoded(external), headers=headers)).status_code == 200
         external['groupId'] = None
-        assert (await client.post(path, content=encoded(external), headers=ext_headers)).status_code == 200
+        assert (await client.post(path, content=encoded(external), headers=headers)).status_code == 200
         assert digests[-1][3] != digests[-2][3]
         external['sourceType'] = 'daa'
-        assert (await client.post(path, content=encoded(external), headers=ext_headers)).status_code == 422
+        assert (await client.post(path, content=encoded(external), headers=headers)).status_code == 422
 
 
 @pytest.mark.asyncio
 async def test_mysql_authorized_ingest_browse_and_cleanup(monkeypatch):
-    """仅显式授权的任务独占 schema：真实事务、授权分页及清理。"""
-    import hashlib
+    """仅显式授权的任务独占 schema：真实事务、范围分页及清理。"""
     import os
     import re
     import uuid
@@ -303,23 +313,20 @@ async def test_mysql_authorized_ingest_browse_and_cleanup(monkeypatch):
         assert result.rowcount == 1
     plc_a, plc_b = f'ACQ3-A-{unique}', f'ACQ3-B-{unique}'
     instance_daa, instance_ext = f'fixture-daa-{unique}', f'fixture-ext-{unique}'
-    token_daa, token_ext = f'daa-secret-{unique}', f'external-secret-{unique}'
     doc = {'target': {'alias': 'fixture', 'serverUuid': server_uuid, 'schema': schema,
                       'schemaRevision': '5f7a9c1e3b25'},
            'instances': [{'instanceId': instance_daa, 'sourceType': 'daa'},
                          {'instanceId': instance_ext, 'sourceType': 'external'}],
-           'credentials': [{'instanceId': instance_daa, 'tokenSha256': hashlib.sha256(token_daa.encode()).hexdigest()},
-                           {'instanceId': instance_ext, 'tokenSha256': hashlib.sha256(token_ext.encode()).hexdigest()}],
            'sources': [{'plcId': plc_a, 'instanceId': instance_daa, 'sourceGeneration': 'gen-a', 'dbNumbers': [21, 22]},
                        {'plcId': plc_b, 'instanceId': instance_ext, 'sourceGeneration': 'gen-b', 'dbNumbers': [21, 22]}],
-           'readScopes': {'admin': [{'plcId': plc_a, 'dbNumbers': [21, 22]}, {'plcId': plc_b, 'dbNumbers': [21, 22]}],
-                          'supervisor': [{'plcId': plc_a, 'dbNumbers': [21]}, {'plcId': plc_b, 'dbNumbers': [22]},
-                                         {'plcId': 'PLC-A', 'dbNumbers': [21]}], 'empty': []}}
-    holder = {'profile': v2_config.parse_profile(doc), 'role': 'supervisor'}
+           'readScopes': {'admin': [{'plcId': plc_a, 'dbNumbers': [21]}],
+                          'supervisor': [{'plcId': plc_b, 'dbNumbers': [22]},
+                                         {'plcId': 'PLC-A', 'dbNumbers': [21]}]}}
+    configured = v2_config.parse_profile(doc)
+    holder = {'profile': configured}
     monkeypatch.setattr(api, 'get_profile', lambda: holder['profile'])
     app = FastAPI()
     app.include_router(api.router, prefix='/api/v1')
-    app.dependency_overrides[api.reader] = lambda: SimpleNamespace(role=holder['role'])
     observed = v2_domain.wire_time(now - timedelta(seconds=5))
     point_id = r'temp_%\A'
     def point(name, value, kind='BOOL'):
@@ -340,24 +347,24 @@ async def test_mysql_authorized_ingest_browse_and_cleanup(monkeypatch):
     ext_22 = body(instance_ext, plc_b, 22, 1, 'b22-' + unique, [point('b22', False)])
     start, end = v2_domain.wire_time(now - timedelta(days=2)), v2_domain.wire_time(now + timedelta(seconds=30))
     path = '/api/v1/integration/plc-facts/samples'
-    def auth(token): return {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token}
     try:
         async with AsyncClient(transport=ASGITransport(app=app), base_url='http://fixture', trust_env=False) as client:
-            send = lambda raw, token: client.post(path, content=raw, headers=auth(token))
-            created = await send(first_raw, token_daa)
+            async def send(raw):
+                return await client.post(path, content=raw, headers={'Content-Type': 'application/json'})
+
+            created = await send(first_raw)
             assert created.status_code == 200 and created.json()['data']['outcome'] == 'created'
-            assert (await send(first_raw, token_daa)).json()['data']['outcome'] == 'duplicate'
-            for document, token in ((late, token_daa), (other_a, token_daa), (ext_21, token_ext), (ext_22, token_ext)):
-                result = await send(encoded(document), token)
+            assert (await send(first_raw)).json()['data']['outcome'] == 'duplicate'
+            for document in (late, other_a, ext_21, ext_22):
+                result = await send(encoded(document))
                 assert result.status_code == 200 and result.json()['data']['outcome'] == 'created'
-            assert (await send(encoded(ext_22), token_ext)).json()['data']['outcome'] == 'duplicate'
+            assert (await send(encoded(ext_22))).json()['data']['outcome'] == 'duplicate'
             with_null = dict(ext_22, groupId=None)
-            assert (await send(encoded(with_null), token_ext)).status_code == 409
+            assert (await send(encoded(with_null))).status_code == 409
             missing = dict(first); missing.pop('groupId')
-            assert (await send(encoded(missing), token_daa)).status_code == 422
-            assert (await send(encoded(dict(ext_22, sourceType='daa')), token_ext)).status_code == 422
-            assert (await send(encoded(first), token_ext)).status_code == 403
-            assert (await send(encoded(first), 'invalid')).status_code == 401
+            assert (await send(encoded(missing))).status_code == 422
+            assert (await send(encoded(dict(ext_22, sourceType='daa')))).status_code == 422
+            assert (await send(encoded(dict(first, instanceId=instance_ext)))).status_code == 403
             latest_path = '/api/v1/acquisition-data/latest'
             exact = await client.get(latest_path, params={'plcId': plc_a, 'dbNumber': 21, 'pointId': point_id})
             assert exact.status_code == 200 and b'1.234567890123456789' in exact.content
@@ -385,14 +392,10 @@ async def test_mysql_authorized_ingest_browse_and_cleanup(monkeypatch):
             assert old['sourceType'] is None
             detail = await client.get(history_path + '/' + ext_history['id'])
             assert detail.status_code == 200 and detail.json()['data']['instanceId'] == instance_ext
-            holder['role'] = 'empty'
+            holder['profile'] = v2_config.parse_profile({**doc, 'readScopes': {}})
             assert (await client.get(browse_path)).json()['data']['total'] == 0
             assert (await client.get(browse_path, params={'dbNumber': 21})).status_code == 403
-            holder['role'] = 'supervisor'
-            revoked = deepcopy(doc)
-            revoked['credentials'] = []
-            holder['profile'] = v2_config.parse_profile(revoked)
-            assert (await send(first_raw, token_daa)).status_code == 401
+            holder['profile'] = configured
             assert (await client.get(latest_path, params={'plcId': plc_a, 'dbNumber': 21})).status_code == 200
         # Force expiry only for this test's synthetic external sample and its one point.
         with engine.begin() as connection:
@@ -434,7 +437,7 @@ async def test_mysql_authorized_ingest_browse_and_cleanup(monkeypatch):
 @pytest.mark.asyncio
 async def test_out_of_range_pages_skip_row_query_without_losing_count(kind, page, total, queries):
     value = v2_config.parse_profile(mixed_profile())
-    scope = service.matching_scope(value, 'supervisor', None, None)
+    scope = service.matching_scope(value, None, None)
     class Counted(SQLCapture):
         async def execute(self, statement):
             self.statements.append(statement)
@@ -443,7 +446,7 @@ async def test_out_of_range_pages_skip_row_query_without_losing_count(kind, page
     if kind == 'latest':
         actual, rows = await crud.browse_latest(session, scope, value['sources'], '', page, 1, NOW)
     else:
-        actual, rows = await crud.history(session, scope, NOW.replace(hour=9), NOW, page, 1, NOW)
+        actual, rows = await crud.history(session, None, None, NOW.replace(hour=9), NOW, page, 1, NOW)
     assert actual == total and rows == []
     assert len(session.statements) == queries
     if queries == 2:
@@ -454,6 +457,7 @@ async def test_out_of_range_pages_skip_row_query_without_losing_count(kind, page
 @pytest.mark.asyncio
 async def test_http_huge_page_retains_count_and_page_for_both_lists(monkeypatch):
     value = v2_config.parse_profile(mixed_profile())
+    install_registry_fixture(monkeypatch, value)
     monkeypatch.setattr(api, 'get_profile', lambda: value)
     sessions = []
     class Counted(SQLCapture):
@@ -470,7 +474,6 @@ async def test_http_huge_page_retains_count_and_page_for_both_lists(monkeypatch)
     monkeypatch.setattr(crud, 'target_now', now)
     app = FastAPI()
     app.include_router(api.router, prefix='/api/v1')
-    app.dependency_overrides[api.reader] = lambda: SimpleNamespace(role='supervisor')
     huge = 10**24
     async with AsyncClient(transport=ASGITransport(app=app), base_url='http://fixture', trust_env=False) as client:
         for path, query in (

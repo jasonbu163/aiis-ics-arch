@@ -12,16 +12,21 @@ pub(crate) use profile_contract::preflight;
 #[cfg(all(test, unix))]
 mod profile_contract_tests;
 mod runtime;
+pub(crate) mod sample_upload;
+#[cfg(test)]
+pub(crate) mod sample_upload_tests;
 mod schema;
 #[cfg(test)]
 mod source_import_tests;
 #[cfg(test)]
 mod tests;
 mod yaml_migration;
+#[cfg(test)]
 use crate::domain::facts_wire::text;
 use crate::domain::local_configuration::{id, Configuration, LocalResult};
 use crate::domain::local_delivery::DeliverySettings;
 use crate::domain::local_sample::encode;
+#[cfg(test)]
 use delivery::event;
 use rusqlite::{params, Connection};
 use serde_json::Value;
@@ -163,7 +168,7 @@ pub(super) fn inspect_one(dir: &Path, role: &'static str) -> Result<(String, u32
             .query_row("PRAGMA user_version", [], |r| r.get(0))
             .map_err(sql)?;
         if (role == "config" && (app != schema::CONFIG_APP || version != 2))
-            || (role == "runtime" && (app != schema::RUNTIME_APP || ![2, 3].contains(&version)))
+            || (role == "runtime" && (app != schema::RUNTIME_APP || ![2, 3, 4].contains(&version)))
         {
             return Err(bad("schema_version_mismatch"));
         }
@@ -193,13 +198,15 @@ pub(super) fn inspect_one(dir: &Path, role: &'static str) -> Result<(String, u32
         }
         let ddl = if role == "config" {
             schema::config_sql()
+        } else if version == 4 {
+            schema::runtime_v4_schema(&c).map_err(|e| ProbeFailure::Other(unsupported(e)))?
         } else if version == 3 {
             schema::runtime_v3_sql()
         } else {
             schema::runtime_sql()
         };
         schema::verify_structure(&c, &ddl).map_err(|e| ProbeFailure::Other(unsupported(e)))?;
-        if role == "runtime" && version == 3 {
+        if role == "runtime" && (version == 3 || version == 4) {
             delivery::verify_schema(&c).map_err(|e| ProbeFailure::Other(unsupported(e)))?;
         }
         Ok((instance, version))
@@ -284,7 +291,7 @@ fn connect(p: &Path, new: bool, app: i64) -> LocalResult<Connection> {
             .query_row("PRAGMA user_version", [], |r| r.get(0))
             .map_err(sql_error)?;
         if (app == schema::CONFIG_APP && version != 2)
-            || (app == schema::RUNTIME_APP && ![2, 3].contains(&version))
+            || (app == schema::RUNTIME_APP && ![2, 3, 4].contains(&version))
         {
             return Err("schema_mismatch".into());
         }
@@ -332,15 +339,17 @@ pub(super) fn initialize_pair(dir: &Path) -> LocalResult<()> {
         tx.commit().map_err(sql_error)?;
         profile_contract::checkpoint("config_committed", dir)?;
         let tx = runtime.transaction().map_err(sql_error)?;
-        tx.execute_batch(&schema::runtime_v3_sql())
+        tx.execute_batch(&schema::runtime_v4_switches_sql())
             .map_err(sql_error)?;
         tx.execute(
-            "INSERT INTO runtime_metadata VALUES(1,?1,3,1,NULL,'asia-shanghai-rfc3339-ms-v1')",
+            "INSERT INTO runtime_metadata VALUES(1,?1,4,1,NULL,'asia-shanghai-rfc3339-ms-v1')",
             [&instance],
         )
         .map_err(sql_error)?;
+        tx.execute("INSERT INTO reporting_identity VALUES(1,NULL)", [])
+            .map_err(sql_error)?;
         tx.execute_batch(&format!(
-            "PRAGMA application_id={}; PRAGMA user_version=3;",
+            "PRAGMA application_id={}; PRAGMA user_version=4;",
             schema::RUNTIME_APP
         ))
         .map_err(sql_error)?;
@@ -348,6 +357,11 @@ pub(super) fn initialize_pair(dir: &Path) -> LocalResult<()> {
         tx.execute(
             "INSERT INTO delivery_settings(id,settings_revision,payload) VALUES(1,?1,?2)",
             rusqlite::params![settings.settings_revision, encode(&settings)?],
+        )
+        .map_err(sql_error)?;
+        tx.execute(
+            "INSERT INTO sample_upload_settings VALUES(1,?1,NULL,?2,5)",
+            params![id(), crate::domain::sample_upload::DEFAULT_PATH],
         )
         .map_err(sql_error)?;
         tx.commit().map_err(sql_error)?;
@@ -366,6 +380,8 @@ impl Stores {
     pub fn open(dir: &Path) -> LocalResult<Self> {
         let lock = profile_contract::admit(dir)?;
         let dir = profile_contract::canonical(dir)?;
+        profile_contract::upgrade_reporting(&dir)?;
+        profile_contract::upgrade_reporting_switches(&dir)?;
         let config = connect(&dir.join("config.sqlite"), false, schema::CONFIG_APP)?;
         let runtime = connect(&dir.join("runtime.sqlite"), false, schema::RUNTIME_APP)?;
         let instance: String = config
@@ -403,8 +419,13 @@ impl Stores {
             test_meter: None,
         };
         s.recover_activation()?;
-        if s.delivery_available()? {
-            s.recover_delivery()?;
+        let version: u32 = s
+            .runtime
+            .query_row("PRAGMA user_version", [], |r| r.get(0))
+            .map_err(sql_error)?;
+        if version == 4 {
+            let now = delivery::db_now(&s.runtime)?;
+            sample_upload::recover(&mut s.runtime, &now)?;
         }
         let clean: i64 = s
             .runtime
@@ -641,6 +662,7 @@ impl Stores {
             .map_err(sql_error)?;
         serde_json::from_str(&raw).map_err(|_| "delivery_settings_corrupt".into())
     }
+    #[cfg(test)]
     pub fn save_delivery_settings(
         &mut self,
         mut settings: DeliverySettings,
@@ -727,56 +749,11 @@ impl Stores {
 }
 
 impl Stores {
-    pub fn read_result(&mut self, plc: &str, result: &str) -> LocalResult<()> {
-        self.delivery_guard()?;
-        let tx = self.runtime.transaction().map_err(sql_error)?;
-        event(&tx, "read_result", plc, result)?;
-        tx.commit().map_err(sql_error)?;
-        self.log.event("read_result", plc, result)
-    }
-}
-
-impl Stores {
-    pub fn delivery_schedule(&self) -> LocalResult<Vec<(String, String)>> {
-        self.delivery_guard()?;
-        let rows=self.runtime.prepare("SELECT batch_id,next_attempt_at FROM delivery_batches WHERE state='prepared' OR state='unknown' OR state='retry_wait' ORDER BY created_order LIMIT 9").map_err(sql_error)?.query_map([],|r|Ok((r.get(0)?,r.get(1)?))).map_err(sql_error)?.collect::<std::result::Result<Vec<_>,_>>().map_err(sql_error)?;
-        if rows.len() > 8 {
-            return Err("delivery_queue_limit".into());
-        }
-        Ok(rows)
-    }
     #[cfg(test)]
     pub fn next_delivery(&mut self) -> LocalResult<Option<delivery::Frozen>> {
         let now = delivery::db_now(&self.runtime)?;
         let due=self.runtime.prepare("SELECT batch_id FROM delivery_batches WHERE state='prepared' OR ((state='unknown' OR state='retry_wait') AND next_attempt_at<=?1) ORDER BY created_order LIMIT 8").map_err(sql_error)?.query_map([now],|r|r.get(0)).map_err(sql_error)?.collect::<std::result::Result<Vec<_>,_>>().map_err(sql_error)?;
         self.next_delivery_ready(due)
-    }
-}
-
-impl Stores {
-    pub fn recover_delivery(&mut self) -> LocalResult<()> {
-        self.delivery_guard()?;
-        let tx = self.runtime.transaction().map_err(sql_error)?;
-        let now = delivery::db_now(&tx)?;
-        tx.execute("UPDATE delivery_batches SET state='unknown',last_error='process_restarted',next_attempt_at=?1 WHERE state='inflight'",[&now]).map_err(sql_error)?;
-        let rows=tx.prepare("SELECT batch_id,next_attempt_at FROM delivery_batches WHERE state='prepared' OR state='unknown' OR state='retry_wait' ORDER BY created_order LIMIT 9").map_err(sql_error)?.query_map([],|r|Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?))).map_err(sql_error)?.collect::<std::result::Result<Vec<_>,_>>().map_err(sql_error)?;
-        if rows.len() > 8 {
-            return Err("delivery_queue_limit".into());
-        }
-        for (id, at) in rows {
-            let delay = (crate::domain::facts_wire::time(&at)?
-                - crate::domain::facts_wire::time(&now)?)
-            .num_seconds()
-            .clamp(1, 300);
-            let next = (crate::domain::facts_wire::time(&now)? + chrono::Duration::seconds(delay))
-                .to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
-            tx.execute(
-                "UPDATE delivery_batches SET next_attempt_at=?1 WHERE batch_id=?2",
-                params![next, id],
-            )
-            .map_err(sql_error)?;
-        }
-        tx.commit().map_err(sql_error)
     }
 }
 

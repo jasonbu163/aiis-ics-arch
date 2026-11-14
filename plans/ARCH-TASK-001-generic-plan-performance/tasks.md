@@ -3,7 +3,7 @@ Revision: r1
 Status: developer_handoff
 Owner Role: Development
 Allowed Writers: Development
-Handoff: fresh-context Verification（第三次精确交接见文末；前两次交接保留）
+Handoff: fresh-context Verification（第四次精确交接见文末；前三次交接保留）
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch
@@ -252,3 +252,30 @@ Human Owner 在实际计划页提出两项界面纠正：恢复「标题及操�
 - **Development 自检。** 在私有候选 `frontend-js/` 执行 `pnpm_config_verify_deps_before_run=false pnpm check:modules`，退出 0；`pnpm_config_verify_deps_before_run=false pnpm test:modules`，退出 0、57 passed、0 skipped；以 `VITE_SUPERVISOR_PAGE_ACCESS_JSON='[]' VITE_OPERATOR_PAGE_ACCESS_JSON='[]' VITE_FRONTEND_MOCK_ENABLED=false VITE_API_BASE_URL=/api/v1` 执行同一 pnpm 的 `build --outDir /private/tmp/arch-task-001-r1-coordination.UaaX27/ui-padding-build`，退出 0，保留 Vite 已有的大 chunk 提示。模块测试中现有 setup 假夹具未模拟 `onBeforeUnmount`，日志有两条无活动组件实例的 Vue 警告；57 项全部通过，未因此修改测试文件。单独执行实际 SFC setup 的合成几何检查：header 底部 186、自然顶部 144 时留白 50px；主区滚动 80px 后留白不累加，模拟 header 底部增加后留白更新为 64px，桌面示例留白 0，卸载时 observer 断开。初版 SFC 对照还确认既有脚本行为、`v-model`、按钮事件和日期格式不变，中英文时区键均存在。两个构建/测试日志与临时构建目录留在任务私有窗口供复核，不进入源码。
 - **实际浏览器证据。** 协调者在正式 `5190` 使用独立 Chrome 运行 `PYTHONPATH=. .venv/bin/python -B <WINDOW>/run-browser-task-layout.py <WINDOW> <EVIDENCE> after`，退出 0。`1280×900` 的计划和实绩页，中英文均为四列筛选、筛选段高度 164px、表格起始 y=325；正文不常驻时区说明，标题问号 hover/focus 提示通过。`430×920`、公共侧栏收起时，两页筛选单列且位于视口内，卡片顶部 y=194，位于 header 底部 y=186 之下；鼠标实际命中问号且 hover/focus 通过。前后脱敏证据 `task-list-layout-before.json` SHA-256 `283c6c59853d7a7c1f8344dd17b3f1fa00b80ba21f6002580a543d83e7f2564d`，`task-list-layout-after.json` SHA-256 `17632466b04a385140368d685d5a0b650e650feb971dc9a5004f0ed738b5985e`，均在上述本机 ignored 证据目录。
 - **交接边界。** 规格 SHA-256 仍为 `bbaf4b2d47881f5db884b53846af47b40c11ad2a28dfb62015f40e624def83fa`。QA2 checklist SHA-256 `d90e366168a618bf11dd1e00ebb93598f8dfde8fffe269878ab066e3d7a58b06`，其 `qa_passed` 只针对第二次交接；该共用页面文件调整后的第三次交接须由 fresh-context Verification 独立核对。QA1 合成任务、字段配置、临时验收进程和 DAA 样本暂由协调者保留并负责最终按标记清理；此前已记录的历史测试限制、真实设备及生产边界不变。本交接不代替新一轮 QA verdict 或 Human Owner 最终验收。
+
+## 2026-11-14 字段设置弹窗与使用说明返工
+
+Human Owner 在 r1 验收中指出字段设置弹窗右侧控件被裁、缺少弹窗本机列宽恢复，并要求说明勾选项、停用/退出及提供使用 MD。协调者确认按既有 R04/AC09–10 同范围处理：不新增已保存字段物理删除、不改后端接口或迁移、不写数据库。当前正式工作树 HEAD `fd999224a8756feda314a33148304b4bf3461876`，并行任务已修改其他采集及文档路径，不能沿用旧 101 文件无漂移假设；本轮实施前的精确允许路径摘要记录于 `/private/tmp/arch-task-001-field-settings.Av8Vy2/dev-preimages.json`。浏览器验证由协调者使用独立 context，限制为读取及拦截写请求/模拟响应。
+
+## 第四次 developer_handoff — ARCH-TASK-001 r1 字段设置
+
+- **改动与边界。** 共用 `TaskConfigDialog.vue` 增加弹窗专用宽度和内部滚动、常显横向滚动条，数字输入按单元格限宽；列顺序支持 0–65535，清空显式提交 `null` 并显示“按槽位”。复用 `useTableColumnWidths`，以稳定列 `prop` 和计划/实绩各自的弹窗 key 保存本机列宽，弹窗内恢复默认不清草稿或主列表列宽。桌面固定最左稳定字段键以便右滚时识别行；窄屏解除固定以免遮挡末列。仅 `_new` 的未保存行显示“移除草稿”；移除后若其余内容与原配置相同则清除无变化草稿，其他未提交修改及取消保留草稿的行为继续保留。已保存行仍通过取消“启用”并保存来停用，未增加物理删除、后端/API、迁移或数据库写入。
+- **说明与翻译。** 两模块中英文各补同一组弹窗提示键；新增 [字段设置使用说明](../../frontend-js/FIELD_SETTINGS_GUIDE.zh-CN.md)，两份 frontend README 分别链接。说明覆盖字段组、全部勾选项、三种实绩归属、列顺序与个人列宽、展示修订与业务版本、停用/复启/替代键，以及 PLC 必填映射、版本登记和 DAA/SMA/CA/FF 的职责与联动。根 `CODE_INDEX.md` 已有共用组件所属条目，本轮未覆盖并行任务对该文件的修改。
+- **自检。** 正式 `frontend-js/` 执行 `pnpm_config_verify_deps_before_run=false pnpm check:modules`，退出 0；`pnpm test:modules` 退出 0、62 passed、0 skipped；以 `VITE_SUPERVISOR_PAGE_ACCESS_JSON='[]' VITE_OPERATOR_PAGE_ACCESS_JSON='[]' VITE_FRONTEND_MOCK_ENABLED=false VITE_API_BASE_URL=/api/v1` 运行同一 pnpm 的 `build --outDir /private/tmp/arch-task-001-field-settings.Av8Vy2/dev-dist-final`，退出 0，保留 Vite 大 chunk 提示。既有列表测试假夹具未模拟 `onBeforeUnmount`，测试日志有两条 Vue 无活动实例警告。`node /private/tmp/arch-task-001-field-settings.Av8Vy2/dev-component-check.mjs` 对实际 SFC setup 的无数据库检查退出 0，覆盖桌面/窄屏固定列切换和监听器移除、已保存行不可本地移除、未保存行移除与重开、其他草稿保留、计划/实绩弹窗及主列表列宽隔离、恢复默认、65535 和 `null` 保存载荷。首次运行该临时检查时，mock 的 `structuredClone` 无法复制 Vue proxy 而退出 1；改为模拟 HTTP 的 JSON 序列化后通过，应用源码未因该夹具问题改变。两模块 workflow 中英各 87 个键对齐，说明与两份 README 的相对链接均存在；`git diff --check` 和新说明逐行空白检查通过。
+- **独立浏览器补充自检。** 协调者在正式 `5190` 以独立 Chrome context 读取真实 dev 的 v3/rev3 定义，分别检查计划/实绩的 `1470×796` 中文日间及 `430×920` 英文夜间四组。末列 65535、输入和表头左右边缘命中均通过；桌面列宽 190→236→页面重载后 236→恢复默认 190，主列表列宽不受影响，恢复默认保留编辑；移除草稿后重开未复活，清空后显示按槽位。浏览器拦截四次模拟保存，覆盖两页顺序与停用；停用载荷仅提交 `enabled:false`，实际业务写请求转发 **0**。首版实测发现窄屏固定键列遮挡末列左侧，随后改为窄屏解除固定并完成上述重测。浏览器结果是协调者补充证据，不代表已对真实业务配置执行保存。持久脱敏 `field-settings-20261114/baseline.json` SHA-256 `40645916b9030a9fd20c4daf22c38bb4d292a47fc2cbdc0e36bfdacea82835df`，`browser.json` SHA-256 `68452395c7516fb772757817264f4f3601e5da905f2dc9485c155fec1d3bb0d5`，同目录包含桌面与窄屏截图。
+- **精确工作树差异。** 以当前 HEAD `fd999224a8756feda314a33148304b4bf3461876` 和本轮实施前实测摘要为基线，仅以下 8 条本任务源码/文档路径发生变化；第二列是 preimage SHA-256，第三列是 postimage SHA-256，`<new>` 表示原来不存在。另有本 Development 文档自身变更；所有范围外并行改动保留。
+
+```text
+frontend-js/src/app/plan/components/TaskConfigDialog.vue ee16840453cc4f532678adc24cd1d4bca55b6caf7855fbcf2feea6508f503302 84f4691cb6fcd9cab3936b8e6a572cbc7c3294dff5a8d0adfe65a79984787d54
+frontend-js/src/app/plan/locales/zh-CN.json b95c9d6d276abda23a5b6773e39bfe82210ed9ec2ce3275ede23bbf90c4c46c3 3a899285f7a83176f43e2870d5077ce7491908b4f8125cf874014dd69057f1e9
+frontend-js/src/app/plan/locales/en-US.json 470f758f0d3b6eed13e0d1737557ab68f738ae7563fa5037bf361bea94988b6f 1333521deb537973d3256ff9cfe7912f90771a5f6f9b44b1641eab51fff17a85
+frontend-js/src/app/performance/locales/zh-CN.json 7dc1093b4906f3f474ef8a408df475888f3a78231dc096775fa9d0c0f001022b de019c6295fc9ab901d2e0181a7bd84a34be5b6bad9442d402ed82cc1ea4a0d9
+frontend-js/src/app/performance/locales/en-US.json 950bb4ba3e1b3037fb81a072461604d1c4dff50c75b678123851b844002e9728 a357c5fe008454614e1e9d610de2a733e606bd15a39b8f25e50ad008fffaef9e
+frontend-js/README.md bcdf3dec67957a7476846d015f7290912912c988ae1aebce10b3e4ebcc7a5ee6 278676a0a906191ae914ae9a0a6be1752461648b99c921ba9d9be8952e0d1fb3
+frontend-js/README.zh-CN.md c8949b41174f274b80781cd301eba833e2ce0e4f5f69e34c0d3fb990e8f10ee5 3da20e53ea822abc1b0912599ebfad5794e04edb1f1d8cce642b039657c9a7a3
+frontend-js/FIELD_SETTINGS_GUIDE.zh-CN.md <new> 13bc619dffee96b48b8734a2dc7a9228edc319215c0286bd50770e66d18389f9
+```
+
+本轮 scoped manifest `backend/data/maintenance-evidence/arch-task-001-r1-dev3307/field-settings-20261114/dev-scoped-manifest.json` SHA-256 `62d5e4bcf902766c09ce272320c43e5f6dcde2ea488b39a78fae101ac3f4a866`，对应 `dev-scoped.patch` SHA-256 `35a4ade8fb10660b08c101cfc2b6079034772cc6a83ec8acb9ffcb801fd6894f`；复算 8/8 postimage 一致，正式树 `git apply --reverse --check --whitespace=error-all` 退出 0。规格 SHA-256 仍为 `bbaf4b2d47881f5db884b53846af47b40c11ad2a28dfb62015f40e624def83fa`，现有 QA3 checklist SHA-256 `9ceac9dfb4dcfdbf23293c0666ab61343dd07accf80b784312fab81a93d959c4`，二者均未修改。当前任务实施未暂存、提交或推送。
+
+QA3 的 `qa_passed` 针对第三次交接；本轮修改须由 fresh-context Verification 独立核对后更新其 checklist，Human Owner 最终验收仍待其决定。临时脚本、前后构建和日志位于 `/private/tmp/arch-task-001-field-settings.Av8Vy2/`，仅供独立复核，持久脱敏浏览器与 scoped diff 证据位于本机 ignored evidence 目录；验证结束后由协调者核对归属并回收临时资源。保留现有 dev 配置、字段、并行任务和用户浏览器，未执行数据库写入或真实设备联调。

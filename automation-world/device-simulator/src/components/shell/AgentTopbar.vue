@@ -25,6 +25,7 @@
       <CuAction
         :label="t('common.actions.refresh')"
         :icon="Refresh"
+        round-icon
         :loading="refreshBusy"
         :disabled="refreshBusy"
         @click="emit('refresh-runtime')"

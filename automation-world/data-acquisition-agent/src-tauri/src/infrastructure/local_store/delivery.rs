@@ -1,17 +1,24 @@
 //! 同runtime可靠投递：新v3能力、独立设置CAS、冻结/派发/ACK短事务与样本引用保护。
 use super::{sql_error, Stores};
 use crate::domain::{
-    facts_canonical as pf,
-    facts_wire::*,
-    local_configuration::{id, LocalResult},
+    facts_canonical as pf, facts_wire::*, local_configuration::LocalResult,
     local_delivery::DeliverySettings,
-    local_sample::encode,
 };
+#[cfg(test)]
+use crate::domain::{local_configuration::id, local_sample::encode};
 use rusqlite::{params, OptionalExtension};
 use serde_json::{json, Value};
 use std::collections::BTreeSet;
 pub(super) fn verify_schema(c: &rusqlite::Connection) -> LocalResult<()> {
-    super::schema::verify_structure(c, &super::schema::runtime_v3_sql())?;
+    let version: u32 = c
+        .query_row("PRAGMA user_version", [], |r| r.get(0))
+        .map_err(sql_error)?;
+    let ddl = match version {
+        3 => super::schema::runtime_v3_sql(),
+        4 => super::schema::runtime_v4_schema(c)?,
+        _ => return Err("schema_structure_mismatch".into()),
+    };
+    super::schema::verify_structure(c, &ddl)?;
     let (revision, settings): (String, String) = c
         .query_row(
             "SELECT settings_revision,payload FROM delivery_settings WHERE id=1",
@@ -27,6 +34,7 @@ pub(super) fn verify_schema(c: &rusqlite::Connection) -> LocalResult<()> {
     }
     Ok(())
 }
+#[cfg(test)]
 #[derive(Clone, Debug)]
 pub(crate) struct Frozen {
     pub batch: Batch,
@@ -45,7 +53,11 @@ impl Stores {
         Ok(version == 3)
     }
     pub(super) fn delivery_guard(&self) -> LocalResult<()> {
-        if self.delivery_available()? {
+        let version: u32 = self
+            .runtime
+            .query_row("PRAGMA user_version", [], |r| r.get(0))
+            .map_err(sql_error)?;
+        if version == 3 || version == 4 {
             Ok(())
         } else {
             Err("delivery_profile_upgrade_required".into())
@@ -56,6 +68,7 @@ pub(super) fn db_now(c: &rusqlite::Connection) -> LocalResult<String> {
     c.query_row(crate::domain::business_time::SQL_NOW, [], |r| r.get(0))
         .map_err(sql_error)
 }
+#[cfg(test)]
 pub(super) fn event(
     tx: &rusqlite::Transaction,
     event: &str,
@@ -202,6 +215,7 @@ impl Stores {
             json!({"schemaVersion":1,"contractVersion":"plc-facts/v1","digestProfile":"pf-json/v1","instanceId":self.instance,"sources":sources}),
         )
     }
+    #[cfg(test)]
     pub(super) fn build_delivery_cycle(&self, cycle: &str) -> LocalResult<BuiltCycle> {
         let (manifest,hash,context,chash):(String,String,String,String)=self.runtime.query_row("SELECT c.manifest,c.sha256,x.payload,x.sha256 FROM collection_cycles c JOIN configuration_contexts x ON c.revision=x.revision WHERE c.id=?1",[cycle],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get(3)?))).map_err(sql_error)?;
         let rows = self
@@ -216,21 +230,7 @@ impl Stores {
             .map_err(sql_error)?;
         build_cycle(&self.instance, &manifest, &hash, &context, &chash, &rows)
     }
-    pub fn preview_delivery(&self, cycle: &str) -> LocalResult<Value> {
-        self.delivery_guard()?;
-        let built = self.build_delivery_cycle(cycle)?;
-        let batch = Batch::new(
-            self.instance.clone(),
-            id(),
-            db_now(&self.runtime)?,
-            vec![built.cycle],
-            built.parts,
-            None,
-        )?;
-        Ok(
-            json!({"schemaVersion":1,"previewOnly":true,"requestDigest":batch.request_digest,"bytes":batch.bytes()?.len(),"body":batch.bytes()?}),
-        )
-    }
+    #[cfg(test)]
     pub(super) fn source_admitted(settings: &DeliverySettings, built: &BuiltCycle) -> bool {
         settings.sources.iter().any(|s| {
             s.plc_id == built.plc_id
@@ -246,6 +246,7 @@ impl Stores {
                     .unwrap_or(false)
         })
     }
+    #[cfg(test)]
     fn block_cycle(
         &mut self,
         cycle: &str,
@@ -276,6 +277,7 @@ impl Stores {
         tx.commit().map_err(sql_error)?;
         Ok(())
     }
+    #[cfg(test)]
     pub(super) fn freeze_cycle(
         &mut self,
         built: BuiltCycle,
@@ -434,6 +436,7 @@ impl Stores {
             depth: 0,
         }))
     }
+    #[cfg(test)]
     fn frozen(&self, batch_id: &str, settings: &DeliverySettings) -> LocalResult<Frozen> {
         let (body,sha,target,depth,digest):(Option<String>,String,String,u32,String)=self.runtime.query_row("SELECT body,body_sha,target_id,parent_depth,request_digest FROM delivery_batches WHERE batch_id=?1",[batch_id],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get(3)?,r.get(4)?))).map_err(sql_error)?;
         let body = body.ok_or("delivery_recovery_material_missing")?;
@@ -517,6 +520,7 @@ impl Stores {
             depth,
         })
     }
+    #[cfg(test)]
     fn recover_frozen(
         &mut self,
         batch: &str,
@@ -536,6 +540,7 @@ impl Stores {
             }
         }
     }
+    #[cfg(test)]
     pub fn next_delivery_ready(&mut self, ready: Vec<String>) -> LocalResult<Option<Frozen>> {
         self.delivery_guard()?;
         let settings = self.delivery_settings()?;
@@ -641,6 +646,7 @@ impl Stores {
         }
         Ok(None)
     }
+    #[cfg(test)]
     pub fn mark_dispatch(&mut self, frozen: &Frozen) -> LocalResult<u32> {
         self.delivery_guard()?;
         let tx = self.runtime.transaction().map_err(sql_error)?;
@@ -661,6 +667,7 @@ impl Stores {
             .event("delivery_started", &frozen.batch.batch_id, "inflight")?;
         Ok(attempt)
     }
+    #[cfg(test)]
     pub fn fail_delivery(
         &mut self,
         batch_id: &str,
@@ -709,7 +716,11 @@ impl Stores {
 
 impl Stores {
     pub fn sample_deliveries(&self, sample: &str) -> LocalResult<Vec<Value>> {
-        if !self.delivery_available()? {
+        let version: u32 = self
+            .runtime
+            .query_row("PRAGMA user_version", [], |r| r.get(0))
+            .map_err(sql_error)?;
+        if version < 3 {
             return Ok(vec![]);
         }
         self.runtime.prepare("SELECT p.part,p.parts,p.state,p.batch_id,p.receipt_id,b.last_error FROM delivery_parts p LEFT JOIN delivery_batches b ON b.batch_id=p.batch_id WHERE p.sample_id=?1 ORDER BY p.part LIMIT 16").map_err(sql_error)?.query_map([sample],|r|Ok(json!({"part":r.get::<_,u32>(0)?,"parts":r.get::<_,u32>(1)?,"state":r.get::<_,String>(2)?,"batchId":r.get::<_,Option<String>>(3)?,"receiptId":r.get::<_,Option<String>>(4)?,"lastError":r.get::<_,Option<String>>(5)?}))).map_err(sql_error)?.collect::<std::result::Result<Vec<_>,_>>().map_err(sql_error)
@@ -772,12 +783,5 @@ impl Stores {
         Ok(
             json!({"schemaVersion":1,"items":rows,"nextCursor":if rows.len()==limit as usize{rows.last().and_then(|r|r["order"].as_i64())}else{None}}),
         )
-    }
-    pub fn delivery_control_event(&mut self, event_key: &str, result: &str) -> LocalResult<()> {
-        self.delivery_guard()?;
-        let tx = self.runtime.transaction().map_err(sql_error)?;
-        event(&tx, event_key, "target", result)?;
-        tx.commit().map_err(sql_error)?;
-        self.log.event(event_key, "target", result)
     }
 }

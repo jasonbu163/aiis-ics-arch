@@ -1,11 +1,11 @@
-"""v2 样本事务、授权查询和提交回执。"""
+"""v2 样本事务、PLC/DB 范围查询和提交回执。"""
 from datetime import timedelta
 import hmac
 
 from sqlalchemy.exc import IntegrityError
 
 from ..crud import async_v2 as crud
-from ..v2_config import read_scope
+from ..crud import async_source_registry as registry
 from ..v2_domain import V2Error, public_points, real_number, validate_times, wire_time
 
 
@@ -29,9 +29,10 @@ def existing_outcome(rows, sample, digest):
 async def write_sample(db, profile, sample, document, digest, boundary):
     try:
         now = await crud.target_now(db, profile['target'])
+        source_type = await registry.admit(db, sample)
         observed, expires = validate_times(sample, now)
         await crud.insert_sample(db, sample, document, digest, observed, expires, now,
-                                 profile['instances'][sample.instance_id])
+                                 source_type)
         await crud.advance_latest(db, sample, observed, expires)
         validate_times(sample, await crud.target_now(db, profile['target']))
         boundary['commit_attempted'] = True
@@ -47,6 +48,7 @@ async def write_sample(db, profile, sample, document, digest, boundary):
         try:
             await db.rollback()
             await crud.target_now(db, profile['target'])
+            await registry.admit(db, sample)
             rows = await crud.identities(db, sample)
             validate_times(sample, await crud.target_now(db, profile['target']))
             outcome = existing_outcome(rows, sample, digest)
@@ -71,22 +73,16 @@ async def write_sample(db, profile, sample, document, digest, boundary):
         raise V2Error('commit_outcome_unknown' if unknown else 'not_ready', 503) from None
 
 
-def allowed_scope(profile, role, plc, number):
-    if number not in read_scope(profile, role).get(plc, frozenset()):
+def allowed_scope(profile, plc, number):
+    if plc not in profile['sources']:
         raise V2Error('scope_rejected', 403)
 
 
-def matching_scope(profile, role, plc, number):
-    selected = {}
-    for key, numbers in read_scope(profile, role).items():
-        if plc is not None and plc != key:
-            continue
-        matched = numbers if number is None else numbers & {number}
-        if matched:
-            selected[key] = matched
-    if (plc is not None or number is not None) and not selected:
+def matching_scope(profile, plc, number):
+    if plc is not None and plc not in profile['sources']:
         raise V2Error('scope_rejected', 403)
-    return selected
+    return {key: None if number is None else {number} for key in profile['sources']
+            if plc is None or key == plc}
 
 
 def summary(row, count):
@@ -101,11 +97,13 @@ def summary(row, count):
     }
 
 
-async def options(db, profile, role):
-    await crud.target_now(db, profile['target'])
-    scope = read_scope(profile, role)
-    return {'items': [{'plcId': plc, 'dbNumbers': sorted(numbers)}
-                      for plc, numbers in sorted(scope.items(), key=lambda item: item[0].encode('utf-8')) if numbers]}
+async def options(db, profile, view=None):
+    now = await crud.target_now(db, profile['target'])
+    rows = await crud.options(db, now, view)
+    grouped = {}
+    for plc, number in rows:
+        grouped.setdefault(plc.decode('utf-8'), []).append(number)
+    return {'items': [{'plcId': plc, 'dbNumbers': numbers} for plc, numbers in grouped.items()]}
 
 
 def latest_item(row, source_type):
@@ -120,14 +118,15 @@ def latest_item(row, source_type):
     }
 
 
-async def latest(db, profile, role, plc, number, point_id=None):
-    allowed_scope(profile, role, plc, number)
+async def latest(db, profile, plc, number, point_id=None):
     now = await crud.target_now(db, profile['target'])
+    profile = await registry.read_profile(db, profile['target'])
+    allowed_scope(profile, plc, number)
     source = profile['sources'].get(plc)
     if source is None:
         return {'items': []}
     rows = await crud.latest(db, plc, number, source, now, point_id)
-    return {'items': [latest_item(row, profile['instances'][source[0]]) for row in rows]}
+    return {'items': [latest_item(row, profile['sourceTypes'][plc]) for row in rows]}
 
 
 def page_result(items, total, page, page_size):
@@ -135,31 +134,31 @@ def page_result(items, total, page, page_size):
             'totalPages': (total + page_size - 1) // page_size}
 
 
-async def browse_latest(db, profile, role, plc, number, search, page, page_size):
-    scope = matching_scope(profile, role, plc, number)
+async def browse_latest(db, profile, plc, number, search, page, page_size):
     now = await crud.target_now(db, profile['target'])
+    profile = await registry.read_profile(db, profile['target'])
+    scope = matching_scope(profile, plc, number)
     total, rows = await crud.browse_latest(db, scope, profile['sources'], search, page, page_size, now)
     items = []
     for row in rows:
         plc_id = row.plc_id.decode('utf-8')
-        source_type = profile['instances'][profile['sources'][plc_id][0]]
+        source_type = profile['sourceTypes'][plc_id]
         items.append({**latest_item(row, source_type), 'plcId': plc_id, 'dbNumber': row.db_number})
     return page_result(items, total, page, page_size)
 
 
-async def history(db, profile, role, plc, number, start, end, page, page_size):
+async def history(db, profile, plc, number, start, end, page, page_size):
     if end <= start or end - start > timedelta(days=7):
         raise V2Error('invalid_request', 422)
-    scope = matching_scope(profile, role, plc, number)
     now = await crud.target_now(db, profile['target'])
-    total, rows = await crud.history(db, scope, start, end, page, page_size, now)
+    total, rows = await crud.history(db, plc, number, start, end, page, page_size, now)
     return page_result([summary(row, count) for row, count in rows], total, page, page_size)
 
 
-async def detail(db, profile, role, identity):
+async def detail(db, profile, identity):
     now = await crud.target_now(db, profile['target'])
     row = await crud.detail(db, identity, now)
-    if row is None or row.db_number not in read_scope(profile, role).get(row.plc_id.decode('utf-8'), frozenset()):
+    if row is None:
         raise V2Error('not_found', 404)
     result = summary(row, len(row.points_json))
     result['points'] = public_points(row.points_json)

@@ -8,6 +8,8 @@
   "components": "组件展示",
   "parameters": "参数预览",
   "sidebar": "切换侧栏",
+  "refresh": "刷新",
+  "refreshSample": "样例刷新事件：{count} 次",
   "light": "日间",
   "dark": "夜间",
   "shellTitle": "公共壳层组合",

@@ -1,87 +1,31 @@
 # AIIS Data Acquisition Agent
 
-[English](README.md)
+[English](README.md) · [使用手册](USER_GUIDE.zh-CN.md) · [任务计划](PLAN.zh-CN.md)
 
-DAA 复用 CU 公共壳，只有一个本地 SQLite runtime。普通 `pnpm tauri dev` 直接打开工作台、PLC 配置、点位与采集组、上报与存储四页，无需 mode/storage 开关。应用Tauri配置统一传递已有 `rust-snap7-driver`，普通命令已包含S7驱动。Snap7是S7通信实现的编译能力，不是选择DS或真实PLC的运行参数；启动仍停止。
+DAA 是独立的现场采集程序：从 PLC 或模拟器读取点位，先保存本机样本，再按配置上报到后端。采集和上报分别控制。完整操作、合成示例、两种手测及故障处理见[使用手册](USER_GUIDE.zh-CN.md)。后端来源登记、第三方发送和读取见[采集数据通用指南](../../docs/acquisition-data-guide.zh-CN.md)。
 
-```bash
+## 启动
+
+在仓库根目录运行：
+
+```sh
+cd automation-world/data-acquisition-agent
 pnpm install --frozen-lockfile
-pnpm build
-cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
 pnpm tauri dev
 ```
 
-来源为CA冻结receipt；[DAA PLAN](PLAN.zh-CN.md)管理实施，[AW PLAN](../PLAN.zh-CN.md)管理跨工程阶段。Human Owner于2026-10-30验收DAA-002 r2、DAA-003 r1、DAA-004 r1及[DAA-007 r2](plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2)，确认阶段B在本次受控DS联调范围完成。原QA/失败及已知限制分别保留；DAA-008 正在实施另批的 A0/A1 候选；实际阶段 C 联调、自动启动策略与真实现场验证继续分立。
+依赖安装后，从 DAA 工程目录用 `pnpm tauri dev` 启动。普通 Tauri 配置已传递 S7 驱动 feature，无需另填。采集和上报默认停止；工作台可分别开启下次启动时自动运行。保存或激活配置本身不会连接或启动。
 
 ## 配置权威与启动
 
-源码开发只读取本应用根 `.env`，高级进程绝对 `DAA_ENV_FILE` 可改选一个可读UTF-8普通文件；显式错误立即拒绝，不回退。`DAA_PROFILE_DIR`按非空进程 > 所选.env非空值 > 原独立应用本地数据目录选择；空白表示未设置。路径须绝对、无父目录穿越及既有symlink，不展开`~`、`$VAR`/`${VAR}`或执行shell，不扫描cwd/父目录/CA/其他应用。相同键首项生效。Vite不加载.env，Rust不转储其正文。
+源码开发读取本应用根 `.env`；需要时由使用者仅在文件不存在时手工复制 `.env.example`，已有文件先核对、不覆盖。`DAA_PROFILE_DIR` 选择独立存储根：非空进程值优先于所选 `.env` 的非空值，否则使用应用默认目录；高级 `DAA_ENV_FILE` 可显式选择可读文件，错误不回退。路径须为绝对字面路径，不展开 `~` 或环境变量。空值不是空目录。各应用 profile 分开；开发或构建不会自动隔离数据。安装版 `.env` 发现与分发不在此合同内。
 
-手工在 `automation-world/data-acquisition-agent/` 将 `.env.example` 复制为 `.env`（已有文件不覆盖，由Owner核对），只按需填 `DAA_PROFILE_DIR`。随后每次仅执行 `pnpm tauri dev`；具体联调路径见[手册](JOINT_TEST_GUIDE.zh-CN.md)。dev/build不会自动隔离数据，空键不等于新空目录；安装包.env发现与分发不在本合同内。旧UTC/未知profile仍写前拒绝，保留原件，迁移另批。
+PLC、点位、组和存储配置由 UI 与本机 SQLite 管理。旧 YAML 自动迁入、直库 writer 和旧运行入口已退役；普通启动不读取旧 YAML。正常进程无需额外配置读取许可；高级进程变量 `DAA_PLC_READ_ALLOWED` 若显式设置为 false、空白或非法值则阻止读取，所选 `.env` 中的同名旧键不覆盖该限制。
 
-`local-acquisition-v1/config.sqlite` / `runtime.sqlite`拥有PLC端点、点位/组/周期、存储与历史，均经UI配置。连接、启采、暂停与断开走工作台显式动作；保存/激活/启动/重开均不自动连接或启采，瞬时connected与运行意图不恢复。普通native无需.env读授权。所选.env的旧 `DAA_PLC_READ_ALLOWED` 无论true/false均忽略，可由Owner一次删除；高级同名进程键确实缺失才默认允许后续UI动作，合法true仅不额外禁止，false、空/空白、非法、不可解码均禁止读取。进程deny不被文件true覆盖，其余启用/地址/激活/容量/日志/时间保护保持，没有新增SQLite全局读取开关。
+已有兼容 profile 可继续使用，但切换前必须核对实际目录。新空 profile 采用 config2/runtime4；冷态 runtime2/3 按原条件只支持本地采集和历史，不自动升级上报。保留原配置、样本、journal 和凭据；身份、时间或 schema 不符时按提示停止，勿手工修改原库。详见[使用手册](USER_GUIDE.zh-CN.md#1-启动并确认目录)和[本地存储说明](src-tauri/src/infrastructure/local_store/README.zh-CN.md)。
 
-旧 YAML 运行模式、直库 writer、Backend health、授权自检已退役，旧 IPC 不再注册。`--ca-*` 与原 runtime 二进制在配置/锁之前返回结构化 `legacy_entry_retired` / exit2，不提供新的 SQLite headless 宿主；运维流程须去掉旧脚本。所选 env 文件的 `DAA_RUNTIME_MODE=legacy_snapshot` 作为旧残留忽略并一次提示键名；进程显式该值返回 `legacy_runtime_retired` / exit2，请删除覆盖后普通启动。空值/local_sqlite 接受，其余非空值拒绝。其它旧 DB/write/autostart/endpoint/Backend/log-path 值不再消费或决定业务，真实 `.env` 不改写。Vite 使用 `envDir:false`，不消费旧 `VITE_DAA_*` 业务输入。
+## 状态与边界
 
-## YAML常驻迁入退役
+[DAA-007 r2](plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2) 于 2026-10-30 获 Human Owner 验收，阶段 B 仅在该受控 DS 联调范围内完成；历史 checkpoint 缺失和来源未明事项仍按原任务记录。DAA-010 样本上报与 DAA-013 多 PLC 身份的具体版本和核验状态见 [DAA 计划](PLAN.zh-CN.md)。此次手册不改变 DAA-010 r5 的独立失败记录、Windows 原生待验证状态、完整阶段 C 或实际环境采用的各自 gate。
 
-DAA-007 r2将已完成的迁入退出普通bootstrap、engine、reload和保存链。旧 `DAA_PLC_CONFIG_PATH` / `DAA_PLC_SNAPSHOT_POLICY_PATH` 只按残留键名忽略，不构造locator、不探测/读取/散列YAML，也不再为新空profile迁入 `PLC_1` 或写receipt/ETag。正常四页无迁入故障入口、弹窗或重试。旧YAML样例和算法仅作为历史材料/测试保留，不再是活动配置。
-
-既有SQLite私有receipt、source archive及保留前缀继续受保护，不清理或重编码。具名兼容摘要仅在显式调用时只读本profile SQLite，返回真实历史状态且 `retryAllowed=false`；兼容retry写前返回 `yaml_retry_forbidden`。业务配置权威仍是UI+SQLite，普通编辑导入仅显式接受 `.db/.udt`，经结构/地址审阅和分组后另行激活、连接与启采。[最小DB/UDT样例](src-tauri/tests/fixtures/source-import-minimal/README.zh-CN.md)仍是手写受控清单，不证明真实TIA/PLC兼容。
-
-### 历史仓内示例（已退出普通启动链）
-
-以下是保留的[plc_points.yaml](config/plc_points.yaml)及[旧policy](config/plc_snapshot_policy.yaml)三点脱敏示例说明，文件没有采样值或历史。DAA-007 r2普通启动不构造locator、不读取/散列/迁入这些文件，真正空profile保持空业务配置；旧YAML键不改变该行为。
-
-| 默认示例 | 值 |
-| --- | --- |
-| PLC / 连接候选 | `PLC_1`，`127.0.0.1:102`，rack 0 / slot 1 |
-| DB / 组 / 旧读取窗口 | DB1，`example_group`，start 0 / size 12，3 点；窗口不是完整 DB 长度证明 |
-| 点 1 | `example_value`，旧类型 `Real`，offset 0 |
-| 点 2 | `example_status`，旧类型 `Bool`，offset 4 / bit 0 |
-| 点 3 | `example_counter`，旧类型 `DInt`，offset 8 |
-| 3 点的退役策略 | raw/latest=true，raw_policy=`every_sample`；仅白名单归档，不转成新采样/上报/直库规则 |
-
-## 本地采集与恢复
-
-四页只有 `useLocalAcquisitionConsole` 一个 owner；纯 shell 只管导航/主题/语言（`daa.theme` / `daa.locale`）。浏览器无桥预览不假保存、不请求 Backend/health；bootstrap 失败单独显示。首次快照失败为尚未加载；后续失败保留最近成功值并显示陈旧；仅一个 1Hz 刷新源。
-
-新空 profile 创建 config SQLite v2/runtime SQLite v3；既有 v2/v2 继续本地能力，不运行投递 DDL 或迁移。DELETE/EXTRA、身份/profile 锁、采集配置 CAS、PLC 串行 actor 与完整轮原始事实保持。启动停采停传。六张同 runtime 投递表承载独立设置、有界冻结请求与严格回执，见[局部存储说明](src-tauri/src/infrastructure/local_store/README.zh-CN.md)。
-
-限额仍为 4 PLC、每 PLC 8 组/32 DB/4096 叶、每组 256 启用点、周期≥500ms。只有完整有效回执才能确认样本，没有人工 ACK 或清空队列。容量包含投递元数据及额外 32 MiB 恢复预留；pending 不因保留期删除。这是准入限额，不证明现场吞吐或断电安全。
-
-## 隔离验证边界
-
-DAA-008 r2 在 A-only 候选中新增已批准的新建 Unix sealed profile 受控恢复机制。[tasks](plans/DAA-008-reliable-facts-upload/tasks.md)保留 r1 hot-journal 原失败与本轮增量自检；r2 独立核验另行记录。既有 profile 不补封或迁移。不要删 journal/marker、改版本或用旧二进制打开 sealed profile。实际 HTTP/DS/MySQL/Docker、原生视觉及完整阶段 C 均未获本轮运行授权/验证。[阶段 C 手册](STAGE_C_GUIDE.zh-CN.md)说明恢复限度及未来显式操作顺序。
-
-`pnpm build --config vite.validation.config.ts --outDir <绝对临时dist> --emptyOutDir` 继续隔离 env。非默认 debug `local-validation` 保留原固定fixture、绝对tmp路径/owner marker/继承env拒绝/release编译拒绝；不会自动发现源码根 YAML。原CLI/二进制及必需参数保持，不能真实传输、执行任意SQL或ACK。DAA-003历史原生迁入/保存重开证据使用其自有tmp env/profile和read gate=false；r2已退役普通迁入，browser/fixture不替代它。本次受控DS范围之外，真实PLC/实际profile迁移、Backend/SMA、C阶段、自动启动策略、生产DB/API、现场切换、Docker/Git/发布/部署及跨平台签名另行批准。
-
-## 多 DB 源码编辑与标准偏移
-
-在点位与采集组页先保存或取消当前编辑，选择PLC后选取`.db/.udt`。Rust自动识别声明，原区域逐DB显示勾选和实际编号（1–65535）；新编号为空，不从名称/日期猜号。UDT仅作依赖摘要，不填编号。10/20/50分页保持跨页勾选/编号。源正文有变时显式选择原已有目标；仅文件名相同不构成更新身份。
-
-预览弹窗展示完整所选差异、定位诊断、人工配置保留和默认折叠的结构树。关闭零写并保留文件选择；一次显式确认仅把所选完整块作为草稿原子保存，不启用点、不激活、不采集。任一所选致命问题阻断整次提交，可取消局部错误块后导入合法子集；文件边界不安全则整文件阻断。编辑/映射变化、重载、旧ETag或过期/不匹配预览token均需重新预览。
-
-有界语法包括UTF-8/BOM、LF/CRLF原字节保留、多命名DATA_BLOCK/TYPE、VERSION、NON_RETAIN/RETAIN、白名单布尔S7_SetPoint字段属性、STRUCT、无环UDT及一维常量数组（允许负/非零下界）。未知语法/属性/类型、字段歧义、依赖缺失/循环/重复、嵌套/多维数组及超限均拒绝。初值/BEGIN不执行、不作为采样值；不是完整TIA编译器。
-
-重导保留稳定DB/point ID、用户名/备注、组、开关、人工地址值/理由；无变化保留ETag。增叶、类型/顺序/布局依赖变化使整个所选DB的既有地址确认失效。删叶/改叶名、改块名、已有DB改号均阻断并保留原配置。来源为不可变逻辑版本，逐DB冻结UDT闭包；未选DB和其他PLC保留原来源/树/地址。相同字节可跨逻辑source/PLC复用物理归档，不覆盖原归档元数据。既有SQLite历史、active版本及私有YAML回执保持。
-
-“预览标准布局偏移”→“确认非人工偏移”是独立两步草稿操作，弹窗展示路径、旧/建议地址、计算/当前DB长度和人工冲突。Siemens STEP7 V20标准word profile要求完整、明确非优化、闭包来源重证；支持BOOL、BYTE/USINT/CHAR、INT/UINT/WORD、DINT/UDINT/DWORD/REAL、嵌套STRUCT/UDT及一维标量/STRUCT/UDT数组。STRING仍可导入/人工地址，但整DB不推算；优化/未知/不完整布局亦整块拒绝。完整树校核容器/数组padding与DB边界；人工地址不改变理论游标、不批量覆盖，理由保留。仅无人工地址且完整非人工集合确认时更新DB长度。真实PLC地址仍需另行现场校核。
-
-[手写多DB样例与先行布局oracle](src-tauri/tests/fixtures/source-import-multi-db/README.zh-CN.md)记录有限profile。新增可选JSON lineage/binding不需DDL，读取旧v1不会自动写回；新程序读旧数据不等于旧binary能读新元数据，降级另核。来源版本仍计入128来源、16MiB配置及物理写预算，不删除未选来源腾空间。
-
-DAA机器身份仍是opaque `point.id`，历史样本字典亦按ID。`name`现为ASCII技术名称，`sourcePath`保留原路径及中文。无可选JSON `nameMode`的存量仍是legacy，只有明确选中才转换；读取/重启/无关保存不转换。新合法结构路径立即成名；中文、数组、标点及超长路径停用/pending且name为空，既有地址确认在同一草稿事务中生成地址名。manual为显式ASCII人工改名；完整PLC namespace包含停用/legacy/manual，最终冲突整次拒绝。enabled pending阻断激活，停用pending和未选legacy保持原准入边界。
-
-点位页按稳定ID勾选，跨页保留（10/20/50），预览旧→新和冲突后显式确认；取消零写、保留选择。原编辑器预览有限用户字段patch并与派生名一起保存；原偏移确认同时成名，无第三次确认。token300秒过期并绑定输入/ETag。None/manual在重导、无关地址/类型变化后保名；直接受影响的managed遵循固定profile。旧历史/receipt/active版本原bytes不改，新元数据的旧binary降级需另证。
-
-[共享导入核心](../shared/tia-import-core/README.zh-CN.md)只保留一套纯parser/展开/布局/命名，DAA保留不可变源证明、闭包、ID及SQLite/CAS。没有DDL/第二技术key或YAML运行模式。共享本身不授予DS产品接受；本次所需DS基线及DAA–DS读取至SQLite闭环已分别接受，阶段B结论归DAA-007。Backend plc-facts/v1 合同现已固定并获 Owner 接受；DAA-008 负责 A0/A1 上传器候选，实际阶段 C 联调仍需具体 B 批准。
-
-普通`pnpm tauri dev`使用本仓package→Tauri beforeDevCommand→Vite15191与`src/main.ts`及本仓`src-tauri`入口。验收不自动复制临时代码或更新安装包。旧`yaml_migration_*`日志仅属于历史迁入；r2普通启动不再产生迁入事件。`runtime_started` stopped和`runtime_stopped` clean描述启动意图和正常关闭，不表示失败。
-
-## 阶段 B 联调操作手册（已验收基线）
-
-[联调手册](JOINT_TEST_GUIDE.zh-CN.md)随2026-10-30最终验收在本次受控DS范围定稿。[tasks](plans/DAA-007-ds-joint-validation-and-time-contract/tasks.md)保留实际开发/Owner/闭库事实，[checklist](plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2)记录AC01–AC22独立核验、8590份样本/4295轮完整重开比较与真实Owner决定。历史checkpoint缺失和15:27来源未明继续跟踪；原联调profile及SQLite配置/历史保留，阶段C/自动启动/现场另项。
-
-已接受的阶段 B 基线当时初始化两库 v2；DAA-008 现在仅为新空 profile 建 config2/runtime3。time_profile 仍为 `asia-shanghai-rfc3339-ms-v1`，样本/manifest=2，配置/context及IPC envelope=1。日历时间固定上海毫秒 `+08:00`，savedAt 为同轮持久化事务内生成时间；stdout 保留纳秒、文件日志保留毫秒。未知/旧 UTC 合同、单库或身份异常在业务写入前拒绝。唯一恢复例外是凭据有效的新 sealed profile、SQLite 原始扩展错误精确776，在原 profile 锁下原生恢复后全量只读核账；sealed cold 也执行同等级后检。原配置/历史不迁移、不旁建替代库，迁移、重绑及降级另批。
-
-历史、陈旧快照和最老待传时间按上海`YYYY-MM-DD HH:mm:ss`显示。历史筛选以上海墙上时间解释，终止秒包含`.999`，原详情JSON/SHA保持。当前历史、样本与投递表提供普通列拖拽、最小宽、横滚、本机应用/表/稳定字段隔离偏好和恢复默认，不写SQLite业务配置。联调沿用手册原Owner合成profile，由Owner一次手工填写应用根.env，之后正常短命令启动；默认profile不属于本次操作范围。
+本地样本、上报队列和可靠回执保留在所选 profile；只有与样本匹配的可靠回执才能确认上报。真实设备、实际数据库迁移、部署和生产运行按各自授权办理。

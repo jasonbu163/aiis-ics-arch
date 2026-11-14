@@ -34,13 +34,27 @@
               <el-option v-for="db in dbNumbers" :key="db" :label="`DB${db}`" :value="db" />
             </el-select>
           </el-form-item>
-          <el-form-item :label="$t('acquisition-data.from')">
-            <el-input v-model="from" class="date-standard" :aria-label="$t('acquisition-data.from')" :placeholder="$t('acquisition-data.dateTimePlaceholder')" clearable @keydown.enter.prevent="submit" />
-            <el-input v-model="from" class="date-narrow" type="textarea" :rows="3" :aria-label="$t('acquisition-data.from')" :placeholder="$t('acquisition-data.dateTimePlaceholder')" @keydown.enter.prevent="submit" />
+          <el-form-item class="date-form-item" :label="$t('acquisition-data.from')">
+            <div class="date-standard">
+              <el-input v-model="from" :aria-label="$t('acquisition-data.from')" :placeholder="$t('acquisition-data.dateTimePlaceholder')" clearable @keydown.enter.prevent="submit" />
+              <button class="date-picker-button" type="button" :aria-label="$t('acquisition-data.selectFromDateTime')" :title="$t('acquisition-data.selectFromDateTime')" @click="openDateTimePicker(fromPicker, 'from')"><el-icon><Calendar /></el-icon></button>
+            </div>
+            <div class="date-narrow">
+              <el-input v-model="from" type="textarea" :rows="3" :aria-label="$t('acquisition-data.from')" :placeholder="$t('acquisition-data.dateTimePlaceholder')" @keydown.enter.prevent="submit" />
+              <button class="date-picker-button" type="button" :aria-label="$t('acquisition-data.selectFromDateTime')" :title="$t('acquisition-data.selectFromDateTime')" @click="openDateTimePicker(fromPicker, 'from')"><el-icon><Calendar /></el-icon></button>
+            </div>
+            <input ref="fromPicker" class="date-native-picker" :class="{ 'is-visible': pickerFallback === 'from' }" type="datetime-local" step="1" :value="toNativeDateTime(from)" :aria-label="$t('acquisition-data.selectFromDateTime')" :tabindex="pickerFallback === 'from' ? 0 : -1" @input="selectDateTime('from', $event)">
           </el-form-item>
-          <el-form-item :label="$t('acquisition-data.to')">
-            <el-input v-model="to" class="date-standard" :aria-label="$t('acquisition-data.to')" :placeholder="$t('acquisition-data.dateTimePlaceholder')" clearable @keydown.enter.prevent="submit" />
-            <el-input v-model="to" class="date-narrow" type="textarea" :rows="3" :aria-label="$t('acquisition-data.to')" :placeholder="$t('acquisition-data.dateTimePlaceholder')" @keydown.enter.prevent="submit" />
+          <el-form-item class="date-form-item" :label="$t('acquisition-data.to')">
+            <div class="date-standard">
+              <el-input v-model="to" :aria-label="$t('acquisition-data.to')" :placeholder="$t('acquisition-data.dateTimePlaceholder')" clearable @keydown.enter.prevent="submit" />
+              <button class="date-picker-button" type="button" :aria-label="$t('acquisition-data.selectToDateTime')" :title="$t('acquisition-data.selectToDateTime')" @click="openDateTimePicker(toPicker, 'to')"><el-icon><Calendar /></el-icon></button>
+            </div>
+            <div class="date-narrow">
+              <el-input v-model="to" type="textarea" :rows="3" :aria-label="$t('acquisition-data.to')" :placeholder="$t('acquisition-data.dateTimePlaceholder')" @keydown.enter.prevent="submit" />
+              <button class="date-picker-button" type="button" :aria-label="$t('acquisition-data.selectToDateTime')" :title="$t('acquisition-data.selectToDateTime')" @click="openDateTimePicker(toPicker, 'to')"><el-icon><Calendar /></el-icon></button>
+            </div>
+            <input ref="toPicker" class="date-native-picker" :class="{ 'is-visible': pickerFallback === 'to' }" type="datetime-local" step="1" :value="toNativeDateTime(to)" :aria-label="$t('acquisition-data.selectToDateTime')" :tabindex="pickerFallback === 'to' ? 0 : -1" @input="selectDateTime('to', $event)">
           </el-form-item>
           <el-form-item class="filter-actions"><ActionButton variant="primary" :disabled="optionsState !== 'ready' || !options.length" :loading="state === 'loading'" @click="submit">{{ $t('acquisition-data.query') }}</ActionButton></el-form-item>
         </el-form>
@@ -91,8 +105,8 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, ref, watch } from 'vue'
-import { QuestionFilled } from '@element-plus/icons-vue'
+import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { Calendar, QuestionFilled } from '@element-plus/icons-vue'
 import ActionButton from '@/components/common/ActionButton.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
 import { formatShanghaiDateTime, shanghaiInputToRfc3339 } from '@/utils/date'
@@ -101,7 +115,7 @@ import { getHistory, getHistoryDetail } from '../../api/index'
 import { useAcquisitionScope, requestStatus, sourceKey } from '../../composables/useAcquisitionScope'
 import HistoryDetailDialog from './HistoryDetailDialog.vue'
 
-const { pageRoot, pagePadding, options, optionsState, plcId, dbNumber, dbNumbers, selection, loadOptions } = useAcquisitionScope()
+const { pageRoot, pagePadding, options, optionsState, plcId, dbNumber, dbNumbers, selection, loadOptions } = useAcquisitionScope('history')
 const columns = useTableColumnWidths('acquisition-data.history', {
   plcId: { width: 190, minWidth: 120 }, dbNumber: { width: 100, minWidth: 80 }, sourceType: { width: 140, minWidth: 120 },
   sampleId: { width: 260, minWidth: 150 }, sampledAt: { width: 200, minWidth: 170 },
@@ -110,6 +124,9 @@ const columns = useTableColumnWidths('acquisition-data.history', {
 const now = Date.now()
 const from = ref(formatShanghaiDateTime(new Date(now - 24 * 60 * 60 * 1000)))
 const to = ref(formatShanghaiDateTime(new Date(now)))
+const fromPicker = ref(null)
+const toPicker = ref(null)
+const pickerFallback = ref('')
 const rows = ref([])
 const state = ref('idle')
 const page = ref(1)
@@ -122,6 +139,27 @@ let submitted = null
 let selectedId = ''
 let sequence = 0
 let detailSequence = 0
+
+// datetime-local 是无时区的日历值，只做文本转换，避免按电脑时区改变上海时间。
+function toNativeDateTime(value) {
+  return shanghaiInputToRfc3339(value) ? value.replace(' ', 'T') : ''
+}
+function selectDateTime(field, event) {
+  const raw = event.target.value
+  if (raw && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?$/.test(raw)) return
+  let value = raw.replace('T', ' ')
+  if (value && value.length === 16) value += ':00'
+  if (value && !shanghaiInputToRfc3339(value)) return
+  if (field === 'from') from.value = value
+  else to.value = value
+}
+function openDateTimePicker(input, field) {
+  if (typeof input?.showPicker === 'function') {
+    try { input.showPicker(); return } catch { /* 显示原生输入框供手动打开 */ }
+  }
+  pickerFallback.value = field
+  nextTick(() => input?.focus())
+}
 
 function clearDetail() {
   detailSequence++
@@ -221,7 +259,15 @@ onBeforeUnmount(() => { sequence++; detailSequence++ })
 .data-card :deep(.table-actions) { min-width: 0; max-width: 100%; flex-wrap: wrap; }
 .data-card :deep(.table-actions .action-button) { max-width: 100%; min-height: 40px; height: auto; padding-block: 8px; white-space: normal; overflow-wrap: anywhere; }
 .plc-option { height: auto; min-height: 34px; padding-block: 6px; line-height: 1.4; white-space: normal; overflow-wrap: anywhere; }
+.date-standard { display: flex; align-items: center; width: 100%; gap: 4px; }
+.date-standard :deep(.el-input) { min-width: 0; flex: 1; }
 .date-narrow { display: none; }
+.date-form-item :deep(.el-form-item__content) { position: relative; }
+.date-picker-button { display: inline-flex; align-items: center; justify-content: center; padding: 2px; border: 0; background: transparent; color: var(--text-secondary); font-size: 16px; cursor: pointer; }
+.date-picker-button:hover { color: var(--primary); }
+.date-picker-button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.date-native-picker { position: absolute; top: 50%; right: 4px; width: 1px; height: 1px; padding: 0; border: 0; opacity: 0; pointer-events: none; }
+.date-native-picker.is-visible { position: static; width: 100%; height: 32px; margin-top: 8px; padding: 4px 8px; border: 1px solid var(--border-secondary); border-radius: 4px; opacity: 1; pointer-events: auto; color: var(--text-primary); background: var(--el-fill-color-blank); }
 .filter-section { padding: 20px 24px; border-bottom: 1px solid var(--border-secondary); }
 .filter-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 16px; align-items: end; }
 .filter-form :deep(.el-form-item) { margin: 0; }
@@ -248,7 +294,8 @@ onBeforeUnmount(() => { sequence++; detailSequence++ })
 }
 @container (max-width: 250px) {
   .date-standard { display: none; }
-  .date-narrow { display: block; }
+  .date-narrow { display: flex; align-items: flex-start; width: 100%; gap: 4px; }
+  .date-narrow :deep(.el-textarea) { min-width: 0; flex: 1; }
   .date-narrow :deep(.el-textarea__inner) { padding: 6px 4px; resize: none; }
 }
 </style>

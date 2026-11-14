@@ -12,12 +12,10 @@
     <template #topbar>
       <AgentTopbar
         :active-section="activeSectionManifest"
-        :backend-status-text="backendStatusText"
         :is-dark-theme="isDarkTheme"
         :is-sidebar-hidden="isSidebarHidden"
         :locale-switch-label="localeSwitchLabel"
         :app-locale="appLocale"
-        :mode-status-text="modeStatusText"
         :theme-switch-label="themeSwitchLabel"
         :refresh-busy="refreshBusy"
         @refresh-runtime="emit('refresh-runtime')"
@@ -37,11 +35,9 @@ import AgentSidebar from '../components/shell/AgentSidebar.vue'
 import AgentTopbar from '../components/shell/AgentTopbar.vue'
 const props = defineProps<{
   activeSection: ConsoleSectionId
-  backendStatusText: string
   isDarkTheme: boolean
   localeSwitchLabel: string
   appLocale: 'zh-CN' | 'en-US'
-  modeStatusText: string
   identityDetail: string
   sections: ConsoleSectionManifest[]
   themeSwitchLabel: string

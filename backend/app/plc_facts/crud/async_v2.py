@@ -1,9 +1,10 @@
 """v2 异步数据库访问；事务由 Service 持有。"""
-from sqlalchemy import and_, case, cast, false, func, or_, select, text
+from sqlalchemy import and_, case, cast, false, func, or_, select, text, union
 from sqlalchemy.dialects.mysql import CHAR, insert
 from sqlalchemy.orm import load_only
 
 from ..models.v2 import LatestPointV2, SampleV2
+from ..models.source_registry import PlcSourceRegistry
 from ..v2_config import REVISION
 from ..v2_domain import V2Error, stored_points, stored_value
 
@@ -91,19 +92,33 @@ async def latest(db, plc, number, source, now, point_id=None):
     return list((await db.execute(statement)).scalars())
 
 
-def scope_condition(model, scope):
-    return or_(false(), *(and_(model.plc_id == key(plc), model.db_number.in_(sorted(numbers)))
-                          for plc, numbers in scope.items() if numbers))
+async def options(db, now, view=None):
+    history = (select(SampleV2.plc_id, SampleV2.db_number)
+               .where(SampleV2.expires_at > now))
+    if view == 'history':
+        actual = history.distinct().subquery()
+        return (await db.execute(select(actual.c.plc_id, actual.c.db_number)
+                                 .order_by(actual.c.plc_id, actual.c.db_number))).all()
+    history = history.join(PlcSourceRegistry, SampleV2.plc_id == PlcSourceRegistry.plc_id)
+    latest = (select(LatestPointV2.plc_id, LatestPointV2.db_number)
+              .join(PlcSourceRegistry, and_(
+                  LatestPointV2.plc_id == PlcSourceRegistry.plc_id,
+                  LatestPointV2.instance_id == PlcSourceRegistry.instance_id,
+                  LatestPointV2.source_generation == PlcSourceRegistry.source_generation))
+              .where(LatestPointV2.expires_at > now))
+    actual = union(history, latest).subquery()
+    return (await db.execute(select(actual.c.plc_id, actual.c.db_number)
+                             .order_by(actual.c.plc_id, actual.c.db_number))).all()
 
 
 async def browse_latest(db, scope, sources, search, page, page_size, now):
     active = []
     for plc, numbers in scope.items():
         source = sources.get(plc)
-        allowed_numbers = numbers if source is not None else frozenset()
-        if allowed_numbers:
+        if source is not None:
             active.append(and_(
-                LatestPointV2.plc_id == key(plc), LatestPointV2.db_number.in_(sorted(allowed_numbers)),
+                LatestPointV2.plc_id == key(plc),
+                *([] if numbers is None else [LatestPointV2.db_number.in_(sorted(numbers))]),
                 LatestPointV2.instance_id == key(source[0]),
                 LatestPointV2.source_generation == key(source[1]),
             ))
@@ -124,9 +139,12 @@ async def browse_latest(db, scope, sources, search, page, page_size, now):
     return total, list((await db.execute(statement)).scalars())
 
 
-async def history(db, scope, start, end, page, page_size, now):
-    predicates = (scope_condition(SampleV2, scope), SampleV2.sampled_at >= start,
-                  SampleV2.sampled_at < end, SampleV2.expires_at > now)
+async def history(db, plc, number, start, end, page, page_size, now):
+    predicates = [SampleV2.sampled_at >= start, SampleV2.sampled_at < end, SampleV2.expires_at > now]
+    if plc is not None:
+        predicates.append(SampleV2.plc_id == key(plc))
+    if number is not None:
+        predicates.append(SampleV2.db_number == number)
     total = (await db.execute(select(func.count()).select_from(SampleV2).where(*predicates))).scalar_one()
     offset = (page - 1) * page_size
     if offset >= total:

@@ -232,6 +232,10 @@ fn leaf_matches(nodes: &[FieldNode], path: &str, typ: &str) -> bool {
     })
 }
 pub(crate) fn validate(c: &Configuration) -> Vec<Issue> {
+    validate_for_runtime(c, 3)
+}
+/// 旧 profile 保留原组限额；runtime4 按 DB 限额及完整轮资源预算检查。
+pub(crate) fn validate_for_runtime(c: &Configuration, runtime_version: u32) -> Vec<Issue> {
     let mut out = vec![];
     let mut err = |code: &str, path: &str| out.push(issue(code, path));
     if c.schema_version != 1
@@ -284,7 +288,7 @@ pub(crate) fn validate(c: &Configuration) -> Vec<Issue> {
             .iter()
             .filter(|p| p.enabled && p.group_id.as_deref() == Some(&g.id))
             .collect();
-        if ps.len() > 256 {
+        if runtime_version != 4 && ps.len() > 256 {
             err("group_limits", &g.id)
         }
         if let Ok(s) = segments(c, g) {
@@ -293,24 +297,56 @@ pub(crate) fn validate(c: &Configuration) -> Vec<Issue> {
             }
         }
         // Conservative encoded upper bound includes duplicated point definitions, maximum ASCII values and manifest keys.
+        let estimate = |p: &&Point| {
+            serde_json::to_vec(p)
+                .map(|b| {
+                    b.len() * 2
+                        + if p.data_type.starts_with("STRING[") {
+                            254 * 6 + 1024
+                        } else {
+                            1024
+                        }
+                })
+                .unwrap_or(usize::MAX / 16384)
+        };
         let encoded = ps
             .iter()
-            .map(|p| {
-                serde_json::to_vec(p)
-                    .map(|b| {
-                        b.len() * 2
-                            + if p.data_type.starts_with("STRING[") {
-                                254 * 6 + 1024
-                            } else {
-                                1024
-                            }
-                    })
-                    .unwrap_or(usize::MAX / 512)
-            })
-            .sum::<usize>()
-            + 8192;
-        if encoded > 512 * 1024 {
+            .map(estimate)
+            .fold(8192usize, usize::saturating_add);
+        if (runtime_version == 4 && encoded > 4 * 1024 * 1024)
+            || (runtime_version != 4 && encoded > 512 * 1024)
+        {
             err("encoding_budget", &g.id)
+        }
+        if runtime_version == 4 {
+            let mut per_db: BTreeMap<&str, (usize, usize)> = BTreeMap::new();
+            for p in &ps {
+                let entry = per_db.entry(&p.db_id).or_insert((0, 8192));
+                entry.0 += 1;
+                entry.1 = entry.1.saturating_add(estimate(p));
+            }
+            for (db, (count, bytes)) in per_db {
+                if count > 512 {
+                    err("db_point_limits", db);
+                }
+                if bytes > 2 * 1024 * 1024 {
+                    err("encoding_budget", db);
+                }
+            }
+        }
+    }
+
+    if runtime_version == 4 {
+        for db in &c.dbs {
+            let groups: BTreeSet<_> = c
+                .points
+                .iter()
+                .filter(|p| p.enabled && p.plc_id == db.plc_id && p.db_id == db.id)
+                .map(|p| p.group_id.as_deref())
+                .collect();
+            if groups.len() > 1 {
+                err("db_group_conflict", &db.id);
+            }
         }
     }
 

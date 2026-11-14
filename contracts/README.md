@@ -60,7 +60,7 @@ Each contract should use one of these statuses:
 
 ## PLC facts provider v2
 
-[PLC facts v2](published/http-api/plc-facts-v2/README.md) defines one complete PLC/DB sample per request and authorized acquisition-data reads. Its source and isolated verification are tracked under [ARCH-BE-012 r4](../plans/ARCH-BE-012-simplified-plc-facts/tasks.md).
+PLC facts v2 defines the raw sample intake for DAA and external producers and the PLC/DB-scoped acquisition reads. The contract explains required fields and includes a Swagger workflow with request and receipt JSON. [PLC facts v2](published/http-api/plc-facts-v2/README.md) · [Manual test](published/http-api/plc-facts-v2/README.md#manual-test-in-swagger) · [Development OpenAPI](published/http-api/plc-facts-v2/openapi-acquisition-dev.json)
 
 ## PLC facts provider v1
 
