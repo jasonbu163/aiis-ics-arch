@@ -241,12 +241,17 @@ The root `docker-compose.prod.yml` uses pinned Nginx with this directory's exist
 
 ## Business observation source selection
 
-Equipment's three dashboards and the monitor curve page persist
-`dataSource=legacy|http` and `equipmentId` in their URL. Default legacy preserves historical behavior and states
-that legacy rows have no business equipment identity. HTTP requires an explicit scoped key; invalid source,
-empty key, empty data, 403 and service failure never select another source or diagnostic mock. Switching clears
-previous data; request generations prevent late responses from repopulating the new selection. Missing values
-remain missing, including chart gaps and zero-valued real observations.
+The four equipment status pages display configured cards from scoped latest snapshots. Temperature, drive and
+cleaning monitoring display configured curves from separately retained process samples; energy samples are
+independent of tasks. Administrators configure stable metric keys, labels, cards and curves. Missing values remain
+missing, including chart gaps; a real zero remains a value. The current pages do not use a URL
+`dataSource=legacy|http` switch or default to legacy data. Existing historical contracts and the original energy
+statistics retain their own documented boundaries.
+
+The source-independent [v2 machine contract](../contracts/published/http-api/equipment-observation-v2/README.md)
+defines authorized HTTP ingestion for SMA, third parties and other programs; it does not claim that a particular
+SMA or PLC has been integrated. See the [r10 guide](../docs/equipment-status-process-monitoring.md#r10-guide) for
+configuration, display, history and access.
 
 The old coil performance source selector, weight edit, process dialog, split, print and efficiency pages are retired. Generic [Plan/Performance workflow](../contracts/published/http-api/generic-task-workflow-v1/README.md) uses task-bound definitions, the existing list paths, Shanghai business times, local table widths and draft preservation. Browser/API/database runtime proof remains a separately approved verification gate.
 

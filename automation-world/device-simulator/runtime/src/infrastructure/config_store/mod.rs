@@ -51,6 +51,13 @@ pub struct RevisionInfo {
     pub sha256: String,
     pub created_utc: String,
 }
+/// 来自同一已保存行的原始字节、摘要与解析结果；导出不得重新序列化替代来源摘要。
+#[derive(Clone, Debug)]
+pub struct RevisionSnapshot {
+    pub revision: RevisionInfo,
+    pub payload: Vec<u8>,
+    pub workspace: Workspace,
+}
 type Reply<T> = mpsc::Sender<Result<T, String>>;
 enum Job {
     Revisions(u32, Reply<Vec<RevisionInfo>>),
@@ -66,6 +73,7 @@ enum Job {
         Reply<SaveResult>,
     ),
     Revision(String, Reply<Workspace>),
+    RevisionSnapshot(String, Reply<RevisionSnapshot>),
     Selections(Reply<Vec<Selection>>),
     Select(String, String, Option<String>, Reply<Selection>),
     Stop(Reply<()>),
@@ -153,6 +161,9 @@ impl Store {
                         }
                         Job::Revision(id, reply) => {
                             let _ = reply.send(queries::revision(&c, &id));
+                        }
+                        Job::RevisionSnapshot(id, reply) => {
+                            let _ = reply.send(queries::revision_snapshot(&c, &id));
                         }
                         Job::Selections(reply) => {
                             let _ = reply.send(queries::selections(&c));
@@ -257,6 +268,12 @@ impl Store {
     }
     pub fn revision(&self, id: &str) -> Result<Workspace, String> {
         self.request(|r| Job::Revision(id.into(), r), "storage_query_timeout")
+    }
+    pub fn revision_snapshot(&self, id: &str) -> Result<RevisionSnapshot, String> {
+        self.request(
+            |r| Job::RevisionSnapshot(id.into(), r),
+            "storage_query_timeout",
+        )
     }
     pub fn selections(&self) -> Result<Vec<Selection>, String> {
         self.request(Job::Selections, "storage_query_timeout")

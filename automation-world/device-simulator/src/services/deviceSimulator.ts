@@ -31,6 +31,8 @@ export interface Point {
     id: string;
     name: string;
     displayName: string;
+    displayNames?: { 'zh-CN': string; 'en-US': string };
+    description?: string;
     dataType: string;
     enabled: boolean;
     sourcePath: string;
@@ -211,6 +213,12 @@ export interface Response<T> {
     currentEtag: string | null;
     data: T | null;
 }
+export interface SaveResult {
+    result: 'saved' | 'unchanged';
+    etag: string;
+    revisionId: string | null;
+    cleanupPending?: string[];
+}
 export class IpcFailure extends Error {
     constructor(public code: string, public currentEtag: string | null = null, public unknown = false) { super(code); }
 }
@@ -227,7 +235,7 @@ const operation = <T>(payload: T) => ({ operationId: crypto.randomUUID(), payloa
 export const getBootstrap = () => call<Bootstrap>('ds_get_bootstrap');
 export const getSnapshot = (instanceId: string | null = null, offset = 0, limit = 50) => call<RuntimeSnapshot>('ds_get_runtime_snapshot', { instanceId, offset, limit });
 export const getConfiguration = (revisionId: string | null = null, revisionOffset = 0) => call<Configuration>('ds_get_configuration', { revisionId, revisionOffset });
-export const saveConfiguration = (expectedEtag: string, workspace: Workspace, confirmPoints: string[]) => call('ds_save_configuration', operation({ expectedEtag, workspace, confirmPoints }));
+export const saveConfiguration = (expectedEtag: string, workspace: Workspace, confirmPoints: string[]) => call<SaveResult>('ds_save_configuration', operation({ expectedEtag, workspace, confirmPoints }));
 export interface DeclarationRef { inputId: string; declarationIndex: number; }
 export interface DependencyIssue { code: string; path: string; typeName: string; candidates: DeclarationRef[]; }
 export const previewImport = (payload: unknown, analyzeOnly = false) => call<{
@@ -269,3 +277,34 @@ export const queryLogs = (offset = 0, limit = 50, event: string | null = null) =
     configurationPath: string;
     storageBytes: string | null;
 }>('ds_query_logs', { offset, limit, event });
+
+/** DS-003 只读保存版本及短期导出票据；目标目录只能由原生选择器提供。 */
+export interface CatalogInstance {
+    instanceId: string; name: string; host: string; port: number; rack: number; slot: number;
+    localTsap: number; remoteTsap: number; selectedRevision: string | null; loadedRevision: string | null;
+    dbCount: number; pointCount: number;
+}
+export interface CatalogTarget {
+    instanceId: string; host: string; port: number; rack: number; slot: number;
+    connectionConfirmed: boolean; loadedDifferenceConfirmed: boolean;
+}
+export interface CatalogPoint {
+    id: string; name: string; displayName: string; displayNames: {'zh-CN': string; 'en-US': string} | null;
+    description: string | null; dataType: string; sourcePath: string; byte: number | null; bit: number | null; enabled: boolean;
+}
+export interface CatalogDb { id: string; name: string; number: number; length: number; enabled: boolean; points: CatalogPoint[]; }
+export interface CatalogRow {
+    instanceId: string; name: string; selectedRevision: string | null; loadedRevision: string | null;
+    loadedDiffers: boolean; loopback: boolean; nonDefaultTsap: boolean; localTsap: number; remoteTsap: number;
+    dbCount: number; pointCount: number; dbs: CatalogDb[]; document: Record<string, unknown> | null;
+    issues: {code: string; dbId: string | null; pointId: string | null}[]; byteCount: number | null; fileSha256: string | null;
+}
+export interface CatalogRevision { revisionId: string; savedSeq: string; createdUtc: string; sha256: string; }
+export interface CatalogPreview { token: string; revision: CatalogRevision; rows: CatalogRow[]; }
+export interface CatalogDirectory { rows: {instanceId: string; filename: string; conflict: boolean; valid: boolean}[]; }
+export interface CatalogResult { rows: {instanceId: string; filename: string; result: 'written' | 'failed' | 'unknown'; errorCode: string | null; cleanupPending: string | null; fileSha256: string | null}[]; }
+export const catalogRevision = (revisionId: string) => call<{revision: CatalogRevision; instances: CatalogInstance[]}>('ds_catalog_revision', operation({revisionId}));
+export const catalogPreview = (revisionId: string, targets: CatalogTarget[]) => call<CatalogPreview>('ds_catalog_preview', operation({revisionId, targets}));
+export const catalogChooseDirectory = (token: string) => call<CatalogDirectory | 'cancelled'>('ds_catalog_choose_directory', operation({token}));
+export const catalogCommit = (token: string) => call<CatalogResult>('ds_catalog_commit', operation({token}));
+export const catalogCancel = (token: string) => call('ds_catalog_cancel', operation({token}));

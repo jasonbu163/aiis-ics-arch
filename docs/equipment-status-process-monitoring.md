@@ -1,8 +1,47 @@
 # Equipment Status and Process Monitoring Discussion
 
-[中文](equipment-status-process-monitoring.zh-CN.md) · [Project documentation](README.md) · [ARCH-OBS-001 r6 specification](../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md)
+[中文](equipment-status-process-monitoring.zh-CN.md) · [Project documentation](README.md) · [ARCH-OBS-001 specification](../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md)
 
-2026-11-11 (Asia/Shanghai). This r6 review draft covers display, collection, storage and interfaces for a new project. The first version uses one deployment per project and starts with configuration and an empty database. D-06 adds third-party and SMA integration guidance under a documentation-only scope. The software design remains a draft. DDL, OpenAPI publication, implementation and first site enablement each require approval for their scope. [r6 §7.4 reading guide](../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md#74-长期阅读指南) · [D-06 delivery scope](../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md#r6-d-06-第三方与-sma-接入说明) · [D-05 delivery scope](../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md#r6-d-05-完整方案审阅稿)
+2026-11-17 (Asia/Shanghai). R10 is the current contract; prior sections remain historical. Independent verification, Human Owner final acceptance, field integration and production deployment are separate.
+
+<a id="r10-guide"></a>
+
+## Current r10 design and operations
+
+R10 accepts source-independent, multi-region bundles using stable `metricKey` scalar values. Equipment latest and history use the same body and independent receipts; energy is recorded per meter without `taskNo`. The older r6–r8 sections below are historical: their per-group snapshot, task-point evidence, `sampledAt` and mandatory SMA source statements do not describe r10. The [machine contract](../contracts/published/http-api/equipment-observation-v2/README.md) and [approved spec §12](../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md#r10-source-independent-energy) provide details. Code and synthetic tests do not establish SMA product, real PLC, production deployment or Human Owner final acceptance.
+
+| Data | Table and meaning | Interface |
+| --- | --- | --- |
+| Equipment snapshot | `equipment_status_main`: one row per `(equipment_id, task_no)`, whole-bundle replacement by a newer real `observed_at`. | Production, cleaning, temperature and drive share configurable cards. The default is the most recently sampled task; a user may select a task or follow the latest again. This does not assert production status. |
+| Process history | `process_monitor_main`: one accepted bundle per row, ordered by original `observed_at`; missing observations can form real gaps. | Temperature, drive and cleaning charts with configured same-unit series and region multi-selection. Selection does not change retention. |
+| Energy | `energy_consumption_main`: one meter/group/event per row, independent of tasks; each metric has its own cumulative, interval or instantaneous meaning. | Energy statistics, meter configuration and energy data management. Legacy energy and price functions keep their prior access rules. |
+
+Equipment JSON is nested by stable region key and target/region slot `01`–`100`. `equipment_metric_groups`, `equipment_metric_configs`, and `equipment_metric_slot_bindings` provide stable interpretation; card and curve tables control presentation separately. Used slots and physical meaning cannot be rebound. Disabling a region hides it but does not turn off history retention; the history slot switch controls retention. Units are optional, displayed with metric titles, and shown once for a shared axis. Zero, false and empty strings are preserved; missing is not zero.
+
+### Administrator setup
+
+1. With an appropriately scoped admin account, open Equipment Status → Configuration Management. Add enabled regions with stable keys, categories, bilingual names and order; register metrics with stable keys, bilingual names, types and optional units; bind and enable each required metric separately for `latest` and `history`. Each target has 100 slots per region. Set dynamic metric-column visibility and order in the relevant data management list.
+2. Configure a card's page, bilingual title and up to ten items. A stale value shows its actual sample time. Under Process Monitoring → Configuration Management, configure same-unit curve series, possibly from multiple regions. The region selector displays names in the active language while retaining stable `groupKey` values. Legends and tooltips identify each series by region and metric name; matching names include stable keys for distinction. Point tooltips show the original sample time; if the chart warns that the selected range cannot distinguish some coordinates, narrow the range. Hiding a region or curve affects presentation only; enable history slots independently.
+3. For energy, an environment owner first registers meters and reader scopes in a private profile. An admin configures each meter/group/metric's name, quantity, unit, measurement mode and applicable rules. Column visibility and order are configured here independently of whether writing is enabled. Cumulative consumption requires real interval boundaries and explicitly confirmed continuity/max gap. Missing boundaries, resets, uncertainty or conflicting same-time readings must not be reported as zero. Do not add two representations of the same consumption or sum instantaneous power as consumption.
+4. Human readers require `equipment-observation-read`, `monitor-observation-read` or `energy-consumption-read` plus the corresponding device/meter scope. Management requires admin and scoped record access. A machine token only discovers its own definitions and does not grant human sample or administration access.
+
+### Repeatable manual acceptance
+
+Use only an authorized local dev or isolated test environment. After migration and configuration, the usual local URLs are `http://127.0.0.1:5190` for the UI and `http://127.0.0.1:8000/api/v1` for the API; confirm the actual running services. With cleaned synthetic samples and an empty device/meter profile, empty states are expected. Choose previously unused, task-owned device, optional meter, region, metric, card, curve, producer, task and event identifiers; check for collisions and record exact keys. Configure a numeric actual/setpoint pair with latest/history slots and a same-unit chart. The private machine profile must grant all regions/metrics that whole-bundle replacement can clear. Replace the template target and token hash with correct private values, never commit actual credentials, and coordinate the required backend profile reload.
+
+The [Chinese walkthrough](equipment-status-process-monitoring.zh-CN.md#r10-guide) contains a concrete `curl` pair using the same JSON body and per-target receipts; substitute the task-owned keys and supply `OBS_MACHINE_TOKEN` securely outside the repository and shell history. Verify `outcome`, `recordId`, `stored` and `skipped`, discover authorized metrics with machine GET, select the device/task and inspect both cards and the two management lists. Choose a time range containing the sample for the two chart lines; a configured chart with no points must show empty axes rather than invented zero values. Latest administration changes remarks only; history supports remarks and abnormal/reviewed marks. Energy is a separate machine request described in the contract.
+
+Before cleanup, stop this test producer, verify no other writer is active, and reconcile the exact producer/target/event/device/task and returned row IDs. Delete only the matching test business rows and then their receipts; if energy was tested, include only the corresponding exact meter/event/row. Confirm no other rows, cards or curves depend on the task-owned metrics/region before removing their exact card, curve, binding, metric and group keys in dependency order. Restore or remove only the task-owned entries in the private profile while preserving concurrent edits. Stop on ambiguous ownership or other references; never truncate tables, delete a shared device's data or clear archive and price tables.
+
+### Migration and controlled recovery
+
+Original r8 latest, history and four configuration tables are retained as `_r8_archive`. Old history rows are converted individually at their original timestamps, never merged by presumed batch; v1 receipt fingerprints and result locations remain available, and new latest waits for a real bundle. Before migration verify target/revision, backups, legacy time semantics and writer quiescence. MySQL DDL implicitly commits: on any failure stop writes and retries, inventory the Alembic revision, tables, constraints, counts and archives, then reconcile executed steps manually; never blindly stamp, downgrade, drop or overwrite. Following a complete upgrade, recovery requires quiesced writers, preserved r10 writes, all original archives present and collision-free `_r10_preserved` names. The guarded recovery retains r10 rows and configuration; manual reconciliation is required before another cutover. Database revision, private profiles and the loaded backend version must agree during both cutover and recovery. Offline SQL is review-only and cannot replace online preflight.
+
+---
+
+## Historical discussion (r6–r8)
+
+The following material preserves the earlier assumptions. Where it differs, current r10 above and the approved specification take precedence.
 
 ## Reading guide
 
@@ -15,6 +54,7 @@
 - [Direct third-party writes: omitted and null fields](#third-party-ingest)
 - [First enablement and implementation sequence](#adoption)
 - [Manage latest snapshots and process history](#admin-lists)
+- [r7 task 000042 end-to-end walkthrough](#r7-walkthrough)
 
 <a id="metric-registry"></a>
 
@@ -102,8 +142,8 @@ The tables share fixed columns. Each table generates `id` as its row primary key
 
 | Value table | Writes and queries |
 | --- | --- |
-| `equipment_latest_snapshots` | Keeps one row per line, task and group. A newer sample replaces the collected fields and preserves the row `id` and remark. |
-| `monitor_history_samples` | Gives each valid append its own `id` and deduplicates by line, original task, group, capture time and source identity. Query by task number and paginate in capture-time and row-`id` order. |
+| `equipment_status_main` | Keeps one row per line, task and group. A newer sample replaces the collected fields and preserves the row `id` and remark. |
+| `process_monitor_main` | Gives each valid append its own `id` and deduplicates by line, original task, group, capture time and source identity. Query by task number and paginate in capture-time and row-`id` order. |
 
 Both tables share the metric registry `equipment_metric_configs`. The binding table `equipment_metric_slot_bindings` assigns slots `01`–`100` separately for each write destination and sampling group. Each value table stores slot keys and original JSON value types in its own `local_values` column. Missing items are omitted, while `0`, `false` and leading zeros in strings are preserved. A slot binding becomes fixed on first successful use. Once either destination stores a metric, its key, type and business unit are fixed for both. Disabling a binding stops new writes for that destination. The slot stays reserved and old values remain readable. Re-enabling uses the original binding.
 
@@ -142,6 +182,8 @@ Discovery GET requires an authenticated, enabled integration identity with write
 
 ## 5. First enablement and implementation sequence
 
+This section retains the r6 proposal; r7 §9 and section 7 govern first-version implementation and later SMA product integration.
+
 Prepare each line’s metrics, slot bindings, cards, curve groups, DAA points and SMA mappings. Latest snapshots and process history start from an empty database. Write admission stays closed until first approved enablement. After enablement, the first validated sample with a confirmed task creates its group’s latest snapshot. History starts with the first sample that also meets the whitelist and sampling policy. Without a qualifying sample, cards show an empty or missing-data state and history queries return empty series. [r6 §7.1 first enablement and data start](../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md#71-首次启用与数据起点)
 
 1. Finalize the interfaces, write admission, receipts, error codes, tables, slot bindings and project presets. Use the synthetic furnace zone 1 sample to cover actual temperature, setpoint temperature, optional readiness and a task changeover.
@@ -159,9 +201,72 @@ Equipment Status provides metric registration, slot binding and card configurati
 
 The latest snapshot list sits under Equipment Status, and the process history list sits under Process Monitoring. Only admins see the management entries. Both lists support filtering by task number, equipment or production line, and sampling group. The backend paginates both lists. Process history also supports filtering by capture time range. The fixed columns are task number, equipment, sampling group, capture time and data status. Details show the configured name, unit and captured value for each metric, along with its key, source, capture quality and management metadata.
 
+In each list, an admin can select bound metrics and their order under Metric columns. With no selection only fixed columns appear. Display settings do not change write admission; a stopped historical metric can still show stored values. Headers use the current language and optional unit; `0`, `false` and an empty string remain distinct from missing. Local column widths use stable metric keys separately for each table.
+
 | List | First-version editable fields |
 | --- | --- |
 | Latest snapshots | Remark only. An SMA update of the collected fields for the same equipment, task and group retains the administrator’s remark. |
 | Process history | Remark and management flags for marking a record abnormal or reviewed. These flags are stored and shown separately from source capture quality. |
 
 The backend checks login, admin permission and device access for list queries, detail views and edits. It rejects fields outside the editable set. Standard cards and curves use the usual business read permissions. Corrections to captured values are deferred. [r6 §4.3 management APIs and editable fields](../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md#43-实时快照与过程历史管理)
+
+<a id="r7-walkthrough"></a>
+
+## 7. Task 000042 end-to-end walkthrough
+
+This describes a synthetic scenario, not field enablement. See the [OpenAPI, bilingual contract and synthetic vectors](../contracts/published/http-api/equipment-observation-v1/README.md) and the [r8 specification](../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md#r8-dev-integration) for exact rules.
+
+1. **Configure the runtime.** Migrate a dedicated empty MySQL explicitly and provision an admin plus separate machine identities. A private, default-off profile pins the database identity, binds `line-01` to `plc-01`/DB 42/`point-active-task-no`, configures idle and task-point max age, and grants role-scoped device reads. Each writer has its own Bearer digest, kind, mapping and device/group/target/key grants. Device/group `groupSettings.staleAfterSeconds` is independent from the task-point age; `historyRules` supplies a whitelist and sender sampling interval. A request body cannot grant authority.
+2. **Register and arrange metrics.** An admin registers `furnaceZone1Actual` and `furnaceZone1Set` as numbers with bilingual labels and `°C`, optionally adding the Boolean `furnaceHeatingReady` for latest only. Bind the latest slots `01/02/03` and history slots `07/08`. Configure the temperature `zone1` card with bilingual title and the first two metrics, and a separate `zone1` curve group using those two same-unit lines. Cards support up to ten metrics; curve visibility and history retention are independent. First use locks a slot's meaning.
+3. **Prove the sampled task.** Synthetic v2 facts contain a task-point string `"000042"` and furnace points. The backend checks the bound device, instance, generation, source quality, event time and expiry. External writes use the latest eligible task observation at the original sampling time; SMA references one stored sample including the task point. The current card follows the confirmed current task; a late sample remains with its original task and unprovable attribution is rejected.
+4. **Discover and write twice.** Both identities call `GET /api/v1/integration/metric-definitions?equipmentId=line-01&groupKey=temperature&target=history` to discover the two allowed temperature keys, without stored values or internal slots. An external caller sends the minimal `external_event`, task, sample time and values; latest may omit quality, history explicitly needs `good`. The synthetic SMA submits a full envelope from a distinct v2 sample: latest includes temperatures plus `false`, history includes the two temperatures. Within each caller both requests reference the same source sample. Confirm and retry each target separately. The fixed-identity walkthrough is restricted to confirmed disposable fixtures and must not be run against the existing dev database; see the contract README.
+5. **Check storage and presentation.** For example SMA values `812.2` and `815.0` produce snapshot `local_values={"01":812.2,"02":815.0,"03":false}` and history `{"07":812.2,"08":815.0}`, with separate receipts and task evidence. Four Equipment Status pages share configurable cards: temperature displays the `zone1` title and two labels/values for current task `000042`, with units in titles only. The temperature, drive and cleaning process pages share curves filtered by task, device and time. A common unit appears once on the axis and missing sampling intervals create gaps. Per-group staleness uses the original sample time.
+6. **Apply read and management permissions.** Login plus `equipment-observation-read` grants scoped device options and cards; `monitor-observation-read` grants scoped process options, history and curves. Machine Bearers are for discovery and writes. Admins open the Web pages `/equipment/observations/admin` and `/monitor/observations/admin`. Their list APIs are `GET /api/v1/equipment/admin/latest-snapshots` and `GET /api/v1/monitor/admin/history-samples`, with corresponding detail APIs: latest permits only a remark; history permits a remark and `abnormal`/`reviewed` flag, not raw-value corrections. Global metric, binding, card and curve settings require admin. Device record lists, details and edits also enforce that admin's device scope; an empty scope permits global configuration and returns an empty record list.
+
+Seven tables are added; the [migration](../backend/alembic/versions/20261116_1800_8c0e2a4d6f18_add_equipment_observation.py) and [specification §10.2](../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md#r8-dev-integration) define all columns and constraints.
+
+| Table | Responsibility |
+| --- | --- |
+| `equipment_metric_configs` | Stable key, source group, type, bilingual labels, unit and decimals. |
+| `equipment_metric_slot_bindings` | Target/group slot 1–100, enablement and first use. |
+| `equipment_card_configs` | Card titles, ordering and ordered metric references for four pages. |
+| `monitor_curve_group_configs` | Curve titles, ordering and ordered series references for three pages. |
+| `equipment_status_main` | Latest row per device/task/group; replace values while retaining row ID and remark. |
+| `process_monitor_main` | Append and deduplicate source samples; retain remarks and review marks. |
+| `metric_ingest_receipts` | Per-target/producer/event digest, result, mapping, source and confirmed task evidence. |
+
+`taskNo` is the cross-system business key; row `id` remains the database primary key and coil number can be a separate string metric. Energy and acquisition-data keep their own contracts. Real SMA product delivery, field DAA wiring, adoption of existing environments and deployment require their own scope and verification.
+
+
+### Prerequisites for future SMA reads and DAA integration
+
+Synthetic client checks do not establish execution of the SMA product, DAA or a real PLC. The current [PLC facts v2 contract](../contracts/published/http-api/plc-facts-v2/README.md) defines development GET/POST without the retired `readScopes` or the observation Bearer. The observation machine interface separately grants equipment, group, target and metric keys. Submit and confirm latest and history independently.
+
+The source GET → target POST product execution and single-target integration described in [SMA-004](../automation-world/semantic-mapping-agent/PLAN.md) §7 and the [SMA future-stage plan](../automation-world/semantic-mapping-agent/plans/SMA-001-cu-integration-and-scope-cleanup/spec.md#4-后续阶段仅目标与依赖) require separate approval. SMA-004 currently authorizes local configuration and pure preview, not product delivery. [ARCH-ACQ-001 coordination](../plans/ARCH-ACQ-001-acquisition-data-coordination/spec.md) sets out the business streams and final connection. Under the [DAA-010 draft](../automation-world/data-acquisition-agent/plans/DAA-010-sample-facts-upload/spec.md), first pin the exact [ARCH-BE-012](../plans/ARCH-BE-012-simplified-plc-facts/spec.md) provider and machine-readable contract and confirm independent verification in its approved isolation environment and Human Owner final acceptance for that exact delivery. Then obtain approval of the precise DAA-010 revision and its implementation/integration, using a newly created disposable isolated profile for the first run rather than reusing or modifying an old profile.
+
+For controlled integration, reconcile each PLC/DB's DAA SQLite source sample and frozen request with Backend history and per-point latest, the corresponding successful or duplicate receipt, and durable SQLite confirmation. HTTP 200 or a displayed value alone does not prove local confirmation. Then verify the SMA-authorized facts GET, mapping, the observation module's two POSTs, each receipt, stored values and task attribution. The complete PLC/DS → DAA → Backend → SMA → business API chain also needs exact acceptance for the relevant APIs and approval for SMA product execution and cross-runtime integration. Check the latest authoritative record for each separate task before acting.
+
+<a id="r8-manual-acceptance"></a>
+
+## 8. Manual administrator acceptance
+
+Use the designated environment after r8 migration, an admin login and the operator-managed private OBS profile. Choose a **unique** device, PLC, instance, generation, task, metric, card and event namespace, verify there are no collisions and scope the temporary profile to the required device, target and metrics. Include both plotted metrics in the history whitelist. Record all objects and receipt IDs created by this run. Replace `-VERIFY-1` consistently with a new suffix and use the current Shanghai timestamp for all items in the sample. Do not run the fixed-identity `walkthrough.py` against an existing dev database.
+
+The empty-device profile permits admin configuration of global metrics, slots, cards and curves, but exposes no devices and admits no machine writes. To send your own acceptance data, have an operator populate `devices`, `readScopes.admin`, `producers`, `historyRules` and `groupSettings` following the [private profile example](../contracts/published/http-api/equipment-observation-v1/example-profile.json), keeping the target UUID, schema and revision matched to the database. Store only the independent token SHA-256 digest in the profile; keep the token private. Backend `.env` selects the private file with `OBSERVATION_PROFILE_FILE`; never commit real contents. The process caches profiles, so its owner reloads the backend after changes.
+
+1. Register the unique PLC, instance and generation in Acquisition Data → Sources. Bind the OBS device profile to the same PLC, DB and task point. In Equipment Status management add `number` metrics `obsActualVerify1` and `obsSetVerify1` in the `temperature` group with bilingual labels and units. Bind free latest and history slots, create a temperature card and a two-line process curve group. The private writer grants and history whitelist must include these metrics.
+2. Send one same-PLC/DB task and temperature sample to `POST /api/v1/integration/plc-facts/samples`. The current acquisition route uses its own contract and does not require the observation Bearer:
+
+   ```json
+   {"contractVersion":"plc-facts/v2","instanceId":"OBS-INSTANCE-VERIFY-1","sampleId":"OBS-SAMPLE-VERIFY-1","plcId":"OBS-PLC-VERIFY-1","dbNumber":42,"sourceGeneration":"OBS-GEN-VERIFY-1","sourceSeq":"1","points":[{"pointId":"obs-task","dataType":"STRING[50]","value":"OBS-TASK-VERIFY-1","quality":"good","observedAt":"2026-11-16T10:30:00+08:00"},{"pointId":"obs-actual","dataType":"REAL","value":810.2,"quality":"good","observedAt":"2026-11-16T10:30:00+08:00"},{"pointId":"obs-set","dataType":"REAL","value":815.0,"quality":"good","observedAt":"2026-11-16T10:30:00+08:00"}]}
+   ```
+
+3. With the authorized external Bearer, POST the same body below independently to `/api/v1/integration/equipment/latest-snapshots` and `/api/v1/integration/monitor/history-samples`. `quality=good` is valid for both. Check each `stored` receipt and retry the identical event per target; the backend maps keys to that target's slots. If the identity grants multiple devices/groups, also supply `equipmentId` and `groupKey`.
+
+   ```json
+   {"sourceRefs":[{"kind":"external_event","sourceEventId":"OBS-EXTERNAL-VERIFY-1"}],"data":{"taskNo":"OBS-TASK-VERIFY-1","sampledAt":"2026-11-16T10:30:00+08:00","quality":"good","values":{"obsActualVerify1":810.2,"obsSetVerify1":815.0}}}
+   ```
+
+   For the full SMA envelope, use the [same-sample reference example](../contracts/published/http-api/equipment-observation-v1/vectors.json); task and mapped points must be in the same sample.
+4. Check the current task and both values on the temperature card; filter the temperature curves by task and time. In each admin list enable the relevant metric columns, filter by task and check values, details, quality and remark/review mark. Display settings must not alter saved history; an expired task point must display an unconfirmed task.
+5. If cleanup is desired, an authorized operator must check the **exact recorded IDs and unique keys** and remove only this run's samples, receipts, configuration and source after confirming they are not referenced or taken over by another writer. Then handle this run's private temporary profile. Never delete by broad time range, whole table, entire device or other shared criterion. The acceptance owner may instead retain their own verification records according to local policy.

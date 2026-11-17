@@ -4,6 +4,8 @@
 
 运行配置仅含 `target`，其 `schemaRevision` 为 `7b9d1f3a5c7e`。管理员在「采集数据 → 来源配置」每台 PLC 登记 `plcId`、`instanceId`、`sourceGeneration` 和展示类型 `sourceType`。样本只匹配前三项，DB 随样本发送；实时读取需要当前登记，未过期历史独立于登记读取。[管理 OpenAPI](../../../contracts/published/http-api/plc-facts-v2/openapi-acquisition-sources-r4.json) · [迁移与恢复](../../scripts/plc_facts_maintenance/README.zh-CN.md#r3-单表迁移与恢复)
 
+安装观察模块的 r8 后继后也显式支持 `8c0e2a4d6f18`。私有 profile 与目标实际 revision 仍必须精确相等；旧目标可继续使用旧 revision，未知或错配一律拒绝。观察模块只经内部证据服务读取当前来源，不改变公开采集合同。
+
 样本 POST 和五个 GET 按开发合同免 Bearer，管理 API 需要 active admin。来源登记不验证设备身份。Web 可复制已提交行的三个标识；接管需要版本校验、明确确认和该 PLC 的新代次，旧队列须先核对，历史不会改写。 [操作说明](../../../docs/acquisition-data-guide.zh-CN.md)
 
 确认删除会移除来源登记并停止其上报，不删除历史。登记行中的退役代次也会删除；当相关事实和最新值已不存在时，旧代次可能无法识别。重新登记同一 PLC 应使用从未使用的新代次。

@@ -80,6 +80,7 @@ pub(crate) struct LocalEngine {
         )>,
     >,
     pub name_preview: Mutex<Option<crate::domain::point_naming::CachedNames>>,
+    pub catalog_preview: Mutex<Option<super::catalog_import::CachedCatalog>>,
     pub offset_preview: Mutex<Option<(String, String, String, Instant)>>,
     pub startup_errors: Mutex<BTreeMap<String, String>>,
     #[cfg(any(test, feature = "local-validation"))]
@@ -154,6 +155,7 @@ impl LocalEngine {
             offset_preview: Mutex::new(None),
             startup_errors: Mutex::new(BTreeMap::new()),
             name_preview: Mutex::new(None),
+            catalog_preview: Mutex::new(None),
             active_io: Mutex::new(BTreeMap::new()),
             cached_snapshot: Mutex::new(None),
             #[cfg(any(test, feature = "local-validation"))]

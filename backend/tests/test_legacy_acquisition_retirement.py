@@ -83,7 +83,9 @@ def test_single_head_and_metadata_retire_only_nine_tables():
     module = migration()
     import_model_packages()
     graph = ScriptDirectory.from_config(Config('alembic.ini'))
-    assert graph.get_heads() == ['7b9d1f3a5c7e']
+    assert graph.get_heads() == ['9d1f3a5c7e20']
+    assert graph.get_revision('9d1f3a5c7e20').down_revision == '8c0e2a4d6f18'
+    assert graph.get_revision('8c0e2a4d6f18').down_revision == '7b9d1f3a5c7e'
     assert graph.get_revision('7b9d1f3a5c7e').down_revision == '6a8c0e2b4d16'
     assert graph.get_revision('6a8c0e2b4d16').down_revision == '5f7a9c1e3b25'
     assert graph.get_revision('4e6a8b0d2f14').down_revision == module.revision
@@ -94,6 +96,10 @@ def test_single_head_and_metadata_retire_only_nine_tables():
         'plc_facts_history', 'plc_facts_latest'}
     task_revision = graph.get_revision('5f7a9c1e3b25').module
     expected = (expected - set(task_revision.OLD_TABLES)) | set(task_revision.NEW_ONLY) | {'performance_main', 'plc_source_registry'}
+    expected |= {'equipment_status_main', 'process_monitor_main', 'equipment_metric_configs',
+                 'equipment_metric_slot_bindings', 'equipment_card_configs', 'monitor_curve_group_configs',
+                 'metric_ingest_receipts', 'equipment_metric_groups', 'energy_metric_configs',
+                 'energy_consumption_main'}
     assert set(Base.metadata.tables) == expected
 
 

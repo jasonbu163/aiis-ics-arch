@@ -1,0 +1,18 @@
+{
+  "format": "aiis.plc_points",
+  "schema_version": 1,
+  "origin": {"kind":"device_simulator","profile_id":"11111111-1111-4111-8111-111111111111","plc_id":"22222222-2222-4222-8222-222222222222"},
+  "export": {"producer":"device_simulator","profile_id":"11111111-1111-4111-8111-111111111111","config_state":"saved_revision","revision_id":"33333333-3333-4333-8333-333333333333","payload_sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","exported_at":"2026-11-16T11:00:00+08:00"},
+  "plc": {"name":"Synthetic catalog","protocol":"s7","connection":{"host":"127.0.0.1","port":31281,"rack":0,"slot":1}},
+  "dbs": [
+    {"id":"44444444-4444-4444-8444-444444444444","name":"First","number":21,"size_bytes":32,"source_enabled":true,"points":[
+      {"id":"55555555-5555-4555-8555-555555555555","name":"DB21_ready_Bool","display_name":"未标记","display_names":{"zh-CN":"就绪","en-US":"Ready"},"description":"独立说明","source_path":"payload.ready","data_type":"BOOL","byte_offset":0,"bit":0,"source_enabled":true},
+      {"id":"66666666-6666-4666-8666-666666666666","name":"DB21_count_Int","display_names":{"zh-CN":"计数","en-US":""},"description":"","data_type":"INT","byte_offset":2,"source_enabled":true},
+      {"id":"77777777-7777-4777-8777-777777777777","name":"DB21_temp_Real","data_type":"REAL","byte_offset":4,"source_enabled":false},
+      {"id":"88888888-8888-4888-8888-888888888888","name":"DB21_label_String","data_type":"STRING[4]","byte_offset":8,"source_enabled":false}
+    ]},
+    {"id":"99999999-9999-4999-8999-999999999999","name":"Second","number":22,"size_bytes":2,"source_enabled":false,"points":[
+      {"id":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","name":"DB22_ready_Bool","data_type":"BOOL","byte_offset":0,"bit":1,"source_enabled":false}
+    ]}
+  ]
+}

@@ -28,10 +28,34 @@ fn candidate(
     {
         return Err("point_name_selection".into());
     }
+    let catalog_dbs = crate::domain::plc_catalog::verify_bindings(c)?;
+    if r.intent == "generate"
+        && c.points
+            .iter()
+            .any(|p| ids.contains(&p.id) && catalog_dbs.contains(&p.db_id))
+    {
+        return Err("catalog_derived_conflict".into());
+    }
     let mut next = c.clone();
     let mut mutable = ids.clone();
     let mut manual = None;
     if let Some(patch) = &r.patch {
+        let original = c.points.iter().find(|p| p.id == r.point_ids[0]).unwrap();
+        let catalog = catalog_dbs.contains(&original.db_id);
+        if catalog
+            && (patch
+                .name
+                .as_ref()
+                .map(|name| name != &original.name)
+                .unwrap_or(false)
+                || patch
+                    .address
+                    .as_ref()
+                    .map(|address| address != &original.address)
+                    .unwrap_or(false))
+        {
+            return Err("catalog_derived_conflict".into());
+        }
         let p = next
             .points
             .iter_mut()
@@ -52,10 +76,26 @@ fn candidate(
         let old = c.points.iter().find(|o| o.id == p.id).unwrap();
         if let Some(name) = patch.name.as_deref().filter(|n| *n != old.name) {
             manual = Some((p.id.clone(), name.to_string()))
-        } else if matches!(old.name_mode, None | Some(NameMode::Manual)) {
+        } else if catalog
+            || matches!(old.name_mode, None | Some(NameMode::Manual))
+            || (patch.display_names.is_some() && p.address == old.address)
+        {
+            // 双语编辑未改变地址时保留技术名；旧请求和地址变动仍走原命名规则。
             mutable.clear()
         }
+        if let Some(names) = &patch.display_names {
+            if !names.valid() {
+                return Err("point_display_names_invalid".into());
+            }
+            if names.empty() {
+                next.point_display_names.remove(&r.point_ids[0]);
+            } else {
+                next.point_display_names
+                    .insert(r.point_ids[0].clone(), names.clone());
+            }
+        }
     }
+    validate_display_names(&next)?;
     let proven = proven_dbs(&next);
     let result = generated(
         &mut next,
@@ -77,7 +117,8 @@ fn candidate(
         if let Some(a) = &p.address {
             if a.confirmed
                 && (a.reason.trim().is_empty()
-                    || !matches!(a.origin.as_str(), "manual" | "inferred")
+                    || !(matches!(a.origin.as_str(), "manual" | "inferred")
+                        || (a.origin == "catalog" && catalog_dbs.contains(&p.db_id)))
                     || a.offset
                         .checked_add(width(&p.data_type).unwrap_or(65537))
                         .map(|v| {

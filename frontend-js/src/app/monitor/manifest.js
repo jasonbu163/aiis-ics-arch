@@ -13,37 +13,55 @@ export const monitorModule = {
   order: 40,
   routes: [
     {
-      path: 'monitor/realtime',
-      name: 'MonitorRealtime',
-      component: () => import('./views/realtime/index.vue'),
-      meta: {
-        titleKey: 'monitor.realtime.menu',
-        pageId: 'monitor.realtime',
-        parentTitleKey: 'monitor.title',
-        navigation: { visible: true, order: 10, icon: 'Monitor' }
-      }
-    },
-    {
       path: 'monitor/temperature',
       name: 'MonitorTemperature',
-      component: () => import('./views/temperature/index.vue'),
+      component: () => import('./views/observations/curves.vue'),
       meta: {
         titleKey: 'monitor.temperature',
-        pageId: 'monitor.temperature',
+        pageId: 'monitor.temperature', observationCategory: 'temperature',
         parentTitleKey: 'monitor.title',
         navigation: { visible: true, order: 20, icon: 'TrendCharts' }
       }
     },
     {
-      path: 'monitor/energy',
+      path: 'monitor/consumption',
       name: 'MonitorEnergy',
-      component: () => import('./views/energy/index.vue'),
+      component: () => import('./views/observations/energy.vue'),
       meta: {
         titleKey: 'monitor.energy',
-        pageId: 'monitor.energy',
+        pageId: 'monitor.consumption',
         parentTitleKey: 'monitor.title',
         navigation: { visible: true, order: 30, icon: 'Cpu' }
       }
+    },
+    {
+      path: 'monitor/drive', name: 'MonitorDrive',
+      component: () => import('./views/observations/curves.vue'),
+      meta: { titleKey: 'monitor.observation.drive', pageId: 'monitor.drive', observationCategory: 'drive',
+        parentTitleKey: 'monitor.title', navigation: { visible: true, order: 40, icon: 'TrendCharts' } }
+    },
+    {
+      path: 'monitor/cleaning', name: 'MonitorCleaning',
+      component: () => import('./views/observations/curves.vue'),
+      meta: { titleKey: 'monitor.observation.cleaning', pageId: 'monitor.cleaning', observationCategory: 'cleaning',
+        parentTitleKey: 'monitor.title', navigation: { visible: true, order: 50, icon: 'TrendCharts' } }
+    },
+    {
+      path: 'monitor/observations/admin', name: 'MonitorObservationAdmin',
+      component: () => import('./views/observations/admin.vue'),
+      meta: { titleKey: 'monitor.observation.configManagement', pageId: 'monitor.observations.admin', requiresAdmin: true,
+        parentTitleKey: 'monitor.title', navigation: { visible: true, order: 60, icon: 'Setting' } }
+    },
+    {
+      path: 'monitor/observations/data', name: 'MonitorObservationData',
+      component: () => import('./views/observations/data.vue'),
+      meta: { titleKey: 'monitor.observation.dataManagement', pageId: 'monitor.observations.data', requiresAdmin: true,
+        parentTitleKey: 'monitor.title', navigation: { visible: true, order: 70, icon: 'List' } }
+    },
+    {
+      path: 'monitor/energy', name: 'MonitorLegacyEnergy', component: () => import('./views/energy/index.vue'),
+      meta: { titleKey: 'monitor.observation.legacyEnergy', pageId: 'monitor.energy', parentTitleKey: 'monitor.title',
+        navigation: { visible: true, order: 80, icon: 'Cpu' } }
     }
   ]
 }

@@ -127,3 +127,17 @@ DAA-014 基线记录在 [QA2 交接清单](tasks.md#返工后的精确交接清�
 | `PLAN.zh-CN.md` | `539399972d7a377741b254ddfb10f7c6907d9042cc1e24d317461b9a94616782` | `dc6fe13907a4bf7da4db2dc5ed049fb32b04f9d8d8b615af5cda28125302249d` |
 | `plans/README.md` | `9b24746684da956772a1d72e2eb2a04a81b5bf9f5baf6179181c7b42f32e7b86` | `d36bf2ba9e69716e7931f1b51ce402a82dbf73117f2c9723518e93ce6764a54d` |
 | `plans/README.zh-CN.md` | `db0d295eaf1475000832d431dd29310acfcbdc2040770f40231f099d4f786bff` | `39a741ba6c6cce040bca71406f5b3f34c1ab57be36fb594d5e6bcbfb8f87832a` |
+
+## 验收后 Windows 手册补充 · 独立静态核验（2026-11-16）
+
+**结论：`qa_passed`，仅覆盖本次新增的双语 Windows 入口与操作说明；无 blocker。** 2026-11-16，Verification `/root/daa_windows_guide_qa` 在 fresh context 独立核对 DAA-014 r1 的 spec、完整交接和 checklist、正式工作树差异、相关配置与记录单；使用 `project-governance`、`aiis`、`desktop-tauri`、`rust-runtime`、`frontend-ui` 与 `i18n-workflow` 按相应表面复核，角色为 `contract_only`。原 QA2 与 2026-11-14 Human Owner 的 `owner_accepted` 原样保留，原 QA2 不覆盖本次新增文字。
+
+| 核验项 | 独立结果 |
+| --- | --- |
+| R01 启动与目录 | 中英文顶部入口均通向各自 Windows 小节；小节说明前置条件、分别核对 DAA/DS 目录、PowerShell 设置绝对 `DAA_PROFILE_DIR` 及从仓根安装和启动。进程值优先、绝对字面路径与 [Rust 配置](../../src-tauri/src/config/mod.rs)一致。 |
+| R02 手测与记录单 | 两语均引导按原第 2–5 节完成配置、停采上报及并行手测，并按同一 `sampleId` 核对回执与 Web 历史。[Windows 记录单](../../WINDOWS_NATIVE_VALIDATION.zh-CN.md)保留首次初始化、独占锁、重开及恢复检查。日常沿用已存在的兼容目录与记录单要求的首次测试 profile 预先不存在，目的区别清楚；未测项应记录为未测。 |
+| 交付与保留 | 英文/中文当前 SHA-256 分别为 `7cc06f6f74d57b6afd07aac034b0b3cded75e7daecbf3ef307f4780501528ba9` / `bbf783fd15f213af53d49ce4f71546ca99fcac905e41d03240f3ccccdd2f183e`，匹配 [Development 交接 §7](tasks.md#7-验收后-windows-操作入口补充2026-11-16)。仅在内存移除新增导航和小节后，逐字节摘要分别恢复为 `1aa85cf01edfee3cbd43d7ce70df4e27f0476bb537fe80b77c5b21ea97574d09` / `ec4cd783a546486c68be598770c9ba99391d6cb90682be3c2ebd5af85a63210b`；原文及 DAA-015 的 **Start reporting** /「启动上报」修正保留，且与现行 locale 和按钮源码一致。记录单 SHA-256 `18c390be426e34373a879c96a21a80282c3889055d56d6c9c77c04c6177962b6` 与 DAA-016 QA2 候选一致。 |
+
+验证环境：正式树 `main`，HEAD `21cd789277695bbafaa55c24e39261fc7247f9b0`；macOS 15.7.7 arm64、Git 2.50.1、Python 3.9.6、zsh 5.9。`python3 -B -` 以内存逆向校验手册和 tasks §1–6 摘要、解析两份手册及记录单共 31 个本地链接与标题/显式锚点，均 exit 0；另静态比较两语 PowerShell 命令、`package.json` 与 `tauri.conf.json`（pnpm 11.11.0、普通 Tauri 命令、S7 feature 和 dev 端口），并对照记录单和两语 locale，exit 0。`git --no-optional-locks diff --check -- <两份手册及本任务 tasks/checklist>` exit 0。`command -v pwsh` exit 1；PowerShell 只作文本对照，未执行。
+
+本轮没有构建或运行应用、Windows、服务、Docker、数据库、DS/PLC，也未读取或写入用户 profile；Windows 原生实测仍待执行，DAA-010 r5 `qa_failed`、阶段 C 和实际环境采用各按原记录。首次以含非 ASCII 文字的 Python stdin 追加本节时出现源码编码 `SyntaxError`（exit 1，未写入），随后使用补丁追加。本次只追加本 checklist，未生成临时证据或清理资源；将本次独立静态核验交 Human Owner 审阅，不代为授予对新增文字的最终验收。

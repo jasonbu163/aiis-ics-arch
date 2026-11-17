@@ -2,6 +2,7 @@
 pub mod configuration;
 pub mod image;
 pub mod layout;
+pub mod plc_catalog;
 pub mod policy;
 pub mod request;
 pub mod result;

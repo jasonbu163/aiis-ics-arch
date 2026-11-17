@@ -1,0 +1,271 @@
+{
+  "note": "Synthetic values only. Refresh timestamps and unique identities when running; result recordId is illustrative. Use independent machine credentials.",
+  "facts": [
+    {
+      "contractVersion": "plc-facts/v2",
+      "instanceId": "daa-fixture",
+      "sampleId": "vendor-task-evidence-42",
+      "plcId": "plc-01",
+      "dbNumber": 42,
+      "groupId": "temperature",
+      "configRevision": "r1",
+      "sourceGeneration": "generation-1",
+      "sourceSeq": "1",
+      "points": [
+        {
+          "pointId": "point-active-task-no",
+          "dataType": "STRING[50]",
+          "value": "000042",
+          "quality": "good",
+          "observedAt": "2026-11-11T09:30:00+08:00"
+        },
+        {
+          "pointId": "point-zone1-temp-act",
+          "dataType": "REAL",
+          "value": 811.2,
+          "quality": "good",
+          "observedAt": "2026-11-11T09:30:00+08:00"
+        },
+        {
+          "pointId": "point-zone1-temp-set",
+          "dataType": "REAL",
+          "value": 815.0,
+          "quality": "good",
+          "observedAt": "2026-11-11T09:30:00+08:00"
+        },
+        {
+          "pointId": "point-zone1-ready",
+          "dataType": "BOOL",
+          "value": false,
+          "quality": "good",
+          "observedAt": "2026-11-11T09:30:00+08:00"
+        }
+      ]
+    },
+    {
+      "contractVersion": "plc-facts/v2",
+      "instanceId": "daa-fixture",
+      "sampleId": "sma-sample-42",
+      "plcId": "plc-01",
+      "dbNumber": 42,
+      "groupId": "temperature",
+      "configRevision": "r1",
+      "sourceGeneration": "generation-1",
+      "sourceSeq": "2",
+      "points": [
+        {
+          "pointId": "point-active-task-no",
+          "dataType": "STRING[50]",
+          "value": "000042",
+          "quality": "good",
+          "observedAt": "2026-11-11T09:30:10+08:00"
+        },
+        {
+          "pointId": "point-zone1-temp-act",
+          "dataType": "REAL",
+          "value": 812.2,
+          "quality": "good",
+          "observedAt": "2026-11-11T09:30:10+08:00"
+        },
+        {
+          "pointId": "point-zone1-temp-set",
+          "dataType": "REAL",
+          "value": 815.0,
+          "quality": "good",
+          "observedAt": "2026-11-11T09:30:10+08:00"
+        },
+        {
+          "pointId": "point-zone1-ready",
+          "dataType": "BOOL",
+          "value": false,
+          "quality": "good",
+          "observedAt": "2026-11-11T09:30:10+08:00"
+        }
+      ]
+    }
+  ],
+  "discovery": {
+    "query": {
+      "equipmentId": "line-01",
+      "groupKey": "temperature",
+      "target": "history"
+    },
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "equipmentId": "line-01",
+        "groupKey": "temperature",
+        "target": "history",
+        "definitions": [
+          {
+            "metricKey": "furnaceZone1Actual",
+            "valueType": "number",
+            "unit": "°C"
+          },
+          {
+            "metricKey": "furnaceZone1Set",
+            "valueType": "number",
+            "unit": "°C"
+          }
+        ]
+      }
+    }
+  },
+  "thirdParty": {
+    "latest": {
+      "sourceRefs": [
+        {
+          "kind": "external_event",
+          "sourceEventId": "vendor-sample-42"
+        }
+      ],
+      "data": {
+        "taskNo": "000042",
+        "sampledAt": "2026-11-11T09:30:00+08:00",
+        "values": {
+          "furnaceZone1Actual": 811.2,
+          "furnaceZone1Set": 815.0
+        }
+      }
+    },
+    "history": {
+      "sourceRefs": [
+        {
+          "kind": "external_event",
+          "sourceEventId": "vendor-sample-42"
+        }
+      ],
+      "data": {
+        "taskNo": "000042",
+        "sampledAt": "2026-11-11T09:30:00+08:00",
+        "values": {
+          "furnaceZone1Actual": 811.2,
+          "furnaceZone1Set": 815.0
+        },
+        "quality": "good"
+      }
+    },
+    "latestReceiptExample": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "target": "latest",
+        "producerId": "vendor-line-01",
+        "eventId": "auto-5efd9e262b4b3ded370a7f57511a29adba672f5479674015486238c949e86980",
+        "outcome": "stored",
+        "recordId": "1"
+      }
+    },
+    "historyReceiptExample": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "target": "history",
+        "producerId": "vendor-line-01",
+        "eventId": "auto-5cdc7a13917cebc779443bbd0277953e982fc5c5a92aec32b7c0f62bc5d4c121",
+        "outcome": "stored",
+        "recordId": "1"
+      }
+    }
+  },
+  "smaEnvelope": {
+    "latest": {
+      "contractVersion": "aiis.metric-ingest/v1",
+      "producerId": "sma-line-01",
+      "eventId": "sma-42-latest",
+      "mappingId": "sma-temperature",
+      "mappingRevision": "r1",
+      "sourceRefs": [
+        {
+          "kind": "plc_fact",
+          "instanceId": "daa-fixture",
+          "plcId": "plc-01",
+          "sampleId": "sma-sample-42",
+          "pointId": "point-active-task-no"
+        },
+        {
+          "kind": "plc_fact",
+          "instanceId": "daa-fixture",
+          "plcId": "plc-01",
+          "sampleId": "sma-sample-42",
+          "pointId": "point-zone1-temp-act"
+        },
+        {
+          "kind": "plc_fact",
+          "instanceId": "daa-fixture",
+          "plcId": "plc-01",
+          "sampleId": "sma-sample-42",
+          "pointId": "point-zone1-temp-set"
+        },
+        {
+          "kind": "plc_fact",
+          "instanceId": "daa-fixture",
+          "plcId": "plc-01",
+          "sampleId": "sma-sample-42",
+          "pointId": "point-zone1-ready"
+        }
+      ],
+      "data": {
+        "equipmentId": "line-01",
+        "taskNo": "000042",
+        "groupKey": "temperature",
+        "sampledAt": "2026-11-11T09:30:10+08:00",
+        "quality": "good",
+        "values": {
+          "furnaceZone1Actual": 812.2,
+          "furnaceZone1Set": 815.0,
+          "furnaceHeatingReady": false
+        }
+      }
+    },
+    "history": {
+      "contractVersion": "aiis.metric-ingest/v1",
+      "producerId": "sma-line-01",
+      "eventId": "sma-42-history",
+      "mappingId": "sma-temperature",
+      "mappingRevision": "r1",
+      "sourceRefs": [
+        {
+          "kind": "plc_fact",
+          "instanceId": "daa-fixture",
+          "plcId": "plc-01",
+          "sampleId": "sma-sample-42",
+          "pointId": "point-active-task-no"
+        },
+        {
+          "kind": "plc_fact",
+          "instanceId": "daa-fixture",
+          "plcId": "plc-01",
+          "sampleId": "sma-sample-42",
+          "pointId": "point-zone1-temp-act"
+        },
+        {
+          "kind": "plc_fact",
+          "instanceId": "daa-fixture",
+          "plcId": "plc-01",
+          "sampleId": "sma-sample-42",
+          "pointId": "point-zone1-temp-set"
+        },
+        {
+          "kind": "plc_fact",
+          "instanceId": "daa-fixture",
+          "plcId": "plc-01",
+          "sampleId": "sma-sample-42",
+          "pointId": "point-zone1-ready"
+        }
+      ],
+      "data": {
+        "equipmentId": "line-01",
+        "taskNo": "000042",
+        "groupKey": "temperature",
+        "sampledAt": "2026-11-11T09:30:10+08:00",
+        "quality": "good",
+        "values": {
+          "furnaceZone1Actual": 812.2,
+          "furnaceZone1Set": 815.0
+        }
+      }
+    }
+  }
+}

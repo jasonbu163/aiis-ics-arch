@@ -10,7 +10,7 @@ SMA owns local connection, OpenAPI catalog/selection, target APIs, value rules, 
 
 Rust is the only business-configuration writer. `<SMA profile>/configuration.sqlite3` uses SMA-owned bundled rusqlite `=0.32.1`, schema v1 and one complete singleton document with monotonic revision and Shanghai `updatedAt`. A write validates the merged graph and compares the observed revision in one short transaction. A stale form or preview requires reload/preview again. Referenced materials, targets and rules cannot be deleted; invalidating a mapping rejects the whole change. Disabled configuration retains its references.
 
-The profile is the explicit absolute `SMA_PROFILE_DIR`, or the application's own app-data directory for an authorized normal adoption. An invalid explicit override, corrupt database or unknown schema fails without a default-directory fallback or delete/rebuild. This task authorizes disposable-profile verification only; adoption or migration of real/default profiles needs a separate decision. No TSS configuration or old localStorage connection is automatically imported or used as fallback. An environment Backend URL is not saved configuration.
+A nonblank process `SMA_PROFILE_DIR` takes precedence over the value in the selected SMA `.env`. When both are blank or unset, SMA uses its existing app-data directory. The profile contains `configuration.sqlite3`, `logs/` and `runtime-startup.json`. An invalid selection, corrupt database or unknown schema stops without falling back to another directory or rebuilding the database. No TSS configuration or old localStorage connection is automatically imported. An environment Backend URL is not saved configuration.
 
 Open **Connection** to explicitly save the one Backend address. Saving sends nothing. **API Materials** first loads the local catalog and selection. Import a local OpenAPI JSON file, review the candidate operations, explicitly apply the catalog, then save selection. Network catalog refresh is explicit and uses the existing HTTP gate; catalog changes do not replace derived targets. Targets can also be maintained manually. The existing JSON wrappers and single-sheet XLSX templates for `targetApis`, `mappingValueRules` and `mappings` remain supported, including legacy nine-column targets defaulting to POST. Preview never writes; apply uses the same content and revision. Duplicate keys, invalid references, formulas, macros and limits reject the whole import.
 
@@ -32,7 +32,21 @@ cargo test --manifest-path src-tauri/Cargo.toml --locked
 pnpm tauri dev
 ```
 
-Ordinary startup stays `pnpm tauri dev`, identity `com.aiis.aw.semanticmappingagent`, dev/preview strict ports 15192/14192. Before disposable runtime verification provide absolute task-owned `SMA_ENV_FILE` / `SMA_PROFILE_DIR`, empty `SMA_BACKEND_BASE_URL` and `SMA_HTTP_ENABLED=false`. The profile isolates Rust files, **not WKWebView storage**; native tests must use a supported temporary incognito overlay. Such a test does not prove native cross-process UI-preference persistence.
+For source development, inspect the SMA project's `.env` if it already exists. If absent, copy `.env.example` to `.env`. To select a project-local profile, use this assignment.
+
+```dotenv
+SMA_PROFILE_DIR=./.local/dev
+```
+
+`.local/dev` and `./.local/dev` both select the `.local/dev` directory under the selected `.env` directory, independently of the terminal's current directory. To select an existing absolute profile, replace the following example with that directory's path.
+
+```dotenv
+SMA_PROFILE_DIR=/absolute/path/to/sma-profile
+```
+
+The optional process `SMA_ENV_FILE` selects a different absolute, readable regular file. Relative profile values from either the process or that file use its parent directory. Profile paths reject `..`, `~`, variables, placeholders, existing symlinks and non-directory components. Check the reported key and reason if startup rejects the selection. A previously exported nonblank process `SMA_PROFILE_DIR` overrides the file.
+
+Ordinary startup stays `pnpm tauri dev`, identity `com.aiis.aw.semanticmappingagent`, dev/preview strict ports 15192/14192. Before disposable runtime verification provide task-owned `SMA_ENV_FILE` / `SMA_PROFILE_DIR`, empty `SMA_BACKEND_BASE_URL` and `SMA_HTTP_ENABLED=false`. The profile isolates Rust files. WKWebView storage is shared across application launches, so native tests use a supported temporary incognito overlay. That overlay does not establish native cross-process UI-preference persistence.
 
 SMA compiles CU's public `src/ui/index.ts` and `src/ui/styles/index.css` with its own dependencies. Built applications need no CU process or CU node_modules. Five navigation groups and seven stable leaves remain. Theme/language and the themed Element Plus overlay preserve mounted workspaces. UI preferences stay under `sma.*` localStorage and are excluded from business backups. Ordinary tables share stable-ID column resizing, persistence and per-table reset; special action/selection columns may stay fixed. Calendar display uses Asia/Shanghai to seconds while retaining underlying precision and showing a missing state for absent/ambiguous time.
 

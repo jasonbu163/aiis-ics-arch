@@ -132,12 +132,40 @@ pub struct Confirmations {
     pub policy: Option<String>,
 }
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DisplayNames {
+    #[serde(rename = "zh-CN")]
+    pub zh_cn: String,
+    #[serde(rename = "en-US")]
+    pub en_us: String,
+}
+// 缺字段才表示未设置；显式 null 必须经过目标类型反序列化并被拒绝。
+fn present<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+    T: Deserialize<'de>,
+{
+    T::deserialize(deserializer).map(Some)
+}
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PointConfig {
     pub id: String,
     pub name: String,
     #[serde(default)]
     pub display_name: String,
+    #[serde(
+        default,
+        deserialize_with = "present",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub display_names: Option<DisplayNames>,
+    #[serde(
+        default,
+        deserialize_with = "present",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub description: Option<String>,
     pub data_type: String,
     #[serde(default = "yes")]
     pub enabled: bool,
@@ -314,6 +342,14 @@ pub fn validate(workspace: &Workspace) -> Result<(), String> {
                 typed_value::width(&point.data_type)?;
                 if point.name.len() > 100
                     || point.display_name.len() > 200
+                    || point
+                        .display_names
+                        .as_ref()
+                        .is_some_and(|names| names.zh_cn.len() > 256 || names.en_us.len() > 256)
+                    || point
+                        .description
+                        .as_ref()
+                        .is_some_and(|value| value.len() > 500)
                     || point.manual_reason.len() > 1000
                     || point.bit.is_some_and(|b| b > 7)
                 {

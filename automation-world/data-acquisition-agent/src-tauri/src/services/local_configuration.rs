@@ -28,11 +28,30 @@ impl LocalEngine {
         .into();
         Ok(view)
     }
-    pub fn save(&self, draft: Configuration, etag: String) -> LocalResult<ConfigurationView> {
+    pub fn save(&self, mut draft: Configuration, etag: String) -> LocalResult<ConfigurationView> {
         self.invalidate_previews();
         let previous = self.configuration()?;
         if previous.etag != etag {
             return Err("draft_conflict".into());
+        }
+        // 普通保存只能保留显示名，或清除随 PLC 明确删除的旧点映射。
+        let mut allowed_names = previous.draft.point_display_names.clone();
+        for point in &previous.draft.points {
+            if !draft.plcs.iter().any(|p| p.id == point.plc_id)
+                && !draft.points.iter().any(|p| p.id == point.id)
+            {
+                allowed_names.remove(&point.id);
+                draft.point_display_names.remove(&point.id);
+                draft.point_legacy_display_names.remove(&point.id);
+            }
+        }
+        draft.catalog_bindings.retain(|binding| {
+            !previous.draft.dbs.iter().any(|db| {
+                db.id == binding.local_db_id && !draft.plcs.iter().any(|plc| plc.id == db.plc_id)
+            })
+        });
+        if draft.point_display_names != allowed_names {
+            return Err("name_preview_required".into());
         }
         protect_derived(&previous.draft, &draft)?;
         self.save_candidate(draft, etag)
@@ -42,6 +61,13 @@ impl LocalEngine {
         mut draft: Configuration,
         etag: String,
     ) -> LocalResult<ConfigurationView> {
+        validate_display_names(&draft)?;
+        let previous = self.configuration()?;
+        if previous.etag != etag {
+            return Err("draft_conflict".into());
+        }
+        protect_catalog_derived(&previous.draft, &draft)?;
+        crate::domain::plc_catalog::verify_bindings(&draft)?;
         if draft.plcs.len() > 4
             || draft.points.len() > 16384
             || draft.dbs.len() > 128
@@ -79,8 +105,29 @@ impl LocalEngine {
         if cap.config_bytes.saturating_mul(2) + encoded * 3 + 65536 > 64 * 1024 * 1024 {
             return Err("configuration_capacity".into());
         }
-        self.storage
-            .call(false, move |s| s.save_draft(&draft, &etag))?;
+        let new_sources: std::collections::BTreeSet<_> = draft
+            .catalog_bindings
+            .iter()
+            .filter(|b| {
+                !previous
+                    .draft
+                    .catalog_bindings
+                    .iter()
+                    .any(|old| old.source_id == b.source_id)
+            })
+            .map(|b| b.source_id.clone())
+            .collect();
+        self.storage.call(false, move |s| {
+            for source_id in &new_sources {
+                let source = draft
+                    .sources
+                    .iter()
+                    .find(|s| &s.id == source_id)
+                    .ok_or("catalog_source_invalid")?;
+                s.ensure_catalog_new(source)?;
+            }
+            s.save_draft(&draft, &etag)
+        })?;
         self.event("draft_saved", "configuration", "committed");
         self.configuration()
     }
@@ -88,6 +135,7 @@ impl LocalEngine {
         *self.import_preview.lock().unwrap() = None;
         *self.offset_preview.lock().unwrap() = None;
         *self.name_preview.lock().unwrap() = None;
+        *self.catalog_preview.lock().unwrap() = None;
     }
     pub fn identify_sources(&self, r: &ImportRequest) -> LocalResult<Identification> {
         self.invalidate_previews();
@@ -284,6 +332,57 @@ impl LocalEngine {
         );
         result
     }
+}
+
+/// 已绑定的目录只允许编辑本地 comment、分组和启用；整台删除仍走既有草稿流程。
+fn protect_catalog_derived(old: &Configuration, new: &Configuration) -> LocalResult<()> {
+    for binding in &old.catalog_bindings {
+        let db = old
+            .dbs
+            .iter()
+            .find(|d| d.id == binding.local_db_id)
+            .ok_or("catalog_binding_invalid")?;
+        if !new.plcs.iter().any(|p| p.id == db.plc_id) {
+            continue;
+        }
+        if !new.catalog_bindings.iter().any(|b| b == binding)
+            || !new.dbs.iter().any(|d| d == db)
+            || old.sources.iter().find(|s| s.id == binding.source_id)
+                != new.sources.iter().find(|s| s.id == binding.source_id)
+            || old
+                .dbs
+                .iter()
+                .filter(|d| d.plc_id == db.plc_id)
+                .map(|d| &d.id)
+                .collect::<std::collections::BTreeSet<_>>()
+                != new
+                    .dbs
+                    .iter()
+                    .filter(|d| d.plc_id == db.plc_id)
+                    .map(|d| &d.id)
+                    .collect()
+        {
+            return Err("catalog_derived_conflict".into());
+        }
+        for original in old.points.iter().filter(|p| p.db_id == db.id) {
+            let point = new
+                .points
+                .iter()
+                .find(|p| p.id == original.id)
+                .ok_or("catalog_derived_conflict")?;
+            let mut allowed = original.clone();
+            allowed.comment = point.comment.clone();
+            allowed.enabled = point.enabled;
+            allowed.group_id = point.group_id.clone();
+            if *point != allowed
+                || old.point_legacy_display_names.get(&point.id)
+                    != new.point_legacy_display_names.get(&point.id)
+            {
+                return Err("catalog_derived_conflict".into());
+            }
+        }
+    }
+    Ok(())
 }
 
 // Only this service's parsed import preview can create or replace source-derived identity/structure.

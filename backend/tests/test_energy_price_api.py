@@ -187,8 +187,10 @@ async def test_observed_at_single_api_clock_null_offsets_and_future(monkeypatch)
 @pytest.mark.asyncio
 async def test_date_validation_three_paths_and_filter_forwarding(monkeypatch):
     app = app_for(monkeypatch)
-    paths = {path: set(methods) for path, methods in app.openapi()['paths'].items() if path == '/api/v1/energy' or path.startswith('/api/v1/energy/')}
-    assert paths == {'/api/v1/energy': {'get','post'}, '/api/v1/energy/current': {'get'}}
+    paths = app.openapi()['paths']
+    assert {path: set(paths[path]) for path in ('/api/v1/energy', '/api/v1/energy/current')} == {
+        '/api/v1/energy': {'get','post'}, '/api/v1/energy/current': {'get'}}
+    assert set(paths['/api/v1/energy/consumption/summary']) == {'get'}
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         for value in ('2024-02-29', '0001-01-01', '9999-12-31', '2099-01-01'):
             response = await client.get('/api/v1/energy', params={'date':value,'page':2,'pageSize':24})

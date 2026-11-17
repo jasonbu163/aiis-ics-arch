@@ -253,12 +253,19 @@ test('actual source preserves Core route identity, shell locales and default-dis
   assert.deepEqual(registry.routes.filter(route => !route.path.startsWith('acquisition-data/')).map(route => [route.name, route.path, route.meta.pageId]), [
     ['PlanList', 'plan/list', 'plan.list'],
     ['PerformanceList', 'performance/list', 'performance.list'],
-    ['MonitorRealtime', 'monitor/realtime', 'monitor.realtime'],
     ['MonitorTemperature', 'monitor/temperature', 'monitor.temperature'],
-    ['MonitorEnergy', 'monitor/energy', 'monitor.energy'],
+    ['MonitorEnergy', 'monitor/consumption', 'monitor.consumption'],
+    ['MonitorDrive', 'monitor/drive', 'monitor.drive'],
+    ['MonitorCleaning', 'monitor/cleaning', 'monitor.cleaning'],
+    ['MonitorObservationAdmin', 'monitor/observations/admin', 'monitor.observations.admin'],
+    ['MonitorObservationData', 'monitor/observations/data', 'monitor.observations.data'],
+    ['MonitorLegacyEnergy', 'monitor/energy', 'monitor.energy'],
     ['EquipmentProductionParameters', 'equipment/production-parameters', 'equipment.production-parameters'],
     ['EquipmentDrive', 'equipment/drive', 'equipment.drive'],
     ['EquipmentTemperature', 'equipment/temperature', 'equipment.temperature'],
+    ['EquipmentCleaning', 'equipment/cleaning', 'equipment.cleaning'],
+    ['EquipmentObservationAdmin', 'equipment/observations/admin', 'equipment.observations.admin'],
+    ['EquipmentObservationData', 'equipment/observations/data', 'equipment.observations.data'],
     ['AuxiliaryStop', 'auxiliary/stop', 'auxiliary.stop'],
     ['AuxiliaryShift', 'auxiliary/shift', 'auxiliary.shift'],
     ['AuxiliaryPrice', 'auxiliary/price', 'auxiliary.price'],
@@ -292,7 +299,7 @@ test('actual source preserves Core route identity, shell locales and default-dis
 })
 
 
-test('five adapted modules retain order, owned bilingual titles and ten visible leaves', async () => {
+test('five adapted modules retain order, owned bilingual titles and current visible leaves', async () => {
   const registry = await loadRegistry(fileURLToPath(new URL('../../', import.meta.url)))
   const groups = [
     ['performance', 30, 'DataLine'], ['monitor', 40, 'Monitor'],
@@ -300,12 +307,19 @@ test('five adapted modules retain order, owned bilingual titles and ten visible 
   ]
   const pages = [
     ['performance.list', 'performance.list', 10, 'List'],
-    ['monitor.realtime', 'monitor.realtime.menu', 10, 'Monitor'],
     ['monitor.temperature', 'monitor.temperature', 20, 'TrendCharts'],
-    ['monitor.energy', 'monitor.energy', 30, 'Cpu'],
+    ['monitor.consumption', 'monitor.energy', 30, 'Cpu'],
+    ['monitor.drive', 'monitor.observation.drive', 40, 'TrendCharts'],
+    ['monitor.cleaning', 'monitor.observation.cleaning', 50, 'TrendCharts'],
+    ['monitor.observations.admin', 'monitor.observation.configManagement', 60, 'Setting'],
+    ['monitor.observations.data', 'monitor.observation.dataManagement', 70, 'List'],
+    ['monitor.energy', 'monitor.observation.legacyEnergy', 80, 'Cpu'],
     ['equipment.production-parameters', 'equipment.productionParameters', 10, 'DataLine'],
     ['equipment.drive', 'equipment.drive', 20, 'Odometer'],
     ['equipment.temperature', 'equipment.temperature', 30, 'Operation'],
+    ['equipment.cleaning', 'equipment.observation.cleaning', 40, 'Operation'],
+    ['equipment.observations.admin', 'equipment.observation.configManagement', 50, 'Setting'],
+    ['equipment.observations.data', 'equipment.observation.dataManagement', 60, 'List'],
     ['quality.list', 'quality.list', 10, 'List'],
     ['quality.spc', 'quality.spc', 20, 'DataAnalysis'],
     ['maintenance.log', 'maintenance.log.title', 10, 'Document']

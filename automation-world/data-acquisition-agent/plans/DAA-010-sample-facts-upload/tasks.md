@@ -1,9 +1,11 @@
 Task ID: DAA-010
-Revision: r5
+Revision: r8
 Workflow Mode: STD
 Role: Development
-Status: developer_handoff — DAA-010 r5 QA1 rework; fresh Verification pending
-Working tree: `/Users/jason/Desktop/DreamCode/aiis-ics-arch` (HEAD `fd999224a8756feda314a33148304b4bf3461876`)
+Allowed Writers: Development
+Status: developer_handoff — DAA-010 r8; fresh Verification pending
+Handoff: DAA-010 r8、精确工作树和下方自检交 fresh-context Verification。
+Working tree: `/Users/jason/Desktop/DreamCode/aiis-ics-arch` (HEAD `21cd789277695bbafaa55c24e39261fc7247f9b0` plus uncommitted changes)
 
 # Development record
 
@@ -539,3 +541,59 @@ The coordinator reported independently verifying that `/private/tmp/daa010-r5-de
 - 资源：首次构建使用独占创建的 `/private/tmp/daa010-r5-ui-M08nef/dist`，exit 0，但该路径偏离 r5 §4 指定的 §6 自有目录；随后在独占创建的 `/private/tmp/daa010-r5-dev-private/ui-dist` 重跑通过。核对两目录归属、0700、无符号链接、各仅含三份构建文件且 `lsof` 无打开文件后，两个本轮自有目录均已回收、路径不存在。未操作现有 Vite/Tauri、`.local/dev`、后端、Docker、真实数据或设备。
 
 **局部交接给协调者及 fresh-context Verification：**复核上述精确工作树文件、双语与两 PLC 回归。此说明改动未做新的原生视觉复测，F-R5-QA2-001 仍未解决，原 `qa_failed`、Mac 剩余核验、Windows 原生及实际采用门槛保持不变；本条不代表整个 DAA-010 返工完成、QA 结论或 Human Owner 最终验收。
+
+## DAA-010 r8 Development self-check 与 developer_handoff（2026-11-16）
+
+**批准与交付。** Human Owner 在本会话批准 [r8 第 1–5 节](spec.md#daa-010-r8相对路径兼容与-mac-受控收尾)，并明确接受第 2 节限定的未修复风险；PM 已将批准原文登记在规格第 6 节。完整获批 `spec.md` SHA-256 `dd319580fd81bb119312f495d17bd81d85a78955ece68e26477bbfd792b5d6fb`。交付为正式共享工作树 `/Users/jason/Desktop/DreamCode/aiis-ics-arch`，HEAD `21cd789277695bbafaa55c24e39261fc7247f9b0` 加未提交内容，没有新 commit。此前本文件头是 r5 QA1 rework 交接、HEAD `fd999224a8756feda314a33148304b4bf3461876`；本次只更新当前头部并追加本节，原 r5 实施、失败及交接正文保留。修改前完整 `tasks.md` SHA-256 `e2feb0bc635005b5b110cb19d8f339cd7d6807d623993d6a5162ed9ab08a7c45`；本角色未写 `spec.md` 或 `checklist.md`，后者当前 SHA-256 `1fc97cc24b64ecdbfb015f150e16e75a74b64018968027eb4a486eadebc58d31`。HEAD 不能代表共享工作树的未提交字节。
+
+**实际改动。** `config/mod.rs` 保存所选环境文件目录；非空进程值仍优先于文件值，普通相对值先检查上级、Windows 非完整根/盘符形式，再拼接配置文件目录并保留字面量和既有符号链接检查。绝对值及默认路径沿原规则；不要求解析阶段目录存在。`local_bootstrap.rs` 仅加定向测试，核对解析结果进入原普通 bootstrap；`profile_contract_tests.rs` 仅加一次合成 profile 冷重开测试，`profile_contract.rs`、SQLite schema、采集、上报、回执及启动开关实现未由本轮修改。`.env.example`、DAA 的双语 README/手册和 AW 双语 README 按 r8 同步；AW 只更正 DAA 路径句，SMA 规则保留。没有结构变化或新增源码文件，因此未改 `CODE_INDEX.md`。
+
+以下为本次交付的完整文件 SHA-256（相对仓库根）；原已脏的 DAA README/手册保留现有并行内容，不能把其整个 Git diff 归属 r8。两份手册在内存中仅逆向去掉本轮配置段后，分别恢复到 DAA-014 已记录的 `7cc06f6f74d57b6afd07aac034b0b3cded75e7daecbf3ef307f4780501528ba9` / `bbf783fd15f213af53d49ce4f71546ca99fcac905e41d03240f3ccccdd2f183e`；Windows 既有小节和其他增量因此保留。
+
+```text
+23af9da38b24fb9e27ee8b5f18966d47c7acfe2c2eda8a15ab5bf0858dd8a975  automation-world/README.md
+211962e420d133c63734e767d22b5200e4d89e23274edca701b3f80bcf66a5ec  automation-world/README.zh-CN.md
+2bd8ea520360242969b267938ac8a6229fd976df12a5bcaa6c01d9491ca0a223  automation-world/data-acquisition-agent/.env.example
+52b9e824e26954ef30d849684237e6e420dcec4e75809bc6b58487db292abeae  automation-world/data-acquisition-agent/README.md
+fb9d670f407ac519e6dc6bb9d5650edd1a655a07af89d3504816a627a5c9493d  automation-world/data-acquisition-agent/README.zh-CN.md
+8537ed539e8ab0c59b4371630b32902d2454456a5b246935b70de3620803d1e9  automation-world/data-acquisition-agent/USER_GUIDE.md
+a1d86b046d08670e013f711e4b9f036543f7bd731267f83f910daf0a86e2c192  automation-world/data-acquisition-agent/USER_GUIDE.zh-CN.md
+3a776328bafd5bf531db7a4eee3b39f932b0450b35f4ef9da3d677cc25b783b4  automation-world/data-acquisition-agent/src-tauri/src/config/mod.rs
+96a3ca7c007273355838c8fc637d52bcd8d09248fbaae2b64a5897d9579fa804  automation-world/data-acquisition-agent/src-tauri/src/config/local_bootstrap.rs
+339da0abaf365457a30ad2c60fa33c8990d6d1465c2e140003d4321dbf04485e  automation-world/data-acquisition-agent/src-tauri/src/infrastructure/local_store/profile_contract_tests.rs
+```
+
+上述三个 Rust 文件相对 HEAD 的联合 `git diff` SHA-256 `d8901b940f18cbab29437018366c48b029509c8bbb4a9253365c65d9fba58c8e`。实施前这三文件均无未提交差异；其余初始脏文件包含根/AW/DAA PLAN、DAA 双语 README/手册、DAA-014/015 记录及 DAA-016、SMA 和其他并行工作，保留在共享工作树，不纳入 r8 改动归属。
+
+**DEV self-check。** Darwin arm64、macOS 15.7.7，rustc/cargo 1.89.0；本机唯一 Rust target 为 `aarch64-apple-darwin`。以 `mktemp -d /private/tmp/daa010-r8-dev.XXXXXXXX` 创建独占 mode 0700 根 `/private/tmp/daa010-r8-dev.hYP5gNUZ`，复制既有 Cargo 缓存为该根内 `target`，夹具 TMPDIR 为其 `daa-008-r2-a-tests` 子目录；没有复制或打开真实配置/profile。以下命令在 DAA 目录执行，均使用 `env -i PATH="$PATH" CARGO_HOME=/Users/jason/.cargo RUSTUP_HOME=/Users/jason/.rustup TMPDIR=/private/tmp/daa010-r8-dev.hYP5gNUZ/daa-008-r2-a-tests CARGO_TARGET_DIR=/private/tmp/daa010-r8-dev.hYP5gNUZ/target TZ=Asia/Shanghai`，日志只含合成数据：
+
+1. `cargo test --manifest-path src-tauri/Cargo.toml --locked --offline --lib startup_env_ -- --test-threads=1`，exit 0，5/5；随后追加相对路径末段 symlink 断言后，用普通启动的 `--no-default-features --features rust-snap7-driver` 重跑同一 filter，exit 0，5/5，内部两个不同工作目录子进程各 1/1。覆盖默认文件缺失、默认/显式文件与进程相对值、进程覆盖、空值回退/默认、绝对值、重复键、缺失/不可读/无效环境文件、符号链接、占位符、变量和上级路径，以及基准不安全时绝对值仍有效。两轮均报告已有测试专用 `empty_for_test` dead-code 告警。最后 feature 日志 SHA-256 `d66f40f2ae69cdfde96514063ba4cd3d9c9071430d20614714f6f334da8d7db6`。
+2. `cargo test --manifest-path src-tauri/Cargo.toml --locked --offline --lib infrastructure::local_store::profile_contract_tests::profile_contract_relative_and_absolute_configuration_reopen_same_profile -- --exact --test-threads=1`，exit 0，1/1。仅在预建的自有合成 profile 上用相对值打开原 `Stores`、合成配置和本地 fixture 周期后，以绝对值冷重开；比较同一实际目录、草稿原文、非空样本原文及 SHA、实例 ID 和 sealed 凭据，测试自行删除其 `.env` 与 profile。此检查用于补足配置解析与实际存储衔接，不是网络、设备或真实数据测试。首次使用未带完整模块名的 `--exact` 过滤器虽 exit 0 但选中 0 个测试；已改完整名称运行上述 1/1，不将零测试记为验证。正确日志 SHA-256 `1c31513b11ba8a33a0330277f0fae42c947a546e00a2b3a6067a2ca0650ec4cc`，零测试日志 `4d30fcbf232459a65a069221b6ae0f19e3b8f3c59482d77daacd0522006a587d`。
+3. `cargo check --manifest-path src-tauri/Cargo.toml --locked --offline --no-default-features --features rust-snap7-driver --bin aiis-data-acquisition-agent`，exit 0，无告警；这是普通启动对应 Rust feature 的编译检查，没有启动程序。日志 SHA-256 `b1fd85858607f73b4ecf823c4eb8a4fa78b6eca5d481a5a731aec0a282906f64`。
+4. 仓库根 `rustfmt --edition 2021 --check --config skip_children=true <上述三个 Rust 文件>` 与 `git diff --check -- <上述十个文件>` 均 exit 0。`python3 -B -` 按 Markdown 本地文件目标及标题锚点检查上述六份双语 Markdown：70 个本地链接、14 个 Markdown 锚点，0 问题；外部网页未请求。另用 Python 在内存逆向两份手册的本轮配置段并按 DAA-014 摘要比较，exit 0。两语入口、示例和手册均说明固定基准、优先级、Mac 新目录前提、原目录保全及 Windows 待验。
+
+**既有证据与关联。** [DAA-014 Owner 手测转交](../DAA-014-unified-operator-guide/tasks.md#2-human-owner-手测转交)是原环境的人工反馈：6 条待发送加 1 条未知共确认 7 条，随后累计 31 条包含原 7 条，仅原未知和一条新样本按 `sampleId` 抽查回执、Web 点值与质量；它没有固定本次完整候选的运行时摘要，不当作 r8 独立复验或 31 条逐项对账。上方两份手册逆向摘要可关联到 DAA-014 交接，并不扩展其运行证据。DAA-010 r5 的 17 条合成样本和 [DAA-012](../DAA-012-startup-warning-cleanup/checklist.md) 预建目录初始化/冷重开是各自较早候选；原 r5 QA1 rework 的 `profile_contract.rs` 为 `5a1d344176e235d9bafb83294473e423dd971fcafa0c607fd12b72fccaacf8a0`，当前为 `4d3f56e16ba0deb522b7842d817d0afdc7a600b20d8a59d939479fd163c520d5`，不能将其当作当前候选的逐字节复验。本轮新合成重开证据如上，既有数据和故障矩阵不能由此扩展。
+
+[DAA-015 QA4](../DAA-015-startup-automation-and-workbench/checklist.md) 归档清单 SHA-256 `52001c772e90de2c010807b3cd81e564a6ef221e69b5def9200fc9f194650648`；逐项重算当前树，34 项中 28 项相符、6 项不同、0 缺失。相符项包括 `local_supervisor.rs`、`local_startup.rs`、`local_delivery.rs`、`local_store/sample_upload.rs` 和该任务的受影响 Rust 测试；不相符的四份 DAA 文档包含后续文档与 r8 修订，另两项 `StartupSettings.vue` / `app.css` 是既有后续并行界面更改。清单未覆盖本轮配置解析文件，因而不能把其 QA4 整体声称为 r8 的独立 QA。DAA-015 的 Owner 自动采集/上报反馈仍按原记录，是未列各开关组合及回执的自述。
+
+**限制与下一 gate。** r5 QA2 `qa_failed` 和 F-R5-QA2-001 原样保留：新目录自动创建后首次身份读取前的替换窗口未修复；预建并确认、且初次启动期间父目录与 profile 不被移动或替换，只绕开该特定窗口，不是程序强制校验或一般竞态安全证明。Windows 不完整路径的断言已按 `cfg(windows)` 写入，当前 Mac 未执行 Windows 编译或原生验证。未重跑既有 dev/17 条联调或全套测试，未启动 DAA/DS GUI、后端、MySQL、Docker 或设备，未读取/操作现有 `.local/dev`、真实配置、历史和数据库。安装版 `.env` 发现、实际环境采用、现场/生产及完整阶段 C 不在本轮验证。交 fresh-context Verification 复核精确工作树、上述摘要、当前 r8 定向测试和证据缺口；本条是 Development 自检及非终态交接，不是 QA verdict 或 Human Owner 最终验收。
+
+**临时资源。** `/private/tmp/daa010-r8-dev.hYP5gNUZ` 为本角色唯一新建根，包含私有 Cargo 缓存克隆、测试日志和 `xcrun_db`；合成 profile 与配置已由测试删除，无本轮运行进程或外部服务依赖。命令、结果及关键摘要已在本节持久化；该根待协调者核对归属及占用后回收，不作为唯一证据。未创建分支或 worktree。
+
+## DAA-010 r8 QA1 返工与 developer_handoff（2026-11-16）
+
+[F-R8-QA1-001](checklist.md#f-r8-qa1-001-配置示例错误描述重开后的自动启动) 指出本轮交付的 `.env.example` 原有两行无条件表述启动/重开保持断连停采，且要求手动采集，与已保存的 DAA-015 启动开关不一致。该表述已存在于 HEAD，并非本轮引入；QA1 的 `qa_failed` 及其证据原样保留。本次仅将这两行替换为中英文对应说明：采集和上报启动开关默认关闭；自动采集关闭时在工作台手动连接和采集；启动按已保存的自动采集和自动上报开关分别执行，并受各自既有准入条件约束。原 S7 driver、PLC/组/点位/存储配置说明和其他内容保留。
+
+**精确候选。** 正式共享工作树 HEAD `21cd789277695bbafaa55c24e39261fc7247f9b0` 加未提交内容，无新 commit。本轮只写 `automation-world/data-acquisition-agent/.env.example` 和本 `tasks.md`。`.env.example` 由 QA1 候选 SHA-256 `2bd8ea520360242969b267938ac8a6229fd976df12a5bcaa6c01d9491ca0a223` 变更为 `fb7f4403ae37726ee2638e6ae4dae2f9dfc971fefd3ff711a4277f1940202b1c`；本节追加前 `tasks.md` SHA-256 `2c69388944f8cb22d090aa0c2e9f75b1610b2fa786b2588a3e59be176915a0a3`。获批 `spec.md` 仍为 `dd319580fd81bb119312f495d17bd81d85a78955ece68e26477bbfd792b5d6fb`，含 QA1 记录的 `checklist.md` 仍为 `5e3e3fc397e1b6285a29c6fbbe4b24a72b0f8aea803a1c1bbba237fc36ea9ae3`，本角色未写两者。三个本轮既有 Rust 文件仍与上一交接摘要一致：`config/mod.rs` `3a776328bafd5bf531db7a4eee3b39f932b0450b35f4ef9da3d677cc25b783b4`、`config/local_bootstrap.rs` `96a3ca7c007273355838c8fc637d52bcd8d09248fbaae2b64a5897d9579fa804`、`local_store/profile_contract_tests.rs` `339da0abaf365457a30ad2c60fa33c8990d6d1465c2e140003d4321dbf04485e`。
+
+**DEV self-check。** 对照 QA1 指向的 `services/local_recovery.rs` / `services/local_startup.rs` 和 DAA 双语手册：普通恢复调用启动自动化，分别按 `auto_collect`、`auto_report` 发起已有动作；本次文字保留各自准入条件，不声称启动必定成功。`python3 -B -` 只在内存将新六行恢复为原两行，重算完整文件 SHA-256 与 QA1 原 `2bd8ea…a223` 一致；同时确认 profile 赋值仍唯一、无行尾空白，exit 0。`git diff --check -- automation-world/data-acquisition-agent/.env.example automation-world/data-acquisition-agent/plans/DAA-010-sample-facts-upload/tasks.md` exit 0。未修改产品代码或其他文档，未创建临时资源或重新运行程序、构建、测试及 dev 联调。
+
+**保留的观察与限制。** QA1 的独立探针发现相对 `alias/`、`alias/.` 可通过配置层路径检查；对该合成符号链接目标，后续 `LocalEngine::open → Stores::open → admit → canonical` 在 profile 锁、SQLite 和日志写入前拒绝，目标仍为空。QA 同时观察旧 HEAD 的绝对 `alias/.` 在配置层也放行；该分层差异不作为已修复或新的业务写入绕过。本次未修改路径实现，详细条件和证据以 QA1 记录为准。r5 QA2 首次自动创建目录的竞态仍未修复，Mac 受控前提、Windows 原生和实际环境采用边界均不变。
+
+**重新交接。** 将精确 DAA-010 r8、上述工作树与文件摘要、原 QA1 失败、返工内容和 DEV 自检交新的 fresh-context Verification。此交接不替代 QA verdict 或 Human Owner 最终验收。
+
+追加前缀核对时，首次脚本将新增章节的分隔换行多计入旧内容，摘要断言 exit 1；按追加边界修正后重算，原 `tasks.md` 摘要与上述 `2c6938…a0a3` 一致。该错误只发生在内存核对，没有修改任何文件。
+
+### r8 临时资源回收
+
+协调者报告已核对本轮 Development 专属根 `/private/tmp/daa010-r8-dev.hYP5gNUZ` 和 QA 专属根 `/private/tmp/daa010-r8-qa.VJzhCOl6`：两者均为 UID 501、权限 0700，均非符号链接或挂载点；分别执行 `lsof -nP +D` 均 exit 1 且无匹配，`mount` 过滤无匹配。QA2 已持久记录必要结果和摘要，不依赖临时文件作为唯一证据。协调者使用 Python `shutil.rmtree` 仅删除上述两个确切路径，命令 exit 0，删除后两路径的 `lexists` 均为 `false`。未触及现有 `.local/dev` 等任务外资源；本条只记录资源清理，不改变 QA2 verdict、候选或 Human Owner 验收状态。

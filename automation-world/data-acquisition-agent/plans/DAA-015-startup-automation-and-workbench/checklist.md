@@ -1,11 +1,11 @@
 Task ID: DAA-015
 Revision: r1
-Status: qa_failed
+Status: owner_accepted
 Owner Role: QA / Verification
 Allowed Writers: QA / Verification, Human Owner
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
-Handoff: QA3 `qa_failed`，F-006 返回 Development 在获批 r1 内返工；重新交接后进行 fresh-context Verification。Human Owner 最终验收待定。
+Handoff: Human Owner 已最终验收 DAA-015 r1。任务专属临时测试资料已清理，中英文手册按钮名称已同步并通过独立静态核验。
 
 # DAA-015 r1：独立验证 QA1
 
@@ -135,3 +135,90 @@ macOS arm64 15.7.7（24G720），Rust/Cargo 1.89.0，Node 22.19.0，pnpm 11.11.0
 - `/private/tmp/daa015-qa3.MVejAl` 含隔离源码和诊断用例、测试日志、Vite 产物、专属合成 profile。Development 的 `/private/tmp/daa015-dev.DgUHuY` 和历史独立 QA 的 `/private/tmp/daa015-qa.5cjZ1S`、`/private/tmp/daa015-qa2.TJ14Wm` 继续保留用于本次返工及核对，正式 Rust target 是共用构建缓存。由协调者在确认无证据、进程或后续返工依赖后回收任务专属资源。
 
 当前结论 `qa_failed`，F-006 交回 Development。在本 Revision 重新交接并完成独立核验后，交 Human Owner 最终验收。当前最终验收 `pending`。
+
+
+## 独立验证 QA4（2026-11-14，Asia/Shanghai）
+
+以命名 Verification 角色与 fresh context 消费 [获批 r1](spec.md)、[Development 交接第 8 节](tasks.md#8-qa3-返工及新的-developer_handoff) 和以上 QA1–QA3 原始证据。依根及最近作用域规则、canonical workflow、project-governance 与 rust-runtime 核验，前端复验对照 frontend-ui 与 i18n-workflow。角色按 `contract_only` 执行。
+
+### 精确候选
+
+- 正式工作树为 `/Users/jason/Desktop/DreamCode/aiis-ics-arch`，本轮 HEAD `21cd789277695bbafaa55c24e39261fc7247f9b0`，交接记载的 HEAD `fd999224a8756feda314a33148304b4bf3461876` 是较早时点。以正式树文件内容和起点补丁固定候选。获批 spec SHA-256 `f571dd51dbed26a3d59f70e78253dc6e47bb89a61453e8c3ed2a97773910340d`，交接 tasks SHA-256 `5538f899ac5c28e84067f7f902a4cc42c099303a3ff488255f3cc87c2f617bb3`。
+- `/private/tmp/daa015-dev.DgUHuY/daa015-qa4-manifest.json` SHA-256 `52001c772e90de2c010807b3cd81e564a6ef221e69b5def9200fc9f194650648`。Python SHA-256 比较原始起点、QA3 快照与正式候选各 34 项全部匹配，QA3 列与原 QA3 清单候选列全等。起点补丁 `daa015-qa4-source.patch` SHA-256 `cef29a63dbdacd12b3c2c236d5b197dfe26d93f65340caf4e1e0493d076c1063`，34 个改动路径与清单相同。返工补丁 `daa015-qa3-rework.patch` SHA-256 `e38f303fec5b6561e580252497798c14f538af213d01562ecb191629841ebddf`，仅 `local_supervisor.rs` 和 `local_store/tests.rs`。两份补丁分别在各自起点正向 `git apply --check --whitespace=error`、在正式树反向 `git apply --check --reverse` 均退出 0。两处 Rust/test 文件与获批范围相符。并行的 DAA-016 草稿及索引变更在工作树可见，独立于本次候选。
+
+### 验收证据
+
+| 验收 | QA4 结果 |
+| --- | --- |
+| AC01 / R01–R02 | 通过。工作台、启动设置、两页共用的上报卡、快照处理、中英文及对应 QA1/QA2 测试与 QA3 证据中的候选逐字节相同。12 项定向 Node 测试复验折叠、键盘和悬停帮助，以及快照失败/恢复、按钮和回执呈现。两页双语 renderer、前端类型检查与构建采用 QA3 已通过的同版本 UI 证据。 |
+| AC02 / R03 | 通过。通过实际 `local_recovery::open` 复验四种开关组合、旧合成 profile 持久化、读写失败及 runtime2/3 本地能力。独立 IPC 探针对已有采集关闭自动采集开关，当次仍继续采集，关闭再打开才保持停态。原保存的开启设置在重开时以新活动配置运行，当次人工暂停未改写该设置。 |
+| AC03 / R03–R04 | 通过，F-006 关闭，F-001、F-005 定向复验通过。实际恢复、PLC actor、草稿保存及两次激活均运行于隔离源码，用两台内存 PLC 覆盖容量等待、已经采集、已连接后暂停、显式人工连接、停用再启用。原始 F-006 复现与 IPC 探针结果见下。 |
+| AC04 / R05 | 通过。`startup_` 中复验旧合成样本的逐源绑定、参与开关、匹配回执与下次启动吸收新绑定。原有阻断与 `prepared/attempt=0` 冻结目标和正文保持。定向复验派发前当前目标及身份检查，以及暂停后在途回执仍保存、无新派发。 |
+| AC05 | 通过规格内源码及合成启动验证。复核正常 Tauri 启动 `run → local_recovery::open` 与 `tauri.conf.json` 传递 `rust-snap7-driver`。Rust 格式和生产 feature 检查通过。原生窗口及现场边界见下。 |
+
+### F-006 关闭证据
+
+先按 QA3 原始独立用例重跑。合成 PLC 从启动恢复后连接 `127.0.0.1:31001`，容量不足时等待自动采集。恢复容量并以同端点激活名称变更，当前连接保留且采集未启动。第二次激活将端口改为夹具端点 `127.0.0.1:31003`。1.5 秒后 `desiredConnection=false, connected=false, desiredCollection=false, savedCycles=0`，退出 0。QA3 原复现的前两项为 `true`。
+
+独立 IPC 探针通过实际 `daa_save_draft`、`daa_activate_configuration`、`daa_set_collection`、`daa_set_connection`、`daa_save_startup_settings` 的 Rust dispatch 复验。首台合成 PLC 首次连接失败时，另一台先采集。每组第二次激活后观察 1.43 秒，另一台各多保存 3 轮：
+
+| 首台场景 | 更新后连接意图 / 已连接 / 采集意图 | 新增采样轮 |
+| --- | --- | --- |
+| 容量等待，经同端点激活后更换端点 | `false / false / false` | 0 |
+| 已连接后手动暂停，经同端点激活后更换端点 | `false / false / false` | 0 |
+| 已自动采集，经同端点激活后更换端点 | `false / false / false` | 0 |
+| 已自动采集并明确手动连接，经同端点激活后更换端点 | `true / true / false` | 0 |
+| 同端点激活后停用，再次激活启用 | `false / false / false` | 0 |
+
+先前的人工暂停在执行时保留原现连。重开后原保存的自动采集开关对新活动版本生效，保存采样后运行状态的 `used_revision` 命中新版本。再保存关闭时仍继续当前采集，下次重开进入停态。[配置安装分支](../../src-tauri/src/services/local_supervisor.rs#L416)在同端点保留连接来源，更换端点或禁用时撤销归属于启动的连接，并停止其自动采集意图。[人工动作分支](../../src-tauri/src/services/local_supervisor.rs#L596)保留独立人工连接意图。现有能力和已验证的手动启停路径可继续使用。
+
+### 命令、环境与资源
+
+macOS arm64 15.7.7（24G720），Rust/Cargo 1.89.0，Node 22.19.0，pnpm 11.11.0。Rust 执行于 `/private/tmp/daa015-qa4.huYPyb/isolated/automation-world/data-acquisition-agent`，源码来自正式树，`TMPDIR` 为 QA4 子目录 `daa-008-r2-a-fixtures`，`CARGO_TARGET_DIR` 为 QA4 专属 `target` 副本。编译产物、日志、诊断与合成 profile 均在该任务临时根下。Rust 运行及生产 feature 编译使用隔离副本，正式 DAA 目录只执行 Node 定向组件测试。没有启动或重启用户服务，没有读取或操作现有 `.local/dev`、dev API/数据库、真实 PLC 或真实样本。没有启动原生窗口、Docker、MySQL 或真实 HTTP 服务。
+
+- `cargo test --manifest-path src-tauri/Cargo.toml --offline --locked --lib <过滤器> -- --test-threads=1`，`startup_` 10/10（含六场景的 Development 回归）、`runtime2_and_3_keep_local_collection_and_refuse_v2_delivery` 1/1、`dispatch_rechecks_` 2/2、`v2_worker_pause_save_preserves_inflight_receipt_and_stops_new_dispatch` 1/1。均退出 0，测试编译保留既有 `empty_for_test` 告警。
+- 同一命令增加 `--nocapture`，分别选择 `qa3_same_endpoint_then_replacement_is_not_automatic` 与 `qa4_startup_origin_through_ipc_and_restart`，各 1/1、退出 0。诊断仅加在隔离测试副本。后者首次用零可用空间尝试激活，按现有容量准入返回 `capacity_paused`，退出 101。调整探针在确认启动处于等待后先恢复合成容量，再走激活，覆盖预期路径。
+- `cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check` 与 `cargo check --manifest-path src-tauri/Cargo.toml --offline --locked --features rust-snap7-driver` 均退出 0。正式 DAA 目录 `node --test tests/startup-settings.test.mjs tests/facts-delivery.test.mjs` 12/12，退出 0。`git diff --check` 与本节本地 Markdown 链接文件目标检查均通过。
+- QA4 自有 `/private/tmp/daa015-qa4.huYPyb` 含隔离源码、两次探针的日志、合成 profile、Cargo 缓存副本与前后审计记录。以上结果和关键状态已持久记录。由协调者在归属、证据及占用条件核准后回收本任务专属资源。旧 Development 和 QA1–QA3 资源及正式树 Cargo 缓存均由现有记录跟踪。QA4 无常驻进程、分支或工作树。
+
+**Verdict** `qa_passed`。F-006 关闭，QA1–QA3 结果保留。源码与合成验证结果交 Human Owner，最终验收 `pending`。Mac 与 Windows 原生 GUI、真实设备和后端、阶段 C 与发布部署仍无本轮验收证据。
+
+**资源收尾记录** 协调者确认归属及无打开句柄后，回收了可重建的 QA4 隔离编译缓存 `/private/tmp/daa015-qa4.huYPyb/target`。QA 只读复核确认该路径已不存在，隔离源码、合成 profile、测试与探针日志及前后审计记录仍在原任务目录。
+
+### Human Owner 会话自述的手测反馈
+
+Human Owner 在会话中确认启动设置的两处 DIRECT 界面修正均正常，标题与下方卡片一致，问号提示完整显示。随后反馈「我测了，可以启动软件后自动上报和采集」。该反馈未提供具体 profile、后端、样本数量、回执或各开关独立组合的测试结果。以上按 Human Owner 手测自述记录。独立 QA4 结论仍为 `qa_passed`，Human Owner 最终验收仍为 `pending`。
+
+## Human Owner 最终验收（DAA-015 r1）
+
+Human Owner 于 2026-11-14（Asia/Shanghai）在当前会话明确验收 DAA-015 r1。登记时间为 `2026-11-14T15:41:19+08:00`。验收原文如下。
+
+> 验收 DAA-015 r1，等 DAA-016 完成后同步中英文手册的按钮名称，并清理本轮临时测试资料。
+
+最终状态为 `owner_accepted`。QA4 的源码和合成验证对应后续 DIRECT 界面小修之前的精确候选。DIRECT 小修随后完成构建和组件测试，Human Owner 目视确认启动设置标题与下方卡片一致、问号完整显示提示，并自述软件启动后可自动采集、自动上报。会话反馈未给出具体 profile、后端目标、样本数量、回执或开关组合。Windows 原生验证仍待实测。
+
+中英文手册的按钮名称由协调者在 DAA-016 完成后另行同步。本轮临时测试资料的清理由协调者另行处理，并以实际清理记录为准。
+
+### 验收后资源收尾
+
+协调者按 Human Owner 要求回收了 DAA-015 专属的五个临时测试目录。QA 只读复核确认 `/private/tmp/daa015-dev.DgUHuY`、`/private/tmp/daa015-qa.5cjZ1S`、`/private/tmp/daa015-qa2.TJ14Wm`、`/private/tmp/daa015-qa3.MVejAl`、`/private/tmp/daa015-qa4.huYPyb` 均已不存在。QA4 历史候选的[清单](evidence/daa015-qa4-manifest.json)和[源码补丁](evidence/daa015-qa4-source.patch)已归档，两份 SHA-256 均与原 QA4 记录一致。本次仅追加资源收尾事实，原 QA 记录与 `owner_accepted` 结论均予保留。
+
+### 验收后手册按钮文案的独立核验
+
+2026-11-14（Asia/Shanghai）。命名 Verification 在 fresh context 核验 Human Owner 验收 DAA-015 r1 后指定的双语手册文案更正。正式工作树为 `/Users/jason/Desktop/DreamCode/aiis-ics-arch`，HEAD `21cd789277695bbafaa55c24e39261fc7247f9b0`。环境为 macOS arm64 15.7.7（24G720）、Git 2.50.1、Python 3.9.6、ripgrep 15.2.0。核验依据为 [r1 规格 R02](spec.md#2-需求)、[Development 同步及自检](tasks.md#10-验收后手册按钮文案同步)、[DAA-016 r1 QA2](../DAA-016-docs-closeout/checklist.md#daa-016-r1-独立文档复验--qa2)及当前源码。角色按 `contract_only` 执行。
+
+| 核查项 | 独立结果 |
+| --- | --- |
+| 按钮与手册 | 工作台和上报与存储页面共用 `FactsDeliveryPanel.vue`，其启动按钮经 `ConsoleActionButton.vue` 翻译 `common.delivery.startOrResume`。`src/locales/index.ts` 在两种语言的 `common` 下加载对应 `common.json`。手册各在第 70 行使用「启动上报」和 **Start reporting**，旧称均无命中。 [按钮源码](../../src/components/console/FactsDeliveryPanel.vue#L8) · [中文手册](../../USER_GUIDE.zh-CN.md#L70) · [英文手册](../../USER_GUIDE.md#L70) |
+| 两份手册差异与导航 | 与同步前基线逐字节比较，各只替换一处按钮名称。18 个 Markdown 链接逐项保留并确认目标可达，包括两份 README 启动标题及英文手册第 3 行的 [英文采集指南](../../../../docs/acquisition-data-guide.md)。 |
+| 任务记录与归档 | `tasks.md` 的本轮增量仅为末尾 §10，之前的 §1–8 复算与原 QA4 交接摘要一致。两份 QA4 归档件摘要仍与原记录一致，五个专属临时路径再次确认不存在。 |
+
+同步前摘要来自 Development 交接。英文手册以 `git show HEAD:<路径>` 的原文应用 DAA-016 导航更改重建，且摘要与 DAA-016 已核验交接清单匹配；中文手册同步前字节等于 HEAD 原文。用 `python3 -B -` 独立解析 locale JSON、按正反方向比对两处替换、检查链接，并截取 `tasks.md` §10 之前的原字节复算 SHA-256。首次截取误计标题前的空行，校正分界后所有断言退出 0。查阅 Development 自检，再重跑 `git --no-optional-locks diff --check HEAD -- <两份手册、DAA-015 tasks.md 与 checklist.md>`，退出 0。
+
+| 文件 | 同步前 SHA-256 | 同步后 SHA-256 |
+| --- | --- | --- |
+| `USER_GUIDE.zh-CN.md` | `4a66349f1936998485616e4389e0049d9b54f068de1851e4329041fca2cd4e94` | `ec4cd783a546486c68be598770c9ba99391d6cb90682be3c2ebd5af85a63210b` |
+| `USER_GUIDE.md` | `92861b37c492e7eb57eebb5b23aafa4ac6dbe654df1fca9c1175ca303ed5d5eb` | `1aa85cf01edfee3cbd43d7ce70df4e27f0476bb537fe80b77c5b21ea97574d09` |
+| `tasks.md` | `ecbf75ea315c159bdc29e185326e45ddb50b058bb18288e853fc6959d118d407` | `6977d70bb3abe39dab1c54683c4afc2df66f4fb35e9b9bc58574053476025262` |
+
+**结论** 验收后双语手册按钮文案更正独立静态核验通过，交 Human Owner 知悉。DAA-015 r1 `owner_accepted` 及 QA4 历史候选各按原记录。DAA-016 r1 文档实施通过 QA2，待 Human Owner 最终验收。本轮范围限文案、链接、源码翻译映射和差异核对，应用、数据库及设备均未测试。

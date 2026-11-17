@@ -9,11 +9,13 @@ pub fn run() {
             // 显式非法profile必须在日志/startup任何路径解析前失败，防止旧Option接口回落默认目录。
             let profile = crate::config::configuration_profile(app.handle())
                 .map_err(|code| std::io::Error::new(std::io::ErrorKind::InvalidInput, code))?;
-            let guard = crate::infrastructure::logging::init(app.handle())?;
+            let defaults = crate::config::load_defaults_from_env();
+            let guard = crate::infrastructure::logging::init(&profile, &defaults)?;
             app.manage(guard);
-            let profile = Ok(profile.join("configuration.sqlite3"));
+            let database_path = Ok(profile.database_path());
+            app.manage(profile);
             app.manage(
-                crate::services::local_configuration::LocalConfigurationService::new(profile),
+                crate::services::local_configuration::LocalConfigurationService::new(database_path),
             );
             let window = app
                 .config()

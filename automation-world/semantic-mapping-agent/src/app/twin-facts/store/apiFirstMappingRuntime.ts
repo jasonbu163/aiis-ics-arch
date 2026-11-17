@@ -2,17 +2,14 @@
  * File Path: /automation-world/semantic-mapping-agent/src/app/twin-facts/store/apiFirstMappingRuntime.ts
  * Description: Reactive controls for the continuous API-first Mapping Runtime.
  * Main Features:
- *   - Starts one Tauri HTTP-only runtime from the saved Backend connection profile
  *   - Polls the HTTP Mapping runtime status independently from source inspection
- *   - Applies local app-open auto-start only through the same normal start action
+ *   - Preserves applicable pause and stop controls
  */
 import { onBeforeUnmount, ref } from "vue";
 
 import {
   getApiFirstMappingRuntime,
   pauseApiFirstMappingRuntime,
-  resumeApiFirstMappingRuntime,
-  startApiFirstMappingRuntime,
   stopApiFirstMappingRuntime,
 } from "../api";
 import type { TwinRuntimeSnapshot } from "../types";
@@ -45,25 +42,15 @@ export function useApiFirstMappingRuntimeStore() {
   }
 
   async function action(
-    actionName: "start" | "pause" | "resume" | "stop",
+    actionName: "pause" | "stop",
   ) {
     await withBusy(async () => {
-      if (actionName === "start") {
-        runtime.value = await startApiFirstMappingRuntime({
-          backendBaseUrl: "",
-        });
-      } else if (actionName === "pause") {
+      if (actionName === "pause") {
         runtime.value = await pauseApiFirstMappingRuntime();
-      } else if (actionName === "resume") {
-        runtime.value = await resumeApiFirstMappingRuntime();
-      } else {
+      } else if (actionName === "stop") {
         runtime.value = await stopApiFirstMappingRuntime();
       }
     });
-  }
-
-  async function autoStartIfEnabled(enabled: boolean) {
-    if (enabled) await action("start");
   }
 
   function startPolling() {
@@ -101,7 +88,6 @@ export function useApiFirstMappingRuntimeStore() {
     error,
     refresh,
     action,
-    autoStartIfEnabled,
     startPolling,
     stopPolling,
   };

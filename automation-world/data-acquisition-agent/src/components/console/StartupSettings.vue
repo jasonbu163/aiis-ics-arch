@@ -2,7 +2,7 @@
 <template>
   <section v-if="local" class="console-card console-card--compact daa-startup">
     <header class="console-card__header">
-      <div class="daa-startup-heading">
+      <div class="console-card__title-wrap daa-startup-heading">
         <h2><button type="button" class="daa-startup-title" :aria-expanded="expanded" aria-controls="daa-startup-body" @click="toggleExpanded">{{ t('common.startup.title') }}</button></h2>
         <div v-if="expanded" class="daa-delivery-help" @mouseenter="hoverHelp = true" @mouseleave="hoverHelp = false">
           <button type="button" class="daa-help-button" :aria-label="t('common.startup.helpLabel')" :aria-expanded="helpVisible" aria-describedby="daa-startup-help" @focus="focusHelp = true" @blur="focusHelp = false; touchHelp = false" @click="touchHelp = !touchHelp">?</button>

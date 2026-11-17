@@ -1,9 +1,9 @@
 Task ID: DAA-011
 Revision: r1
-Status: owner_approved
+Status: superseded
 Owner Role: PM
 Allowed Writers: PM, Human Owner
-Handoff: Human Owner 已批准 aiis-ics-arch::DAA-011 r1，交 Development 按本规格更新中英文手册
+Handoff: Human Owner 已决定按 DIRECT 将旧指南任务作历史收尾；原独立 QA 和未单独终验事实保留，现行指南由后续任务接续。见第 7 节。
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch
@@ -69,3 +69,17 @@ Human Owner 批准精确 r1 后，Development 按 `project-governance` 与项目
 > 批准 aiis-ics-arch::DAA-011 r1，按 spec 更新 DAA 中英文操作手册并做独立文档核验
 
 批准对象为登记前的完整 r1 草案，已核对 SHA-256 `d5bfd02d436daa32ac3e7c7d4bb31bb0f78df8e84109cb6903ed0b086fb86db2`。本次登记包含批准状态、记录与交接。Development、独立文档核验及 Human Owner 最终验收按第 6 节接续。
+
+<a id="daa011-historical-disposition"></a>
+
+## 7. Human Owner 历史收尾决定（2026-11-16）
+
+Human Owner 在当前会话同意将 DAA-011 标为旧指南已被后续手册接替，并明确要求保留历史记录、同步任务目录、不重复测试或操作现有数据，按 DIRECT 处理。原话：
+
+> 可以，按你说的收尾 DAA-008 和 DAA-011，保留历史记录并同步任务目录，不重复测试，也不动现有数据。走 DIRECT 就好。
+
+本任务原双语指南的独立文档 QA2 为 `qa_passed`，当时未单独记录 Human Owner 最终验收；该事实及原候选与失败历史保持不变。本次不补记当时未发生的验收。后续 [DAA-014](../DAA-014-unified-operator-guide/checklist.md) 和 [DAA-016](../DAA-016-docs-closeout/checklist.md) 已分别验收统一手册及文档收尾；当前操作请查阅 [DAA 使用手册](../../USER_GUIDE.zh-CN.md)。
+
+此前顶部 `Status: owner_approved`、原 Handoff 和第 1–6 节保留其当时的事实；收尾前完整 spec SHA-256 为 `674c0880f1e700f2d4104458f7a096c56f36565b791bf59a5552e1604c0551d1`。除顶部 Status/Handoff 转为当前历史状态外，本节以前正文未改。Windows 原生验证仍待后续实测。
+
+收尾前 Handoff 原文：`Human Owner 已批准 aiis-ics-arch::DAA-011 r1，交 Development 按本规格更新中英文手册`

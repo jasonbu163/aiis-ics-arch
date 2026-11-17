@@ -1,0 +1,50 @@
+{
+  "latest": {
+    "eventId": "sample-000042-001",
+    "data": {
+      "equipmentId": "line-01",
+      "taskNo": "000042",
+      "observedAt": "2026-11-17T10:30:00.123+08:00",
+      "quality": "good",
+      "groups": {
+        "production": {
+          "coilNo": "000042"
+        },
+        "heatZone1": {
+          "zone1Actual": 810.2,
+          "zone1Set": 815.0
+        }
+      }
+    }
+  },
+  "history": {
+    "eventId": "sample-000042-001",
+    "data": {
+      "equipmentId": "line-01",
+      "taskNo": "000042",
+      "observedAt": "2026-11-17T10:30:00.123+08:00",
+      "quality": "good",
+      "groups": {
+        "production": {
+          "coilNo": "000042"
+        },
+        "heatZone1": {
+          "zone1Actual": 810.2,
+          "zone1Set": 815.0
+        }
+      }
+    }
+  },
+  "energy": {
+    "eventId": "meter-01-001",
+    "data": {
+      "meterId": "meter-01",
+      "groupKey": "electricity",
+      "observedAt": "2026-11-17T10:30:00+08:00",
+      "quality": "good",
+      "values": {
+        "energyReading": 1006
+      }
+    }
+  }
+}

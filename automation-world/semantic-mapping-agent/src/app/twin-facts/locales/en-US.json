@@ -217,6 +217,7 @@
   "runtimeAutoStartOnOpen": "Start automatically when SMA opens",
   "apiFirstMappingRuntimeKicker": "collection_facts bound-point consumer",
   "apiFirstMappingRuntimeTitle": "API-first Mapping Runtime",
+  "mappingDeliveryUnavailable": "Only configuration and preview are currently available. Mapping delivery is not enabled.",
   "apiFirstMappingRuntimeHint": "Locks enabled Mapping and Target API configuration at start. Each cycle freshly reads that Mapping’s bound facts and sends a POST, including unchanged values, then waits its saved execution interval. Failed reads do not send old values; reads resume next cycle.",
   "apiFirstMappingRuntimeSafety": "A failed Target request or uncertain outcome blocks only the current Mapping, without automatic replay.",
   "mappingRuntimeAutoStartHint": "The app-open startup preference is retained. Native admission rejects all automatic delivery in this stage; this is not OS boot startup.",

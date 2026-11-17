@@ -6,11 +6,14 @@
 
 | Task ID | 状态 | 规格 | 最新事实 / 下一 gate |
 | --- | --- | --- | --- |
-| SMA-001 | draft | [r2 总规格](plans/SMA-001-cu-integration-and-scope-cleanup/spec.md) | SMA-002/SMA-003 已获 Owner 验收。SMA-004 r1 经有限返工后独立 QA2 通过，待 Owner 最终验收；后续阶段仍仅列目标，总规格保持 draft。 |
+| SMA-001 | draft | [r2 总规格](plans/SMA-001-cu-integration-and-scope-cleanup/spec.md) | SMA-002、SMA-003 和 SMA-004 r1 均已验收。总规格仍为草案，后续阶段仅列目标与依赖。 |
 | SMA-002 | owner_accepted | [r1 职责清理](plans/SMA-002-scope-cleanup/spec.md) | [独立验证与 Owner 收口](plans/SMA-002-scope-cleanup/checklist.md)固定候选 af7140357f2a81fa6a2870aed1c2d092dfe4e64ab7795dbf472cf62cdbcff6e2，确认无漂移，并在 Owner 接受已披露影响与限制后关闭 B1。QA 通过，条件性清理验收仅对此候选生效；原事件历史与未来 profile 保护不变。 |
 | SMA-003 | owner_accepted | [r1 CU 接入](plans/SMA-003-cu-integration/spec.md) | [独立验证与 Owner 验收](plans/SMA-003-cu-integration/checklist.md#owner-acceptance-r1)固定候选 ae9b3c4900e6e3f326a61e700f1736d67338247716e609a559a90a598a1d8bcf：QA 通过、N1/N2 已关闭，Human Owner 于 2026-11-04 最终验收本 CU 阶段。历史失败及原生跨进程偏好持久性未实测限制保留；API/DAA 对接和 SMA 总体完成另项。 |
-| SMA-004 | qa_passed | [r1 配置独立化](plans/SMA-004-local-configuration/spec.md) | [独立 QA2](plans/SMA-004-local-configuration/checklist.md#qa2-r1)核准 53 项候选 9d514bc4c71ae3ebb0b634118c86c6f409835f5d8d933b3fab5bccc51fc93676，关闭 F-QA1-001/002/003。原生 Save As、产品真实备份/恢复及本地化控件通过，未变存储/重开/Rust 证据已核准复用；QA1 失败和证明限制保留。正常投递保持关闭，Owner 最终验收 pending。 |
+| SMA-004 | owner_accepted | [r1 配置独立化](plans/SMA-004-local-configuration/spec.md) | [Owner 于 2026-11-14 验收](plans/SMA-004-local-configuration/checklist.md#owner-acceptance-r1)独立 QA2 通过的精确候选，覆盖本地 SQLite 配置、备份恢复及纯预览。正常投递处于关闭状态。 |
+| SMA-005 | qa_blocked | [r1 页面交互首批](plans/SMA-005-page-interaction/spec.md) | OpenAPI 只读测试（#4）和投递可用状态（#6）的独立离线检查通过，[验证记录](plans/SMA-005-page-interaction/checklist.md)等待 Human Owner 补齐原生 GET 手测证据。 |
+| SMA-006 | draft | [r1 弹窗交互首批](plans/SMA-006-dialog-interaction/spec.md) | 框内错误反馈（#7）、未保存输入保护（#8）和长弹窗滚动（#9）。 |
+| SMA-007 | qa_passed | [r1 开发 profile 路径对齐](plans/SMA-007-dev-profile-path/spec.md) | 相对和绝对路径的[独立验证](plans/SMA-007-dev-profile-path/checklist.md)通过，待 Human Owner 最终验收。 |
 
-实施顺序：**SMA-002 → SMA-003 → SMA-004**。前两阶段已接受，SMA-004 已通过 QA2、待 Owner 最终验收；阶段④–⑥仍仅列目标与依赖，未创建未来 bundle。子任务接受不代表 SMA 总体交付完成。
+实施顺序为 **SMA-002 → SMA-003 → SMA-004**。三个阶段均已验收。阶段④–⑥的目标与依赖见总规格草案。
 
 实际角色文件和待创建阶段见[任务目录](plans/README.zh-CN.md)。

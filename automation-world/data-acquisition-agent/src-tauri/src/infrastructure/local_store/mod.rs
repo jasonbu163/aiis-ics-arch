@@ -1,9 +1,13 @@
 //! 本地SQLite双库与公平有界执行队列：统一串行数据库工作，不在PLC/UI等待中持有事务。
 pub(crate) mod capacity;
+#[cfg(test)]
+mod catalog_import_tests;
 mod configuration;
 pub(crate) mod delivery;
 #[cfg(test)]
 pub(crate) mod delivery_tests;
+#[cfg(test)]
+mod point_display_names_tests;
 #[cfg(test)]
 mod point_naming_tests;
 mod profile_contract;

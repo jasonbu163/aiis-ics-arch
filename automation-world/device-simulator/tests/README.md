@@ -21,3 +21,13 @@ The non-default native driver uses fixed DOM events, File/DataTransfer and norma
 Raw commands, stdout/stderr, file events, wire bytes, images, process/resources, SQLite copies and status are saved under the role's T5 run then copied member-for-member to persistent A5 with a second SHA/byte check. Public P5 contains exactly five compact manifests/indexes, no raw DB, logs or binaries. `collect_evidence.py` seals new runs; `verify_evidence.py` verifies an explicit archive or same-role B0 without writing P5. `retire_g0.py` first creates a per-file plan, verifies persistent originals and requires current full product validation before exact-file removal; it never deletes unknown build/profile/system data.
 
 Native resource attribution combines actual POSIX children, the exact owned WebKit store and fixed read-only PID getters on the current WKWebView, only in the non-default test build. The macOS Private SPI is runtime-guarded and not a supported product API; unsupported or unattributed costs remain unknown. Per-PID observations, terminal unavailable samples and shared XPC lifetime are reported separately; no system service is killed.
+
+DS-003 development self-checks use an explicitly owned temporary root and never connect to a PLC:
+
+```sh
+mkdir -p /private/tmp/ds003-dev/profiles
+DS_TEST_RUN_ROOT=/private/tmp/ds003-dev/profiles CARGO_TARGET_DIR=/private/tmp/ds003-dev/target cargo test --manifest-path runtime/Cargo.toml --locked --offline --test plc_catalog_export
+node --test tests/plc-catalog-export.test.mjs
+```
+
+Use a unique, owned empty root for an actual run. Synthetic tests do not substitute for the native folder dialog or the same-file DS→DAA test.

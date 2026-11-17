@@ -15,10 +15,10 @@ export const equipmentModule = {
     {
       path: 'equipment/production-parameters',
       name: 'EquipmentProductionParameters',
-      component: () => import('./views/production-parameters/index.vue'),
+      component: () => import('./views/observations/cards.vue'),
       meta: {
         titleKey: 'equipment.productionParameters',
-        pageId: 'equipment.production-parameters',
+        pageId: 'equipment.production-parameters', observationPage: 'production',
         parentTitleKey: 'equipment.title',
         navigation: { visible: true, order: 10, icon: 'DataLine' }
       }
@@ -26,10 +26,10 @@ export const equipmentModule = {
     {
       path: 'equipment/drive',
       name: 'EquipmentDrive',
-      component: () => import('./views/drive/index.vue'),
+      component: () => import('./views/observations/cards.vue'),
       meta: {
         titleKey: 'equipment.drive',
-        pageId: 'equipment.drive',
+        pageId: 'equipment.drive', observationPage: 'drive',
         parentTitleKey: 'equipment.title',
         navigation: { visible: true, order: 20, icon: 'Odometer' }
       }
@@ -37,13 +37,31 @@ export const equipmentModule = {
     {
       path: 'equipment/temperature',
       name: 'EquipmentTemperature',
-      component: () => import('./views/temperature/index.vue'),
+      component: () => import('./views/observations/cards.vue'),
       meta: {
         titleKey: 'equipment.temperature',
-        pageId: 'equipment.temperature',
+        pageId: 'equipment.temperature', observationPage: 'temperature',
         parentTitleKey: 'equipment.title',
         navigation: { visible: true, order: 30, icon: 'Operation' }
       }
+    },
+    {
+      path: 'equipment/cleaning', name: 'EquipmentCleaning',
+      component: () => import('./views/observations/cards.vue'),
+      meta: { titleKey: 'equipment.observation.cleaning', pageId: 'equipment.cleaning', observationPage: 'cleaning',
+        parentTitleKey: 'equipment.title', navigation: { visible: true, order: 40, icon: 'Operation' } }
+    },
+    {
+      path: 'equipment/observations/admin', name: 'EquipmentObservationAdmin',
+      component: () => import('./views/observations/admin.vue'),
+      meta: { titleKey: 'equipment.observation.configManagement', pageId: 'equipment.observations.admin', requiresAdmin: true,
+        parentTitleKey: 'equipment.title', navigation: { visible: true, order: 50, icon: 'Setting' } }
+    },
+    {
+      path: 'equipment/observations/data', name: 'EquipmentObservationData',
+      component: () => import('./views/observations/data.vue'),
+      meta: { titleKey: 'equipment.observation.dataManagement', pageId: 'equipment.observations.data', requiresAdmin: true,
+        parentTitleKey: 'equipment.title', navigation: { visible: true, order: 60, icon: 'List' } }
     }
   ]
 }

@@ -31,6 +31,12 @@ source topology or important entrypoints change.
 - `backend/alembic/versions/20261013_1200_a6c8e0f2b4d6_add_public_energy_prices.py` — one-table successor to the unchanged Core root.
 - `backend/tests/test_energy_price_api.py` / `test_energy_price_service.py` / `test_energy_price_migration.py` — no-DB HTTP, transaction, SQL and metadata checks.
 - `backend/app/monitor/` — collector health, monitoring queries and typed business integration.
+- `backend/app/equipment_observation/` — configurable equipment cards, multi-region history, independent energy statistics, administration and source-independent ingest.
+- `backend/app/equipment_observation/machine_openapi.py` — v2 machine request schemas shared by the live OpenAPI routes.
+- `backend/app/plc_facts/services/observation_evidence.py` — retained r8 task attribution helper; r10 observation ingest does not require PLC evidence.
+- `backend/alembic/versions/20261116_1800_8c0e2a4d6f18_add_equipment_observation.py` — explicit seven-table r8 successor.
+- `backend/alembic/versions/20261117_1200_9d1f3a5c7e20_observation_bundles.py` — guarded r10 bundle, archive and independent energy successor.
+- `contracts/published/http-api/equipment-observation-v2/` — source-independent machine discovery, ingest, synthetic examples and private-profile template.
 - `backend/app/plc_facts/api/v2.py` — sample upload, exact point reads, scoped realtime browsing and sample history.
 - `backend/app/plc_facts/{api,schemas,models}/source_registry.py` and `{crud,services}/async_source_registry.py` — single-table registry, transactional admission, takeover and confirmed deletion.
 - `backend/app/plc_facts/services/sync_source_registry_import.py` / `backend/scripts/plc_facts_maintenance/source_registry.py` — historical r2 source import and recovery export, used from the frozen predecessor.
@@ -59,6 +65,7 @@ source topology or important entrypoints change.
 - `frontend-js/src/components/navigation/ModuleNavigation.vue` — generic group/leaf menu and icon fallback.
 - `frontend-js/src/app/plan/` / `frontend-js/src/app/performance/` — generic task list, detail, field settings and actions; old dashboard is disabled.
 - `frontend-js/src/app/acquisition-data/` — paginated realtime PLC points and DB sample history with optional filters, source labels and sample details.
+- `frontend-js/src/app/{equipment,monitor}/views/observations/` — configurable cards, curves and administrator pages; `equipment/components/observations/RecordList.vue` provides configurable metric columns.
 - `frontend-js/src/app/acquisition-data/views/sources/index.vue` — administrator source list, copyable parameters, confirmed takeover and deletion.
 - `frontend-js/src/utils/tableColumnWidths.js` — shared local column-width preferences keyed by table and field.
 - `frontend-js/src/config/systemName.js` — independent bilingual build-time system names and optional login descriptions consumed through global i18n.

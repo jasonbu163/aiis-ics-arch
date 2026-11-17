@@ -7,6 +7,139 @@ use crate::domain::{
 };
 use rusqlite::params;
 use serde_json::{json, Value};
+
+// DAA-018 r2 阻塞证据：仅在隔离测试的旧 v1 构造链重现完整上下文中的显示名。
+#[test]
+fn daa018_legacy_batch_context_contains_display_name_sentinels() {
+    use crate::domain::local_configuration::PointDisplayNames;
+    let mut s = legacy(3);
+    let mut c = super::tests::configuration();
+    let point_id = c.points[0].id.clone();
+    c.point_display_names.insert(
+        point_id,
+        PointDisplayNames {
+            zh_cn: "哨兵中文_DAA018".into(),
+            en_us: "SENTINEL_EN_DAA018".into(),
+        },
+    );
+    let revision = super::tests::activated(&mut s, &c);
+    let result = s.commit_cycle(super::tests::cycle(&c, &revision)).unwrap();
+    let built = s
+        .build_delivery_cycle(result["cycleId"].as_str().unwrap())
+        .unwrap();
+    adopt(&mut s, &built);
+    let settings = s.delivery_settings().unwrap();
+    let frozen = s.freeze_cycle(built, &settings, false).unwrap().unwrap();
+    assert!(frozen.body.contains("哨兵中文_DAA018"));
+    assert!(frozen.body.contains("SENTINEL_EN_DAA018"));
+    let body: Value = serde_json::from_str(&frozen.body).unwrap();
+    assert_eq!(body["contractVersion"], "plc-facts/v1");
+    let context = body["cycles"][0]["contextUtf8"].as_str().unwrap();
+    assert_eq!(
+        pf::sha(context.as_bytes()),
+        body["cycles"][0]["contextSha256"]
+    );
+    assert_eq!(pf::sha(frozen.body.as_bytes()), frozen.body_sha);
+    s.clean_exit().unwrap();
+}
+
+#[test]
+fn daa018_old_context_frozen_and_receipt_rows_survive_new_revision() {
+    use crate::domain::local_configuration::PointDisplayNames;
+    let mut s = legacy(3);
+    let mut c = super::tests::configuration();
+    let old_revision = super::tests::activated(&mut s, &c);
+    let old1 = s
+        .commit_cycle(super::tests::cycle(&c, &old_revision))
+        .unwrap();
+    let built = s
+        .build_delivery_cycle(old1["cycleId"].as_str().unwrap())
+        .unwrap();
+    adopt(&mut s, &built);
+    let settings = s.delivery_settings().unwrap();
+    let acked = s.freeze_cycle(built, &settings, false).unwrap().unwrap();
+    s.mark_dispatch(&acked).unwrap();
+    let response = receipt(&acked);
+    s.commit_delivery(
+        &acked,
+        &response,
+        &serde_json::to_string(&response).unwrap(),
+    )
+    .unwrap();
+    let old2 = s
+        .commit_cycle(super::tests::cycle(&c, &old_revision))
+        .unwrap();
+    let built = s
+        .build_delivery_cycle(old2["cycleId"].as_str().unwrap())
+        .unwrap();
+    let queued = s.freeze_cycle(built, &settings, false).unwrap().unwrap();
+    let tables = [
+        "collection_cycles",
+        "samples",
+        "sample_delivery",
+        "configuration_contexts",
+        "delivery_cycles",
+        "delivery_parts",
+        "delivery_batches",
+        "delivery_receipts",
+        "sample_references",
+    ];
+    let before = super::source_import_tests::dump(&s.runtime, &tables);
+    let old_payload: (String, String) = s
+        .config
+        .query_row(
+            "SELECT payload,sha256 FROM configuration_revisions WHERE id=?1",
+            [&old_revision],
+            |r| Ok((r.get(0)?, r.get(1)?)),
+        )
+        .unwrap();
+    c.point_display_names.insert(
+        c.points[0].id.clone(),
+        PointDisplayNames {
+            zh_cn: "历史旁的新中文".into(),
+            en_us: "HISTORY_NEW_EN".into(),
+        },
+    );
+    let new_revision = super::tests::activated(&mut s, &c);
+    assert_ne!(old_revision, new_revision);
+    let old_after: (String, String) = s
+        .config
+        .query_row(
+            "SELECT payload,sha256 FROM configuration_revisions WHERE id=?1",
+            [&old_revision],
+            |r| Ok((r.get(0)?, r.get(1)?)),
+        )
+        .unwrap();
+    assert_eq!(old_payload, old_after);
+    let after = super::source_import_tests::dump(&s.runtime, &tables);
+    for table in tables.iter().filter(|t| **t != "configuration_contexts") {
+        assert_eq!(before[*table], after[*table], "{table}");
+    }
+    let old_context: (String, String) = s
+        .runtime
+        .query_row(
+            "SELECT payload,sha256 FROM configuration_contexts WHERE revision=?1",
+            [&old_revision],
+            |r| Ok((r.get(0)?, r.get(1)?)),
+        )
+        .unwrap();
+    assert_eq!(old_context.0, old_payload.0);
+    assert_eq!(old_context.1, old_payload.1);
+    assert_eq!(
+        s.get_delivery(&queued.batch.batch_id).unwrap()["bodySha256"],
+        queued.body_sha
+    );
+    let body: String = s
+        .runtime
+        .query_row(
+            "SELECT body FROM delivery_batches WHERE batch_id=?1",
+            [&queued.batch.batch_id],
+            |r| r.get(0),
+        )
+        .unwrap();
+    assert_eq!(body, queued.body);
+    s.clean_exit().unwrap();
+}
 pub(crate) fn fresh() -> Stores {
     legacy(3)
 }

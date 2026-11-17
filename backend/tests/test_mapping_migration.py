@@ -62,7 +62,9 @@ def test_six_revision_60_to_64_model_parity_and_53_protection():
         assert isinstance(recorder.metadata.tables[table].c[key].type.dialect_impl(mysql.dialect()),mysql.VARBINARY)
         assert 'VARBINARY(200)' in str(CreateTable(recorder.metadata.tables[table]).compile(dialect=mysql.dialect()))
     graph = ScriptDirectory.from_config(Config('alembic.ini'))
-    assert graph.get_heads()==['7b9d1f3a5c7e']
+    assert graph.get_heads()==['9d1f3a5c7e20']
+    assert graph.get_revision('9d1f3a5c7e20').down_revision=='8c0e2a4d6f18'
+    assert graph.get_revision('8c0e2a4d6f18').down_revision=='7b9d1f3a5c7e'
     assert graph.get_revision('7b9d1f3a5c7e').down_revision=='6a8c0e2b4d16'
     assert graph.get_revision('6a8c0e2b4d16').down_revision=='5f7a9c1e3b25'
 

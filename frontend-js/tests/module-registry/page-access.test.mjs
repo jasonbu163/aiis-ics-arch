@@ -30,6 +30,9 @@ test('role arrays reject missing, broken, duplicate, forbidden and non-subset co
   assert.throws(() => parseRolePageAccess(env(['missing.list']), registry), /unknown pageId missing.list/)
   assert.throws(() => parseRolePageAccess(env(['aiis_demo.example']), registry), /disabled pageId aiis_demo.example/)
   assert.throws(() => parseRolePageAccess(env(['system.projection-mapping']), registry), /unknown pageId/)
+  assert.throws(() => parseRolePageAccess(env(['monitor.realtime']), registry), /unknown pageId/)
+  for (const id of ['equipment.observations.admin', 'monitor.observations.admin'])
+    assert.throws(() => parseRolePageAccess(env([id]), registry), /admin-only pageId/)
   for (const retired of ['dashboard.home','performance.split','performance.print','performance.efficiency','performance.quality']) assert.throws(() => parseRolePageAccess(env([retired]), registry), /unknown pageId|disabled pageId/)
   assert.throws(() => parseRolePageAccess(env(['plan.list'], ['performance.list']), registry), /absent from VITE_SUPERVISOR/)
   assert.deepEqual(parseRolePageAccess(env(['plan.list', 'performance.list'], ['plan.list']), registry).operator, ['plan.list'])
@@ -39,8 +42,9 @@ test('admin, supervisor, operator and unknown share route/menu/default decisions
   const grants = parseRolePageAccess(env(['plan.list', 'performance.list'], ['plan.list']), registry)
   const matrix = {
     admin: { paths: [
-      '/plan/list', '/performance/list', '/monitor/realtime', '/monitor/temperature',
-      '/monitor/energy', '/equipment/production-parameters', '/equipment/drive', '/equipment/temperature',
+      '/plan/list', '/performance/list', '/monitor/temperature', '/monitor/consumption', '/monitor/drive',
+      '/monitor/cleaning', '/monitor/observations/admin', '/monitor/observations/data', '/monitor/energy', '/equipment/production-parameters', '/equipment/drive',
+      '/equipment/temperature', '/equipment/cleaning', '/equipment/observations/admin', '/equipment/observations/data',
       '/auxiliary/stop', '/auxiliary/shift', '/auxiliary/price', '/quality/list', '/quality/spc',
       '/quality/control/:id', '/system/user', '/maintenance/log'
     ], menus: ['plan', 'performance', 'monitor', 'equipment', 'auxiliary', 'quality', 'system', 'maintenance'], entry: '/plan/list' },
@@ -55,6 +59,17 @@ test('admin, supervisor, operator and unknown share route/menu/default decisions
     assert.equal(defaultAuthenticatedPath(registry, access), expected.entry)
     assert.equal(registry.routes.some(route => route.name === 'AiisDemoExample'), false)
   }
+})
+
+test('legacy energy page stays reachable only for the original grant', () => {
+  const grants = parseRolePageAccess(env(['monitor.energy'], ['monitor.energy']), registry)
+  const access = { isAdmin: false, hasPageAccess: id => grants.operator.includes(id) }
+  const legacy = registry.routeRecords.find(route => route.meta.pageId === 'monitor.energy')
+  const modern = registry.routeRecords.find(route => route.meta.pageId === 'monitor.consumption')
+  assert.equal(legacy.path, '/monitor/energy')
+  assert.equal(canAccessRoute(legacy, access), true)
+  assert.equal(canAccessRoute(modern, access), false)
+  assert.ok(accessibleNavigation(registry, access).flatMap(group => group.children).some(leaf => leaf.route.meta.pageId === 'monitor.energy'))
 })
 
 test('Vite shared env, local/mode and process priority feed the same checker', async () => {
@@ -137,8 +152,8 @@ test('current host and Docker grant shapes never gain pages from enabled modules
 
 test('public new-page grants align menu, route and default; parameter details stay hidden', () => {
   for (const pageId of ['performance.list',
-    'monitor.realtime', 'monitor.temperature', 'monitor.energy', 'equipment.production-parameters',
-    'equipment.drive', 'equipment.temperature', 'quality.list', 'quality.spc', 'maintenance.log',
+    'monitor.temperature', 'monitor.energy', 'monitor.drive', 'monitor.cleaning', 'equipment.production-parameters',
+    'equipment.drive', 'equipment.temperature', 'equipment.cleaning', 'quality.list', 'quality.spc', 'maintenance.log',
     'quality.control']) {
     const grants = parseRolePageAccess(env([pageId], [pageId]), registry)
     const route = registry.routeRecords.find(route => route.meta.pageId === pageId)

@@ -4,7 +4,7 @@ import time
 from sqlalchemy import delete, func, select, text, update
 
 from ..models.v2 import LatestPointV2, SampleV2
-from ..v2_config import REVISION
+from ..v2_config import ALLOWED_REVISIONS
 from ..v2_domain import V2Error
 
 
@@ -18,7 +18,7 @@ def target_now(db, target):
     )).one()
     if (str(row[0]).lower() != target['serverUuid'] or row[1] != target['schema']
             or not str(row[2]).split('-')[0].startswith('8.4.') or row[4] != 28800
-            or target['schemaRevision'] != REVISION or revisions != [REVISION]):
+            or target['schemaRevision'] not in ALLOWED_REVISIONS or revisions != [target['schemaRevision']]):
         raise V2Error('not_ready', 503)
     return row[3].replace(tzinfo=None)
 

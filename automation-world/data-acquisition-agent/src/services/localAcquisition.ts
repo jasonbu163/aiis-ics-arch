@@ -108,6 +108,9 @@ export interface Configuration {
     plcs: Plc[];
     dbs: Db[];
     points: Point[];
+    pointDisplayNames?: Record<string, PointDisplayNames>;
+    pointLegacyDisplayNames?: Record<string, string>;
+    catalogBindings?: Array<{ localDbId: string; sourceId: string; sourceSha256: string; sourceKind: 'exchange_json'; originDbId: string; pointMappings: Array<{ localPointId: string; catalogPointId: string }> }>;
     groups: Group[];
     sources: Source[];
     storage: {
@@ -115,6 +118,21 @@ export interface Configuration {
         retentionDays: number;
     };
 }
+export interface PointDisplayNames { 'zh-CN': string; 'en-US': string; }
+export interface CatalogConnection { host: string; port: number; rack: number; slot: number; local_tsap?: number; remote_tsap?: number; }
+export interface CatalogPoint {
+    id: string; name: string; display_name?: string; display_names?: PointDisplayNames; description?: string;
+    source_path?: string; data_type: string; byte_offset: number; bit?: number; source_enabled: boolean;
+}
+export interface Catalog {
+    format: string; schema_version: number;
+    origin: { kind: string; profile_id: string; plc_id: string };
+    export: { producer: string; profile_id: string; config_state: string; revision_id: string; payload_sha256: string; exported_at: string };
+    plc: { name: string; protocol: string; connection: CatalogConnection };
+    dbs: Array<{ id: string; name: string; number: number; size_bytes: number; source_enabled: boolean; points: CatalogPoint[] }>;
+}
+export interface CatalogInput { bytes: number[]; filename: string; expectedEtag: string; target: CatalogConnection | null; }
+export interface CatalogPreview { catalog: Catalog; sha256: string; target: CatalogConnection; previewToken: string; etag: string; }
 export interface ConfigurationView {
     schemaVersion: 1;
     draft: Configuration;
@@ -245,6 +263,7 @@ export interface Offset {
 export class LocalCommandError extends Error {
     currentEtag?: string;
     currentActiveRevision?: string | null;
+    commitUnknown?: boolean;
 }
 export function localCall<T>(command: string, request: unknown = {}): Promise<T> {
     if (!isTauri() || !bootstrap.localStorage)
@@ -253,11 +272,11 @@ export function localCall<T>(command: string, request: unknown = {}): Promise<T>
         errorCode?: string;
         currentEtag?: string;
         currentActiveRevision?: string | null;
-    } : null; const error = new LocalCommandError(body?.errorCode ?? String(reason)); error.currentEtag = body?.currentEtag; error.currentActiveRevision = body?.currentActiveRevision; throw error; });
+    } : null; const error = new LocalCommandError(body?.errorCode ?? String(reason)); error.currentEtag = body?.currentEtag; error.currentActiveRevision = body?.currentActiveRevision; error.commitUnknown = !body?.errorCode; throw error; });
 }
 
 export type NameMode = 'pending' | 'auto_path' | 'auto_address' | 'manual';
-export interface NamePatch { name?: string; comment?: string; enabled?: boolean; groupId?: string | null; address?: Address | null; }
+export interface NamePatch { name?: string; comment?: string; enabled?: boolean; groupId?: string | null; address?: Address | null; displayNames?: PointDisplayNames; }
 export interface NameRequest { expectedEtag: string; plcId: string; pointIds: string[]; intent: 'generate' | 'edit'; patch: NamePatch | null; }
 export interface NameChange { pointId: string; sourcePath: string; oldName: string; oldMode: NameMode | null; proposedName: string; proposedMode: NameMode | null; addressConfirmed: boolean; reason: string; }
 export interface NamePreview { rows: NameChange[]; readiness: Issue[]; canConfirm: boolean; unchanged: boolean; inputDigest: string; previewToken: string; etag: string; }

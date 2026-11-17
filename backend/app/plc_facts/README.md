@@ -4,6 +4,8 @@
 
 The runtime profile contains only `target`, with `schemaRevision` `7b9d1f3a5c7e`. An active administrator registers one row per PLC with `plcId`, `instanceId`, `sourceGeneration` and the display label `sourceType`. Samples match only the three identifiers; DB is supplied with each sample. Realtime reads require current registration; unexpired history remains readable independently. [Management OpenAPI](../../../contracts/published/http-api/plc-facts-v2/openapi-acquisition-sources-r4.json) · [Migration and recovery](../../scripts/plc_facts_maintenance/README.md#r3-single-table-migration-and-recovery)
 
+The observation r8 successor additionally supports `8c0e2a4d6f18`. The private profile must still match the actual target revision exactly; the previous revision remains supported and unknown or mismatched revisions are rejected. Observation reads source evidence internally without changing the public acquisition contract.
+
 The sample POST and five GETs require no Bearer in development; management requires an active administrator. Registration is not device authentication. Web copies the three identifiers from the saved row. A takeover needs version checking, explicit confirmation and a new generation for that PLC. Reconcile the old queue first; history is not rewritten.
 
 Confirmed deletion removes the source row and stops its uploads without deleting history. It also removes that row's retired-generation list; after facts and latest values disappear, an old generation may no longer be detectable. Use a never-used generation when registering the PLC again.

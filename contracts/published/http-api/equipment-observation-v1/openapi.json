@@ -1,0 +1,590 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Equipment Observation Ingest API",
+    "version": "aiis.metric-ingest/v1",
+    "description": "The SMA and third-party identity conditions, task evidence, and retry rules are described in README."
+  },
+  "paths": {
+    "/api/v1/integration/metric-definitions": {
+      "get": {
+        "tags": [
+          "Equipment observation"
+        ],
+        "summary": "Definitions",
+        "operationId": "definitions_api_v1_integration_metric_definitions_get",
+        "security": [
+          {
+            "ObservationMachineBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "equipmentId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Equipmentid"
+            }
+          },
+          {
+            "name": "groupKey",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Groupkey"
+            }
+          },
+          {
+            "name": "target",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "latest",
+                "history"
+              ],
+              "type": "string",
+              "title": "Target"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefinitionsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integration/equipment/latest-snapshots": {
+      "post": {
+        "tags": [
+          "Equipment observation"
+        ],
+        "summary": "Write Latest",
+        "operationId": "write_latest_api_v1_integration_equipment_latest_snapshots_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiptResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ObservationMachineBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/integration/monitor/history-samples": {
+      "post": {
+        "tags": [
+          "Equipment observation"
+        ],
+        "summary": "Write History",
+        "operationId": "write_history_api_v1_integration_monitor_history_samples_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiptResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ObservationMachineBearer": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DefinitionsResponse": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "const": 200,
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DefinitionsData"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "data"
+        ],
+        "title": "DefinitionsResponse"
+      },
+      "DefinitionsData": {
+        "properties": {
+          "equipmentId": {
+            "type": "string",
+            "title": "Equipmentid"
+          },
+          "groupKey": {
+            "type": "string",
+            "title": "Groupkey"
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "latest",
+              "history"
+            ],
+            "title": "Target"
+          },
+          "definitions": {
+            "items": {
+              "$ref": "#/components/schemas/MetricDefinition"
+            },
+            "type": "array",
+            "title": "Definitions"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "equipmentId",
+          "groupKey",
+          "target",
+          "definitions"
+        ],
+        "title": "DefinitionsData"
+      },
+      "MetricDefinition": {
+        "properties": {
+          "metricKey": {
+            "type": "string",
+            "title": "Metrickey"
+          },
+          "valueType": {
+            "type": "string",
+            "enum": [
+              "number",
+              "boolean",
+              "string"
+            ],
+            "title": "Valuetype"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "metricKey",
+          "valueType"
+        ],
+        "title": "MetricDefinition"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "IngestRequest": {
+        "properties": {
+          "contractVersion": {
+            "type": "string",
+            "const": "aiis.metric-ingest/v1",
+            "title": "Contractversion"
+          },
+          "producerId": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Producerid"
+          },
+          "eventId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Eventid"
+          },
+          "mappingId": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Mappingid"
+          },
+          "mappingRevision": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Mappingrevision"
+          },
+          "sourceRefs": {
+            "items": {
+              "$ref": "#/components/schemas/SourceRef"
+            },
+            "type": "array",
+            "maxItems": 128,
+            "minItems": 1,
+            "title": "Sourcerefs"
+          },
+          "data": {
+            "$ref": "#/components/schemas/IngestData"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sourceRefs",
+          "data"
+        ],
+        "title": "IngestRequest"
+      },
+      "SourceRef": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "plc_fact",
+              "external_event"
+            ],
+            "title": "Kind"
+          },
+          "instanceId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Instanceid"
+          },
+          "plcId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Plcid"
+          },
+          "sampleId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Sampleid"
+          },
+          "pointId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Pointid"
+          },
+          "sourceGeneration": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Sourcegeneration"
+          },
+          "configRevision": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Configrevision"
+          },
+          "sourceId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Sourceid"
+          },
+          "sourceEventId": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Sourceeventid"
+          },
+          "observedAt": {
+            "type": "string",
+            "title": "Observedat"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "title": "SourceRef"
+      },
+      "IngestData": {
+        "properties": {
+          "equipmentId": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Equipmentid"
+          },
+          "groupKey": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Groupkey"
+          },
+          "taskNo": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Taskno"
+          },
+          "sampledAt": {
+            "type": "string",
+            "title": "Sampledat"
+          },
+          "quality": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "good",
+                  "bad",
+                  "unknown"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quality"
+          },
+          "values": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "type": "object",
+            "maxProperties": 100,
+            "minProperties": 1,
+            "title": "Values"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "taskNo",
+          "sampledAt",
+          "values"
+        ],
+        "title": "IngestData"
+      },
+      "ReceiptResponse": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "const": 200,
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "$ref": "#/components/schemas/app__equipment_observation__schemas__ReceiptData"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "data"
+        ],
+        "title": "ReceiptResponse"
+      },
+      "app__equipment_observation__schemas__ReceiptData": {
+        "properties": {
+          "target": {
+            "type": "string",
+            "enum": [
+              "latest",
+              "history"
+            ],
+            "title": "Target"
+          },
+          "producerId": {
+            "type": "string",
+            "title": "Producerid"
+          },
+          "eventId": {
+            "type": "string",
+            "title": "Eventid"
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "stored",
+              "already_stored",
+              "stale"
+            ],
+            "title": "Outcome"
+          },
+          "recordId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recordid"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "target",
+          "producerId",
+          "eventId",
+          "outcome",
+          "recordId"
+        ],
+        "title": "ReceiptData"
+      }
+    },
+    "securitySchemes": {
+      "ObservationMachineBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

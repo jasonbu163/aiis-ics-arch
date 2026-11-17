@@ -18,13 +18,17 @@ pnpm tauri dev
 
 ## 配置权威与启动
 
-源码开发读取本应用根 `.env`；需要时由使用者仅在文件不存在时手工复制 `.env.example`，已有文件先核对、不覆盖。`DAA_PROFILE_DIR` 选择独立存储根：非空进程值优先于所选 `.env` 的非空值，否则使用应用默认目录；高级 `DAA_ENV_FILE` 可显式选择可读文件，错误不回退。路径须为绝对字面路径，不展开 `~` 或环境变量。空值不是空目录。各应用 profile 分开；开发或构建不会自动隔离数据。安装版 `.env` 发现与分发不在此合同内。
+源码开发读取本应用根 `.env`；需要时由使用者仅在文件不存在时手工复制 `.env.example`，已有文件先核对、不覆盖。`DAA_PROFILE_DIR` 选择独立存储根：非空进程值优先于所选文件的非空值，否则使用应用默认目录。可填写绝对字面路径或 `./.local/dev` 这样的相对字面路径；相对值（包括进程值）以所选配置文件所在目录为基准，不随启动工作目录改变；默认 `.env` 不存在时仍以其所在目录为基准。高级 `DAA_ENV_FILE` 必须是指向可读文件的绝对路径，错误不回退。不展开 `~`、变量或占位符，拒绝上级路径及已有符号链接组件。Windows 不接受 `C:foo`、`\foo` 等不完整的盘符或根相对路径。空值不是空目录。各应用 profile 分开；开发或构建不会自动隔离数据。安装版 `.env` 发现与分发不在此合同内。
 
 PLC、点位、组和存储配置由 UI 与本机 SQLite 管理。旧 YAML 自动迁入、直库 writer 和旧运行入口已退役；普通启动不读取旧 YAML。正常进程无需额外配置读取许可；高级进程变量 `DAA_PLC_READ_ALLOWED` 若显式设置为 false、空白或非法值则阻止读取，所选 `.env` 中的同名旧键不覆盖该限制。
 
 已有兼容 profile 可继续使用，但切换前必须核对实际目录。新空 profile 采用 config2/runtime4；冷态 runtime2/3 按原条件只支持本地采集和历史，不自动升级上报。保留原配置、样本、journal 和凭据；身份、时间或 schema 不符时按提示停止，勿手工修改原库。详见[使用手册](USER_GUIDE.zh-CN.md#1-启动并确认目录)和[本地存储说明](src-tauri/src/infrastructure/local_store/README.zh-CN.md)。
 
+Mac 首次使用新 profile 前，先在自己控制且可写的父目录中预建空 profile 根目录，初次启动期间不让其他进程移动或替换父目录及 profile，并根据进程值和配置文件确认实际所选路径；SQLite 文件由 DAA 自建。已有兼容目录保留原路径与身份，不清空、复制或迁移。预建只绕开 [r5 QA2](plans/DAA-010-sample-facts-upload/checklist.md#f-r5-qa2-001-首次创建期间替换的空目录被封存为新-profile) 记录的自动创建特定窗口；底层竞态尚未修复，也不证明其他替换安全。Windows 原生验证仍待进行。
+
 ## 状态与边界
+
+[Windows 原生验证记录单](WINDOWS_NATIVE_VALIDATION.zh-CN.md)供后续实测填写，目前待验证。
 
 [DAA-007 r2](plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2) 于 2026-10-30 获 Human Owner 验收，阶段 B 仅在该受控 DS 联调范围内完成；历史 checkpoint 缺失和来源未明事项仍按原任务记录。DAA-010 样本上报与 DAA-013 多 PLC 身份的具体版本和核验状态见 [DAA 计划](PLAN.zh-CN.md)。此次手册不改变 DAA-010 r5 的独立失败记录、Windows 原生待验证状态、完整阶段 C 或实际环境采用的各自 gate。
 

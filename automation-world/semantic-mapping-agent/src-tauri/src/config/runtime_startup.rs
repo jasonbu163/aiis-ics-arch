@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager};
 
-const PREFERENCES_FILE: &str = "runtime-startup.json";
+pub(super) const PREFERENCES_FILE: &str = "runtime-startup.json";
 const SCHEMA_VERSION: u8 = 1;
 pub const DEFAULT_MAPPING_FACTS_POLLING_INTERVAL_MS: u64 = 1_000;
 
@@ -136,11 +136,10 @@ pub fn save_to_path(path: &Path, preferences: &RuntimeStartupPreferences) -> Res
 }
 
 fn preferences_path(app: &AppHandle) -> Result<PathBuf, String> {
-    crate::config::profile_override()
-        .map(Ok)
-        .unwrap_or_else(|| app.path().app_data_dir())
-        .map(|directory| directory.join(PREFERENCES_FILE))
-        .map_err(|_| "RUNTIME_STARTUP_PREFERENCES_PATH_INVALID".to_string())
+    let profile = app
+        .try_state::<crate::config::ResolvedProfile>()
+        .ok_or_else(|| "RUNTIME_STARTUP_PREFERENCES_PATH_INVALID".to_string())?;
+    Ok(profile.startup_preferences_path())
 }
 
 fn validate(preferences: &RuntimeStartupPreferences) -> Result<(), String> {

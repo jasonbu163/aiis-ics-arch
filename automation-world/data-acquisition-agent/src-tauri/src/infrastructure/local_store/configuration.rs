@@ -1,7 +1,9 @@
 //! 配置草稿CAS、不可变版本与可恢复跨库token；数据库逻辑只存在本适配层。
 use super::{sql_error, Stores};
 use crate::domain::{
-    local_configuration::{id, validate_for_runtime, Configuration, LocalResult},
+    local_configuration::{
+        id, validate_display_names, validate_for_runtime, Configuration, LocalResult,
+    },
     local_runtime::{ConfigurationView, StartupSettings, STARTUP_PRIVATE_ID, STARTUP_PRIVATE_NAME},
     local_sample::{digest, encode, now},
 };
@@ -83,6 +85,8 @@ impl Stores {
             .map_err(sql_error)?;
         let draft: Configuration =
             serde_json::from_str(&payload).map_err(|_| "configuration_corrupt")?;
+        validate_display_names(&draft).map_err(|_| "configuration_corrupt")?;
+        self.verify_catalog_archives(&draft)?;
         let (active, previous): (Option<String>, Option<String>) = self
             .config
             .query_row(
@@ -111,11 +115,120 @@ impl Stores {
             phase: "stopped".into(),
         })
     }
+    fn verify_catalog_archives(&self, c: &Configuration) -> LocalResult<()> {
+        crate::domain::plc_catalog::verify_bindings(c).map_err(|_| "catalog_binding_invalid")?;
+        for binding in &c.catalog_bindings {
+            let source = c
+                .sources
+                .iter()
+                .find(|s| s.id == binding.source_id)
+                .ok_or("catalog_source_invalid")?;
+            let archived: Option<String> = self
+                .config
+                .query_row(
+                    "SELECT content FROM source_documents WHERE sha256=?1",
+                    [&source.sha256],
+                    |r| r.get(0),
+                )
+                .optional()
+                .map_err(sql_error)?;
+            if archived.as_deref() != Some(source.content.as_str()) {
+                return Err("catalog_source_invalid".into());
+            }
+        }
+        Ok(())
+    }
+    /// 在同一个串行存储任务内重查现有身份、历史上下文和来源归档，再由调用方执行草稿 CAS。
+    pub fn ensure_catalog_new(
+        &self,
+        source: &crate::domain::local_configuration::SourceDocument,
+    ) -> LocalResult<()> {
+        use std::collections::BTreeSet;
+        let (catalog, _, sha) = crate::domain::plc_catalog::parse(source.content.as_bytes())?;
+        if sha != source.sha256 {
+            return Err("catalog_source_invalid".into());
+        }
+        let mut ids: BTreeSet<String> =
+            BTreeSet::from([catalog.origin.plc_id.clone(), source.id.clone()]);
+        for db in &catalog.dbs {
+            ids.insert(db.id.clone());
+            ids.extend(db.points.iter().map(|point| point.id.clone()));
+        }
+        let conflicts = |c: &Configuration| {
+            c.plcs.iter().any(|v| ids.contains(&v.id))
+                || c.dbs.iter().any(|v| ids.contains(&v.id))
+                || c.points.iter().any(|v| ids.contains(&v.id))
+                || c.groups.iter().any(|v| ids.contains(&v.id))
+                || c.sources.iter().any(|v| ids.contains(&v.id))
+        };
+        let current = self.configuration()?;
+        if ids.contains(&self.instance) || ids.contains(&current.etag) || conflicts(&current.draft)
+        {
+            return Err("catalog_identity_conflict".into());
+        }
+        for (connection, table, key) in [
+            (&self.config, "configuration_revisions", "id"),
+            (&self.runtime, "configuration_contexts", "revision"),
+        ] {
+            let mut stmt = connection
+                .prepare(&format!("SELECT {key},payload,sha256 FROM {table}"))
+                .map_err(sql_error)?;
+            let mut rows = stmt.query([]).map_err(sql_error)?;
+            while let Some(row) = rows.next().map_err(sql_error)? {
+                let old_id: String = row.get(0).map_err(sql_error)?;
+                let raw: String = row.get(1).map_err(sql_error)?;
+                let hash: String = row.get(2).map_err(sql_error)?;
+                if digest(&raw) != hash {
+                    return Err("configuration_corrupt".into());
+                }
+                let old: Configuration =
+                    serde_json::from_str(&raw).map_err(|_| "configuration_corrupt")?;
+                if ids.contains(&old_id) || conflicts(&old) {
+                    return Err("catalog_identity_conflict".into());
+                }
+            }
+        }
+        let mut stmt = self
+            .config
+            .prepare("SELECT id,sha256,content FROM source_documents")
+            .map_err(sql_error)?;
+        let mut rows = stmt.query([]).map_err(sql_error)?;
+        while let Some(row) = rows.next().map_err(sql_error)? {
+            let old_id: String = row.get(0).map_err(sql_error)?;
+            let old_sha: String = row.get(1).map_err(sql_error)?;
+            let content: String = row.get(2).map_err(sql_error)?;
+            if ids.contains(&old_id) || old_sha == sha {
+                return Err("catalog_identity_conflict".into());
+            }
+            if let Ok((old, _, _)) = crate::domain::plc_catalog::parse(content.as_bytes()) {
+                if old.origin == catalog.origin {
+                    return Err("catalog_origin_conflict".into());
+                }
+            }
+        }
+        let mut stmt = self
+            .runtime
+            .prepare("SELECT plc_id,generation FROM plc_sources")
+            .map_err(sql_error)?;
+        let rows = stmt
+            .query_map([], |row| {
+                Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+            })
+            .map_err(sql_error)?;
+        for row in rows {
+            let (plc_id, generation) = row.map_err(sql_error)?;
+            if ids.contains(&plc_id) || ids.contains(&generation) {
+                return Err("catalog_identity_conflict".into());
+            }
+        }
+        Ok(())
+    }
     pub fn save_draft(
         &mut self,
         c: &Configuration,
         expected: &str,
     ) -> LocalResult<ConfigurationView> {
+        validate_display_names(c)?;
         if c.sources.iter().any(|s| {
             s.name
                 .starts_with(crate::domain::yaml_migration::PRIVATE_NAME)
@@ -201,7 +314,10 @@ impl Stores {
         if digest(&payload) != hash {
             return Err("revision_corrupt".into());
         }
-        serde_json::from_str(&payload).map_err(|_| "revision_corrupt".into())
+        let c: Configuration = serde_json::from_str(&payload).map_err(|_| "revision_corrupt")?;
+        validate_display_names(&c).map_err(|_| "revision_corrupt")?;
+        self.verify_catalog_archives(&c)?;
+        Ok(c)
     }
     pub fn prepare_activation(
         &mut self,

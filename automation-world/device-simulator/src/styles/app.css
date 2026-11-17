@@ -96,8 +96,17 @@ h1,h2,h3,p { margin-top:0; }
 .ds-data-table__grid td.el-table-fixed-column--right,.ds-data-table__grid td.el-table-fixed-column--left { background-color:var(--agent-surface); }
 .ds-data-table__grid tr:hover > td[class*="el-table-fixed-column--"],.ds-data-table__grid tr.hover-row > td[class*="el-table-fixed-column--"] { background-image:linear-gradient(var(--agent-table-row-hover),var(--agent-table-row-hover)); }
 .ds-table-tooltip { max-width:min(560px,calc(100vw - 32px));overflow-wrap:anywhere; }
+.ds-saved-value { white-space:pre-wrap;overflow-wrap:anywhere; }
 @container (max-width:760px){
   /* EP冻结列使用!important；窄容器按同等优先级取消右侧冻结，避免遮住数据。 */
   .ds-data-table__grid .el-table__cell.el-table-fixed-column--right { position:static!important; }
   .ds-data-table__grid .el-table__cell.el-table-fixed-column--right::before { display:none; }
 }
+
+/* 保存版本导出：实例目标和完整点集在同一预览中核对。 */
+.ds-catalog-instances { display: grid; gap: 12px; }
+.ds-catalog-instance { border: 1px solid var(--el-border-color); padding: 12px; margin: 12px 0; }
+.ds-catalog-fields { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.ds-catalog-fields label { display: flex; align-items: center; gap: 6px; }
+.ds-catalog-fields .el-input { width: 180px; }
+.ds-catalog-error { color: var(--el-color-danger); }

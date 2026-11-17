@@ -22,6 +22,7 @@ pub fn run() {
         }
     };
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .setup(move |host| {
             let default = host.path().app_local_data_dir()?;
             let mut bootstrap = config::bootstrap::load(&default).map_err(std::io::Error::other)?;
@@ -92,6 +93,11 @@ pub fn run() {
             commands::configuration::ds_preview_delete_revision,
             commands::configuration::ds_delete_revisions,
             commands::configuration::ds_cancel_preview,
+            commands::catalog_export::ds_catalog_revision,
+            commands::catalog_export::ds_catalog_preview,
+            commands::catalog_export::ds_catalog_choose_directory,
+            commands::catalog_export::ds_catalog_commit,
+            commands::catalog_export::ds_catalog_cancel,
             commands::import::ds_preview_import,
             commands::import::ds_confirm_import,
             commands::import::ds_preview_layout,

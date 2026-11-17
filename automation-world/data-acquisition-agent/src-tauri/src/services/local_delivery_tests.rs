@@ -25,6 +25,272 @@ struct Substitute {
     reply: Response,
     calls: std::sync::atomic::AtomicUsize,
 }
+
+#[cfg(unix)]
+#[test]
+fn daa017_catalog_sample_fake_transport_excludes_bilingual_names() {
+    use crate::{
+        config::local_bootstrap::Bootstrap,
+        domain::{
+            local_configuration::{id, Group, LocalResult, Plc},
+            sample_upload::ReportingBinding,
+        },
+        infrastructure::{local_store::sample_upload_tests::sealed_v4_fixture, managed_s7},
+        services::{
+            catalog_import::{CatalogConfirmation, CatalogRequest},
+            local_scheduler,
+            local_supervisor::LocalEngine,
+        },
+    };
+    use std::{
+        sync::{mpsc, Arc},
+        time::Duration,
+    };
+    struct MemoryS7;
+    impl managed_s7::Transport for MemoryS7 {
+        fn connect(&mut self, _: &Plc) -> LocalResult<()> {
+            panic!("network connection forbidden")
+        }
+        fn read(&mut self, db: u16, start: u32, size: u32) -> LocalResult<Vec<u8>> {
+            assert_eq!(db, 21);
+            let mut bytes = [0u8; 32];
+            bytes[0] = 1;
+            bytes[2..4].copy_from_slice(&42i16.to_be_bytes());
+            bytes[4..8].copy_from_slice(&12.5f32.to_be_bytes());
+            Ok(bytes[start as usize..(start + size) as usize].to_vec())
+        }
+        fn disconnect(&mut self) {}
+        fn connected(&self) -> bool {
+            true
+        }
+    }
+    struct Capture(mpsc::SyncSender<String>);
+    impl Transport for Capture {
+        fn post(&self, _: &str, _: &str) -> Result<Response, String> {
+            panic!("legacy POST forbidden")
+        }
+        fn post_sample(&self, _: &str, body: &str) -> Result<Response, String> {
+            let wire: Value = serde_json::from_str(body).unwrap();
+            self.0.send(body.to_owned()).unwrap();
+            Ok(Response { status: 200, media_type: "application/json".into(), retry_after: None,
+                body: serde_json::to_vec(&json!({"code":200,"message":"success","data":{"contractVersion":"plc-facts/v2","instanceId":wire["instanceId"],"sampleId":wire["sampleId"],"status":"committed","outcome":"created"}})).unwrap() })
+        }
+    }
+    let profile = sealed_v4_fixture();
+    let engine = LocalEngine::open(Bootstrap {
+        mode: "local_sqlite".into(),
+        profile: profile.clone(),
+        read_allowed: false,
+        validation: false,
+        migration: None,
+        ignored_keys: vec![],
+        fixture: None,
+    })
+    .unwrap();
+    let mut source: Value = serde_json::from_slice(include_bytes!(
+        "../../../tests/fixtures/plc-catalog-v1.json"
+    ))
+    .unwrap();
+    source["dbs"][0]["points"][0]["display_names"] =
+        json!({"zh-CN":"目录中文哨兵_DAA017","en-US":"CATALOG_EN_SENTINEL_DAA017"});
+    let input = CatalogRequest {
+        bytes: serde_json::to_vec(&source).unwrap(),
+        filename: "synthetic.json".into(),
+        expected_etag: engine.configuration().unwrap().etag,
+        target: None,
+    };
+    let preview = engine.preview_catalog(input.clone()).unwrap();
+    let imported = engine
+        .confirm_catalog(CatalogConfirmation {
+            input,
+            preview_token: preview.preview_token,
+        })
+        .unwrap();
+    let mut config = imported.draft;
+    config.plcs[0].enabled = true;
+    let group = Group {
+        id: id(),
+        plc_id: config.plcs[0].id.clone(),
+        name: "Synthetic".into(),
+        enabled: true,
+        interval_ms: 1000,
+    };
+    config.groups.push(group.clone());
+    for point in config
+        .points
+        .iter_mut()
+        .filter(|p| p.db_id == config.dbs[0].id && p.data_type != "STRING[4]")
+    {
+        point.enabled = true;
+        point.group_id = Some(group.id.clone());
+    }
+    let saved = engine.save(config, imported.etag).unwrap();
+    let result = engine
+        .activate(saved.etag.clone(), saved.active.clone(), false)
+        .unwrap();
+    let revision = result["active"].as_str().unwrap().to_owned();
+    let plc_id = saved.draft.plcs[0].id.clone();
+    engine
+        .storage
+        .call(false, move |s| {
+            let generation: String = s
+                .runtime
+                .query_row(
+                    "SELECT generation FROM plc_sources WHERE plc_id=?1",
+                    [&plc_id],
+                    |r| r.get(0),
+                )
+                .map_err(crate::infrastructure::local_store::sql_error)?;
+            let mut settings = s.sample_upload_settings()?;
+            let expected = settings.settings_revision.clone();
+            settings.origin = Some("http://fixture.invalid".into());
+            settings.bindings.push(ReportingBinding {
+                local_plc_id: plc_id.clone(),
+                instance_id: s.instance.clone(),
+                plc_id,
+                source_generation: generation,
+            });
+            s.save_sample_upload_settings(settings, expected)?;
+            Ok(())
+        })
+        .unwrap();
+    let cycle = local_scheduler::collect(
+        &saved.draft,
+        &saved.draft.plcs[0],
+        &group,
+        &revision,
+        &mut MemoryS7,
+        "fixture",
+    )
+    .unwrap();
+    assert_eq!(cycle.points[&21].len(), 3);
+    assert!(cycle.points[&21].values().all(|fact| fact.quality == "good"
+        && fact.definition.address.as_ref().unwrap().origin == "catalog"));
+    engine
+        .storage
+        .call(false, move |s| s.commit_cycle(cycle).map(|_| ()))
+        .unwrap();
+    let (tx, rx) = mpsc::sync_channel(1);
+    engine
+        .set_delivery_using("start", || Ok(Arc::new(Capture(tx))))
+        .unwrap();
+    let body = rx.recv_timeout(Duration::from_secs(8)).unwrap();
+    assert!(!body.contains("目录中文哨兵_DAA017") && !body.contains("CATALOG_EN_SENTINEL_DAA017"));
+    let wire: Value = serde_json::from_str(&body).unwrap();
+    assert_eq!(wire["contractVersion"], "plc-facts/v2");
+    let points = wire["points"].as_array().unwrap();
+    assert_eq!(points.len(), 3);
+    for (name, expected) in [
+        ("DB21_ready_Bool", json!(true)),
+        ("DB21_count_Int", json!(42)),
+        ("DB21_temp_Real", json!(12.5)),
+    ] {
+        let point = points.iter().find(|p| p["name"] == name).unwrap();
+        assert_eq!(point["value"], expected);
+        assert!(point.get("displayNames").is_none() && point.get("comment").is_none());
+    }
+    engine.shutdown();
+    drop(engine);
+    std::fs::remove_dir_all(profile).unwrap();
+}
+
+#[cfg(unix)]
+#[test]
+fn daa018_v2_transport_old_new_and_frozen_retry_exclude_display_names() {
+    use crate::{
+        config::local_bootstrap::Bootstrap,
+        infrastructure::local_store::sample_upload_tests::{sealed_v4_fixture, seed_daa018_v2},
+        services::local_supervisor::LocalEngine,
+    };
+    use std::{
+        collections::BTreeSet,
+        sync::{mpsc, Arc},
+        time::{Duration, Instant},
+    };
+    struct Capture(mpsc::SyncSender<String>);
+    impl Transport for Capture {
+        fn post(&self, _: &str, _: &str) -> Result<Response, String> {
+            panic!("legacy v1 network forbidden")
+        }
+        fn post_sample(&self, _: &str, body: &str) -> Result<Response, String> {
+            let v: Value = serde_json::from_str(body).unwrap();
+            self.0
+                .send(body.to_string())
+                .map_err(|_| "capture_closed")?;
+            Ok(Response { status: 200, media_type: "application/json".into(), retry_after: None, body: serde_json::to_vec(&json!({"code":200,"message":"success","data":{"contractVersion":"plc-facts/v2","instanceId":v["instanceId"],"sampleId":v["sampleId"],"status":"committed","outcome":"created"}})).unwrap() })
+        }
+    }
+    let profile = sealed_v4_fixture();
+    let (old_revision, new_revision, frozen_body, old_ids) = seed_daa018_v2(&profile);
+    let boot = Bootstrap {
+        mode: "local_sqlite".into(),
+        profile: profile.clone(),
+        read_allowed: false,
+        validation: false,
+        migration: None,
+        ignored_keys: vec![],
+        fixture: None,
+    };
+    let engine = LocalEngine::open(boot).unwrap();
+    let (tx, rx) = mpsc::sync_channel(16);
+    engine
+        .set_delivery_using("start", || Ok(Arc::new(Capture(tx))))
+        .unwrap();
+    let bodies: Vec<String> = (0..4)
+        .map(|_| rx.recv_timeout(Duration::from_secs(8)).unwrap())
+        .collect();
+    let mut seen_old = BTreeSet::new();
+    let mut saw_new = false;
+    let mut saw_retry = false;
+    for body in &bodies {
+        assert!(
+            !body.contains("新中文哨兵_DAA018")
+                && !body.contains("NEW_EN_SENTINEL_DAA018")
+                && !body.contains("pointDisplayNames")
+        );
+        assert!(!body.contains("COMMENT_DAA018_DISTINCT"));
+        let wire: Value = serde_json::from_str(body).unwrap();
+        assert_eq!(wire["contractVersion"], "plc-facts/v2");
+        let id = wire["sampleId"].as_str().unwrap().to_string();
+        if old_ids.contains(&id) {
+            seen_old.insert(id.clone());
+            assert_eq!(wire["configRevision"], old_revision);
+        }
+        if wire["configRevision"] == new_revision {
+            saw_new = true;
+        }
+        if body == &frozen_body {
+            saw_retry = true;
+        }
+        let source = engine
+            .storage
+            .call(true, move |s| {
+                s.runtime
+                    .query_row("SELECT payload FROM samples WHERE id=?1", [&id], |r| {
+                        r.get::<_, String>(0)
+                    })
+                    .map_err(crate::infrastructure::local_store::sql_error)
+            })
+            .unwrap();
+        let sample: Value = serde_json::from_str(&source).unwrap();
+        for point in wire["points"].as_array().unwrap() {
+            let fact = &sample["points"][point["pointId"].as_str().unwrap()];
+            assert_eq!(point["name"], fact["definition"]["name"]);
+            assert_eq!(point["value"], fact["value"]);
+            assert!(point.get("comment").is_none() && point.get("displayNames").is_none());
+        }
+    }
+    assert_eq!(seen_old.len(), old_ids.len());
+    assert!(saw_new && saw_retry);
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while engine.delivery_snapshot().unwrap()["acknowledged"] != 4 {
+        assert!(Instant::now() < deadline);
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    engine.shutdown();
+    drop(engine);
+    std::fs::remove_dir_all(profile).unwrap();
+}
 impl Transport for Substitute {
     fn post(&self, _: &str, body: &str) -> Result<Response, String> {
         self.calls.fetch_add(1, std::sync::atomic::Ordering::SeqCst);

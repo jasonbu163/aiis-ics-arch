@@ -4,7 +4,12 @@
 
 | Task ID | 状态 | 规格 | 最新事实 / 下一 gate |
 | --- | --- | --- | --- |
-| SMA-001 | draft | [r2 总规格](semantic-mapping-agent/plans/SMA-001-cu-integration-and-scope-cleanup/spec.md) | SMA-002/SMA-003 已获 Owner 验收。SMA-004 r1 经返工后独立 QA2 通过，待 Owner 最终验收。正常投递保持关闭，见 [SMA PLAN](semantic-mapping-agent/PLAN.zh-CN.md)。 |
+| ARCH-PLC-001 | owner_approved | [r5 设计](plans/ARCH-PLC-001-shared-plc-point-json/spec.md) | Human Owner 已批准 r5 及实施顺序调整；最终验收另行处理。 |
+| DS-004 | qa_blocked | [r2 双语显示名](device-simulator/plans/DS-004-bilingual-point-display-names/spec.md) | QA4 的合成检查未发现新的确定性失败；必需的原生检查因隔离事件仍暂停。 |
+| DAA-018 | qa_blocked | [r3 双语显示名](data-acquisition-agent/plans/DAA-018-bilingual-point-display-names/spec.md) | QA2 已复核预览绕过修复；必需的原生检查因隔离事件仍暂停。 |
+| DS-003 | qa_passed | [r5 导出规格](device-simulator/plans/DS-003-plc-json-export/spec.md) | 返修后的 DS→DAA 原生联测完成，QA2 已通过；待 Human Owner 验收。 |
+| DAA-017 | qa_passed | [r5 导入规格](data-acquisition-agent/plans/DAA-017-plc-json-import/spec.md) | 返修后的 DS→DAA 原生联测完成，QA2 已通过；待 Human Owner 验收。 |
+| SMA-001 | draft | [r2 总规格](semantic-mapping-agent/plans/SMA-001-cu-integration-and-scope-cleanup/spec.md) | SMA-002、SMA-003 已验收。[SMA-004 r1 于 2026-11-14 验收](semantic-mapping-agent/plans/SMA-004-local-configuration/checklist.md#owner-acceptance-r1)，独立 QA2 已通过。正常投递处于关闭状态。 |
 | ARCH-AW-007 | owner_accepted | [r2](../plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md) | Human Owner 于 2026-10-21 最终验收精确 r2 文档，原独立 AC01–AC14 QA 保留。DAA、SMA 表格、CA 通用编排/内部连接器及未来全类型健康分工明确，首版无登录；完整 r1 历史/QA 保留，证据已归档，两处自有临时目录共 49 文件已清理，未改代码、未追加测试。 |
 | ARCH-AW-006 | owner_approved | [r2](../plans/ARCH-AW-006-unified-flow-agent-design/spec.md) | 精确 r2 设计已批准：DAA 大量采集、SMA 表格/工作台、CA 节点编排/版本/上下文/扩展；首版无登录。完整 r1 保留，文档实施统一归 007 r2，软件工作另立范围。 |
 | ARCH-AW-001 | owner_accepted | [r1](../plans/ARCH-AW-001-agent-foundation/spec.md) | CA已迁入并冻结，DAA/SMA可构建并独立启动；定向复核通过，Human Owner于2026-10-14接受r1；本轮未追加测试。UI与SQLite后续处理。 |
@@ -21,7 +26,7 @@ AW 管理整体阶段和跨工程依赖。各子工程 PLAN 管理自身实施�
 
 | 工程 | 所属计划 | 当前阶段 |
 | --- | --- | --- |
-| Semantic Mapping Agent | [SMA PLAN](semantic-mapping-agent/PLAN.zh-CN.md) | SMA-002/SMA-003 已接受；SMA-004 r1 本地配置/纯预览独立 QA2 通过，待 Owner 最终验收。三处 QA1 缺陷已修复并独立关闭，历史保留；Backend/GET→POST 与 DAA 对接仍为后续范围，SMA-001 r2 仍 draft。 |
+| Semantic Mapping Agent | [SMA PLAN](semantic-mapping-agent/PLAN.zh-CN.md) | 职责清理、CU 接入和本地配置与纯预览均已验收。GET→POST 执行和 Backend、DAA 联调仍是 SMA-001 r2 草案中的后续阶段。 |
 | Console UI | [CU PLAN](console-ui/PLAN.zh-CN.md) | CU-001至CU-008均已最终验收，包含分组/二级导航；DAA和SMA各按自身已接受任务接入，新CA接入仍属后续。 |
 | Device Simulator | [DS PLAN](device-simulator/PLAN.zh-CN.md) | DS-001 r1及ARCH-AW-005 r5已于2026-10-27获owner_accepted，10月27日DS/手册/整改已接受；10月29日草稿/版本DIRECT增量为DEV自检、人工确认待定；历史QA4及全部失败保留，独立QA仅DS-001例外未执行。验收/资源收尾已记录，未追加功能或整套QA；受控DAA–DS SQLite联调已按DAA-007独立验收，阶段C另项。 |
 | Data Acquisition Agent | [DAA PLAN](data-acquisition-agent/PLAN.zh-CN.md) | [DAA-002 r2](data-acquisition-agent/plans/DAA-002-local-acquisition-loop/checklist.md#owner-acceptance-r2); [DAA-003 r1](data-acquisition-agent/plans/DAA-003-sqlite-only-startup/checklist.md#owner-acceptance-r1); [DAA-004 r1](data-acquisition-agent/plans/DAA-004-migration-notice-and-source-import-validation/checklist.md#owner-acceptance-r1); [DAA-007 r2](data-acquisition-agent/plans/DAA-007-ds-joint-validation-and-time-contract/checklist.md#owner-acceptance-r2)已于2026-10-30验收；DAA-001/005/006原接受保持。阶段B仅在本次受控DS联调范围完成，失败历史、证据可用性限制和来源未明事项保留。当前SQLite入口不再迁入YAML，配置/历史及原联调profile保留，阶段C、自动启动策略与真实现场另项。 |

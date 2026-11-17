@@ -2,6 +2,7 @@
 pub(crate) mod local_configuration;
 pub(crate) mod local_runtime;
 pub(crate) mod local_sample;
+pub(crate) mod plc_catalog;
 pub(crate) mod yaml_migration;
 
 pub(crate) mod source_import;

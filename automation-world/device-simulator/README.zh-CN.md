@@ -10,9 +10,9 @@
 
 页面及版本/操作预览表格共用Element Plus薄封装，消费DAA/CU主题与密度。普通列拖拽调整，按应用、稳定表格ID及字段键在本机WebView记忆；每表有“恢复默认列宽”。偏好不进入业务SQLite或保存版本，不改变筛选、选择、分页和权限判断。普通长文省略悬停查看，表内滚动；窄容器取消右侧冻结以免遮挡。操作见[手册§1.1](USER_GUIDE.zh-CN.md#11-所有表格的列宽与查看操作)。
 
-每个 profile 拥有独立 `device-simulator-v1/config.sqlite`、OS profile 锁及持久 WebKit data-store UUID。默认使用 Tauri 的 DS 应用本地数据目录；可选 `DS_PROFILE_DIR` 接受显式绝对路径。未知、损坏、不兼容或只读数据库拒绝打开并保留原件。运行值、连接和运行意图不持久化：重开按 selected 版本初始化并保持 stopped。saved、selected、loaded 分开记录。
+每个 profile 拥有独立 `device-simulator-v1/config.sqlite`、OS profile 锁及持久 WebKit data-store UUID。默认使用 Tauri 的 DS 应用本地数据目录，可通过 `DS_PROFILE_DIR` 指定。未知、损坏、不兼容或只读数据库拒绝打开并保留原件。运行值、连接和运行意图不持久化：重开按 selected 版本初始化并保持 stopped。saved、selected、loaded 分开记录。
 
-源码开发在 `automation-world/device-simulator/.env` 仅可选填写 `DS_PROFILE_DIR`，由Owner手工从本目录 `.env.example` 复制后编辑，已有文件不覆盖。选择顺序为非空进程 > 自身.env非空值 > Tauri原默认目录；空键表示未设，不等于新空目录。绝对字面路径不展开`~`/变量、不允许父目录穿越或既有symlink，非法选择在锁/库/日志前拒绝，不降级默认。简单KEY=VALUE仅去一层配对引号，重复键首项生效，不搜索父目录/另一个应用.env或执行shell。一次配置后正常启动仅 `pnpm tauri dev`，Tauri沿用`native-s7`；UI+SQLite管理实例/点位/策略，保存、停机加载、工作台启动分开，启动/重开仍stopped。dev/build不会自动隔离数据；安装版.env发现/分发不在本次支持承诺内。DAA-007 r2新增bootstrap合同已随2026-10-30本任务独立核验及Owner最终验收接受，不倒记为DS旧QA/验收；阶段B仅在本次受控联调范围完成。
+源码开发在 `automation-world/device-simulator/.env` 仅可选填写 `DS_PROFILE_DIR`，由Owner手工从本目录 `.env.example` 复制后编辑，已有文件不覆盖。选择顺序为非空进程 > 自身.env非空值 > Tauri原默认目录；空键表示未设，不等于新空目录。支持绝对路径和相对路径，例如 `.local/dev`，相对值统一以 `.env` 所在的 DS 工程目录为基准。路径不展开 `~` 或变量，不允许父目录穿越或已有符号链接。非法选择在锁/库/日志前拒绝，不降级默认。简单KEY=VALUE仅去一层配对引号，重复键首项生效，不搜索父目录/另一个应用.env或执行shell。一次配置后正常启动仅 `pnpm tauri dev`，Tauri沿用`native-s7`；UI+SQLite管理实例/点位/策略，保存、停机加载、工作台启动分开，启动/重开仍stopped。dev/build不会自动隔离数据；安装版.env发现/分发不在本次支持承诺内。DAA-007 r2新增bootstrap合同已随2026-10-30本任务独立核验及Owner最终验收接受，不倒记为DS旧QA/验收；阶段B仅在本次受控联调范围完成。
 
 日历时间统一按 Asia/Shanghai（UTC+08:00）显示到秒，不跟随电脑时区，原始毫秒保留。在线值的 `updatedAt` 表示初始化或最近成功提交的日历时间，`updatedNs` 继续保留单调计数；刷新或规则值未变时不推进更新时间。新日志带有 `+08:00` 的 RFC3339 `timestamp`；`monotonic_ns` 仍是独立的排序/耗时计数。未记录日历时间的旧日志明确标识，不推算日期。版本界面使用真实序号摘要及一致/待加载提示，完整身份、三类状态和解释收在问号悬停提示中。既有 SQLite `*_utc` 字段和版本内容保留原 UTC 格式，显示时转换一次；本次不做数据库结构或历史数据迁移。新增原生时间字段在开发进程重新编译/启动后生效。
 
@@ -24,3 +24,5 @@
 后续产品迭代由本工程 [PLAN](PLAN.zh-CN.md) 与 [任务目录](plans/README.zh-CN.md) 管理。Human Owner已于2026-10-27（Asia/Shanghai）最终接受当时DS版本、DS-001 r1及ARCH-AW-005 r5；[DS-001验收](plans/DS-001-policy-table-and-usability/spec.md#owner-acceptance-ds001)及[r5验收/收尾](../../plans/ARCH-AW-005-ds-g0-prototype-validation/checklist.md#owner-acceptance-r5)分别保留原开发自检、历史独立QA与Owner决定。DS-001独立QA仍按明确例外未执行，本次只收尾、未追加功能或整套QA。历史证据和仍在使用的开发资源保留；DAA–DS读取至SQLite联调另批，阶段C暂不开展。
 
 2026-10-29 DIRECT增量：弹窗“完成编辑”接回编辑内容，“保存草稿”只更新同一份SQLite草稿，“保存为版本”经清单确认后生成整个工作区快照，内容相同不重复生成。导入/地址/命名/初值策略确认及保存关闭均不隐式生成版本。实例页版本列表支持当前页勾选、批量删除和单行删除，共用清单确认；最新、全部实例selected/实际loaded及有效加载预览仍保护。仅有previous回退保留的版本可在清单列出全部实例、明确勾选放弃后，同一事务解除保留并删除；当前已选、已加载和运行值不变。重复加载同版不改写回退保留；取消/离开预览释放票据，刷新列表重读引用而不覆盖草稿。新发布默认保留最近5份加使用保护及回退保留旧版，自动清理不替用户放弃回退；启动、此次开发及保存草稿不裁剪已有库。沿用v1表结构，未迁移用户库；本增量为DEV自检交付，Owner按手册§2.7/2.8手工确认，旧验收与DAA阶段B/C边界保持。
+
+DS-003 开发候选增加按保存版本及实例导出 PLC JSON 的流程。[操作与本机复验说明](USER_GUIDE.zh-CN.md#plc-json-export)说明目录选择、完整点集核对和文件摘要；原生及跨应用实际结果以任务记录为准。

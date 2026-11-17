@@ -237,6 +237,19 @@ fn ordinary_read_allowed(value: Result<String, std::env::VarError>) -> bool {
 mod startup_env_tests {
     use super::*;
     #[test]
+    fn startup_env_relative_profile_reaches_ordinary_bootstrap() {
+        let root = std::env::temp_dir().join(format!("daa-r8-bootstrap-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir(&root).unwrap();
+        std::fs::write(root.join(".env"), "DAA_PROFILE_DIR=./new-profile\n").unwrap();
+        let config = super::super::AgentConfig::load_selected(None, &root).unwrap();
+        let selected = config.profile(None).unwrap();
+        let bootstrap =
+            ordinary(&config, None, selected, Err(std::env::VarError::NotPresent)).unwrap();
+        assert_eq!(bootstrap.profile, root.join("new-profile"));
+        assert!(bootstrap.profile.is_absolute() && !bootstrap.profile.exists());
+        std::fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
     fn startup_env_read_admission_is_process_only_and_stopped() {
         for file_value in ["true", "false"] {
             let c = super::super::AgentConfig::from_values(std::collections::HashMap::from([

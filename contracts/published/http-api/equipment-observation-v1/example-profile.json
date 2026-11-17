@@ -1,0 +1,107 @@
+{
+  "target": {
+    "serverUuid": "00000000-0000-4000-8000-000000000001",
+    "schema": "arch_obs_r7_example",
+    "schemaRevision": "8c0e2a4d6f18"
+  },
+  "devices": [
+    {
+      "equipmentId": "line-01",
+      "nameZh": "合成产线 1",
+      "nameEn": "Synthetic line 1",
+      "plcId": "plc-01",
+      "dbNumber": 42,
+      "taskPointId": "point-active-task-no",
+      "idleValue": "",
+      "maxTaskAgeSeconds": 3600
+    }
+  ],
+  "readScopes": {
+    "admin": [
+      "line-01"
+    ],
+    "supervisor": [
+      "line-01"
+    ]
+  },
+  "producers": [
+    {
+      "producerId": "vendor-line-01",
+      "tokenSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "kind": "external",
+      "enabled": true,
+      "mappingId": "vendor-temperature",
+      "mappingRevision": "r1",
+      "sourceId": "vendor-source-01",
+      "grants": [
+        {
+          "equipmentId": "line-01",
+          "groupKey": "temperature",
+          "target": "latest",
+          "metricKeys": [
+            "furnaceZone1Actual",
+            "furnaceZone1Set",
+            "furnaceHeatingReady"
+          ]
+        },
+        {
+          "equipmentId": "line-01",
+          "groupKey": "temperature",
+          "target": "history",
+          "metricKeys": [
+            "furnaceZone1Actual",
+            "furnaceZone1Set"
+          ]
+        }
+      ]
+    },
+    {
+      "producerId": "sma-line-01",
+      "tokenSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "kind": "sma",
+      "enabled": true,
+      "mappingId": "sma-temperature",
+      "mappingRevision": "r1",
+      "sourceId": null,
+      "grants": [
+        {
+          "equipmentId": "line-01",
+          "groupKey": "temperature",
+          "target": "latest",
+          "metricKeys": [
+            "furnaceZone1Actual",
+            "furnaceZone1Set",
+            "furnaceHeatingReady"
+          ]
+        },
+        {
+          "equipmentId": "line-01",
+          "groupKey": "temperature",
+          "target": "history",
+          "metricKeys": [
+            "furnaceZone1Actual",
+            "furnaceZone1Set"
+          ]
+        }
+      ]
+    }
+  ],
+  "historyRules": [
+    {
+      "equipmentId": "line-01",
+      "groupKey": "temperature",
+      "metricKeys": [
+        "furnaceZone1Actual",
+        "furnaceZone1Set"
+      ],
+      "intervalSeconds": 10
+    }
+  ],
+  "groupSettings": [
+    {
+      "equipmentId": "line-01",
+      "groupKey": "temperature",
+      "staleAfterSeconds": 60
+    }
+  ]
+}

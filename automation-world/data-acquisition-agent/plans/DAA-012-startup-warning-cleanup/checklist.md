@@ -1,9 +1,9 @@
 Task ID: DAA-012
 Revision: r1
-Status: qa_passed
+Status: owner_accepted
 Owner Role: QA / Verification
 Allowed Writers: QA / Verification, Human Owner
-Handoff: AC01–AC03 独立验证通过，交 Human Owner 最终验收。
+Handoff: Human Owner 已最终验收 DAA-012 r1；Windows 原生验证后续安排。
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch
@@ -72,3 +72,15 @@ QA 在启动检查完成后对自己以 `start_new_session=True` 启动的进程
 ## 交接元数据复核
 
 Development 已补录 `Allowed Writers` 与 `Handoff`。更新后 `tasks.md` 的 SHA-256 为 `ba0d0528223bba2e2f513a6520935cb47f7eec1db7634e5fd7727cce78536982`。在内存中去除这两行后重算摘要，与上表原交接摘要一致；规格和 9 个正式源码摘要也全部匹配。格式发现关闭，AC01–AC03 沿用本轮独立证据，待 Human Owner 最终验收。 [Development 交接](tasks.md)
+
+## Human Owner 最终验收 — DAA-012 r1
+
+2026-11-16（Asia/Shanghai），Human Owner 在会话中作出明确决定，由协调者转交；原话如下：
+
+> 验收 DAA-012 r1 和 DAA-013 r1，范围以各自的独立验证记录为准；Windows 原生验证后续安排，留下操作文档，后续在window环境直接操作。
+
+**`owner_accepted`（DAA-012 r1）**。验收范围以本清单既有独立 `qa_passed` 为准：2026-11-13 macOS arm64 的 AC01–AC03，包括当时普通开发启动及等效锁定构建、51 条基线告警清理和 49 项定向回归。测试构建仍有一条范围外既有告警；原验证环境、命令、资源与限制保留在上文。
+
+本次只登记 Owner 决定并只读核对已有记录，没有重跑构建、测试、应用或原生 Windows，也没有操作数据库、后端、设备或既有 profile。原 QA 与 Development 专用临时日志目录已不存在；本次依据上文持久化的独立验证记录及摘要。当前工作树 HEAD 为 `21cd789277695bbafaa55c24e39261fc7247f9b0`；以交接表 SHA-256 只读比对时 9 项中 5 项仍相同、4 项已变化，不能将历史 QA 外推为对后续工作树字节的新验证。登记前 `git diff --check` 退出 0。
+
+Windows 原生验证未进行，由 Human Owner 后续安排和操作。[Windows 原生验证记录单](../../WINDOWS_NATIVE_VALIDATION.zh-CN.md)目前以 DAA-010 r5 为依据；用于本任务前仍须按实际候选核对 DAA-012 的适用步骤与证据。实际环境采用、发布打包、DS、项目 dev API、MySQL、真实 PLC 与上传联调仍按各自范围处理；本次验收不代表整阶段验收。

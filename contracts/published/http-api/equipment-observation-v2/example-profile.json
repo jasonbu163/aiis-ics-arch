@@ -1,0 +1,88 @@
+{
+  "target": {
+    "serverUuid": "00000000-0000-0000-0000-000000000000",
+    "schema": "replace_schema",
+    "schemaRevision": "9d1f3a5c7e20"
+  },
+  "devices": [
+    {
+      "equipmentId": "line-01",
+      "nameZh": "示例产线",
+      "nameEn": "Example line",
+      "staleAfterSeconds": 30,
+      "futureToleranceSeconds": 5
+    }
+  ],
+  "readScopes": {
+    "admin": [
+      "line-01"
+    ]
+  },
+  "meters": [
+    {
+      "meterId": "meter-01",
+      "nameZh": "示例电表",
+      "nameEn": "Example meter"
+    }
+  ],
+  "meterReadScopes": {
+    "admin": [
+      "meter-01"
+    ]
+  },
+  "producers": [
+    {
+      "producerId": "example-producer",
+      "tokenSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "kind": "external",
+      "enabled": false,
+      "grants": [
+        {
+          "equipmentId": "line-01",
+          "groupKey": "production",
+          "target": "latest",
+          "metricKeys": [
+            "coilNo"
+          ]
+        },
+        {
+          "equipmentId": "line-01",
+          "groupKey": "production",
+          "target": "history",
+          "metricKeys": [
+            "coilNo"
+          ]
+        },
+        {
+          "equipmentId": "line-01",
+          "groupKey": "heatZone1",
+          "target": "latest",
+          "metricKeys": [
+            "zone1Actual",
+            "zone1Set"
+          ]
+        },
+        {
+          "equipmentId": "line-01",
+          "groupKey": "heatZone1",
+          "target": "history",
+          "metricKeys": [
+            "zone1Actual",
+            "zone1Set"
+          ]
+        }
+      ],
+      "energyGrants": [
+        {
+          "meterId": "meter-01",
+          "groupKey": "electricity",
+          "metricKeys": [
+            "energyReading"
+          ]
+        }
+      ]
+    }
+  ],
+  "historyRules": [],
+  "groupSettings": []
+}

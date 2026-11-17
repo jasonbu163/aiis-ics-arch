@@ -1,7 +1,7 @@
 <!--
 File Path: /automation-world/semantic-mapping-agent/src/app/twin-facts/components/TwinJsonContractPanel.vue
 Description: Data Workspace composition for read-only source facts, API-first Mapping configuration, and HTTP runtime.
-Main Features: Coordinates app-open runtime preferences after defaults/profile readiness while keeping facts and saved configuration backend-first.
+Main Features: Keeps facts and saved configuration backend-first and shows runtime diagnostics.
 -->
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
@@ -14,7 +14,6 @@ import { useApiMaterialsStore } from "../store/apiMaterials";
 import { useMappingConfigurationsStore } from "../store/mappingConfigurations";
 import { useMappingValueRulesStore } from "../store/mappingValueRules";
 import { useApiFirstMappingRuntimeStore } from "../store/apiFirstMappingRuntime";
-import { useMappingStartupStore } from "../store/mappingStartup";
 import { useTargetApiConfigurationStore } from "../store/targetApiConfiguration";
 import { ConsoleCard, ConsoleActionButton } from "@aw-ui";
 import { localConfiguration, previewConfiguration, applyConfiguration, exportConfiguration, type LocalImportPreview, type ChangeIntent } from "../api/localConfiguration";
@@ -33,7 +32,6 @@ const collection = useCollectionFactsStore();
 const apiMaterials = useApiMaterialsStore();
 const mappingConfigurations = useMappingConfigurationsStore();
 const mappingValueRules = useMappingValueRulesStore();
-const runtime = useMappingStartupStore();
 const apiFirstMappingRuntime = useApiFirstMappingRuntimeStore();
 const targetApis = useTargetApiConfigurationStore();
 
@@ -107,7 +105,6 @@ watch(() => [props.enabled, props.page, props.view] as const, ([enabled, page, v
 onMounted(() => {
   if (!props.enabled) return;
   apiFirstMappingRuntime.startPolling();
-  void run(async () => { await runtime.loadStartupPreferences(); await apiFirstMappingRuntime.autoStartIfEnabled(runtime.runtimeStartupPreferences.value.runtimeAutoStart.apiMappingRuntime.enabled); });
 });
 
 </script>
@@ -247,7 +244,6 @@ onMounted(() => {
       :saved-preview="mappingConfigurations.savedPreview.value"
       @preview-saved="id => run(() => mappingConfigurations.previewSaved(id))"
       :manual-runs="mappingConfigurations.manualRuns.value"
-      :manual-run-busy-ids="mappingConfigurations.manualRunBusyIds.value"
       :busy="mappingConfigurations.busy.value"
       :facts-busy="mappingConfigurations.factsBusy.value"
       :status="mappingConfigurations.status.value"
@@ -266,7 +262,6 @@ onMounted(() => {
       @update-binding="mappingConfigurations.updateBinding"
       @save="run(mappingConfigurations.save)"
       @remove="run(() => mappingConfigurations.remove($event))"
-      @run-manual="run(() => mappingConfigurations.runManual($event))"
       @preview-import="run(() => mappingConfigurations.previewImport($event))"
       @apply-import="run(mappingConfigurations.applyImport)"
       @clear-import="mappingConfigurations.clearImport"
@@ -279,12 +274,8 @@ onMounted(() => {
       :labels="labels"
       :runtime="apiFirstMappingRuntime.runtime.value"
       :busy="apiFirstMappingRuntime.busy.value"
-      :error="apiFirstMappingRuntime.error.value || runtime.runtimeStartupError.value"
-      :enabled="enabled"
-      :auto-start-enabled="runtime.runtimeStartupPreferences.value.runtimeAutoStart.apiMappingRuntime.enabled"
-      :runtime-startup-busy="runtime.runtimeStartupBusy.value"
+      :error="apiFirstMappingRuntime.error.value"
       @action="run(() => apiFirstMappingRuntime.action($event))"
-      @update:auto-start="run(() => runtime.setApiMappingRuntimeAutoStart($event))"
     />
 
   </div>

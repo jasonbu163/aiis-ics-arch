@@ -1,10 +1,10 @@
 Task ID: SMA-004
 Revision: r1
-Status: qa_passed
+Status: owner_accepted
 QA Verdict: qa_passed
 Owner Role: QA / Verification
 Allowed Writers: QA / Verification, Human Owner
-Handoff: Verification QA2 -> Human Owner final acceptance pending；精确 r1 返工候选 9d514bc4c71ae3ebb0b634118c86c6f409835f5d8d933b3fab5bccc51fc93676 通过独立验证；QA1 失败历史保留，F-QA1-001/002/003 已在下文 QA2 关闭
+Handoff: Human Owner 已于 2026-11-14 最终验收 QA2 通过的 SMA-004 r1 精确候选 9d514bc4c71ae3ebb0b634118c86c6f409835f5d8d933b3fab5bccc51fc93676；交主协调同步索引与盘点资源，范围见 §Human Owner 最终验收
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 
@@ -302,3 +302,17 @@ QA2 唯一临时根 `/private/tmp/sma-004-r1-qa2-20261104-1915/` 保留：同SHA
 图像为本轮受支持 CUA 实际返回并目视核对；工具未提供本地图像路径，不虚构截图文件。原31Rust、普通dev和QA1原生CRUD/reopen原始日志SHA仍见完整QA1记录及已核准manifest。
 
 最终 QA2 handoff 审计（2026-11-04T19:37:37.206707+08:00）退出0：53项候选/283项保护面/spec/tasks/001/003权威SHA均保持；原QA1正文除当前三项metadata更新外逐字保全，当前qa_passed与Owner final pending一致；22份Markdown的314条本地路径链接有效、无尾随空白。仅本checklist为QA2项目写入，索引由root机械同步。
+
+<a id="owner-acceptance-r1"></a>
+
+## Human Owner 最终验收（2026-11-14，Asia/Shanghai）
+
+主协调在当前会话分别说明 SMA-004 r1 已通过 QA2 的范围和另列的 12 项 UI 发现，Human Owner 随后明确决定：
+
+> sma-004验收先。
+
+命名 Verification 据主协调转交原话记录：**SMA-004 r1 为 `owner_accepted`，`QA Verdict: qa_passed` 保持。** 所接受的是 2026-11-04 QA2 通过的精确候选 **`9d514bc4c71ae3ebb0b634118c86c6f409835f5d8d933b3fab5bccc51fc93676`**：隔离 profile 中的 SMA 本地 SQLite 配置、文件导入与完整备份恢复、已保存配置的只读纯预览；正常投递仍按原设计关闭。QA1 失败及 QA2 对三项返工的关闭均保留为历史。
+
+- **候选核对：** macOS 15.7.7 arm64 / Python 3.9.6，在交付树读取 [tasks.md](tasks.md) 原 53 项 before/after 表及六项返工 delta，按仓库相对路径排序并计算 UTF-8 compact JSON 三元组 SHA-256，复现原 `ca47b7a9…` 与最终 `9d514bc4…` 两个摘要。以 `git show 0465f45ced6a2c8f8ca271b8bbf71f9eabc99de9:<path>` 核对，历史 after 53/53 匹配；原 QA2 checklist 的 SHA-256 为 `5a6eb4f2af0a7215cd1c212401ac1dfe58b1808a4a31fb165f4e42ca84d49e90`，登记前与该提交一致，spec/tasks 的摘要也与 QA2 一致。当前工作树 after 匹配 52/53，只有根 `CODE_INDEX.md` 从 `08cf4e2bdb02953a7806d17c32aa3a8b22d5812143feb2e860467f611488869a` 变为 `e6e9f707519cd20712727a94e81d7c4131aa8a82458a8f4f0b14fe381ce685a3`；`git diff` 核对为后续全仓索引更新，SMA 条目未变。这不是当前工作树与历史候选完全相同的声明。
+- **证据边界：** 本次只核对源码身份与已有记录。依据是原 QA2 的 AC01–AC12、前端 check / 12 项 Node 测试 / build、隔离原生 Save As 与恢复，以及经 QA2 核准复用的 31 项 Rust 测试和跨进程重开证据。本次未重跑软件 QA 或启动应用；未能重新读取抽查的 QA2 临时原始日志，持久证据见上方 QA2。当前 SMA 仍以源码方式消费后来变更的共享 `ConsoleActionButton.vue`、`LanguageSwitch.vue` 和 `components.css`；[CU-009 r1](../../../console-ui/plans/CU-009-round-topbar-actions/checklist.md) 的独立 QA 含 SMA 构建和浏览器检查，其 Owner 最终验收仍待定。这 12 项 UI 发现仍开放。阶段④ GET→POST、真实交付和业务保存、真实或默认 profile 采用/迁移、DAA/Backend 联调、可靠恢复/容量、设备及部署发布仍属独立范围。
+- **收尾交接：** Verification 仅登记本 checklist，交主协调机械同步索引和按归属核对历史临时资源；关键证据及身份已随任务记录持久化。本次验收登记未回收资源。

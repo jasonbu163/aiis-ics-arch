@@ -1,4 +1,707 @@
 Task ID: ARCH-OBS-001
+Revision: r11
+Status: developer_handoff
+Owner Role: Development
+Allowed Writers: Development
+Handoff: r11 R11-QA-001 授权返工开发自检完成；交新的 fresh-context Verification 独立复验
+Workflow Mode: STD
+Execution Mode: agent_team_same_session
+
+# r11 QA1 返工
+
+2026-11-17：接收独立 Verification 的 R11-QA-001 与 `qa_failed`，checklist SHA-256 `0b45a548c236245b20816d061827465186d49113077821a2be0d7a45d167c959`；原 65 项正式源码及 27 项临时材料逐项匹配。只在指定隔离容器修正本任务账号授权及临时材料，保留原 QA 和开发记录。
+
+### r11 QA1 返工 developer_handoff
+
+**精确对象。** 本轮只修复获批 r11 的 R11-QA-001 隔离测试账号授权和任务临时材料，保留 Verification 的 `qa_failed` 和 r10 QA4 `qa_blocked` 原记录；不修改 spec、checklist、正式业务实现或真实配置。spec SHA-256 `b84a907c6fbf31508816373c165ba70194f89919bac2b99c4f22a8127f33a8ff`；返工依据的 checklist SHA-256 `0b45a548c236245b20816d061827465186d49113077821a2be0d7a45d167c959`。正式工作树 HEAD `21cd789277695bbafaa55c24e39261fc7247f9b0`，前次 65 文件逐项复核均未变化，清单整体 SHA-256 `b3d52719cb1c99c329ac015e1bb5886efb3b86837481989b4d886b80d9dd194f`，完整 65 项仍见下方先前 r11 handoff。前次 27 项临时材料写入前也全部匹配。
+
+**授权修正。** 仅对指定容器 `58c935ee29f4e782204fb20a1866a4f0733a882cb68da4df84b0a26ef9f01c40` 中本任务的 `obs_r11@%` 操作，先审计 UUID、镜像、绑定、账号、无活动测试客户端/事务、原授权和 main 全部 11 表行/DDL，再逐 schema 撤销旧的未转义通配授权并授予下划线按字面转义的授权。三个授权对象分别为 `` `obs\_r11\_main`.* ``、`` `obs\_r11\_guard`.* ``、`` `obs\_r11\_recovery`.* ``，每个仅含 `SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, REFERENCES, INDEX, ALTER, LOCK TABLES`，全局只有 `USAGE`，账号无活动角色；未改变全局 `partial_revokes=0`、其他账号或任何 schema 数据。该 10 项列表是依据现有迁移/测试静态审计收窄的候选，**完整迁移链尚未用该授权执行**，由 fresh Verification 独立确认其是否足够；不得因权限不足自动扩大范围。
+
+MySQL DCL 非事务：第一条 main 撤销和新授权实际已提交，但初次逐步核对脚本因 `mysql --batch` 把输出中的反斜杠再次转义而误判并立即停止；当时 guard/recovery 尚未处理。经独立只读比较，驱动与 `mysql --raw` 的实际 SHOW GRANTS 一致，确认 main 新授权正确且 baseline 不变；未重复其 DCL。随后以精确预期的部分状态和原 journal 为前置条件，只对 guard/recovery 逐条完成撤销与精确授权，每步读取实际 SHOW GRANTS；没有自动重试失败 DCL。非秘密步骤日志 SHA-256 `0c080d3342c78ea453ce0e4394ab6b5d60e4a2fc764a749ece554ec569a20e0e`。初次误判和中间部分提交事实不以最终成功覆盖。
+
+**DEV self-check 与边界。** 最终以该账号实际连接三个精确 schema，检查 `SHOW GRANTS FOR CURRENT_USER()`、`CURRENT_ROLE()` 和 `@@partial_revokes`：恰好 3 个字面授权、每个 10 项、无旧通配授权，三个库均可连接。main 保持 r8 `8c0e2a4d6f18`，11/11 旧基线表的全部行与 `SHOW CREATE TABLE` 逐项不变；guard/recovery 仍为空。对三个合法名称及其人为构造的相似**字符串**执行 MySQL LIKE 正/反例，均符合转义规则；没有创建、连接或测试实际其他 schema 的拒绝，不能把字符串结果冒充该证据。实际授权/基线只读报告 SHA-256 `71f2eca70362a582c83c00890d549e376af06bd730425307e2363a1cf56a3e29`。
+
+临时 `create_target.py` 和 `initialize_target.py` 已改用同一严格 allowlist/转义/10 权限策略，并在创建授权后检查实际 SHOW GRANTS；`safe_target.connect` 每次连接均对身份、无活动角色、`partial_revokes=0` 和精确权限 fail closed。新增 `grant_policy.py`、实际只读 `audit_grants.py` 和纯策略测试；测试覆盖合法授权、未转义授权、权限增删、额外范围/角色/语义及 CLI 双转义输出，**5 passed**；25 个临时 Python 文件语法检查通过，`git diff --check` 退出 0。修订后的 bootstrap 脚本未重新创建容器实跑。65 项正式源码逐项不变；原 27 项临时材料中仅 `RUNBOOK.md`、`safe_target.py`、`create_target.py`、`initialize_target.py` 按本缺陷更新，另加 7 项策略/检查/一次性修复证据，当前 **34 项**清单整体 SHA-256 `b05b4590ef9e70cbda98e7c7f3029933fa9dfd433c69d5983174b5cfed7fef03`，逐项见下。
+
+**独立复验与资源。** 当前 [RUNBOOK](/private/tmp/arch-obs-r11-8O97SDOg/RUNBOOK.md) SHA-256 `51019ccf41cf54cfbdc6706abd906067740b801e6cba49622dc09d7c04f59241`；Verification 可先独立运行 `test_grant_policy.py` 和 `audit_grants.py`，重新核对容器 ID、镜像、UUID、角色、三条实际授权及数据，随后按已批准顺序自行执行 r8→r10、真实 MySQL 原请求回放、ID 重叠、受控恢复、guard 和中断。上述迁移/回放/恢复仍**未由本轮 Development 执行**，既有 R11-AC02–04 和 R10-AC03/09 不因此通过。容器及 0700 专属目录继续保留供 QA；三份 0600 临时凭据仅供该实例/QA 使用，不输出或提交。QA 结束并持久化证据后，由协调者核验完整 ID、镜像、标签、挂载、UUID、端口和无后续依赖再按授权回收。未访问 3307/dev、其他容器或 SMA/DAA/PLC，未改其他账号或用户服务。
+
+**返工后临时验证材料 34 项摘要**（SHA-256 和相对 `/private/tmp/arch-obs-r11-8O97SDOg` 的路径，不含凭据文件）：
+
+```text
+51019ccf41cf54cfbdc6706abd906067740b801e6cba49622dc09d7c04f59241  RUNBOOK.md
+34832b746aa711948038eaa46436d4dabae89f03e14c405e2dfc77915b67850c  audit_facts_predecessor.py
+adfbc96103b7b8165eb654210e5781da11afe531e8d3cf125292e70f54541106  audit_final.py
+5d0d798de574e3adff33f160d62af99b5f7cad231d940da190ce5e352d284ce6  audit_grants.py
+0cbf731aeeeffa5aba8fda9385e5f61951a686541546857b0e68f2dc4cf4e5ca  audit_predecessor.py
+2d50c0fa23f98c40ca4b6115ad057bbd35138b93bf841458d792bb8e92f6bfb5  control.py
+dc892ffa91cdd3d9c3717b78b7406411fb4741e55ab85e9e4969ba5f7c6126e0  copy_source.py
+da4fa57002591dc343634d060216a15056fda7e0fd86161b8214ec9d8f26148c  create_target.py
+71f2eca70362a582c83c00890d549e376af06bd730425307e2363a1cf56a3e29  grant-final-audit.json
+0c080d3342c78ea453ce0e4394ab6b5d60e4a2fc764a749ece554ec569a20e0e  grant-repair-steps.jsonl
+d524237d9e3ed0995b18fad1777cc2ac707a9aa3f9cc9a9754de3d4fe366657e  grant_policy.py
+fe147b784732585d6e1334755a124cec043acdc92d4ca3b3c5bba9a3f1476ee7  init-r8-obs_r11_main.log
+9b4cc9f7637984f3170df791eab45203ae15cccdae97257629eaa19dd6973309  initialize_target.py
+0cfb4549525f745d4c4bca532cc922f19cd4c5fbf8d99dec52a6926c34c4e619  ownership.json
+fe1405a3d61bbeb4ab3a21a0e12f11af4e19999d5c24af0df003ee42e2302109  qa_guards.py
+8ea68b115b90fc1775da4f200157bb2ea062810a30b6cc046971fabfd0350d96  qa_interrupt.py
+8ac61b38971841819ac748d427d02d8486ac3e2acd3350f70b191fa2f9131e0c  qa_interrupt_child.py
+a6c4226fc67898adb608c6088470675ccec6020334bc7472bf82f1916787a24b  qa_interrupt_refusal.py
+d1f9ca554b786987955eea5fcd626080064ee2447306e874237a4551fdb68a30  qa_recover.py
+7563b35c084b5401261b9ae88a3948a076a2251233c43c081b357a1906cc01c6  qa_recovery_collision.py
+a56780c5930b8925da9cab3dacfde85c76202cf5a9ab36430e5ec8004df9aa4d  qa_replay.py
+630dd116bc3ada541452d0b11fa08ca0c4a350e508789e045fdec438614a4272  qa_replay_http.py
+62e93d2895089c650511b3e3937245cab2b5769bd4dafddd54d576b4172b73c7  qa_upgrade.py
+1cfdaad0f872e8d26a16b645fdc50cfaec13029684797cee3b2b7adde07bfa22  r8-baseline-obs_r11_main.json
+2e0ded43b9f002577b8c2e17732dbb6d30f2f64765c84d7076d2a45b1c02ea34  r8_ingest_reference.py
+4d6807f0eac80b8bc62189ce10dd8e772b33189cc254d998f915c5b1c2bb5cef  repair_grants.py
+c5c9359fb2e5186409b33e01e5feed97dc23f03f9473c2f768c0abbf284e5e09  resume-r8-facts-obs_r11_main.log
+e5d6f6c2a4f2ecda1a939d9814773c78a45f65c7c420366cd04b9360d27c882b  resume-r8-obs_r11_main.log
+7528c17846442145139be07900d742a8050c39c92376644e32215f78ef016d76  resume_grants.py
+30af3b9ccfd75d75e8204989f37842d0ac410ee245500bb31a577f55c0a7769f  safe_target.py
+1fb4054b563379cd9d6f77638a38d25f8ce6a69cec0fa94026bd80ed94dc2662  seed-r8-obs_r11_main.log
+9436125d5ea2e92add134cc3a9546c47d3a4e2b56bc86f2e35e3813baedb75e8  seed_r8.py
+4cb75f820fa09beaec2a65a984182d00478a3783ca08917d17b9480491ee3662  source-manifest.json
+a78aca73c4f201425edd35aa99df3d1d113c22772b6f0f3925da7cbb9a0e6543  test_grant_policy.py
+```
+
+# r11 隔离迁移复验准备
+
+2026-11-17：Human Owner 批准 r11 §13，批准后 spec SHA-256 `b84a907c6fbf31508816373c165ba70194f89919bac2b99c4f22a8127f33a8ff`；QA4 `qa_blocked` checklist SHA-256 `7599d30b39d3b1b98e915bc06348b0e83e23f17b4bad8ee16fbb5e4e1e704830`。原 63 项候选逐项核对一致；此前 r10 事实及 QA 记录完整保留。此阶段仅更新两份前端 README、本文件和专属临时测试材料。
+
+### r11 developer_handoff
+
+**批准与精确交付。** Human Owner 已批准 `ARCH-OBS-001 r11 §13`（[§13.6](spec.md#r11-approval)）；spec SHA-256 `b84a907c6fbf31508816373c165ba70194f89919bac2b99c4f22a8127f33a8ff`，本轮依赖的 QA4 checklist SHA-256 `7599d30b39d3b1b98e915bc06348b0e83e23f17b4bad8ee16fbb5e4e1e704830`，其 `qa_blocked` 事实不变。交付为正式 `main` 工作树 HEAD `21cd789277695bbafaa55c24e39261fc7247f9b0` 上未提交候选；写入前原 63 项全部匹配，此轮只改 [英文前端 README](../../frontend-js/README.md#business-observation-source-selection)、[中文前端 README](../../frontend-js/README.zh-CN.md#业务观测来源选择) 的指定段落及本 `tasks.md`，未修改实现、其他源码、spec 或 checklist。原 63 项加两份 README 共 65 项，逐项清单见下，整体 SHA-256 `b3d52719cb1c99c329ac015e1bb5886efb3b86837481989b4d886b80d9dd194f`；tasks/spec/checklist 单独定身，不计入该清单。
+
+**说明与静态检查。** 两份说明对应当前四设备页的配置化卡片、温度/传动/清洗过程曲线、独立能耗及来源无关的 v2 机器上报，明确现行页面没有 URL legacy/HTTP 选择，旧历史合同和原能耗统计边界仍保留，并分别链接同语种 r10 使用说明及 v2 合同；与之无关的计划/实绩、部署、权限与历史段落原样保留。仅有两个指定段落产生 diff；4 个新增本地链接及显式片段锚点均存在，`git diff --check` 退出 0。按 §13.3 本轮没有因文档改动修改或构建页面、接口和迁移。
+
+**合成目标及 DEV 准备。** 仅在指定 `127.0.0.1:13316` 创建本任务 MySQL 8.4.6：完整容器 ID `58c935ee29f4e782204fb20a1866a4f0733a882cb68da4df84b0a26ef9f01c40`，容器名 `arch-obs-r10-qa-20261117-a1`，精确镜像 ID `sha256:869218921e61d6c3c89820955d63cca42971f0e3e6c1e2792247bbd944ebc6e9` / arm64，目标 UUID SHA-256 前缀 `c6c91aa0c925`，时差 +08:00；经核对不同于现有 dev UUID。数据库 datadir 为容器独占 tmpfs，无已有卷；仅两个本任务凭据文件只读 bind mount，桥接网络并非完全隔离。专用 schema `obs_r11_main` 已用正式 Alembic 链到 `8c0e2a4d6f18`，`obs_r11_guard`、`obs_r11_recovery` 最后核查均为空。专用测试账号仅对三个 schema 授权；容器 ID/镜像/随机归属标签/端口/挂载与 UUID 记录在 0600 的临时所有权文件中。既有 3307 dev 未连接、复制或修改；未操作其他容器、SMA、DAA、PLC 或正式前后端进程。
+
+`obs_r11_main` 最后一次只读对账：旧实时 2、过程 3、旧回执 5、指标 2、槽位 4、卡片 1、曲线 1；旧能耗量、旧曲线、价格和小时价格各 1。两组实时具有不同原采集时间；两条同区域历史有相同原时刻、不同合成来源键及独立行；备注、异常/复核、ID、配置和原上海采样时间保留。5 个旧原请求及其实际数据库回执指纹逐条对账：使用与 r8 交接一致的旧 `ingest.py` SHA-256 `2e0ded43b9f002577b8c2e17732dbb6d30f2f64765c84d7076d2a45b1c02ea34` 提取 `_fields`/`normalize`/`fingerprint`，与当前回放函数及 `permitted` AST 相同，domain 源字节一致；旧 task evidence 是明确标注的合成元数据，不能证明真实来源。包括请求、结果 ID、逐行数据和旧表 DDL 的基线文件 SHA-256 `1cfdaad0f872e8d26a16b645fdc50cfaec13029684797cee3b2b7adde07bfa22`。
+
+**环境隔离与已知启动过程。** 临时源码副本从正式树只复制 507 个 Python 源码与 Alembic 配置，逐文件与正式源码比较 507/507 一致，清单 SHA-256 `4cb75f820fa09beaec2a65a984182d00478a3783ca08917d17b9480491ee3662`；不含真实 `.env`、私有运行 profile、Git 或符号链接。子进程以清空后的显式 env 覆盖数据库类型、host、port、用户名、schema、其他数据库禁用和测试目标；同环境核实 settings 解析的异步/同步 URL 均为获批 13316/对应 schema，root engine 配置为无效身份且未连接。数据库与 Alembic 每步前由脚本重验容器 ID、UUID、schema 与版本，不提供自动换目标。
+
+创建时 `mysqladmin ping` 先于认证 SQL 就绪，首次身份查询非零、当时未保存错误文本，未创建 schema；只读复查同一容器运行且初始化完成、目标名为空后，才创建三个 schema。创建脚本随后改为等待认证 `SELECT 1`，**该改版尚未重新执行**。main 从空库执行 Alembic 时先在 `2c4e6a8b0d12` 因缺少旧 ACQ 目标变量停止；只读核查 77 张表集合、待退役 9 张均空且可见外键为 0 后，显式提供本容器 UUID/schema 继续。一次隔离审计子进程因精简 PATH 未包含 Docker 目录而停止、未写库；补正 PATH 后继续，正式迁移在空合成库删除这 9 张空旧表。接着在 `3d5f7a9c1e23` 因缺少 facts 迁移目标/操作号停止；只读核查两旧 facts 表为空且新名不存在后，配置本容器的 facts、task 和 registry 后续守卫，正式链完成至 r8。以上均有专属日志，未 stamp、降级、重置或自动忽略失败。
+
+**供 fresh Verification 独立执行。** [本任务临时 RUNBOOK](/private/tmp/arch-obs-r11-8O97SDOg/RUNBOOK.md) SHA-256 `557cdf38d877cb0e0629fffebb598704e2e286db2212cecba069e6f580fd8545` 提供精确命令、目标检查和保全步骤：main 使用 `qa_upgrade.py` 在线升级并对照旧表/约束、`qa_replay.py` 以真实 r10 FastAPI ASGI 路由和真实隔离 MySQL 重放每个原请求并制造新旧 ID 1 重叠，随后明确测试恢复目标碰撞和 `qa_recover.py` 的受控恢复；guard 与 recovery 两个空 schema 分别从正式链建到 r8 并执行未静默、未确认旧时间、归档冲突及真实 RENAME 后注入异常的中断/监督拒绝测试。ASGI 不等于回环 HTTP；受控异常不等于断电或覆盖所有 DDL 故障。碰撞标记及中断现场默认保留，不自动 stamp、盲目重试或删除。
+
+这些 QA 脚本已完成 **19 个临时 Python 文件的语法检查和安全边界静态审阅**；main 的 r10 升级、旧请求回放、新行/配置保全恢复、guard 拒绝及受控中断 **均尚未由 Development 执行**，不能把工具或 r8 准备当作 AC02–04 通过。若实际执行出现错误或缺陷，停止并保存现场，由独立 Verification 记录事实，不在 r11 内修改实现或更换目标。原 R10 其余未覆盖条件仍按 QA4 保留；Development 不作 QA verdict 或 Human Owner 最终验收。
+
+**资源归属与结束条件。** 本轮容器仍运行，供下一名独立 Verification 使用；本任务私有目录 `/private/tmp/arch-obs-r11-8O97SDOg` 为 0700，临时 root/client/测试账号凭据文件为 0600，仅供该容器和 QA 使用，不输出、提交或记入日志。QA 完成、关键脱敏证据写入 checklist，协调者确认无后续依赖后，按完整 container ID、镜像、标签、挂载、UUID、端口及写入方重新核对，再仅停止/删除该容器并移除任务独有目录和凭据；不使用通配 Docker 删除或触及其他卷。意外中断先审计所有权、revision 和对象，不因名称相同就清理。留存的脚本、基线、DDL 日志、源码及敏感临时文件都有该 QA/回收依赖；容器删除前不得删其挂载。
+
+**正式源码 65 项摘要**（SHA-256 和路径，按路径排序）：
+
+```text
+db53dca713fd3f1e2c6844284f6ef56fc93aa11f9ff2ad88e46d6feb4766f501  CODE_INDEX.md
+8d0780c83d990c88ac6fa8ba7c40052740ea4dbe1f4fb4d67b4bdf7ee9d8dcb3  backend/alembic/versions/20261117_1200_9d1f3a5c7e20_observation_bundles.py
+d12b94302436835dcd322646c788fd30755dcad48d2318405d22ec606bfc4847  backend/app/equipment_observation/README.md
+93bc8166ad154d8a0039a0e7e9eff592cc67b530733fbb93b622fd6ea21b21c2  backend/app/equipment_observation/README.zh-CN.md
+89d04f96973411baa31b2ec40c7e8335fab80c86dc5ff892b83c153e9d8f6af0  backend/app/equipment_observation/api/routes.py
+39798a2a3119d40b1b846bf26d8fd3ab9a624bfb1cb9b8854f1c0b16dd1dffc2  backend/app/equipment_observation/error_codes.py
+93cb6b4d5c6a464b06364441c8887aa466885bed75902fc97d1fe5fb77ca51ef  backend/app/equipment_observation/machine_openapi.py
+35b037ee43126b2e6bf991c44f327f5b123a6446c4b239986ea62430258079d7  backend/app/equipment_observation/manifest.py
+5a69c30586f65364fb57485dd3adabfd00fc178b2168228f8c08f09cc12f6a7d  backend/app/equipment_observation/models/__init__.py
+8ae102b30edf13beb3387f779e35c4ed5119b97b9d55d6d5c07c48322b736914  backend/app/equipment_observation/models/records.py
+80e5f3cffd54f67736da287e973110d1e3ce8c94cf20fbd8561921f5f8efc89e  backend/app/equipment_observation/profile.py
+262612e3364e725a9f821cec719bc8048e987951a1a4c1bd37b7ce60b2e5956e  backend/app/equipment_observation/schemas.py
+aa3ab6a53fcfa0cc30529a6cebd6e9c09fe1857693bcc5857a5cc35b6e31aa49  backend/app/equipment_observation/services/configuration.py
+135dc8f46b5758cd9600ad5e93553c8993c3ab762c5a48a3422e8f8ab4c95ee8  backend/app/equipment_observation/services/energy_reads.py
+af5601fdcc89298f71b8adfae07af0465786c7f746fd8ae905653011df09778c  backend/app/equipment_observation/services/energy_statistics.py
+60b870f2eb2fc7dbea43a83a498245e1312d6f3d6402d0aca80ef535c1de4be3  backend/app/equipment_observation/services/guard.py
+0ee4c6c94420f29db504f384491b5e54f2d7d7aa6c72cac02e4c288cf411138e  backend/app/equipment_observation/services/ingest.py
+cd94cc1ff19975054ed4903666bf2a794b137af312ca199685f1a1b14b773894  backend/app/equipment_observation/services/ingest_v2.py
+f3e8ab8c2d5d711f301593cabb68a756d76699f5b22a6e97a65d479673daf6c2  backend/app/equipment_observation/services/reads.py
+bd7f081c6791dbf2ee9969c3f0e77ce13aad686d4a4f20a9c71b4e437fbb4b89  backend/app/equipment_observation/services/v2_domain.py
+6f92dfb56df56d3ca1d9866a609d0c4bf55cbc74380394a91ba48a89de5d2fe0  backend/app/plc_facts/v2_config.py
+39e4cdd218d83475112cddc5780a1fd4a8eba24cfc3ce79b29d5ef3b8a6bce76  backend/common/integration/storage.py
+582e34fc026e80291c44e90dae45f9814a5ceb4a9db76369f8a3b5f48af37748  backend/tests/test_energy_price_api.py
+a6f24f3b01610bdd3736564148c179ae3a28fd95d165d16d82f5562222ef59e6  backend/tests/test_equipment_observation_domain.py
+32ead808cdf317b9b38c32fa45eb35bef66074d0a8d87dbec06e384a2469d855  backend/tests/test_equipment_observation_r10.py
+b19452c3fdae3722579cd17628de196732f2e6ed291032a6f99deb0a82751641  backend/tests/test_equipment_observation_r10_flow.py
+71d91aa54ae883be9c2e3961fdb89fa5eb6ad4b52d57d7de808fc5422a609444  backend/tests/test_equipment_observation_r8.py
+4fdc00cdf51d41f1b87badcf7b9c3af0d5c8e805fb5441022a57c08ed8905123  backend/tests/test_equipment_temperature_migration.py
+0393e9346c4d04884d99d77c6c006754894864c7a3d57b2517a4feb5d3e208ae  backend/tests/test_legacy_acquisition_retirement.py
+706acd4edfe88e09a0f38dcacda98f0792407e41fed2b7ee30083f225f98f6c2  backend/tests/test_mapping_migration.py
+0532f522a69fe2db7e463536617cd0de3af08fc86bbb2775dabd4084b2d2e68f  contracts/README.md
+980e5616459dcda55633fd289368e88829a176486e7c88504d481867766b3c23  contracts/README.zh-CN.md
+b3379d7181b285680f739bd3b9ebc6ca8ea010a542b546993bd706244a4609bc  contracts/published/http-api/equipment-observation-v2/README.md
+e84d4c2afe7e55bf3ddc7005244bfd755f715d7469072508d91da3b5222958d6  contracts/published/http-api/equipment-observation-v2/README.zh-CN.md
+d11a7c030f7a4401219b2d5160f4d77345df28d42a39e364861144a019252989  contracts/published/http-api/equipment-observation-v2/example-profile.json
+cf1b37634557f534a933ea2142001fb14b01a47fb349b5205634c42c90857646  contracts/published/http-api/equipment-observation-v2/openapi.json
+870378e53e1becd7c70a5d0b38f062b2e4bf809ff68a8269c34bd5441962d0a7  contracts/published/http-api/equipment-observation-v2/vectors.json
+0b777e70584e0086b00616270716fe93df24419ed737c1df9720473e368b7528  docs/equipment-status-process-monitoring.md
+7c7137720e399e7e60cf89614ad1f9b486c52928c1a9f23ca68b4fa44ff3d798  docs/equipment-status-process-monitoring.zh-CN.md
+28b21dda4d0e9b5eef7af1b8fd60d341741e197883adced60202839b39304183  frontend-js/README.md
+ad82b29d155e715eb2e3c9d36b5eb80c8dc8f9ba9c3248dac843e760d7409d99  frontend-js/README.zh-CN.md
+ca56e4c8b672d05067c1394d9a832b9beed201ad04477b2c6735989205b661ef  frontend-js/src/app/equipment/api/observations.js
+b2ac30ca6e7779ad16b8e5825ad150438e9d219678fa574d655dc706269ec688  frontend-js/src/app/equipment/components/observations/RecordList.vue
+f89964f9802f9a99339981947864fcb405d2b5a61a68c746a0d979ea63a53341  frontend-js/src/app/equipment/locales/en-US.json
+2a374840c98e82d808615502e80fa229d87a88230c30875f3dbd9ea1c4834970  frontend-js/src/app/equipment/locales/zh-CN.json
+cd24870f3c2301acae453cf99ba40669414c018974b895b0420333ccdce96dbe  frontend-js/src/app/equipment/manifest.js
+dd5c965bf83ce900c52bbb341ad7c249f13d650d1db12893ccfd36173a28dd68  frontend-js/src/app/equipment/views/observations/admin.vue
+9d3dcb8d7f74e69dfb2c270978e9c688187f8c9d68091b0b383864e64182579d  frontend-js/src/app/equipment/views/observations/cards.vue
+086e8027db5990bda7d006b8a92bdd865fc1c1f8aea135dfb46631d034de41d0  frontend-js/src/app/equipment/views/observations/data.vue
+144992b29bc569d33a9260928cfc49cf6f318c44d09aff8ce9eaf12867c57dc5  frontend-js/src/app/monitor/api/observations.js
+ef53632ce9a9fc9dc522a86336c35f85e42b59b9738cd1f940913f2121a190dd  frontend-js/src/app/monitor/components/observations/CurveChart.vue
+19865b25d524b65edcdf155fe2436a7efd921b3c7ef311749e215739d55c64a5  frontend-js/src/app/monitor/components/observations/EmptyAxes.vue
+7e11059e9a03496b5f39b247e3e98608aaacae68c0e5fb7853fd0fe28da784e1  frontend-js/src/app/monitor/components/observations/EnergyAdmin.vue
+a6f659342eea1b29862c75a440a4a21ec8cdeeeb473e4bbfdcaf723fa977f1ee  frontend-js/src/app/monitor/components/observations/curveSeries.js
+309cc3912ae14d1d8dbeffb0cb81dd26949a9e995aedd1ceccb240c48f18ffe6  frontend-js/src/app/monitor/locales/en-US.json
+dfddf97b60aeb1eb1242b6fa22cf530a93426910f9c43410166b29c504385f10  frontend-js/src/app/monitor/locales/zh-CN.json
+e8dfbec2c1537e33d9624cce8fff4c5c0c325b340eb08ec229a1a1f115212dc7  frontend-js/src/app/monitor/manifest.js
+3c8678e8af7379dfba1903316c45b4f413f2c72e35a11369f5c7b2a3dd2a2787  frontend-js/src/app/monitor/views/observations/admin.vue
+a202167be58e577d4076273f1e98e1e9051b553469ac1afb4b0f8f90cfb1fd10  frontend-js/src/app/monitor/views/observations/curves.vue
+11e3a81d8b0e425e83058fdf65da2eadb809d4239de49c0673846d20a38256ac  frontend-js/src/app/monitor/views/observations/data.vue
+7a9318614f675691c12386dd342cf492e1b578ad3e59a74ac658148c49b7eb65  frontend-js/src/app/monitor/views/observations/energy.vue
+d28979a3b7817f1c54e1191255d9cc9f7028db6753f55fc0af9311e8fd939a59  frontend-js/tests/module-registry/equipment-observation-columns.test.mjs
+f21807090478aff142e6c0679ffc6a32e450ff70077880924d1b64ecc4f0d247  frontend-js/tests/module-registry/equipment-observation.test.mjs
+e2918a4a63ebf7f923a7ee8f50399f5c4d110628e1eff0c223b6d424752aee8a  frontend-js/tests/module-registry/page-access.test.mjs
+0a3c1ef166eae9dcd0303bc8450b3186962bb7e335ad835fbe6ccb45cc71c5de  frontend-js/tests/module-registry/registry.test.mjs
+```
+
+**临时验证材料 27 项摘要**（SHA-256 和相对 `/private/tmp/arch-obs-r11-8O97SDOg` 的路径，不含凭据文件）：
+
+```text
+557cdf38d877cb0e0629fffebb598704e2e286db2212cecba069e6f580fd8545  RUNBOOK.md
+f178e8f5bac84a1b3cf54e215be70ae675d39c2752992f9bc2c5a33b9a332e67  safe_target.py
+2d50c0fa23f98c40ca4b6115ad057bbd35138b93bf841458d792bb8e92f6bfb5  control.py
+9436125d5ea2e92add134cc3a9546c47d3a4e2b56bc86f2e35e3813baedb75e8  seed_r8.py
+2e0ded43b9f002577b8c2e17732dbb6d30f2f64765c84d7076d2a45b1c02ea34  r8_ingest_reference.py
+62e93d2895089c650511b3e3937245cab2b5769bd4dafddd54d576b4172b73c7  qa_upgrade.py
+a56780c5930b8925da9cab3dacfde85c76202cf5a9ab36430e5ec8004df9aa4d  qa_replay.py
+630dd116bc3ada541452d0b11fa08ca0c4a350e508789e045fdec438614a4272  qa_replay_http.py
+7563b35c084b5401261b9ae88a3948a076a2251233c43c081b357a1906cc01c6  qa_recovery_collision.py
+d1f9ca554b786987955eea5fcd626080064ee2447306e874237a4551fdb68a30  qa_recover.py
+fe1405a3d61bbeb4ab3a21a0e12f11af4e19999d5c24af0df003ee42e2302109  qa_guards.py
+8ea68b115b90fc1775da4f200157bb2ea062810a30b6cc046971fabfd0350d96  qa_interrupt.py
+8ac61b38971841819ac748d427d02d8486ac3e2acd3350f70b191fa2f9131e0c  qa_interrupt_child.py
+a6c4226fc67898adb608c6088470675ccec6020334bc7472bf82f1916787a24b  qa_interrupt_refusal.py
+adfbc96103b7b8165eb654210e5781da11afe531e8d3cf125292e70f54541106  audit_final.py
+4cb75f820fa09beaec2a65a984182d00478a3783ca08917d17b9480491ee3662  source-manifest.json
+1cfdaad0f872e8d26a16b645fdc50cfaec13029684797cee3b2b7adde07bfa22  r8-baseline-obs_r11_main.json
+f1e0f225e43e74363f7927b0c1de5cb47840fc74426df7df8b8f8e04f1d4e96e  create_target.py
+e98b485d1adebc0087e43f78e89bdbe5a1e610f4a737b0b3a63ad5d0e59beb4c  initialize_target.py
+dc892ffa91cdd3d9c3717b78b7406411fb4741e55ab85e9e4969ba5f7c6126e0  copy_source.py
+0cbf731aeeeffa5aba8fda9385e5f61951a686541546857b0e68f2dc4cf4e5ca  audit_predecessor.py
+34832b746aa711948038eaa46436d4dabae89f03e14c405e2dfc77915b67850c  audit_facts_predecessor.py
+0cfb4549525f745d4c4bca532cc922f19cd4c5fbf8d99dec52a6926c34c4e619  ownership.json
+fe147b784732585d6e1334755a124cec043acdc92d4ca3b3c5bba9a3f1476ee7  init-r8-obs_r11_main.log
+e5d6f6c2a4f2ecda1a939d9814773c78a45f65c7c420366cd04b9360d27c882b  resume-r8-obs_r11_main.log
+c5c9359fb2e5186409b33e01e5feed97dc23f03f9473c2f768c0abbf284e5e09  resume-r8-facts-obs_r11_main.log
+1fb4054b563379cd9d6f77638a38d25f8ce6a69cec0fa94026bd80ed94dc2662  seed-r8-obs_r11_main.log
+```
+
+# r10 QA3 返工
+
+2026-11-17：接收独立 Verification 的 `qa_failed`，checklist SHA-256 `c71a6ff741600b5db30e96cd9bc58ceaa1c8eda411bde26715096181775d7b11`；前次交接 61 文件摘要、spec SHA-256 与两份模块 README 的修改前摘要均已核对。仅按获批 r10 §12 修复 R10-QA-008–009，历史交接与 QA 结论保留。
+
+### r10 QA3 返工 developer_handoff
+
+**对象与变更。** 获批对象为 `ARCH-OBS-001 r10 §12`，正式交付为 `main` 工作树、HEAD `21cd789277695bbafaa55c24e39261fc7247f9b0` 上的未提交候选。spec SHA-256 `667eb48607afe9300e675fdc5a2b6152631b58705e2cd18a994bd843ec3df623`；返工依据 checklist SHA-256 `c71a6ff741600b5db30e96cd9bc58ceaa1c8eda411bde26715096181775d7b11`。上一 61 项逐项核对一致后，本轮只修改 `frontend-js/src/app/monitor/components/observations/EnergyAdmin.vue`、`frontend-js/tests/module-registry/equipment-observation-columns.test.mjs`，补正 `backend/app/equipment_observation/README.md`、`README.zh-CN.md`，以及本 `tasks.md`。前两份为原清单修改，两份 README 为此轮补入候选；其余 59 项保持原字节，未改 spec、checklist 或其他并行工作。本节末完整 63 项清单整体 SHA-256 为 `8512aaecbd8610cae2d44cf02014b7bb643dddea48bf0876d4866d5eb41fb6ea`，该摘要不含 tasks/spec/checklist 本身。QA3 对旧缺陷的结论及本轮 `qa_failed` 原样保留，开发自检不是 QA 或 Human Owner 最终验收。
+
+**R10-QA-008。** 两份模块 README 以 r10/v2 为当前入口，解释来源无关、真实 `observedAt`、设备最新整包／过程追加／独立能耗三表、配置与人类/机器权限；v1、PLC 任务证据仅作为旧合同和原回执重放的历史说明。保留 SMA 产品和实际 PLC 接入未由本任务证明的边界。
+
+**R10-QA-009。** 表计、组和页改变时同步失效旧请求、关闭旧编辑、清除旧行；仅提交仍匹配当前选择及请求代次的配置、样本与错误，并保留同范围分页总数以避免翻页重置。样本配置与数据作为同一查询结果提交；旧配置请求不能再发新表计的样本请求。编辑只允许当前已展示且属于所选表计的对象，保存固定打开时的身份；保存期间禁用切换控件，旧保存回调不能覆盖新选择。新增 4 个实际 Vue SFC 与可控 promise 回归；修复前复现 A 旧配置覆盖 B、A 旧样本覆盖 B 和 A 旧请求重复请求 B 三条失败，修复后覆盖两模式逆序、筛选／分页、迟到错误与旧保存失败、无表计选项重试、打开后切换、修改表单身份但固定目标，以及既有动态列顺序、零/false/空值、语言、微秒与同名图例。
+
+**正式源码 DEV self-check。** `frontend-js/` 执行 `pnpm_config_verify_deps_before_run=false pnpm test:modules` 退出 0，**85 passed**；`VITE_SUPERVISOR_PAGE_ACCESS_JSON='[]' VITE_OPERATOR_PAGE_ACCESS_JSON='[]' pnpm_config_verify_deps_before_run=false pnpm build --outDir /private/tmp/arch-obs-r10-qa3-rework-dist` 退出 0、2262 模块；外部 outDir 与大 chunk 提示保留。`backend/` 用不可连接的合成 MySQL 端口 1 和项目 uv 锁定环境执行 `PYTHONDONTWRITEBYTECODE=1 UV_CACHE_DIR=/private/tmp/arch-obs-r8-private.ZQFVM8IQ/uv-cache LOG_DIR=/private/tmp/arch-obs-r10-qa-log MYSQL_HOST=127.0.0.1 MYSQL_PORT=1 MYSQL_USER=fixture MYSQL_PASSWORD=fixture MYSQL_DATABASE=fixture MYSQL_ROOT_USER=fixture MYSQL_ROOT_PASSWORD=fixture TEST_MYSQL_DATABASE=fixture_test OBSERVATION_ENABLED=false uv run --offline --frozen --no-sync pytest -q -p no:cacheprovider -m no_db -rs --tb=line tests/test_equipment_observation_domain.py tests/test_equipment_observation_r8.py tests/test_equipment_observation_r10.py tests/test_equipment_observation_r10_flow.py`：退出 0，**50 passed、1 warning**，warning 为 SQLite datetime adapter 弃用。包含独立 SQLite/ASGI 普通能耗读角色允许表计 1、拒绝表计 2 和管理接口的测试。六份公开说明 150 个本地目标、两份模块 README 10 个本地链接及显式锚点均可达；`git diff --check` 通过，新改文件无行尾空格。先前扩展测试集中旧 `test_equipment_temperature_config.py::test_three_examples_add_only_empty_scope_with_english_comment` 的固定数量断言失败仍按旧 handoff 保留；本轮未改、未重跑该范围外测试或示例模板。
+
+**真实 dev／正式浏览器。** 测试前复核授权 `127.0.0.1:3307 / industrial_level_2_system`、server UUID SHA-256 前缀 `ac2319a3fdc8`、revision `9d1f3a5c7e20`、连接与近 5 分钟采集事实；当时无活动 SQL、未见近期事实写入，Human Owner 此前确认已停止 SMA 投递，不代表可预测后续所有写入。使用后缀 `aaa8d2962e25` 的独有合成设备、4 区、指标、绑定、卡片、3 曲线、两表计、两种模拟机器身份与临时 admin/operator；没有操作 SMA 产品或 PLC。先仅切换指向该临时 profile 的一项 OBS 引用并按授权短暂重载现有 8000，真实机器发现成功；正式普通账号访问设备/过程/能耗读及能耗管理各 403，未改已有全局角色权限。
+
+以任务独有 Chrome 会话和临时账号登录状态访问**正式 5190 + 正式 8000 + 真实 dev MySQL**：温度曲线在配置存在但无样本时实际显示所选范围的空 X/Y 轴、`°C` 与“暂无数据”；正式 8000 的第三方和模拟 SMA HTTP 写入后，页面查询恢复真实多区域曲线，移除一区只留二区、再全选。过程管理表显示 6 条样本与实际值／设定值指标列；能耗数据管理从表一的 `1000/1006` 切至表二的 `2/3`，编辑表二记录 `32` 的备注；表计配置管理从累计表一切到时段增量表二，修改表二中文名。随后以真实 MySQL 只读核对，表二配置和记录 32 已按测试修改，表一的对应配置与两条样本均未改。完整业务路由得到实时 1、历史 6、能耗 4，累计用量 6、区间用量 5，真实缺测事件与微秒入库校验通过；本轮没有执行撤权重放，旧证据仍在。页面快照显示管理页面无浏览器 error、出现 1 条未深入定位的 warning；本轮未在正式页重复传动／清洗／能耗统计直达、错误重试、普通角色获授权正向浏览器及所有权限组合。普通角色正向目前只有上面的 SQLite/ASGI 测试，不能冒充真实 MySQL／浏览器正向验证。
+
+空图与有值图截图仅含合成数据，分别暂留 `/private/tmp/arch-obs-r10-private.j0jFyKfK/qa3-formal-empty.png`、`qa3-formal-with-data.png`，SHA-256 `591738510fce6c7bdfd6e930d06f02ba2de5c0a7a15ca69bc0af5b6019506f29`、`469660ee11c3ba32fa61dd9f21387db122cbf1f14c8037829817b950d719c039`；截图辅助记录，不代替上述实际 HTTP 和 MySQL 对账。
+
+**恢复与资源。** 已主动释放窗口，原 `.env` 字节恢复并重载；采集 GET 200，临时机器身份返回 401。按本轮主键与回执核对归属后清理，区域、指标、槽位、卡片、曲线、实时／历史／能耗、回执、两个测试账号及临时 profile 均零残留；17 张保护表的行数与 checksum 前后一致，包含原采集、计划/实绩、旧表、价格、用户及 token blacklist。自有 API 和隔离 Chrome 已停止，临时浏览器 auth 文件与 `.env` 备份已删；原 5190 和其他进程未停止，未再次迁移、未改持久 profile。精确对象及行 ID 的私有归属证据 `dev-r10-row-evidence-aaa8d2962e25.json` SHA-256 `ae31e0f30b7eaa48866be45a6c2250044b763c1b3a9f7010514700ac96aa4c92`，仅含合成标识，不含令牌。前述截图、脚本、私有证据、前端临时构建暂由当前任务持有，供 fresh QA 复查；完成 QA 且无依赖后由协调者按各自归属回收。
+
+**独立复验的可执行路径。** `/private/tmp/arch-obs-r10-private.j0jFyKfK/dev_r10_qa3_formal.py` SHA-256 `309e65bc018034cf9ca4cfbfa2d2d652e94eff729516dfaaee7bbc55899707ff` 是本次已运行的任务专用脚本，不含明文凭据；执行前须重新审计脚本及准确 dev UUID/schema/revision、写入方、端口、profile、目标键、当前数据和授权。当前库/用户状态可能变化，不可把上次预检当作永久结论。`backend/` 用项目环境及仅供自有子进程的占位 bootstrap 值执行：
+
+```sh
+PYTHONPATH=. PYTHONDONTWRITEBYTECODE=1 UV_CACHE_DIR=/private/tmp/arch-obs-r8-private.ZQFVM8IQ/uv-cache ADMIN_BOOTSTRAP_USERNAME=fixture ADMIN_BOOTSTRAP_PASSWORD=fixture-only JWT_SECRET_KEY=fixture-only uv run --offline --frozen --no-sync python /private/tmp/arch-obs-r10-private.j0jFyKfK/dev_r10_qa3_formal.py --execute-dev-http-fixture ARCH-OBS-001-r10
+```
+
+脚本先打印 `blank_ready`、随机任务号、一次性浏览器 state 路径和第一个信号路径；在独立浏览器访问 `http://127.0.0.1:5190/monitor/temperature`，加载该 **0600 临时测试账号** state 或使用已授权 admin 会话，选择该任务与时间范围，检查已配置无样本空轴；按输出的精确第一个 signal 路径创建空文件后才写数据，检查 `data_ready` 对应有值页面、管理列表及两表计，再按第二个精确信号路径释放。脚本每阶段最多等 600 秒并在正常异常路径恢复 OBS 引用、重载、验证并按明确归属清理；不输出或保存明文密码。不得使用旧固定身份脚本清理 dev，不得用通配符删除。若进程被强杀或断电使 `finally` 未运行，不要重跑或猜删：先核对当前 `.env` 仍只指向该轮 `dev-r10-profile-<suffix>.json`，并核对其他配置未被并发修改；受保护的 `qa3-env-backup-<suffix>` 是原 `.env` 字节，仅在满足这些条件后原子恢复，再仅重载授权的 8000、核对采集 GET、原 profile 和机器拒绝。依据该轮 `dev-r10-owned-<suffix>.json`、回执与业务行外键逐项确认归属、无外部引用后按反依赖清理；遇到不明关联或配置变化即停止并报告，不覆盖其他工作。备份可能含真实密钥，永不打印或提交，确认恢复后删除。
+
+普通角色获授权的正向独立实测可另用任务独有随机设备／表计及局部 profile，启动任务独有的正式源码 API 和 Vite 端口，在**该进程**给予 operator 所需的 `equipment-observation-read`、`monitor-observation-read`、`energy-consumption-read` 和对应非 admin pageId（supervisor 授权需为其超集），只授一个设备／表计；以真实或清楚标注的合成登录身份验证获准查询 200、其他设备/表计及管理 403，完成后精确清理。不得为此更改正式 8000/5190 的全局角色授权，且应标注独立端口与认证夹具的边界。此路径是后续复验建议，并非本次已完成的证据。
+
+**最终源码逐项摘要**（SHA-256 与路径，按路径排序）：
+
+```text
+db53dca713fd3f1e2c6844284f6ef56fc93aa11f9ff2ad88e46d6feb4766f501  CODE_INDEX.md
+8d0780c83d990c88ac6fa8ba7c40052740ea4dbe1f4fb4d67b4bdf7ee9d8dcb3  backend/alembic/versions/20261117_1200_9d1f3a5c7e20_observation_bundles.py
+d12b94302436835dcd322646c788fd30755dcad48d2318405d22ec606bfc4847  backend/app/equipment_observation/README.md
+93bc8166ad154d8a0039a0e7e9eff592cc67b530733fbb93b622fd6ea21b21c2  backend/app/equipment_observation/README.zh-CN.md
+89d04f96973411baa31b2ec40c7e8335fab80c86dc5ff892b83c153e9d8f6af0  backend/app/equipment_observation/api/routes.py
+39798a2a3119d40b1b846bf26d8fd3ab9a624bfb1cb9b8854f1c0b16dd1dffc2  backend/app/equipment_observation/error_codes.py
+93cb6b4d5c6a464b06364441c8887aa466885bed75902fc97d1fe5fb77ca51ef  backend/app/equipment_observation/machine_openapi.py
+35b037ee43126b2e6bf991c44f327f5b123a6446c4b239986ea62430258079d7  backend/app/equipment_observation/manifest.py
+5a69c30586f65364fb57485dd3adabfd00fc178b2168228f8c08f09cc12f6a7d  backend/app/equipment_observation/models/__init__.py
+8ae102b30edf13beb3387f779e35c4ed5119b97b9d55d6d5c07c48322b736914  backend/app/equipment_observation/models/records.py
+80e5f3cffd54f67736da287e973110d1e3ce8c94cf20fbd8561921f5f8efc89e  backend/app/equipment_observation/profile.py
+262612e3364e725a9f821cec719bc8048e987951a1a4c1bd37b7ce60b2e5956e  backend/app/equipment_observation/schemas.py
+aa3ab6a53fcfa0cc30529a6cebd6e9c09fe1857693bcc5857a5cc35b6e31aa49  backend/app/equipment_observation/services/configuration.py
+135dc8f46b5758cd9600ad5e93553c8993c3ab762c5a48a3422e8f8ab4c95ee8  backend/app/equipment_observation/services/energy_reads.py
+af5601fdcc89298f71b8adfae07af0465786c7f746fd8ae905653011df09778c  backend/app/equipment_observation/services/energy_statistics.py
+60b870f2eb2fc7dbea43a83a498245e1312d6f3d6402d0aca80ef535c1de4be3  backend/app/equipment_observation/services/guard.py
+0ee4c6c94420f29db504f384491b5e54f2d7d7aa6c72cac02e4c288cf411138e  backend/app/equipment_observation/services/ingest.py
+cd94cc1ff19975054ed4903666bf2a794b137af312ca199685f1a1b14b773894  backend/app/equipment_observation/services/ingest_v2.py
+f3e8ab8c2d5d711f301593cabb68a756d76699f5b22a6e97a65d479673daf6c2  backend/app/equipment_observation/services/reads.py
+bd7f081c6791dbf2ee9969c3f0e77ce13aad686d4a4f20a9c71b4e437fbb4b89  backend/app/equipment_observation/services/v2_domain.py
+6f92dfb56df56d3ca1d9866a609d0c4bf55cbc74380394a91ba48a89de5d2fe0  backend/app/plc_facts/v2_config.py
+39e4cdd218d83475112cddc5780a1fd4a8eba24cfc3ce79b29d5ef3b8a6bce76  backend/common/integration/storage.py
+582e34fc026e80291c44e90dae45f9814a5ceb4a9db76369f8a3b5f48af37748  backend/tests/test_energy_price_api.py
+a6f24f3b01610bdd3736564148c179ae3a28fd95d165d16d82f5562222ef59e6  backend/tests/test_equipment_observation_domain.py
+32ead808cdf317b9b38c32fa45eb35bef66074d0a8d87dbec06e384a2469d855  backend/tests/test_equipment_observation_r10.py
+b19452c3fdae3722579cd17628de196732f2e6ed291032a6f99deb0a82751641  backend/tests/test_equipment_observation_r10_flow.py
+71d91aa54ae883be9c2e3961fdb89fa5eb6ad4b52d57d7de808fc5422a609444  backend/tests/test_equipment_observation_r8.py
+4fdc00cdf51d41f1b87badcf7b9c3af0d5c8e805fb5441022a57c08ed8905123  backend/tests/test_equipment_temperature_migration.py
+0393e9346c4d04884d99d77c6c006754894864c7a3d57b2517a4feb5d3e208ae  backend/tests/test_legacy_acquisition_retirement.py
+706acd4edfe88e09a0f38dcacda98f0792407e41fed2b7ee30083f225f98f6c2  backend/tests/test_mapping_migration.py
+0532f522a69fe2db7e463536617cd0de3af08fc86bbb2775dabd4084b2d2e68f  contracts/README.md
+980e5616459dcda55633fd289368e88829a176486e7c88504d481867766b3c23  contracts/README.zh-CN.md
+b3379d7181b285680f739bd3b9ebc6ca8ea010a542b546993bd706244a4609bc  contracts/published/http-api/equipment-observation-v2/README.md
+e84d4c2afe7e55bf3ddc7005244bfd755f715d7469072508d91da3b5222958d6  contracts/published/http-api/equipment-observation-v2/README.zh-CN.md
+d11a7c030f7a4401219b2d5160f4d77345df28d42a39e364861144a019252989  contracts/published/http-api/equipment-observation-v2/example-profile.json
+cf1b37634557f534a933ea2142001fb14b01a47fb349b5205634c42c90857646  contracts/published/http-api/equipment-observation-v2/openapi.json
+870378e53e1becd7c70a5d0b38f062b2e4bf809ff68a8269c34bd5441962d0a7  contracts/published/http-api/equipment-observation-v2/vectors.json
+0b777e70584e0086b00616270716fe93df24419ed737c1df9720473e368b7528  docs/equipment-status-process-monitoring.md
+7c7137720e399e7e60cf89614ad1f9b486c52928c1a9f23ca68b4fa44ff3d798  docs/equipment-status-process-monitoring.zh-CN.md
+ca56e4c8b672d05067c1394d9a832b9beed201ad04477b2c6735989205b661ef  frontend-js/src/app/equipment/api/observations.js
+b2ac30ca6e7779ad16b8e5825ad150438e9d219678fa574d655dc706269ec688  frontend-js/src/app/equipment/components/observations/RecordList.vue
+f89964f9802f9a99339981947864fcb405d2b5a61a68c746a0d979ea63a53341  frontend-js/src/app/equipment/locales/en-US.json
+2a374840c98e82d808615502e80fa229d87a88230c30875f3dbd9ea1c4834970  frontend-js/src/app/equipment/locales/zh-CN.json
+cd24870f3c2301acae453cf99ba40669414c018974b895b0420333ccdce96dbe  frontend-js/src/app/equipment/manifest.js
+dd5c965bf83ce900c52bbb341ad7c249f13d650d1db12893ccfd36173a28dd68  frontend-js/src/app/equipment/views/observations/admin.vue
+9d3dcb8d7f74e69dfb2c270978e9c688187f8c9d68091b0b383864e64182579d  frontend-js/src/app/equipment/views/observations/cards.vue
+086e8027db5990bda7d006b8a92bdd865fc1c1f8aea135dfb46631d034de41d0  frontend-js/src/app/equipment/views/observations/data.vue
+144992b29bc569d33a9260928cfc49cf6f318c44d09aff8ce9eaf12867c57dc5  frontend-js/src/app/monitor/api/observations.js
+ef53632ce9a9fc9dc522a86336c35f85e42b59b9738cd1f940913f2121a190dd  frontend-js/src/app/monitor/components/observations/CurveChart.vue
+19865b25d524b65edcdf155fe2436a7efd921b3c7ef311749e215739d55c64a5  frontend-js/src/app/monitor/components/observations/EmptyAxes.vue
+7e11059e9a03496b5f39b247e3e98608aaacae68c0e5fb7853fd0fe28da784e1  frontend-js/src/app/monitor/components/observations/EnergyAdmin.vue
+a6f659342eea1b29862c75a440a4a21ec8cdeeeb473e4bbfdcaf723fa977f1ee  frontend-js/src/app/monitor/components/observations/curveSeries.js
+309cc3912ae14d1d8dbeffb0cb81dd26949a9e995aedd1ceccb240c48f18ffe6  frontend-js/src/app/monitor/locales/en-US.json
+dfddf97b60aeb1eb1242b6fa22cf530a93426910f9c43410166b29c504385f10  frontend-js/src/app/monitor/locales/zh-CN.json
+e8dfbec2c1537e33d9624cce8fff4c5c0c325b340eb08ec229a1a1f115212dc7  frontend-js/src/app/monitor/manifest.js
+3c8678e8af7379dfba1903316c45b4f413f2c72e35a11369f5c7b2a3dd2a2787  frontend-js/src/app/monitor/views/observations/admin.vue
+a202167be58e577d4076273f1e98e1e9051b553469ac1afb4b0f8f90cfb1fd10  frontend-js/src/app/monitor/views/observations/curves.vue
+11e3a81d8b0e425e83058fdf65da2eadb809d4239de49c0673846d20a38256ac  frontend-js/src/app/monitor/views/observations/data.vue
+7a9318614f675691c12386dd342cf492e1b578ad3e59a74ac658148c49b7eb65  frontend-js/src/app/monitor/views/observations/energy.vue
+d28979a3b7817f1c54e1191255d9cc9f7028db6753f55fc0af9311e8fd939a59  frontend-js/tests/module-registry/equipment-observation-columns.test.mjs
+f21807090478aff142e6c0679ffc6a32e450ff70077880924d1b64ecc4f0d247  frontend-js/tests/module-registry/equipment-observation.test.mjs
+e2918a4a63ebf7f923a7ee8f50399f5c4d110628e1eff0c223b6d424752aee8a  frontend-js/tests/module-registry/page-access.test.mjs
+0a3c1ef166eae9dcd0303bc8450b3186962bb7e335ad835fbe6ccb45cc71c5de  frontend-js/tests/module-registry/registry.test.mjs
+```
+
+# r10 QA2 返工
+
+2026-11-17：接收 fresh-context Verification 正常完成并持久化的 `qa_failed` checklist，SHA-256 `673dc33d2d4c7ae146da213d1defb0c29a4f39cab9bb69ef052127910f2e1bd8`。写入前核对 spec SHA-256 `667eb48607afe9300e675fdc5a2b6152631b58705e2cd18a994bd843ec3df623` 及先前交接 61 文件摘要均匹配。QA1 原缺陷 R10-QA-001–004 的原始复现由 QA2 关闭；本轮仅在已批准 r10 §12 范围返工 R10-QA-005–007，不修改 spec／checklist，保留全部历史。新的 developer_handoff 已记录如下。
+
+### r10 QA2 返工 developer_handoff
+
+**精确候选。** 获批范围为 ARCH-OBS-001 r10 §12；正式 `main` 工作树 HEAD `21cd789277695bbafaa55c24e39261fc7247f9b0`，交付为当前未提交源码及任务文档。spec SHA-256 `667eb48607afe9300e675fdc5a2b6152631b58705e2cd18a994bd843ec3df623`；返工依据的 QA2 checklist SHA-256 `673dc33d2d4c7ae146da213d1defb0c29a4f39cab9bb69ef052127910f2e1bd8`，原 `qa_failed` 和 QA1 四项关闭事实由 Verification 记录，本角色不改判。写入前 QA1 返工候选 61 文件逐项匹配；本轮只改变其中下列 6 项：设备卡片页、能耗页、曲线组件、对应前端测试和两份双语使用说明。新的 61 文件 `SHA-256  相对路径` 清单整体 SHA-256 为 `dab8569947134f5c331a1d71d111f5f86ac819b2518169cee97e41bea12104ad`，逐项清单见下。未改变其他并行工作、spec 或 checklist。
+
+**R10-QA-005。** 表计定义读取按当前表计及请求代次核对，多个同表计重试共用正在进行的定义请求；切换表计、组、指标或范围立即使旧采样／汇总／分页请求失效并清除旧值。只提交属于当前 `(meterId, groupKey, metricKey, range)` 的结果，迟到的旧结果及错误不能覆盖新选择或将新界面误设为失败。定向测试实际编译 Vue SFC，通过可控 promise 验证 A→B 定义倒序、旧失败、同名指标跨组、旧分页和汇总迟到、当前组 0 值、中英名称以及初始化重试；真实 dev 合成浏览器中 B 显示最新 3，切回 A 时旧统计消失，重新查询显示 1006。该浏览器观察不是对全部网络时序的证明，乱序由受控 SFC 测试验证。
+
+**R10-QA-006。** 四个设备页共用的卡片对过期值显示其自身的真实 `observedAt`，按项目上海时区格式显示到秒；采集时间缺失或无效时显示 `—`，不使用刷新、接收或当前时间。实际 Vue 模板双语 SSR 覆盖带 UTC 偏移转换、0、false、缺测及空采集时间；独立合成浏览器从真实 MySQL/API 看到的值 810.2／815 标记陈旧，接口原时刻 `2026-11-17T14:21:29.200538+08:00` 在中英卡片均为 `2026-11-17 14:21:29`。
+
+**R10-QA-007。** 每个图例的内部身份使用稳定 `groupKey + metricKey`，同一指标的连线与同刻散点归同一图例；图例和 tooltip 显示当前语言的区域及指标名，若两个显示名仍相同则附带无歧义的稳定键，tooltip 对名称继续 HTML 转义。不同区域指标各自隐藏／恢复；切换语言或刷新渲染时保留同一稳定系列的图例选择。项目 ECharts 实例和实际 SFC 测试覆盖两个区域同名、区域名称也相同、含分隔符的键、独立控制、同刻散点、语言变化与特殊字符转义；先前微秒／缺测／宽范围提示回归仍通过。正式源码的任务专属浏览器副本在真实 MySQL 上看到两个区域的同名实际值，隐藏一区后二区仍在，切换中文到英文后该隐藏状态仍保持。浏览器截图在工具中观察但未保存；tooltip 的独立名称和转义由实际 ECharts SSR 测试验证，本轮未在浏览器中复现 hover 提示。
+
+**正式树 DEV self-check。** 在 `frontend-js/` 执行 `node --test tests/module-registry/equipment-observation-columns.test.mjs tests/module-registry/equipment-observation.test.mjs` 得 **18 passed**；`pnpm_config_verify_deps_before_run=false pnpm test:modules` 得 **81 passed**；`VITE_SUPERVISOR_PAGE_ACCESS_JSON='[]' VITE_OPERATOR_PAGE_ACCESS_JSON='[]' pnpm_config_verify_deps_before_run=false pnpm build --outDir /private/tmp/arch-obs-r10-qa2-final-dist` 退出 0、2262 模块，仍有外部 outDir 与大 chunk 提示。
+
+正式 `backend/` 使用不可连接的合成 MySQL 端口 1、虚构账号及项目锁定运行时执行 `PYTHONDONTWRITEBYTECODE=1 UV_CACHE_DIR=/private/tmp/arch-obs-r8-private.ZQFVM8IQ/uv-cache LOG_DIR=/private/tmp/arch-obs-r10-qa-log MYSQL_HOST=127.0.0.1 MYSQL_PORT=1 MYSQL_USER=fixture MYSQL_PASSWORD=fixture MYSQL_DATABASE=fixture MYSQL_ROOT_USER=fixture MYSQL_ROOT_PASSWORD=fixture TEST_MYSQL_DATABASE=fixture_test OBSERVATION_ENABLED=false uv run --offline --frozen --no-sync pytest -q -p no:cacheprovider -m no_db -rs --tb=line tests/test_equipment_observation_domain.py tests/test_equipment_observation_r8.py tests/test_equipment_observation_r10.py tests/test_equipment_observation_r10_flow.py`，**50 passed、1 warning**，退出 0；warning 为 SQLite datetime adapter 弃用。包含先前回执当前授权、旧 v1 重放和能耗相关保护。此前额外扩展集合的 `test_equipment_temperature_config.py::test_three_examples_add_only_empty_scope_with_english_comment` 仍有已记录的固定数量断言失败（当时 338 passed、2 skipped、1 failed）：断言公开示例为 69／91，三份实际 66／84。本次未重跑该扩展集合；该测试及三份示例当前无工作树改动，未篡改其断言。双语使用说明及机器合同的 98 个本地文件链接可达，`git diff --check` 通过；新改的 4 个源码／测试文件另查尾随空格为 0。
+
+**dev、浏览器及清理。** 两轮唯一合成对象后缀 `3fc39f339e51`、`86b2e92d607f` 均在明确授权的 `127.0.0.1:3307 / industrial_level_2_system` 上，先核对 server UUID 摘要前缀 `ac2319a3fdc8`、schema、唯一 revision `9d1f3a5c7e20`、时区及唯一键无冲突。每轮使用随机第三方与模拟 SMA 机器身份、独立回环 API、真实正式 OBS 路由与 MySQL；独立 UI API 使用合成只读 admin 身份，四个直接前端源码文件与正式树分别匹配。每轮验证 1 条实时、6 条历史（含微秒与缺测）、4 条能耗、卡片曲线、两路撤权和恢复重放以及累计／区间统计。只按本轮精确记录、回执、指标、区域、卡片、曲线与表计键核查归属和外部引用后清理；两轮残留均 0，15 张保护表行数及 checksum 前后不变，独立 API／只读 API／Vite 停止、合成 profile 删除。第一轮窗口到 300 秒上限自动结束，第二轮主动释放。按顺序的私有归属证据 SHA-256 为 `09e3b212bc4cfb1156308a93a8e1b338a6b2f109323339cb990e8cbe9f75e46e`、`75b4d7e8dbcc73b0f0c866d9a39147b5b292060123fa23914fb8338cbffd6141`，仅用于复核，不提交密钥。
+
+最终只读对账：新三主表、回执及配置均为 0；原采集历史／latest 为 73／6、来源登记 3，旧能耗两表 0，原价格表 1／3；没有再次迁移或改写持久 profile。用用户已自行登录的正式 5190 同浏览器配置**新建的独占标签**，只读看到温控页面、温度曲线的无设备提示及能耗的无表计提示，随后只关闭本轮新标签；未接管或覆盖原用户标签、输入、密码或 token。合成 admin 不代表正式账号权限矩阵，正式用户下有数据的三项页面及普通用户范围仍由 QA 复核；未操作 SMA／DAA 产品、PLC、其他进程或生产。
+
+**资源及下一 gate。** 两轮本任务独占的临时浏览器源码副本及迟到释放标志已清理；`/private/tmp/arch-obs-r10-qa2-rework-dist`、`/private/tmp/arch-obs-r10-qa2-final-dist` 是本轮构建产物，原候选与 `/private/tmp/arch-obs-r10-private.j0jFyKfK` 私有证据／恢复资料继续由协调者保留，独立 QA 完成且无恢复依赖后核对归属回收。以下精确候选交新的 fresh-context Verification 复验 QA2 三项和未覆盖项；本记录是 Development 自检，不是 QA 或 Human Owner 验收。
+
+<details><summary>r10 QA2 返工交付清单（61 项）</summary>
+
+```text
+db53dca713fd3f1e2c6844284f6ef56fc93aa11f9ff2ad88e46d6feb4766f501  CODE_INDEX.md
+8d0780c83d990c88ac6fa8ba7c40052740ea4dbe1f4fb4d67b4bdf7ee9d8dcb3  backend/alembic/versions/20261117_1200_9d1f3a5c7e20_observation_bundles.py
+89d04f96973411baa31b2ec40c7e8335fab80c86dc5ff892b83c153e9d8f6af0  backend/app/equipment_observation/api/routes.py
+39798a2a3119d40b1b846bf26d8fd3ab9a624bfb1cb9b8854f1c0b16dd1dffc2  backend/app/equipment_observation/error_codes.py
+93cb6b4d5c6a464b06364441c8887aa466885bed75902fc97d1fe5fb77ca51ef  backend/app/equipment_observation/machine_openapi.py
+35b037ee43126b2e6bf991c44f327f5b123a6446c4b239986ea62430258079d7  backend/app/equipment_observation/manifest.py
+5a69c30586f65364fb57485dd3adabfd00fc178b2168228f8c08f09cc12f6a7d  backend/app/equipment_observation/models/__init__.py
+8ae102b30edf13beb3387f779e35c4ed5119b97b9d55d6d5c07c48322b736914  backend/app/equipment_observation/models/records.py
+80e5f3cffd54f67736da287e973110d1e3ce8c94cf20fbd8561921f5f8efc89e  backend/app/equipment_observation/profile.py
+262612e3364e725a9f821cec719bc8048e987951a1a4c1bd37b7ce60b2e5956e  backend/app/equipment_observation/schemas.py
+aa3ab6a53fcfa0cc30529a6cebd6e9c09fe1857693bcc5857a5cc35b6e31aa49  backend/app/equipment_observation/services/configuration.py
+135dc8f46b5758cd9600ad5e93553c8993c3ab762c5a48a3422e8f8ab4c95ee8  backend/app/equipment_observation/services/energy_reads.py
+af5601fdcc89298f71b8adfae07af0465786c7f746fd8ae905653011df09778c  backend/app/equipment_observation/services/energy_statistics.py
+60b870f2eb2fc7dbea43a83a498245e1312d6f3d6402d0aca80ef535c1de4be3  backend/app/equipment_observation/services/guard.py
+0ee4c6c94420f29db504f384491b5e54f2d7d7aa6c72cac02e4c288cf411138e  backend/app/equipment_observation/services/ingest.py
+cd94cc1ff19975054ed4903666bf2a794b137af312ca199685f1a1b14b773894  backend/app/equipment_observation/services/ingest_v2.py
+f3e8ab8c2d5d711f301593cabb68a756d76699f5b22a6e97a65d479673daf6c2  backend/app/equipment_observation/services/reads.py
+bd7f081c6791dbf2ee9969c3f0e77ce13aad686d4a4f20a9c71b4e437fbb4b89  backend/app/equipment_observation/services/v2_domain.py
+6f92dfb56df56d3ca1d9866a609d0c4bf55cbc74380394a91ba48a89de5d2fe0  backend/app/plc_facts/v2_config.py
+39e4cdd218d83475112cddc5780a1fd4a8eba24cfc3ce79b29d5ef3b8a6bce76  backend/common/integration/storage.py
+582e34fc026e80291c44e90dae45f9814a5ceb4a9db76369f8a3b5f48af37748  backend/tests/test_energy_price_api.py
+a6f24f3b01610bdd3736564148c179ae3a28fd95d165d16d82f5562222ef59e6  backend/tests/test_equipment_observation_domain.py
+32ead808cdf317b9b38c32fa45eb35bef66074d0a8d87dbec06e384a2469d855  backend/tests/test_equipment_observation_r10.py
+b19452c3fdae3722579cd17628de196732f2e6ed291032a6f99deb0a82751641  backend/tests/test_equipment_observation_r10_flow.py
+71d91aa54ae883be9c2e3961fdb89fa5eb6ad4b52d57d7de808fc5422a609444  backend/tests/test_equipment_observation_r8.py
+4fdc00cdf51d41f1b87badcf7b9c3af0d5c8e805fb5441022a57c08ed8905123  backend/tests/test_equipment_temperature_migration.py
+0393e9346c4d04884d99d77c6c006754894864c7a3d57b2517a4feb5d3e208ae  backend/tests/test_legacy_acquisition_retirement.py
+706acd4edfe88e09a0f38dcacda98f0792407e41fed2b7ee30083f225f98f6c2  backend/tests/test_mapping_migration.py
+0532f522a69fe2db7e463536617cd0de3af08fc86bbb2775dabd4084b2d2e68f  contracts/README.md
+980e5616459dcda55633fd289368e88829a176486e7c88504d481867766b3c23  contracts/README.zh-CN.md
+b3379d7181b285680f739bd3b9ebc6ca8ea010a542b546993bd706244a4609bc  contracts/published/http-api/equipment-observation-v2/README.md
+e84d4c2afe7e55bf3ddc7005244bfd755f715d7469072508d91da3b5222958d6  contracts/published/http-api/equipment-observation-v2/README.zh-CN.md
+d11a7c030f7a4401219b2d5160f4d77345df28d42a39e364861144a019252989  contracts/published/http-api/equipment-observation-v2/example-profile.json
+cf1b37634557f534a933ea2142001fb14b01a47fb349b5205634c42c90857646  contracts/published/http-api/equipment-observation-v2/openapi.json
+870378e53e1becd7c70a5d0b38f062b2e4bf809ff68a8269c34bd5441962d0a7  contracts/published/http-api/equipment-observation-v2/vectors.json
+0b777e70584e0086b00616270716fe93df24419ed737c1df9720473e368b7528  docs/equipment-status-process-monitoring.md
+7c7137720e399e7e60cf89614ad1f9b486c52928c1a9f23ca68b4fa44ff3d798  docs/equipment-status-process-monitoring.zh-CN.md
+ca56e4c8b672d05067c1394d9a832b9beed201ad04477b2c6735989205b661ef  frontend-js/src/app/equipment/api/observations.js
+b2ac30ca6e7779ad16b8e5825ad150438e9d219678fa574d655dc706269ec688  frontend-js/src/app/equipment/components/observations/RecordList.vue
+f89964f9802f9a99339981947864fcb405d2b5a61a68c746a0d979ea63a53341  frontend-js/src/app/equipment/locales/en-US.json
+2a374840c98e82d808615502e80fa229d87a88230c30875f3dbd9ea1c4834970  frontend-js/src/app/equipment/locales/zh-CN.json
+cd24870f3c2301acae453cf99ba40669414c018974b895b0420333ccdce96dbe  frontend-js/src/app/equipment/manifest.js
+dd5c965bf83ce900c52bbb341ad7c249f13d650d1db12893ccfd36173a28dd68  frontend-js/src/app/equipment/views/observations/admin.vue
+9d3dcb8d7f74e69dfb2c270978e9c688187f8c9d68091b0b383864e64182579d  frontend-js/src/app/equipment/views/observations/cards.vue
+086e8027db5990bda7d006b8a92bdd865fc1c1f8aea135dfb46631d034de41d0  frontend-js/src/app/equipment/views/observations/data.vue
+144992b29bc569d33a9260928cfc49cf6f318c44d09aff8ce9eaf12867c57dc5  frontend-js/src/app/monitor/api/observations.js
+ef53632ce9a9fc9dc522a86336c35f85e42b59b9738cd1f940913f2121a190dd  frontend-js/src/app/monitor/components/observations/CurveChart.vue
+19865b25d524b65edcdf155fe2436a7efd921b3c7ef311749e215739d55c64a5  frontend-js/src/app/monitor/components/observations/EmptyAxes.vue
+8bbb08b46eb61fed0a282944851ee8c3805aad03bd4fadcff78d4e5e9bf25b37  frontend-js/src/app/monitor/components/observations/EnergyAdmin.vue
+a6f659342eea1b29862c75a440a4a21ec8cdeeeb473e4bbfdcaf723fa977f1ee  frontend-js/src/app/monitor/components/observations/curveSeries.js
+309cc3912ae14d1d8dbeffb0cb81dd26949a9e995aedd1ceccb240c48f18ffe6  frontend-js/src/app/monitor/locales/en-US.json
+dfddf97b60aeb1eb1242b6fa22cf530a93426910f9c43410166b29c504385f10  frontend-js/src/app/monitor/locales/zh-CN.json
+e8dfbec2c1537e33d9624cce8fff4c5c0c325b340eb08ec229a1a1f115212dc7  frontend-js/src/app/monitor/manifest.js
+3c8678e8af7379dfba1903316c45b4f413f2c72e35a11369f5c7b2a3dd2a2787  frontend-js/src/app/monitor/views/observations/admin.vue
+a202167be58e577d4076273f1e98e1e9051b553469ac1afb4b0f8f90cfb1fd10  frontend-js/src/app/monitor/views/observations/curves.vue
+11e3a81d8b0e425e83058fdf65da2eadb809d4239de49c0673846d20a38256ac  frontend-js/src/app/monitor/views/observations/data.vue
+7a9318614f675691c12386dd342cf492e1b578ad3e59a74ac658148c49b7eb65  frontend-js/src/app/monitor/views/observations/energy.vue
+8acecef11f47402a01c0801c4c5ae0a82e79f381772042e76a833c662b0570a9  frontend-js/tests/module-registry/equipment-observation-columns.test.mjs
+f21807090478aff142e6c0679ffc6a32e450ff70077880924d1b64ecc4f0d247  frontend-js/tests/module-registry/equipment-observation.test.mjs
+e2918a4a63ebf7f923a7ee8f50399f5c4d110628e1eff0c223b6d424752aee8a  frontend-js/tests/module-registry/page-access.test.mjs
+0a3c1ef166eae9dcd0303bc8450b3186962bb7e335ad835fbe6ccb45cc71c5de  frontend-js/tests/module-registry/registry.test.mjs
+```
+</details>
+
+# r10 QA1 返工
+
+2026-11-17：接收独立 Verification 已持久化的 `qa_failed` checklist，SHA-256 `d30c929766f3f6f4fdd4b066694565c0c319e02190f2401528b35b6416d9fb78`。写入前核对原 r10 交接 60 文件摘要均匹配、spec SHA-256 `667eb48607afe9300e675fdc5a2b6152631b58705e2cd18a994bd843ec3df623` 未变，按该清单对 R10-QA-001–004 返工；既有独立 verdict、旧 handoff 和全部历史保留。Verification 在写完 checklist 后的最终交接回复因自动内容审核提示可能的网络安全风险而中断，随后只请求其确认元数据的回复也被同样中断；此处仅记录该通信限制，不伪造其最终回复或改变已持久化的 QA 结论。本轮在批准的 r10 §12 范围内继续，尚未形成新的 developer_handoff。
+
+### r10 QA1 返工 developer_handoff
+
+**交付身份。** 精确获批版本为 ARCH-OBS-001 r10 §12，批准后 spec SHA-256 `667eb48607afe9300e675fdc5a2b6152631b58705e2cd18a994bd843ec3df623`；返工依据的独立 QA1 checklist SHA-256 `d30c929766f3f6f4fdd4b066694565c0c319e02190f2401528b35b6416d9fb78`，其 `qa_failed` 不改判。交付为 `/Users/jason/Desktop/DreamCode/aiis-ics-arch` 的 `main` 未提交工作树，HEAD `21cd789277695bbafaa55c24e39261fc7247f9b0`。新候选包括原 r10 60 文件及本次新增到候选清单的既有 `frontend-js/tests/module-registry/equipment-observation-columns.test.mjs`，下方 61 文件的 `SHA-256  相对路径` 清单整体 SHA-256 为 `90195c854713c4d93503d996c49e298a2c7d61c2bda9ce4d59c87bf2fbfb9ea0`。返工前原 60 文件逐项匹配；未覆盖其他并行工作。开发不修改 spec 或 checklist，也不宣称独立 QA 通过或 Human Owner 最终验收。
+
+**R10-QA-001（F1）。** 曲线以带偏移原始 `observedAt` 转换为精确微秒身份，只有真实同刻才并列；绘图以所选起始日期附近为相对原点，以避免常见日期的绝对毫秒浮点误差。缺测和配置间隔的断点仍基于精确时刻；每个图表点保留原始时间并在提示中显示。实际 ECharts SVG SSR 测试检验公元 2500 年相差 1 微秒的两点在真实数据和像素坐标中不同、真正同刻两点坐标相同、缺测不连线；间隔恰好阈值和多 1 微秒分别不断／断线。极长时间跨度受浮点坐标精度限制，已实测选择 2300 年至 2601 年时，2600 年 `.123001`／`.123002` 可能落在相同坐标；两个真实点及原始时间仍保留、不判作同刻，并显示中英文提示要求缩小范围。屏幕像素也可能重合，不能据此推断事实同刻。默认轴标签仍按项目合同显示到秒，诊断提示保留原始精度。
+
+**R10-QA-002（F2）。** 设备实时和历史回执重放先核对当前 producer、设备、目标、区域和指标授权；实时还核对全部可替换范围，之后才返回匹配回执。原文、原权限下重试仍返回原回执，冲突正文仍 409；权限收窄后两路均 403、无新增回执或业务行，恢复后仍能重放。SQLite 实际路由用真实机器 Bearer 校验，覆盖模拟 `sma`／`external`／`other`、区域或指标撤权、禁用机器、恢复、历史窄范围新事件和实时替换范围；v1 已存回执与能耗原回归仍保留。真实 MySQL／回环 HTTP 使用独有 external 和模拟 SMA 身份，对区域、指标各收窄分别验证两目标拒绝、无行数变化及恢复后原回执；未运行 SMA 产品。
+
+**R10-QA-003（F3）。** 表计指标编辑可设置已有的列表顺序；能耗样本列表以启用的列表列按顺序升序显示，未设置顺序排后，写入启用和列表显示仍独立。实际组件测试验证 20／10／空顺序与保存；真实 MySQL 的两列分别配置 10 和 20，独立浏览器按 `Synthetic power (kW)`、`Synthetic reading (kWh)` 显示 43／1006，配置弹窗显示列顺序 20。保存测试来自 SFC 合成 API，浏览器只读夹具不提交编辑。
+
+**R10-QA-004（F4）。** 人类曲线 GET 按当前语言返回每个系列的配置区域 `groupLabel`，多选显示该名称但保留稳定 `groupKey`，后续改名不改变键。SQLite 实际路由覆盖两种语言和重命名；真实 MySQL 浏览器中选中 `一区/二区`，切换语言后为 `Area One/Area Two`，单选生效。机器 v2 双语说明已补充回执的当前授权规则，双语使用说明补充区域、排序与精度提示。
+
+**DEV self-check 命令与结果。** 以下数据库变量均为不可连接的合成占位符，端口 1；执行前未访问用户登录凭据。共同前缀为 `PYTHONDONTWRITEBYTECODE=1 UV_CACHE_DIR=/private/tmp/arch-obs-r8-private.ZQFVM8IQ/uv-cache LOG_DIR=/private/tmp/arch-obs-r10-qa-log MYSQL_HOST=127.0.0.1 MYSQL_PORT=1 MYSQL_USER=fixture MYSQL_PASSWORD=fixture MYSQL_DATABASE=fixture MYSQL_ROOT_USER=fixture MYSQL_ROOT_PASSWORD=fixture TEST_MYSQL_DATABASE=fixture_test OBSERVATION_ENABLED=false uv run --offline --frozen --no-sync pytest -q -p no:cacheprovider -m no_db -rs --tb=line`，在正式 `backend/` 执行：
+
+1. 附加 `tests/test_equipment_observation_domain.py tests/test_equipment_observation_r8.py tests/test_equipment_observation_r10.py tests/test_equipment_observation_r10_flow.py tests/test_equipment_temperature_migration.py tests/test_legacy_acquisition_retirement.py tests/test_mapping_migration.py tests/test_energy_price_api.py`：**147 passed、1 skipped、1 warning**，退出 0。skip 是冻结 BE003 候选；warning 是 SQLite datetime adapter 弃用。
+2. 附加 `--basetemp=/private/tmp/arch-obs-r10-rework-complement.168c6820d081 tests/test_acquisition_data_browse.py tests/test_acquisition_facts_migration.py tests/test_acquisition_source_registry.py tests/test_business_integration_migration.py tests/test_energy_price_migration.py tests/test_energy_price_service.py tests/test_monitor_business.py tests/test_monitor_frontend_permissions.py tests/test_monitor_mapping.py tests/test_plc_facts_v2.py`：**179 passed、2 skipped**，退出 0。skip 分别为采集浏览需独立 fixture、BE012 B runner 仅在保留前驱候选运行。两批覆盖先前记录的 18 文件；本次新增测试和此前时点不同，不能将 326 和原 317 当同一个数量。
+3. 额外扩大第二批，还纳入 `tests/test_equipment_temperature_api.py tests/test_equipment_temperature_config.py tests/test_equipment_temperature_service.py`，使用独有 `/private/tmp/arch-obs-r10-rework-pytest.168c6820d081` basetemp：**338 passed、2 skipped、1 failed**，退出 1。失败是未修改的 `test_equipment_temperature_config.py::test_three_examples_add_only_empty_scope_with_english_comment`：断言三份未修改的公开 `.env` 示例历史字段数／总数为 69／91，而三份现均为 66／84。该失败不在原 18 文件集合，未修改示例、旧断言或以其他通过数掩盖。
+4. 正式 `frontend-js/` 执行 `pnpm_config_verify_deps_before_run=false pnpm test:modules`：**75 passed**；`VITE_SUPERVISOR_PAGE_ACCESS_JSON='[]' VITE_OPERATOR_PAGE_ACCESS_JSON='[]' pnpm_config_verify_deps_before_run=false pnpm build --outDir /private/tmp/arch-obs-r10-rework-dist` 退出 0，2262 模块，保留外部 outDir／大 chunk 提示。独立定向运行两个 observation 模块测试 **12 passed**。四份双语指南／机器说明的 98 个本地文件链接可达；中英文 monitor observation 键集合相等；`git diff --check` 退出 0；项目 Alembic 唯一 head `9d1f3a5c7e20`。
+
+**授权 dev 与真实浏览器边界。** 对 `127.0.0.1:3307 / industrial_level_2_system` 重查 server UUID 摘要前缀 `ac2319a3fdc8`、东八区、9d revision、旧私有 profile 引用及本轮随机键无冲突；用独立随机机器、独立合成 admin 认证依赖和正式 OBS 路由／真实 dev MySQL 执行上述两路 HTTP。唯一身份后缀 `168c6820d081`，实时 1 行、历史 6 行（含两条相差 1 微秒的原始时间及缺测）、能耗 4 行，并检查卡片、列表、累计 6、区间 5。只读临时 UI API 使用相同正式读取路由和服务及真实 MySQL，独立浏览器查看 F3、F4；前端副本的五个直接触达文件与正式树摘要一致。浏览器中截图可见，但本轮未持久化截图，不能以此称有截图证据；该合成 admin 不证明正式 8000 用户授权，且本次未重新验证正式 5190 的已登录账号完整权限。QA1 已在用户自行登录后独立观察正式 5190 四页空态，具体边界以 QA checklist 为准。未读取或使用用户密码／token，未操作 SMA、PLC 或用户其他进程。
+
+测试结束前对本轮已创建区域、指标、槽位、曲线、卡片、表计指标、producer／事件／回执和业务行逐键核验归属及外部引用，只删除本轮唯一对象；残留 0，15 张保护表前后行数及 checksum 一致。私有精确行归属证据 SHA-256 `041f4d6432ff59eceeaed72f45f454b6a1d0e9a973c6d6caed5a4dcb70c17ef1`；自有 API、只读 API 和 Vite 已停止，测试 profile 已删。授权目标复核：三张新主表、回执和配置表均为 0；既有采集历史／latest 73／6、来源 3，旧能耗两表 0、原价格 1／3。8000 OpenAPI 与 5190 两入口只读 HTTP 200，不以 HTTP 成功代替浏览器闭环。正式持久 profile／.env 未修改，本轮未再次迁移。
+
+**资源与下一 gate。** 本轮独立浏览器源码副本及两个独有 pytest 临时目录已按归属清理；`/private/tmp/arch-obs-r10-rework-dist` 构建产物、原隔离候选 `/private/tmp/arch-obs-r10-dev.jt9Ah6Pc` 及私有 `/private/tmp/arch-obs-r10-private.j0jFyKfK` 证据／恢复资料暂由协调者保留供独立 QA 与恢复审计，QA 完成且无恢复依赖后核对归属回收；私有目录不可提交或输出凭据。下列正式工作树候选交新的 fresh-context Verification 复验全部返工及 QA1 未覆盖事项。真实 SMA/DAA 产品、PLC、生产部署及 Human Owner 终验均未执行。
+
+<details><summary>r10 QA1 返工交付清单（61 项）</summary>
+
+```text
+db53dca713fd3f1e2c6844284f6ef56fc93aa11f9ff2ad88e46d6feb4766f501  CODE_INDEX.md
+8d0780c83d990c88ac6fa8ba7c40052740ea4dbe1f4fb4d67b4bdf7ee9d8dcb3  backend/alembic/versions/20261117_1200_9d1f3a5c7e20_observation_bundles.py
+89d04f96973411baa31b2ec40c7e8335fab80c86dc5ff892b83c153e9d8f6af0  backend/app/equipment_observation/api/routes.py
+39798a2a3119d40b1b846bf26d8fd3ab9a624bfb1cb9b8854f1c0b16dd1dffc2  backend/app/equipment_observation/error_codes.py
+93cb6b4d5c6a464b06364441c8887aa466885bed75902fc97d1fe5fb77ca51ef  backend/app/equipment_observation/machine_openapi.py
+35b037ee43126b2e6bf991c44f327f5b123a6446c4b239986ea62430258079d7  backend/app/equipment_observation/manifest.py
+5a69c30586f65364fb57485dd3adabfd00fc178b2168228f8c08f09cc12f6a7d  backend/app/equipment_observation/models/__init__.py
+8ae102b30edf13beb3387f779e35c4ed5119b97b9d55d6d5c07c48322b736914  backend/app/equipment_observation/models/records.py
+80e5f3cffd54f67736da287e973110d1e3ce8c94cf20fbd8561921f5f8efc89e  backend/app/equipment_observation/profile.py
+262612e3364e725a9f821cec719bc8048e987951a1a4c1bd37b7ce60b2e5956e  backend/app/equipment_observation/schemas.py
+aa3ab6a53fcfa0cc30529a6cebd6e9c09fe1857693bcc5857a5cc35b6e31aa49  backend/app/equipment_observation/services/configuration.py
+135dc8f46b5758cd9600ad5e93553c8993c3ab762c5a48a3422e8f8ab4c95ee8  backend/app/equipment_observation/services/energy_reads.py
+af5601fdcc89298f71b8adfae07af0465786c7f746fd8ae905653011df09778c  backend/app/equipment_observation/services/energy_statistics.py
+60b870f2eb2fc7dbea43a83a498245e1312d6f3d6402d0aca80ef535c1de4be3  backend/app/equipment_observation/services/guard.py
+0ee4c6c94420f29db504f384491b5e54f2d7d7aa6c72cac02e4c288cf411138e  backend/app/equipment_observation/services/ingest.py
+cd94cc1ff19975054ed4903666bf2a794b137af312ca199685f1a1b14b773894  backend/app/equipment_observation/services/ingest_v2.py
+f3e8ab8c2d5d711f301593cabb68a756d76699f5b22a6e97a65d479673daf6c2  backend/app/equipment_observation/services/reads.py
+bd7f081c6791dbf2ee9969c3f0e77ce13aad686d4a4f20a9c71b4e437fbb4b89  backend/app/equipment_observation/services/v2_domain.py
+6f92dfb56df56d3ca1d9866a609d0c4bf55cbc74380394a91ba48a89de5d2fe0  backend/app/plc_facts/v2_config.py
+39e4cdd218d83475112cddc5780a1fd4a8eba24cfc3ce79b29d5ef3b8a6bce76  backend/common/integration/storage.py
+582e34fc026e80291c44e90dae45f9814a5ceb4a9db76369f8a3b5f48af37748  backend/tests/test_energy_price_api.py
+a6f24f3b01610bdd3736564148c179ae3a28fd95d165d16d82f5562222ef59e6  backend/tests/test_equipment_observation_domain.py
+32ead808cdf317b9b38c32fa45eb35bef66074d0a8d87dbec06e384a2469d855  backend/tests/test_equipment_observation_r10.py
+b19452c3fdae3722579cd17628de196732f2e6ed291032a6f99deb0a82751641  backend/tests/test_equipment_observation_r10_flow.py
+71d91aa54ae883be9c2e3961fdb89fa5eb6ad4b52d57d7de808fc5422a609444  backend/tests/test_equipment_observation_r8.py
+4fdc00cdf51d41f1b87badcf7b9c3af0d5c8e805fb5441022a57c08ed8905123  backend/tests/test_equipment_temperature_migration.py
+0393e9346c4d04884d99d77c6c006754894864c7a3d57b2517a4feb5d3e208ae  backend/tests/test_legacy_acquisition_retirement.py
+706acd4edfe88e09a0f38dcacda98f0792407e41fed2b7ee30083f225f98f6c2  backend/tests/test_mapping_migration.py
+0532f522a69fe2db7e463536617cd0de3af08fc86bbb2775dabd4084b2d2e68f  contracts/README.md
+980e5616459dcda55633fd289368e88829a176486e7c88504d481867766b3c23  contracts/README.zh-CN.md
+b3379d7181b285680f739bd3b9ebc6ca8ea010a542b546993bd706244a4609bc  contracts/published/http-api/equipment-observation-v2/README.md
+e84d4c2afe7e55bf3ddc7005244bfd755f715d7469072508d91da3b5222958d6  contracts/published/http-api/equipment-observation-v2/README.zh-CN.md
+d11a7c030f7a4401219b2d5160f4d77345df28d42a39e364861144a019252989  contracts/published/http-api/equipment-observation-v2/example-profile.json
+cf1b37634557f534a933ea2142001fb14b01a47fb349b5205634c42c90857646  contracts/published/http-api/equipment-observation-v2/openapi.json
+870378e53e1becd7c70a5d0b38f062b2e4bf809ff68a8269c34bd5441962d0a7  contracts/published/http-api/equipment-observation-v2/vectors.json
+99cf87e523d23b84273a4ff36ed8008054f6a45c0e048161d78a0ce544a1f84b  docs/equipment-status-process-monitoring.md
+a90f4ed555f132d0ac40a63debfc59b5927c27f0afc849d247c0da8dfcd70530  docs/equipment-status-process-monitoring.zh-CN.md
+ca56e4c8b672d05067c1394d9a832b9beed201ad04477b2c6735989205b661ef  frontend-js/src/app/equipment/api/observations.js
+b2ac30ca6e7779ad16b8e5825ad150438e9d219678fa574d655dc706269ec688  frontend-js/src/app/equipment/components/observations/RecordList.vue
+f89964f9802f9a99339981947864fcb405d2b5a61a68c746a0d979ea63a53341  frontend-js/src/app/equipment/locales/en-US.json
+2a374840c98e82d808615502e80fa229d87a88230c30875f3dbd9ea1c4834970  frontend-js/src/app/equipment/locales/zh-CN.json
+cd24870f3c2301acae453cf99ba40669414c018974b895b0420333ccdce96dbe  frontend-js/src/app/equipment/manifest.js
+dd5c965bf83ce900c52bbb341ad7c249f13d650d1db12893ccfd36173a28dd68  frontend-js/src/app/equipment/views/observations/admin.vue
+d819f2b0452b6ec58cbc5b54d51b0e8577e3b5cf80d3f989c4d933a295e889ef  frontend-js/src/app/equipment/views/observations/cards.vue
+086e8027db5990bda7d006b8a92bdd865fc1c1f8aea135dfb46631d034de41d0  frontend-js/src/app/equipment/views/observations/data.vue
+144992b29bc569d33a9260928cfc49cf6f318c44d09aff8ce9eaf12867c57dc5  frontend-js/src/app/monitor/api/observations.js
+c4024622f0b1415cec362d0401abf3b7925e23ea0f5212d1520ce3271726bce5  frontend-js/src/app/monitor/components/observations/CurveChart.vue
+19865b25d524b65edcdf155fe2436a7efd921b3c7ef311749e215739d55c64a5  frontend-js/src/app/monitor/components/observations/EmptyAxes.vue
+8bbb08b46eb61fed0a282944851ee8c3805aad03bd4fadcff78d4e5e9bf25b37  frontend-js/src/app/monitor/components/observations/EnergyAdmin.vue
+a6f659342eea1b29862c75a440a4a21ec8cdeeeb473e4bbfdcaf723fa977f1ee  frontend-js/src/app/monitor/components/observations/curveSeries.js
+309cc3912ae14d1d8dbeffb0cb81dd26949a9e995aedd1ceccb240c48f18ffe6  frontend-js/src/app/monitor/locales/en-US.json
+dfddf97b60aeb1eb1242b6fa22cf530a93426910f9c43410166b29c504385f10  frontend-js/src/app/monitor/locales/zh-CN.json
+e8dfbec2c1537e33d9624cce8fff4c5c0c325b340eb08ec229a1a1f115212dc7  frontend-js/src/app/monitor/manifest.js
+3c8678e8af7379dfba1903316c45b4f413f2c72e35a11369f5c7b2a3dd2a2787  frontend-js/src/app/monitor/views/observations/admin.vue
+a202167be58e577d4076273f1e98e1e9051b553469ac1afb4b0f8f90cfb1fd10  frontend-js/src/app/monitor/views/observations/curves.vue
+11e3a81d8b0e425e83058fdf65da2eadb809d4239de49c0673846d20a38256ac  frontend-js/src/app/monitor/views/observations/data.vue
+8786b58198a8f03de4aeb78b47b7c4def27bd355512cb246d23b960e14e7aa77  frontend-js/src/app/monitor/views/observations/energy.vue
+5aa7d0139025d5ce20fb21fd4c58114fdba452183c50f5d722bdbbf6cfdd32f3  frontend-js/tests/module-registry/equipment-observation-columns.test.mjs
+f21807090478aff142e6c0679ffc6a32e450ff70077880924d1b64ecc4f0d247  frontend-js/tests/module-registry/equipment-observation.test.mjs
+e2918a4a63ebf7f923a7ee8f50399f5c4d110628e1eff0c223b6d424752aee8a  frontend-js/tests/module-registry/page-access.test.mjs
+0a3c1ef166eae9dcd0303bc8450b3186962bb7e335ad835fbe6ccb45cc71c5de  frontend-js/tests/module-registry/registry.test.mjs
+```
+</details>
+
+# r10 Development 实施进展
+
+Human Owner 按 [spec §12.10](spec.md#r10-approval) 精确批准 r10，批准登记后 spec SHA-256 `667eb48607afe9300e675fdc5a2b6152631b58705e2cd18a994bd843ec3df623`，并授权指定 dev 的必要保全迁移、配置、合成数据联调及必要的短暂后端重载；须预先核对写入方，只清理本次测试对象。原 r8 `qa_failed` 不改判，未批准的 r9 `mappedPointIds` 不实施。
+
+2026-11-17：建立不含真实 `.env`、profile、密钥和 Git 数据的隔离候选 `/private/tmp/arch-obs-r10-dev.jt9Ah6Pc`；1,050 个源码／文档文件初始摘要清单 SHA-256 `c49c352c0647a9f77c6945d97e0565833ed80b8ea5abdc2dcefc77b81906467d`。先按合同实现并进行无库、编译和离线 SQL 核对；正式整合前须复核并保留并行修改，dev 执行前须复核目标、旧数据、写入方及恢复方案。当前没有经授权的独立 MySQL，不新建 dev schema 或启停 Docker。建立候选时未修改 dev、正式源码或运行服务，尚未形成 developer handoff。
+
+**本轮 MySQL 合成表恢复预演（不是正式迁移）。** 2026-11-17 在用户授权的 `127.0.0.1:3307 / industrial_level_2_system`，执行前重查目标 UUID 的 SHA-256 前缀 `ac2319a3fdc8`、MySQL 8.4、东八区和唯一 8c revision；先核对随机前缀 `o342e344b_` 的所有候选表及约束无冲突。以 `/private/tmp/arch-obs-r10-private.j0jFyKfK/mysql_rehearsal.py --execute-dev-ack ARCH-OBS-001-r10-owned-table-rehearsal` 使用项目 Python，仅将 r8 基线、r10 升级及恢复离线 SQL 的表、索引、约束替换为该前缀，跳过原版的只读 SQL 哨兵和版本表更新；每个语句校验目标与 FK／来源归属，绝不对正式表执行 DDL 或业务写入。离线 r8、r10 升级、r10 恢复 SQL SHA-256 分别为 `16cbe885fc855c2245c2fb78e56b7d9754c30b87e04ef1a4f374c9fedd10ed51`、`13711951634ef5c66b41fb0259b9afbc421c6d2be82539abb6eb03e8411cd7ec`、`9aadddf95821190fc508f1b6f9b90a53e07d7445b903eb5113594b21eaa5a175`。其中两个 r10 离线文件开头均有强制失败的 review-only 哨兵，不能直接用于正式库。
+
+预演成功核对：两条不同时刻、不同备注的旧实时组行完整进入 r8 归档，新实时表为空；一条旧过程行按原 ID、时刻、值、备注和复核标记转为单组新历史；旧回执标识为 v1/r8。加入本次新实时、新历史、能耗和变更后的卡片配置后，原子恢复保留 r8 原行和旧配置，同时将新实时／历史与新配置保存在 r10 保全表、保留能耗行；新旧相同数字 ID 能按版本／表区分。实际仅有该轮 16 张唯一表，执行后检查完整 owned 集合、无外部 FK，再按依赖叶删除，残留 0；14 张原表的行数和 `CHECKSUM TABLE` 均与操作前一致，包括计划、实绩、采集三表、r8 两主表及指标／槽／回执、旧能耗两表和 `energy_prices`、`energy_price_hours`。脚本 SHA-256 `541be6b6d80be1ce5d7d127ec356993471704613aaa1173af78b7edcd36b0e44`，脱敏日志 SHA-256 `ff7eb3aa524e7ead0c851ebac88a91180e79c9d79c74421c1d4e0717428d7680`；临时目录保留供后续核对。该预演没有修改正式表、Alembic revision、真实 profile、原价格或运行服务，也不证明生产迁移、并发或完整页面闭环。源代码仍在实施，尚无新的 developer_handoff。
+
+**原结构恢复的第二次预演。** 迁移调整为把六张 r8 原表原子改名归档，再复制配置到新的 r10 可写表；恢复时保留 r10 表，原子恢复原 r8 表。2026-11-17 13:00 在同一授权目标重查 UUID 摘要、库、8c revision、时区、表名与约束冲突后，以唯一前缀 `o0eb93525_` 重跑完整合成预演：旧数据、新数据及两版配置均保留；六张恢复后的旧表逐项比较列、索引、约束和外键均与原表一致。只删除本轮成功创建且可证明归属的 16 张表，剩余 0；原有 14 张表的行数及校验和保持不变。升级 SQL SHA-256 `8907d0537382e9161968f86f6c958baaa25692afca0dfa86f5c33c3861a3a05a`，恢复 SQL `9aadddf95821190fc508f1b6f9b90a53e07d7445b903eb5113594b21eaa5a175`，脚本 `cb24ae977e339d56d92aae75dc11b44f0863b051c8b63432bde7a37ed1aa174d`，脱敏日志 `4b4e37193f7881b248dff95afab1fcdd84b51b9f1826ca84a1207e0a926f6cb6`；仍为改名合成预演，不等同正式迁移、并发或生产验证。
+
+**候选和切换准备。** 13:00 后隔离候选的 observation 四组无库测试共 41 passed（含 SQLite 合成 HTTP；1 条 SQLite datetime 弃用警告），前端模块测试 69 passed、生产构建成功（Vite 大 chunk 提示）。生产构建与 SQLite 测试不等于正式 MySQL 联调或独立 QA。真实浏览器使用独立合成 SQLite fixture 检查四过程页面、数据列表、真实数据曲线和区域多选，不使用 dev 业务数据；原 5190 仍需在服务恢复后另行复验。机器 v2 合同、双语说明和恢复流程已在候选整理；v1 历史合同保留。
+
+切换前只读复查目标 UUID 摘要 `ac2319a3fdc8`、库、唯一 8c revision、MySQL 8.4.6／+08 与新表无冲突；r8 七表和旧能耗两表均 0，原价格表分别 1 和 3 行，采集事实表分别 73 和 6 行。可见该库 27 个连接、当时无活动 SQL，近五分钟未见采集事实新增，最近事实距检查约 250790 秒；时点观察不证明间歇写入不存在。新 profile 两份及 .env 备份已在仓库外私有目录以 0600 保全，对象比较仅 revision 不同，原 profile 和当前引用未改。精确后端短暂重载由 Human Owner 在 r10 批准原文授权；不停止 5190、DBX 或其他进程。正式树 55 个候选路径与隔离副本基线比较无冲突，实际写入前仍复核。所有数字均为时点记录，正式 DDL 前再次核验。
+
+**授权 dev 实际迁移。** Human Owner 随后确认已停止 SMA 投递，授权仅以第三方或模拟 SMA 的 HTTP 包联调，不使用 SMA 产品。执行前检查 SMA 进程存在，但当前配置中的目标 API 和映射为 0、观察时无 TCP 连接，持久日志长期无投递；本机锁屏，未直接读取其内存运行状态，上述时点观察不声称能预测后续活动。未停止或修改 SMA、DBX 或 5190。受控脚本验证授权目标及精确 Alembic URL、唯一 9d 源码 head、60 文件摘要、旧新 profile、admin 登录、8c 配置 GET、无活动 SQL 与未提交事务，短暂结束 8000 的工作子进程而保留其重载父进程；静默后再次核对事务 0 和业务快照不变，执行 `alembic -x obs_r10_writers_quiesced=yes upgrade 9d1f3a5c7e20`。数据库现为 `9d1f3a5c7e20`：9 张既有保护表行数和 checksum 不变，6 张 r8 原表归档与原表行数及 checksum 一致，3 张新主表开始为空；旧采集事实 73／最新 6，价格数据 1／3 保留。切换 .env 中两个私有 profile 引用到新 revision，其余值逐项不变并保留原文件及 0600 备份，重载 8000 后事实 options 和 admin 区域配置 GET 均为 200。两份切换前后脱敏对账摘要 SHA-256 `a16de1d842bed92cc6e020a58e487974263266f5b269f69fbda6700ec7890026`／`1bb92940d21c956b494e3beb626463b1f350ac0de84096145e52104644fdc069`，Alembic 日志 `948ee7029f6ccf8e922c3120ffc9e737fd8d6500b292f09ed8b72c407d9e930c`；该迁移不证明 SMA／真实 PLC 或生产部署。现正进行仅本轮身份的 HTTP 联调，尚无 developer_handoff。
+
+**dev 合成 HTTP 和浏览器自检。** 使用任务自有回环 API、私有临时 profile 与实际 dev MySQL，认证使用本轮随机机器身份，分别模拟 external 与 SMA 的同合同 HTTP，未运行或改动 SMA 产品。三轮唯一前缀 `500598ebd8fd`、`c69473ade097`、`59383de333fd` 各验证四个设备整包、实时覆盖一行、历史追加四行、禁用历史项跳过、未知组拒绝、相同事件重放、列表动态指标列和卡片／曲线读取；两表计累计 `1006−1000=6`、区间 `2+3=5`。每轮先检查随机键不存在；清理前核对成功创建的配置键、producer／事件／回执行和具体业务行及无外部引用，逐精确 ID 和键逆依赖删除本轮对象。三轮均检查无残留、15 张原有保护表行数与 checksum 不变，任务独有 API／Vite 停止、临时 profile 删除。精确行与配置身份证据文件 SHA-256 分别为 `4e50f452f795d37c5f8ecf7649a7d11b6a0d23eb21698c367b4842e36ffdacfa`、`22814ed69b2018c0111fdc05cdf5f51a11d232c1dd352ca14b2e9cee316141f7`、`de505c8f4bd3fa6a73c8af22b690ff5c0800b31ba7ce5b095fab2c3f37110ef9`，保存在本任务私有临时证据目录；未保留测试令牌。
+
+第二轮独立 Chrome 使用仅允许 GET 的任务专用 UI API，挂载正式 OBS 路由和读取服务、读取真实 dev MySQL，并用合成只读身份；它不代表正式 8000 的用户鉴权或正式 5190 的页面验证。真实温控卡及实时列表显示 810.2／815 和同一任务，过程列表显示四行及缺测 `—`；从菜单进入温度、传动、清洗、能耗，温度图两区域单选／全选及空样本区间→真实数据恢复可操作，能耗最新读数 1006、缺边界显示不完整。暂时暂停并恢复的仅为本任务专属只读 UI API：页面显示“读取失败，请重试”，重试后恢复真实数据。第一次浏览器窗口使用旧标签连续直达时日期／菜单点击未可靠触发；关闭另一任务自有 Vite，重新建立同源登录后的独立直达标签后操作正常，不能确定原故障唯一原因。正式 5190 已由协调者按 Human Owner 另行授权重启，不由本角色操作。
+
+第三轮把同一合成任务采样时间拉开为 `2026-11-17 09:59:43.488128+08:00`（810.2）、`10:59:43.488128+08:00`（缺测）、`11:59:43.488128+08:00`（810.2）、`12:59:43.488128+08:00`（810.2）；所有时刻早于请求时刻。浏览器选 11 月 17 日至 18 日的时间框，实际 Vue/ECharts 图上第一点孤立，跨缺测处没有连线，第三和第四点相连。对应唯一任务的脱敏真实数据库点序列证据 SHA-256 `c3a6cae57af0462eed5fe741b50cb1b5ed48e82453ef37e3196b158544531aea`。截图在实时工具结果中观察到，但本轮未持久化为截图文件；独立 Verification 应在自己的唯一样本下重新观察，不得将无文件截图当持久证据。
+
+### r10 developer_handoff
+
+**交付面。** 交付源码为 `/Users/jason/Desktop/DreamCode/aiis-ics-arch` 当前 `main` 工作树的未提交变更，非临时源码副本。r10 改动包括来源无关的设备多区域整包、最新快照和过程历史、独立能耗写入与统计、区域／指标／槽位／卡片／曲线配置、三个管理列表及权限、新的显式后继迁移和版本守卫、机器 v2 合同及双语使用说明。已发布 v1 合同、r8 `qa_failed` 和 r9 未批准记录未倒写。下方清单只列本次 60 个实现文件；并行任务的工作树差异不属于本交接，不得覆盖。
+
+**DEV self-check。** 正式树以项目 uv 和锁文件、假 MySQL 端口／虚构设置及唯一 `/private/tmp` basetemp 对 observation、受影响历史迁移和采集 guard、旧能价及 monitor 测试运行 `pytest -q -p no:cacheprovider -m no_db -rs --tb=line`：**317 passed、3 skipped、1 warning**；三项分别是冻结 BE003 测试、采集浏览需隔离 fixture、保留 BE012 B runner。为适配当前 head 与新增能耗路由，保留旧保护并修订 4 个相关断言；首次扩大运行因旧 head／路径断言及默认临时目录不满足旧 runner guard 出现 5 项失败，修订并使用专用 `/private/tmp` basetemp 后重跑上述集合通过。随后补齐实时 OpenAPI 描述，正式树重跑 observation 与 4 项受影响回归 **46 passed、1 warning**，包含三条运行时 POST 正文 schema 与发布 v2 的完整比对及原始 JSON／类型校验。唯一警告为 Python 3.12+ SQLite datetime adapter 弃用提示。正式前端 `pnpm_config_verify_deps_before_run=false pnpm test:modules` **69 passed**；生产构建成功，Vite 提示既有大 chunk；6 份相关 Markdown 150 个本地文件目标均可解析，`git diff --check` 通过，Alembic 唯一 head `9d1f3a5c7e20`。运行中的 8000 OpenAPI 三条机器 POST schema 与公开 v2 一致，采集 options、admin 全局区域配置及两个空管理列表均 HTTP 200。
+
+**实际 dev 与资源。** 目标仅为授权的 `127.0.0.1:3307 / industrial_level_2_system`，当前 revision 为 `9d1f3a5c7e20`。清理核对后三张主表、回执及本次新配置均 0 行；既有采集历史／latest 为 73／6 行，来源登记 3 行，旧能耗两表 0 行，原价格表 1／3 行。启用的持久 OBS 私有 profile 故意保留 0 设备、0 表计、0 producer；管理员能打开全局配置，设备选择和机器写入在用户按项目配置前为空／关闭。facts 与 OBS 目标 profile 在仓库外用户私有 Application Support 的 dev 目录，由 `backend/.env` 两个 profile 引用定位；旧 profile 和 0600 的 .env 备份保留供受控恢复，不将路径内容或凭据提交仓库。独立测试 API、只读 UI API、各自 Vite 和浏览器标签均退出；协调者按用户明确授权重启的正式 5190 继续运行。
+
+**限制及 QA 复核重点。** 重启后 5190 的温度模块、图表组件和 ECharts 变换资源只读 HTTP 均 200，旧缺失优化依赖的 hash 已变化；正式浏览器无可复用已登录 5190 标签，不能证明正式账号登录后的四页动态导入、菜单或权限已恢复。真实 MySQL 浏览器结果来自隔离 Vite／只读合成认证夹具，且断点截图未持久化；独立 Verification 须用实际登录的正式 5190 会话和独立合成样本复核相关页面、权限、曲线及清理，不能把本自检代作 QA verdict。原 MySQL DDL 预演覆盖无损恢复，但隐式提交中断后的处理仍须人工对账，禁止自动 stamp／删除／降级。首次各设备、表计、机器权限、时钟、单位、累计与增量规则由项目管理员配置；真实 SMA/DAA 产品、PLC、现场联调、生产部署与 Human Owner 最终验收均未包含在本交接。
+
+隔离候选 `/private/tmp/arch-obs-r10-dev.jt9Ah6Pc` 与私有证据／恢复记录 `/private/tmp/arch-obs-r10-private.j0jFyKfK` 暂留供 fresh-context Verification 复查；后者含私有备份，文件权限 0600，不得提交或输出内容。待独立核验完成、Human Owner 最终验收且无恢复依赖时由协调者核实归属回收。下列逐文件摘要按 `SHA-256  相对路径\n` 排序后整体 SHA-256 为 `a7a9ba7ca57b121736559c6e9c902a55c3c7f662f1f50d407c08c12e594de279`；60/60 与已验证候选一致。此记录是 Development 自检和交接，不是独立 QA 或最终验收。
+
+<details>
+<summary>r10 交付文件与 SHA-256（60 项）</summary>
+
+```text
+db53dca713fd3f1e2c6844284f6ef56fc93aa11f9ff2ad88e46d6feb4766f501  CODE_INDEX.md
+8d0780c83d990c88ac6fa8ba7c40052740ea4dbe1f4fb4d67b4bdf7ee9d8dcb3  backend/alembic/versions/20261117_1200_9d1f3a5c7e20_observation_bundles.py
+89d04f96973411baa31b2ec40c7e8335fab80c86dc5ff892b83c153e9d8f6af0  backend/app/equipment_observation/api/routes.py
+39798a2a3119d40b1b846bf26d8fd3ab9a624bfb1cb9b8854f1c0b16dd1dffc2  backend/app/equipment_observation/error_codes.py
+93cb6b4d5c6a464b06364441c8887aa466885bed75902fc97d1fe5fb77ca51ef  backend/app/equipment_observation/machine_openapi.py
+35b037ee43126b2e6bf991c44f327f5b123a6446c4b239986ea62430258079d7  backend/app/equipment_observation/manifest.py
+5a69c30586f65364fb57485dd3adabfd00fc178b2168228f8c08f09cc12f6a7d  backend/app/equipment_observation/models/__init__.py
+8ae102b30edf13beb3387f779e35c4ed5119b97b9d55d6d5c07c48322b736914  backend/app/equipment_observation/models/records.py
+80e5f3cffd54f67736da287e973110d1e3ce8c94cf20fbd8561921f5f8efc89e  backend/app/equipment_observation/profile.py
+262612e3364e725a9f821cec719bc8048e987951a1a4c1bd37b7ce60b2e5956e  backend/app/equipment_observation/schemas.py
+aa3ab6a53fcfa0cc30529a6cebd6e9c09fe1857693bcc5857a5cc35b6e31aa49  backend/app/equipment_observation/services/configuration.py
+135dc8f46b5758cd9600ad5e93553c8993c3ab762c5a48a3422e8f8ab4c95ee8  backend/app/equipment_observation/services/energy_reads.py
+af5601fdcc89298f71b8adfae07af0465786c7f746fd8ae905653011df09778c  backend/app/equipment_observation/services/energy_statistics.py
+60b870f2eb2fc7dbea43a83a498245e1312d6f3d6402d0aca80ef535c1de4be3  backend/app/equipment_observation/services/guard.py
+0ee4c6c94420f29db504f384491b5e54f2d7d7aa6c72cac02e4c288cf411138e  backend/app/equipment_observation/services/ingest.py
+b10b6a6529004f319b95c39a00083fd35aedcd6a577a4b4f043e01c76bebae33  backend/app/equipment_observation/services/ingest_v2.py
+a76e8e190900e42ec3b5f2d3408b2b47f1577f711b1aba60f10ff6c01182c622  backend/app/equipment_observation/services/reads.py
+bd7f081c6791dbf2ee9969c3f0e77ce13aad686d4a4f20a9c71b4e437fbb4b89  backend/app/equipment_observation/services/v2_domain.py
+6f92dfb56df56d3ca1d9866a609d0c4bf55cbc74380394a91ba48a89de5d2fe0  backend/app/plc_facts/v2_config.py
+39e4cdd218d83475112cddc5780a1fd4a8eba24cfc3ce79b29d5ef3b8a6bce76  backend/common/integration/storage.py
+582e34fc026e80291c44e90dae45f9814a5ceb4a9db76369f8a3b5f48af37748  backend/tests/test_energy_price_api.py
+a6f24f3b01610bdd3736564148c179ae3a28fd95d165d16d82f5562222ef59e6  backend/tests/test_equipment_observation_domain.py
+32ead808cdf317b9b38c32fa45eb35bef66074d0a8d87dbec06e384a2469d855  backend/tests/test_equipment_observation_r10.py
+cfcebfbe646c333405a81776787a9504c10f735084f7835080ee2d4907a57f18  backend/tests/test_equipment_observation_r10_flow.py
+71d91aa54ae883be9c2e3961fdb89fa5eb6ad4b52d57d7de808fc5422a609444  backend/tests/test_equipment_observation_r8.py
+4fdc00cdf51d41f1b87badcf7b9c3af0d5c8e805fb5441022a57c08ed8905123  backend/tests/test_equipment_temperature_migration.py
+0393e9346c4d04884d99d77c6c006754894864c7a3d57b2517a4feb5d3e208ae  backend/tests/test_legacy_acquisition_retirement.py
+706acd4edfe88e09a0f38dcacda98f0792407e41fed2b7ee30083f225f98f6c2  backend/tests/test_mapping_migration.py
+0532f522a69fe2db7e463536617cd0de3af08fc86bbb2775dabd4084b2d2e68f  contracts/README.md
+980e5616459dcda55633fd289368e88829a176486e7c88504d481867766b3c23  contracts/README.zh-CN.md
+67fd745096bb59946e6dc04eabf62d7110403f71deefced35db883ff8739ce30  contracts/published/http-api/equipment-observation-v2/README.md
+a47daac5b9ec3b08d3e694e14838737005ed1a1e35513a571385ddcfd32c5144  contracts/published/http-api/equipment-observation-v2/README.zh-CN.md
+d11a7c030f7a4401219b2d5160f4d77345df28d42a39e364861144a019252989  contracts/published/http-api/equipment-observation-v2/example-profile.json
+cf1b37634557f534a933ea2142001fb14b01a47fb349b5205634c42c90857646  contracts/published/http-api/equipment-observation-v2/openapi.json
+870378e53e1becd7c70a5d0b38f062b2e4bf809ff68a8269c34bd5441962d0a7  contracts/published/http-api/equipment-observation-v2/vectors.json
+47a222755710b3132b4137671af881db4cac997586c0eb3a7c8a9a60f0edcb11  docs/equipment-status-process-monitoring.md
+543fa475102bfbc767bef8e658e59bfd631f67fb876ed5d032aa21c30ef9f9d4  docs/equipment-status-process-monitoring.zh-CN.md
+ca56e4c8b672d05067c1394d9a832b9beed201ad04477b2c6735989205b661ef  frontend-js/src/app/equipment/api/observations.js
+b2ac30ca6e7779ad16b8e5825ad150438e9d219678fa574d655dc706269ec688  frontend-js/src/app/equipment/components/observations/RecordList.vue
+f89964f9802f9a99339981947864fcb405d2b5a61a68c746a0d979ea63a53341  frontend-js/src/app/equipment/locales/en-US.json
+2a374840c98e82d808615502e80fa229d87a88230c30875f3dbd9ea1c4834970  frontend-js/src/app/equipment/locales/zh-CN.json
+cd24870f3c2301acae453cf99ba40669414c018974b895b0420333ccdce96dbe  frontend-js/src/app/equipment/manifest.js
+dd5c965bf83ce900c52bbb341ad7c249f13d650d1db12893ccfd36173a28dd68  frontend-js/src/app/equipment/views/observations/admin.vue
+d819f2b0452b6ec58cbc5b54d51b0e8577e3b5cf80d3f989c4d933a295e889ef  frontend-js/src/app/equipment/views/observations/cards.vue
+086e8027db5990bda7d006b8a92bdd865fc1c1f8aea135dfb46631d034de41d0  frontend-js/src/app/equipment/views/observations/data.vue
+144992b29bc569d33a9260928cfc49cf6f318c44d09aff8ce9eaf12867c57dc5  frontend-js/src/app/monitor/api/observations.js
+b082a1621082eeac8c2f4e2ef1c67611faff02590a3a5f4ee8255d80a48e3444  frontend-js/src/app/monitor/components/observations/CurveChart.vue
+19865b25d524b65edcdf155fe2436a7efd921b3c7ef311749e215739d55c64a5  frontend-js/src/app/monitor/components/observations/EmptyAxes.vue
+635c62812af6eb6b55938c9e03e6fa57217ce5eab097eb31ed9badee40a8fde8  frontend-js/src/app/monitor/components/observations/EnergyAdmin.vue
+6d950f4dfffd8fcd802b4c0d56a620149ba7c0445ec62ccec68ea7f06d463ff6  frontend-js/src/app/monitor/components/observations/curveSeries.js
+d52f635dbe29d2be0b513e11e1905ac38e37cf51ebcd0a658f3dbc42db9b65e3  frontend-js/src/app/monitor/locales/en-US.json
+5a7b13158220f97b33b7faa8715a4030be74881d1b369df9d5c8cc7b5432e689  frontend-js/src/app/monitor/locales/zh-CN.json
+e8dfbec2c1537e33d9624cce8fff4c5c0c325b340eb08ec229a1a1f115212dc7  frontend-js/src/app/monitor/manifest.js
+3c8678e8af7379dfba1903316c45b4f413f2c72e35a11369f5c7b2a3dd2a2787  frontend-js/src/app/monitor/views/observations/admin.vue
+a202167be58e577d4076273f1e98e1e9051b553469ac1afb4b0f8f90cfb1fd10  frontend-js/src/app/monitor/views/observations/curves.vue
+11e3a81d8b0e425e83058fdf65da2eadb809d4239de49c0673846d20a38256ac  frontend-js/src/app/monitor/views/observations/data.vue
+8786b58198a8f03de4aeb78b47b7c4def27bd355512cb246d23b960e14e7aa77  frontend-js/src/app/monitor/views/observations/energy.vue
+787478e1fe28e183dcbc668c09bc0c6e4682c1e808f431a11e1f6dd957d72769  frontend-js/tests/module-registry/equipment-observation.test.mjs
+e2918a4a63ebf7f923a7ee8f50399f5c4d110628e1eff0c223b6d424752aee8a  frontend-js/tests/module-registry/page-access.test.mjs
+0a3c1ef166eae9dcd0303bc8450b3186962bb7e335ad835fbe6ccb45cc71c5de  frontend-js/tests/module-registry/registry.test.mjs
+```
+</details>
+
+**5190 页面加载故障定位，尚未恢复。** 2026-11-17 约 12:53（上海时间），在独立临时 Chrome 标签只读复现正式 `http://127.0.0.1:5190/monitor/temperature` 白屏并记录浏览器实际脚本资源：`/node_modules/.vite/deps/chunk-QDYHHCQC.js?v=e9194e38`、`chunk-SU6QCEEU`、`chunk-NUTLW766`、`chunk-2NUMRAKG`、`chunk-ABXUQGM4`、`chunk-MTEXU75C`（后五者同目录、同 `?v=e9194e38`）均经只读 HTTP 确认为 **404**，而页面和部分 ECharts 顶层依赖为 200；这解释了为什么只看入口状态无法发现图表依赖缺失。正式工作树 `frontend-js/node_modules/.vite/deps/_metadata.json` 当时 `browserHash=a876c393`，与运行页面依赖请求的 `e9194e38` 不一致，表明现有 Vite 运行态与磁盘优化依赖产物不一致；尚未证明哪个操作造成此状态，不把可能原因写成定论。临时标签已关闭，未删除缓存、刷新原用户标签或停止 5190。隔离候选使用独立依赖缓存可以在真实 Chrome 进入温度、传动、清洗和新能耗页面，这不能代替正式 5190 的恢复与复验。
+
+约 12:56 另开自有 5190 临时标签尝试浏览器强制刷新，白屏与同一批缺失依赖仍存在；不把普通／强制刷新当作已验证的恢复办法，未触碰用户原有标签。现有监听为用户 Vite/node，可能需协调其优化缓存及服务所有权，任何恢复步骤须先说明短时影响并遵守额外授权边界。
+
+# R8-QA-001 返工进展
+
+独立 Verification 以 SHA-256 `d5eb209ce0ea43e66e24aeae7ceaa58d035f633955e230e8da4ccd432bbac1f1` 的 checklist 记录 `qa_failed`，两条真实 SMA 写入仅引用任务点但提交其他指标时返回 `stored`；返工前的 r8 developer handoff 为本文件原 SHA-256 `51e5fafad2769d8baf6959c0cceebf7e922d67d0c68e21064de99f9c1e7b4f9f`，下方完整保留其实施及证据记录。获批 spec 仍为 SHA-256 `bedca6d06769879bed608376a3e0b88a3c6bc071d999afe42aae1bd96cd30cb8`。
+
+当前信封没有声明引用的用途，也没有可供后端信赖的指标到 PLC 点映射：任务点既供任务归属也供指标使用，与漏报指标来源的请求，在请求和已存采样相同时不能区分。强制两个不同点会拒绝可共用的点；按上报值与任务值是否相等猜测来源也不能证明映射，并可能误拒已讨论的换算或常量。该语义已报协调者，PM 正评估修订、由 Human Owner 决定；本阶段未对正式源码、数据库或运行服务做新的修改，不声明缺陷已修复。任何标记只能表达发送方声明，不能凭标记证明实际映射执行。
+
+不依赖最终选择的准备：在 `/private/tmp/arch-obs-r8-dev.F157ayJv/backend/tests/test_equipment_observation_r8.py` 暂存双目标 SMA 已保存回执重放及同事件不同内容冲突测试（SHA-256 `cb7fcf477f5b7ea2dfc93bce606a669823545083fa180946517c88c205845c8c`）。用项目 uv 和既有虚拟环境、仅虚构设置与不可连接的 MySQL 假端口 `9`，运行 `pytest -q -p no:cacheprovider -m no_db tests/test_equipment_observation_r8.py`：**12 passed**；首次直接运行因隔离副本没有 `.env`、应用设置缺失而未启动，补齐虚构设置后重跑通过。该测试未访问 dev。 `/private/tmp/arch-obs-r8-private.ZQFVM8IQ/dev_rework_probe.py`（SHA-256 `1570cf415ceb3cd0915d0a7e20446e5122749e067c99e6e7700c9095b21cdadd`）准备了后续两目标缺失引用的 HTTP、业务行与回执前后对账，并保留按唯一身份清理逻辑；目前仅通过语法检查，**尚未运行或写入 dev**。新方案定稿后须调整候选及该脚本，再执行受权范围内的定向回归、清理与全新交接。
+
+# r8 Development 实施记录
+
+Human Owner 批准 [r8 §10](spec.md#r8-approval)，批准后规格 SHA-256 为 `bedca6d06769879bed608376a3e0b88a3c6bc071d999afe42aae1bd96cd30cb8`，并授权对指定 dev 目标迁移、必要配置及合成联调，只清理本次测试数据。Human Owner 随后明确允许本次短暂重载现有 127.0.0.1:8000 后端；不包括停止其他进程或写入者。实施与独立 QA、Human Owner 最终验收分别记录。
+
+1. 在独立候选中适配 r7、当前采集来源登记、单一迁移后继和配置化指标列，先执行无库、构建及离线 SQL 自检。
+2. 核对正式树并行改动、前驱目标、已有进程和有效 profile，整合候选并验证旧目标仍可用；按获批目标执行前向迁移和必要配置，复核 guard 及既有数据。
+3. 使用本轮唯一来源和身份完成合成双路/页面核对，记录精确对象并仅清理本轮数据；在正式树记录实际命令、结果和限制后交 fresh-context Verification。
+
+## r8 实施与 DEV 自检
+
+正式交付目录为仓库 `main` 工作树。先以 r7 QA3 候选和当前采集源码建立 `/private/tmp/arch-obs-r8-dev.F157ayJv`；未复制真实 `.env` 或私有 profile。独立候选适配来源登记、单双 revision guard、两张新主表和七表迁移、列表列配置；对原有可受影响测试按实际版本／路由更新断言。按获批 8000 短暂重载范围整合到正式树，整合前本次 62 个路径无并行未提交差异，逐文件比较与候选一致。
+
+**dev 执行。** 迁移前只读确认目标 `127.0.0.1:3307 / industrial_level_2_system`、MySQL 8.4.6、`+08:00`、server UUID 的 SHA-256 前缀 `ac2319a3fdc8`、唯一 revision `7b9d1f3a5c7e`、七张新表无碰撞；应用账号对目标有 `ALL PRIVILEGES`。最近 30 秒无新采集事实仅是当时观察，未停止其他写入者。旧目标与旧 profile 在新版源码下的 `/api/v1/acquisition-data/options` 实测 HTTP 200。使用正式树的 `uv run --offline --frozen --no-sync alembic upgrade 8c0e2a4d6f18`，退出 0；迁移日志 SHA-256 `34241ee2e766cbbb77714e3462fe4496ea2ad3aafdfa777eb07af16d66e6dede`。执行后唯一 revision 为 `8c0e2a4d6f18`，表数由 57 增至 64，七张目标表及列表字段存在；原计划、实绩、采集历史、采集 latest、来源登记五表行数及 `CHECKSUM TABLE` 值一致，所有原表索引的结构摘要一致。
+
+保留原私有 facts profile，新增目标相同、revision 为 8c 的 `plc-facts-target-8c0e2a4d6f18.json`（SHA-256 `a020d914afe4b54197736b8d2fd64465701b67c2f7ca8da9552694786fece29b`）；另新增 `observation-target-8c0e2a4d6f18.json`（SHA-256 `2dae4a626a6f97c584784fa9aa45f7244e55e3ec04e8312f5c33402cf3c5e83d`），设备和 producer 均为空，机器准入默认关闭。两文件位于用户私有 Application Support/aiis-ics-arch/dev 目录、均为 0600，精确路径由本机 `backend/.env` 的对应键确定；未把凭据或私有 profile 放进仓库。`.env` 只切换 `PLC_FACTS_V2_PROFILE_FILE` 并添加 `OBSERVATION_ENABLED`、`OBSERVATION_PROFILE_FILE`，其余解析后的键值逐项不变。旧 `.env` 备份在 `/private/tmp/arch-obs-r8-private.ZQFVM8IQ/backend-env-before`，0600；需保留至最终验收及不再需要恢复时，禁止纳入仓库。触发获准的 8000 热重载后，采集 options、admin 登录、空设备选项、全局指标配置及两个空管理列表均 HTTP 200；无机器凭据发现指标返回 401。原 5190 服务未停止，三个入口只读检查返回 HTML 200。
+
+**合成 MySQL/HTTP 闭环。** 在相同 dev 库使用任务独有的设备、PLC、实例、代次、任务、指标和 producer，通过独立临时 API 及 profile 执行真实 HTTP。第三方最简请求及合成 SMA 全信封各自调用发现及两条 POST；实际核对回执、两目标槽位、同槽不同组、`0`、`false`、空字符串、整组覆盖后缺测、备注和复核、停写历史指标可见、卡片／曲线和相同事件重放。经 admin API 删除本轮来源后，当前任务变 unknown，原始事实和过程历史仍存在，已提交回执仍可重放；随后才按精确实例、代次、样本、记录、producer、槽位及配置键删除本轮自有对象，未按整表或共享设备清理。最终轮产生实时 2 条、历史 2 条、回执 6 条；四轮 `14d64f82c178`、`0980335c0cf3`、`406da997da79`、`da3959a89411` 按唯一身份逐表复核零残留。收尾时原五表行数及校验和和原索引摘要仍匹配迁移前，脱敏对账 `/private/tmp/arch-obs-r8-private.ZQFVM8IQ/dev-after-cleanup.json` SHA-256 `7de99ad6487966c04909d052bfdbbd3fef381a7cd278c3bd1a3f9820c4ddf89b`。
+
+**实际浏览器自检。** 独立临时 API、两个仅回环 Vite 和 Chrome 157.0.8103.78，使用已有 admin 登录，未创建用户或更改权限。实际在中文页面选择实时两列、检查值；历史列可见；拖拽动态列宽、页面重载恢复与重置；温控卡和温度曲线画布、中英文切换；连接真实 8000 的空设备 profile 时 admin 仍能打开配置及空列表；无 pageerror。首轮因脚本定位隐藏表、第二轮因未等弹窗关闭动画而超时，均已按各自精确身份清理，修正测试脚本后第三轮通过；不把前两轮写成产品成功。截图保留给 QA：`/private/tmp/arch-obs-r8-private.ZQFVM8IQ/ui-da3959a89411-{latest-zh,history-zh,card-zh,curve-en,empty-admin}.png`，对应 SHA-256 顺序为 `d2c4928aa4612ca8c94ba367a6031dc12e392dec4d56683cf8d08251125a07a9`、`55c7f30523689b48d8e5a24f2eceb4b137d8a7212bd76c1a75e7e1565ba185be`、`da54df8a199678f77e6191df780a37e25a9b6f7d712e51ec50eeef4b6877e4f9`、`2535c3e600d9923583bc300b09a7ae372fbd35494ffabdaab60b21b873c45467`、`482454c523342fdf6d6ab5c792209d4df92596fbee38809a1fb9ec3edeecef07`。所有独立测试 API／Vite／Chrome 已停止；未操作其他进程。
+
+| 检查 | 结果 |
+| --- | --- |
+| 正式树 `uv run --offline --frozen --no-sync pytest -q -p no:cacheprovider -m no_db -rs`，覆盖 `test_equipment_observation_{domain,r8}.py`、business integration migration、equipment temperature migration、legacy acquisition retirement、mapping migration、acquisition source/browse、plc facts v2 | 退出 0，160 passed、3 skipped。跳过项分别是 BE003 冻结候选测试、需独立任务 fixture 的采集浏览测试、BE012 保留前驱 runner；不称全部测试通过。 |
+| 正式树 `pnpm test:modules` | 退出 0，67 passed；包含实际列表 SFC 设置与列宽和先前四项旧路由／权限断言。 |
+| 正式树 `pnpm build --outDir /private/tmp/arch-obs-r8-dev.F157ayJv/formal-frontend-dist` | 退出 0，模块预检通过；保留 Vite 大 chunk 和外部 outDir 提示。 |
+| 正式树对应 Python `compileall`、`git diff --check`、39 个新增文件 no-index whitespace 检查 | 退出 0。 |
+| Alembic 唯一 head、`7b9d1f3a5c7e:8c0e2a4d6f18 --sql` | 退出 0；离线 SQL 仅创建七表／索引并更新版本，SHA-256 `16cbe885fc855c2245c2fb78e56b7d9754c30b87e04ef1a4f374c9fedd10ed51`。 |
+| 三条机器 OpenAPI 路径与已发布 schema 对照；双语 JSON 对称；八份相关文档本地链接和锚点 | 退出 0；三路径一致，7 个 JSON 解析，134 个文件目标及 84 个片段均解析。 |
+| 正式前端 5190、后端 8000 只读探针 | 运行中；采集 GET、admin 空 profile 和入口均成功，无凭据机器查询 401。 |
+
+### 限制和 Verification 提示
+
+本次是 Development 自检，不是独立 QA 或 Human Owner 最终验收。当前持久 OBS profile 故意没有设备和机器身份，管理员可配置全局指标，但真实卡片、曲线和写入要先按[手动验收说明](../../docs/equipment-status-process-monitoring.zh-CN.md#r8-manual-acceptance)配置实际或用户自己的独有测试设备/点位/producer；不要猜测真实 PLC。typed 业务接入当前关闭，未在 dev 实际以已采用 typed profile 写入；旧／新 guard 的错配和跨设备过滤已做无库测试，实际并发的来源切换／删除锁、A/B 迟到换单、多设备越权和所有卡片／曲线类别仍需独立 Verification 覆盖或如实说明。r7 隔离 MySQL runner 未指向本次真实 dev，未宣称该 runner 通过。未运行 SMA 或 DAA 产品、真实 PLC、生产部署或发布。
+
+候选、截图、离线 SQL 和私有备份暂留 `/private/tmp/arch-obs-r8-dev.F157ayJv`、`/private/tmp/arch-obs-r8-private.ZQFVM8IQ` 供独立 QA 复核；包含敏感备份的目录及文件为私有权限，不输出或提交。待 Human Owner 最终验收且无证据／恢复依赖后由协调者核对归属回收；用户的两份持久 profile 和运行服务不属于临时清理对象。`/private/tmp/arch-obs-r8-pytest.ezwMJhRJ` 仅含本轮临时测试数据、无 QA 依赖，已回收。QA 请从正式树、获批 spec、下方 62 文件 SHA、真实 dev 目标及脱敏记录独立核验；不得把自检替代 QA verdict。
+
+### 精确交付文件与 SHA-256
+
+对下列按路径排序的 `SHA-256  相对路径\n` 文本再取 SHA-256，得到 `a501d2e221bbe64cdc8003c6c5eed31395b3393eaada570901ecb201a8210ece`；62/62 与候选相同。本清单仅列本次实现文件，不含 spec、角色记录和其他任务差异。
+
+| 路径 | SHA-256 |
+| --- | --- |
+| `CODE_INDEX.md` | `f4477144739ec0eee571dfe0e0b19fded854ca4455bd09c505a14bd639ffd9a3` |
+| `backend/alembic/versions/20261116_1800_8c0e2a4d6f18_add_equipment_observation.py` | `33fea415320944712c92898f82f11430a6b90b428978c307d23d2990b385cb14` |
+| `backend/app/equipment_observation/README.md` | `1afc33de2d9186c740e66babf3142c5d07814e8d9bba5f7acef0d7d053db992e` |
+| `backend/app/equipment_observation/README.zh-CN.md` | `c1df213dfd3976ff7d5d5254e618f6ef47277125a1339f691abcf09911e226fb` |
+| `backend/app/equipment_observation/__init__.py` | `56fc319faab27f00444050a7f4cede5bfd82c40a776223482a9d0b6cb9b92130` |
+| `backend/app/equipment_observation/api/__init__.py` | `77a668728ad2886630462f40fe5920f121ce342aaba26c2cc2934040570df252` |
+| `backend/app/equipment_observation/api/routes.py` | `74a5de11d0004779b524dfc2100ce51189576cf95aa15087eec0cec77ead2373` |
+| `backend/app/equipment_observation/domain.py` | `17a61fb2175db447a0fd31f6050a4a86a0585982d128fbc80017db54e4faa0bc` |
+| `backend/app/equipment_observation/error_codes.py` | `662d6e34cdfd9c5df8fe39fa27408e591033b3e600dceee2058195806c130fd3` |
+| `backend/app/equipment_observation/manifest.py` | `592adc32634ec1edce508deca9ccba6004cdef6bb64a5848ea9a548c09abe4c3` |
+| `backend/app/equipment_observation/models/__init__.py` | `8a49f24867d27ae803823dc6d6f2253404437439bcbbfaff253b6797186b3c73` |
+| `backend/app/equipment_observation/models/records.py` | `2353a65857297c3b30d35b17cfcb65e098ce5ee6af8ed5d34b0697949e88e914` |
+| `backend/app/equipment_observation/profile.py` | `d3d283eef7527250838bc4dd351d0ddab2510e0eb609759d3ed689819646470f` |
+| `backend/app/equipment_observation/schemas.py` | `5a6a990716d593890f2184d646278aefee899755df67e6d6bd5244c229195c90` |
+| `backend/app/equipment_observation/services/__init__.py` | `877cf89acf402aedd0374737b6e5c80c355d914974d8e84c15b5409eb9da12de` |
+| `backend/app/equipment_observation/services/configuration.py` | `1ddd94f3a0d8baf47057ee450eac45b5e28d6af3f32ce35833d933d04e3ced9d` |
+| `backend/app/equipment_observation/services/ingest.py` | `2e0ded43b9f002577b8c2e17732dbb6d30f2f64765c84d7076d2a45b1c02ea34` |
+| `backend/app/equipment_observation/services/reads.py` | `85fa8b78e1ee4b82001badf0c1e1af8e2e050eeaf577e90be7c15cb744e6f932` |
+| `backend/app/plc_facts/README.md` | `25d3a11aef2c9abdddf2580d16de76f93cf83ed91c9acb4c3a007cd28ba55dcd` |
+| `backend/app/plc_facts/README.zh-CN.md` | `940afbddb492d73619fa088b96e7ec28fc7a4cc05d55001e24f6c9ed7611ef7b` |
+| `backend/app/plc_facts/crud/async_v2.py` | `5656ced4b98a154e7e16c1c0ece4a5e23fedd6ea53a70a9425157b0994ee4017` |
+| `backend/app/plc_facts/crud/sync_v2_maintenance.py` | `ba26d3b21f3cce238d88c9aea961e410e4064928f4084888594170fa51aa12f9` |
+| `backend/app/plc_facts/manifest.py` | `566856dddc489e306c339a12dcc0b5f17880c4479fae4998f5fcf84514514dc2` |
+| `backend/app/plc_facts/services/observation_evidence.py` | `d8db96c3ed1004620b29c764b1346aad7ed2d350fc5bd1617d75445a1b084ad7` |
+| `backend/app/plc_facts/v2_config.py` | `7052e20cb811c8a1b9763a9b020cd48ca09f4bee75aa97b7808ebc8b41357435` |
+| `backend/common/integration/storage.py` | `353fbe6beff6a3a9f22331248ce0187b319908283a34c3556dd1a4d6ad957969` |
+| `backend/tests/test_equipment_observation_domain.py` | `6cf8b6de25ef7bcb941216a6feeebc67f4e0408373825030f21108393f4a062a` |
+| `backend/tests/test_equipment_observation_r8.py` | `d65e229cc80032773257b9ce5a60c7a5496f095fd9b9466b55514a4a7e21249f` |
+| `backend/tests/test_equipment_temperature_migration.py` | `77647193275d39d990c314169688daec603ac386c420e66599929ebdd68bf1f4` |
+| `backend/tests/test_legacy_acquisition_retirement.py` | `3d91dcd0ee951c2f70ff02215dd028391d5f6aaa1e26e09a7295b27943c1456f` |
+| `backend/tests/test_mapping_migration.py` | `62ba395430dca3c83c0682344177ea9c8856cd0db4cf8b3c1eba184378646b88` |
+| `backend/tests_mysql/test_equipment_observation_mysql.py` | `b8637aa7e67e37837deab15eecd606e6ab8c22e9e20687d1ff7160785b39242f` |
+| `contracts/README.md` | `34f3b8ba6ffbe3f730dd3d8762c8b18f7f8b80c042323197e77e47d7f96351fb` |
+| `contracts/README.zh-CN.md` | `ba08e026ba6f058faef755a67271c3e83021b67b3777e4be769d68c26fbbbd88` |
+| `contracts/published/http-api/equipment-observation-v1/README.md` | `9f1ff72d3b598eaac1f989272f45f5e8010114c5ffef56b31cefe86d57e8a694` |
+| `contracts/published/http-api/equipment-observation-v1/README.zh-CN.md` | `568de3dc8ba14f5380bd9ba43dd14191e67d277e52e08d57d593115a6b9e7989` |
+| `contracts/published/http-api/equipment-observation-v1/example-profile.json` | `c07d02096fa2f8f0afc4a0826a5c6323aa8ed93b6fcd16686c36147f6c711f70` |
+| `contracts/published/http-api/equipment-observation-v1/openapi.json` | `7a5bd636a75208dbaf65531bff9d72e9dae8d81765d73f2ae10631e745849c07` |
+| `contracts/published/http-api/equipment-observation-v1/vectors.json` | `dd904d37d2a787c04afe14f13331c08b44ab54cb72708a37206be8be05456ed8` |
+| `contracts/published/http-api/equipment-observation-v1/walkthrough.py` | `709dd9200f2df1e4294ff0ea83c5d7b8a9647d1304c0bf98788fad70ece8ce91` |
+| `docs/equipment-status-process-monitoring.md` | `72e880398d6dc3ed366771048e57d8e5b0eca8c9629381481b8724ddcbd358ce` |
+| `docs/equipment-status-process-monitoring.zh-CN.md` | `960c18c5012e95cd29368641e27363d3472bf0681360a904aa6ef5038f389bfa` |
+| `frontend-js/src/app/equipment/api/observations.js` | `2de0a077040bcf684d0bc9f8163b73c1ad3cf19e1ae7ad33929f6feb1d1b5db5` |
+| `frontend-js/src/app/equipment/components/observations/RecordList.vue` | `b77b13a956cb17ee2d798fc1ccc0edf199288446238c78e242b048fd7234acbb` |
+| `frontend-js/src/app/equipment/components/observations/columnModel.js` | `bcb9c4f4b433db6da0acdcb0f24d6dacafddbbf02930032c69679ecf94626cba` |
+| `frontend-js/src/app/equipment/locales/en-US.json` | `dd26abd0948bc655f95883e58f42bb9324af266ff77b441f078576505c2865f0` |
+| `frontend-js/src/app/equipment/locales/zh-CN.json` | `305702a1dd7a03f76fbdd7fbc3ef499f716b2119cf41b5c74c67afc96e3225ce` |
+| `frontend-js/src/app/equipment/manifest.js` | `8ccc0f244d154ec0f9216142736b940daa630ff4cc722db426639d876faab96e` |
+| `frontend-js/src/app/equipment/views/observations/admin.vue` | `aa1d0f887281b60ff5d0517f216a9264a1ebc0d321466b1965f81c724392e591` |
+| `frontend-js/src/app/equipment/views/observations/cards.vue` | `0f0f9330cae3d1c97fb941a36fc4886108a0d5ed2b9fef8a91e220f45506bcd9` |
+| `frontend-js/src/app/monitor/api/observations.js` | `6d3ee0a8ad807f5c292e1857253b0d8d7ff6e19d173c540de2427792bfa4887d` |
+| `frontend-js/src/app/monitor/components/observations/CurveChart.vue` | `167c0e55ca1d0135a90c2214d6498a52353cfa5d8643ddc68289d89e9bf215cb` |
+| `frontend-js/src/app/monitor/components/observations/curveSeries.js` | `b092e99b878609f8cb107dd50922972cadd239ee3c4a13195948c5e8b2162d7d` |
+| `frontend-js/src/app/monitor/locales/en-US.json` | `e8aec65ac4314240d233e5a0e263c73bad8d6f47dc33b8f1845f20f712e26534` |
+| `frontend-js/src/app/monitor/locales/zh-CN.json` | `7fdabe4b01e7fc6d0e124307174e7283bb0dbf00335668da3180ac06c5f8a80b` |
+| `frontend-js/src/app/monitor/manifest.js` | `fe604032a2ab8a81c6dfd20d8bc5d620fc631d502254a2a4e285526e81db9d85` |
+| `frontend-js/src/app/monitor/views/observations/admin.vue` | `60494af0dc8ad6f7622d3db441e4db48045b2f399443759bbd7042769917e4b0` |
+| `frontend-js/src/app/monitor/views/observations/curves.vue` | `b852627a9ca29de568a363ce7527a654c4bb0d9ce951f32f425e5592ad34ee34` |
+| `frontend-js/tests/module-registry/equipment-observation-columns.test.mjs` | `dcb8610373649c117d0f80842d068cfdcfcff303a0d3a9bc94c074a579b47d51` |
+| `frontend-js/tests/module-registry/equipment-observation.test.mjs` | `eb957cb55b10596b0e0c896b26705a7db4ef0282d166394fb391062ea00b0bc5` |
+| `frontend-js/tests/module-registry/page-access.test.mjs` | `8856ca5bf916bcca6dce9d0103fde81145d4d52bf3c8dfbfa1654e6a5f436501` |
+| `frontend-js/tests/module-registry/registry.test.mjs` | `b88230eb4b0dab888d453604b1fb15bd3bd9cd0e60fef1e944154a531b75f02c` |
+
+<details>
+<summary>r7 及更早 Development 原记录</summary>
+
+<!-- ARCH-OBS-001-r7-history-begin -->
+Task ID: ARCH-OBS-001
 Revision: r7
 Status: developer_handoff
 Owner Role: Development
@@ -600,4 +1303,7 @@ async function render(template, locale, row, extra = {}) {
 })().catch(error => { console.error(error); process.exitCode = 1 })
 ```
 
+</details>
+
+<!-- ARCH-OBS-001-r7-history-end -->
 </details>

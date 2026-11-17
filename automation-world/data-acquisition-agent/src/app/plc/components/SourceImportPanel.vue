@@ -3,7 +3,8 @@
   <section class="daa-source-import">
     <p class="daa-capability-note">{{ t('plc.sourceImport.help') }}</p>
     <el-alert v-if="local.dirty || local.editing" :title="t('common.local.saveBeforeTools')" type="warning" :closable="false" />
-    <div class="console-action-group daa-source-import__picker"><input ref="fileInput" type="file" accept=".db,.udt" multiple hidden @change="local.readFiles" /><ConsoleActionButton label-key="common.local.importFile" tone="primary" :disabled="local.busy || local.dirty || local.editing || !local.selectedPlc" @click="fileInput?.click()" /><span class="daa-capability-note">{{ local.sources.map(s => s.name).join(' · ') || t('plc.sourceImport.chooseHint') }}</span></div>
+    <div class="console-action-group daa-source-import__picker"><input ref="fileInput" type="file" accept=".db,.udt" multiple hidden @change="local.readFiles" /><ConsoleActionButton label-key="common.local.importFile" tone="primary" :disabled="local.busy || local.dirty || local.editing || local.mutationUnknown || !local.selectedPlc || selectedCatalogPlc" @click="fileInput?.click()" /><ConsoleActionButton label-key="plc.catalog.open" :disabled="local.busy || local.dirty || local.editing || local.mutationUnknown || !local.view" @click="local.openCatalog" /><span class="daa-capability-note">{{ local.sources.map(s => s.name).join(' · ') || t('plc.sourceImport.chooseHint') }}</span></div>
+    <CatalogImportDialog :local="local" />
     <template v-if="local.identification && local.sources.length">
       <p>{{ t('plc.sourceImport.counts', { files: local.identification.fileCount, dbs: local.identification.dbCount, udts: local.identification.udtCount }) }}</p>
       <el-table :data="local.pagedImportRows" :row-key="rowKey" :tooltip-options="{ appendTo: '#daa-feedback' }">
@@ -39,19 +40,22 @@
     </ElDialog>
     <ElDialog v-model="local.sourceStructureOpen" :title="t('plc.sourceImport.structure')" :append-to-body="false" :close-on-click-modal="false" width="min(900px, calc(100vw - 32px))" class="daa-import-dialog">
       <p class="daa-capability-note">{{ t('plc.sourceImport.lengthEditHint') }}</p>
-      <details v-for="d in local.dbs.filter(d => !local.selectedDb || d.id === local.selectedDb)" :key="d.id" class="daa-details"><summary>{{ d.name }} · DB{{ d.number }} · {{ local.label(d.complete ? 'complete' : 'incomplete') }}</summary><ElForm label-position="top" @submit.prevent><ElFormItem :label="t('common.local.dbLength')"><ElInputNumber v-model="d.length" :disabled="local.busy" :min="1" :max="65536" :precision="0" controls-position="right" /></ElFormItem></ElForm><ElTree :data="d.tree" node-key="path" :props="{ children: 'children', label: 'name' }" :expand-on-click-node="false"><template #default="{ data }"><span>{{ data.name }} · {{ data.dataType }} · {{ data.line }}</span></template></ElTree></details>
+      <details v-for="d in local.dbs.filter(d => !local.selectedDb || d.id === local.selectedDb)" :key="d.id" class="daa-details"><summary>{{ d.name }} · DB{{ d.number }} · {{ local.label(d.complete ? 'complete' : 'incomplete') }}</summary><template v-if="isCatalogDb(d.id)"><p>{{ t('plc.catalog.noTree') }}</p><code>{{ local.draft?.sources.find(s => s.id === d.sourceId)?.sha256 }}</code></template><template v-else><ElForm label-position="top" @submit.prevent><ElFormItem :label="t('common.local.dbLength')"><ElInputNumber v-model="d.length" :disabled="local.busy" :min="1" :max="65536" :precision="0" controls-position="right" /></ElFormItem></ElForm><ElTree :data="d.tree" node-key="path" :props="{ children: 'children', label: 'name' }" :expand-on-click-node="false"><template #default="{ data }"><span>{{ data.name }} · {{ data.dataType }} · {{ data.line }}</span></template></ElTree></template></details>
     </ElDialog></Teleport>
   </section>
 </template>
 <script setup lang="ts">
 import { ElDialog, ElTree, ElCheckbox, ElForm, ElFormItem, ElInputNumber, ElOption, ElSelect } from 'element-plus';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { LocalConsole } from '../../../console/composables/useLocalAcquisitionConsole';
 import type { IdentifiedBlock } from '../../../services/localAcquisition';
 import ConsoleActionButton from '../../../components/console/ConsoleActionButton.vue';
+import CatalogImportDialog from './CatalogImportDialog.vue';
 const props = defineProps<{ local: LocalConsole }>();
 const { t } = useI18n();
 const fileInput = ref<HTMLInputElement | null>(null);
+const isCatalogDb = (id: string) => !!props.local.draft?.catalogBindings?.some(binding => binding.localDbId === id);
+const selectedCatalogPlc = computed(() => props.local.dbs.some(db => isCatalogDb(db.id)));
 const rowKey = (row: { block: IdentifiedBlock }) => JSON.stringify([row.block.sourceIndex, row.block.blockKey]);
 </script>

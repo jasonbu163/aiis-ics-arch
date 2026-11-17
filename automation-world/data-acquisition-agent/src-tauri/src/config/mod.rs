@@ -3,7 +3,7 @@
 //! Main Features:
 //!   - Loads local .env values without taking backend .env ownership
 //!   - Parses only this app profile/mode values; retired values are ignored
-//!   - 显式路径写前拒绝；普通读取准入由bootstrap的process-only规则处理
+//!   - profile 相对路径锚定所选配置文件目录，写前保留原路径准入
 
 use std::collections::HashMap;
 use std::fs;
@@ -11,6 +11,7 @@ use std::path::{Path, PathBuf};
 
 pub(crate) struct AgentConfig {
     values: HashMap<String, String>,
+    env_directory: PathBuf,
 }
 
 impl AgentConfig {
@@ -19,7 +20,10 @@ impl AgentConfig {
         Self::load_selected(std::env::var_os("DAA_ENV_FILE"), &application_root())
     }
 
-    fn load_selected(selector: Option<std::ffi::OsString>, root: &Path) -> Result<Self, String> {
+    pub(crate) fn load_selected(
+        selector: Option<std::ffi::OsString>,
+        root: &Path,
+    ) -> Result<Self, String> {
         let explicit = selector.is_some();
         let path = selector
             .map(PathBuf::from)
@@ -37,6 +41,10 @@ impl AgentConfig {
         };
         Ok(Self {
             values: parse_env(&content),
+            env_directory: path
+                .parent()
+                .expect("absolute env file has a parent")
+                .into(),
         })
     }
 
@@ -59,9 +67,33 @@ impl AgentConfig {
         if selected.is_some_and(|v| v.contains(['$', '~', '<', '>'])) {
             return Err("profile_literal_required:DAA_PROFILE_DIR".into());
         }
-        let path = selected
+        let selected_path = selected
             .map(|v| PathBuf::from(v.trim()))
             .unwrap_or_else(default_profile_dir);
+        if selected_path
+            .components()
+            .any(|c| matches!(c, std::path::Component::ParentDir))
+        {
+            return Err("profile_absolute_required:DAA_PROFILE_DIR".into());
+        }
+        let path = if selected_path.is_absolute() || selected.is_none() {
+            selected_path
+        } else {
+            // Windows 的盘符相对、根相对路径不是普通相对路径。
+            if selected_path.has_root()
+                || selected_path
+                    .components()
+                    .any(|c| matches!(c, std::path::Component::Prefix(_)))
+            {
+                return Err("profile_absolute_required:DAA_PROFILE_DIR".into());
+            }
+            let joined = self.env_directory.join(selected_path);
+            let text = joined.to_str().ok_or("profile_invalid:DAA_PROFILE_DIR")?;
+            if text.contains(['$', '~', '<', '>']) {
+                return Err("profile_literal_required:DAA_PROFILE_DIR".into());
+            }
+            joined
+        };
         if !path.is_absolute()
             || path
                 .components()
@@ -78,13 +110,17 @@ impl AgentConfig {
 
     #[cfg(test)]
     pub(crate) fn from_values(values: HashMap<String, String>) -> Self {
-        Self { values }
+        Self {
+            values,
+            env_directory: application_root(),
+        }
     }
 
     #[cfg(test)]
     pub(crate) fn empty_for_test() -> Self {
         Self {
             values: HashMap::new(),
+            env_directory: application_root(),
         }
     }
 
@@ -253,17 +289,16 @@ mod startup_env_tests {
             assert!(AgentConfig::load_selected(Some(selector.into_os_string()), &root).is_err());
         }
         for bad in [
-            "relative",
             "$HOME/profile",
             "${HOME}/profile",
             "~/profile",
+            "../escape",
+            "nested/../../escape",
             "/private/tmp/$HOME",
             "/private/tmp/<profile>",
             "/private/tmp/../escape",
         ] {
-            let c = AgentConfig {
-                values: parse_env(&format!("DAA_PROFILE_DIR={bad}")),
-            };
+            let c = AgentConfig::from_values(parse_env(&format!("DAA_PROFILE_DIR={bad}")));
             assert!(c.profile(None).is_err());
             assert!(c.profile(Some(bad.into())).is_err());
         }
@@ -288,6 +323,159 @@ mod startup_env_tests {
         fs::write(root.join(".env"), [255]).unwrap();
         assert!(AgentConfig::load_selected(None, &root).is_err());
         assert!(!file_profile.exists() && !process.exists());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn startup_env_relative_profile_uses_selected_file_directory() {
+        let root = std::env::temp_dir().join(format!("daa-r8-config-{}", uuid::Uuid::new_v4()));
+        let alternate_dir = root.join("alternate");
+        fs::create_dir_all(&alternate_dir).unwrap();
+        let c = AgentConfig::load_selected(None, &root).unwrap();
+        assert_eq!(c.profile(None).unwrap(), default_profile_dir());
+        assert_eq!(
+            c.profile(Some("./missing".into())).unwrap(),
+            root.join("./missing")
+        );
+
+        fs::write(
+            root.join(".env"),
+            "DAA_PROFILE_DIR=./file-profile\nDAA_PROFILE_DIR=ignored\n",
+        )
+        .unwrap();
+        let selected = alternate_dir.join("selected.env");
+        fs::write(&selected, "DAA_PROFILE_DIR=./file-profile\n").unwrap();
+        for (selector, base) in [
+            (None, root.as_path()),
+            (
+                Some(selected.clone().into_os_string()),
+                alternate_dir.as_path(),
+            ),
+        ] {
+            let c = AgentConfig::load_selected(selector, &root).unwrap();
+            assert_eq!(c.profile(None).unwrap(), base.join("./file-profile"));
+            assert_eq!(
+                c.profile(Some("  ".into())).unwrap(),
+                base.join("./file-profile")
+            );
+            assert_eq!(
+                c.profile(Some("./process-profile".into())).unwrap(),
+                base.join("./process-profile")
+            );
+            let absolute = root.join("absolute-profile");
+            assert_eq!(
+                c.profile(Some(absolute.clone().into_os_string())).unwrap(),
+                absolute
+            );
+            assert!(c.profile(None).unwrap().is_absolute());
+        }
+        fs::write(&selected, "DAA_PROFILE_DIR= \n").unwrap();
+        let c = AgentConfig::load_selected(Some(selected.clone().into_os_string()), &root).unwrap();
+        assert_eq!(c.profile(Some(" ".into())).unwrap(), default_profile_dir());
+        assert!(!root.join("missing").exists());
+        assert!(!alternate_dir.join("file-profile").exists());
+
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::symlink;
+            let link = root.join("linked-dir");
+            symlink(&alternate_dir, &link).unwrap();
+            let default = AgentConfig::load_selected(None, &root).unwrap();
+            assert_eq!(
+                default
+                    .profile(Some("linked-dir/child".into()))
+                    .unwrap_err(),
+                "profile_symlink:DAA_PROFILE_DIR"
+            );
+            let c =
+                AgentConfig::load_selected(Some(link.join("selected.env").into_os_string()), &root)
+                    .unwrap();
+            assert_eq!(
+                c.profile(Some("child".into())).unwrap_err(),
+                "profile_symlink:DAA_PROFILE_DIR"
+            );
+            let absolute = root.join("absolute-profile");
+            assert_eq!(
+                c.profile(Some(absolute.clone().into_os_string())).unwrap(),
+                absolute
+            );
+
+            fs::create_dir(root.join("intermediate")).unwrap();
+            let traversing = root.join("intermediate/../alternate/selected.env");
+            let c = AgentConfig::load_selected(Some(traversing.into_os_string()), &root).unwrap();
+            assert!(c.profile(Some("child".into())).is_err());
+            assert_eq!(
+                c.profile(Some(root.join("absolute-profile").into_os_string()))
+                    .unwrap(),
+                root.join("absolute-profile")
+            );
+
+            let literal_dir = root.join("$literal-base");
+            fs::create_dir(&literal_dir).unwrap();
+            fs::write(literal_dir.join("selected.env"), "DAA_PROFILE_DIR=child\n").unwrap();
+            let c = AgentConfig::load_selected(
+                Some(literal_dir.join("selected.env").into_os_string()),
+                &root,
+            )
+            .unwrap();
+            assert_eq!(
+                c.profile(None).unwrap_err(),
+                "profile_literal_required:DAA_PROFILE_DIR"
+            );
+            assert_eq!(
+                c.profile(Some(root.join("absolute-profile").into_os_string()))
+                    .unwrap(),
+                root.join("absolute-profile")
+            );
+        }
+
+        #[cfg(windows)]
+        for bad in [r"C:foo", r"\foo", r"C:"] {
+            assert!(c.profile(Some(bad.into())).is_err(), "{bad}");
+        }
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn startup_env_relative_profile_is_independent_of_working_directory() {
+        const CHILD_ROOT: &str = "DAA_R8_CONFIG_CHILD_ROOT";
+        if let Some(root) = std::env::var_os(CHILD_ROOT) {
+            let root = PathBuf::from(root);
+            let alternate = root.join("alternate/selected.env");
+            let default = AgentConfig::load_selected(None, &root).unwrap();
+            let selected =
+                AgentConfig::load_selected(Some(alternate.into_os_string()), &root).unwrap();
+            assert_eq!(default.profile(None).unwrap(), root.join("file"));
+            assert_eq!(
+                default.profile(Some("process".into())).unwrap(),
+                root.join("process")
+            );
+            assert_eq!(selected.profile(None).unwrap(), root.join("alternate/file"));
+            assert_eq!(
+                selected.profile(Some("process".into())).unwrap(),
+                root.join("alternate/process")
+            );
+            return;
+        }
+        let root = std::env::temp_dir().join(format!("daa-r8-cwd-{}", uuid::Uuid::new_v4()));
+        fs::create_dir_all(root.join("alternate")).unwrap();
+        fs::create_dir(root.join("other-cwd")).unwrap();
+        fs::write(root.join(".env"), "DAA_PROFILE_DIR=file\n").unwrap();
+        fs::write(
+            root.join("alternate/selected.env"),
+            "DAA_PROFILE_DIR=file\n",
+        )
+        .unwrap();
+        for cwd in [&root, &root.join("other-cwd")] {
+            let status = std::process::Command::new(std::env::current_exe().unwrap())
+                .args(["--exact", "config::startup_env_tests::startup_env_relative_profile_is_independent_of_working_directory"])
+                .env(CHILD_ROOT, &root)
+                .current_dir(cwd)
+                .status()
+                .unwrap();
+            assert!(status.success());
+        }
+        assert!(!root.join("file").exists() && !root.join("alternate/file").exists());
         fs::remove_dir_all(root).unwrap();
     }
 }

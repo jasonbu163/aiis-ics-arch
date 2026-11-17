@@ -3259,11 +3259,20 @@ fn startup_connection_origin_survives_same_endpoint_activation_and_pause() {
             }
         }
         if scenario == "collecting_manual_connection" {
-            let result = e.request(vec![first.clone()], "connection", true, &revision, None).unwrap();
+            let result = e
+                .request(vec![first.clone()], "connection", true, &revision, None)
+                .unwrap();
             let op = result["items"][0]["operationId"].as_str().unwrap();
             let deadline = Instant::now() + Duration::from_secs(2);
             loop {
-                if e.operations.lock().unwrap().iter().any(|o| o.operation_id == op && o.phase == "applied") { break; }
+                if e.operations
+                    .lock()
+                    .unwrap()
+                    .iter()
+                    .any(|o| o.operation_id == op && o.phase == "applied")
+                {
+                    break;
+                }
                 assert!(Instant::now() < deadline);
                 thread::sleep(Duration::from_millis(10));
             }
@@ -3305,7 +3314,8 @@ fn startup_connection_origin_survives_same_endpoint_activation_and_pause() {
         {
             let states = e.states.lock().unwrap();
             let state = &states[&first];
-            let manual = scenario == "manual_connection" || scenario == "collecting_manual_connection";
+            let manual =
+                scenario == "manual_connection" || scenario == "collecting_manual_connection";
             assert_eq!(state.desired_connection, manual, "{scenario}");
             assert_eq!(state.connected, manual, "{scenario}");
             assert!(

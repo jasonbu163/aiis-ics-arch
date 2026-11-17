@@ -3,7 +3,7 @@ Revision: r1
 Status: qa_passed
 Owner Role: QA / Verification
 Allowed Writers: QA / Verification, Human Owner
-Handoff: QA3 通过 r1 第三次精确交接的 AC10 共用列表布局复验。QA2 已关闭 QA-F01、QA-F02、QA-F03，Human Owner 最终验收待定。
+Handoff: QA4 通过 r1 第四次精确交接的字段设置、使用说明及相关前端复验，结果交 Human Owner 最终验收。
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch
@@ -136,3 +136,30 @@ QA2 对精确 r1 第二次交接的 verdict 为 **`qa_passed`**。QA-F01、QA-F0
 - 旧卷材报表及实绩打印入口在 r1 §7 R09 一次性切换中退役。该范围同时撤下旧报表依赖的 `print_records` 和旧实绩关系，通用报表重建另立范围。 [获批切换规格](spec.md#7-旧卷材一次性切换)
 
 QA3 对精确 r1 第三次交接的 verdict 为 **`qa_passed`**，无 blocker。结果交 Human Owner 做最终验收。QA1 和 QA2 的历史限制继续适用，现场设备、DAA/SMA/CA/FF 原生联调、生产部署和长稳运行仍待对应范围验证。正式交付中 Verification 唯一更新为本清单。
+
+## QA4 独立验证
+
+2026-11-14 Asia/Shanghai。Verification 以 fresh context 接收第四次 `developer_handoff`，独立读取根契约、canonical workflow、角色 TOML、前端作用域、完整任务 bundle、正式实现、差异及 Development 检查输出。使用 `project-governance`、`frontend-ui`、`i18n-workflow`，以本机 Playwright 驱动独立 Chrome。范围为 R04、AC09–AC10 的字段设置与使用说明，以及相应 AC12 前端检查。此前的业务、数据库和回归矩阵沿用 QA1–QA3。
+
+正式工作树 HEAD 为 `fd999224a8756feda314a33148304b4bf3461876`。核对获批 `spec.md` SHA-256 `bbaf4b2d47881f5db884b53846af47b40c11ad2a28dfb62015f40e624def83fa`、第四次交接 `tasks.md` `6f4f6a7f9d21b225c81891d2a4ab74f59f5cdd8dba16be2fe58c5d391d445bcd`、更新前 QA3 checklist `9ceac9dfb4dcfdbf23293c0666ab61343dd07accf80b784312fab81a93d959c4`。QA1–QA3 正文自 `# QA1 独立验证` 起的原字节 SHA-256 为 `d8f231fedb373ab41788149207a7be138236b45ff0e0fabfb3f83e5ce86fd4bf`，原样保留。
+
+第四次 scoped manifest SHA-256 为 `62d5e4bcf902766c09ce272320c43e5f6dcde2ea488b39a78fae101ac3f4a866`，patch 为 `35a4ade8fb10660b08c101cfc2b6079034772cc6a83ec8acb9ffcb801fd6894f`，共用弹窗 SFC 为 `84f4691cb6fcd9cab3936b8e6a572cbc7c3294dff5a8d0adfe65a79984787d54`。正式工作树 8/8 路径摘要匹配，独立临时副本反向恢复 8/8 preimage，正向重放 8/8 postimage。检查范围按第四次交接的实施前摘要判定，保留工作树其他并行差异。验证收尾时工作树 HEAD 已前进至 `21cd789277695bbafaa55c24e39261fc7247f9b0`，再次复算 8/8 交付文件、spec 与 tasks 摘要，均匹配原交接，正式树反向 patch 检查仍退出 0。 [第四次交接](tasks.md#第四次-developer_handoff--arch-task-001-r1-字段设置) · [范围清单](../../backend/data/maintenance-evidence/arch-task-001-r1-dev3307/field-settings-20261114/dev-scoped-manifest.json) · [范围差异](../../backend/data/maintenance-evidence/arch-task-001-r1-dev3307/field-settings-20261114/dev-scoped.patch)
+
+### 验收复核
+
+| 验收项 | QA4 结论 | 独立证据 |
+| --- | --- | --- |
+| R04 / AC10 末列与视口 | 通过 | 正常 `5190` 的 `/plan/list`、`/performance/list` 在 `1470×796`、`430×920` 分别使用真实语言开关复核中英文，共 8 组。横滚到右端后输入 65535，末列表头文字、输入区和数字增减控件两侧均通过 DOM 命中检查，横向滚动条可见，页面宽度等于视口。稳定字段键仅桌面固定。 |
+| R04 / AC10 列宽与本机草稿 | 通过 | 两页桌面分别实际拖动弹窗字段键列，宽度 190 → 232 px，关闭重开后仍为 232 px，恢复后为 190 px。隔离浏览器分别预置两页主表任务号列为 205 px，确认重置弹窗后显示宽度和本机偏好仍为 205 px。恢复默认保留尚未提交的顺序值。8 组均验证只在新增未保存行出现“移除草稿”，移除并关闭重开后不复活，已有其他编辑继续保留，仅新增后又移除则清除无变化草稿。 |
+| R04 / AC09 / AC10 保存请求 | 通过 | 直接从正常 `8000` 读取 v3/rev3，计划 4 项、实绩 5 项，两侧共享定义相同，前后完整响应一致。24 次 PUT 均由浏览器拦截，各 8 次对应当前模块顺序值 65535、清空为 `null`、已保存字段仅提交 `enabled:false`（加 scope/slotNo 标识）。现有顺序值均为空，清空用例在拦截层将实际 GET 的单项顺序模拟为 65535 再通过控件清空，正确显示“按槽位 / Use slot”。保存请求均包含模块及实际版本和修订号。真实业务写入为 0，版本发布证据沿用 QA2。 |
+| R04 / AC09 / AC10 使用说明 | 通过 | 对照两页实际六项勾选、三类字段组与三种实绩归属，核对“启用”、新旧版本、退用和复启、展示修订叠加、共享回写条件、下发必填参数和目标/版本映射。用源码确认未开放第三方集成时人工新建计划也校验目标版本与映射，DAA 采集和 SMA 或 CA / Field Flow 上报职责与合同一致。中英文 README 的指南链接及指南到公开合同的链接均有效。 |
+| AC12 前端回归 | 通过 | `pnpm check:modules`、`pnpm test:modules` 和隔离 `pnpm build` 均退出 0，62 passed、0 failed、0 skipped。两模块各 87 个 workflow 顶层键，中英文完整键结构相同，弹窗 literal key 和四个新增键均可解析。 |
+
+### 命令、限制与交接
+
+- macOS 15.7.7 arm64，Node v22.19.0、pnpm 11.11.0、Chrome 157.0.8103.78 和本机 Playwright `1.64.0-alpha-1789764292000`。默认沙盒探测回环失败，使用本机验证权限后正常服务 `5190/login` 与 `8000/openapi.json` 均 HTTP 200。CLI 离线缓存没有 `@playwright/cli`，使用本机已有 Playwright 模块。QA 探针早期登录字段和 DOM 时序断言退出 1，修正临时探针后完整运行退出 0，应用源码未改。
+- 在 `backend/` 由 `.venv/bin/python -B` 从项目设置读取管理员登录配置，经 stdin 传给 `node /private/tmp/arch-task-001-qa4.VL1pcw/browser.cjs <脱敏 JSON 路径>`。浏览器经正常 UI 登录一次，转发 148 个业务 GET，另直连 API 前后各读取两次配置；真实业务写入、意外写入请求和页面异常均为 0。独立浏览器及 context 已关闭，证据无凭据、任务号或真实字段名。浏览器结果 SHA-256 为 `b22f6a34bb3ee8f7075ea993c94c30d5bbb473c4e8d89562028ab0e212fe7945`。 [独立浏览器证据](../../backend/data/maintenance-evidence/arch-task-001-r1-dev3307/field-settings-20261114/qa4-browser.json)
+- `git diff --check`、`git apply --reverse --check --whitespace=error-all <scoped patch>` 和 `python3 /private/tmp/arch-task-001-qa4.VL1pcw/scope.py` 均退出 0。前端使用项目锁定依赖与 `pnpm_config_verify_deps_before_run=false VITE_SUPERVISOR_PAGE_ACCESS_JSON='[]' VITE_OPERATOR_PAGE_ACCESS_JSON='[]' VITE_FRONTEND_MOCK_ENABLED=false VITE_API_BASE_URL=/api/v1`，构建输出写入 `/private/tmp/arch-task-001-qa4.VL1pcw/dist`。模块测试输出两条既有测试夹具的 Vue 生命周期警告，构建有 Vite 大 chunk 提示。
+- 本轮未执行真实配置发布、数据库写入、迁移、服务重启或现场操作。后端验收矩阵、设备原生联调、部署及长稳运行沿用既有范围和证据边界。临时探针、日志和构建保留在上述 QA4 临时目录，持久结论及脱敏结果已落盘，临时目录交协调者按任务资源规则回收。
+
+QA4 对 **ARCH-TASK-001 r1 第四次交接**的 verdict 为 **`qa_passed`**，无 blocker。结果交 Human Owner 最终验收。Verification 仅更新本清单和上述本机脱敏浏览器证据。

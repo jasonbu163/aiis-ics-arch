@@ -3,7 +3,7 @@ Revision: r2
 Status: draft
 Owner Role: PM
 Allowed Writers: PM, Human Owner
-Handoff: PM -> Human Owner 总规格审阅；SMA-002 / SMA-003 既有候选已由各 checklist 核定 owner_accepted / qa_passed，SMA-004 r1 已获精确范围批准可交Development，本总规格仍draft
+Handoff: PM -> Human Owner 审阅 SMA-007 r1 rework-2 的独立验证结果并做最终验收。SMA-005 r1 待 Human Owner 手工完成隔离原生 GET 测试与重开等取证，再交独立 Verification 复核。POST 暂缓。SMA-006 r1 保留草案，SMA-002 至 SMA-004 已验收
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch.aw.sma
@@ -46,15 +46,28 @@ Human Owner 于 2026-11-04（Asia/Shanghai）明确授权：
 | --- | --- | --- |
 | ① 职责清理 | [SMA-002 r1](../SMA-002-scope-cleanup/spec.md)，checklist为 `owner_accepted` / `qa_passed` | [独立checklist](../SMA-002-scope-cleanup/checklist.md)已确认B1关闭、原af7140候选无漂移，Owner条件性接受仅此清理基线生效；原偏差/工具失败/blocked历史保留，不放宽未来真实profile禁令。 |
 | ② CU 接入 | [SMA-003 r1](../SMA-003-cu-integration/spec.md)，checklist为 `owner_accepted` / `qa_passed`；Depends On: SMA-002 | [独立checklist](../SMA-003-cu-integration/checklist.md#owner-acceptance-r1)已记录Owner明确验收，N1/N2恢复关闭与原分层限制保留；仅原ae9b3c候选生效，不代表配置独立化或GET→POST已完成。 |
-| ③ 配置独立化 | [SMA-004 r1](../SMA-004-local-configuration/spec.md)，`owner_approved`；Depends On: SMA-003 | Owner已精确批准本地配置与纯预览、暂时关闭正常投递；003前置接受已核定，可交Development，完成后仍须fresh独立验证及Owner终验，真实配置采用不在本次授权。 |
+| ③ 配置独立化 | [SMA-004 r1](../SMA-004-local-configuration/spec.md)，checklist 为 `owner_accepted` / `qa_passed`，依赖 SMA-003 | [Owner 验收](../SMA-004-local-configuration/checklist.md#owner-acceptance-r1)记录 2026-11-14 对 QA2 候选的验收，范围为本地配置、备份恢复和纯预览。正常投递关闭。 |
 
 以上子任务为本 namespace 内同一 SMA 能力、模块 Owner 和总验收链的范围切片，均 `child_inherited`。父子只复用上下文；每个 Task ID / Revision 独立取得范围批准、形成 DEV handoff、fresh Verification 和 Human Owner 接受，不继承批准或 verdict。
 
 子 spec 可先行准备，软件实施必须按上述顺序串行。SMA-002 交接实际变更、删除/保留清单、mapping 启动偏好及已触达展示 helper；SMA-003 已复用该基线，SMA-004 再以已接受CU候选为前提，避免重复整改或恢复退役能力。根 AGENTS 的表格/时间规则在各自实际触达范围持续适用。
 
+### 基于阶段③的 UI 调整
+
+| 子任务 | 首批范围 | 状态 |
+| --- | --- | --- |
+| [SMA-005 r1 页面交互](../SMA-005-page-interaction/spec.md) | #4 连接测试与保存分开、#6 运行能力状态 | 依赖 SMA-004。已[交接开发候选](../SMA-005-page-interaction/tasks.md#developer_handoff)。[独立验证](../SMA-005-page-interaction/checklist.md)为 `qa_blocked`，待 Human Owner 手工完成隔离原生 GET 测试、重开等取证后复核。 |
+| [SMA-006 r1 弹窗交互](../SMA-006-dialog-interaction/spec.md) | #7 框内错误、#8 关闭防误操作、#9 长正文滚动 | `draft`，依赖 SMA-004 |
+
+两个 UI 子任务各自提交范围批准。二者共享少量组件与文案，建议页面变更交接后，再在同一工作树处理弹窗的重叠文件。UI 可用隔离配置验证，阶段④–⑥继续按下表组织。其余 UI 优先级记在对应子规格的后续事项。
+
+### 基于阶段③的开发 profile 路径
+
+[SMA-007 r1 开发 profile 路径对齐](../SMA-007-dev-profile-path/spec.md)依赖 SMA-004。rework-2 候选在获批的离线范围内通过 AC01–AC05，结论为 `qa_passed`，待 Human Owner 最终验收。 [开发交接](../SMA-007-dev-profile-path/tasks.md#developer_handoff-rework-2) · [独立验证记录](../SMA-007-dev-profile-path/checklist.md)
+
 ## 4. 后续阶段：仅目标与依赖
 
-阶段③上述SMA-004 r1已精确获批，其实施与独立验证归自身bundle；以下④–⑥未创建软件 spec/bundle、未分配 Task ID，进入时再界定精确合同、范围、验收和风险，不在本总规格提前冻结新 API、并发数或重试参数。
+以下④–⑥尚未创建软件 spec 或分配 Task ID，进入对应阶段时再界定合同、范围、验收和风险。阶段③的实施、验证与验收记录见 SMA-004。
 
 | 顺序 | 目标 | 前置依赖与届时决定 |
 | --- | --- | --- |
@@ -89,7 +102,8 @@ Backend 拥有事实/业务 API，DAA 拥有采集/上传，均非 SMA 子任务
 | --- | --- | --- |
 | 2026-11-03 | r1 | 合并 CU/职责清理的未实施 draft，未获软件范围批准、未开发或 QA。 |
 | 2026-11-04 | r2 | 按§1授权重组；SMA-002/003 r1原候选均依各checklist核定owner_accepted/qa_passed。SMA-004 r1先形成draft，随后获Owner精确批准，可交Development。总spec仍draft，④–⑥未获软件批准；只同步事实，不改范围/顺序/关系/总体验收或r2。旧slug仅作链接兼容。 |
+| 2026-11-14 | r2 草案 | 同步阶段③的 Owner 验收。按本次起草要求登记 SMA-005 与 SMA-006 两份 r1 草案，分别记录首批问题及验收标准。 |
 
 [r1 原文归档](evidence/r1-before-task-split/spec.md) 只读保留，SHA-256：`2af6751eff91a9d082fd99fd058c4e90cd314be8f79708b3dd7b0ac6247544f6`；不追认批准，不作当前软件执行依据。
 
-文档重组阶段PM仅写三份spec；本次PM仅在SMA-004 r1登记Owner精确批准并最小同步本总规格的子状态/链接，不改SMA-002/003的spec/tasks/checklist。主协调负责索引并实际启动SMA-004 Development，DEV handoff后仍须fresh Verification。父任务不转移批准，④–⑥不随之获得授权或创建空bundle。
+2026-11-04 文档重组阶段 PM 起草了三份规格，随后登记 SMA-004 r1 的精确批准与子任务链接。SMA-004 的实施与 Verification 记录归其自身 bundle。2026-11-14 的两份 UI 草案由 PM 交 Human Owner 审阅，主协调同步索引。

@@ -217,6 +217,7 @@
   "runtimeAutoStartOnOpen": "打开 SMA 时自动启动",
   "apiFirstMappingRuntimeKicker": "collection_facts 绑定点消费端",
   "apiFirstMappingRuntimeTitle": "API-first 映射运行时",
+  "mappingDeliveryUnavailable": "当前仅支持配置和预览，映射投递未启用。",
   "apiFirstMappingRuntimeHint": "启动时锁定已启用 Mapping 与目标 API 配置。每轮重新读取该映射绑定的事实并发送 POST，相同值也发送；本轮完成后等待已保存的执行间隔。读取失败不发送旧值，下个周期重新读取。",
   "apiFirstMappingRuntimeSafety": "目标请求失败或结果不确定时不自动重放，只阻塞当前 Mapping。",
   "mappingRuntimeAutoStartHint": "保留打开应用时的启动偏好；本阶段原生准入仍拒绝任何自动投递，不是系统开机启动。",

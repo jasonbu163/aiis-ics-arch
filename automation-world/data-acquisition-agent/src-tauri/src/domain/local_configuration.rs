@@ -20,6 +20,20 @@ pub(crate) struct Configuration {
     pub groups: Vec<Group>,
     pub sources: Vec<SourceDocument>,
     pub storage: StoragePolicy,
+    #[serde(
+        default,
+        skip_serializing_if = "BTreeMap::is_empty",
+        deserialize_with = "display_name_map"
+    )]
+    pub point_display_names: BTreeMap<String, PointDisplayNames>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub catalog_bindings: Vec<super::plc_catalog::CatalogBinding>,
+    #[serde(
+        default,
+        skip_serializing_if = "BTreeMap::is_empty",
+        deserialize_with = "legacy_name_map"
+    )]
+    pub point_legacy_display_names: BTreeMap<String, String>,
 }
 impl Default for Configuration {
     fn default() -> Self {
@@ -31,8 +45,100 @@ impl Default for Configuration {
             groups: vec![],
             sources: vec![],
             storage: StoragePolicy::default(),
+            point_display_names: BTreeMap::new(),
+            catalog_bindings: vec![],
+            point_legacy_display_names: BTreeMap::new(),
         }
     }
+}
+/// 显示名属于配置而非 Point/PointFact；语言、空格及 Unicode 原样保存。
+#[derive(Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct PointDisplayNames {
+    #[serde(rename = "zh-CN", deserialize_with = "display_name")]
+    pub zh_cn: String,
+    #[serde(rename = "en-US", deserialize_with = "display_name")]
+    pub en_us: String,
+}
+impl PointDisplayNames {
+    pub fn empty(&self) -> bool {
+        self.zh_cn.is_empty() && self.en_us.is_empty()
+    }
+    pub fn valid(&self) -> bool {
+        self.zh_cn.len() <= 256 && self.en_us.len() <= 256
+    }
+}
+fn display_name<'de, D: serde::Deserializer<'de>>(d: D) -> Result<String, D::Error> {
+    let value = String::deserialize(d)?;
+    if value.len() > 256 {
+        return Err(serde::de::Error::custom("point_display_name_limits"));
+    }
+    Ok(value)
+}
+fn display_name_map<'de, D: serde::Deserializer<'de>>(
+    d: D,
+) -> Result<BTreeMap<String, PointDisplayNames>, D::Error> {
+    struct Names;
+    impl<'de> serde::de::Visitor<'de> for Names {
+        type Value = BTreeMap<String, PointDisplayNames>;
+        fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            f.write_str("a map of unique point IDs to display names")
+        }
+        fn visit_map<A: serde::de::MapAccess<'de>>(
+            self,
+            mut map: A,
+        ) -> Result<Self::Value, A::Error> {
+            let mut names = BTreeMap::new();
+            while let Some((key, value)) = map.next_entry()? {
+                if names.insert(key, value).is_some() {
+                    return Err(serde::de::Error::custom("duplicate point display name ID"));
+                }
+            }
+            Ok(names)
+        }
+    }
+    d.deserialize_map(Names)
+}
+fn legacy_name_map<'de, D: serde::Deserializer<'de>>(
+    d: D,
+) -> Result<BTreeMap<String, String>, D::Error> {
+    struct Names;
+    impl<'de> serde::de::Visitor<'de> for Names {
+        type Value = BTreeMap<String, String>;
+        fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            f.write_str("a map of unique point IDs to unlabelled display names")
+        }
+        fn visit_map<A: serde::de::MapAccess<'de>>(
+            self,
+            mut map: A,
+        ) -> Result<Self::Value, A::Error> {
+            let mut names = BTreeMap::new();
+            while let Some((key, value)) = map.next_entry::<String, String>()? {
+                if value.len() > 256 || names.insert(key, value).is_some() {
+                    return Err(serde::de::Error::custom("invalid legacy display name"));
+                }
+            }
+            Ok(names)
+        }
+    }
+    d.deserialize_map(Names)
+}
+pub(crate) fn validate_display_names(c: &Configuration) -> LocalResult<()> {
+    let mut counts = BTreeMap::new();
+    for point in &c.points {
+        *counts.entry(point.id.as_str()).or_insert(0usize) += 1;
+    }
+    for (id, names) in &c.point_display_names {
+        if !valid_id(id) || counts.get(id.as_str()) != Some(&1) || !names.valid() {
+            return Err("point_display_names_invalid".into());
+        }
+    }
+    for (id, value) in &c.point_legacy_display_names {
+        if !valid_id(id) || counts.get(id.as_str()) != Some(&1) || value.len() > 256 {
+            return Err("point_display_names_invalid".into());
+        }
+    }
+    Ok(())
 }
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -238,6 +344,13 @@ pub(crate) fn validate(c: &Configuration) -> Vec<Issue> {
 pub(crate) fn validate_for_runtime(c: &Configuration, runtime_version: u32) -> Vec<Issue> {
     let mut out = vec![];
     let mut err = |code: &str, path: &str| out.push(issue(code, path));
+    let catalog_dbs = match super::plc_catalog::verify_bindings(c) {
+        Ok(dbs) => dbs,
+        Err(_) => {
+            err("catalog_binding_invalid", "");
+            BTreeSet::new()
+        }
+    };
     if c.schema_version != 1
         || c.plcs.len() > 4
         || c.storage.quota_bytes < 128 * 1024 * 1024
@@ -376,18 +489,18 @@ pub(crate) fn validate_for_runtime(c: &Configuration, runtime_version: u32) -> V
             || !c.sources.iter().any(|s| {
                 s.id == d.source_id
                     && s.plc_id == d.plc_id
-                    && (d
-                        .import_binding
-                        .as_ref()
-                        .map(|b| {
-                            b.lineage_id == s.lineage_id.as_deref().unwrap_or(&s.id)
-                                && b.block_key.kind == "DATA_BLOCK"
-                                && b.block_key.name == d.name
-                                && b.udt_source_ids.iter().all(|i| {
-                                    c.sources.iter().any(|u| u.id == *i && u.plc_id == d.plc_id)
-                                })
-                        })
-                        .unwrap_or(false)
+                    && (catalog_dbs.contains(&d.id)
+                        || d.import_binding
+                            .as_ref()
+                            .map(|b| {
+                                b.lineage_id == s.lineage_id.as_deref().unwrap_or(&s.id)
+                                    && b.block_key.kind == "DATA_BLOCK"
+                                    && b.block_key.name == d.name
+                                    && b.udt_source_ids.iter().all(|i| {
+                                        c.sources.iter().any(|u| u.id == *i && u.plc_id == d.plc_id)
+                                    })
+                            })
+                            .unwrap_or(false)
                         || s.db_number == Some(d.number)
                         || s.name.ends_with(".yaml")
                         || s.name.ends_with(".yml"))
@@ -453,7 +566,9 @@ pub(crate) fn validate_for_runtime(c: &Configuration, runtime_version: u32) -> V
             err("incomplete_source", &p.id)
         }
         if !db
-            .map(|d| leaf_matches(&d.tree, &p.source_path, &p.data_type))
+            .map(|d| {
+                catalog_dbs.contains(&d.id) || leaf_matches(&d.tree, &p.source_path, &p.data_type)
+            })
             .unwrap_or(false)
         {
             err("point_source_mismatch", &p.id)
@@ -464,7 +579,8 @@ pub(crate) fn validate_for_runtime(c: &Configuration, runtime_version: u32) -> V
         };
         if !a.confirmed
             || a.reason.trim().is_empty()
-            || !matches!(a.origin.as_str(), "manual" | "inferred")
+            || !(matches!(a.origin.as_str(), "manual" | "inferred")
+                || (a.origin == "catalog" && catalog_dbs.contains(&p.db_id)))
             || a.offset
                 .checked_add(w)
                 .map(|e| e > 65536 || db.map(|d| e > d.length).unwrap_or(true))

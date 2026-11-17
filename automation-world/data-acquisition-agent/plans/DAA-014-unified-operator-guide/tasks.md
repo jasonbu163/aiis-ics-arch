@@ -257,3 +257,13 @@ fec92516e5b83023568a60bcc40992ab25510446c207f55eaeac37d7e5a03c22  automation-wor
 ```
 
 **返工 developer_handoff**：将精确 DAA-014 r1、上述正式工作树及 25 项摘要、本任务完整记录、QA1 checklist、双语手册与本轮自检交新的 fresh-context Verification；F-001–F-003 是否关闭由该角色独立判断。原 DAA-010 r5 qa_failed、Windows 原生、阶段 C、实际环境采用及 Human Owner 终验仍按各自 gate。
+
+## 7. 验收后 Windows 操作入口补充（2026-11-16）
+
+Human Owner 要求将 Windows 手动验证指导放入 `USER_GUIDE`。按获批 r1 的 R01 启动/profile 与 R02 手测范围，在中英文 DAA 手册增加对应的 Windows 源码启动与手动验证小节及顶部入口；复用现有第 2–5 节和 DS 手册，并链接已验收的 [Windows 原生验证记录单](../../WINDOWS_NATIVE_VALIDATION.zh-CN.md)。该记录单保持独立且未修改。新小节说明其首次自动建库验证要求测试 profile 原先不存在，与使用已有目录的目的不同；未将预建目录描述为并发问题修复或 Windows 已验证。
+
+正式共享工作树为 `/Users/jason/Desktop/DreamCode/aiis-ics-arch`，HEAD `21cd789277695bbafaa55c24e39261fc7247f9b0`；既有未提交文档和 DAA-015 手册增量作为起点保留。两份手册的修改前 SHA-256 分别为英文 `1aa85cf01edfee3cbd43d7ce70df4e27f0476bb537fe80b77c5b21ea97574d09`、中文 `ec4cd783a546486c68be598770c9ba99391d6cb90682be3c2ebd5af85a63210b`；仅去除新增导航链接与 Windows 小节后，逐字节恢复至相应摘要。修改后英文 SHA-256 `7cc06f6f74d57b6afd07aac034b0b3cded75e7daecbf3ef307f4780501528ba9`、中文 `bbf783fd15f213af53d49ce4f71546ca99fcac905e41d03240f3ccccdd2f183e`。原 `tasks.md` 在追加本节前 SHA-256 为 `0d34b37abbc66de3565a6e5ba67147d00b27cd0f1a11f309c875af525dcc0693`；原验收与交接事实保留。
+
+Development 自检：`python3 -B -` 在内存逆向核对两份起点摘要、检查两语新增标题和导航锚点、比对两份 PowerShell 命令及 DAA `package.json`、`tauri.conf.json`，并扫描两份手册共 22 处本地文件链接目标，退出 0；`git diff --check -- <两份手册>` 退出 0。当前 macOS 的 `command -v pwsh` 退出 1，PowerShell 命令仅静态对照、未执行。Tauri 官方 [Windows 前置条件](https://v2.tauri.app/start/prerequisites/#windows)及 [开发命令](https://v2.tauri.app/develop/)已核对；不声称 Windows 实机、构建、程序或后端验证。未运行 dev 联调、设备、HTTP、数据库、现有 profile 或应用；没有创建临时文件。
+
+本次为 Human Owner 后续指示的手册补充，不改变 DAA-014 r1 已有 `owner_accepted` 或把原 QA2 扩大到本次新增文字。将两份手册、本条精确差异和以上自检交 fresh-context Verification 单独静态核验；DAA-010 r5、Windows 原生及阶段 C 状态仍按各自记录。

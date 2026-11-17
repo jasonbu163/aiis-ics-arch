@@ -1,6 +1,6 @@
 # DAA User Guide
 
-[中文](USER_GUIDE.zh-CN.md) · [Quick start](README.md) · [Common acquisition-data guide](../../docs/acquisition-data-guide.zh-CN.md)
+[中文](USER_GUIDE.zh-CN.md) · [Quick start](README.md) · [Windows operation and verification](#windows-source-startup-and-manual-checks) · [Common acquisition-data guide](../../docs/acquisition-data-guide.md)
 
 This guide applies to source versions containing DAA-010 sample reporting and DAA-013 per-PLC bindings, with a backend that has adopted the corresponding source-registration contract. Use the deployment and authorization for the actual environment. This guide does not imply that every environment has been upgraded or accepted for field or production use. Follow the actual version's instructions for older clients or targets.
 
@@ -18,13 +18,17 @@ Confirm the DAA source, PLC or simulator, backend and Web belong to the permitte
 
 DAA and DS have separate profiles. If a compatible configuration and history already exist, check the directory actually selected by each app and the PLC endpoint, then continue in the original directories. An empty profile creates separate configuration and history. Do not delete the original directory or copy a sealed profile to manufacture an empty environment. Cold runtime2/3 profiles remain subject to their original admission checks and retain local collection and history without automatic reporting upgrade. Preserve the entire directory and investigate an unknown version, identity or time error.
 
-For source development, manually copy `.env.example` to `.env` in the DAA directory only if `.env` is absent; review an existing file yourself. If needed, set `DAA_PROFILE_DIR` to an absolute literal path, for example:
+For source development, manually copy `.env.example` to `.env` in the DAA directory only if `.env` is absent; review an existing file yourself. If needed, choose either a relative or an absolute literal path:
 
 ```dotenv
-DAA_PROFILE_DIR=/absolute/path/to/your/daa-profile
+# Choose one; the relative example is under the selected configuration file's directory.
+DAA_PROFILE_DIR=./.local/dev
+# DAA_PROFILE_DIR=/absolute/path/to/your/daa-profile
 ```
 
-A nonblank process `DAA_PROFILE_DIR` takes precedence over the selected `.env`; advanced `DAA_ENV_FILE` can select a different environment file. An empty value is unset, not an empty directory; paths do not expand `~` or environment variables. See [README](README.md#start) for startup and compatibility details.
+A nonblank process `DAA_PROFILE_DIR` takes precedence over the selected file's nonblank value; if both are blank or absent, the application default is used. Relative file and process values use that file's directory, not the command's working directory. If the default DAA-root `.env` is absent, its directory is still the base. Advanced `DAA_ENV_FILE` must select an absolute, readable file; an invalid selection fails without fallback. Paths do not expand `~`, variables or placeholders, and parent traversal and existing symlink components are refused. An empty value is unset, not an empty directory.
+
+On Mac, before using a new profile, pre-create the empty root under a writable parent you control. Prevent other processes from moving or replacing the parent or profile during first startup, and confirm the actual selection using the process value, selected configuration file and base above. DAA creates the SQLite files; do not create them yourself. An existing compatible profile keeps its original path, configuration, samples, pending queue, receipts and sealed identity; do not clear, copy or migrate it. If identity or admission fails, preserve the directory and follow the error. Pre-creation only avoids the specific automatic-creation window in [r5 QA2](plans/DAA-010-sample-facts-upload/checklist.md#f-r5-qa2-001-首次创建期间替换的空目录被封存为新-profile): the underlying race remains unfixed and other replacements are not proven safe. This source-development rule does not establish installed-package `.env` discovery or distribution; Windows native validation remains pending. See [README](README.md#start) for startup and compatibility details.
 
 Install the locked dependencies once in the DAA project and start normally:
 
@@ -35,6 +39,22 @@ pnpm tauri dev
 ```
 
 Run `cd` from the repository root. Afterwards, use `pnpm tauri dev` from the DAA project directory. If the app is already running with a checked profile, continue there. Startup follows the two saved workbench switches; saving or activating PLC configuration does not itself start collection.
+
+### Windows source startup and manual checks
+
+These steps are for later use on Windows 10/11 x64; native Windows validation has not yet been performed. Prepare the complete repository, Git, Node.js, the project-specified pnpm, the Rust Windows MSVC toolchain, Microsoft C++ Build Tools with the Windows SDK, and the WebView2 Runtime. See the [Tauri Windows prerequisites](https://v2.tauri.app/start/prerequisites/#windows).
+
+1. Confirm that DAA and DS select separate data directories. Check and retain any existing compatible directories. To select the DAA directory explicitly, set `$env:DAA_PROFILE_DIR = 'C:\AIIS\DAA\profile'` in PowerShell, replacing the example with your **absolute path**; this takes precedence over `.env`. For DS startup and profile selection, see the [DS user guide](../device-simulator/USER_GUIDE.md).
+2. From the repository root in the same PowerShell window, run:
+
+   ```powershell
+   cd .\automation-world\data-acquisition-agent
+   pnpm install --frozen-lockfile
+   pnpm tauri dev
+   ```
+
+3. Follow sections 2–3 to configure the simulated PLC, collection and reporting source, then sections 4–5 to check paused-collection reporting and concurrent collection/reporting. Check the reliable receipt and Web history for the same selected `sampleId`. Check existing configuration first; there is no need to recreate it.
+4. Use the [Windows native validation record](WINDOWS_NATIVE_VALIDATION.zh-CN.md) (Chinese) to record first initialization, close/reopen, exclusive locking and failure recovery. Its first automatic-initialization check requires a test profile that **does not already exist**; ordinary use of an existing profile serves a different purpose. Mark checks that were not performed as untested.
 
 ## 2. Configure one PLC and inspect a local sample
 
@@ -52,6 +72,18 @@ This synthetic example need not replace existing configuration. In DS use [minim
 4. In **Workbench**, select **Connect** for the PLC, then **Start collection**. After a few seconds choose **Pause collection**. Pausing collection and disconnecting are separate actions.
 5. Open **Reporting and storage → Local history**, filter by PLC, group and time, and choose **View sample** on a DB21 row. Check the three values, quality and collection times. Samples collected before the reporting binding is saved are **Local record only** and do not automatically enter the queue later.
 
+In the point editor, Chinese and English display names are independent of the technical name and comment. Enter either or both explicitly; an empty value stays empty, and each value is limited to 256 UTF-8 bytes. The list follows the top-bar language without saving the draft. Saving an edit uses the existing preview and draft confirmation; activate separately when needed. Display names do not enter the current v2 reporting body.
+
+### Use a PLC JSON exported by DS
+
+These are the steps for the current source candidate. Cross-application and native results belong to the [DAA-017 task record](plans/DAA-017-plc-json-import/tasks.md).
+
+1. Check each running DAA and DS process and its selected profile. When using the confirmed `.local/dev` for each app, record existing PLC, connection, collection and reporting states first. Stop if existing devices or real reporting could be triggered. Follow the [DS guide](../device-simulator/USER_GUIDE.md) to create an identifiable synthetic instance, save a revision and export that instance's JSON; record the revision, instance identity and file SHA-256. Use only your own `127.0.0.1` port; loopback works only on the same computer.
+2. In DAA open **Points and collection groups → Source files and complete structure**, choose **Import DS PLC JSON**, and select the actual DS export. No `.db` or `.udt` is needed again. Check the origin, export revision, input-file hash, client target, every DB and point, including disabled points, the unlabelled legacy name, both display names and the independent description. The exporter's declared configuration hash is not verified by DAA and does not establish device layout, file authenticity or network reachability. After changing the target, choose **Preview again**, explicitly confirm, then choose **Confirm creation and save draft**. The selected file object is read again before confirmation; if the bytes change or the read fails, select and preview it again. A browser may retain a file snapshot without exposing changes at the underlying path, so explicitly reselect a file you know has changed. Cancel does not save; existing origins, identities or the same file are rejected without merging or overwriting. If the result is unknown, reload the draft and source before deciding; do not retry blindly.
+3. The new PLC and points start disabled and ungrouped; source enabled values do not grant collection permission. Select the new PLC, add and enable a collection group, confirm its interval, select the required points and assign them to it; enable the new PLC under **PLC configuration**. Save the draft, explicitly activate, and confirm the checked scope. Catalog point sets, technical names, addresses and types cannot be overridden; display names, comments, grouping and enabled state use the existing preview. The JSON catalog does not fabricate a TIA tree.
+4. On the workbench choose **Connect** and **Start collection** only for this new PLC. In **Local history**, check the BOOL, INT and REAL identities, DB, addresses, values and quality, and confirm disabled points remain in configuration. This does not require reporting; actual network reporting follows sections 3–5 and its own authorization.
+5. Pause this collection and disconnect the test PLC. Use normal application operations to clean up only objects and export files confirmed to belong to this test. If an active revision or history refers to them, or removal could affect other data, retain and record them for a later decision. Do not delete the entire `.local/dev`, existing PLCs, history, queues or receipts.
+
 ## 3. Register the source and configure reporting
 
 First confirm the target backend has adopted the single-table source contract and that registration and reporting are permitted for this run. Sign in as an administrator to Web **Acquisition Data → Source Configuration** and add or reuse the source: `sourceType=daa`, for example `plcId=PLC-A`, `instanceId=daa-a`, `sourceGeneration=gen-a`. Use a generation never used for that PLC when registering a new source. If a backlog exists, check its original identity and the active registration before making changes; do not assign old samples a new generation.
@@ -67,7 +99,7 @@ One DAA can collect from multiple PLCs. Each has a separate backend row and a se
 
 1. Pause collection. In **Local history** or **Reporting records → View sample**, note the sample ID, local PLC, DB, time, values and quality of a sample collected **after binding**. An unfrozen sample's details do not show its individual reporting identity; the local instance, PLC and generation in the original sample do not substitute for it. If none is eligible, complete section 3, connect the PLC, collect briefly and pause, then select a new sample. Old local-only records do not become pending automatically.
 2. Before starting, inspect the reporting states and backlog. Start processes each eligible sample of enabled sources and may send more than one. An unfrozen sample may have no request body, target or receipt yet. For a frozen or attempted record, use **Delivery details** to check its available request body, target and receipt; the receipt remains empty until one is received. A frozen `prepared` sample with zero attempts may use the current new target after review and explicit resumption, keeping its body and identity. Attempted but unconfirmed samples retain their original target; see section 6 before changing it.
-3. Under **Facts delivery**, select **Start / resume reporting**. In the confirmation, compare the **current URL, contract and every listed source** against backend registration and the authorized scope, including instance, reporting PLC, DB and generation for any backlog that could send. The confirmation lists a set of sources; it does not map an individual `sampleId` to a row. If the target or any source cannot be verified, cancel and stop; confirm only after they are checked. Watch pending and unknown states; do not rely on the HTTP status or acknowledged count alone.
+3. Under **Facts delivery**, select **Start reporting**. In the confirmation, compare the **current URL, contract and every listed source** against backend registration and the authorized scope, including instance, reporting PLC, DB and generation for any backlog that could send. The confirmation lists a set of sources; it does not map an individual `sampleId` to a row. If the target or any source cannot be verified, cancel and stop; confirm only after they are checked. Watch pending and unknown states; do not rely on the HTTP status or acknowledged count alone.
 4. Open **Delivery details** on the selected sample and expand its read-only JSON. Check the reporting instance, PLC, generation and `sampleId` in the frozen request, then verify the receipt `instanceId` and `sampleId` match that request, `status=committed`, and `outcome=created` or `duplicate`. The local instance and PLC IDs in the original sample can differ from the reporting binding; do not confuse them. This is the sample's reliable confirmation; GET or HTTP 200 alone does not substitute for it.
 5. In Web **Acquisition Data → Acquisition History**, query using the **reporting PLC ID** from the frozen request (`PLC-A` in this example), the DB and the time range covering collection. Open the **same `sampleId`** and compare point values and quality. The local name `DEV-PLC-A` or local PLC ID is not a substitute for the reporting ID. Latest values may belong to a different sample and do not substitute for history reconciliation.
 

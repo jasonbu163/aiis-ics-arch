@@ -1,23 +1,95 @@
 # Generic Plan and Performance Tasks · First-Version Review Draft
 
-**MES order → Plan saved → CA/FF claims and dispatches → PLC acknowledges receipt → Production starts → DAA captures facts → SMA reports Performance → Write back to a matching Plan**
+**MES order → Plan saved → CA/FF or a third party queries and handles it → SMA or a third party reports Performance → Write back to a matching Plan**
 
 [中文](generic-task-workflow-discussion.zh-CN.md) · [Documentation index](README.md)
 
 This is the review draft for generic Plan and Performance tasks. Section 1 follows one order. Sections 6–9 cover tables, pages, interfaces and write-back. Section 10 records agreed decisions, the proposed cutover and open items. **Confirmed** means agreed in discussion. **Open for confirmation** means a first-version decision remains. **To verify** means implementation needs a practical check. Sections 6.1 and 11 point to existing source and contracts.
 
+> **New discussion direction, not implemented (2026-11-16):** The user chose to read and write both old and new tasks using currently enabled fields, retaining values for omitted fields. The proposed per-task configuration-version switch is no longer the direction. References below to creation-version binding, processing with the old version and individual switching are retained as prior design and current-code context, not the new direction. Editing already-dispatched orders, applying shared fields to existing Performance records, interfaces and integration changes remain under discussion and will be reconciled after confirmation. The existing spec's status is unchanged.
+
+> **New generic-task discussion direction, not implemented (2026-11-17):** SMA or a third party may report; generic task integration does not require a token, while the frontend still requires login. `producerId`, `targetKey` and `fieldConfigVersion` are optional. An unknown target stays empty and is not assigned to a line; see [section 8.1.1](#optional-integration-metadata). Performance `observationSeq` and `observedAt` are also optional; updates for the same task follow the backend's effective processing order. See [section 9.2](#performance-ordering) for the rules and ordering limits. Older interfaces and schemas below do not mean the new direction is available now.
+
+> **Latest clarification, not implemented (2026-11-17):** CA/FF or a third party only queries Plan through GET. Plan and Performance do not own claim, reservation, PLC dispatch or determining whether a push succeeded; the caller decides how to handle queried tasks. A Plan POST creates a missing task or updates only submitted fields on an existing task; it may explicitly submit `productionStatus`. A Performance POST synchronizes eligible shared values and production status to a matching Plan. The last effective status update processed by the backend wins: `running` can overwrite Plan `error`, and a valid `running` report after Performance `completed` updates Performance and its matching Plan. The initial status of a newly created Plan with existing Performance is a [proposal awaiting confirmation](#supplement-plan). Original claim, dispatch state, receipt and recovery sections below remain prior-discussion and current-source context, not this new direction.
+
 ## Reading guide
 
+- [New direction: pages, tables, interfaces and flow](#new-direction-overview)
 - [Follow one order](#workflow) · [Task numbers and repeated submissions](#task-identity)
 - [Plan states and edits](#editing) · [Changes, pause and cancellation](#order-changes)
 - [PLC handshake](#plc-conditions) · [Recovery after timeout or restart](#recovery)
-- [Tables and fields](#storage) · [Configuration changes and old tasks](#field-config-evolution) · [Capacity, types and storage checks](#field-capacity-types)
+- [Tables and fields](#storage) · [Configuration changes and old tasks](#field-config-evolution) · [Switching a task's configuration version](#task-field-version-switch) · [Capacity, types and storage checks](#field-capacity-types)
 - [Physical schema](#task-schema) · [List and claim indexes](#task-indexes) · [Requests and responses](#task-api-details)
-- [Lists and settings entrypoints](#pages) · [Equipment status and process monitoring](#field-config-alignment)
-- [Interfaces for each caller](#interfaces) · [Performance persistence and write-back](#writeback)
+- [Lists and settings entrypoints](#pages) · [Deleting saved fields and reusing slots](#field-removal) · [Equipment status and process monitoring](#field-config-alignment)
+- [Interfaces for each caller](#interfaces) · [Optional source, target and version](#optional-integration-metadata) · [Performance persistence and write-back](#writeback)
 - [Supplemental Plan creation](#supplement-plan) · [Task changes, late reports and duplicates](#performance-ordering) · [Inheritance, write-back and ownership](#performance-writeback)
 - [First-version decisions](#open-questions) · [Review scenarios](#first-version-recommendations)
 - [Legacy coil cutover](#legacy-cutover) · [First-version acceptance](#first-version-acceptance) · [Source and contracts](#references)
+
+<a id="new-direction-overview"></a>
+
+## Review of the new direction: pages, tables, interfaces and flow
+
+This section brings together the Plan and Performance direction under discussion. **It is not an existing feature or an approved implementation specification.** Later sections retain the old bound versions, required fields and dispatch workflow for comparison; where they differ, they do not define the new direction.
+
+```mermaid
+flowchart LR
+    ADMIN["Admin: local / shared field settings"] --> CFG["Field definitions: keys, labels, types and write-back"]
+    MES["MES / third party"] -->|"Submit Plan by task number"| PLAN["Plan: plan_main"]
+    CFG -. "Interpret fields" .-> PLAN
+    PLC["Site production / acquisition"] --> SENDER["SMA / third party"]
+    SENDER -->|"Submit Performance by task number"| PERF["Performance: performance_main"]
+    CFG -. "Interpret fields" .-> PERF
+    PERF --> MATCH{"Matching Plan?"}
+    MATCH -->|"Yes"| SYNC["Write back enabled shared values and production state"]
+    SYNC --> PLAN
+    MATCH -->|"No"| KEEP["Keep Performance; optionally add Plan later"]
+    PLAN --> UI["Plan list / details"]
+    PERF --> UI2["Performance list / details"]
+```
+
+### Page responsibilities
+
+| Page | Main content and actions |
+| --- | --- |
+| Plan list | Filter by task number and other fixed fields; display fixed information and configured Plan-local and shared columns; view, create or edit under permissions. An unknown target displays `—`. |
+| Performance list | Filter by task number and other fixed fields; display production status, Plan presence, configured Performance-local and shared columns; view details or edit manual fields under permissions. An unknown collection time displays `—`. |
+| Each list's field settings dialog | Plan manages Plan-local fields only; Performance manages Performance-local fields only. Only administrators can modify them. |
+| Shared field settings | Both modules navigate to the same page and manage the same shared definitions. Only administrators can modify them. See section 7 for labels, type, enablement, display and write-back. |
+
+Both lists retain three areas: title and actions, filters, and result table. Shared fields have one definition, but Plan and Performance save their own business values; the write-back switch controls synchronization. `productionStatus` is a fixed field synchronized from Performance facts to matching Plan, not a disableable custom field.
+
+### Table responsibilities
+
+| Table | What it holds |
+| --- | --- |
+| `plan_main` | Fixed information for one Plan plus two JSON objects: shared `sync_values` and Plan-local `local_values`. |
+| `performance_main` | Fixed information for one Performance record plus its own shared `sync_values` and Performance-local `local_values`. |
+| `task_field_definitions` | Definitions for shared, Plan-local and Performance-local fields: slot, stable key, bilingual labels, type, enablement, editability, display and write-back. |
+| `task_field_config_state` | Current field configuration state and the revision used when administrators save changes. |
+
+Each main table uniquely identifies a business record by `task_no`; write-back matches that number, **without a foreign key between the main tables**. Each has up to 100 logical shared and 100 local slots, not 200 SQL columns. Existing dispatch attempts and operator actions have separate supporting tables; whether to retain the original dispatch flow needs a separate review.
+
+For example, shared 01 is product code, shared 02 target length, shared 03 completed length, Plan-local 01 customer order number and Performance-local 01 current speed. If the first two are configured as order values inherited when Performance is first created, and the third has Performance-to-Plan write-back enabled, task 001 after 300 metres can be understood as:
+
+| Table | `task_no` | `target_key` | `sync_values` | `local_values` |
+| --- | --- | --- | --- | --- |
+| `plan_main` | `001` | `NULL` | `{"01":"PRODUCT-A","02":"1200","03":"300"}` | `{"01":"MES-001"}` |
+| `performance_main` | `001` | `NULL` | `{"01":"PRODUCT-A","02":"1200","03":"300"}` | `{"01":"78.5"}` |
+
+This is a conceptual illustration, not final migration SQL. Fixed times, states and other fields retain their own meanings; `last_observed_at` is a fixed Performance field. Changes to the record's version and source columns remain to be designed. Shared values are stored separately; not every shared field overwrites the other module.
+
+### Interface responsibilities
+
+| Caller | Interface direction | Purpose |
+| --- | --- | --- |
+| Frontend | `GET /api/v1/plans`, `GET /api/v1/performances`, and related interfaces | Use a login token to query lists and details and act within permissions. |
+| Frontend administrator | Field configuration reads and saves | Manage both local groups and the same shared definitions. The split interface shape remains to be designed. |
+| MES / third party | `POST /api/v1/integration/plans/upsert` | Create a Plan by task number or update fields permitted for editing. |
+| SMA / third party | `POST /api/v1/integration/performances/upsert` | Create Performance by task number or update submitted fields. |
+| Integration caller | Both `GET .../by-task/{taskNo}` interfaces | Read Plan and Performance respectively: order and synchronized progress versus actual production. |
+
+The new discussion direction does not require tokens for generic task integration; frontend interfaces still use login tokens. New `items` examples are in sections 8.3 and 8.5. The existing integration GET queries by task number. The new direction proposes a Plan list query filterable by production status; its exact path and response remain open. A query does not claim a task, change its state or determine the PLC push result.
 
 <a id="workflow"></a>
 
@@ -31,7 +103,7 @@ Suppose MES orders task `JOB-20261107-001` on `LINE-01` with a target length of 
 | Claim | CA/FF sees the agreed site condition and claims the task. The backend freezes a copy of the parameters for that attempt. | The Plan is claimed. The attempt uses the frozen parameters. |
 | PLC acceptance | CA/FF stages the task and parameters and then writes the request sequence. The PLC acknowledges acceptance and CA/FF verifies and reports it. | The Plan shows “PLC accepted.” Production shows “Not reported” until a production report is accepted. |
 | Actual start | The site starts production. The PLC changes the active task number, and DAA captures, stores and uploads the facts. | Production state refreshes once the backend accepts Performance. |
-| Performance report | SMA maps data under the task number in the sample. The backend creates Performance on the first valid report and then updates the same record. | Performance shows “Running” and 300 metres produced. |
+| Performance report | SMA or a third party reports data under the task number. The backend creates Performance on the first valid report and then updates the same record. | Performance shows “Running” and 300 metres produced. |
 | Plan write-back | The backend finds the matching Plan and copies feedback allowed by its settings into the matching positions. | The Plan can show the 1,200-metre target and 300 metres produced together. |
 | Completion | The site retains the final snapshot with its original task number. SMA submits final values and the completion fact. | Performance shows “Completed.” Plan shows the final feedback allowed by the write-back rules. |
 
@@ -51,6 +123,7 @@ flowchart TB
     DAA --> FACTS["Upload to the backend facts interface"]
     FACTS --> SMA["SMA maps and reports by task number"]
     SMA --> PERF["Backend saves Performance"]
+    EXTERNAL["Third party reports by task number"] --> PERF
     PERF --> MATCH{"Matching Plan?"}
     MATCH -->|Yes| SYNC["Write back permitted shared feedback"]
     MATCH -->|No| KEEP["Save Performance, with optional human Plan creation"]
@@ -71,7 +144,7 @@ CA and FF both serve the field execution role in this flow. The project chooses 
 | `taskNo` | Business identifier for one production task. A Plan and a Performance record can have the same number. |
 | `targetKey` | A line or receiving area that can be dispatched independently, such as `LINE-01`. Provide it on Plan creation and Performance reports. Claiming a Plan locks the target. |
 | `dispatchId` | Identifier for one claim and dispatch attempt. A verified redispatch uses a new attempt. |
-| `observationSeq` | Sequence within a task's automated observations. It distinguishes later reports from duplicates and late arrivals. |
+| `observationSeq` | A sample sequence supplied by the reporter. The current interface requires it to identify order and retries; the new direction makes it optional and uses backend processing order. See section 9.2. |
 
 The first version uses one project per deployment. Each main table enforces task-number uniqueness across that project, including all its lines. Trim surrounding spaces, uppercase English letters and validate the result. Use 1–50 characters drawn from English letters, digits, hyphens, underscores and periods. Keep the number assigned at creation. Rework and new runs use new numbers. Coil, product and customer order identifiers can remain business fields. Validate the task-number encoding and length against the PLC point list at dispatch.
 
@@ -87,9 +160,9 @@ The backend matches by project and `taskNo`. Each table has its own internal `id
 | Explicit `0`, `false` or an empty string | Validate each as an actual value. |
 | Explicit `null` | Clear the value when the field permits clearing. |
 | Same values submitted again | Return success with no change and keep the business update time. |
-| Invalid field, type or unauthorized change | Reject the entire submission. State, same-sequence content or configuration-version conflicts use `409`. |
+| Invalid field, type or unauthorized change | Reject the entire submission. State and configuration-version conflicts can use `409`; see section 9.2 for the new Performance reporting direction. |
 
-For example, while A is pending, MES can submit only a revised target of 1,250 metres and keep the other values. If CA/FF claims it first, the backend applies the locked state. A unique constraint handles concurrent creation, and backend transactions govern claim and edit races. Automated SMA reports also follow the sequence rules in section 9.2.
+For example, while A is pending, MES can submit only a revised target of 1,250 metres and keep the other values. If CA/FF claims it first, the backend applies the locked state. A unique constraint handles concurrent creation, and backend transactions govern claim and edit races. Section 9.2 describes the new Performance reporting order.
 
 <a id="editing"></a>
 
@@ -332,16 +405,16 @@ A field definition returned to the frontend can look like this. SMA reports the 
 | --- | --- | --- |
 | `id` | Both | Backend-generated internal primary key. |
 | `task_no` | Both | Normalized task number, unique per table. The API uses `taskNo`. |
-| `target_key` | Both | Line or receiving-area key. The API uses `targetKey`. |
-| `field_config_version` | Both | Business field version bound to the matching task. |
+| `target_key` | Both | Line or receiving-area key. The API uses `targetKey`. The current tables require it; the new direction allows an unknown target to remain empty. See section 8.1.1. |
+| `field_config_version` | Both | The current table records the task-bound field version. The new direction uses currently enabled configuration; whether and how to retain this column remains to be designed. |
 | `remark` | Both | Nullable remark saved under business edit permissions. |
 | `created_at`, `updated_at` | Both | First persistence and most recent actual update in the backend. |
 | `priority`, `dispatch_status` | Plan | Order priority and dispatch state. Claims, valid acknowledgements and human actions advance the state. |
 | `production_status` | Both | Performance records accepted production state. Plan stores progress maintained by the backend and uses null before any report. |
 | `started_at`, `completed_at` | Performance | Actual start and completion times. Leave them empty when the source lacks exact times. |
-| `last_observed_at` | Performance | Time of the most recent accepted sample, taken from `observedAt`. |
-| `observation_seq`, `observation_digest` | Performance | Last accepted automated sequence and content digest for handling late and duplicate reports. |
-| `record_source` | Performance | Backend records the source that created the record. |
+| `last_observed_at` | Performance | Fixed field for the actual collection time of the latest sample report, taken from `observedAt`; not a shared or local custom field. It is empty when the actual time is unknown. See section 9.2. |
+| `observation_seq`, `observation_digest` | Performance | The current structure stores the last accepted automated sequence and digest to handle late and duplicate reports. The new direction makes the sequence optional and uses backend processing order; the storage changes remain to be designed. |
+| `record_source` | Performance | The current table records the creation source and only permits `sma` or `ca_ff`; the new direction needs to allow third-party and unknown sources. |
 
 Plan has 10 fixed fields and Performance has 14. Performance derives `hasPlan` by looking for the same task number. The dispatch attempt stores the first time CA/FF observed a valid acknowledgement for that attempt.
 
@@ -349,7 +422,7 @@ For example, DAA observes 300 metres at 10:30:00 and the backend accepts the upd
 
 <a id="field-config-evolution"></a>
 
-### 6.5 Which version applies to an existing task
+### 6.5 Prior design: which version applies to an existing task
 
 If A was created under V1, its first Performance record uses V1 even if it arrives after V2 goes live. If Performance came first, a supplemental Plan uses the Performance version. The backend retains definitions referenced by tasks and applies the bound fields, types, writers and write-back rules.
 
@@ -360,6 +433,30 @@ If A was created under V1, its first Performance record uses V1 even if it arriv
 | Add, disable or re-enable a field, or change write and write-back rules | Save a new business version for tasks first created afterward. Existing tasks use their bound version. |
 
 Disabled slots retain their definitions and history and count toward capacity. Re-enabling a slot restores its original field. For example, if V2 disables shared slot 03, A can still report and write back under V1. New V2 tasks use the V2 enabled set.
+
+The first version uses disablement to retire saved fields. The [proposed deletion and slot reuse flow](#field-removal) covers saved fields added by mistake whose versions have no task or dispatch references.
+
+<a id="task-field-version-switch"></a>
+
+#### 6.5.1 Letting task B use a re-enabled field
+
+**Prior discussion proposal, superseded by the new direction at the top and not implemented.** B was created under V2 while a field was disabled. Re-enabling the original field creates V3, but B stays on V2 automatically. The prior proposal allowed an administrator to separately switch B's field configuration version if B needed the field. V2 would not be rewritten and other tasks would not switch automatically. It would change the business configuration version for the whole task, not one field switch on B alone. The following remains as prior-design context, not a feature currently planned under the new direction.
+
+**All eligibility conditions must hold:**
+
+1. B is paused, has no production fact or Performance record with the same task number, and has never been claimed by CA/FF; there is no historical dispatch attempt.
+2. The target is the currently active new version. Comparing B's version with that version, the only business-definition difference across all fields is that **the same original field changes from disabled to enabled**. Field group, slot, stable key, type, unit, nullability, writer ownership, editing, write-back and all other business rules are unchanged. Current labels, list visibility and ordering follow the existing display rules and do not count as business-definition differences.
+3. The target's dispatch and automatic-reporting integration configuration is ready and supports the target version; simulated tests use a corresponding simulated configuration. The operator has administrator permission.
+
+**Flow.** The administrator opens B's details from the Plan list and first pauses it if it is pending. “Switch field configuration version” shows the task number, current and target versions, field differences and eligibility checks. On confirmation, the backend rechecks permissions, version, state, claim history and Performance, then commits the switch and its action record in one transaction. Failed checks leave the version unchanged and show the actual reason. Concurrent claims or Performance creation must be reconciled within the backend transaction so stale check results cannot authorize a switch.
+
+After a successful switch, B keeps its task number and existing values. The re-enabled field initially has no value; the system does not invent history for the disabled period. The target version still determines who can fill it, edit it and write it back. B **remains paused**. Once required dispatch values and integration settings are ready, an authorized person separately resumes dispatch. A later matching Performance record uses B's switched version.
+
+The switch record retains at least task number, operator, time and old and new versions. Field-deletion eligibility must also consider these historical version bindings; switching a task cannot make its former binding appear never to have existed.
+
+**Not supported in this first proposal.** Claimed or previously claimed tasks, including an attempt verified and returned to paused; PLC-accepted tasks; tasks with Performance or production facts; and cancelled tasks cannot switch. Other business-definition differences, an unready integration configuration, or a state or active-version change after preview also block the switch. The page explains the reason; an administrator may check again after resolving it. A future switch for tasks already producing or with Performance needs a separate discussion of in-flight reports, version conflicts and write-back; do not edit the database version directly.
+
+For example, shared slot 03 “Completed length” is disabled in V2 when B is created and re-enabled in V3; other business definitions match. If B has never been claimed, has no Performance, is paused and the target configuration is ready, an administrator can switch B to V3 after the checks. B remains paused and an authorized source later fills or reports slot 03. If B was previously claimed, a later return to paused does not make this proposal applicable.
 
 <a id="field-capacity-types"></a>
 
@@ -394,7 +491,7 @@ The data directory was in memory. The temporary container was confirmed removed 
 
 ### 6.7 First-version physical schema
 
-The first version uses the agreed tables, column types and constraints below. Each main table has two JSON value columns. The design uses MySQL 8.4.6, InnoDB, `DYNAMIC` and `utf8mb4`, with one project per deployment. ASCII key columns use `ascii_bin`. Normalize task numbers as in section 2. `targetKey` is a registered project key. Both `targetKey` and `producerId` use 1–64 ASCII letters, digits, periods, underscores or hyphens, matched with their original case.
+The original first-version tables, types and constraints below are retained for comparison with the current implementation. The new reporting direction in section 9.2 requires a further decision on sequence-related columns, so this is not its final schema. Each main table has two JSON value columns. The design uses MySQL 8.4.6, InnoDB, `DYNAMIC` and `utf8mb4`, with one project per deployment. ASCII key columns use `ascii_bin`. Normalize task numbers as in section 2. `targetKey` is a registered project key. Both `targetKey` and `producerId` use 1–64 ASCII letters, digits, periods, underscores or hyphens, matched with their original case.
 
 Record times use `DATETIME(6)` to retain source precision up to microseconds. Creation and update times use the database clock. Both can default to `CURRENT_TIMESTAMP(6)` on insert. The backend advances `updated_at` on an actual change. Align database time with the project contract for `Asia/Shanghai`. Start, completion, sample and acknowledgement times come from their respective sources. API responses return these times with `+08:00`.
 
@@ -501,11 +598,15 @@ The sample tables in section 6.6 verified the target, state and time index patte
 
 Both lists support exact matching by task number and target key, state filters and a creation time range in Shanghai time. The backend filters and sorts before pagination. Default to descending creation time, with an ascending option. Break ties with `id` in the same direction. Settings select custom values for display, with the full set in details. List filters and sorting use fixed fields.
 
-Plan and Performance each have an admin field settings entrypoint. They reuse the component and configuration API. Plan exposes shared and Plan-local settings. Performance exposes shared and Performance-local settings. Both edit the same definition for shared slot 03, and the other entrypoint sees the change when reloaded.
+**New discussion direction; not implemented.** The Plan and Performance lists keep the existing field-settings dialog, each managing only its own local fields; no additional local-settings page is needed. Both module menus provide “Shared field settings,” opening the same page and reusing the table-editing interaction to read and save one shared configuration. The current dialog mixes shared and local fields and needs changes to match this direction.
+
+**Suggested settings, pending confirmation.** All three retain the field key, Chinese and English labels, type, unit, enabled and clearable flags, plus the relevant list visibility and order. Plan-local settings include Plan editing. Performance-local settings include the Performance source (automatic or manual) and manual editing. Shared settings additionally cover visibility, order and editing rules for each list, Performance source (inherited from Plan, automatic or manual), and “write back to Plan.” Enabled, list visibility and write-back are independent. `productionStatus` is a fixed business field, not an enableable custom field.
+
+Suggested operations retain add, save, cancel, draggable headers, horizontal scrolling and resetting the current table's widths. Unsaved fields can be removed as drafts; deletion and disablement of saved fields follow the discussion in [section 7.2](#field-removal). Exact row layout, deletion entry and the way historical use is checked under the current-configuration direction are still open. Only administrators can modify settings.
 
 **On save**, the backend checks admin permission, scope, capacity and name uniqueness and merges the submitted scope atomically. It checks the revision read by the page and asks the editor to reload if someone saved in the meantime. Field enablement, feedback write-back and list visibility are separate settings.
 
-The frontend reads types, units and permissions from the task's version and uses the current bilingual labels. Fixed text and state labels use frontend i18n. Ordinary columns can be resized, with minimum widths, horizontal scrolling, local persistence and a reset action. Personal visibility and widths use stable field identities and are restored when the page or app reopens. Refresh keeps filters, pagination, widths and unsaved edits. Display times in `Asia/Shanghai` using a 24-hour clock, and label observation and actual update separately.
+The current implementation reads types, units and permissions from the task's bound version and uses current bilingual labels. The new discussion direction uses currently enabled fields; implementation details remain to be decided. Fixed text and state labels use frontend i18n. Ordinary columns can be resized, with minimum widths, horizontal scrolling, local persistence and a reset action. Personal visibility and widths use stable field identities and are restored when the page or app reopens. Refresh keeps filters, pagination, widths and unsaved edits. Display times in `Asia/Shanghai` using a 24-hour clock, and label observation and actual update separately.
 
 <a id="field-config-alignment"></a>
 
@@ -515,6 +616,30 @@ Plan and Performance find task fields by `name`. Equipment status and process mo
 
 The editor could share support for business keys, bilingual labels, type, unit, default visibility and order. Plan and Performance also need write-back and edit permissions. Equipment and process settings also need grouping, page display and history delivery rules. Each domain has its own configuration entrypoints and business meaning. The shared editor scope is open.
 
+**Cross-module reference; the equipment live and process discussion owns its detailed decisions.** The suggested direction is to show a live value with `—` for an unknown collection time, and never substitute creation or update time on a process curve. A sample without time cannot be placed directly on a time axis: only when its position between two known samples is reliable can their connecting line be broken, without inventing a time coordinate for the missing point; otherwise omit the point and indicate that the time is missing. Fill a time later only if the original time and corresponding sample can be verified. Equipment and process storage, interfaces, line breaks and backfill remain separate discussion items. The current equipment observation ingest still requires `sampledAt`; this is not implemented. [Equipment status and process monitoring](equipment-status-process-monitoring.md)
+
+<a id="field-removal"></a>
+
+### 7.2 Deleting saved fields and reusing slots
+
+**Confirmed eligibility rule.** Use the field group, slot and stable field key to find every version that contains the definition. Any Plan, Performance or dispatch attempt bound to one of those versions limits the field to disablement. Blank values, a disabled definition in that version, completed or cancelled tasks and closed dispatch attempts all count. Tasks bound only to versions before the field was added leave it eligible for the remaining deletion checks.
+
+**Proposed UI.** An administrator manages local fields from the corresponding Plan or Performance dialog. Shared fields use “Shared field settings” from either module and the same eligibility check on the shared page.
+
+| Field state | Row action or message |
+| --- | --- |
+| New and unsaved | **Remove draft** removes the new row from the local draft. |
+| Saved and eligible for deletion | Show **Delete field**. The confirmation identifies the field label, key and slot. For example, “Deleting this field frees shared slot 08 for a new field.” Confirmation submits the deletion. Resolve other unsaved edits first. |
+| A task or dispatch attempt is bound to a version containing the field | Show **Disable only** and the reason. For example, “A Plan uses configuration version 4. Clear Enabled and save to disable this field.” Name Performance or a dispatch attempt when it supplies the reference. |
+| A dispatch or integration mapping still uses the field | Show “A dispatch or integration mapping uses this field. Update the mapping first.” The backend checks the project dispatch mappings it can see. The administrator checks keys already configured in MES or SMA. |
+| A new reference appears or someone saves the configuration while the dialog is open | Return the actual reference reason and show **Disable only** when the field becomes referenced. On a stale revision, show “Field settings have changed. Reload and try again.” Keep unsaved edits available for review. |
+
+**Proposed submission and reuse.** In one transaction, the backend locks the configuration state, checks the current version, revision and field identity, then checks the versions bound to Plans, Performance records and dispatch attempts. Task creation and deletion use the same configuration lock, so the first commit determines whether the next operation can proceed.
+
+Successful deletion removes the field from a new active version and advances the configuration revision. Older snapshots remain available for traceability. After both dialogs reload the configuration, the slot is selectable again within its original group. Use **Add field** to select the slot, enter a new stable key, type and labels, then save to activate the next version. The original version still interprets historical values. Check the stable field key when applying display settings, so a new field in the same slot does not replace old labels or ordering. Recreating the same stable key remains open.
+
+For example, A and B are bound to v3 and shared slot 08 was added by mistake in v4. If no business record references v4 or any later version containing that field, and the integration mapping checks pass, deletion frees shared slot 08 in v5. A replacement can use that slot in v6. If a v4 Plan exists, the field can only be disabled even if slot 08 has always been blank. When continuing simulated orders in dev, configure the target mapping for the actual active version and use that version as the request's `fieldConfigVersion`.
+
 <a id="interfaces"></a>
 
 ## 8. Interfaces and data for each caller
@@ -523,16 +648,36 @@ The editor could share support for business keys, bilingual labels, type, unit, 
 
 | Caller | First-version rule |
 | --- | --- |
-| Signed-in frontend user | Use the relevant permissions for queries, task edits and manual actions. |
+| Signed-in frontend user | Use a login token and the relevant permissions for queries, task edits and manual actions. |
 | Admin | Sign in with admin permission to save field definitions. |
-| MES, CA/FF and SMA generic task calls | Use the generic task integration entrypoints without the frontend login token. |
+| MES, CA/FF, SMA or third-party generic task calls | Use generic task integration entrypoints. The current discussion direction requires no Bearer token and adds no other token authentication. SMA or a third party can report Performance. |
 | DAA fact uploads and SMA fact reads | Follow the acquisition facts contract for the relevant integration. See section 8.2 for current entrypoints. |
 
-The backend checks field types, state, entrypoint and eligibility. `producerId` supports tracing, and `dispatchId` identifies the attempt. Management entrypoints check management permissions separately. Frontend and integration adapters use the same business rules. Performance writes back through the Plan business service. When both use one database, Performance, the accepted sequence and permitted write-back commit together.
+The backend checks field types and state. `producerId` identifies the source; it is not a token or secret. The current implementation still checks target and reporter configuration; the new optional-field rules follow below. `dispatchId` identifies the attempt. Management entrypoints check management permissions separately. Frontend and integration adapters use the same business rules. Performance writes back through the Plan business service. When both use one database, Performance and permitted write-back commit together. The token-free direction applies only to generic task interfaces and does not change the DAA facts interface or other modules' authentication contracts.
+
+<a id="optional-integration-metadata"></a>
+
+#### 8.1.1 Optional source, target and version
+
+**Agreed discussion direction, not implemented.** These rules apply to MES / third-party Plan writes and SMA / third-party Performance writes. Omission or `null` means the caller did not provide the field this time. The interface and database changes require further design.
+
+| Field | When omitted | When supplied |
+| --- | --- | --- |
+| `producerId` | Source is unknown. Do not reject the write for its absence or guess SMA versus third party. | A caller-provided source label that can be logged for troubleshooting; it is not authentication, a password or a token. |
+| `targetKey` | A new Plan with no known target stays empty. Performance can use a known target on the matching Performance or Plan; if neither is known it stays empty. An omitted value does not clear a saved target. | A real target can be recorded. If it conflicts with the known target of existing Performance or matching Plan, reject the request and identify the conflict; a later change follows Plan state and operator rules. |
+| `fieldConfigVersion` | The backend uses one currently active configuration to validate all fields in this request. | Treat it as additional information. Do not select an old configuration or reject merely because it differs from the current version. Returning the actually used version for troubleshooting is a suggestion; the response field remains open. |
+
+An empty target is not a default line. The list shows `—` and must not assign it to `LINE-01` automatically. If Performance has a target and Plan does not, save it on Performance only; this rule does not automatically write the target to Plan. If existing Plan and Performance targets already conflict, surface that inconsistency instead of choosing one. Validation, persistence and write-back in one database must stay consistent.
+
+Line-specific claim or dispatch requires the actual target; an untargeted Plan does not enter a line's queue automatically. Whether and how to retain the original CA/FF claim interface remains open; this section does not make its `targetKey` or executor fields optional. Performance still saves without a Plan, and a later Plan follows the supplemental rules in section 9.1.
+
+Whether or not the request includes a version, the backend identifies submitted `items` using currently enabled fields. Unknown, disabled or mistyped fields produce a specific error and reject the whole write, with no partial update to other fields or production state. Omitted business values remain unchanged.
+
+**Difference from current implementation.** The current Performance interface requires all three fields, checks against the task-bound version and validates target / reporter configuration. Current Plan creation also requires a target, version and integration reporter. Both main tables currently require `target_key`, and Performance `record_source` permits only `sma` or `ca_ff`. Supporting this direction requires later changes to request validation, source and target handling, configuration reads and table constraints; merely omitting fields from the request is insufficient. [Performance write logic](../backend/app/performance/services/async_workflow.py) · [Plan write logic](../backend/app/plan/services/async_workflow.py)
 
 ### 8.2 Interface list
 
-This is the agreed first-version interface list for generic tasks. Section 8.6 specifies requests, responses and error keys.
+This retains the original first-version interface list for generic tasks. Requests still need adjustment for the new direction. Section 8.6 records the original requests, responses and error keys.
 
 | Caller | Method and path | Purpose |
 | --- | --- | --- |
@@ -548,7 +693,7 @@ This is the agreed first-version interface list for generic tasks. Section 8.6 s
 | MES | `POST /api/v1/integration/plans/upsert` | Place an order or update a matching Plan under the rules. |
 | CA/FF | `POST /api/v1/integration/plans/dispatch/claim` | Claim atomically and return frozen parameters, or return no work. |
 | CA/FF | `POST /api/v1/integration/plans/dispatch/report` | Report acceptance or an exception for the attempt. |
-| SMA | `POST /api/v1/integration/performances/upsert` | Create or update Performance. A project can designate CA/FF as the reporting source where needed. |
+| SMA, third party | `POST /api/v1/integration/performances/upsert` | Proposed entrypoint to create or update Performance. The current implementation still constrains target and reporter configuration. |
 | MES or integration caller | `GET /api/v1/integration/plans/by-task/{taskNo}` | Read order progress, dispatch, PLC acceptance and any production progress written back. |
 | MES or integration caller | `GET /api/v1/integration/performances/by-task/{taskNo}` | Read reported production state, times and actual values. |
 
@@ -558,7 +703,39 @@ The current acquisition facts v2 service uses `POST /api/v1/integration/plc-fact
 
 ### 8.3 MES submits task A
 
-Submit the following to the Plan integration entrypoint using the field definitions in section 6.2.
+**New-direction example, not implemented and not a runnable request for the current Swagger.** With the field definitions in section 6.2, the caller can provide only the task number and submitted order values; source, target and configuration version can be omitted.
+
+```json
+{
+  "taskNo": "JOB-20261107-001",
+  "items": {
+    "productCode": "PRODUCT-A",
+    "targetLength": 1200,
+    "customerOrderNo": "MES-ORDER-001"
+  }
+}
+```
+
+#### Update only submitted fields on a matching Plan
+
+**User-clarified direction, not implemented.** The same Plan POST creates or updates by `taskNo`: an ordinary new Plan defaults to `new` when status is omitted; see the section 9.1 proposal when matching Performance already exists. Update only explicitly submitted fields on an existing Plan. `productionStatus` is a fixed field that can be submitted at the request top level, outside `items`. For example, to change only the status of existing task 001:
+
+```json
+{
+  "taskNo": "001",
+  "productionStatus": "error"
+}
+```
+
+Order values, target and other fields omitted from this request retain their values, as do the internal `id` and `createdAt`. Both Plan and Performance already have the fixed database column `updated_at`, exposed as `updatedAt`: the backend advances it on an actual record change; repeating identical values leaves it unchanged. `updatedAt` is the persistence update time, not a site collection time.
+
+**Agreed new direction.** A Plan POST updating status does not automatically update Performance; the previously discussed synchronization direction is Performance to Plan. Effective status updates take precedence in the order actually processed and committed by the backend; `error` has no special priority. For example, if Plan is `error` and Performance is `running`, a later effective Performance report of `running` updates Plan to `running`. Even if Performance itself was already `running`, a valid status report must still check and update the matching Plan rather than skipping write-back merely because Performance's own status was unchanged. Update Plan's `updatedAt` when Plan actually changes. If Performance itself does not change, its own `updatedAt` remains unchanged.
+
+**Reporting after completion.** The user confirmed that the new direction also permits Performance to change from `completed` to `running` and synchronizes a matching Plan. The old design's prohibition on returning after completion does not apply to the new direction. The proposed initial status for a Plan created after Performance is in section 9.1.
+
+The current Plan request model does not accept `productionStatus`, and the existing database production-status constraint does not include `new` or `error`. This example cannot be used in the current Swagger; implementation requires separate approval and changes.
+
+**Current legacy-interface format illustration.** It still requires source, target and the bound version and separates values into two groups; actual requests must also satisfy the current integration configuration.
 
 ```json
 {
@@ -619,23 +796,32 @@ After confirming sequence 41, CA/FF reports it under the original attempt.
 
 Retry a timed-out claim with the original `claimRequestId`, then check the local journal when the original attempt is returned. See section 8.6 for exception and operator-action payloads.
 
-### 8.5 SMA reports 300 metres for A
+### 8.5 SMA or a third party reports 300 metres for A
 
-This is an update after A already has a Performance record. `observedAt` is the sample time. `observationSeq` increases in sampling order within the task.
+**Example of the new direction, not implemented and not a runnable request for the current Swagger.** The source, target, field version, sample sequence and collection time are omitted. If the actual collection time is known, send for example `"observedAt": "2026-11-07T10:30:00+08:00"`; if unknown it may also be explicitly `null`.
 
 ```json
 {
-  "producerId": "sma-01",
   "taskNo": "JOB-20261107-001",
-  "targetKey": "LINE-01",
-  "fieldConfigVersion": 1,
   "productionStatus": "running",
-  "observationSeq": 12,
-  "observedAt": "2026-11-07T10:30:00+08:00",
-  "syncValues": {"completedLength": 300},
-  "localValues": {"currentSpeed": 78.5}
+  "items": {"completedLength": 300, "currentSpeed": 78.5}
 }
 ```
+
+The backend identifies shared and Performance-local fields in `items` from field configuration. Values omitted from this report are preserved. The final request and response need further design. The following responses illustrate the original design.
+
+#### Report completion when production ends
+
+**User-clarified direction, not implemented.** When production ends, a program can send only the task number and completion status to the Performance write entrypoint:
+
+```json
+{
+  "taskNo": "001",
+  "productionStatus": "completed"
+}
+```
+
+For existing Performance, update only the submitted status and preserve saved business values. If Performance is absent, create a completed record under the create-or-update rule. When a matching Plan exists, the backend synchronizes its production status to `completed`; Performance still saves if no Plan exists. A known actual completion time can be submitted as `completedAt`; leave an unknown time empty and do not substitute backend creation or update time. A later valid `running` report for the same Performance updates it and a matching Plan in backend processing order. This example cannot be submitted directly to the current Swagger.
 
 A response can express successful write-back to a matching Plan as follows.
 
@@ -672,6 +858,8 @@ With a matching Plan and no eligible feedback, `hasPlan` is still `true` and `pl
 <a id="task-api-details"></a>
 
 ### 8.6 First-version requests and responses
+
+**Original first-version design and current interface context.** This section retains old requests and responses for comparison. The required Performance sequence, complete snapshot and sequence-based handling differ from the new discussion direction in section 9.2. The running service's OpenAPI and source define what is callable now; the new direction is not implemented.
 
 This section details the agreed generic-task interfaces listed in section 8.2. Frontend entrypoints require a login token and the applicable permissions. Integration entrypoints follow section 8.1. Each integration write includes `producerId` for tracing. The project designates the automatic reporting stream.
 
@@ -719,7 +907,7 @@ After a request ID obtains a claim, its retry returns the original attempt and f
 
 The backend checks reports against the current attempt, original sequence and evidence. The same evidence for an attempt succeeds on retry and keeps the original time. An exception can move to accepted on valid confirmation. An old attempt or conflicting evidence returns `409 task.dispatch_conflict`. Dispatch acceptance and Performance production state advance separately.
 
-#### SMA automatic writes and write-back results
+#### Original SMA automatic writes and write-back results
 
 | Request fields | Rule |
 | --- | --- |
@@ -785,13 +973,19 @@ For example, sequence 12 reported with two different snapshots returns HTTP `409
 
 ## 9. Saving Performance, write-back and special cases
 
-The backend checks the task, version, fields and report sequence. On first creation it inherits order values under section 9.3 and applies the accepted submission. With a matching Plan it writes back eligible shared feedback and reports skipped values and reasons. On one database, Performance, the report sequence when applicable, and permitted write-back commit together. Production facts advance Plan's production progress. The dispatch workflow owns dispatch state.
+The backend checks the task, fields and eligibility. The new direction follows the backend processing order in section 9.2. On first creation it inherits order values as discussed in section 9.3 and applies the accepted submission. With a matching Plan it writes back eligible shared feedback and reports skipped values and reasons. On one database, Performance and permitted write-back commit together. Production facts advance Plan's production progress. The dispatch workflow owns dispatch state.
 
 For task A, `targetLength` is 1,200 metres and `completedLength` is 300 metres. They occupy separate slots. The 300-metre write-back updates the Plan's completed length.
 
 <a id="supplement-plan"></a>
 
 ### 9.1 Production exists before a Plan
+
+**New proposal, awaiting user confirmation and not implemented.** When creating a Plan, look for Performance with the same `taskNo`. If the request does not explicitly provide `productionStatus`, use the current Performance status when one exists; otherwise default to `new`. For example, if Performance 001 is already `running`, a later matching Plan starts as `running` instead of being mistaken for a new task. If the request explicitly provides a valid `productionStatus`, the suggestion is to use the submitted value; a later effective Performance status report then writes back in backend processing order. Concurrent Plan creation and Performance reporting must not miss an applicable status update due to interleaving. The Plan's `createdAt` and `updatedAt` are its own creation times, not copied Performance times.
+
+This proposal decides status only. The previously discussed approach for historical shared business values remains: do not backfill automatically by default; allow the user to choose. Later Performance reports follow the shared-field write-back switches. Under the latest create-if-missing direction, ordinary Plan POST can create a Plan even when matching Performance exists, without requiring a dedicated supplemental entrypoint; the page can also provide an entrypoint. Detailed validation of explicitly supplied status remains open. The current legacy interface instead requires dedicated supplemental creation when Performance exists and needs later changes.
+
+**The following is prior supplemental-flow and current-interface context, not a settled rule for the new direction.**
 
 1. The backend accepts valid Performance and saves it independently. Details show “No Plan.” A user with Plan creation permission can select **Add Plan** there.
 2. The form carries the read-only `taskNo` and uses the Performance version. After required fields are supplied, the backend checks again by project and task number. It returns an existing Plan if found, and the unique constraint handles concurrent creation. Ordinary Plan creation directs callers here when matching Performance already exists.
@@ -804,19 +998,29 @@ Later accepted reports follow the normal write-back rules. Section 8.6 covers th
 
 ### 9.2 Task changes, late reports and duplicates
 
-Before changing from A to B, the site retains one rereadable record of A's task number, original sample time and corresponding values. At actual completion, it also retains the completion fact and final values. Prefer the site's completion area and retain the record until DAA saves it reliably. SMA can report the saved A snapshot after the number changes. A site with only live points keeps the last acquired observation for A and records completion when completion evidence becomes available.
+**Agreed discussion direction, not implemented.** SMA and third parties can report Performance; generic task integration calls require no token. The backend finds Performance by `taskNo`, creates it if absent or updates it if present, and then writes eligible shared fields and production state to a matching Plan. It still saves Performance when no Plan exists.
 
-DAA persists samples. SMA reads replayable facts and holds each outbound snapshot until business acknowledgement. Each task has one designated automated reporting stream. Each submission is a complete snapshot of the fields that stream owns. `observationSeq` increases per task in sampling order. The completion snapshot is last in that automated sequence. Retries and restarts reuse the original sequence, time and content. [SMA reliable input and delivery design](AIIS_SMA_Detailed_Design.md)
+1. `observationSeq` can be omitted or null; the reporter need not generate or resume a sequence. Even when supplied, it does not determine overwrite order or guarantee deduplication. Whether to store or return it remains to be designed.
+2. The backend serializes valid requests for the same task; they take effect in the order actually processed and successfully committed. Concurrent requests cannot be assumed to follow sender, network-arrival or actual collection order. Only submitted fields that may be written are overwritten; omitted values remain. Performance and eligible write-back in the same database commit together.
+3. `observedAt` can be omitted or null. Send the actual collection time with a timezone when known. The backend does not use it to decide overwrite order or substitute server receipt, creation or update time for it.
+4. When Performance is `completed` and a valid `running` report later arrives for the same task, update Performance to `running` and synchronize a matching Plan. The old prohibition on returning after completion does not apply to the new direction. Preserve omitted business fields. If an earlier `completedAt` exists and is omitted this time, do not clear it automatically; it is a previously reported time, not proof of this run's next completion time.
 
-| What the backend receives | Handling |
-| --- | --- |
-| It accepted 12 and then receives 11 | Acknowledge the late report and keep the Performance and write-back results for 12. |
-| Same sequence 12 and same content | Acknowledge the duplicate successfully. |
-| Same sequence 12 with different content | Return `409` so the producer can check the original snapshot. |
-| First or later sequence while the task is open | Validate, save and write back under the rules. A completion snapshot saves final values and closes automated reporting for that task. |
-| New automated report after completion | Return the completed outcome and keep the final Performance and Plan feedback. |
+For example, after 001 is completed, a program can submit the following to the Performance entrypoint. Under this proposed rule the backend updates Performance and a matching Plan to `running`. This new-direction example cannot be submitted directly to the current Swagger.
 
-The backend keeps the last accepted sequence and digest for each task. It can accept A's pending completion snapshot after B starts. Site retention and release, sequence source and continuity after restart still need project decisions. Manual corrections to collected values have their own scope.
+```json
+{
+  "taskNo": "001",
+  "productionStatus": "running"
+}
+```
+
+**Tradeoff of the simplification.** The backend knows only its processing order. Neither `taskNo` nor an automatically generated backend sequence can establish actual source order or reliably tell an old retry from a new report. For example, if the backend accepts speed `60 → 70 → 60`, the last `60` could be a new sample or a late retry and may overwrite `70`. Similarly, if an earlier `running` request is retried and arrives after `completed`, it will return the status to `running`. If the overwritten value is a shared field with write-back enabled, Plan also receives the update. Reporters should try to send and retry a task's reports in order. Reliable late-report protection and deduplication would require a separate agreement on trustworthy source sample identity and sequence; receipt order cannot reconstruct them.
+
+**Where collection time belongs.** `observedAt` is fixed metadata for the report, stored in the Performance fixed field `last_observed_at` and read as `lastObservedAt`. It is not a shared or local custom field and is not written to Plan by the shared-field switch. When an accepted collected-value update provides no actual time, the collection time for that update is empty and the page displays `—`; the previous report's time must not be presented as the new data's time. With partial updates, the record time describes only the latest collection report and cannot establish when every retained field was collected. `createdAt` and `updatedAt` continue to mean persistence and actual update times respectively.
+
+**Task changeover.** Before A changes to B, the site should retain A's task number, values, any verifiable original collection time and completion facts; leave the time empty if unknown. After B starts, A's final data can still be reported under A's task number. Since the first version does not use a source sequence to prevent late updates, the site still needs to arrange final-packet retention and sending order; the old prohibition on returning after completion does not apply to the new direction. [SMA reliable input and delivery design](AIIS_SMA_Detailed_Design.md)
+
+**Difference from current implementation.** The existing Performance interface requires `observationSeq`, requires the `observedAt` key even though it may be `null`, and requires complete automatic-field snapshots in both value objects. It uses sequence and digest to handle late reports, retries and conflicts. After completion the existing interface returns `already_completed` for a new report with a higher sequence, rather than moving back to `running`. The `items` request, optional fields and processing-order behavior are not implemented; the existing database sequence and digest columns are still required. The example here cannot replace the current Swagger contract.
 
 <a id="performance-writeback"></a>
 
@@ -825,7 +1029,7 @@ The backend keeps the last accepted sequence and digest for each task. It can ac
 | Example value | Source and use |
 | --- | --- |
 | Product code and target length | At Performance creation, inherit enabled, compatible shared order values from the matching Plan and show them as a read-only snapshot. |
-| Completed length and current speed | The designated automated producer maintains these values under section 9.2. Current speed belongs to Performance-local. |
+| Completed length and current speed | SMA or a third party reports these values under section 9.2. Current speed belongs to Performance-local; the project configuration determines integration eligibility. |
 | Manual inspection result | An authorized user enters it through the Performance editing entrypoint. |
 
 When Performance comes first, inherited order values can be empty. A later supplemental Plan leaves the order snapshot tied to the original Performance creation. Assign one writer to each Performance field. The backend validates the whole submission against its entrypoint and field ownership.
@@ -843,10 +1047,15 @@ This draft covers the generic Plan and Performance business modules. The agreed 
 | Status | Item |
 | --- | --- |
 | Confirmed | `plan_main` and `performance_main` each have a local and a shared JSON value column, with 100 slots per group. Sections 2–9 cover task identity, states, field versions, interfaces and write-back. |
-| Confirmed | Priority 1 claims first, with creation time and ID breaking ties. MES updates in backend acceptance order and submits and retries sequentially for each task. Manual edits to Performance cover manually owned fields and remarks. Ordinary edits after supplemental Plan creation cover remarks. |
+| Agreed new direction, not implemented | SMA or third-party generic Performance reports require no token. Sequence and collection time are optional; the backend uses processing order, and an unknown actual time stays empty. See section 9.2 for the current-interface differences. |
+| Agreed new direction, not implemented | `producerId`, `targetKey` and `fieldConfigVersion` are optional on Plan and Performance writes. An unknown target stays empty and is not assigned to a line. See section 8.1.1 for source, target-conflict and current-configuration rules. |
+| Agreed new direction, not implemented | Effective Plan and Performance status updates use backend processing order; a later `running` report can overwrite Performance `completed` and synchronize Plan. See sections 8.3 and 9.2. |
+| New proposal awaiting confirmation | When Performance exists but Plan does not, a Plan created without explicit status would use current Performance status; without Performance it would use `new`. See section 9.1. |
+| Prior-design context | Original claim priority and manual-edit constraints remain for comparison. Claims are outside the latest direction at the top of this draft. |
+| New direction to refine | Decide whether a supplied `observationSeq` is stored or returned, whether to return the effective version, and how requests, responses and target, source, version and sequence database columns change. Agree separately on source identity and order if reliable late-report protection or deduplication is required. |
 | Open for the first version | Confirm the list of legacy coil features to retire and the one-time dev database cutover in section 10.2. |
 | Open for the first version | Confirm the acceptance scope in section 10.3, the fields in the A/B task example and the permissions. Specify which order values are frozen, which values SMA reports and writes back, and which values people can edit. Identify who can pause, resume, cancel, return after verification and create a supplemental Plan. |
-| Decide before site integration | Specify PLC addresses, receive value, task number encoding, sequence retention and reset, timeout and old executor isolation. Decide when to save and release the final snapshot, where the SMA observation sequence comes from and how it resumes after restart. |
+| Decide before site integration | Specify PLC addresses, receive value, task number encoding, PLC handshake sequence retention and reset, timeout and old executor isolation. Decide when to save and release the final snapshot and its actual sending order. |
 | Verify during implementation | Verify the complete migration, full slots, concurrent claims, the Performance and write-back transaction, permissions and page behavior. Section 6.6 records the completed sample-table tests. |
 
 <a id="first-version-recommendations"></a>
@@ -855,11 +1064,17 @@ This draft covers the generic Plan and Performance business modules. The agreed 
 
 | Scenario | What to expect |
 | --- | --- |
-| The PLC accepted A and the site has yet to start | Plan shows “PLC accepted” and production shows “Not reported.” |
+| Prior-flow context: the PLC accepted A and the site has yet to start | The original design distinguished PLC acceptance and unreported production; dispatch state is outside the latest direction at the start of this draft. |
 | SMA reports 300 metres for A with write-back enabled | Performance shows 300 metres. Plan's completed length updates to 300 metres and its target shows 1,200 metres. |
-| A accepts sequence 12 and then receives 11 or a duplicate of 12 | The response identifies a late or duplicate report. The saved result reflects the accepted snapshot. |
-| Performance exists without Plan and a person adds the Plan | Performance stays available. The supplemental Plan shows “No dispatch required.” Backfill is initially off. |
-| V2 disables shared slot 03 while A is bound to V1 | A validates and writes back under V1. New V2 tasks use V2. |
+| Performance and matching Plan are `completed`, then Performance receives an effective `running` report | Both update to `running`; omitted business values remain. The current interface does not yet support this direction. |
+| A's speed is processed in order 60, 70, 60 | Under the new direction the last effective value is 60; the system cannot tell from these requests alone whether the last packet was late. |
+| A Performance update has no `observedAt` | Under the new direction the collection time is empty and the Performance page shows `—`, without substituting persistence time. |
+| Neither Plan nor Performance has a target | Both records can be saved, the target shows `—`, and no line is assigned automatically. |
+| Matching Plan has `LINE-01` and Performance omits its target | Performance uses `LINE-01`. If it reports `LINE-02`, show a conflict and update neither record. |
+| Request omits the field version or supplies an old version | Use currently enabled configuration under the new direction. Unknown, disabled or mistyped fields reject the whole write. |
+| Performance is already `running`; a matching Plan is created without status | The proposal starts Plan at `running`; historical shared-value backfill is user-selected. The proposal remains open. |
+| Prior-design context: V2 disables shared slot 03 while A is bound to V1 | The original design used V1; the current-enabled-field direction at the start of this document supersedes it. |
+| Prior-design context: B was created while shared slot 03 was disabled in V2; V3 re-enables it | The original design proposed a per-task version switch subject to checks; the new direction supersedes it. |
 | CA/FF disconnects after submission and finds the original acknowledgement on recovery | It reports acceptance for the original attempt. An unknown outcome stays in dispatch exception. |
 
 These scenarios cover first-version business outcomes. See section 10.3 for verification.
@@ -889,7 +1104,7 @@ These scenarios cover first-version business outcomes. See section 10.3 for veri
 
 ### 10.3 Proposed first-version delivery and acceptance
 
-Use one cross-module specification for the FastAPI schema and APIs and the existing frontend's Plan and Performance lists, details and two field settings entrypoints. Equipment status, process monitoring and field runtime wiring follow their own tasks. For first-version acceptance, run the backend and browser with the agreed dev database. Test clients provide MES orders, PLC acknowledgements and SMA snapshots. Verify the field runtime and a real PLC when the site settings in section 10 are available.
+The following original first-version delivery and acceptance proposal is retained for comparison. Acceptance of field versions and Performance sequences must be revised for the directions at the start of this document and in section 9.2. Use one cross-module specification for the FastAPI schema and APIs and the existing frontend's Plan and Performance lists, details and two field settings entrypoints. Equipment status, process monitoring and field runtime wiring follow their own tasks. For first-version acceptance, run the backend and browser with the agreed dev database. Test clients provide MES orders, PLC acknowledgements and SMA snapshots. Verify the field runtime and a real PLC when the site settings in section 10 are available.
 
 | Acceptance area | Passing result |
 | --- | --- |

@@ -11,6 +11,7 @@ from .v2_domain import V2Error, identifier
 
 LEGACY_REVISION = '5f7a9c1e3b25'
 REVISION = '7b9d1f3a5c7e'
+ALLOWED_REVISIONS = (REVISION, '8c0e2a4d6f18', '9d1f3a5c7e20')
 
 
 class V2Settings(BaseSettings):
@@ -107,7 +108,10 @@ def load_profile(settings):
         document = json.loads(path.read_text(encoding='utf-8'), object_pairs_hook=_unique_pairs)
         if not isinstance(document, dict) or set(document) != {'target'}:
             raise ValueError('invalid target profile')
-        return {'target': validate_target(document['target'], REVISION)}
+        revision = document['target'].get('schemaRevision') if isinstance(document['target'], dict) else None
+        if revision not in ALLOWED_REVISIONS:
+            raise ValueError('invalid target revision')
+        return {'target': validate_target(document['target'], revision)}
     except (ValueError, TypeError, OSError, UnicodeError, V2Error):
         raise V2Error('not_ready', 503) from None
 

@@ -1,21 +1,23 @@
 Task ID: ARCH-OBS-001
-Revision: r7
+Revision: r11
 Status: owner_approved
 Owner Role: PM
 Allowed Writers: PM, Human Owner
-Handoff: r7 §9 已获 Human Owner 精确批准，交命名角色 `development` 实施
+Handoff: Human Owner 已批准 r11 §13；交命名 Development 实施，随后 fresh-context Verification 独立验证
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch
 Classification: root
-Capability: 配置驱动的设备状态看板与独立过程历史
+Capability: 配置驱动的设备状态、过程历史及独立能耗数据与统计
 Owner: AIIS ICS Architecture
-Acceptance Chain Reference: 本稿第 9 节及 Development Lifecycle Workflow
-Related Task: ARCH-ACQ-001, ARCH-ACQ-003, ARCH-BE-010, aiis-ics-arch.aw.sma::SMA-004
+Acceptance Chain Reference: 本稿第 13 节与 Development Lifecycle Workflow；第 12 节为已批准 r10，第 10 节为已批准 r8，第 11 节为未批准候选
+Related Task: ARCH-ACQ-001, ARCH-ACQ-003, ARCH-ACQ-004 r4, ARCH-ACQ-005 r1, ARCH-TASK-001, ARCH-BE-010, aiis-ics-arch.aw.sma::SMA-004
 Created: 2026-11-07
-Updated: 2026-11-11
+Updated: 2026-11-17
 
 # 配置优先的设备状态与过程监控方案
+
+> **版本提示：本次待审设计请阅读 [§12 r10](#r10-source-independent-energy)。标题后的原引言和 §1–10 保留历史设计与 r8 批准记录，§11 r9 是未批准候选；其中的采集事实、PLC 点位和任务证据依赖不是 r10 草案建议的准入要求；当前 r8 实现仍有相关限制，r10 尚未实施。r10 本身仍是未批准草案。**
 
 SMA 和前端共用稳定的 `metricKey`，后端按写入目标和采样组把指标转成各自的本地槽位。采样按现场证据归属生产任务，设备状态四页查询当前任务的实时快照，过程监控单独追加需要长期保存的样本。管理员通过两个列表查看采集数据并补充管理信息。新项目优先通过设备、点位绑定、展示和历史采样配置接入，超出通用行为的需求再立模块范围。
 
@@ -741,3 +743,699 @@ Human Owner 批准精确 `ARCH-OBS-001 r7` 及 §9.3 的隔离动作后，Develo
 > 批准 ARCH-OBS-001 r7，按 §9 在隔离环境实施并验证
 
 本批准覆盖 §9 的源码交付和 §9.3 的隔离动作。当前状态为 `owner_approved`，交命名角色 `development` 按本节实施。软件独立核验与 Human Owner 最终验收依交付候选记录。
+
+<a id="r8-dev-integration"></a>
+
+## 10. r8：采集适配、管理列表与 dev 接入草案
+
+2026-11-16（Asia/Shanghai）。本节是新的、待批准的精确实施范围；与 §1–9 有冲突时，以本节为准。§1–9 及 §9.5.1 是原方案和 r7 精确批准的历史，r7 的批准仅覆盖隔离候选和当时的隔离动作，不延伸到本节、正式工作树整合或真实 dev 数据库。r7 隔离候选的 QA3 为 `qa_passed`，Human Owner 最终验收待决定；它不能证明本节已实施、dev 已接入或实际 SMA 产品已联调。原 [Development 交接](tasks.md) 与 [Verification 记录](checklist.md) 保留 r7 状态和证据，r8 获批后再由对应角色分别记录新一轮工作。
+
+**r7 原稿复核。** 原 r7 spec 的 SHA-256 为 `3ca7a9ec910a21ad141e349f15f2ea0df61a79cbf979f2e660d59fb55b530631`。本修订只改变顶部六条元数据并在原文之后追加本节；删除 r8 锚点前的空行及其后全部内容，再将顶部六条恢复为 `Revision: r7`、`Status: owner_approved`、`Handoff: r7 §9 已获 Human Owner 精确批准，交命名角色 `development` 实施`、`Acceptance Chain Reference: 本稿第 9 节及 Development Lifecycle Workflow`、`Related Task: ARCH-ACQ-001, ARCH-ACQ-003, ARCH-BE-010, aiis-ics-arch.aw.sma::SMA-004`、`Updated: 2026-11-11`，即可还原原稿并按该摘要校验。
+
+### 10.1 交付结果与边界
+
+| 部分 | r8 交付目标 |
+| --- | --- |
+| 设备状态 | 生产参数、清洗工艺、温控工艺、传动工艺四页共用指标和卡片配置，每卡最多 10 项；显示项目按稳定 `metricKey` 取值。 |
+| 过程监控 | 温度、传动、清洗三页展示管理员配置的曲线组；曲线是否显示与是否保留历史相互独立，同单位共用纵轴时单位标一次。 |
+| 管理数据 | 两个 admin 列表分别面向实时快照和过程历史，参考计划／实绩字段设置，管理员可配置并直接在列表显示指标列；各有分页、筛选和详情。编辑仅限实时备注、历史备注及异常／已复核标记，不能改采集原值。 |
+| 接入 | SMA 与第三方继续共用 §5 的发现 GET 和两条写入路径，实时与历史分别请求、独立回执和重试。外部字段仍为 `metricKey`，不暴露本地槽位。 |
+| 基线整合 | 在核对正式工作树现状与并行修改后，将 r7 候选所需范围适配并整合至项目正式交付工作树，接入已采用的采集来源登记模型，形成可核验的源码候选和迁移计划。 |
+
+`id` 是各主表的行主键；`task_no` 是跨系统业务任务号，按原合同保留字符串和前导零，用于筛选和关联，不代替 `id`。卷号是生产参数里的普通指标值；任务事实由采集点证明，不以计划／实绩表或状态机推断。实时以 `equipment_id + task_no + group_key` 定位并整组覆盖，保留行 ID 和管理员备注：本次该组未提交的指标从新快照中移除并显示缺测，不沿用上次值；其他组不受影响。历史以新行追加、同源样本按 §3.3 去重。实时可含比历史更多的指标；两路不自动复制或同步，历史留存仅由历史接入白名单及发送侧采样间隔决定。已写入的过程历史不随采集事实 TTL 清理，首版不配置自动到期删除；后续容量治理另行决策。
+
+本次只修订 spec。r8 未批准实施；SMA/DAA 产品源码、实际 PLC、生产部署及发布不在本范围。实际 dev DDL、profile／凭据变更、合成写入、服务切换与测试数据清理均须先取得针对目标和操作的明确授权；本稿不会触发或代替该授权。Human Owner 可以在同一条指令中分别明确批准 r8 软件范围、指定 dev 目标及具体物理操作，不要求为每项操作另发一轮消息；未明确授权的动作不执行。Redis、原采集值更正和新的 PLC 跨 DB 任务归属协议均不在首版。
+
+### 10.2 七张表、槽位及可恢复迁移
+
+首版为新建表，不回填或删除计划、实绩、采集事实及旧业务数据。保持 §3.3 的类型、键、回执与约束；下表的两个主表名替代 §3.3 的旧候选名，API 路径保持原样。
+
+| 物理表 | 职责及关键约束 |
+| --- | --- |
+| `equipment_status_main` | 实时快照；`id` 主键，`(equipment_id, task_no, group_key)` 唯一；采集时间、质量、来源样本键、回执、`local_values JSON`、备注及创建／更新时间。较新采样整组替换，旧包不倒退；同时间不同内容冲突，管理备注不被覆盖。 |
+| `process_monitor_main` | 过程历史；独立 `id` 主键、任务／设备／组／采集时间、质量、来源样本键、回执、`local_values JSON`、备注与 `review_mark`。同一 `(equipment_id, task_no, group_key, sampled_at, source_sample_key)` 唯一；保留 §3.3 的任务及设备组时间索引。 |
+| `equipment_metric_configs` | 唯一 `metric_key`、来源组、类别、中英文名、`number/boolean/string` 类型、可空单位与小数位；名称可改，已用指标物理含义、类型和单位口径不重定义。 |
+| `equipment_metric_slot_bindings` | `(target, group_key, slot_no)` 主键、同目标组内 `metric_key` 唯一、写入开关 `enabled`、首次使用时间；按下述增加列表开关和顺序。 |
+| `equipment_card_configs` | 卡片稳定键、页面、中英文标题、开关、顺序和有序指标引用；最多 10 项。 |
+| `monitor_curve_group_configs` | 曲线组稳定键、类别、中英文标题、开关、顺序和有序历史指标引用。 |
+| `metric_ingest_receipts` | 两路各自的 `(target, producer_id, event_id)` 唯一回执、请求摘要、结果、映射、来源引用及 `task_evidence JSON`。业务写入与对应回执同一事务提交。 |
+
+每目标、每组各有 100 个本地槽，`local_values` 的键为 `"01"`–`"100"`，值是原类型 JSON 标量；没有同步槽位。初次存值后绑定固定，停用仍占槽并用于解码旧记录。新业务含义使用新指标键和空槽。实时与历史可使用不同槽号；同槽号也可在不同组指向不同指标，绝不能仅凭槽号解释。
+
+列表配置不新建表：在 `equipment_metric_slot_bindings` 增加 `list_visible BOOLEAN NOT NULL DEFAULT false` 与可空的非负 `list_order INT`。字段归属该目标、组及槽位，`NULL` 表示使用默认顺序；保存时服务端校验范围及既有绑定。指标列可选自该目标已登记且有绑定的指标；`list_visible` 控制该目标管理列表是否出现，`enabled` 只控制该目标的新值准入，两者互不隐含。历史指标停写后，若列表仍选中它，历史旧值继续按原绑定显示；不能清除旧值或隐藏整列。列表开关、卡片开关、曲线开关和历史白名单彼此独立。未配置任何指标列时只显示固定列。
+
+迁移必须正面处理分叉：r7 隔离迁移 `4e6a8b0d2f14 → 5f7a9c1e3b26` 与现有计划／采集链是两个后继，不能将旧 patch 原样套用、`stamp` 版本或修改已存在的迁移历史。当前源码链为 `4e6a8b0d2f14 → 5f7a9c1e3b25 → 6a8c0e2b4d16 → 7b9d1f3a5c7e`。r8 拟新增单一前向 revision `8c0e2a4d6f18`，明确 `down_revision = 7b9d1f3a5c7e`，新建本节七表和上述列表列；不登记 r7 的 `5f7a9c1e3b26` 到正式链。实施与真实执行前分别重新核对源码及目标均为预期唯一 head，若共享树或目标已变化则停止并回 PM 调整修订，不猜测后继或另造第二 head。
+
+迁移需保留现有表、数据、索引、来源、水位、访问及已采用的 typed 业务合同。MySQL DDL 可能部分成功而 Alembic revision 未前进：失败时停止应用、保全执行前后 schema 与日志，按实际对象逐一核对、制定有数据保护的恢复或修复步骤；不得盲目重试、删表、强行标记或重写旧 revision。现有可用恢复材料及恢复方式在执行前如实核对，并向 Owner 说明实际可恢复性；不假定存在备份，也不强制新建备份或新库。不得把尚未验证的降级称作 dev 恢复方案。
+
+### 10.3 管理列表、字段设置与 API
+
+管理员从两个管理页的字段设置选择本目标已绑定指标的列表显示和排序，复用指标的 `nameZh`、`nameEn` 和可空 `unit`；有单位时表头显示“名称 (单位)”，单元格只显示值。两个目标各自配置，不改写指标定义；已有 [计划／实绩列表](../../frontend-js/src/app/plan/components/TaskPage.vue) 和 [字段显示顺序](../../backend/app/task/services/async_fields.py) 仅作为交互与 `visible/order` 思路参考。首版不照搬其按槽位拼接前端列键的方式，也不把停写指标从已选列表排除。
+
+固定列至少显示 `id`、设备、任务号、采样组、采样时间、采集质量，历史另有复核标记；指标列按目标统一配置顺序显示。支持设备、任务号、组筛选，历史另支持采集时间范围；列表查询先按当前 admin 的设备范围约束再过滤、计数和分页，不能用未经授权的设备汇总或通过总数泄漏。各行是一台设备、一个任务、一个采样组的一条主表记录，非跨组聚合；跨组未采集的指标显示“—”。`0`、`false`、空字符串是有效值，按自身类型保留显示，不以真假值判断缺测。
+
+| 方法与路径 | r8 合同 |
+| --- | --- |
+| `GET /api/v1/equipment/observation-list-columns?target=latest` 或 `?target=history` | admin 查询该目标所有已绑定指标及各自的 `groupKey`、`slotNo`、`metricKey`、写入开关、列表显示与顺序、中英文名、类型和单位，供配置和展示；不是机器指标发现接口。按非空 `listOrder` 升序、空值在后，相同顺序再按 `groupKey`、`metricKey` 升序，结果确定且两目标独立。 |
+| `GET /api/v1/equipment/metric-slot-bindings?target=...&groupKey=...` | 在原返回字段上增加 `listVisible`、`listOrder`，继续包含停用绑定。 |
+| `PATCH /api/v1/equipment/metric-slot-bindings/{target}/{groupKey}/{slotNo}` | 在原 `enabled` 外允许部分提交 `listVisible` 和 `listOrder`。未提交字段不变；`listOrder: null` 恢复默认排序，其余 `null`、非法类型、越界、未知字段或不存在的绑定拒绝；只改变对应绑定及其显示设置，不迁移或改写原值。 |
+| `GET /api/v1/equipment/admin/latest-snapshots` | admin 读取实时分页；支持 `equipmentId`、`taskNo`、`groupKey`、`page`、`pageSize`。只读 `equipment_status_main`。 |
+| `GET /api/v1/monitor/admin/history-samples` | admin 读取历史分页；除以上筛选，还支持 `from`、`to`。只读 `process_monitor_main`。 |
+| 两个资源的 `GET /{id}`、`PATCH /{id}` | 按对应主表 ID 及设备范围读详情或更新白名单；实时只可 `remark`，历史只可 `remark`、`reviewMark`。非法字段服务端拒绝，管理标记与来源质量分开。 |
+
+`observation-list-columns` 成功响应的 `data` 形状示例；即使 `enabled=false`，这里仍可配置和返回旧值列：
+
+```json
+{
+  "target": "history",
+  "items": [
+    {
+      "groupKey": "temperature",
+      "slotNo": 7,
+      "metricKey": "furnaceZone1Actual",
+      "enabled": false,
+      "listVisible": true,
+      "listOrder": 10,
+      "nameZh": "加热区1实际温度",
+      "nameEn": "Heating zone 1 actual temperature",
+      "valueType": "number",
+      "unit": "°C",
+      "decimals": 1
+    }
+  ]
+}
+```
+
+例如向 `PATCH /api/v1/equipment/metric-slot-bindings/history/temperature/7` 提交 `{"listVisible": true, "listOrder": 10}`，只改变历史列表显示；成功响应返回更新后的该条绑定（包括 `enabled`、`listVisible`、`listOrder`），不得因此开启写入、增删数据或改变实时列表。
+
+列表沿用 r7 响应外壳 `{code, message, data: {items, total, page, pageSize, totalPages}}`。每个 `items[]` 带固定字段及 `values: [{metricKey, nameZh, nameEn, value, valueType, unit, decimals}]`，按当前记录的目标和 `groupKey` 解析本行实际存有的槽位，允许返回该行全部已存指标；前端只按列配置选择显示。停用绑定仍参与解码，未存的指标不出现在 `values`；不根据其他组或另一目标的同槽号补值。示例：`temperature` 组 01 为 `temperatureActual`，`drive` 组 01 为 `driveSpeed` 时，两行各只在自身指标列显示对应值。
+
+实时按 `id DESC`、历史按 `sampled_at DESC, id DESC` 稳定分页；`page >= 1`、`pageSize 1–100`，无结果返回空页，时间端点遵循项目上海时间合同，`from`／`to` 均包含边界且起始不得晚于结束。确定的排序在数据集不变时稳定；并发写入可使 offset 分页的行位置变化，不承诺跨请求固定快照。首版不承诺按动态指标排序或筛选；固定排序由服务端执行，不在已分页结果中伪造全局排序。前端以 `metricKey` 为列和列宽稳定标识，并按应用、两张表分别保存本机列宽；语言切换、筛选、翻页、刷新及重开后保留，可恢复默认，失效配置回退默认。切换目标、筛选或列配置后的异步响应不得覆盖新页面的数据或造成跨页、跨组串值。
+
+### 10.4 采集登记、任务证据与接入
+
+基线为已最终验收并在 dev 采用的 [ARCH-ACQ-004 r4](../ARCH-ACQ-004-acquisition-source-registry/checklist.md)；[ARCH-ACQ-005 r1](../ARCH-ACQ-005-acquisition-source-deletion/checklist.md) 已通过独立 QA，最终验收仍待 Human Owner。正式源码中的 `plc_source_registry` 是 PLC 当前 `(plcId, instanceId, sourceGeneration)` 的事实来源；采集 profile 是 target-only，DB 号属于采样事实，不再采用 r2 `readDbNumbers` 或按旧三元 sources tuple 猜测 DB 准入。OBS 自己的受控 profile 仍需设备绑定 `plcId`、`dbNumber`、`taskPointId`、精确空闲值和正的最大任务年龄，并分别限制角色设备及写入身份、目标、组和指标。采集公开 GET 沿用其现有权限和行为；OBS 通过 `plc_facts` manifest 导出的内部只读服务取证，不能把该服务当作公开无授权接口。
+
+实时当前任务只采纳登记的当前实例和代次、匹配 PLC/DB/点位、质量 `good`、有效且不超龄的任务事实；合法任务号为 active，精确空闲值为 idle，未登记、错绑、过期、坏质量或无效值为 unknown。active 才读取该任务快照，不能用旧值假装当前任务。来源切换或删除后，新的任务判断不得继续使用旧身份的 latest；ACQ-005 的公开历史仍可在原有效期内按其合同查询，不得为此删除旧事实。已经保存的 OBS 历史和回执按业务权限持续可查。
+
+新写入在同一事务内以当前来源登记为准验证任务证据，并与来源切换／删除协调登记行锁；先提交的合法事件与删除／切换后的新事件必须各自有确定结果，避免校验后换代仍入库。SMA 的 `plc_fact` 引用必须能在实际已入库 v2 样本中核验：任务点和映射点来自同一份样本、同一 PLC/DB/实例/代次及原采集时刻；可选引用字段如代次、配置版本和观测时间若提供亦须一致。该前提只覆盖同 DB 同样本场景：现场任务点与工艺点跨 DB 时，本稿不假定可按同一帧证明，也不编造跨帧关联；应先确定证据和顺序合同并另行修订后实施。
+
+第三方仍按 §5 以外部事件证明自身样本；任务归属另从绑定来源在其 `sampledAt` 当时或之前最近的合格任务观测证明，按原时刻及来源序号确定顺序，空闲、无效、过期或任务不匹配时拒绝，不跳过较新观测回借旧任务。迟到但证据仍可按当前准入核验的 A 单写 A，B 页不会显示 A。新事件不可证明时拒绝；在认证、目标准入和内容相同的前提下，已持久回执的重试可先核对既有回执，不因任务事实后来过期而丢失结果。伪造引用、代次不匹配和不同内容复用事件号均不得新增业务记录。
+
+SMA 和第三方使用同一三接口：`GET /api/v1/integration/metric-definitions` 按设备、组、目标返回获准且启用的指标；`POST /api/v1/integration/equipment/latest-snapshots` 写实时；`POST /api/v1/integration/monitor/history-samples` 写历史。机器 Bearer 和授权范围独立于管理员／业务读权限。SMA 每次提供完整信封及可核验 `plc_fact`；第三方只按 §5 的明确省略规则，由已配置身份补齐可省字段，并每次提交外部事件、任务号、原采集时间和非空指标。实时省略质量按 `unknown`，历史必须明确 `good`；`null` 与缺项按 §5 区分。每个 `values` 项是稳定指标键对应的单一数字、布尔或字符串；每路可选择不同指标，分别上报并原事件重试。可复用 §5 已有的 [实时最简 JSON](#third-party-latest-example) 和 [历史最简 JSON](#third-party-history-example)，完整示例和错误码以本 spec 与后续获批合同为准。
+
+### 10.5 dev 接入准备、切换及恢复
+
+2026-11-16 协调者对本机 `127.0.0.1:3307 / industrial_level_2_system` 所做**只读事务快照**：MySQL 8.4.6、上海 `+08:00`，唯一 revision `7b9d1f3a5c7e`；`plan_main`、`performance_main`、`plc_facts_history`、`plc_facts_latest`、`plc_source_registry` 存在；两张新主表、r7 两旧名和五张观察配置／回执表均不存在。已采用采集 profile 为 target-only 且与该时点 UUID／schema／revision 匹配；latest 共 6 行，有效 `good STRING` 任务点 0。API `8000` 和 Web `5190` 已有监听。此为时点证据，不是新任务 QA 或可直接写入的许可；不得将该快照当作未来条件保证。
+
+1. **可先只读准备**：核对仓库及并行工作、r7 补丁／候选来源和当前源码单一 head；通过只读方式重查目标服务身份、server UUID、schema、MySQL 版本与会话时区、实际 `alembic_version`、新旧候选表名碰撞、目标 profile 路径与权限、任务点质量／类型、已有数据和来源登记。只记录脱敏摘要，不输出密钥。核对当前 reader／writer 和用户启动进程；无任务点时页面应是 unknown，不能补造事实称已接通。
+2. **形成待审批执行包**：确定源代码和候选摘要、明确目标和操作者、升级 SQL 及预期七表、适配后的采集与 OBS 目标 revision、按顺序的维护窗口／reader writer 协调、配置启用、回归方案、失败处置及现有可用恢复材料。明确是否采用现有经授权的测试资源和进程；不要求为了本任务另建隔离库或强制重启用户进程。
+3. **仅在目标和动作获明确批准后**：按执行前复核的状态协调写入者，在指定 dev 目标执行唯一后继迁移及经批准的私有配置变更；重新校验 UUID、库、单一 revision、七表结构／索引、两套 profile 的版本匹配与 guard。保留原采集登记、事实、计划／实绩数据及原私有配置；不把示例凭据提交到仓库。真实服务由已授权的负责人在确认窗口切换，未授权时不停止、替换或重启现有服务。
+4. **仅在明确授权目标及合成写入动作后**：预先检查测试设备／组、任务、PLC／实例／代次／样本和事件标识不会撞到已有数据；记录本次创建的精确主键与受影响对象，走两种身份、两路和页面读取。使用有明确所有权及回收条件的测试数据，结束后仅按获准范围清理本次对象并对账；不得删除、覆盖或重置原业务来源、事实、管理信息或他人资源。每次证据说明读取的是哪个源码、profile、数据库与进程。
+5. **失败处理**：任何版本不符、对象碰撞、未知写入者或部分 DDL 均停止，按第 10.2 节核对现场和恢复材料后提报处理，不自动 stamp／降级。实际 profile 指向新 revision 前旧服务、采集维护与 typed 业务的版本守卫和可用性须经过验证并协调，避免把短暂错误误报为数据库损坏。
+
+后端实现需同时适配采集 `v2_config.py` profile 校验、async 与 sync／维护目标 revision 守卫、OBS 自身 profile、[typed 业务的版本白名单](../../backend/common/integration/storage.py) 等全部相关入口：旧目标使用与之相配的旧 profile，已迁移目标使用明确允许的新 revision 且 profile、实际库、UUID、schema 与时区严格一致；错配或未知 revision 拒绝，不使用无条件放宽。验证原采集写读、删除来源后的历史查询和维护入口，以及既有 typed 业务访问与数据保全。
+
+### 10.6 实施顺序、允许范围与交接
+
+Human Owner 批准精确 `ARCH-OBS-001 r8` 后，Development 才在下列范围实施并记录 `tasks.md`。本修订是待审工作合同，不是本轮实际改代码许可；具体 dev DDL、配置、服务切换和合成数据动作按 §10.5 再确认目标及授权。新旧并行任务触及相同文件时先核对其未提交修改并协调，不能覆盖别人的工作。原 r7 冻结候选与 QA3 证据保持可复核；正式交付工作树才是后续源码整合和启动入口，不能仅留临时副本。
+
+| 范围 | r8 未来获批后允许的直接相关文件 |
+| --- | --- |
+| 后端与迁移 | `backend/app/equipment_observation/**` 新模块；`backend/alembic/versions/*_8c0e2a4d6f18_*.py` 新后继；`backend/app/plc_facts/{manifest.py,v2_config.py,crud/async_v2.py,crud/sync_v2_maintenance.py,services/observation_evidence.py,README.md,README.zh-CN.md}` 的 OBS 适配和守卫；`backend/common/integration/storage.py` 的明确兼容版本。其他已采用采集业务和合同保持现状。 |
+| Web | `frontend-js/src/app/equipment/` 与 `frontend-js/src/app/monitor/` 各自的 `manifest.js`、`api/observations.js`、`locales/{zh-CN,en-US}.json`、`views/observations/**`、`components/observations/**`。不扩大到无关页面，复用现有公共列宽工具。 |
+| 受影响测试 | `backend/tests/test_equipment_observation*.py`、`backend/tests_mysql/test_equipment_observation*.py`；`backend/tests/test_business_integration_migration.py`、`test_legacy_acquisition_retirement.py`、`test_mapping_migration.py`、`test_equipment_temperature_migration.py`、`test_acquisition_source_registry.py`、`test_acquisition_data_browse.py`、`test_plc_facts_v2.py`；`frontend-js/tests/module-registry/{equipment-observation.test.mjs,page-access.test.mjs,registry.test.mjs}` 及本功能定向测试。只调整受本修订影响的断言，保留原版本链、表／路由保护与其他覆盖。 |
+| 合同与文档 | `contracts/published/http-api/equipment-observation-v1/**` 新合同及向量、`contracts/README{,.zh-CN}.md` 对应索引、`docs/equipment-status-process-monitoring{,.zh-CN}.md` 及直接相关索引、`CODE_INDEX.md` 的相关条目；不覆盖既有已发布采集合同快照。 |
+| 角色记录 | Development 仅按其职责写本任务 `tasks.md`；交接后 fresh-context Verification 写 `checklist.md`。它们各自保留 r7 历史，不改写先前 QA 结果。 |
+
+1. 固定工作树、r7 候选和 ACQ-004/005 实际差异，确定单一 head 与源码整合清单；先做无数据库写入的接口、任务证据和迁移检查。
+2. 按 10.2／10.4 补齐新迁移、版本守卫、后端事务与按组解码；验证旧业务与采集合同。按项目 `backend-arch` skill 开发，涉及接口和来源事实遵循对应采集合同。
+3. 实现两套列表动态指标列及字段设置，接上四个卡片页和三类曲线页；遵循 `frontend-ui` 与 `i18n-workflow`，核对中文英文和实际接口。
+4. 先完成可在当前获准资源上执行的验证，准备 10.5 执行包及实际目标授权；在授权范围内再完成 dev 迁移、合成两种调用和端到端读取。Development 记录命令、结果、差异与资源归属，fresh-context Verification 针对同一候选独立验证，再交 Human Owner 最终验收。SMA 产品或真实设备联调由后续相应任务批准。
+
+### 10.7 r8 验收标准
+
+| 编号 | 可独立观察的结果 |
+| --- | --- |
+| R8-AC01 基线与迁移 | 交付树与 r7 可追溯；唯一前向 head 是获批后继，七表及键、100 槽、列表字段与索引符合 10.2。带既有计划／实绩和采集数据的获准目标迁移前后对账，旧数据、登记、索引和 typed 行为不变；实际目标、版本与恢复能力如实记录。 |
+| R8-AC02 列表与列设置 | 两个 admin 列表独立配置指标列和顺序，直接显示实时及历史各自行值；同一槽号不同组与两目标不同绑定不串值，停写历史指标后已选列仍显示旧值。覆盖缺测、`0`、`false`、空字符串、双语单位、列宽记忆与复位、筛选分页、请求竞态和固定排序。 |
+| R8-AC03 权限与管理 | 服务端验证管理配置需 admin；涉及设备的列表、详情和 PATCH 还须验证该 admin 的设备范围。普通用户、机器身份或越权设备无法读取管理数据及总数或修改。实时只可改备注、历史只可改备注／标记，非法字段拒绝且采集原值和回执不变。 |
+| R8-AC04 采集适配 | 当前登记三身份、指定 DB 和任务点、真实有效期、质量、idle／unknown、来源切换与删除都可观察；采集公开历史保留原合同。核对同样本 SMA 引用真伪、迟到换单、前导零、已确认回执重放及写入与接管／删除的事务顺序；跨 DB 未被冒充为已支持。 |
+| R8-AC05 外部 HTTP | SMA 完整信封和第三方最简请求分别实际调用同一发现 GET 和两路 POST；核对补齐、鉴权、类型、单位、历史白名单、间隔、整组覆盖且遗漏项变缺测、其他组不变、增量历史、质量、同源去重、重复事件及独立重试与持久回执。HTTP、数据库和管理页面对得上。 |
+| R8-AC06 页面闭环 | 四个设备卡片页和三类曲线页按配置显示、缺测和空闲／未知正确；单卡不超 10 项，曲线显示与留存可分别启停，同单位纵轴标识正确；旧过程实时入口按 r7 退役，既有采集和能耗入口可用。 |
+| R8-AC07 兼容和测试 | 旧、新配套 revision 分别可用，错配和未知版本拒绝；采集 async、sync／维护和 typed 业务回归。r7 QA3 记录的两项后端、四项前端旧断言在 r8 允许按实际新 head、七表与退役路由修正并重跑，保留有效保护；任何剩余失败、跳过或未执行须如实记录，不以局部 QA 替代全套通过。 |
+| R8-AC08 交接和 dev 边界 | 验证证据区分源码测试、经授权的 dev 物理变更、合成 SMA 信封、SMA 产品实际投递和真实设备；列出版本、目标、记录及清理结果。未获 dev 物理操作授权时保持待执行，不能声称已接入。独立 QA 结果不等于 Human Owner 最终验收或生产投运。 |
+
+Human Owner 审阅并明确批准本精确 revision 后，按项目 STD 顺序交由 Development 和 fresh-context Verification；真实 dev 操作仍依 §10.5 的目标与动作授权。对外说明按实际已验证范围区分规格、软件候选、dev 接入、SMA 产品和现场设备。
+
+<a id="r8-approval"></a>
+
+### 10.8 r8 Human Owner 精确批准与交接
+
+2026-11-16（Asia/Shanghai），Human Owner 明确批准 `ARCH-OBS-001 r8` §10，并对具体 dev 目标与操作给出以下指令。批准前 r8 规格 SHA-256 为 `bd661411267b8b1b13368ad298a93f8492200aaea3ef0ebbe27321d15b0b29ce`。
+
+> 批准 ARCH-OBS-001 r8 §10，按方案实施并验证。同时授权对 dev 库 127.0.0.1:3307 / industrial_level_2_system 执行迁移、必要配置和合成数据联调，保留现有数据，只清理本次测试数据。完成后告诉我如何验收。
+
+本批准覆盖 §10 的软件实施和验证，以及指定 `127.0.0.1:3307 / industrial_level_2_system` 的迁移、必要配置、合成数据联调和仅清理本次测试数据，按 §10.2、§10.5 与 §10.6 的核对、保全及恢复边界执行。现有数据必须保留。§10.1 和 §10.6 中关于“本次只修订 spec”“r8 未批准实施”“待审工作合同”的文字记述批准前状态；本段不改变原有范围、验收标准或历史记录。
+
+当前规格状态为 `owner_approved`，交实际命名角色 `development` 按获批范围实施，在 `tasks.md` 记录源码与 dev 目标的真实操作、自检和 `developer_handoff`。交接后由 fresh-context 命名 `verification` 对精确候选及授权动作独立验证并写 `checklist.md`，再由 Human Owner 进行最终验收。本批准不视为已实施、已完成 dev 接入、QA 通过或最终验收；未明确授权停止、替换或重启现有用户服务，也不扩展到实际 PLC、DAA/SMA 产品运行、生产部署或发布。
+
+<a id="r9-mapping-declaration"></a>
+
+## 11. r9 候选：SMA 指标映射点声明与回执
+
+2026-11-16（Asia/Shanghai）。**本节是待审阅的 `draft`，不是 Human Owner 对技术形式或实施范围的批准。** 依据 [r8 独立验证 R8-QA-001](checklist.md#r8-qa-001sma-映射用点引用可全部省略)，本节提出一个较小的候选：由 SMA 在请求中显式声明本次指标映射使用的点。Human Owner 的选择和对精确 r9 的批准仍待确认；如选择其他表达或不接受声明的可信边界，应先调整本节再实施。与 §1–10 冲突时，本节在获批后对 r9 范围优先；§10.8 是 r8 的批准历史，不把其原先 `owner_approved` 文字解释成 r9 已获批准。
+
+已发生的 r8 事实继续由 [Development 交接](tasks.md) 与 [Verification 记录](checklist.md) 分别维护：指定 dev 库已从 `7b9d1f3a5c7e` 迁至 `8c0e2a4d6f18`，r8 独立 QA 为 `qa_failed`，R8-QA-001 及未完成的验证保留。r9 不回滚或重做该迁移，也不表示已有数据、既有部署或 r8 验收状态发生变化。
+
+### 11.1 问题和可信边界
+
+现行 SMA 请求的 `sourceRefs` 有同一样本中的真实任务点时，后端可以核实任务归属，但请求本身没有区分哪些点被用于业务指标。QA 的两条真实请求只引用任务点，仍成功写入实时和历史；现有合同又要求引用映射用点，因此“只引用任务点”无法区分**漏报映射点**、**任务点本身兼作指标点**及**指标全部由常量产生**。不得推断后二者不合法，也不得把一个任意添加的真实点当成逐指标映射已经得到证明。
+
+本候选只让发送方声明本次指标所用事实点的集合。后端可核验声明格式、声明点被引用、实际样本和采集来源身份，但没有可信的 `metricKey → pointId` 映射登记，也不重算 SMA 的映射或转换。声明某个点、声明为空数组或提供映射 ID 都不能证明该点确实参与运算、结果由该点算出、其他点未参与或整包确实全为常量。这是发送方自报及可验证来源引用，不是逐指标血缘或防伪证明；需要可信映射及运算核验时另行设计并批准。
+
+现有 SMA 产品在本任务期间不修改，其已接受范围是配置和纯预览，正常投递尚未启用。本地配置已有 `fact` 与 `constant` 绑定；本节不声称已存在目标合同的自动组包、单位换算或实际产品投递。将来如果 SMA 支持事实转换或单位换算，仍应声明实际参与映射的原始事实点；后端不通过比较原始点值与指标值来猜测映射是否正确。SMA 产品自动生成声明和真实 DAA/SMA 接线另归其任务。
+
+### 11.2 候选请求与准入
+
+两条写入路径和 `aiis.metric-ingest/v1` 信封保留。在新 SMA 事件中新增信封顶层 `mappedPointIds`，与 `sourceRefs` 和 `data` 同级；它是本次 `data.values` 涉及的事实点 `pointId` 集合，不是每个 `metricKey` 的逐项绑定。SMA 继续提供已配置任务点的 `plc_fact` 引用，其他声明的点各自也须在 `sourceRefs` 中有引用。指标值仍为按 `metricKey` 上报的 JSON 标量，实时与历史分别提交和确认。因现有 v1 接收端不认识该字段、修订后新 SMA 事件又要求显式提供该字段，这是 **SMA 新事件的合同收紧**；不能把旧发送程序视为已适配。旧已持久回执及第三方按下文处理，不声明本修订已发布或真实 SMA 已接入。
+
+例如炉区 1 的实际温度绑定采集点、设定温度由发送方配置为常量：
+
+```json
+{
+  "contractVersion": "aiis.metric-ingest/v1",
+  "producerId": "sma-line-01",
+  "eventId": "temperature-42-latest",
+  "mappingId": "temperature-metrics",
+  "mappingRevision": "r1",
+  "sourceRefs": [
+    {"kind": "plc_fact", "instanceId": "daa-01", "plcId": "plc-01", "sampleId": "sample-42", "pointId": "point-active-task-no"},
+    {"kind": "plc_fact", "instanceId": "daa-01", "plcId": "plc-01", "sampleId": "sample-42", "pointId": "point-zone1-temp-act"}
+  ],
+  "mappedPointIds": ["point-zone1-temp-act"],
+  "data": {
+    "equipmentId": "line-01",
+    "taskNo": "000042",
+    "groupKey": "temperature",
+    "sampledAt": "2026-11-16T09:30:00.123+08:00",
+    "quality": "good",
+    "values": {"furnaceZone1Actual": 810.2, "furnaceZone1Set": 815.0}
+  }
+}
+```
+
+上例的设定值为示例中的发送方常量，不能从数字 `815.0` 或字段名推断它是常量。候选准入规则如下：
+
+1. **新 SMA 事件显式声明。** `mappedPointIds` 必须是 JSON 字符串数组，最多 128 个互不重复的有效 `pointId`；`null`、缺失、非法元素、重复或超限返回 HTTP 422 和稳定的 `equipment_observation.mapped_points`。集合顺序不代表语义，进入摘要和持久记录前以确定顺序归一。空数组可用，不得把缺失自动补为 `[]`。
+2. **事实点及任务点。** 非空数组中的每个点必须有对应的 `plc_fact` 引用，否则返回 422；任务点始终必须有引用，即使数组为空也须按 §10.4 核验合法任务。所有引用继续来自同一个已持久、未到期、采样时间吻合的 PLC/DB 样本，并满足设备绑定、当前 `plcId`/`instanceId`/`sourceGeneration`、来源切换与任务点质量／年龄规则。引用或证据错误按既有 `source_refs`／`task_evidence` 合同拒绝，实时与历史均不得写业务行或新回执。其他被引用点不因未列入声明就被推定为映射点。
+3. **同点兼用。** 如果绑定的任务点也用于指标，`sourceRefs` 中只引用该点一次，并把该点的 `pointId` 列入 `mappedPointIds`；后端可以核验该点和任务，但其指标用途仍是发送方声明。不能以“数组元素必须不同于任务点”拒绝该情况。
+4. **常量和混合。** `mappedPointIds: []` 是发送方声明本次指标全部为常量，仍需真实任务点证据；事实点与常量混合时只列发送方声明实际使用的事实点，常量不伪造 PLC 引用。例如全部指标均为常量时，仍使用上述真实任务引用，发送 `"mappedPointIds": []`；任务点本身还用于某指标时，发送 `"mappedPointIds": ["point-active-task-no"]`。后端不能仅据请求核实这些用途是否真实。
+5. **第三方不变。** 第三方仍按 §5 提交一条 `external_event` 和原有数据字段，不增加 `mappedPointIds`，也不因 SMA 新规则改变缺省、认证、归属、质量、回执或错误行为。调用身份由凭据和服务端配置判定，不由请求中自称的角色判定。
+
+收到请求时先执行原有机器认证、媒体类型／大小和语法保护，并校验设备、组与目标的现行授权。根据持久回执区分旧事件和新事件后，再执行新事件的声明必填与来源核验；不得因新的字段要求跳过认证、泄漏无权限的回执或破坏 §10.4 的来源切换／删除事务顺序。声明点不属于当前真实引用、任务证据无效、指标越权或质量不合格时，不产生新的业务写入或回执。
+
+### 11.3 持久声明与新旧事件幂等
+
+新 SMA 事件成功时，在已有 `metric_ingest_receipts.task_evidence` JSON 中保留任务事实字段，并另增 `mappingDeclaration: {"declaredBy": "sender", "mappedPointIds": [...]}`。该子对象明确是发送方声明：其中每个所列点的存在及样本身份可按准入结果核对，**用途与数值运算未由后端验证**。`source_refs` 继续保存原来源引用数组；历史回执不回填、不改写，缺少声明的旧回执解释为“旧事件未记录声明”，不能解释成“全常量”。管理员详情既有 `taskEvidence` 原字段继续可读；新增子对象不改变管理员或机器权限。复用现有 JSON，不新增表、列或数据库 revision。
+
+按原有 `(target, producerId, eventId)` 定位回执。认证、目标和设备组准入仍先于返回任何回执；基础 JSON 格式须合法。**命中回执后先比较其对应版本的规范化内容，再处理新事件准入**：
+
+- 对已保存的 r8 SMA 回执，原请求不含 `mappedPointIds` 时，沿用 r8 原摘要算法；内容一致返回原回执，采集事实之后到期或来源删除不改变已确认结果。为旧事件补上声明、改动其他已指纹化内容或复用事件号发送不同内容时返回 409，不重写旧回执；需要新的声明时使用新事件号。
+- 对 r9 新 SMA 回执，摘要包括规范化的 `mappedPointIds`，并区分字段缺失与明确的 `[]`。相同事件和相同声明／数据重试返回原回执；同一事件改动声明或内容返回 409。声明集合仅顺序变化按同一规范化集合比较，重复元素不是合法声明。实时和历史各自独立回执及重试。
+- 没有旧回执的新 SMA 事件才应用 §11.2 的声明必填规则；无字段或 `null` 返回 422，不能从任务点推断用途或缺省为空数组。解析 schema 与 OpenAPI 必须允许服务端识别“字段缺失”以接入旧回执重放，但文档须明确标注新 SMA 事件有条件必传、第三方不传；不能让通用请求模型在查询回执前无条件拒绝合法旧重试。
+
+历史同源样本去重、实时同组整体覆盖且漏传项缺测、来源保留及时间合同继续按 r8；新声明不能改变另一目标结果或绕过指标/历史白名单。`mappingDeclaration` 和指纹都不能替代逐指标真实性核验。
+
+### 11.4 候选实施范围与执行边界
+
+本节待 Human Owner 选择并批准后才允许 Development 动手。只处理 R8-QA-001 所需的后端入参、来源核验编排、原回执兼容、错误码、机器合同与对应测试和说明。拟定直接范围为：
+
+| 范围 | 允许的直接相关路径和用途 |
+| --- | --- |
+| 接口与服务 | `backend/app/equipment_observation/{api/routes.py,schemas.py,error_codes.py,manifest.py,services/ingest.py,services/reads.py}`；必要时 `backend/app/plc_facts/services/observation_evidence.py`。只为声明解析、校验、回执和已有详情读取作必要修改，不改变采集公开 HTTP 合同。 |
+| 测试 | `backend/tests/test_equipment_observation*.py` 和 `backend/tests_mysql/test_equipment_observation*.py`；只新增或调整本问题、旧回执兼容及受影响断言，保留原测试保护。 |
+| 机器合同与说明 | `contracts/published/http-api/equipment-observation-v1/{openapi.json,README.md,README.zh-CN.md,vectors.json,walkthrough.py}`、`backend/app/equipment_observation/README{,.zh-CN}.md` 和 `docs/equipment-status-process-monitoring{,.zh-CN}.md` 的直接相关内容；真实结构变化时相应维护 `CODE_INDEX.md`。 |
+| 角色记录 | Development 更新本任务 `tasks.md` 并保留 r8 交接；实际 handoff 后由 fresh-context Verification 更新 `checklist.md`，保留 r8 `qa_failed`、已经完成的 dev 迁移和此前证据。 |
+
+不改前端页面、SMA/DAA 产品、其他业务合同或数据库结构；不启用 Redis、PLC 操作、生产部署或发布。新合同只声明产品运行方的责任，不能把合成 HTTP 客户端冒充 SMA。已授权 dev 数据库仍是 `127.0.0.1:3307 / industrial_level_2_system`，仅在批准的目标、测试对象和动作内使用：执行前重查 server UUID、schema、revision `8c0e2a4d6f18`、已有数据和配置；使用唯一合成设备、来源、任务、指标、producer 和事件身份，事先核对无碰撞，记录主键，结束时只清理本次测试对象并对账。不得删除、覆盖或重置他人记录、原来源、真实历史或既有配置；未经明确授权不停止、替换或重启现有用户服务。旧回执兼容测试应保留可复核的 r8 真实规范化输入和已保存合成回执，验证完成后按测试对象范围清理；不能伪造一条新摘要冒充 r8 原结果。
+
+### 11.5 候选验收标准
+
+| 编号 | 可独立观察的结果 |
+| --- | --- |
+| R9-AC01 两路缺声明负例 | 对 QA 复现中的真实同源任务和指标样本，以新事件分别调用实时和历史；只有任务引用且缺 `mappedPointIds` 均得 422 `equipment_observation.mapped_points`，两张主表与回执均不产生对应新变化。不能把缺字段自动视为 `[]`。 |
+| R9-AC02 格式与来源负例 | 两路覆盖 `null`、非数组、无效或重复点、点不在引用中，以及错误样本、PLC/DB/实例/代次、过期样本、任务点缺失和无效任务。按 §11.2/既有合同拒绝；核对无新的业务行或回执。 |
+| R9-AC03 正常与混合 | 一份真实入库的合成样本同时含任务点和映射点，数组列映射点；指标事实值和常量混合时两路各自成功，来源、槽位、持久回执及标明发送方声明的子对象正确。修改显示配置不改变写入或声明。 |
+| R9-AC04 常量和同点 | 全常量显式 `[]` 及任务点兼作指标点显式 `[taskPointId]` 在其他准入条件满足时均可使用；前者仍核验真实任务样本。明确观察两种情况均为发送方声明，未证明实际映射的真实性。 |
+| R9-AC05 新旧重放 | 已存 r8 原请求不含声明可重放同一结果；后续事实到期或来源删除仍可按既有授权返回。旧事件增加声明或更改内容冲突；r9 新事件同内容同声明重放成功，声明改变／省略冲突，`[]` 与缺失不同。两路独立验证。 |
+| R9-AC06 身份与第三方 | 未认证、停用、越权设备／组／目标等不暴露或返回别人的回执；第三方原始最简请求和缺省、质量、授权、错误及重试行为与 r8 对照一致。 |
+| R9-AC07 已有数据和 dev | 无新数据库迁移或版本改变；两张主表、配置、既有采集事实及其他业务记录不被修改。真实 dev 验证仅触及拥有明确主键的本次合成对象，清理后对账与资源归属可复核。 |
+| R9-AC08 合同和交接 | OpenAPI、双语说明、向量、最简/完整示例及回执字段一致；明确 SMA 新事件的字段要求、旧回执兼容与声明不可证明映射。Development 自检和 fresh-context Verification 证据分开，补充与该返工相关的 r8 未覆盖项；已发生迁移、合成客户端、真实 SMA/DAA/PLC、Owner 最终验收分别报告。 |
+
+本草案仅供审阅和选择；无需现在执行代码、数据库写入或运行测试。确认技术表达及可信边界后由 Human Owner 批准精确 r9，再按 STD 角色顺序实施、验证与验收。
+
+<a id="r10-source-independent-energy"></a>
+
+## 12. r10 草案：通用来源写入与独立能耗
+
+2026-11-16（Asia/Shanghai）。**本节是未批准的 `draft`；除按 canonical workflow 机械同步任务状态索引外，本轮只修订 spec，不改代码、数据库、配置或运行进程。** Human Owner 要求设备状态与过程监控不限制数据来源，能耗有独立主表且不关联订单，并询问过程页面卡住是否会在后续修复。Human Owner 已确认设备状态默认显示最近采样任务、可手动切换且管理列表默认全部，能耗按各表计指标配置计量方式；本轮进一步确认设备／任务多区域整包和三路统一 `observedAt`。具体现场参数由 admin 逐项配置。**这是产品原则的确认，不是对 r10 实施或数据库迁移的批准；r10 尚未实施。**
+
+§1–10 保留其历史合同与批准记录，§11 r9 的 `mappedPointIds` 是曾提出但未批准的候选；若 Human Owner 明确批准精确 r10，发生冲突时本节在 r10 范围内优先。采集事实、PLC 点位、`sourceRefs`、`mappedPointIds`、DAA／SMA 身份或数据库内事实查询都**不是**业务写入与 `taskNo` 准入的前提。来源声明仅为可选元数据，不证明指标取值的真实血缘。现有 SMA 产品的投递仍未启用，不因本节改变，也不把合成请求说成真实产品联调。
+
+已发生事实不可改写：dev 库原先已按 r8 迁至 `8c0e2a4d6f18`；r8 独立 QA 为 `qa_failed`、其失败及未覆盖项见 [checklist](checklist.md#r8-独立-verificationqa_failed)，实施事实见 [tasks](tasks.md)。r10 不将原 QA 失败改判通过；新合同获批后由 Development 重新实现与交接，由 fresh-context Verification 对新合同及受影响的 r8 未尽项目独立验证。r8 原批准及其目标操作授权仍是历史记录，不自动扩大为本次文档修改允许实施；本轮不撤销或重新执行已有迁移。
+
+### 12.1 原理、时间与边界
+
+```text
+可信 SMA / 第三方 / 其他获授权写入方
+        │ 同一设备/任务多区域整包，分别请求、确认和重试
+        ├─ 设备状态 ─→ equipment_status_main（设备+任务一行最新整包）
+        ├─ 过程监控 ─→ process_monitor_main（每个采样整包追加一行）
+        └─ 能耗 ─────→ energy_consumption_main（表计样本追加，无订单）
+                              ↑
+区域/指标/槽位、卡片/曲线和回执等辅助配置 ─→ 解释、显示、校验与幂等
+```
+
+三个主表是各自业务值的持久真相；配置表保存含义、展示和槽位绑定，回执负责接收与幂等，不是另一份业务值。`id` 是行主键；`task_no` 是设备状态与过程历史贯穿系统的任务／卷业务关联键，按字符串保留前导零，不替代 `id`，也不强制要求计划／实绩行或 PLC 任务点。`coilNo` 若要显示，是普通字符串指标。能耗按表计、时刻及事件识别，不传、不存 `task_no` 或订单外键，按单分摊另立范围。
+
+设备／任务整包的 `groups` 容纳生产参数和动态清洗、温度、传动区域；组键、指标键稳定，值为单个数字／布尔／字符串。同一完全授权且已登记的完整请求可分别发实时和历史两路；实时按整包覆盖，历史按留存配置选项追加，两路回执和重试独立。区域与卡片由配置驱动，每卡至多 10 个指标，不固定实际值／设定值数量，不自动生成偏差或状态。指标单位可留空；有单位时拼入中英文指标标题，值区只显示原类型的值；同单位曲线纵轴标一次单位。过程显示曲线与历史留存独立。
+
+**统一时间合同**：三个新业务请求都必须非空携带 `data.observedAt`，为这份业务样本唯一、真实且有明确来源语义的原采集／样本代表时刻；不使用发送、接收、创建、更新或 UI 刷新时间冒充，也不对缺失时间自动补当前时间。API 接收含时区偏移的 ISO 8601，统一换算到 `Asia/Shanghai`／`+08:00`，三个主表均以 `observed_at DATETIME(6)` 保存，不截秒或静默丢掉六位内有效小数。超过六位且不能无损表达时明确拒绝并提示，不能偷截或四舍五入伪造精度；如需更高精度另定合同。`created_at` 是记录创建时刻，`updated_at` 是实际内容更新时刻（包含备注／管理标记），各自独立且都不得冒充采集时刻。这里的强制非空只适用于新的监控与能耗事件；通用实绩合同的 `observedAt` 仍可为 `null`，不因同名而更改该合同。
+
+**DAA / SMA 的已核对事实，不是准入依赖**：DAA 当前按读取块记录完成时间并赋给有关点，跨块点时刻可能不同（[scheduler](../../automation-world/data-acquisition-agent/src-tauri/src/services/local_scheduler.rs)）；采集后端对一份完整 PLC／DB 样本以该样本各点采集时间的最大值形成唯一 `sampledAt` 摘要（[写入](../../backend/app/plc_facts/crud/async_v2.py)、[摘要](../../backend/app/plc_facts/services/async_v2.py)）。如果 SMA 实际使用这一完整 DB 样本，可以原样将其摘要作为业务 `observedAt`；它是该样本**最晚点位观测／读取时间**，最大值覆盖包括 `bad` 点在内的全部点的真实读取尝试时间；不保证是最后一次成功值，不表示所有点同刻或全部有效。不能仅因摘要时间存在就把业务质量推断为 `good`；发送方须按实际采样质量与业务规则据实填报。逐点 latest 可能跨轮，不能把它们伪装成同批。
+
+跨多个 DB／独立来源样本拼一个业务整包时，发送方须先有可追溯的同一有效批次及真实代表时刻规则；具体取法和上游可否提供属于实施／联调前待确认项，不把它写成当前 DAA／SMA 已有能力。无法成立时不得拼为一份声称同步的样本，也不能用发送／接收时间代替；历史可按各真实批次独立上报，实时仍按整包覆盖，缺少的组会显示缺测。业务服务不要求调用者提供 DAA 或 PLC 事实作为接受条件。
+
+### 12.2 三张主表、存储与旧数据迁移
+
+设备状态和过程的 `local_values` 采用嵌套 JSON：第一层为稳定 `groupKey`，第二层为该目标／区域的本地槽号 `"01"`–`"100"`。每目标、每区域最多 100 槽；能耗仍按 `(meter_id, group_key)` 各 100 槽。不是 100 个物理列，也不是系统总共 100 项；外部只传 `metricKey`。槽首次使用后不改绑，停用不释放历史含义，编辑标题不改变键或物理单位。
+
+| 主表 | 拟定字段与索引 | 行为 |
+| --- | --- | --- |
+| `equipment_status_main`（r8 已存在，需改造） | `id`；`equipment_id`、`task_no`、`observed_at DATETIME(6)`、`quality`、嵌套 `local_values`、当前回执／来源样本键、备注、`created_at`／`updated_at`；新唯一键 `(equipment_id, task_no)`。不再以 `group_key` 将一个任务拆成多行。 | 同设备／任务最新**整包**仅一行。更晚 `observedAt` 替换整包，保留该行 ID 和备注；更早返回 `stale`，同刻同内容确认已存、同刻不同内容冲突。缺省组、`{}` 组和缺省指标在新包中都是缺测，绝不沿用上一包；`0`、`false`、空字符串保留。 |
+| `process_monitor_main`（r8 已存在，需改造） | `id`；`equipment_id`、`task_no`、`observed_at DATETIME(6)`、`quality`、嵌套 `local_values`、来源样本键／回执、备注／`review_mark`、`created_at`／`updated_at`；查询索引按设备、任务和 `observed_at`。 | 每个被允许的真实历史采样整包追加一行；只保留已开启历史留存的已授权指标，迟到按原时刻追加。不同真实样本即使同一 `observedAt` 也都保留；同事件重试不新增。原值永久保留，admin 只改备注／异常或已复核标记。 |
+| `energy_consumption_main`（拟新增） | `id`；`meter_id`、`group_key`、`observed_at DATETIME(6)`、`quality`、`local_values`；可空 `interval_start_at`／`interval_end_at`、采集方／事件与回执或摘要、备注／复核标记、`created_at`／`updated_at`；按表计、组及 `observed_at` 建查询索引，无任务／订单外键。 | 按表计样本追加，事件防重；读数或趋势按 `observed_at` 而不是抵达／更新时间判新。管理更改只更新管理字段和真实 `updated_at`，不修改原始采集值与 `observed_at`。 |
+
+例如对下文虚构的设备整包，实时主表一行 `local_values` 可为 `{"production":{"01":"000042","02":0},"heatZone1":{"01":810.2,"02":815.0},"driveRoll1":{"01":false}}`；每个 `01` 的语义由其各自区域和目标的槽绑定决定，不同组不会串值。空区域可规范化为未存的键，但读取须一致显示缺测。
+
+过程曲线横轴与样本先后**只按 `observed_at`**，迟到样本按其原 `observed_at` 插入图上；不得以 `created_at`、`updated_at`、到达顺序或 `id` 冒充采样时间。相同 `observed_at` 的不同真实样本不得丢弃，也不能靠 `id` 猜测先后；分页可使用 `(observed_at, id)` 等稳定次序仅作为**同刻技术分页**，须覆盖查询快照内每个点，并对同刻点避免画出虚假的先后关系。迟到插入既有游标之前时按查询快照／重新查询规则可见，不能声称 ID 顺序是时间。具体点的质量与缺测保留；查询必须逐个真实整包的 `observed_at` 为所选指标返回值或明确缺测（也可返回等价的明确缺测段），缺区域或部分指标缺失均在该时刻形成断点，不可只查询有值记录而把前后点误连，更不能复制上一值。只对读取结果可用 `value: null` 与 `present: false` 表达缺测；写入请求中的指标值仍不接受 `null`。
+
+**r8 到 r10 的显式保全迁移，待批准后执行**：r8 现有实时每设备／任务／组一行，列名为 `sampled_at`；过程也按组一行。此段的旧列名仅描述历史迁移，**不是新接口字段**。实施前核验目标、快照、行数、旧时间语义／时区、所有相关写入方、回执、备注与配置；旧 `sampled_at` 的确为真实采集时刻且时区有证据时，才无损映射为 `observed_at`，不得盲目加减八小时，无法确认则保持旧原文并阻止该部分切换。
+
+1. 实时旧组数据只有在有可信的同一原采集批次身份、相同真实采集时刻，且字段、备注及回执可完整保全时，才可以合并成一个整包；禁止简单取最大时间把不同时间组拼成一轮。不能证明同批同刻时，原始行、原组槽配置及管理信息保留为持久、可读／可恢复的旧版本归档；新实时表等待下一次真实整包，UI 明确等待新整包，不能用旧组伪装为当前整包。归档不是第四张业务主表、不是临时备份，也不能作为不可访问的唯一证据；须以受控只读方式核查旧值、原时刻与原配置并可恢复。是否需要旧档页面入口依实施前实际数据和管理需要决定，不自动新增。归档具体结构、旧／新 ID 映射、权限和恢复步骤在实施前定稿及对账；旧归档和新表可能出现相同数字 ID，必须结合结果版本与映射定位，不能把旧回执指向重号的新记录。
+2. 过程旧组行无可信同包证据时，各自转换／呈现为只含原组的独立历史样本，其他组缺测，保持原时间、值、备注、复核和可追溯原 ID；不按时间邻近猜测合并。相同时间不同事件不因新索引互相覆盖。旧配置及槽语义保留，可解码停用指标。
+3. 新增明确 Alembic 后继，保全已有行、回执与旧指纹；变更旧实时唯一键和两张旧表的时间列，校验数量、逐项值、事件、备注、时区和可追溯映射，明确中断写入窗口、回退和恢复。已有 `source_sample_key`、`ingest_receipt_id` 不是 PLC 准入条件；新事件用已认证发送方和事件身份生成。旧 v1 已确认事件仍按旧信封和旧指纹重放、返回其原回执，不重新入库或将旧样本拼成新事件。新增 archive／转换目标、不可逆冲突、目标环境与授权需在执行前具体核定；本轮不执行。
+
+能耗包含任一时段增量指标时，`data.intervalStartAt`／`intervalEndAt` 必须真实存在，开始含、结束不含且开始早于结束，保存在能耗主表并进入事件摘要；多个增量指标的区间必须一致，否则分事件。没有增量指标的包不填写区间。同表计／组同包可混合累计、瞬时与增量：区间只解释增量，累计与瞬时仍按业务 `observedAt` 记录。
+
+### 12.3 区域、指标、卡片与辅助配置
+
+以下五张为 r8 已有配置／回执表，职责沿用并按整包合同调整；除此之外拟新增区域定义 `equipment_metric_groups`，以及下文的能耗指标配置表。辅助表不是新的业务值主表。
+
+| 表 | 主要职责 |
+| --- | --- |
+| `equipment_metric_groups`（拟新增） | 稳定 `group_key`、所属 `production`／`temperature`／`cleaning`／`drive` 类别、中英文区域名、显示启停和排序；admin 可新增／命名／启停／排序。停用显示不删除历史，也不暗示停止留存；已使用的区域键和类别不能改绑其他含义。 |
+| `equipment_metric_configs`（现有） | 全局稳定 `metric_key`、所属区域、类型、双语名、可选单位和小数显示；名称可改，已使用的键不得换含义。当前模型以指标键为主键，不默认同一键可以绑定多个区域；示例以 `zone1Actual`、`zone2Actual` 区分。 |
+| `equipment_metric_slot_bindings`（现有） | `(target, group_key, slot_no)` 分别绑定实时／历史槽；目标写入启用与管理列表列显示／排序独立，展示开关不等于留存开关。同区域同一指标在两目标可有不同槽号。已使用绑定不得改绑，停用仍可解码旧值。 |
+| `equipment_card_configs`（现有） | 四设备页的卡片、页面、双语标题、排序、启停以及有序指标；区域可配实际、设定等任意已登记指标，一卡最多 10 项，不写死两个值或区域数量。 |
+| `monitor_curve_group_configs`（现有） | 三个过程页配置同单位图框、可选区域及区域下数值指标／系列；选择哪些区域只影响显示，不修改历史留存。不同单位使用分图或明确区分的轴，空配置不伪造区域。 |
+| `metric_ingest_receipts`（现有） | `(target, producer_id, event_id)` 内容摘要、处理结果、主表／旧归档定位与历史跳过信息；与写入同事务。当前映射、来源和任务证据等列非空，需明确迁移以允许通用新事件；保留旧回执内容及旧指纹解释，不凭空要求 PLC。 |
+
+管理员在温度、清洗、传动分类下配置区域及其 `groupKey`，配置区域内指标及 `metricKey`，分别设置实时／历史绑定和列表／卡片／曲线可见性；生产参数同样使用已登记组。区域是否显示、指标是否写实时、是否留历史及曲线是否勾选是独立设置。`enabled` 为展示开关时不能静默变成删除或越权；目标写入开关定义为目标是否保存，账号的设备／目标／区域／指标授权另行判定。机器发现接口返回指定目标、被授权的组／指标及两目标状态，供发送方组装整包；服务端不信任客户端自述授权。
+
+**能耗配置：按表计的每个指标独立配置。** 拟新增一张 `energy_metric_configs`，首版以 `(meter_id, group_key, metric_key)` 为业务主键，`(meter_id, group_key, slot_no)` 唯一，`slot_no` 范围 1–100；同一 `meter_id` 的每个组有独立的 100 槽，不同表计可使用相同组名、指标键和槽号而互不串值。业务行用自身 `meter_id + group_key` 定位配置，再把 `local_values` 的槽位还原为 `metricKey`；接入方不传槽号。已有 `equipment_metric_slot_bindings` 的 CHECK 只允许 `latest`／`history`，现状不支持能耗；本方案使用单独配置表，须通过明确迁移建立，不伪称当前已存在。
+
+| 配置字段／约束 | 作用 |
+| --- | --- |
+| `meter_id`, `group_key`, `metric_key` | 三者共同标识一个表计的一个指标；`metricKey` 是对外稳定键，不以可编辑名称代替。相同键在不同表计可有不同配置，读写、授权和展示均先按三者定位。 |
+| `slot_no`, `first_used_at` | 对应该表计组的 `local_values` 键 `01`–`100`；同一表计和组内槽号唯一，首次成功存值与使用标记同事务生效。 |
+| `value_type`, `quantity_key`, `measurement_mode` | 首版计量指标为 JSON 数值；`quantity_key` 描述电量、功率、流量等物理量；模式分别为 `cumulative` 累计读数、`interval` 时段增量、`instantaneous` 瞬时量。每条指标独立设置，启用写入前必须明确其类型与模式；不能假设一块表全部为同一模式。 |
+| `unit`, `decimals`, 中英文名称 | `unit` 可为空；为空时可原样展示数值，但不能把未知单位当作 kWh 或 m³，也不能据此进行依赖已知单位的汇总。`decimals` 是显示精度；持久值须采用不会静默损失所需精度的表达，不能把显示四舍五入写回原值。名称和非空单位用于对应语言的标题。 |
+| `enabled`, `list_visible`, `list_order` | 控制新写入及展示／列表顺序；禁用后不删除原样本，历史查询仍能按旧绑定还原。 |
+| 现场规则 | 预留该指标的采样／缺口、区间、重置／换表等配置或关联；不推定具体数值。计算所需规则未明确时返回缺失／不完整，不猜测、也不伪装成 0。 |
+
+为防止已有值被重新解释，首次成功写入后，本行的表计、组、指标键、槽位、数值类型、物理量、**物理计量单位与模式**不可原位改成另一含义；显示名称、展示顺序、显示小数位和启停可改，但不改原始值。空单位已有样本也不能直接改成一个假定单位并追认历史；如实际需要新模式／单位，应新建新 `metricKey` 和未用槽，旧配置保留用于解码，或另立有证据的历史更正／版本迁移范围；不能无记录覆盖旧配置或重用槽。变更与写入并发时须在事务中保证绑定、首次使用和样本一致。现场逐个表计由 admin 配置对应指标；名称、模式、单位、采样周期与重置策略均不替任何真实表计预设。
+
+以下仅是演示配置，不表示现场已有这些表计；最后一行说明相同 `metricKey` 在不同表计可以有不同模式，前面三行说明同一表计可同时有累计、瞬时和时段增量指标：
+
+| `meterId` | `groupKey` | `metricKey` | `slotNo` | 模式 | 单位 |
+| --- | --- | --- | --- | --- | --- |
+| `meter-01` | `electricity` | `energyReading` | `01` | `cumulative` | `kWh` |
+| `meter-01` | `electricity` | `electricPower` | `02` | `instantaneous` | `kW` |
+| `meter-01` | `electricity` | `energyInterval` | `03` | `interval` | `kWh` |
+| `meter-02` | `electricity` | `energyReading` | `01` | `interval` | `kWh` |
+
+能耗事件去重优先复用可安全扩展的现有回执；若选择在能耗主表以 `(producer_id, event_id)` 唯一键加摘要实现相同语义，也可不增加能耗回执表，但必须说明目标隔离、旧回执兼容及事务原子性。首版从原始样本按请求计算统计，不预建日／月汇总表；真实性能或长期存储压力经测量后再另定缓存、汇总和保留策略。Redis 不在本轮范围。
+
+### 12.4 最近采样任务与手动选择
+
+Human Owner 已确认设备状态默认显示所选设备的**最近采样任务**，可手动切换；实时和过程 admin 管理列表默认全部任务，可筛选 `taskNo`。这不表示该设备仍在生产或处于空闲，也不是 r10 已实施。
+
+1. 在身份有权查看的指定设备实时主表中比较每任务整包 `observed_at`，最大者为最近采样；不同任务同刻并列时按 `task_no` 二进制升序确定默认展示、提示并列并列出获准候选，不按到达或 ID 伪造时间先后。无样本显示“暂无采样任务”；数据过期标注真实时间和“已过期”。
+2. 页面打开期间手动选择其他获准任务后，数据轮询／刷新及新样本到达不覆盖手选；“跟随最近采样”恢复自动。切换设备回到新设备最近采样；重载或再次进入按默认跟随，不要求跨浏览器重启保存手选。手选任务不可用／失权时提示重新选择，不悄悄跳到其他任务。
+3. 所选任务某区域或指标缺失就显示缺测，不向其他任务或上一包借值。原 A 单迟到包若 `observedAt` 早于 B 的当前样本，不能因最后到达使自动选择回 A；若 A 的真实业务采集时刻更晚，它只能被称作最近采样任务。
+4. 同一设备／任务的较旧实时包返回 `stale`；同一时刻整包内容不同返回冲突。多写入方需约定可信时钟；允许的未来偏差及整包过期阈值由项目配置，不能将时间戳之外的 ID 或接收时间当作时钟。发现时钟不可靠须标示，不能声称任务正在生产。页面不以 PLC 点事实判断任务；跨发送方同一物理样本使用不同事件号时无法自动保证去重。
+
+### 12.5 SMA／第三方接口与整包示例
+
+以下为未实施的候选；当前 r8 仍是旧按组合同。SMA、第三方与其他受信任程序使用同一业务格式和接口：先配置机器 Bearer 与 producer、设备／目标／区域／指标授权，再以稳定键发送，不要求 PLC／DAA 事实。`eventId` 每次必传且在同一 producer／目标范围稳定，实时和过程可使用同一个事件号但分别确认；`observedAt` 每包必传且非空。可选 `contractVersion` 缺省为拟定 `aiis.metric-ingest/v2`，可选 `producerId` 必须与认证身份一致；`mappingId`／`mappingRevision` 可一起省略，`sourceRefs` 可省略，提供时仅按合同验格式及记录，不作为准入、任务证明或真实性保证。
+
+| 方法／路径（以下均在 `/api/v1`） | 契约与权限 |
+| --- | --- |
+| `GET /integration/metric-definitions?equipmentId=...` | 机器发现自身授权的区域、指标、类型、可选单位及实时／历史目标启用状态；不得枚举越权范围。供构造一份可投两路的整包。 |
+| `POST /integration/equipment/latest-snapshots` | 同一设备／任务整包覆盖，必须有对该设备**全部可替换实时区域和指标**的授权，包括省略时将被清空的部分；部分范围授权不能借整包清空越权字段。 |
+| `POST /integration/monitor/history-samples` | 相同的整包结构和公共事件身份，须有设备／历史目标及每个提交区域／指标的授权；服务端选出已启用历史的项追加，不因另一些已授权项未留存而拒绝。 |
+| `GET /integration/energy/metric-definitions?meterId=...&groupKey=...` | 只发现机器有权访问且已启用的该表计／组指标及各自单位和计量模式。 |
+| `POST /integration/energy/samples` | 每次一表计／组样本，`observedAt` 必填；按 `(meterId, groupKey, metricKey)` 校验授权与模式，无订单／任务关联。 |
+
+设备两路 `data` 都要求 `equipmentId`、字符串 `taskNo`、`observedAt` 和 `groups` 对象；每个 `groups[groupKey]` 是 `{metricKey: 单值}`。已登记且有权访问的组可以省略或写 `{}`，已登记指标可以省略；顶层 `groups: {}` 也有效，表示此次所有组缺测，实时会清空该设备／任务原整包。空组与省略在存储和展示上均表示缺测；可按同一缺测语义读取，但**先校验空组的登记和权限**；未知组／指标、越权、`null` 值或类型错误整包拒绝，不得先写一部分。`0`、`false` 和空字符串是有效值。实时接受 `quality: good/bad/unknown`，缺省或 `null` 记 `unknown`；历史沿用现有规则，须明确 `quality: good` 才追加。不能因为空组、缺测或留存过滤省略／编造 `observedAt`。
+
+对每个显式提交的指标，先按设备、当前 producer、目标接口及已登记组／指标验证权限与类型；**授权不等于目标留存开关**。对已登记且完全授权的指标，目标绑定启用则保存，目标绑定未启用则跳过并在回执指出；历史因此可以接受完整实时包而只保留历史启用项，实时未开启的目标项也不保存并列明跳过。未知、非授权或类型不符仍是错误，不能伪装为跳过。被过滤的指标和省略／空组都不会沿用旧快照。若设备存在已开启历史留存的指标，本次为符合质量及授权规则的真实采样，即使过滤后该整包所有历史指标都缺测，也要追加一条保留原 `observedAt` 的空／缺测历史样本，用于显示断点；这是实际缺测事件，不是补造数值。只有该设备完全没有开启任何历史留存指标时，才不创建过程样本，并原子保存结果为 `no_history_metrics` 的回执及已授权跳过项；重试返回同结果。允许空整包实时覆盖的调用者仍必须具有全部替换范围权限。
+
+两个目标分别以 `(target, producerId, eventId)` 持久去重；调用方必须以同一事件 ID 重试原请求；相同事件和相同内容返回原回执，异内容复用返回 409。v2 指纹区分显式空组与省略组的提交形式，二者虽都表示缺测，不能在重试时改写正文后假设仍幂等；JSON 对象键顺序不代表内容变化。整个合法请求、目标过滤结果、行写入及回执同事务；提交状态不明时原事件重试。事件 ID 不是时钟，不决定业务先后。同一时刻的两个真实历史事件使用不同事件身份并各存一行；跨发送方使用不同事件号的同一物理样本无法自动可靠判重。收到已存 r8 v1 事件时，先认证并校验旧范围，再按旧 schema、旧时间字段和旧指纹比较，必要时用原规则及保存的旧认证／默认值上下文推导缺省事件 ID；不得先按新 schema 必填项拒绝原重试。相同原请求返回原结果，即使旧结果在保全归档中也可按旧版本定位，不重新写入；已撤销身份的权限不因兼容而恢复。新请求用 v2 整包／`observedAt`；显式 v1 的新事件不承诺继续接收，返回明确升级错误，不将兼容限制静默冒充旧合同不变。
+
+**机器指标发现**的 `data` 示例；以下均为虚构配置，账户只有对应完整范围授权才能提交后面的实时整包：
+
+```json
+{
+  "equipmentId": "line-01",
+  "groups": [
+    {"groupKey": "production", "metrics": [
+      {"metricKey": "coilNo", "valueType": "string", "latestEnabled": true, "historyEnabled": false},
+      {"metricKey": "lineSpeed", "valueType": "number", "latestEnabled": true, "historyEnabled": false}
+    ]},
+    {"groupKey": "heatZone1", "metrics": [
+      {"metricKey": "zone1Actual", "valueType": "number", "latestEnabled": true, "historyEnabled": true},
+      {"metricKey": "zone1Set", "valueType": "number", "latestEnabled": true, "historyEnabled": true}
+    ]},
+    {"groupKey": "washTank1", "metrics": []},
+    {"groupKey": "driveRoll1", "metrics": [
+      {"metricKey": "driveReady", "valueType": "boolean", "latestEnabled": true, "historyEnabled": false}
+    ]}
+  ]
+}
+```
+
+**实时整包**，数字、区域及时间仅为示例：
+
+```json
+{
+  "eventId": "sample-000042-001",
+  "data": {
+    "equipmentId": "line-01",
+    "taskNo": "000042",
+    "observedAt": "2026-11-17T10:30:00.123+08:00",
+    "quality": "good",
+    "groups": {
+      "production": {"coilNo": "000042", "lineSpeed": 0},
+      "heatZone1": {"zone1Actual": 810.2, "zone1Set": 815.0},
+      "washTank1": {},
+      "driveRoll1": {"driveReady": false}
+    }
+  }
+}
+```
+
+**历史请求**发到另一条 POST；可以逐字复用同一完全授权的请求，后端决定哪些项留存，而不是要求 SMA 重新裁剪：
+
+```json
+{
+  "eventId": "sample-000042-001",
+  "data": {
+    "equipmentId": "line-01",
+    "taskNo": "000042",
+    "observedAt": "2026-11-17T10:30:00.123+08:00",
+    "quality": "good",
+    "groups": {
+      "production": {"coilNo": "000042", "lineSpeed": 0},
+      "heatZone1": {"zone1Actual": 810.2, "zone1Set": 815.0},
+      "washTank1": {},
+      "driveRoll1": {"driveReady": false}
+    }
+  }
+}
+```
+
+假设上例只开启 `heatZone1` 两个指标的历史留存，历史回执的 `data` 候选如下；被跳过的是已登记且授权但未开启留存的项，并非未知或越权：
+
+```json
+{
+  "target": "history",
+  "eventId": "sample-000042-001",
+  "outcome": "stored",
+  "recordId": "42",
+  "stored": [{"groupKey": "heatZone1", "metricKeys": ["zone1Actual", "zone1Set"]}],
+  "skipped": [
+    {"groupKey": "production", "metricKey": "coilNo", "reason": "history_disabled"},
+    {"groupKey": "production", "metricKey": "lineSpeed", "reason": "history_disabled"},
+    {"groupKey": "driveRoll1", "metricKey": "driveReady", "reason": "history_disabled"}
+  ]
+}
+```
+
+**后续实时整包缺测示例**：`heatZone1` 为空，清洗和传动组省略；覆盖后这些位置均缺测，不沿用上一个包。设备和空组仍需事先登记并授权：
+
+```json
+{
+  "eventId": "sample-000042-002",
+  "data": {
+    "equipmentId": "line-01",
+    "taskNo": "000042",
+    "observedAt": "2026-11-17T10:30:01.123+08:00",
+    "quality": "good",
+    "groups": {"production": {"coilNo": "000042", "lineSpeed": 0}, "heatZone1": {}}
+  }
+}
+```
+
+前端 `GET /equipment/latest-cards` 和 `GET /monitor/history-curves` 等人类接口使用人类业务读权限、设备范围及配置还原稳定键。以下是前端曲线 GET 的 `data` 候选：两个不同真实事件可以有同一个 X 坐标，必须都返回；`recordId` 仅定位或技术分页，不代表真实采样先后；第 103 行是原始真实整包在该指标上的缺测断点，读取时 `null` 不代表允许写入 `null`：
+
+```json
+{
+  "equipmentId": "line-01",
+  "taskNo": "000042",
+  "curveGroupKey": "heating-temperature",
+  "unit": "°C",
+  "series": [
+    {
+      "groupKey": "heatZone1",
+      "metricKey": "zone1Actual",
+      "points": [
+        {"recordId": "101", "observedAt": "2026-11-17T10:30:00.123+08:00", "value": 810.2},
+        {"recordId": "102", "observedAt": "2026-11-17T10:30:00.123+08:00", "value": 810.3},
+        {"recordId": "103", "observedAt": "2026-11-17T10:30:01.123+08:00", "present": false, "value": null},
+        {"recordId": "104", "observedAt": "2026-11-17T10:30:02.123+08:00", "value": 811.5}
+      ]
+    }
+  ]
+}
+```
+
+**能耗示例**：以下是 §12.3 的虚构表计；`GET /integration/energy/metric-definitions?meterId=meter-01&groupKey=electricity` 返回的 `data` 中，同表计不同指标可独立配置模式：
+
+```json
+{
+  "meterId": "meter-01",
+  "groupKey": "electricity",
+  "definitions": [
+    {"metricKey": "energyReading", "valueType": "number", "measurementMode": "cumulative", "unit": "kWh"},
+    {"metricKey": "electricPower", "valueType": "number", "measurementMode": "instantaneous", "unit": "kW"},
+    {"metricKey": "energyInterval", "valueType": "number", "measurementMode": "interval", "unit": "kWh"}
+  ]
+}
+```
+
+同包的区间仅解释增量指标；`observedAt` 依然是此次样本的真实代表采集时刻，不能从 `intervalEndAt` 代填：
+
+```json
+{
+  "eventId": "meter-01-20261117-0900",
+  "data": {
+    "meterId": "meter-01",
+    "groupKey": "electricity",
+    "observedAt": "2026-11-17T09:00:00+08:00",
+    "intervalStartAt": "2026-11-17T08:00:00+08:00",
+    "intervalEndAt": "2026-11-17T09:00:00+08:00",
+    "quality": "good",
+    "values": {"energyReading": 1006.0, "electricPower": 10.0, "energyInterval": 6.0}
+  }
+}
+```
+
+第二块表计对相同 `energyReading` 键设置 `interval` 时，按它自己的配置解释：
+
+```json
+{
+  "eventId": "meter-02-20261117-0800-0900",
+  "data": {
+    "meterId": "meter-02",
+    "groupKey": "electricity",
+    "observedAt": "2026-11-17T09:00:00+08:00",
+    "intervalStartAt": "2026-11-17T08:00:00+08:00",
+    "intervalEndAt": "2026-11-17T09:00:00+08:00",
+    "quality": "good",
+    "values": {"energyReading": 5.0}
+  }
+}
+```
+
+### 12.6 能耗统计和旧数据衔接
+
+统计必须基于 admin 为每个 `(meterId, groupKey, metricKey)` 配置的**物理含义、单位、计量模式与真实区间**，禁止仅根据指标名、数字大小、`currentPower` 名称或其他模块字段推断；同一表计的不同指标、不同表计的同名键均分别解释。跨表计汇总必须先确认物理量、单位、时间区间及计量口径兼容，不对累计读数和增量混算。即使同一表计同时给出累计读数和时段增量，也可能是同一份用量的两种表达；须按确定的统计来源择一使用，不能把二者加倍。总表和其分表也不得未经确认直接相加。下面数字是口径示例，不代表现场设备配置：
+
+| 上报模式 | 示例与计算 | 边界 |
+| --- | --- | --- |
+| 累计表计读数 | 同一有效电表 08:00 为 `1000 kWh`，09:00 为 `1006 kWh`，确认期间无重置／换表时该区间用量为 `6 kWh`。 | 前后读数必须有相同表计／指标和一致单位、质量可用且覆盖所需边界；下降、重置、回卷、换表或无法确认的间断显示异常／不完整，不能简单当负数或自行猜补。 |
+| 时段增量 | 同一表计两个不重叠、各自边界明确的时段分别为 `2 kWh` 与 `3 kWh`，完整覆盖目标区间时总量为 `5 kWh`。 | 防止重叠、重复和漏段；跨日段没有真实边界数据时不得任意分摊成两天。 |
+| 瞬时功率／流量 | 某时刻功率 `10 kW` 或流量 `10 m³/h` 是速率，不是 `10 kWh` 或 `10 m³` 的用量，不能直接逐条相加。 | 未来若用 `功率 × 时间` 等积分，须另行确认插值、有效采样间隔、缺口与换表规则；首版不暗算。 |
+
+日、月按 `Asia/Shanghai`，日范围为当地 `[00:00, 次日 00:00)`，月范围同理；API 输入带时区并在边界统一转换一次。日初／日末缺必要累计读数，或增量跨界无法归属时，返回缺失／不完整及原因，不能当作零；有合法读数且算出 0 才显示 0。`bad`／`unknown`、无采样、迟到、缺口、重置、换表、重复重放、不同表计或不同单位分别处理；无现场确定的间断容忍时间、采样节奏与跨界分配规则之前，不猜测其完整性。明确区分最新读数、实际用量、速率和统计完整性；校验时间排序、样本重放和并发，不能重复计费或因迟到自动覆盖原始事实。计算精度及舍入依单位与现场计量要求确认，不用浮点近似冒充计费精度。
+
+**现有代码事实**：`monitor_history_energy_consumptions` 记录按卷结束时的电／氮增量，现有 `/api/v1/monitor/energy` 对此按时间求和；`monitor_history_process_curves` 另有 `elect_consum`／`n2_total` 曲线字段，旧接口的实时趋势从该表读取，其 `currentPower` 只是最后一条 `elect` 值，不能由名称推断为功率。现有接口对无汇总值回填 0；r10 的新统计要区分缺失与实际零，不能把旧行为直接当成已经具备新口径。`energy_prices` 与 `energy_price_hours` 是能源**价格**配置／历史，不是能源用量，既有价格 API 和数据不因新主表更名或删除；金额计算若需与分时价格联动，须另定价格有效区间、计量区间、单位与舍入，不能把价目直接加到用量。
+
+协调者于 2026-11-16 对已授权 dev 做只读核对：旧能耗量表及旧曲线表当时均为 0 行，价格表已有记录。此为时点事实而非永久前提；实施前须重查数据、写入方、权限和备份。旧数据不自动迁移、删除或按未知语义混算；旧统计入口保持可用，先并行验证真实样例与新口径，明确切换点和旧表读写衔接后再切换，避免新旧重复计数或无数据时虚报零。旧表退役、历史转换和任何有损清理须有单独明确的范围、对账与授权；已有数据必须保留。
+
+### 12.7 页面、菜单、管理和读取
+
+沿用现有左侧**两级模块／子页面**结构，管理入口放在各自模块内；数据管理和配置管理仅 admin 可见，且对应 API 必须由服务端校验 admin 及设备／表计范围。下列为候选菜单名称，现有路由或菜单尚未因此改动；实施时中英文文案对称：
+
+```text
+设备状态
+  生产参数 / 清洗工艺 / 温度工艺 / 传动工艺
+  数据管理（admin：设备实时主表）
+  配置管理（admin：区域、指标、目标绑定及设备卡片）
+过程监控
+  温度曲线 / 传动曲线 / 清洗曲线 / 能耗统计
+  数据管理（admin：过程主表、能耗主表分别列示）
+  配置管理（admin：历史显示、曲线和能耗表计指标）
+```
+
+- **设备状态**：四页从所选设备／任务的同一实时整包按已启用卡片显示区域及最多 10 个指标；没有的区域或指标显示缺测，`0`、`false` 和空字符串不隐藏。默认最近采样任务、页面内手选和过期行为按 §12.4；admin 可配置区域、指标、目标绑定、卡片和列表列。
+- **过程监控**：温度、传动、清洗三页按 admin 配置的同单位图框读取过程主表，可按设备、`taskNo`、时间筛选。每个图框支持区域全选／多选，各区域显示配置的实际、设定等数值系列；不同单位分图或使用明确区分的纵轴。勾选只影响本次显示，不改变历史留存或其他用户配置；横轴、迟到及同刻多点按 §12.2 的 `observedAt` 规则。已配置图框无样本或所选区域无点时仍显示空 X/Y 轴、所选时间范围、配置单位和“暂无数据”，不绘假零；未选择设备、没有可选设备或尚未配置曲线时显示一个通用空 X/Y 占位、明确原因和下一步提示，不伪造炉区、曲线、单位、时间或数值刻度。只有用户确实选定时间范围才可据实标注；请求失败显示错误与重试，不冒充“暂无数据”。
+- **管理列表**：实时和过程各有仅 admin 的分页管理列表，参考计划／实绩，默认全部任务，支持配置指标列、设备／任务／区域／时间筛选及项目公共列宽偏好。实时每设备／任务一行，过程每个历史事件一行；区域筛选作用于嵌套值和配置，不假设主表仍有 `group_key`。实时只编辑备注，过程只编辑备注与异常／已复核标记；旧实时组归档须可受控只读核查原值及原时刻，不得伪装成新整包，是否需要页面入口按实施前实际数据和管理需要决定。过程模块内分别管理过程和能耗主表。
+- **能耗统计与管理**：过程菜单中的能耗统计页按表计、指标与时段查看最新读数、真实用量及完整性；能耗趋势在配置存在但无样本时也按所选范围为每个已配置组显示带单位的空 X/Y 轴与“暂无数据”；尚未选择表计、没有可选表计或尚无指标配置时，显示一个通用的空 X/Y 坐标占位和对应原因，不伪造指标、曲线、单位或时间。只有用户确实选定时间范围时才可据实标注，否则只显示轴线而不编造时间或数值刻度；读取失败则显示错误与重试，均不以零代替缺失。admin 按表计／组／指标分别配置名称、模式、单位和列表列；查看样本及标注备注／异常／复核，不能修改原始采样值。页面与统计按所选 `meterId + groupKey + metricKey` 展示和解释，同名指标在不同表计的模式和单位各自生效；同组不同单位／物理量的指标按单位分图或使用明确区分的纵轴，不把 `kWh` 与 `kW` 混作一个轴。原能耗页面现有价格功能仍按原权限保留，不能将统计读权限视为价格管理权限。
+
+人类读取分别使用设备状态和过程监控既有业务读权限与后端设备范围约束；能耗引入独立的统计读取／管理权限及表计范围，精确权限键以实施合同列出。配置与管理列表服务端必须检查 admin 及相应设备／表计范围；页面隐藏不是授权。机器 GET 仅发现获准字段，不能读取历史样本或管理列表，除非另明确授予只读接口范围。admin 区域配置候选为 `GET`／`POST /equipment/metric-groups` 和 `PATCH /equipment/metric-groups/{groupKey}`；既有指标、目标槽位、卡片与曲线配置需支持动态区域及多区域系列。人类 GET 包括：`/equipment/latest-cards`，`/monitor/history-samples`、`/monitor/history-curves`，以及 admin 的 `/equipment/admin/latest-snapshots`、`/monitor/admin/history-samples`；拟新增人类 `GET /energy/consumption/samples` 和 `/energy/consumption/summary`，支持按获准表计、组与时间范围查询原始值或读数／用量／完整性；拟新增 admin `GET /energy/admin/consumption-samples` 与 `PATCH /energy/admin/consumption-samples/{id}`，后者仅改备注／管理标记；`GET /energy/metric-configs?meterId=...&groupKey=...`、`POST /energy/metric-configs` 及 `PATCH /energy/metric-configs/{meterId}/{groupKey}/{metricKey}` 供 admin 在权限范围内维护能耗指标配置，写入后不能更改受锁定的语义。它们是待实现合同候选，详细参数及响应须在交付的 API 合同中登记；以上路径均在 `/api/v1` 下，现有机器端和人类端权限不可互相推导。
+
+### 12.8 页面卡住的已知现象与后续修复范围
+
+Human Owner 报告中断执行后过程模块界面卡住。2026-11-16，协调者对用户现有 Chrome 页面只读观察到：从过程菜单进入时，温度／传动／清洗共用的 `src/app/monitor/views/observations/curves.vue` 及 `src/app/monitor/views/energy/index.vue` 都出现 `TypeError: Failed to fetch dynamically imported module`，Vue Router 报导航未捕获错误。随后只读请求这两个模块 URL 均返回 HTTP 200、`Content-Type: text/javascript`，后端 8000 的 OpenAPI 返回 200、进程仍在。协调者再在新开的独立 Chrome 标签直接访问 `/monitor/temperature`，也观察到白屏及相同的 `curves.vue` 动态导入失败；直接 HTTP GET 入口、`CurveChart.vue` 与 ECharts 顶层依赖均为 200 JavaScript；对入口响应涉及的 55 个本地静态 ES 模块作只解析／链接、不执行的检查也通过。**这说明问题不只在既有标签复现；HTTP 可达及静态链接通过不等于浏览器执行已恢复。具体原因尚未定位，不能据此认定缓存、服务、数据库或空配置为根因，也不代表已修复。**
+
+后续获批准的 r10 实施应先在不破坏现有数据和用户启动进程的前提下复现、记录实际入口与网络／控制台证据并定位根因，再修复属于本任务触达的路由、模块加载、接口或空状态问题；需要服务切换时遵守现有授权与协调。若根因属于任务外独立模块，记录证据并反馈归属，不冒称已修。交接和独立验收须在真实浏览器从菜单及直接路由分别进入温度、传动、清洗、能耗四页，检查模块及传递依赖加载、正常数据、无设备／空配置／空数据、请求失败的可理解提示与恢复，导航不得长期卡住或产生未捕获异常。未选择设备／表计、没有可选对象或尚无配置时，须验证通用空 X/Y 坐标占位及准确原因，且不伪造指标、单位、数据或时间；配置存在但无样本时须验证每个实际图表的空 X/Y 轴、所选 X 轴时间范围、Y 轴单位及“暂无数据”，再通过真实接口数据到达或重试观察曲线恢复；还须验证同单位图框的区域全选／多选、各系列、缺测断点及按 `observedAt` 排列的真实曲线；不能只以 DOM 存在或截图冒充图表／请求闭环。不得为修界面删除业务数据、重置数据库、遮盖 API 错误或伪造数据。本轮不刷新、重启或停止用户进程。
+
+### 12.9 范围、实施顺序、验收与开放项
+
+**获批准后的有界交付**：调整 OBS 后端鉴权／规范化／回执／查询及相关合同；新增能耗主表、必要配置、接口、统计与可验证的前端页面和 admin 管理；修复 §12.8 范围内页面可用性；提供显式迁移、现有数据保全和受影响版本守卫；更新对应 API 合同及双语使用说明。执行角色按需加载 `backend-arch`、`frontend-ui`、`i18n-workflow`；涉及结构索引按 `code-document-indexer`，沿用项目既有迁移与数据边界。不得改 SMA/DAA 产品，不启用 Redis／后台采集或 PLC 操作，不部署生产或发布，不自动退役旧能耗表、不改价格合同，不为按单能耗分摊造模型。确需扩大范围时先回到 PM 修订。
+
+未来获得精确 r10 批准后的直接文件范围如下；路径以交付工作树为准，碰到并行修改先协调，不覆盖他人工作。此表是范围候选，不授权本轮实施。
+
+| 范围 | 允许触达的直接责任面 |
+| --- | --- |
+| 后端与迁移 | `backend/app/equipment_observation/**`；`backend/app/monitor/**` 与 `backend/app/energy/**` 中仅限本节能耗读写、统计和页面问题所需部分；`backend/alembic/versions/` 下新增后继迁移，不改写既有 migration；OBS 迁移导致版本守卫变化时限 `backend/app/plc_facts/{v2_config.py,crud/async_v2.py,crud/sync_v2_maintenance.py,services/observation_evidence.py}` 及 `backend/common/integration/storage.py` 中必要兼容。 |
+| Web | `frontend-js/src/app/equipment/**` 与 `frontend-js/src/app/monitor/**` 中配置、卡片、曲线、能耗和管理列表的直接相关页面、组件、API、路由及中英文文案；尽可能复用现有公共表格，不扩大到无关模块。 |
+| 验证 | `backend/tests/`、`backend/tests_mysql/` 下 equipment observation、monitor、energy 和受迁移影响的采集版本守卫定向测试；`frontend-js/tests/` 中对应模块与路由测试。测试须保留已有业务保护，不借更新断言掩盖失败。 |
+| 合同、说明与交接 | `contracts/published/http-api/` 下新增／更新与本节精确对应的机器合同和必要索引；`docs/equipment-status-process-monitoring{,.zh-CN}.md` 及直接相关能耗使用说明；真实结构变化时的 `CODE_INDEX.md`；Development、Verification 在各自职责内更新本任务 `tasks.md`／`checklist.md`。已发布 v1 的语义与历史证据不得静默改写。 |
+
+建议顺序：① Human Owner 审阅并批准精确 r10 后，核对现状、旧组样本／回执／时间、调用者和页面失败；② 定稿保全式后继迁移、归档／回执映射、整包和跨来源时刻边界，并设计按表计配置的合同；③ 用合成数据实现／验证两路整包、真实缺测断点、能耗与时间合同；④ 接通区域配置、菜单、曲线多选和三个管理视图，定位并修复导航问题；⑤ 对隔离与获准 dev 目标做可复核验证，保留现有数据，仅清理本次有明确主键的合成对象；Development 写自检和 handoff，fresh-context Verification 独立复核，再由 Human Owner 最终验收。软件设计和合成验证不必等待收齐所有现场表计资料；每项实际启用前由 admin 配置并确认该表计的计量方式、单位及其依赖的现场规则。此前对指定 dev 库及短暂重载的授权是具体历史事实；执行任何动作仍须核对该授权适用的精确目标／动作及当前写入者，未覆盖的新动作不可自行扩权。
+
+| 编号 | 可独立验收的结果 |
+| --- | --- |
+| R10-AC01 来源无关与授权 | SMA、第三方和其他授权方以同一多区域整包结构分别调用两路，无 DAA／PLC 点／事实前提；机器、设备、目标、区域和指标均由服务端鉴权。未知组／指标（包括未知空组）、越权及类型错误拒绝且无部分写入；实时整包替换要求对所有受覆盖范围授权，省略不能清除越权数据。 |
+| R10-AC02 整包与缺测 | 同设备／任务的多组值只占一条实时行，较新整包替换全部区域；省略组、空组、缺省指标均缺测，0、false 和空字符串按类型保留。相同完整授权请求可分别提交实时与历史，历史只保存已启用项并在回执标明跳过；历史启用但整包全缺时保留空／缺测历史样本，设备完全无历史启用指标才返回 `no_history_metrics`。旧包 stale、同刻异值冲突、`groups: {}` 及好质量历史准入可观察。 |
+| R10-AC03 幂等和旧回执 | 同目标／producer／事件 ID 原请求重试返回原回执，异内容冲突，显式空组与省略组虽同为缺测但不得改写后假定同一请求；两路独立且原子。r8 旧回执按旧指纹重放，旧新结果／归档位置可定位、不二次写入，事件 ID 不当时钟；两份同刻真实历史事件均保留。 |
+| R10-AC04 三表与配置 | 实时唯一键 `(equipment_id, task_no)`；过程一包一行；三主表均有真实 `observed_at`、`created_at`、`updated_at`。设备每目标每区域、能耗每表计每组各 100 槽；区域／指标稳定键和锁定绑定可解码旧值。能耗两表相同键可分别为累计／增量，同表指标可分别为累计／瞬时；模式、物理单位与槽用后不可改写历史。能耗不含订单／任务外键。 |
+| R10-AC05 任务选择 | 默认按设备整包 `observed_at` 显示最近采样任务，管理列表默认全部；验证真实时刻、迟到、过期、同刻并列、设备范围及不可伪称生产／空闲。页面打开期间手选不受轮询或新样本覆盖，“跟随最近采样”恢复自动；切换设备和页面重载按规则回到新设备最新，不跨任务或跨包借值。 |
+| R10-AC06 能耗口径 | 两块合成表计按各自 `(meterId, groupKey, metricKey)` 发现、授权、写入和解释；累计 `1006−1000=6`、不重叠增量 `2+3=5`，瞬时功率不能直接求和。同包混合时真实区间只属于增量并保存，增量不同区间分事件，同一消耗不重复相加；覆盖空单位、0、缺测、质量、跨日、去重、乱序、重置／换表、缺边界和上海时区。 |
+| R10-AC07 页面与权限 | 两级菜单中管理入口位于各自模块且只允许 admin；过程数据管理区分过程／能耗主表。管理员新增、命名、启停、排序多个区域，设置稳定指标键、两目标绑定及卡片；单卡至多 10 项。温度／传动／清洗的同单位图框支持全选／多选区域及多条实际／设定等系列，切换不改变历史留存，异单位不混用无区别纵轴；普通业务读、设备／表计范围和机器权限独立验证。 |
+| R10-AC08 卡顿修复与空图 | 在真实浏览器从菜单和直接路由进入温度、传动、清洗、能耗；定位动态导入／导航失败，验证模块依赖、未选择／未配置的通用空 X/Y 与明确原因、已配置无样本的各图空轴和单位、选择区域无点、失败重试及真实数据到达后恢复。不可虚构时间／数值、以截图或 DOM 检查冒充端到端；任务外根因如实记录，不报已修。 |
+| R10-AC09 无损迁移与旧能耗 | 先核查旧时间语义／时区、按组行、配置、回执、备注及写入者。新唯一键切换时，不把不同时刻组拼成一轮；旧实时原行和配置可持久、受控只读核查及恢复，旧过程未证同批的各组保留各自时刻和数据；对账原 ID／值／回执／管理信息并验证回退。保全旧能耗量、曲线及两价格表，旧统计切换前可用，不重复统计、不将缺失充零。旧档 UI 依需要决定，历史转换／退役不自动执行。 |
+| R10-AC10 交接边界 | 新合同、公开示例与配置及双语页面一致，记录授权目标、实际迁移、检查、合成数据清理及浏览器结果；区分合成 HTTP、SMA 产品、真实设备、独立 QA 和 Human Owner 验收。未获精确 r10 实施批准不进行代码／DB 变更，不以局部成功代替整体通过。 |
+| R10-AC11 原采集时间与曲线断点 | 三路新事件的 `observedAt` 缺失、null、无偏移或无法无损存 DATETIME(6) 时拒绝；先保存 T2，再补传较早 T1，随后修改 T1 备注使其 `updated_at` 晚于 T2，温度／传动／清洗历史和曲线仍按 `observedAt` 呈现 T1→T2，与创建、更新、到达和 ID 无关。同一时刻不同真实事件均保留在同一 X 坐标，ID 仅技术分页且不漏点；T0 有值、T1 合法真实包全部历史值缺测、T2 有值时，T1 保存缺测并在所选指标处画断点，不把 T0 与 T2 误连。验证 DAA 完整 DB 摘要的最晚点含 bad 的语义，跨 DB 不虚构时刻；实绩既有可空合同保持不变。 |
+
+**后续逐项配置／确认**：① 每个设备的整包过期阈值、允许未来时间偏差及各写入方时钟来源；最近采样和同刻并列已在 §12.4 确定。② 跨多个 DB／独立样本拼包时，由实际发送方在实施／联调前明确有效批次和真实代表采集时刻规则；单 DB 完整样本可使用其已存在摘要，不推断所有点同刻，也不声称 SMA 已实现自动投递。③ 实施前根据真实旧数据确定持久保全形式、旧／新 ID 与回执映射、只读核查和恢复流程；不能将不同批次合并成单个时刻。④ admin 在每个实际表计／组／指标启用前配置物理量、模式、可选单位及适用区间／采样／重置／换表／缺口规则；未知规则不得猜测。⑤ 能耗保留时长、统计精度／费用及旧统计切换点仍需项目确认；任何删除和历史转换须在相应授权与对账范围内进行。这些现场字段可以随项目逐项配置，不要求收齐所有真实表计资料才能审阅设计、实施软件或执行合成验证。
+
+本节为审阅稿，不是本轮软件或数据库操作指令。Human Owner 审阅并批准精确 r10 后，才进入 Development → fresh-context Verification → Human Owner 最终验收；产品原则已确认，不要求所有真实表计资料先到齐。各角色仅维护各自文档，不倒写既有 QA 结论。
+
+<a id="r10-approval"></a>
+
+### 12.10 r10 Human Owner 精确批准与交接
+
+2026-11-17（Asia/Shanghai），Human Owner 对 `ARCH-OBS-001 r10` §12 明确批准实施和独立验证，并授权指定 dev 目标上的必要操作。批准前 spec SHA-256 为 `683e9e3cc5fcfbc242eccc22ab6a2bedbb0c9a7d7bbd6aee68774c3d8f3ce111`。Human Owner 原文：
+
+> 批准 ARCH-OBS-001 r10 §12，按当前 spec 实施并进行独立验证。授权对 dev 库 127.0.0.1:3307 / industrial_level_2_system 执行必要的保全迁移、配置和合成数据联调；保留现有数据，只清理本次测试数据。必要时可短暂重载后端，先核对现有写入方。
+
+批准覆盖本节其余内容既定的范围、验收、文件 allowlist 和约束，以及指定 `127.0.0.1:3307 / industrial_level_2_system` 的必要保全迁移、配置和合成数据联调；现有数据须保留，仅清理可确认属于本次测试的对象。仅在必要时可短暂重载后端，操作前核对现有写入方并遵守既有数据和用户进程边界。审批不自动扩大至其他数据库、真实设备或 PLC、DAA／SMA 产品改造和现场投递、生产部署、发布或其他未明确授权的动作。跨多个来源的代表采集时刻和实际表计参数仍按 §12 逐项核定，不将未确认的上游能力写成已实现。
+
+标题后版本提示及 §12 中“未批准”“待审”“本轮只修订 spec”“未来获批”之类文字均保留为**批准前历史状态**；本记录和文件头 `Status: owner_approved` 表示上述精确 r10 范围现已获批，不改写原范围、验收标准、allowlist 或风险。r8 的已迁事实与 `qa_failed`、r9 未批准候选和此前所有 QA 证据保持原样；本次范围批准不表示软件已完成、dev 迁移已执行、独立 QA 已通过或 Human Owner 最终验收。
+
+**交接**：实际命名 `development` 按本 spec §12.1–12.9、既有任务 bundle 和已授权目标实施并在 `tasks.md` 记录准确操作、自检、限制及 `developer_handoff`；随后由 fresh-context 命名 `verification` 对精确候选和已授权操作独立验证并在 `checklist.md` 记录结论，再交 Human Owner 最终验收。涉及冲突或批准范围实质变化，按 canonical workflow 回 PM 修订，不以推断扩大授权。
+
+<a id="r11-isolated-recovery"></a>
+
+## 13. r11：隔离迁移复验与前端双语说明修正草案
+
+2026-11-17（Asia/Shanghai）。**本节为 `draft`，尚未获得 Human Owner 批准；本轮只准备可审阅的续办规格，不启动或改动容器、不操作数据库或服务、不改实现和说明文档。** r10 §12 及其 §12.10 的批准、已完成的指定 dev 迁移和各轮 QA 历史仍为原事实；r11 不撤销 r10 的批准，也不把任何旧 verdict 改写为通过。顶端版本提示及 §1–12 的版本／状态用语保留各时点原文，应以本节和各角色记录确定当前状态。
+
+### 13.1 缘由和基线
+
+[r10 QA4](checklist.md#r10-qa4-独立-verificationqa_blocked) 为 **`qa_blocked`**：已关闭 QA-008／009 的原复现，但 R10-AC03 的旧回执重放和 R10-AC09 的带旧数据迁移／恢复仍缺获准的独立目标。dev 中旧 OBS 行与回执在核验时为空，已执行的空数据迁移、SQL 改名预演及合成 HTTP 不能替代带数据的实际在线迁移／恢复。其他尚未穷尽的 AC01–11 条件依 QA4 原记录保留；不得因补测两项就自动改判全部通过。
+
+本节起草前：r10 已批准 spec SHA-256 为 `667eb48607afe9300e675fdc5a2b6152631b58705e2cd18a994bd843ec3df623`；Development 交接 [tasks.md](tasks.md) SHA-256 为 `5cf8f8b6d79998ec1f507202e45c6306bbaee47d4026b2f220c8ebb5cf87287b`，QA4 [checklist.md](checklist.md) SHA-256 为 `7599d30b39d3b1b98e915bc06348b0e83e23f17b4bad8ee16fbb5e4e1e704830`。r10 候选是 `main` 工作树的未提交交付，HEAD `21cd789277695bbafaa55c24e39261fc7247f9b0`，63 项有序清单整体 SHA-256 `8512aaecbd8610cae2d44cf02014b7bb643dddea48bf0876d4866d5eb41fb6ea`；以 Development 交接逐项文件摘要为准，不能将并行工作纳入候选或覆盖。r11 增加的两份 README 不在原 63 项中，修改前以实际工作树和冲突复核为准。
+
+QA4 另记录 [frontend-js/README.md](../../frontend-js/README.md#business-observation-source-selection) 与 [中文配对](../../frontend-js/README.zh-CN.md#业务观测来源选择) 仍把 `dataSource=legacy|http` 和默认 legacy 描述为当前设备／曲线页面行为；现有设备和过程路由已指向 r10 observation 页面。该问题当时不在 r10 §12.9 的直接责任面内，QA 未擅自修改。r11 拟仅同步该部分说明，不能因此推断软件行为或 API 合同改变。
+
+### 13.2 待批准的隔离目标和资源边界
+
+本机 2026-11-17 的只读预检显示已存在 `mysql:8.4.6` 镜像，镜像 ID 为 `sha256:869218921e61d6c3c89820955d63cca42971f0e3e6c1e2792247bbd944ebc6e9`、架构 `linux/arm64`；拟用容器名 `arch-obs-r10-qa-20261117-a1` 当时未见同名，宿主 `127.0.0.1:13316` 当时未监听。这些只是时点事实，**不表示容器已创建、目标已验证或 Docker 操作已获批**。
+
+拟在获批后仅为本任务新建一次性 MySQL 8.4.6 独立容器，以精确镜像 ID 启动、宿主端口仅绑定 `127.0.0.1:13316`；容器名为 `arch-obs-r10-qa-20261117-a1`，datadir 使用容器独有临时存储，不挂载已有数据库、项目真实 `.env`、profile 或其他人的卷。测试用空 schema 限该容器内 `obs_r11_main`、`obs_r11_guard`、`obs_r11_recovery`，专用临时凭据和辅助文件限本任务拥有的 `/private/tmp/arch-obs-r11-*`，权限最小且不输出、提交或记录明文。若使用容器桥接网络，不能把宿主回环端口绑定描述为容器网络完全隔离；仍须使用随机强凭据，不连接其他服务。不得拉取新镜像、使用 Compose、修改其他容器／卷或复用已有实例。
+
+启动前复核镜像 ID／架构、容器名称、回环端口和临时目录均符合上述条件并无冲突；不同则停止并报告，不覆盖、替换、自动拉取或自行换目标。创建后记录本次容器 ID、镜像 ID、端口绑定、挂载／存储归属、随机测试身份及新 MySQL 的 UUID、版本、时区；确认其不属于且不指向 `127.0.0.1:3307 / industrial_level_2_system`。每次迁移、写入、恢复或清理前均以实际连接、UUID、schema、容器 ID 和仅本任务拥有的凭据核对目标，任何不符立即停止。不得连接、复制、迁移、降级或清理现有 dev 数据；不修改用户 `.env`、持久 profile、角色配置及运行中的 3307／8000／5190 服务，不操作 SMA／DAA／PLC。离线或临时运行配置必须明确覆盖所有 DB 指向且不得意外读取真实配置；需要源码副本时仅复制必要源码并排除 `.env`、profile、Git 和真实数据，核对与交付候选一致，不以副本取代交付源码。
+
+本节拟请求的 Docker 生命周期仅限**该新建容器**的创建／启动、核对、停止及删除，以及容器内上述合成 schema 的创建、迁移、读写、受控恢复与回收；不授权对现有 Docker 服务做 up/down/build 或对其他数据库执行 DDL。由执行者记录拥有关系、容器 ID、专属临时文件和清理条件；完成验证后协调者先确认身份、无后续依赖和证据已写入角色记录，再只回收该容器及明确归属的临时文件。异常中断时先核对实际容器和目录的归属及状态，再按本节处理；不能因名称相同、时间相近或脚本失败就删除未知资源。关键脱敏证据持久写入本 bundle，不以 `/private/tmp` 的文件为唯一依据。
+
+### 13.3 待批准工作和独立验证
+
+1. **说明修正**：Development 仅在上述两份前端 README 的“业务观测来源选择 / Business observation source selection”中，替换设备状态／过程监控当前 `dataSource` 及默认 legacy 的过时描述；与 r10 的四设备页、过程曲线、配置驱动读取和来源无关上报一致，并链接 [r10 双语使用说明](../../docs/equipment-status-process-monitoring.zh-CN.md#r10-guide)及 [v2 机器合同](../../contracts/published/http-api/equipment-observation-v2/README.zh-CN.md)。英文文档链接英文配对。保留与此无关的通用计划／实绩、部署及历史说明，不能把设备／过程历史合同静默改写成已删除事实。仅作文字及链接检查，不修改页面、接口、权限、迁移或其他源码。
+2. **纯合成准备**：使用空的独立目标，通过项目正式 Alembic 链建立到 r8 `8c0e2a4d6f18`；仅构造本轮独有且可逐行追溯的 r8 多组不同时刻实时记录、同刻不同真实事件的过程记录、指标／槽位／卡片／曲线配置、备注／复核标记、旧回执、旧能耗量／曲线和价格行。所有时间是自造、语义明确的上海原采集时间。旧回执须采用原 r8/v1 真实指纹与结果语义并在 MySQL 持久化，保留原请求和基线；不能把新 v2 回执或仅内存模拟说成 r8 旧回执。
+3. **迁移与重放**：独立 Verification 核对当前任务唯一写入方已静默、目标旧时间与时区明确、归档目标不存在；再在独立 schema 对实际 r10 迁移 `8c0e2a4d6f18 → 9d1f3a5c7e20` 执行受控在线升级。按旧表逐行核对主键、值、原采集时刻、备注、复核、配置、约束／索引、旧能耗及价格保全；不合并未证明同批的旧组。以真实 MySQL 和 r10 接口重放合成 r8 旧原请求，核对旧指纹、原结果、版本／归档定位与业务行／回执数均正确，重试不产生重复；测试新旧数值 ID 重叠时不混淆位置。
+4. **恢复及失败防护**：在该独立目标写入并核对 r10 新样本，确认保全后按迁移既有 guard 执行受控恢复，核验 r8 原表及配置和 r10 保全行／配置均可定位。对该容器内独立空测试 schema，分别验证写入方未静默、旧时间未确认、归档或恢复目的地已存在等条件下的拒绝；对受控 DDL 中断验证停下、对象状态可核查且不会盲目重试／stamp／删除。只运行经审阅的合成流程，按实际结果报告，不能把验证失败自动修补成通过。
+5. **职责和交接**：Human Owner 批准精确 r11 后，实际命名 Development 只修改两份 README、创建所需的本任务临时测试材料并更新 `tasks.md`，记录基线、校验、限制与精确 `developer_handoff`；涉及 Docker 与数据库材料按 `docker-expert`、`docker-project-ops`、`backend-arch`，文档按 `project-governance`。其自检不代替独立试验。随后 fresh-context 命名 Verification 独立核对交付身份及中英文说明，并在 §13.2 指定目标自行执行上述合成 MySQL 实测与对账，更新 `checklist.md`；验证完整证据链时复核既有 R10-AC01–11 的已证和未证条件，按真实结果给 verdict。核验受阻或发现实现缺陷时保留证据并交回，**不能在本 r11 内擅自修改实现或扩展文件范围**；需修实现、改变目标或扩展验收时回 PM 修订并重新批准。
+
+### 13.4 允许范围与验收
+
+| 归属 | r11 直接范围 |
+| --- | --- |
+| PM、角色记录和索引 | PM 只维护本 `spec.md`；获批后 Development、Verification 分别维护 `tasks.md`、`checklist.md` 并保留全部历史；协调者只机械同步对应 PLAN／目录状态。 |
+| Development | `frontend-js/README.md`、`frontend-js/README.zh-CN.md` 中 §13.3 指定的来源说明；以及本任务 `/private/tmp/arch-obs-r11-*` 下的临时合成验证材料。其他源码、配置、文档、真实数据及既有服务不变。 |
+| Verification | 对交付工作树和上述两份说明只读验证，在 §13.2 明确的独立实例／schema 上执行合成在线迁移、重放和恢复；仅写本任务 checklist 与本任务私有临时测试材料。 |
+
+| 验收项 | 可观察结果 |
+| --- | --- |
+| R11-AC01 范围与隔离 | Human Owner 精确批准本节及目标后才执行。创建前／后、每次写入和销毁前均有镜像、容器 ID、回环端口、schema、UUID、来源配置及所有权核对；任何碰撞或不一致停止。独立目标只含合成数据，无现有 dev 连接／挂载／修改。 |
+| R11-AC02 带旧行升级 | 正式在线迁移从 r8 到 r10；旧实时多组原行及配置可独立核查，旧历史按真实各自采样时刻保留，不拼接不同批次；旧 ID、指标值、回执、备注／复核、配置、约束／索引及旧能耗／价格按各自语义对账。 |
+| R11-AC03 旧回执 | 基于真实 MySQL 中的合成 r8/v1 回执，用原请求重放后返回原结果，旧／新 ID 重叠可区分归档位置；对照重放前后业务行和回执数量，证明没有二次写入；不得把来源声明当作已验证血缘。 |
+| R11-AC04 保全恢复及保护 | 受控恢复后，r8 原行与配置可核验，r10 新业务行及配置保全可查；未静默、时间未确认、目标冲突及模拟中断均按各自 guard 或受控恢复流程处理，不盲目降级、stamp 或清理。 |
+| R11-AC05 双语说明 | 两份前端 README 的当前设备／过程说明和现有页面及 v2 合同一致，不再把 URL 来源切换或默认 legacy 当作现行实现；中英文对应，相关链接与锚点可解析，无关章节保留。 |
+| R11-AC06 交接与资源 | Development 和 fresh-context Verification 分开记录实际命令、结果、数据与目标范围、未覆盖项；QA4 和更早失败／阻塞证据保留。任务独有资源清点并按身份回收，真实用户数据、现有服务和配置不受影响；最终验收仍由 Human Owner 决定。 |
+
+原 R10-AC01–11 继续有效；本节只针对已记录缺口提出补验和说明修正，不将 QA4 标为通过、不豁免其余未覆盖条件。真实生产数据迁移、真实 PLC／SMA／DAA、设备动作、现场联调、Redis、生产部署、发布和其他 Docker／数据库操作均不在本续办范围。
+
+### 13.5 建议的精确批准用语
+
+> 批准 ARCH-OBS-001 r11 §13，按方案修正两份前端说明并进行独立验证；授权仅为本次测试在 127.0.0.1:13316 创建、使用和回收指定的一次性 MySQL 8.4.6 容器及其合成数据库，不访问或修改现有 dev 数据库和其他容器。
+
+该句仅为待 Human Owner 决定的建议，不是已获批准；在实际明确批准之前不得实施、启动测试容器或改两份 README。
+
+<a id="r11-approval"></a>
+
+### 13.6 r11 Human Owner 精确批准与交接
+
+2026-11-17（Asia/Shanghai），Human Owner 对协调者的 r11 方案确认问题作出明确答复。该问题指定本规格 §13、两份前端说明修正，以及在 `127.0.0.1:13316` 创建、使用和回收指定一次性 MySQL 8.4.6 容器及其合成数据库，现有 dev 和其他容器不受影响。问题上下文在此转述；Human Owner 的答复原文为：
+
+> 批准 r11，按方案继续
+
+批准前 spec SHA-256 为 `94d18d3945c342b8fb30dfd573033fd713a224b66ee1a00c91e7884ede4fd90c`。该答复批准 `ARCH-OBS-001 r11` §13 的精确范围和其中所列的指定一次性隔离目标、动作及回收，不扩大到其他数据库、现有容器、SMA／DAA／PLC、生产部署或源码实现变更。r10 既有批准、已执行的 dev 迁移及 QA4 `qa_blocked` 与之前全部证据保持原状；本次范围批准不表示隔离验证已执行或通过，也不是 Human Owner 最终验收。
+
+§13 标题及前文的 `draft`、待批准和不得实施措辞保留批准前状态；本记录和文件头的 `Status: owner_approved` 表示本节所列 r11 范围现已获批。实际命名 `development` 按 §13.3–13.4 交付两份说明并在 `tasks.md` 记录自检和精确 `developer_handoff`；其后 fresh-context 命名 `verification` 在 §13.2 指定隔离目标独立验证并更新 `checklist.md`。若目标、范围、验收或风险发生实质变化，停止越界动作并按 canonical workflow 回 PM 修订，不因本批准推断额外授权。

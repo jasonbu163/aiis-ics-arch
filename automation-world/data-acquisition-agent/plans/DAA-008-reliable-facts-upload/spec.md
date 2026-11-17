@@ -1,9 +1,9 @@
 Task ID: DAA-008
 Revision: r4
-Status: owner_approved
+Status: superseded
 Owner Role: PM
 Allowed Writers: PM, Human Owner
-Handoff: Human Owner 已精确批准 r4 第19节（第20节） -> 唯一主协调/root -> Development 复用现有 B01 隔离环境完成剩余准备与就绪复核 -> Owner 收到普通原生启动命令及 M01 步骤后手动操作。
+Handoff: Human Owner 已决定按 DIRECT 将旧 v1 方案作历史收尾，不再推进 B-RUN-01；原实施、未完成项目及 QA 记录保留。见第 21 节。
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch
@@ -653,3 +653,17 @@ Human Owner 对 `aiis-ics-arch::DAA-008 r4` [第19节](#r4-b01-f7-pin) 的明确
 批准对象为登记前完整 `Revision: r4 / Status: draft`，SHA-256 `585ee4197d7dc95bd8bfb32c862d6b7914a62c92771891d011e5a885e8e38317`。本次登记只更新顶部 Status、Handoff 并追加本节。第1至19节正文、历史批准与归档均保留原字节。前文的待批表述保留为起草时点事实，现行批准以本节为准。
 
 由唯一主协调将精确批准交实际 Development。依第19节，在同一个已建 B-RUN-01 隔离目标上使用校正后的固定 F7，核对原门禁并完成剩余准备。就绪核验通过后向 Owner 交接普通原生启动命令和 M01 步骤。当前准备交接到此为止，原生启动及操作由 Owner 手动执行。继续保护已有配置、历史和原 profile，复用已迁移的专用库及适用既有证据，保留原门禁失败及诊断记录。后续来源采用、实际联调与验收依各自的实证与冻结 B01 门禁记录。
+
+<a id="daa008-historical-disposition"></a>
+
+## 21. Human Owner 历史收尾决定（2026-11-16）
+
+Human Owner 在当前会话同意将 DAA-008 旧方案标为历史、不再推进，并明确要求保留历史记录、同步任务目录、不重复测试或操作现有数据，按 DIRECT 处理。原话：
+
+> 可以，按你说的收尾 DAA-008 和 DAA-011，保留历史记录并同步任务目录，不重复测试，也不动现有数据。走 DIRECT 就好。
+
+DAA-008 r4 的旧 `plc-facts/v1` / `/batches` 和 B-RUN-01 按历史保留，不再安排该旧流程的剩余操作。当前新版单样本上报由 [DAA-010](../DAA-010-sample-facts-upload/spec.md) 接续，其 [r8 Mac 受控范围验收](../DAA-010-sample-facts-upload/checklist.md#daa-010-r8-human-owner-最终验收mac-受控范围)按原记录解释，不视为逐项补完本任务的旧验收。
+
+本决定不将本任务未完成的 B 联调、AC18–AC20 或最终验收改写为通过，也不改变 r2 A0/A1 QA3、失败、实际运行及资源记录。此前顶部 `Status: owner_approved`、原 Handoff 和第 1–20 节保留其当时的事实；收尾前完整 spec SHA-256 为 `bbf5cdb7d472f7439102431300f69736715928acf4c36159d270ab7fd90fda70`。除顶部 Status/Handoff 转为当前历史状态外，本节以前正文未改。Windows 原生验证和实际环境采用仍按各自任务处理。
+
+收尾前 Handoff 原文：`Human Owner 已精确批准 r4 第19节（第20节） -> 唯一主协调/root -> Development 复用现有 B01 隔离环境完成剩余准备与就绪复核 -> Owner 收到普通原生启动命令及 M01 步骤后手动操作。`

@@ -1,45 +1,35 @@
 Task ID: DS-002
-Revision: r1
+Revision: r2
 Status: draft
 Owner Role: PM
 Allowed Writers: PM, Human Owner
-Handoff: PM design draft -> Human Owner review of exact DS-002 r1; no Development or Verification handoff, implementation permission or acceptance is inferred
+Handoff: PM scope draft -> Human Owner approval of exact DS-002 r2 -> Development A0, then A1 only on A0 pass -> fresh-context Verification -> Human Owner final acceptance
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: device-simulator
 Classification: root
-Capability: 同一DS产品的S7/Modbus TCP设备模拟与隔离设备读写调试设计、分阶段实施边界及DS点位文件可导出性反馈
+Capability: 同一DS产品的Modbus TCP模拟与S7兼容（本次待批）；独立设备读写调试与点位导出（后续设计）
 Owner: Device Simulator
-Acceptance Chain Reference: DS-002 r1 PM design -> Human Owner exact design approval; any implementation requires a separately approved precise phase/revision -> Development -> fresh-context Verification -> Human Owner final acceptance
+Acceptance Chain Reference: DS-002 r2 PM draft -> Human Owner exact scope approval -> Development developer_handoff -> fresh-context Verification checklist -> Human Owner final acceptance
 Related Task: device-simulator::DS-001 r1; aiis-ics-arch::ARCH-AW-004 r2; aiis-ics-arch::ARCH-AW-005 r5; aiis-ics-arch::DAA-007 r2
 
-# DS多协议设备模拟与设备读写调试设计 r1
+# DS 多协议设备模拟与设备读写调试设计 r2
 
 ## 1. 当前效力、唯一归属与可审阅交付
 
-2026-11-02（Asia/Shanghai），Human Owner要求在独立DS会话研究“增加Modbus、配置中心区分协议、连接S7/Modbus设备进行手工单点及范围读写调试”，本轮**只形成设计/spec及必要双语导航，不进入源码实施**。本文件是新能力的唯一范围入口，归[DS PLAN](../../PLAN.md)及[任务目录](../README.md)管理；没有Parent Task ID，不继承旧任务批准、QA、例外或验收。
+**当前为 `draft / r2`。** 2026-11-14（Asia/Shanghai），Human Owner确认把上一轮界面对比及节点图补入本设计，先审 Modbus TCP 模拟范围和 S7 兼容，设备读写调试留下一阶段，确认范围后才改代码。此次“可以”批准的是文档补充；没有 r1/r2 实施批准或最终验收。本文仍是同一个 DS-002 的唯一规格，归 [DS PLAN](../../PLAN.zh-CN.md) 和[任务目录](../README.zh-CN.md)管理，不继承其他任务的批准、QA 或例外。
 
-**当前为`draft / r1`，等待Human Owner审阅精确设计。** 本轮不创建`tasks.md`或`checklist.md`。对r1的设计批准只固定本文的产品边界、建议和分期，不授权任何代码、依赖安装、迁移实验、协议监听、调试连接或真实设备写入。以后选择具体实施阶段时，PM须将其精确文件、依赖版本、实验资源、验收和风险固化为新的获批Revision/独立实施范围，再由实际Development创建tasks；真实developer_handoff后才启动fresh-context Verification并创建checklist。
+**本次送审的实施合同是 §4、§5、§8、§10–13：** A0 用独立合成客户端验证候选 Modbus TCP 服务和资源释放；A0 全过后进入 A1，在现有 DS 内增加 IPv4 loopback Modbus TCP 模拟实例并保持 S7 行为。一次精确批准涵盖两阶段及这个先后条件。§6、§7 的设备读写调试、§9 的跨端导出，以及 r1 的候选文件、旧验收编号和旧审批文字，仅作后续设计或历史。范围冲突以本段和 r2 验收矩阵为准。
 
-当前仓库写面恰为下列五文件。PM只写第一件，主协调仅在后三类既有导航表中新增DS-002行，其余字节及并行修改保留：
-
-| 本轮精确路径（仓根相对） | 责任与内容 |
-| --- | --- |
-| `automation-world/device-simulator/plans/DS-002-multi-protocol-simulation-and-device-debugging/spec.md` | 实际PM；本r1设计草案。 |
-| `automation-world/device-simulator/PLAN.md` | 主协调；draft、spec入口与下一gate。 |
-| `automation-world/device-simulator/PLAN.zh-CN.md` | 同一任务的中文对应。 |
-| `automation-world/device-simulator/plans/README.md` | 主协调；只链接已存在的spec，诚实标记后续文档未创建。 |
-| `automation-world/device-simulator/plans/README.zh-CN.md` | 同一目录行的中文对应。 |
-
-DS本地目录目前仅有DS-001，没有同题或DS-002现有bundle；根ARCH-AW-004/005中的Modbus是当时明确延期项，不是可复用的Modbus实施授权。本轮不改根/AW索引、旧bundle、长期详细设计正文、FF、DAA、CA、SMA、Backend、共享core、应用配置、真实.env/profile/SQLite、源码、测试、依赖或锁。当前正式交付树为`/Users/jason/Desktop/DreamCode/aiis-ics-arch`，读时HEAD=`8030dbb3401ac6d1cf8bea46c81cfeff9e8e073b`，已有大量dirty并行修改；HEAD不代表本次读取源码全部已提交，不reset、不切换/新建工作树、不清他人资源。
+本轮只更新本 `spec.md`（PM）及 DS 的 [PLAN](../../PLAN.md) / [PLAN.zh-CN](../../PLAN.zh-CN.md)、[任务目录](../README.md) / [任务目录中文版](../README.zh-CN.md)中的现有 DS-002 条目（主协调）。不创建 `tasks.md` 或 `checklist.md`。本轮在正式工作树读时的 HEAD 为 `21cd789277695bbafaa55c24e39261fc7247f9b0`，DS 范围起点干净，保留其他任务的并行修改。
 
 ## 2. 已核现状与历史效力
 
-以下是2026-11-02的源码/记录读取事实。源路径均在本仓；行号只定位本次读时快照，后续实施重新冻结实际输入。
+以下是 r1 的历史记录与 2026-11-14 复核的 DS 源码入口。§4.2 补充直接影响 S7 兼容和回退的当前行为。后续实施重新冻结实际输入。
 
 | 表面与定位 | 当前事实、复用与改造风险 |
 | --- | --- |
-| [配置值对象](../../runtime/src/domain/configuration.rs)，PointConfig约136、DbConfig179、InstanceConfig201、Workspace231、validate248行 | `Workspace.schema_version=1`；InstanceConfig有host/port/rack/slot/calling_tsap/dbs，DbConfig有DB号/字节长度，点有byte/bit和TIA来源。serde拒未知字段，校验仅接收S7/loopback模型。不存在Modbus四表、寄存器地址或协议分型。只加下拉框不足以实现多协议。 |
+| [配置值对象](../../runtime/src/domain/configuration.rs) | Rust `Workspace.schema_version=1`，实际 JSON 键是 `schemaVersion`。实例有 host/port/rack/slot/calling_tsap/dbs，DB 有编号和字节长度，点有 byte/bit 和 TIA 来源；serde 拒绝未知字段，当前校验只接收旧 S7 模型。 |
 | [layout](../../runtime/src/domain/layout.rs)、[image](../../runtime/src/domain/image.rs)、[request](../../runtime/src/domain/request.rs)、[owner](../../runtime/src/services/owner.rs) | 编译、coverage、image和请求均按S7 DB/byte/bit工作；Request载荷固定256B。现有唯一写owner、权限、CAS、规则/控制可借鉴，不能把Modbus表塞入DB map或沿用S7 STRING编码。 |
 | [配置解码](../../runtime/src/infrastructure/config_store/queries.rs)5–11行、[schema检查](../../runtime/src/infrastructure/config_store/schema.rs) | payload先验原字节SHA再按Workspace解码；库appID/user_version、migration SHA及sqlite_master SQL均严格核对。新增payload分型、SQL表变动和旧版兼容是不同问题，不能靠删除字段/忽略校验处理。 |
 | [configuration](../../runtime/src/services/configuration.rs)、[apply](../../runtime/src/services/apply.rs)、[versions](../../runtime/src/services/versions.rs) | 来源只读、布局/初值/策略确认、草稿CAS、不可变版本、selected/实际loaded、停机加载及引用保护已有完整业务。改造必须覆盖所有读写和版本路径，保留同版加载不重置、回退引用及预览保护。 |
@@ -83,50 +73,55 @@ PM读取当前有效Revision、批准/失败/交接/收尾段及源码，历史�
 
 ## 4. R02–R03：协议分型、存储兼容与模拟业务边界
 
-### 4.1 R02：模型建议
+### 4.1 R02：一个实例、一个协议
 
-持久配置采用明确的版本化payload入口。候选v2只共享稳定id/name、可选brand/model资料、公共策略和版本事实；协议内容为可辨识联合：
+v2 配置共享稳定实例 ID、名称、监听端点/连接上限、公共策略和版本事实，以明确的 `protocol` 区分专属字段：
 
 | 分型 | 协议专属内容 |
 | --- | --- |
 | `s7` | listen.host/port、rack/slot/calling_tsap、S7 DB（id/number/length/points/byte/bit/来源/确认），保留现有语义 |
-| `modbus_tcp` | listen.host/port、显式Unit ID、四种table的有界areas、points及register codec；没有rack/slot/DB |
+| `modbus_tcp` | listen.host/port、显式 Unit ID、四表区域/点位和 32 位字序；无 rack/slot/DB |
 
 一个已保存模拟实例的protocol不可直接翻转；用户新增另一协议实例并显式配置，避免同UUID的DB历史被解释为寄存器。Modbus `Area`有稳定id、table、零基start_address、quantity；bit表按bit计数，register表按16-bit register计数，区间不重叠且起点+长度不溢出65536。point引用area及绝对PDU地址，type占用范围必须完全位于area内；首版拒绝相互重叠的typed point/别名，禁止多寄存器标量被半写。
 
 S7继续由其已验证owner/image/native adapter处理；新增Modbus模型、image和adapter有自己的寻址，不把S7 `Request.db/start/data[256]`改名后冒称公共协议请求。实例manager只用小型枚举分派公共start/pause/stop/reset/snapshot；共享纯值规则/校验工具须有实际两处消费者，S7 codec和Modbus register codec分开。协议adapter负责帧/连接/协议异常映射，共享模拟业务负责初值、唯一写方、规则、版本、提交和观测；adapter不持第二份权威业务内存。
 
-### 4.2 R03：兼容、迁移与回退建议
+### 4.2 R03：S7 兼容、首次 v2 保存和回退
 
-推荐先评估**保持SQLite v1表结构，新增payload schema_version=2及版本化读取**，避免首增量同时重写SQL模型。SQLite `user_version`/format标识描述容器结构，payload版本描述业务内容，不能混为同一个版本号；也不能因为DDL没变就说不存在数据迁移风险。
+**当前源码事实。** [schema.rs](../../runtime/src/infrastructure/config_store/schema.rs) 校验 SQLite 完整性、外键、appID、`user_version=1`、迁移记录和实际库结构，并校验已选实例及其摘要。[queries.rs](../../runtime/src/infrastructure/config_store/queries.rs) 对被读取的 payload 先校验原字节 SHA-256，再用旧 DTO 解析与校验。打开时读取草稿及已选版本；列历史只读元数据，打开特定版本才解码该 payload。[transactions.rs](../../runtime/src/infrastructure/config_store/transactions.rs) 分别处理草稿 CAS、发布不可变版本及保留策略、选择实例版本及前一版本保护。
 
-1. v1 payload继续按原字节hash/原DTO验证，再在内存映射为S7分型；不重写旧revision/source BLOB、原hash、UUID、saved_seq、selected/previous或历史UTC。旧S7初值/策略/布局确认不能因加protocol字段无故丢失，也不能将归一化后摘要冒充原slice_sha256；版本化摘要规则须可验证。
-2. 普通startup/read/reopen不迁移、发布或裁剪。首次持久化v2是显式数据格式维护：另立获批schema-maintenance/迁移范围，应用已停止且profile独占，先保全可恢复的完整已关闭库和身份，再用CAS/短事务写新草稿；不可变旧版本原样保留，新版本只由显式“保存为版本”生成。先证明合成库故障/恢复，再决定是否授权用户profile操作。
-3. 新二进制须能读取v1/v2历史并按各自原版本编译/加载；旧二进制遇v2不支持时明确拒绝，不能降级忽略Modbus或清空草稿。旧loader可能遍历多份revision，仅把selected切回v1不保证旧程序能打开混有v2的库。回退须显式停止应用，使用迁移前完整profile/库备份或独立保留profile，保全新库且不得静默抛弃迁移后新增记录；不能让旧程序写含v2的新库，不作原库原位自动降级。迁移后配置的保全与恢复选择须由Owner明确。
-4. saved/latest、每实例selected、实际loaded、pending预览和previous回退保留继续分别记事实；草稿保存不加载，加载不启动。运行中只编辑草稿，结构/协议内容变化停机预览后加载；换版兼容保值、reset、stop-start、重开初始化并停止按现有S7合同回归。
-5. profile锁、`DS_PROFILE_DIR`优先级、自有.env边界、空配置、只读/坏库拒绝和正常关闭保护保持。新增日历字段按`Asia/Shanghai`/`+08:00`，显示到秒；旧`*_utc`/payload时间不批量加八小时，单调计数仍只用于耗时/排序。
+**r2 操作合同。**
 
-如果实际实现证明必须增表/列、改变appID/user_version、迁移ledger或目录定位，停止该设计路径，PM新Revision明确DDL、备份/恢复、旧版拒绝和批准点；本r1不给SQL/schema/数据写入权限。
+1. 保留现有 SQLite v1 物理格式、DDL、appID、迁移记录、约束和锁。新增的是 payload JSON 的 `schemaVersion: 2`，不是 SQLite `user_version: 2`。对每个实际读取的 v1 payload，仍先用原字节/原 hash 校验和原 DTO 解码，后在内存识别为 S7；旧 `slice_sha256` 继续按原 S7 DTO 算法验证。同一内容的 v1/v2 S7 表现一致；不同编码的摘要无需相同。坏库、坏 hash/引用、未知 payload 版本明确拒绝，不建空库掩盖错误。
+2. 打开、查询、关闭、重启不转换、不发布、不裁剪。只使用 S7 且尚无 v2 的旧 profile，可照常编辑、显式保存及发布，继续使用原 v1 编码，仍可由旧程序读取。旧历史和来源 BLOB/hash 不重编码；实例/DB/点位 IDs、来源版本、名称确认、规则、原时间、草稿序号及 selected/previous 引用不因启用新程序而改变。显式发布仍执行既有预览和保留规则，保护原本受保护的引用；读操作和首次保存不会借机删历史。
+3. 第一次写入 v2 只能发生于用户**显式保存含 Modbus 的草稿**。沿用草稿保存流程：预览说明格式改变、旧程序不再适合打开该 profile，以及先保留可恢复的停机副本；操作者明确确认后，以同一草稿内容和当前 etag 一次 CAS 提交。服务层对所有保存入口执行同一个门，包括关窗时的“保存草稿并关闭”；未确认保留草稿和窗口，可回配置中心继续。普通 S7 保存没有这一步；缺确认、取消、预览过期或已知提交前失败不转换、不发布、不切 selected、不改 loaded。提交或回执结果未知时，沿现有未知结果处理重读草稿、版本及 etag，再决定是否继续，不盲重试。已写入 v2 的 profile 继续用 v2，即使删除最后一个 Modbus 实例。没有自动原位降级，也不新增迁移工具或数据库标记。
+4. 测试从独立新合成 profile 和旧 S7 合成库的**停机副本**分别验证首写。维护者在停机并释放锁后保全完整已关闭 profile、库字节和身份，记录哈希；使用另一个显式 `DS_PROFILE_DIR` 操作副本，备份留在配置子目录之外。旧库副本与原库共享原 profile ID，桌面 WebKit 也用该 ID；副本用测试宿主，或原件与副本串行，不能把路径不同当作 WebKit 隔离。产品防误转换靠预览确认和 CAS；本任务准入仅限自有合成数据，已有真实用户 profile 的复制、采用、替换或恢复留给 Owner 另行选择。
+5. 新程序同库读取 v1/v2 草稿或历史版本，按各自编码验证，再按同一 S7 规则运行；保存/发布不自动加载，加载不启动。已选、实际加载、待应用和前一版本分别显示。现有停机预览/保值、同版加载不重置、stop/start 保值、重开从 selected 初始化且不自动监听的规则继续有效；不得为版本切换重写历史。
+6. 旧程序遇 v2 草稿或需解码的 v2 已选版本时应拒绝并保留原件；只有未选 v2 历史时可能仍能打开，读到该版本或将其作为最新版本比较时会失败。单切 selected、删除 Modbus 或导出部分记录都不等于旧版回退。验证回退时先停机，保全升级后的完整库和新增记录，再把停机前完整副本作为单独 profile 用旧程序打开核验；两个版本各自保留。没有覆盖或合并历史的隐式步骤。
+
+继续遵守 [profile 锁](../../runtime/src/infrastructure/profile_lock.rs)及 [profile 身份](../../runtime/src/config/profile.rs)规则。新的日历时间用 `Asia/Shanghai`、携带 `+08:00`；原历史时间不改写。若需 DDL、改变容器版本/迁移清单或调整 profile 规则，超出 r2，返 PM。
 
 ## 5. R04：Modbus TCP模拟的首增量合同
 
 四表为`coils`、`discrete_inputs`、`holding_registers`、`input_registers`。配置和协议使用零基PDU地址0..65535；常见0xxxx/1xxxx/3xxxx/4xxxx编号仅可作为明确基准的辅助显示，用户不能输入40001后由系统默默猜成地址0。bit值为BOOL，寄存器按16位值传输。四表及PDU寻址依据[Modbus官方V1.1b3 §4.2–4.4](https://www.modbus.org/file/secure/modbusprotocolspecification.pdf)。
 
-| 首增量建议 | 模拟server及调试client的范围 |
+| 本次可批准的功能码 | 本地模拟服务行为 |
 | --- | --- |
-| FC01/02 | coils/discrete_inputs读取，协议每次1..2000 bits；实际设备或产品预算可更低 |
-| FC03/04 | holding/input registers读取，协议每次1..125 registers；设备下限优先 |
-| FC05 | 单coil写；值编码、地址、写方、权限先校验，拒绝不改变image |
-| FC06 | 单holding register写；只允许完整16-bit目标，不拆写32-bit值 |
-| 其余功能码 | 明确unsupported/协议异常；FC15/16/22/23、广播、网关路由、诊断/文件传输另定范围 |
+| FC01/02 | 读 coils / discrete inputs，每次 1..2000 bit。 |
+| FC03/04 | 读 holding / input registers，每次 1..125 register。 |
+| FC05 | 写一个完整 BOOL coil，值只接受 `0xFF00` / `0x0000`。 |
+| FC06 | 写一个完整 16 位 holding 点；32 位点的两个半字都拒绝。 |
+| 其余功能码 | 对可识别的合法请求返回异常；无批量写、广播、网关路由或设备调试客户端。 |
 
-上述协议数量上限来自[官方§6.1–6.6](https://www.modbus.org/file/secure/modbusprotocolspecification.pdf)，不是EVO800或其他设备能力证明。首增量一个模拟实例监听一个TCP端点、接受一个显式Unit ID；建议产品允许1..255、默认1并拒绝0，属于待批准产品域，不承诺广播/网关。不同Unit ID不能落到同一内存而假成功；同端口多Unit设备模拟列后续。监听首轮继续IPv4 loopback、用户可配置高位端口，不开放wildcard/远端监听或申请102/502特权端口。
+协议数量上限来自 [Modbus 官方 §6.1–6.6](https://www.modbus.org/file/secure/modbusprotocolspecification.pdf)。每个 Modbus 实例仅监听一个 IPv4 loopback 端点，端口 1024..65535（例 15020），只响应一个显式 Unit ID 1..255（默认 1）；0 不可配置。其它 Unit ID 的合法帧忽略、无响应和副作用，诊断限频。同端口不复用不同 Unit ID；与 S7 冲突的绑定必须报实际失败。S7 已有端口配置合同不变。
 
-建议首轮typed点：bit表BOOL；register表U16/I16/U32/I32/F32（有限f32），32-bit占两个连续register。寄存器内wire字节按网络大端；跨寄存器word_order明确`high_word_first`/`low_word_first`，不由品牌猜。UI同时显示原始16-bit register和typed值；不支持的字节交换、64-bit、字符串、BCD、厂家缩放/地址映射另批。32-bit点可由本地规则/UI生成并被读取，但其协议写在未批准FC16的阶段默认禁用；不能把一个FLOAT拆成两次FC06后声称单点写成功。
+bit 表支持 BOOL，register 表支持 U16/I16/U32/I32/F32（有限值）；32 位点占两个连续 register。寄存器内字节采用网络大端，跨寄存器配置 `high_word_first` / `low_word_first`。在线值显示原始 register 与类型值；32 位值可以经本地规则或本地手工写更新并由外部读取，禁止用 FC06 拼写 32 位值。不支持字节交换、64 位、字符串、BCD、品牌地址和缩放。
 
-配置只分配显式area，建议每实例最多16 area、4096 typed点，四表总原始image不超过256KiB；沿既有最多8模拟实例及全进程预算，所有数字是设计预算，非已测容量。未映射地址/越界/空洞按真实协议异常拒绝，不自动创建全地址空间。规则沿hold/fixed/ramp/sine/random/toggle的适用类型，初值只在初始化/显式reset生效，pause不让出rule写权；discrete_inputs/input_registers在协议上始终只读，不能用模拟策略打开远端写。所有协议/UI/rule/init/reset写经该实例唯一受控提交入口，权限冲突在提交前拒绝，失败无值/seq变化；FC05/06只承诺该单操作提交粒度，不宣称跨请求原子。
+每个 Modbus 实例最多 16 个区域、4096 个点、256 KiB 原始镜像。配置地址为零基 PDU 0..65535；同一表内区域和点位各自不重叠，读取必须落在同一已配置区域内，区外、跨区和地址溢出拒绝。区域内无点的原始位置读为 0，只读；合法原始读取可只读 32 位点中的一个 register。只有实际配置的 coil/16 位 holding 点在现有控制模式、唯一写方及协议权限均允许时可由客户端写入。discrete inputs / input registers 永远不能经协议写。BOOL 支持 hold/fixed/toggle，数字支持 hold/fixed/ramp/sine/random；暂停只冻结规则推进，不释放写方权限。所有本地、协议、规则和重置写走实例唯一提交入口；拒绝无值或序号变化。
 
-## 6. R05–R07：手工调试、范围采样与受控单点写
+对可响应的合法报文，异常功能码是原 FC 加 `0x80`；`01` 不支持、`02` 地址/范围/写入不可用、`03` 数量或值非法、`04` 已知内部失败、`06` 处理队列忙。响应关联原 Transaction ID 和 Unit ID。无效 Protocol ID、MBAP Length 不在 2..254（TCP ADU 上限 260 字节）或超时半帧应结束该连接，不入业务队列。合法且已提交的写若回应丢失不保证客户端可判定结果；服务端不重放或制造第二次提交。
+
+## 6. 后续设计 R05–R07：手工调试、范围采样与受控单点写
 
 ### 6.1 R05：直接手工输入
 
@@ -161,7 +156,7 @@ S7继续由其已验证owner/image/native adapter处理；新增Modbus模型、i
 - 请求未发送可确定cancelled；发出后缺可靠应答为`unknown`，即使UI取消、socket关闭或超时也不声称没写/已回滚。明确协议异常与已确认成功分别记录。协议write ACK只代表该协议请求结果，不代表设备工艺动作完成。
 - 批量、整块、读改写、掩码写、命令握手、自动恢复写列后续；须定义每操作/每块的部分成功、unknown及停止点，不能以一个布尔总成功隐藏前面已执行的写。
 
-## 7. R08–R09：连接复用、有界排队、取消与观测
+## 7. 后续设计 R08–R09：调试连接复用、有界排队、取消与观测
 
 ### 7.1 R08：会话和期限
 
@@ -192,17 +187,49 @@ transport超时、晚到响应或关联不明后，建议废弃旧context，清�
 
 后续验收同时观察会话owner/在途数/队列/轮询任务、socket/线程/句柄和实际join。包括无应答、半帧、断连、取消、切目标、重复关闭和应用退出；必须看到自有任务结束与资源回落，再报告释放。Stop按钮变灰、页面隐藏、连接对象析构、listener不在均不能单独证明已释放。模拟/调试并发要核全进程预算和互不误停，既有native硬崩可能影响整个进程的边界继续保留，不承诺进程级故障隔离。
 
-## 8. R10：界面与手工输入效率
+## 8. R10：六个页面现在与加入 Modbus 后的对比
 
-同一应用提供清楚的“设备模拟 / 本地模拟服务”和“设备读写调试 / 连接远端设备”入口。配置中心的协议标识同时出现在实例行、详情、监听/启动确认和日志筛选中；选S7才显示DB/TSAP/导入，选Modbus显示四表/area/PDU地址/word_order。品牌/型号是资料区，未核实资料可标unverified，不能出现“已兼容汇川”产品文案。
+| 页面 | 现在：S7 | 加入 Modbus TCP 后 |
+| --- | --- | --- |
+| 工作台 | 一张 S7 实例表，显示监听端点、状态、连接与版本；可启停实例。 | 仍用一张表，增加协议列；S7 与 Modbus 行独立启停、暂停和重置。区分草稿端点、实际加载配置及实际绑定端点；连接面板按协议显示状态、占用/上限及拒绝原因，Modbus 显示 Unit ID。停其中一台不影响另一台。 |
+| 配置中心 | 新增实例填写地址、端口、Rack、Slot、TSAP；走草稿 → 发布 → 选择/加载。 | 创建时先选 S7 或 Modbus TCP；共同填写名称、地址、端口和连接上限。S7 仍显示原参数和导入；Modbus 只显示 Unit ID 等适用参数。已保存实例协议不可就地翻转；首写 v2 提示与版本流程见 §4.2。 |
+| DB 点位 | 以 DB、byte/bit、点类型、来源/命名确认管理 S7 点。 | 页面统一叫“点位”，按实例展示 S7 DB/原导入与命名，或 Modbus 四表、区域起点/长度、零基 PDU 地址、数据类型和 32 位字序。寄存器/位单位随表变化；保持稳定点 ID、名称/显示名及 S7 来源，Modbus 手工点不要求 TIA 来源。 |
+| 模拟策略 | 查看实例、DB、点位的规则和写入来源；配置客户端及界面权限。 | 延用实例 → 区域（S7 DB 或 Modbus 区域）→ 点位继承。显示实际规则、写方和有效权限；Modbus 两种只读表及 32 位点不可开协议写，仍可由本地规则或许可的本地操作改变。 |
+| 在线值 | 查看 S7 地址、类型、当前值、写方、质量和最后更新；可按权限写本地模拟值。 | Modbus 行显示表/地址、类型值、原始位或 register、字序、写方和最后真实更新；S7 保留旧显示和操作。写入仍针对本机实例内存，显示权限/状态阻止原因，无远端读写入口。 |
+| 日志与存储 | 现有本机存储和日志页显示 S7 连接、权限、状态等事件。 | 保留同一个日志与存储页，按协议/实例筛选；S7 保留握手/TSAP 上下文，Modbus 适用时显示 Unit ID、FC、事务 ID、异常码和关闭结果。沿用日志留存与限频；不逐帧持久记录普通读，也不记录整帧。 |
 
-调试页面顺序为连接参数→单点/范围表单→读取一次/开始或停止轮询→raw与typed结果；写入是独立默认关闭入口。支持键盘Tab、正常数值键入、保留未完成/非法输入及准确单位提示，常用连接参数在当前会话复用；切目标确认后清空旧结果/写准入。首轮不强加保存连接库、版本发布或点表导入步骤；可有清除表单，不自动发现/扫描设备。
+样稿示例：工作台两行分别为 `PLC_Test`（S7，`127.0.0.1:30102`）和 `FlowMeter_Demo`（Modbus TCP，`127.0.0.1:15020`，Unit ID 1）。后者的 `Flow_F32`（holding 100–101）由规则写入 42.5，高字在前显示 `422A 0000`、低字在前显示 `0000 422A`；`Setpoint_U16`（holding 102）为 60 / `003C`，可以按权限用 FC06 写。其它区域分别示例 coils 0–7、discrete inputs 0–7 和 input registers 300–307。这些是合成界面数据，不是已接设备的点表或原生运行结果；评审以本表和下图为准，上一轮 HTML 样稿不进仓库。
 
-结果表显示协议地址、raw/typed值、质量/错误、DS本机请求开始/响应完成的观测时间与块编号；设备实际提供的采样/事件时间及来源另列，缺失时不推断。历史结果标明目标和代次，partial/unknown直接可见。新普通列消费公共列宽工具：可拖拽、有合理min width/横滚、按应用/稳定表ID/字段键本机持久化及每表恢复默认；特殊操作列可固定，不用翻译标题作存储键。新增文案进入中英对称locale，不写死在Vue/Rust错误串；Rust返回稳定错误key，UI翻译。只扩当前DS页面及新调试模块，不重做CU、其它AW应用或整套导航系统。
+```mermaid
+flowchart TB
+  subgraph NOW["现在：S7 模拟"]
+    nUI["工作台 / 配置中心"] --> nVer["S7 草稿 → 发布 → 选择 / 加载"]
+    nVer --> nOwner["S7 实例：DB 内存、规则、唯一写方"]
+    nOwner --- nSrv["Snap7 服务：本机端点"]
+    nSrv <-->|"TCP + COTP/S7 会话内读写"| nClient["外部 S7 客户端"]
+    nOwner --> nView["在线值 / 状态 / 日志"]
+  end
+  subgraph NEXT["加入 Modbus TCP：同一个 DS，两种模拟实例"]
+    aUI["同一工作台 / 配置中心：按协议配置"] --> aVer["共同草稿、版本、每实例选择 / 加载"]
+    aVer --> aMgr["实例管理：按协议分派，各自启停"]
+    aMgr --> aS7["S7：DB 内存、规则、唯一写方"]
+    aMgr --> aMB["Modbus TCP：四表内存、规则、唯一写方"]
+    aS7 --- aS7Srv["S7 本机监听"]
+    aMB --- aMBSrv["Modbus TCP 本机监听"]
+    aS7Srv <-->|"TCP + COTP/S7 会话内读写"| aS7C["外部 S7 客户端"]
+    aMBSrv <-->|"TCP 连接内请求 / 应答"| aMBC["外部 Modbus 客户端"]
+    aS7 --> aView["按实例观测：在线值 / 连接 / 日志"]
+    aMB --> aView
+  end
+```
 
-## 9. R11：向FF的JSON字段映射与可导出性反馈
+两种协议都先有 TCP 连接。Modbus TCP 可以连一次读写后断开，也可以复用同一 TCP 连接请求多次；S7 在 TCP 上还有 COTP/S7 会话建立。对 DS 而言，两者都是本地服务端：启动后监听、接收外部客户端请求、更新各自内存、停止时关该实例的监听和连接。
 
-FF主会话的统一JSON设备点位清单仍是**未批准、未落地提案**；本节只反馈DS可提供的事实与缺口，不创建合同/schema/示例文件、不修改FF加载器或其文档/源码，也不把JSON定位争论变成当前任务依赖。建议共同骨架`schema_version / source / devices[]`；正式schema_version值、required字段和type枚举必须由后续双方合同范围确定，本文不抢占版本号。
+普通表格列用现有公共列宽工具，允许拖拽、横滚、按稳定键本机保存并恢复默认。操作表单能正常键入、Tab 切换并说明单位和无效输入；所有新增文案进入对称的中英文 locale，错误以稳定键翻译。§6/§7 的连接参数、单点/范围输入、采样结果和独立写入口是后续调试页面的设计；不在这六页附加远端功能。
+
+## 9. 后续设计 R11：向 FF 的 JSON 字段映射与可导出性反馈
+
+Field Flow 的 [FF-004 r2 A](../../../../field-flow/plans/FF-004-plc-json-catalog-and-multi-plc/checklist.md) 已在自己的任务内验收 Rust S7 切片；其 Modbus 是格式校验范围，未运行 Modbus。下表保留 r1 时的 DS 来源/缺口反馈，字段是当时提议，不是 FF 当前合同或 DS 已实现导出能力。正式对接时按 FF 已生效合同重新映射；本次不创建导出文件或改 FF，DS 模拟也不依赖导出。
 
 | 提议字段 | DS当前S7来源 / Modbus所需来源 | 交接约束 |
 | --- | --- | --- |
@@ -225,115 +252,78 @@ FF主会话的统一JSON设备点位清单仍是**未批准、未落地提案**�
 
 DS导出可独立阶段实施，先给S7提供文件；无需等Modbus模拟或调试全部完成。FF可以先手写/维护其自身获批格式的JSON，不以DS导出为其前置依赖。本会话不发送跨会话消息或变更FF任务归属。
 
-## 10. R12：候选技术栈、分阶段建议和技术gate
+## 10. R12：A0 技术验证、A1 产品范围和资源边界
 
-继续Tauri v2 + Vue/TypeScript + Rust runtime +现有SQLite/CU/Element Plus设施，普通启动继续`pnpm tauri dev`，所需features由Tauri配置承担；不复制新“品牌版”工程，不引Python sidecar/Backend/Celery。新增依赖须在实施spec中冻结版本/feature/lock及许可证/平台影响，本轮不安装、不解析Cargo新锁、不编译/启动。
-
-| 能力 | 候选与必须证明的gate |
+| 阶段 | 有界交付和进入条件 |
 | --- | --- |
-| Modbus TCP | [slowtec/tokio-modbus官方项目](https://github.com/slowtec/tokio-modbus)及[0.17.0 TCP server API](https://docs.rs/tokio-modbus/0.17.0/tokio_modbus/server/tcp/index.html)是候选，TCP client/server分feature收敛，不启RTU。须核MBAP/事务/长度校验、异常回执、提交前拒写、child task归属、连接/帧/输出预算和真实关闭；API存在不表示这些都已满足。 |
-| S7调试client | 优先评估已纳native构建的Snap7 client经独立薄bridge暴露，[官方API](https://snap7.sourceforge.net/snap7_api_ref.html)仅作能力资料；也可评估独立Rust client，不能修改/依赖DAA私有runtime或拿其旧读证据代验本client。须先证端口/TSAP、受控分块、位写/STRING、期限及join；不能停就回选型。 |
-| 共享业务 | 原S7 adapter/owner优先保持，新增Modbus专属image/codec及小型枚举分派；只抽已被两侧消费的纯规则/结果辅助，不预建驱动注册平台。 |
-| 合成独立协议验证 | Modbus server用独立raw-wire或另一实现的client核协议，不只server/client同库自测；调试client再对独立合成server验证延迟/异常/晚到/断连。S7回归保持其原协议与资源向量，模拟profile不操作用户库。 |
+| A0：候选验证 | 精确批准 r2 后，在自有合成数据、IPv4 loopback、非特权临时端口，用小型测试服务及独立原始 TCP 夹具核验 AC07。只改 §11 的 A0 文件；不接产品 UI/配置存储、不启普通应用新 feature。 |
+| A1：产品模拟 | AC07 全过才接入现有 DS 的配置、版本、实例、点值和六个页面，完成其余验收。无需在两阶段之间重复批准；AC07 失败、需换库、放宽资源、增文件或改兼容合同则停止并回 PM。Development 留存两个阶段的实际证据。 |
 
-建议阶段如下；它们是路线建议，全部尚未授权。一个阶段验收不自动启动下一阶段，数字/文件/依赖有实质变更须PM重新冻结：
+**锁定候选。** [tokio-modbus 0.17.0 清单](https://raw.githubusercontent.com/slowtec/tokio-modbus/v0.17.0/Cargo.toml)为 `=0.17.0`、`default-features = false`、只启 `tcp-server`（会带入公共 `tcp` API，不提供产品客户端或 RTU），MSRV 1.76、MIT 或 Apache-2.0。[Tokio 1.52.3 清单](https://raw.githubusercontent.com/tokio-rs/tokio/tokio-1.52.3/tokio/Cargo.toml)为 `=1.52.3`（现有桌面锁版本），关闭默认功能，直接依赖只启 `io-util`、`net`、`rt`、`sync`、`time`，MSRV 1.71、MIT。核对实际传递 features、许可证、两份 Cargo 锁和 macOS arm64 工具链；不改 Rust 最低版本或其他无关依赖。runtime 与 Tauri 转发使用 `modbus-tcp` feature；A1 的 [Tauri 配置](../../src-tauri/tauri.conf.json)同时传递原 `native-s7` 与新 feature，普通入口仍为 `pnpm tauri dev`。
 
-| 阶段 | 有界交付与进入条件 | 验收/后续批准 |
+**候选库的两个门。** [TCP codec](https://raw.githubusercontent.com/slowtec/tokio-modbus/v0.17.0/src/codec/tcp.rs)不提供 §5 的 ADU 上限和半帧期限；在放入库解码器前必须限制 header、长度和时间。[TCP server 源码](https://raw.githubusercontent.com/slowtec/tokio-modbus/v0.17.0/src/server/tcp.rs)每连接 spawn，`serve_until` 返回或发取消信号不足以证明子任务已退出。允许在 transport 层做有限 IO 包装、连接准入和退出跟踪；不改上游源码、不另写一套协议栈。独立夹具按[官方 TCP 指南](https://www.modbus.org/file/secure/messagingimplementationguide.pdf)构造字节，不依赖候选库的客户端、解码器或期望值生成器。
+
+**资源上限。** Modbus 每实例最多 8 个连接（可配置 1..8），进程合计最多 16 个 Modbus 连接，连接计入清理完毕为止；每连接至多 1 个未完成请求，每实例最多 4 个等待处理的协议请求，忙时拒绝，不无限接纳或缓存流水请求。半帧自首字节至完整最多 2 秒，入队到处理完成最多 1 秒，响应写入最多 2 秒，空闲连接最多 60 秒；超时未提交不得稍后补写。沿用全 DS 8 个实例上限、512 MiB 分配准入及 64 线程预算，保留现有 S7 transport 独立约束；新增 Modbus worker、连接、任务和内存须进入合计准入，不能按两种协议的独立满配相加承诺。单实例停机沿用现有 stop 合同；应用退出所有实例共享原 4 秒期限。超时仍报清理失败/未完成，不冒充已关闭；以监听释放、真实 socket 关闭、任务/worker join 及资源回到基线为准。
+
+**排除。** §6/§7 的设备读写调试（含仅只读的远端连接、调试页面、轮询和设备写入）、§9 导出、RTU、批量写、设备网关、多 Unit 同端口、非 loopback 监听、品牌适配、真实设备/用户 profile、其他 AW 模块、共用 UI 组件库改造和新平台适配均不在 r2。现有 DS 以 macOS arm64 验证，Linux/Windows 或任何 EVO/S7 真机需独立证据，不从 Rust 库能力推导整应用支持。
+
+## 11. 精确的未来实施文件范围（当前不授权）
+
+下表以 `automation-world/device-simulator/` 为前缀；花括号仅逐项展开列出的名字，不匹配其他文件。未列文件不写；既有文件仅改 r2 触达部分。下列范围供 Human Owner 对 r2 一次审阅；不是本轮 PM 的写权限。
+
+| 阶段 / 类别 | 已有文件 | 可新建文件 |
 | --- | --- | --- |
-| D0（本轮） | r1设计、字段映射和五文件导航；只读源码/官方资料与静态文档核对 | Human Owner审阅精确r1；没有产品/独立QA结果 |
-| A0 | 单独获批的Modbus adapter可行性及payload兼容合成验证；不接用户profile | 先证写前拒绝/异常/资源关闭、v1原字节保护/新payload拒绝和恢复；失败返回PM，不先改全部UI |
-| A1 | 按新的精确scope将Modbus TCP模拟接配置/版本/有限UI，保留S7原路径 | 双协议隔离、FC01–06的批准子集、规则/权限、S7回归及正常退出；用户profile迁移仍另批准 |
-| B1 | 独立设备调试只读：手工S7/Modbus连接、单点/范围/有界轮询、队列/取消/释放 | 合成目标验证，无需先建模拟配置；证明重用/超时/晚到/切目标和真实资源下降 |
-| B2 | 再批准受控单点写：S7受支持类型、Modbus FC05/06 | 默认关闭/目标确认、拒绝/ACK/unknown/no-replay、位邻居/STRING；不含批量或FC16 |
-| C | 文件导出，可在A/B之前独立做S7切片 | 先与FF owning范围明确正式文件合同；仅DS导出/验证，不改FF源码；不是FF手写JSON的依赖 |
-| D | Windows/Linux、安装分发、RTU、FC16/批量写、远端监听及真实EVO目标 | 各自先核资料/精确spec/资源授权/平台证据；本r1不授予任何真实设备连接/写入 |
+| A0 依赖和候选服务 | `runtime/{Cargo.toml,Cargo.lock}`；`src-tauri/{Cargo.toml,Cargo.lock}`；`runtime/src/{lib.rs,infrastructure/mod.rs}`（仅候选 feature/入口及两锁） | `runtime/src/infrastructure/modbus_tcp.rs`；`runtime/tests/modbus_transport.rs`；`tests/protocol/modbus_tcp_wire.py` |
+| A1 运行时入口和领域 | `runtime/src/{app.rs,lib.rs,config/workspace.rs,domain/configuration.rs,domain/mod.rs,domain/rule.rs,domain/layout.rs,domain/policy.rs}` | `runtime/src/domain/{device_configuration.rs,modbus.rs}` |
+| A1 配置、版本和生命周期 | `runtime/src/services/{configuration.rs,apply.rs,queries.rs,versions.rs,layout.rs,naming.rs,source_import.rs,lifecycle.rs,mod.rs}`；`runtime/src/infrastructure/config_store/{mod.rs,queries.rs,schema.rs,transactions.rs}`；`runtime/src/infrastructure/logging.rs`（只扩日志字段与分页前筛选）；A0 候选服务与注册文件 | `runtime/src/services/{modbus_owner.rs,modbus_lifecycle.rs}` |
+| A1 桌面桥接 | A0 两份 Cargo 清单/锁；`src-tauri/tauri.conf.json`；`src-tauri/src/{lib.rs,commands/configuration.rs,commands/runtime.rs,commands/queries.rs}` | 无 |
+| A1 六页和本机状态 | `src/services/deviceSimulator.ts`；`src/console/composables/useDeviceSimulator.ts`；`src/console/sections.ts`（仅日志页接入）；`src/components/console/{ConfigRevisionBar.vue,LocalLogPanel.vue}`；`src/App.vue`（只在关窗保存需要接入确认时）；`src/app/simulator/views/{overview,instances,points,policies,values}/index.vue`；`src/app/simulator/components/{InstanceEditor.vue,PointEditor.vue,PolicyEditor.vue,PolicyBatchDialog.vue,ApplyPreviewDialog.vue,ConnectionPanel.vue,ValueWriteDialog.vue}`；`src/app/simulator/locales/{en-US,zh-CN}.json`；`src/locales/{en-US,zh-CN}/navigation.json` | `src/app/simulator/components/ModbusAreaEditor.vue` |
+| A1 回归、证据和说明 | A0 两个测试文件；`runtime/src/bin/ds-test-host.rs`；`tests/ui/{native_driver.js,scenarios.json}`；`{README,README.zh-CN,BUILD,BUILD.zh-CN,USER_GUIDE,USER_GUIDE.zh-CN,CODE_INDEX}.md`；`runtime/{README,README.zh-CN}.md`；`tests/{README,README.zh-CN}.md` | `runtime/tests/{workspace_compatibility.rs,modbus_model.rs,modbus_protocol.rs}`；`tests/modbus-presentation.test.mjs` |
+| STD 角色记录 | 本 `spec.md` 仅 PM/Owner；状态导航按规范同步同一条目 | 批准后由 Development 创建同 bundle `tasks.md`；交接后由 fresh-context Verification 创建同 bundle `checklist.md` |
 
-当前可推荐先做A0→A1，再做B1→B2；如果近期工作重点是手工排查，B1也可独立优先，不需要先完成A。Owner选优先级时决定下一精确实施spec，不把本轮建议默认为下一阶段授权。
+已跟踪的 `src/console/sections.ts` 当前引用被 Git 忽略的极薄日志页 wrapper，纯跟踪源码无法依赖它。A1 仅将该日志入口接到已跟踪的 `LocalLogPanel.vue`，保留页标记 `page-logs`，不动 `.gitignore` 或本机 wrapper。SQL 迁移文件、SQLite 物理结构、native S7 bridge/CMake、pnpm 锁及共享工程也不在文件范围内。现有测试用作旧行为的参考，不改旧期望来迁就新行为。临时编译、进程、端口、profile 和日志按 §13 处理，运行生成物不作为源码变更。
 
-## 11. 候选精确文件集合（仅估算、不是当前allowlist）
+## 12. 实施验收矩阵（均未执行）
 
-下列前缀`D`均为`automation-world/device-simulator/`。花括号仅列出有限明确成员，不是目录递归/通配权限；`planned`表示当前不存在。本轮一律不写。实施Revision须从中选择真正需要的文件，补齐实验/依赖精确版本和验收；未列路径或拆分改名需重新评审，不能用本表自动扩scope。
+S7 兼容单独核验。由旧候选建立自有合成 S7 库，包含多个版本、已选/前一版本、TIA 来源、名称确认、规则和不同点类型；对照旧二进制、原字节及实际协议输出。记录前后 `user_version`、appID、SQLite 结构/完整性、不可变 payload 与来源 SHA、实例摘要、ID/引用和读取行为。
 
-| 后续候选 | 文件与责任 |
+| 编号 | 场景和通过标准 |
 | --- | --- |
-| A：协议分型/兼容 | 既有`D/runtime/src/domain/{configuration.rs,layout.rs,mod.rs}`、`D/runtime/src/services/{configuration.rs,source_import.rs,layout.rs,naming.rs,apply.rs,versions.rs,queries.rs,mod.rs}`、`D/runtime/src/infrastructure/config_store/{queries.rs,transactions.rs,schema.rs,mod.rs}`、`D/runtime/src/app.rs`；新增`D/runtime/src/domain/{device_configuration.rs,modbus.rs}`（planned）。保留旧DTO/hash语义并显式分派，schema.rs只调整版本化校验所需部分，DDL不在本建议内。 |
-| A：Modbus运行/接线 | 新`D/runtime/src/services/{modbus_owner.rs,modbus_lifecycle.rs}`、`D/runtime/src/infrastructure/modbus_tcp.rs`（planned）；既有`D/runtime/src/infrastructure/mod.rs`、`D/runtime/{Cargo.toml,Cargo.lock}`、`D/src-tauri/{Cargo.toml,Cargo.lock,tauri.conf.json}`。既有S7 `owner.rs/lifecycle.rs/native_ffi.rs`不是Modbus重写面；若实需共同预算的小改，须在下一scope逐项加入。 |
-| A：模拟UI | 既有`D/src/services/deviceSimulator.ts`、`D/src/console/composables/useDeviceSimulator.ts`、`D/src/app/simulator/views/{instances,points,policies,values,overview}/index.vue`、`D/src/app/simulator/components/{ApplyPreviewDialog.vue,PolicyEditor.vue,PolicyBatchDialog.vue}`；新`D/src/app/simulator/components/ModbusAreaEditor.vue`（planned）。源导入仍S7专属，不能伪装Modbus导入。 |
-| A：合成验证 | 新`D/runtime/tests/{workspace_compatibility.rs,modbus_model.rs,modbus_protocol.rs}`、`D/tests/protocol/modbus_cases.py`（planned）；既有`D/runtime/tests/{configuration_store.rs,apply_retention.rs,source_import.rs,versions.rs}`只为真实受影响回归；既有S7协议fixtures/oracle保持，不随新实现重写expected。 |
-| B：调试运行/IPC | 新`D/runtime/src/domain/debugging.rs`、`D/runtime/src/services/{debugging.rs,debug_polling.rs}`、`D/runtime/src/infrastructure/device_clients/{mod.rs,s7.rs,modbus_tcp.rs}`、`D/src-tauri/src/commands/debugging.rs`（planned）；既有`D/runtime/src/{domain,services,infrastructure}/mod.rs`、`D/src-tauri/src/{app.rs,lib.rs,commands/mod.rs}`。S7 client若采用native bridge，新`D/native/bridge/{ds_s7_client.h,ds_s7_client.cpp}`（planned）及既有`D/native/CMakeLists.txt`须在B scope明确；不默认修改controlled上游。 |
-| B：调试UI | 新`D/src/app/debugger/{manifest.ts,api/deviceDebugger.ts,views/device-debug/index.vue,components/TargetConnectionForm.vue,components/DebugReadForm.vue,components/DebugWriteDialog.vue,components/DebugResultsTable.vue,locales/zh-CN.json,locales/en-US.json}`（planned）；既有`D/src/console/{sections.ts,types.ts}`、`D/src/App.vue`、`D/src/styles/app.css`。独立facade/state，不把远端调用加进本地模拟写操作。 |
-| B：合成验证 | 新`D/runtime/tests/{debug_sessions.rs,debug_reads.rs,debug_writes.rs,debug_shutdown.rs}`、`D/tests/debug-input.test.mjs`、`D/tests/protocol/debug_target.py`（planned）；必要真实原生流程在既有`D/tests/ui/{native_driver.js,scenarios.json}`按批准子集增加，不重建通用测试平台。 |
-| C：导出切片 | 新`D/runtime/src/domain/point_manifest.rs`、`D/runtime/src/services/point_export.rs`、`D/src-tauri/src/commands/export.rs`、`D/src/app/simulator/components/PointExportDialog.vue`、`D/runtime/tests/point_export.rs`、`D/tests/point-export.test.mjs`（planned）；既有对应三个`mod.rs`、`D/src-tauri/src/lib.rs`、`D/src/services/deviceSimulator.ts`及实例页。正式合同/schema的存放、文件名和归属须双方范围先明确，本表不授权root contracts或FF写入。 |
-| A/B/C各自必要文档/文案 | 既有`D/src/app/simulator/locales/{zh-CN.json,en-US.json}`、`D/{README.md,README.zh-CN.md,USER_GUIDE.md,USER_GUIDE.zh-CN.md,BUILD.md,BUILD.zh-CN.md,CODE_INDEX.md}`、`D/runtime/{README.md,README.zh-CN.md}`、`D/src/app/{README.md,README.zh-CN.md}`、`D/tests/{README.md,README.zh-CN.md}`只按实际触达同步。当前导航仍仅§1四件，源码结构未变不更新CODE_INDEX。 |
+| AC01 旧库常规打开 | 用新程序打开、查询草稿/版本/来源、关闭并重开；继续严格校验容器/原 BLOB SHA/旧 DTO，无隐式升级、发布或裁剪。坏库、错 hash、坏引用和未知 payload 版本拒绝且不覆盖原件。 |
+| AC02 旧 S7 日常编辑 | 从纯 v1 profile 编辑、保存、发布 S7 草稿；保存及新版本仍编码为 v1，旧程序能打开、查看、选择并运行；既有旧历史 BLOB/hash、ID、来源、规则/命名和保护引用按 §4.2 保留。 |
+| AC03 首次含 Modbus | 新合成 profile 及完整备份后的旧库合成副本各验证：打开、编辑、取消、缺确认、旧 etag 和已知提交前失败不转换；关窗保存未确认不关闭或丢草稿；提交回执丢失时重读实际结果。明确确认仅提交 v2 草稿，SQLite 结构不变，旧版本/来源/摘要和运行中加载值不变，显式发布才产生 v2 版本。 |
+| AC04 同库读取及保值 | 同库读取并核验 v1/v2，选取内容相同的 S7 切片对照地址、初值、规则、读写/拒写、返回字节；运行时编辑、停机加载预览、同版加载、可兼容保值、停止后再启动、关闭重开、重置和前一版本保护按旧合同，选中状态不冒充 loaded，无历史重写。 |
+| AC05 旧程序和完整回退 | 用合成夹具分别隔离 v2 草稿、v2 已选和仅有未选 v2 历史：旧程序对前两种拒绝且无覆盖；第三种可能打开，读取 v2 版本明确失败。删最后 Modbus/切 selected 不降级。先保全 v2 库及后来新增版本，再在独立路径打开完整旧备份，核对原身份、hash、历史和 S7 运行；两边资料保留。 |
+| AC06 原生 S7 回归 | macOS arm64 运行原 Snap7 native/独立 S7 协议基线，覆盖 DB、BOOL 邻位、STRING、写入权限、初值/规则、16 会话及第 17 条拒绝等既有场景；另外在混跑环境验证 S7 正常读写和状态。不能以 Rust 单测替代这层证据。 |
 
-任何阶段都不以目录级授权覆盖用户真实配置/SQLite/日志或历史证据；不改FF/Backend/DAA/CA/SMA/CU/shared core，不新造根或第二DS bundle。未来若需要跨owner公共提取/正式合同变化，另立相应独立范围。
+Modbus 模拟及整合验收：
 
-## 12. 可核验的设计验收与后续行为矩阵
-
-下列AC是**r1设计完整性标准**，供Owner审阅及以后文档Verification使用；不是当前QA pass，也不是代码验收。D0只有PM/协调必要静态自检，不预建checklist。A/B/C实施必须把对应行为矩阵转为其精确获批AC、DEV命令及fresh Verification输入。
-
-| AC | 对应需求 | 可审阅结果 |
+| 编号 | 阶段 | 场景和通过标准 |
 | --- | --- | --- |
-| AC01 | §1–2 | 唯一本地Task ID/r1/draft、五文件写面、历史/当前时点和角色gate明确；不继承DS-001例外或旧验收。 |
-| AC02 | R01 | 同产品按S7/Modbus TCP分协议、品牌型号独立、EVO800资料未核、RTU延期。 |
-| AC03 | R01 | 模拟/调试配置、连接、任务、内存、状态、日志、权限和停止范围隔离，连接不会启模拟。 |
-| AC04 | R02 | 准确定位InstanceConfig/DbConfig/image/owner/FFI的S7耦合，明确Modbus四表/area/typed范围及adapter/业务边界。 |
-| AC05 | R03 | v1原BLOB/hash/ID/确认/版本引用保留、内存归一化和持久迁移区分，普通startup不迁移，备份/恢复与旧二进制拒绝有gate。 |
-| AC06 | R03 | 草稿/saved/selected/actual_loaded、预览/回退保护、停机加载/独立启动、同版幂等、stop保值/重开初始化/profile/时间保留明确。 |
-| AC07 | R04 | 四表、零基PDU、FC01–06有限子集、协议/设备上限、Unit ID/分配预算、网络大端/word_order及拒半写完整。 |
-| AC08 | R05 | 无模拟配置前置的手工S7/Modbus单点、范围连接/地址/type/数量表单及真实错误态明确。 |
-| AC09 | R06 | 受控分块、每块采样/错误/partial、hidden split gate、typed不完整和非跨块原子约束可推演。 |
-| AC10 | R07 | 默认只读、独立单点写确认、BOOL邻位/STRING/FC06限制、ACK≠工艺、unknown/no-replay及批量延期明确。 |
-| AC11 | R08 | 同连接多请求、1在途/有界队列、轮询上限/合并、公平和期限包含排队；generation防串目标。 |
-| AC12 | R08–R09 | 取消未发/已发区别，真实socket/task/worker join和释放/closing失败边界、两角色并发及退出总期限明确。 |
-| AC13 | R09–R10 | 日志上下文/JSONL/有界环与+08时间语义、手工输入效率、对称i18n及公共列宽要求明确。 |
-| AC14 | R11 | JSON骨架只是提案；字段逐项有DS来源/缺口，稳定ID/来源版本/实际loaded/可达host/权限隔离明确，不共享SQLite或修改FF。 |
-| AC15 | R11–R12 | S7导出可独立、FF可先手写；模拟/只读调试/单点写/导出/平台分期，阶段批准点明确。 |
-| AC16 | R12/§11 | 候选技术有一手资料和否决gate；当前与未来文件集合分开，planned与既有路径可核对，无目录通配实施权限。 |
-| AC17 | §12–13 | S7回归、独立Modbus协议、调试合成目标/故障资源、JSON合同、三平台/真实目标证据界限及回退风险齐备。 |
-| AC18 | 全文 | Markdown元数据/本地引用/围栏/表格及双语导航一致；实际执行检查和未运行项诚实记录，无源码/schema/监听器/依赖/设备动作。 |
+| AC07 候选先行 | A0 | 两份 Cargo 锁、feature、许可证、工具链可核对；独立 raw TCP 核一个连接连续多次请求、FC01–06 正常帧/异常关联、错 Protocol ID/Length、超大帧及慢半帧。限额实测；关闭包含监听及所有连接，实际任务退出、permit 归还并可重新绑定。任一不达标则不进入 A1。 |
+| AC08 模型和规则 | A1 | 四表、0/65535、溢出、重叠、区域边界、Unit ID、点类型、读空位与区外拒绝；黄金字节核 F32 与 32 位高/低字序及本地规则更新，原始/typed 结果一致。实例/点位身份、规则继承、权限和初值行为可核。 |
+| AC09 独立线协议 | A1 | 用 AC07 夹具验证产品 FC01–04 数量边界、bits/寄存器、异常码/事务关联、错 Unit ID、断线及重连。FC05/06 准许、拒绝、权限、非法值、32 位两半各测；同地址的只读表值不可被改写。拒绝或未提交超时前后比较完整值及序号，合法单值一次提交。 |
+| AC10 混跑与资源 | A1 | S7 和 Modbus 同时监听/读写、各自启停/暂停、端口冲突、复位和关闭不串实例；错端口/占用/队列满/慢输入输出的状态真实。至少 20 次 stop/start，另测退出；记录监听/连接/待处理数、实际 tasks/线程、FD/Mach ports 和内存趋势，确认完成后回到空闲基线、重绑可用、应用共同期限及组合准入。 |
+| AC11 六页原生 UI | A1 | macOS arm64 用普通 `pnpm tauri dev` 和实际桥接验证 §8 六页、协议创建/不可就地改协议、S7 原表单、首次保存提示、草稿/loaded/绑定分别可见。验证四表/字序、权限、值与日志筛选，中文英文、正常键入、列宽恢复及退出；静态样稿或浏览器无桥接不算通过。 |
+| AC12 证据和交付 | A1 | 核对新增 feature/两份锁、生产入口、`pnpm build`、适用 Rust/Node 测试和静态检查；正式跟踪源码构建不依赖被忽略的日志 wrapper。关键日志含实例/协议、Unit ID/FC/事务或 S7 上下文、错误/关闭结果，记录真实 +08:00 日历时间并限频。对正式树候选记录命令、退出码、fixture、环境、未跑项和资源收尾；测试/QA 不代表 Owner 最终验收、真实设备或平台支持。 |
 
-未来行为矩阵（当前全部not_run，不把设计推演当已测）：
+## 13. 风险、停止条件和回退
 
-| 编号 / 阶段 | 必需场景与证据 |
+| 风险 | 处理 |
 | --- | --- |
-| V01 / A | 旧S7合成v1草稿/多份不可变revision/selected/previous读写兼容；原BLOB/hash/ID前后相同，迁移前后备份/失败恢复、坏库/未知版本拒绝、同版加载不重置、预览/删除保护。 |
-| V02 / A | 两协议实例隔离/同端口冲突/独立暂停停止/重新绑定；S7 DB/BOOL/STRING/六来源拒写、保值/换版/重开及原受影响协议资源向量回归，不能只测Modbus新路径。 |
-| V03 / A | 独立wire client核四表/Unit ID/FC01–06批准子集、0/末地址/越界/空洞/非法数量/MBAP长度/异常码；写前拒绝比对完整值/seq不变，word_order/跨register类型/半写拒绝。 |
-| V04 / B1 | 独立合成S7/Modbus目标，单次连接连续多次单点/范围读取；类型及raw一致，范围按设备小上限分块，单块错误/partial及采样时间正确。 |
-| V05 / B1 | 轮询慢目标/队列满/过期/停止/切目标/迟到响应；块间公平、generation拒旧结果，轮询无追赶积压，无暗中自动重连或新连接风暴。 |
-| V06 / B1–B2 | 无应答/半帧/断连/取消/重复关闭/应用退出，核实际socket、任务、线程/句柄、join及重新绑定；至少连续20次连接关闭/轮询启停的有界资源趋势，单次成功不替代释放证明。 |
-| V07 / B2 | 默认写关/目标变化失效；发送前取消不写，合成目标已接收但丢ACK导致unknown且不重发，明确ACK成功、协议异常、写后另读；S7 BOOL邻位和STRING/边界、Modbus32-bit写拒绝。 |
-| V08 / A+B | 本地模拟持续运行时远端调试fault/关闭不误停模拟；模拟stop不误关独立远端session；应用退出共同deadline，完整进程资源预算而非各自局部计数。 |
-| V09 / C | 正式获批JSON schema与静态golden文件，S7/未来Modbus映射、稳定point ID/重名/地址/类型/来源hash、saved≠loaded/未loaded、wildcard拒绝、缺确认和失败无半文件；无运行值/写权/SQLite共享。 |
-| V10 / A/B/C | `pnpm build`/类型和i18n对称/真实UI表单普通键入、错误/partial/unknown、列宽持久与reset、浏览器无bridge不假成功；构建只证明编译，不替原生/协议。 |
+| S7 回归或历史摘要误算 | AC01–06 对照旧程序、旧字节、协议及保护引用。失败停止交接；不通过改写历史修正摘要。 |
+| 旧程序无法读取 v2、产生后续配置 | 首写确认与合成备份回退按 §4.2 / AC03–05。回退保全两个完整 profile；真实用户的选用与维护另行批准。 |
+| 候选库的超时/取消遗漏连接或任务 | AC07 先证明限制、停止和回收；不以强杀进程、丢 handle 或只看 UI 状态作为通过。选型、预算或风险实质变化返 PM。 |
+| 点位偏一、字序错误或误写 | 明示零基/单位、raw 与 typed 并列，验证已知字节；单值权限及 32 位半写检查先于提交。 |
+| 合成资源与并行任务冲突 | 只用自有临时目录、独立 `DS_PROFILE_DIR`、可用的 loopback 高位端口；冲突先确认，勿接管其他监听。Development/Verification 记录资源归属、PID/端口、清理条件和持久证据；关闭并核验自己创建的 socket、进程与临时文件，不触碰其他任务或真实数据。 |
 
-环境证据必须分别记录：当前历史S7只证明对应macOS arm64候选；未来macOS实施需自己的锁/feature/正常`pnpm tauri dev`、真实native/协议/退出证据。Windows和Linux目前未验证，native/CMake的硬限制仍在；Modbus Rust库可跨平台不等于整DS已能构建/打包/释放资源。三平台可编译、原生功能、协议、安装器/签名、现场与长稳分列，未跑记not_run/deferred，无“支持三平台”概括通过。真实EVO/S7设备需核资料后逐目标独立授权，合成目标不代替实机。
+## 14. 修订历史、角色与批准点
 
-## 13. 风险、开放项与回退
-
-| 风险 | 控制与回退 |
+| 日期 | Revision / 决定 |
 | --- | --- |
-| S7模型被假泛化而破坏旧协议/版本 | 旧DTO/owner/native保留、分型入口、原字节兼容向量和受影响S7回归；失败停新协议准入，恢复已保护候选，不reset并行工作。 |
-| payload升级使旧程序打不开或引用hash失真 | 明确数据格式迁移/版本化hash与旧版拒绝；合成证明/完整备份先行，用户数据另授权；不能改原revision“修复hash”。 |
-| Modbus地址/word_order误解 | 零基PDU/单位/功能码同屏；raw与typed同时可核；无厂家地址推断、不静默字节交换，真实点表另核。 |
-| 写入时序和unknown造成重复动作 | 会话目标确认、一次写、不盲重试/不回滚声明；已发送与ACK分开，批量/FC16另定合同。 |
-| 超时只结束外层等待，底层阻塞/任务泄漏 | 候选先过可中断/有界完成及join gate；真正释放前不归还预算，不用无限worker或强杀代替正常关闭。 |
-| 双角色资源相互影响 | 分别计数及总预算，既有S7容量不外推，合成并行/取消/退出验证；native硬崩仍可能全进程影响。 |
-| 导出混用最新/selected/loaded或被当写权限 | 冻结来源/每设备事实/可达host确认；文件只描述点位，FF权限独立；不共享可写库。 |
+| 2026-11-02（Asia/Shanghai） | r1：授权设计草案。完整旧版（含旧验收/候选和讨论）保存在 Git `21cd789277695bbafaa55c24e39261fc7247f9b0` 下同一路径；未记录精确实施批准。 |
+| 2026-11-14（Asia/Shanghai） | r2：用户确认补充界面对比和节点图，先整理 Modbus TCP 模拟及 S7 兼容范围，设备读写调试后移。当前仍 `draft`，等待精确实施范围批准。 |
 
-待Owner或后续阶段确认的产品选择有建议缺省，不阻止本轮设计审阅：下一优先做A还是B1；真实目标CPU/固件/Server配置/点表；是否需要RTU；是否需要32-bit写从而单独开FC16；是否需要跨机器模拟监听；调试目标是否未来持久化；JSON正式版本/规范类型与导出模式。首轮按TCP、只读先行、单点写有限子集、loopback模拟、单调试session、会话参数不持久化；这些是推荐，尚未形成实施权限。
+实际 PM 按 [pm 角色](../../../../.codex/agents/pm.toml)和 [canonical workflow](../../../../.codex/workflows/development-lifecycle-workflow.md)，使用 `aiis`、`project-governance` 和 `plc-point-mapping`。Development/Verification 使用对应角色；Rust 用 `rust-runtime`，Tauri 配置/启动用 `desktop-tauri`，Vue 用 `frontend-ui`，文案用 `i18n-workflow`，新源码和索引用 `code-document-indexer`，点位模型用 `plc-point-mapping`。本轮自检只读源码、核本地引用/Markdown 和审计文档差异，未执行构建、项目测试、依赖安装、SQLite 实验、UI 启动、协议连接或任何真实 profile / 设备操作。
 
-本轮仅文档可回退：保留其他任务内容，移除本次新增spec和导航行须按Owner实际决定处理；不回滚代码、数据库、已有运行窗口或历史。未创建临时源码副本、worktree、profile、数据库、listener或构建产物；协调自有静态审计临时材料在完成差异核对且无证据依赖后按workflow回收，关键结论留本spec/交付记录。
-
-## 14. Skill路由、PM自检与批准记录
-
-实际PM按[pm角色](../../../../.codex/agents/pm.toml)和[canonical workflow](../../../../.codex/workflows/development-lifecycle-workflow.md)形成本草案，使用`aiis`、`project-governance`、`plc-point-mapping`及适用跨端/资源/日志合同；没有用新项目模板或治理initializer重建既有工程。后续Rust协议/队列/存储用`rust-runtime`；Tauri壳/feature/退出用`desktop-tauri`并组合Rust；Vue/表格/输入用`frontend-ui`，文案用`i18n-workflow`，实际源码结构/文件头用`code-document-indexer`；点位/导出用`plc-point-mapping`。不因存在候选阶段就装依赖、写UI/Rust、改共享skill或执行Backend任务。
-
-本轮允许的自检为`rg/cat/sed/nl`读取、实际路径存在性、元数据/需求AC/Markdown本地链接与围栏/表格、有限导航差异及`git diff --check`。这些是PM/协调静态自检，不是Development self-check或独立QA。未运行Cargo/pnpm构建/项目测试、schema、应用、协议server/client、DS/DAA、真实PLC/第三方接口；未读写用户.env/profile/数据库，未发送其他会话消息、邮件，未commit/push/tag/release/部署。官方协议/库页面只作为2026-11-02的只读资料，不是本地验证结果。
-
-| 日期 | Revision / 真实决定 | 下一gate |
-| --- | --- | --- |
-| 2026-11-02（Asia/Shanghai） | Human Owner授权独立DS设计会话；实际PM形成DS-002 r1 draft，只设计/spec和必要导航 | 等待Human Owner审阅精确r1；本轮没有范围批准、Development、Verification或最终验收 |
-
-**批准点：请审阅DS-002 r1的同产品双协议/双角色边界、v1保护与迁移建议、有限功能码/写入边界、分阶段路线及JSON映射反馈。** 若同意，只记录设计批准；下一实施阶段仍须PM给出精确获批范围后才进入Development。本文件保持draft，沉默、方向认可或其他任务接受均不等于本r1批准。
+**请 Human Owner 审阅并明确批准 DS-002 r2 的 A0 与有条件的 A1：** §4.2 的 v1/v2 与回退、§5/§8 的功能和界面、§10–11 的候选门及文件范围、§12 AC01–AC12、§13 的风险/资源。批准后才由 Development 创建 `tasks.md`；A0 通过后才做 A1，真实交接后由 fresh-context Verification 创建 `checklist.md`，最后由 Human Owner 验收。设备读写调试、导出和任何实质变更另行审阅。

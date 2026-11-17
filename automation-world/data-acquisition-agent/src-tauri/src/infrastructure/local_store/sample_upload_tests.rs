@@ -748,6 +748,70 @@ pub(crate) fn seed_v4_fixture(profile: &std::path::Path, cycles: usize) {
     s.clean_exit().unwrap();
 }
 
+/// 自有配置：先记录无显示名的旧样本，再激活仅增加双语的 revision 并冻结一个 v2 重试。
+#[cfg(unix)]
+pub(crate) fn seed_daa018_v2(profile: &std::path::Path) -> (String, String, String, Vec<String>) {
+    use crate::domain::{facts_wire, local_configuration::PointDisplayNames};
+    let mut s = super::Stores::open(&profile.join("local-acquisition-v1")).unwrap();
+    let mut c = super::tests::configuration();
+    c.points[0].comment = "COMMENT_DAA018_DISTINCT".into();
+    let old_revision = super::tests::activated(&mut s, &c);
+    bind_legacy_fixture(&mut s, &c);
+    let old = s
+        .commit_cycle(super::tests::cycle(&c, &old_revision))
+        .unwrap();
+    let old_cycle = old["cycleId"].as_str().unwrap();
+    let old_ids: Vec<String> = s
+        .runtime
+        .prepare("SELECT id FROM samples WHERE cycle_id=?1 ORDER BY id")
+        .unwrap()
+        .query_map([old_cycle], |r| r.get(0))
+        .unwrap()
+        .collect::<Result<_, _>>()
+        .unwrap();
+    for sample in &old_ids {
+        assert_eq!(
+            sample_upload::legacy_status(&s.runtime, sample, old_cycle).unwrap(),
+            LegacyStatus::NeverSent
+        );
+    }
+    let old_digest = facts_wire::definitions(&serde_json::to_value(&c).unwrap(), &c.plcs[0].id)
+        .unwrap()
+        .1;
+    c.point_display_names.insert(
+        c.points[0].id.clone(),
+        PointDisplayNames {
+            zh_cn: "新中文哨兵_DAA018".into(),
+            en_us: "NEW_EN_SENTINEL_DAA018".into(),
+        },
+    );
+    let new_digest = facts_wire::definitions(&serde_json::to_value(&c).unwrap(), &c.plcs[0].id)
+        .unwrap()
+        .1;
+    assert_eq!(old_digest, new_digest);
+    let revision = super::tests::activated(&mut s, &c);
+    assert_ne!(revision, old_revision);
+    let new = s.commit_cycle(super::tests::cycle(&c, &revision)).unwrap();
+    assert_ne!(new["cycleId"], old["cycleId"]);
+    let mut settings = s.sample_upload_settings().unwrap();
+    let expected = settings.settings_revision.clone();
+    settings.origin = Some("http://fixture.invalid".into());
+    settings.interval_seconds = 1;
+    s.save_sample_upload_settings(settings, expected).unwrap();
+    let target = "http://fixture.invalid/api/v1/integration/plc-facts/samples";
+    let frozen = s
+        .next_sample_upload(target, &s.sample_upload_bindings().unwrap(), true)
+        .unwrap()
+        .unwrap();
+    let body: serde_json::Value = serde_json::from_str(&frozen.body).unwrap();
+    assert_eq!(body["configRevision"], revision);
+    let attempt = s.mark_sample_upload_attempt(&frozen).unwrap();
+    s.record_sample_upload_response(&frozen, Err("synthetic_no_response".into()), attempt)
+        .unwrap();
+    s.clean_exit().unwrap();
+    (old_revision, revision, frozen.body, old_ids)
+}
+
 #[cfg(unix)]
 pub(crate) fn add_v4_cycle(
     s: &mut super::Stores,

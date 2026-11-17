@@ -302,6 +302,90 @@ fn owned_profile() -> PathBuf {
 }
 
 #[test]
+fn profile_contract_relative_and_absolute_configuration_reopen_same_profile() {
+    let profile = owned_profile();
+    let root = profile.parent().unwrap();
+    let env_file = root.join(".env");
+    assert!(!env_file.exists());
+    std::fs::write(
+        &env_file,
+        format!(
+            "DAA_PROFILE_DIR=./{}\n",
+            profile.file_name().unwrap().to_str().unwrap()
+        ),
+    )
+    .unwrap();
+    let config = crate::config::AgentConfig::load_selected(None, root).unwrap();
+    let relative = config.profile(None).unwrap();
+    let absolute = config
+        .profile(Some(profile.clone().into_os_string()))
+        .unwrap();
+    assert_eq!(
+        relative.canonicalize().unwrap(),
+        absolute.canonicalize().unwrap()
+    );
+    let mut store = Stores::open(&relative.join("local-acquisition-v1")).unwrap();
+    let configuration = super::tests::configuration();
+    let revision = super::tests::activated(&mut store, &configuration);
+    store
+        .commit_cycle(super::tests::cycle(&configuration, &revision))
+        .unwrap();
+    let draft: String = store
+        .config
+        .query_row(
+            "SELECT payload FROM configuration_draft WHERE id=1",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap();
+    let samples: Vec<(String, String)> = store
+        .runtime
+        .prepare("SELECT payload,sha256 FROM samples ORDER BY id")
+        .unwrap()
+        .query_map([], |row| Ok((row.get(0)?, row.get(1)?)))
+        .unwrap()
+        .collect::<Result<_, _>>()
+        .unwrap();
+    assert!(!samples.is_empty());
+    let instance = store.instance.clone();
+    let credential = std::fs::read(store.dir.join(CREDENTIAL)).unwrap();
+    store.clean_exit().unwrap();
+    drop(store);
+
+    let mut reopened = Stores::open(&absolute.join("local-acquisition-v1")).unwrap();
+    assert_eq!(reopened.instance, instance);
+    assert_eq!(
+        reopened
+            .config
+            .query_row::<String, _, _>(
+                "SELECT payload FROM configuration_draft WHERE id=1",
+                [],
+                |row| row.get(0)
+            )
+            .unwrap(),
+        draft
+    );
+    let after: Vec<(String, String)> = reopened
+        .runtime
+        .prepare("SELECT payload,sha256 FROM samples ORDER BY id")
+        .unwrap()
+        .query_map([], |row| Ok((row.get(0)?, row.get(1)?)))
+        .unwrap()
+        .collect::<Result<_, _>>()
+        .unwrap();
+    assert_eq!(after, samples);
+    assert_eq!(
+        std::fs::read(reopened.dir.join(CREDENTIAL)).unwrap(),
+        credential
+    );
+    assert_eq!(reopened.dir, profile.join("local-acquisition-v1"));
+    reopened.clean_exit().unwrap();
+    drop(reopened);
+    std::fs::remove_file(env_file).unwrap();
+    std::fs::remove_dir_all(profile).unwrap();
+}
+
+#[test]
 fn profile_contract_reopens_partial_and_failed_points_without_rewriting_payload() {
     let profile = owned_profile();
     let dir = profile.join("local-acquisition-v1");

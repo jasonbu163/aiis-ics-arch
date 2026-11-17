@@ -21,3 +21,13 @@ fresh 独立角色使用 `qa` 及自己的 stage/cache/build/tmp/profile/runs；
 原命令、stdout/stderr、file events、wire、images、进程/资源、SQLite 副本及 status 先保存角色 T5 run，再逐成员复制持久 A5 并二次核 SHA/bytes。公开 P5 只放五个紧凑 manifest/index，不放 raw DB、日志或二进制。`collect_evidence.py` 封存新 run；`verify_evidence.py` 只读核显式 archive 或同角色 B0，不写 P5。`retire_g0.py` 先生成逐文件计划、核持久原件，仅当前完整产品验证通过后逐文件退役，不删归属未知的 build/profile/系统数据。
 
 原生资源归属结合实际POSIX children、精确owned WebKit store与当前WKWebView固定只读PID getter，仅非默认测试构建包含该probe。macOS Private SPI经运行时守卫，不是稳定产品API；不支持或无法归属的费用保持unknown。逐PID样本、终止时不可用样本及共享XPC生命周期分列，不杀系统服务。
+
+DS-003 开发自检使用明确归属的临时目录，不连接 PLC：
+
+```sh
+mkdir -p /private/tmp/ds003-dev/profiles
+DS_TEST_RUN_ROOT=/private/tmp/ds003-dev/profiles CARGO_TARGET_DIR=/private/tmp/ds003-dev/target cargo test --manifest-path runtime/Cargo.toml --locked --offline --test plc_catalog_export
+node --test tests/plc-catalog-export.test.mjs
+```
+
+实际运行应使用唯一、归本次任务所有的空目录。合成测试不能替代原生目录对话框或同一文件的 DS→DAA 联测。

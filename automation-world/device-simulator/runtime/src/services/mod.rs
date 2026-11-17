@@ -1,5 +1,6 @@
 //! DS运行时职责：DS services boundary.
 pub mod apply;
+pub mod catalog_export;
 pub mod configuration;
 pub mod layout;
 pub mod lifecycle;

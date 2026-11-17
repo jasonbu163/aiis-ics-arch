@@ -1,0 +1,606 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Equipment observation and energy machine ingest",
+    "version": "aiis.metric-ingest/v2",
+    "description": "R10 machine endpoints. Runtime checks additionally enforce grants, stable configuration, number fidelity, paired mapping fields, interval rules and retry semantics; see README and approved spec. Existing v1 receipts may replay under the old rules."
+  },
+  "paths": {
+    "/api/v1/integration/metric-definitions": {
+      "get": {
+        "summary": "Discover authorized equipment regions and metric keys",
+        "security": [
+          {
+            "ObservationMachineBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "equipmentId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorized definitions in standard response envelope"
+          },
+          "401": {
+            "description": "Machine identity missing or invalid"
+          },
+          "403": {
+            "description": "Scope denied"
+          },
+          "409": {
+            "description": "Event/sample or contract conflict"
+          },
+          "413": {
+            "description": "Payload exceeds 65536 bytes"
+          },
+          "415": {
+            "description": "Content type must be application/json"
+          },
+          "422": {
+            "description": "Invalid fields, type, scope, timestamp or quality"
+          },
+          "503": {
+            "description": "Target unavailable or commit outcome unknown: retry identical event"
+          }
+        }
+      }
+    },
+    "/api/v1/integration/equipment/latest-snapshots": {
+      "post": {
+        "summary": "Replace the complete equipment/task snapshot",
+        "security": [
+          {
+            "ObservationMachineBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "eventId",
+                  "data"
+                ],
+                "dependentRequired": {
+                  "mappingId": [
+                    "mappingRevision"
+                  ],
+                  "mappingRevision": [
+                    "mappingId"
+                  ]
+                },
+                "properties": {
+                  "contractVersion": {
+                    "type": "string",
+                    "enum": [
+                      "aiis.metric-ingest/v2"
+                    ],
+                    "default": "aiis.metric-ingest/v2"
+                  },
+                  "producerId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "eventId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "mappingId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "mappingRevision": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 32
+                  },
+                  "sourceRefs": {
+                    "type": "array",
+                    "maxItems": 128,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "kind"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128
+                        }
+                      },
+                      "additionalProperties": true
+                    }
+                  },
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "equipmentId",
+                      "taskNo",
+                      "observedAt",
+                      "groups"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "equipmentId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                      },
+                      "taskNo": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 50
+                      },
+                      "observedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Original observed time, explicit offset required, losslessly storable in DATETIME(6); converted to Asia/Shanghai."
+                      },
+                      "quality": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "good",
+                          "bad",
+                          "unknown",
+                          null
+                        ]
+                      },
+                      "groups": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "object",
+                          "maxProperties": 100,
+                          "additionalProperties": {
+                            "oneOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "string",
+                                "maxLength": 4096
+                              },
+                              {
+                                "type": "boolean"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Receipt in standard response envelope, including outcome and recordId"
+          },
+          "401": {
+            "description": "Machine identity missing or invalid"
+          },
+          "403": {
+            "description": "Scope denied"
+          },
+          "409": {
+            "description": "Event/sample or contract conflict"
+          },
+          "413": {
+            "description": "Payload exceeds 65536 bytes"
+          },
+          "415": {
+            "description": "Content type must be application/json"
+          },
+          "422": {
+            "description": "Invalid fields, type, scope, timestamp or quality"
+          },
+          "503": {
+            "description": "Target unavailable or commit outcome unknown: retry identical event"
+          }
+        }
+      }
+    },
+    "/api/v1/integration/monitor/history-samples": {
+      "post": {
+        "summary": "Append a history sample after history filtering",
+        "security": [
+          {
+            "ObservationMachineBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "eventId",
+                  "data"
+                ],
+                "dependentRequired": {
+                  "mappingId": [
+                    "mappingRevision"
+                  ],
+                  "mappingRevision": [
+                    "mappingId"
+                  ]
+                },
+                "properties": {
+                  "contractVersion": {
+                    "type": "string",
+                    "enum": [
+                      "aiis.metric-ingest/v2"
+                    ],
+                    "default": "aiis.metric-ingest/v2"
+                  },
+                  "producerId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "eventId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "mappingId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "mappingRevision": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 32
+                  },
+                  "sourceRefs": {
+                    "type": "array",
+                    "maxItems": 128,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "kind"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128
+                        }
+                      },
+                      "additionalProperties": true
+                    }
+                  },
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "equipmentId",
+                      "taskNo",
+                      "observedAt",
+                      "groups",
+                      "quality"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "equipmentId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                      },
+                      "taskNo": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 50
+                      },
+                      "observedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Original observed time, explicit offset required, losslessly storable in DATETIME(6); converted to Asia/Shanghai."
+                      },
+                      "quality": {
+                        "type": "string",
+                        "const": "good"
+                      },
+                      "groups": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "object",
+                          "maxProperties": 100,
+                          "additionalProperties": {
+                            "oneOf": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "string",
+                                "maxLength": 4096
+                              },
+                              {
+                                "type": "boolean"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Receipt in standard response envelope, including outcome and recordId"
+          },
+          "401": {
+            "description": "Machine identity missing or invalid"
+          },
+          "403": {
+            "description": "Scope denied"
+          },
+          "409": {
+            "description": "Event/sample or contract conflict"
+          },
+          "413": {
+            "description": "Payload exceeds 65536 bytes"
+          },
+          "415": {
+            "description": "Content type must be application/json"
+          },
+          "422": {
+            "description": "Invalid fields, type, scope, timestamp or quality"
+          },
+          "503": {
+            "description": "Target unavailable or commit outcome unknown: retry identical event"
+          }
+        }
+      }
+    },
+    "/api/v1/integration/energy/metric-definitions": {
+      "get": {
+        "summary": "Discover authorized meter/group metrics",
+        "security": [
+          {
+            "ObservationMachineBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "meterId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupKey",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authorized definitions in standard response envelope"
+          },
+          "401": {
+            "description": "Machine identity missing or invalid"
+          },
+          "403": {
+            "description": "Scope denied"
+          },
+          "409": {
+            "description": "Event/sample or contract conflict"
+          },
+          "413": {
+            "description": "Payload exceeds 65536 bytes"
+          },
+          "415": {
+            "description": "Content type must be application/json"
+          },
+          "422": {
+            "description": "Invalid fields, type, scope, timestamp or quality"
+          },
+          "503": {
+            "description": "Target unavailable or commit outcome unknown: retry identical event"
+          }
+        }
+      }
+    },
+    "/api/v1/integration/energy/samples": {
+      "post": {
+        "summary": "Append an independent energy sample",
+        "security": [
+          {
+            "ObservationMachineBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "eventId",
+                  "data"
+                ],
+                "dependentRequired": {
+                  "mappingId": [
+                    "mappingRevision"
+                  ],
+                  "mappingRevision": [
+                    "mappingId"
+                  ]
+                },
+                "properties": {
+                  "contractVersion": {
+                    "type": "string",
+                    "enum": [
+                      "aiis.metric-ingest/v2"
+                    ],
+                    "default": "aiis.metric-ingest/v2"
+                  },
+                  "producerId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "eventId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "mappingId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "mappingRevision": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 32
+                  },
+                  "sourceRefs": {
+                    "type": "array",
+                    "maxItems": 128,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "kind"
+                      ],
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128
+                        }
+                      },
+                      "additionalProperties": true
+                    }
+                  },
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "meterId",
+                      "groupKey",
+                      "observedAt",
+                      "values"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "meterId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                      },
+                      "groupKey": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                      },
+                      "observedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Original observed time, explicit offset required, losslessly storable in DATETIME(6); converted to Asia/Shanghai."
+                      },
+                      "quality": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "good",
+                          "bad",
+                          "unknown",
+                          null
+                        ]
+                      },
+                      "intervalStartAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Original observed time, explicit offset required, losslessly storable in DATETIME(6); converted to Asia/Shanghai."
+                      },
+                      "intervalEndAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Original observed time, explicit offset required, losslessly storable in DATETIME(6); converted to Asia/Shanghai."
+                      },
+                      "values": {
+                        "type": "object",
+                        "minProperties": 1,
+                        "maxProperties": 100,
+                        "additionalProperties": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Receipt in standard response envelope, including outcome and recordId"
+          },
+          "401": {
+            "description": "Machine identity missing or invalid"
+          },
+          "403": {
+            "description": "Scope denied"
+          },
+          "409": {
+            "description": "Event/sample or contract conflict"
+          },
+          "413": {
+            "description": "Payload exceeds 65536 bytes"
+          },
+          "415": {
+            "description": "Content type must be application/json"
+          },
+          "422": {
+            "description": "Invalid fields, type, scope, timestamp or quality"
+          },
+          "503": {
+            "description": "Target unavailable or commit outcome unknown: retry identical event"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ObservationMachineBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

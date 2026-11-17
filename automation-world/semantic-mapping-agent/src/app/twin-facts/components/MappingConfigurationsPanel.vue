@@ -1,10 +1,10 @@
 <!--
   File Path: /automation-world/semantic-mapping-agent/src/app/twin-facts/components/MappingConfigurationsPanel.vue
-  Description: Saved Mapping table, Target API-derived local drafts, binding dialog, and confirmed manual-run result display.
+  Description: Saved Mapping table, Target API-derived local drafts, binding dialog, and diagnostic results.
   Main Features:
     - Loads enabled Target APIs into removable page-memory Mapping drafts
     - Selects a source and fact for each fact binding, or a fixed constant instead
-    - Keeps local previews side-effect free while a saved row can emit one explicit manual-run confirmation
+    - Keeps saved mapping previews side-effect free
 -->
 <script setup lang="ts">
 import { ElDialog } from "element-plus";
@@ -47,7 +47,6 @@ const props = defineProps<{
   selectedTargetApiLocked: boolean;
   requestPreview: MappingRequestPreview;
   manualRuns: Record<string, MappingManualRunSummary>;
-  manualRunBusyIds: string[];
   busy: boolean;
   factsBusy: boolean;
   status: "idle" | "saved" | "deleted";
@@ -70,7 +69,6 @@ const emit = defineEmits<{
   "update-binding": [jsonPath: string, patch: Partial<MappingConfigurationBinding>];
   save: [];
   remove: [mappingId: string];
-  "run-manual": [mappingId: string];
   "preview-import": [items: unknown[]];
   "apply-import": [];
   "clear-import": [];
@@ -215,11 +213,6 @@ function manualRunFor(mapping: MappingConfiguration): MappingManualRunSummary | 
   return props.manualRuns[mapping.id] ?? null;
 }
 
-function canRunManual(mapping: MappingConfiguration) {
-  const target = props.targetApis.find((item) => item.id === mapping.targetApiId) ?? null;
-  return Boolean(mapping.enabled && mapping.rowVersion && target?.enabled);
-}
-
 function manualRunIsStale(mapping: MappingConfiguration, run: MappingManualRunSummary | null) {
   return Boolean(run && run.mappingRowVersion !== mapping.rowVersion);
 }
@@ -244,27 +237,13 @@ function manualRunUnresolved(mapping: MappingConfiguration) {
   );
 }
 
-function requestManualRun(mapping: MappingConfiguration) {
-  const target = props.targetApis.find((item) => item.id === mapping.targetApiId) ?? null;
-  if (!target || !mapping.rowVersion || props.manualRunBusyIds.includes(mapping.id)) return;
-  const confirmation = props.labels.mappingManualRunConfirm
-    .replace("{mappingName}", mapping.name)
-    .replace("{mappingKey}", mapping.mappingKey)
-    .replace("{targetName}", target.name)
-    .replace("{targetApiKey}", target.apiKey)
-    .replace("{method}", target.httpMethod)
-    .replace("{path}", target.path);
-  if (globalThis.confirm(confirmation)) emit("run-manual", mapping.id);
-}
-
-
 const mappingsTable = useTableWidths("mappings", [{ id: "state", width: 140 }, { id: "key", width: 200 }, { id: "name", width: 220 }, { id: "targetApi", width: 220 }, { id: "bindings", width: 180 }, { id: "enabled", width: 140 }, { id: "manualRun", width: 220 }, { id: "actions", width: 380, min: 380, fixed: true }]);
 const bindingsTable = useTableWidths("mapping-bindings", [{ id: "parameter", width: 220 }, { id: "mode", width: 180 }, { id: "value", width: 400 }, { id: "rule", width: 240 }, { id: "validation", width: 230 }]);
 </script>
 
 <template>
   <div class="mapping-page-stack mapping-configurations-stack">
-    <p class="hint">{{ labels.localConfigurationOnly }}</p>
+    <p class="hint">{{ labels.mappingDeliveryUnavailable }}</p>
     <section v-if="savedPreview"><h3>{{ labels.localSavedPreview }}</h3><pre>{{ JSON.stringify(savedPreview, null, 2) }}</pre></section>
     <ConsoleCard :title="labels.mappingConfigurationsTitle">
     <p v-if="busy" class="hint" role="status">{{ labels.loading }}</p>
@@ -279,8 +258,8 @@ const bindingsTable = useTableWidths("mapping-bindings", [{ id: "parameter", wid
       <div class="table-scroll mapping-list-scroll" tabindex="0"><ConsoleActionButton size="small" @click="mappingsTable.reset">{{ labels.resetTableWidths }}</ConsoleActionButton>
 <table v-table-widths="[mappingsTable, labels.resizeTableColumn]" class="mapping-list-table mapping-configurations-table"><thead><tr><th>{{ labels.mappingConfigurationState }}</th><th>{{ labels.mappingConfigurationKey }}</th><th>{{ labels.targetApiName }}</th><th>{{ labels.mappingConfigurationTargetApi }}</th><th>{{ labels.mappingConfigurationBindingSummary }}</th><th>{{ labels.targetApiState }}</th><th>{{ labels.mappingManualRunResult }}</th><th>{{ labels.targetApiActions }}</th></tr></thead>
         <tbody>
-          <tr v-for="pending in localDrafts" :key="pending.localId"><td>{{ labels.mappingConfigurationDraft }}</td><td><code>{{ pending.draft.mappingKey }}</code></td><td>{{ pending.draft.name }}</td><td><code>{{ pending.draft.targetApiKey }}</code></td><td>{{ bindingSummary(pending.draft.bindings) }}</td><td>{{ pending.draft.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td>{{ labels.mappingManualRunSavedOnly }}</td><td><div class="mapping-list-row-actions"><ConsoleActionButton size="small" tone="secondary" native-type="button" :disabled="!enabled || busy" @click="openDraft(pending.localId)">{{ labels.mappingValueRuleConfigure }}</ConsoleActionButton><ConsoleActionButton size="small" tone="danger" native-type="button" :disabled="!enabled || busy" @click="emit('remove-draft', pending.localId)">{{ labels.mappingConfigurationRemoveDraft }}</ConsoleActionButton></div></td></tr>
-          <tr v-for="mapping in configurations" :key="mapping.id"><td>{{ labels.mappingConfigurationSavedState }}</td><td><code>{{ mapping.mappingKey }}</code></td><td>{{ mapping.name }}</td><td><code>{{ mapping.targetApiKey }}</code></td><td>{{ bindingSummary(mapping.bindings) }}</td><td>{{ mapping.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td><div class="mapping-manual-run-result"><span>{{ manualRunStatus(mapping) }}</span><small v-if="manualRunUnresolved(mapping)">{{ manualRunUnresolved(mapping) }}</small></div></td><td><div class="mapping-list-row-actions"><ConsoleActionButton size="small" tone="secondary" :disabled="!enabled || busy" @click="emit('preview-saved', mapping.id)">{{ labels.localSavedPreview }}</ConsoleActionButton><ConsoleActionButton size="small" tone="primary" native-type="button" :disabled="!enabled || busy || !canRunManual(mapping) || manualRunBusyIds.includes(mapping.id) || manualRunFor(mapping)?.status === 'in_progress'" @click="requestManualRun(mapping)">{{ labels.mappingManualRunOnce }}</ConsoleActionButton><ConsoleActionButton size="small" tone="secondary" native-type="button" :disabled="!enabled || busy" @click="openEditor(mapping.id)">{{ labels.targetApiEdit }}</ConsoleActionButton><ConsoleActionButton size="small" tone="danger" native-type="button" :disabled="!enabled || busy" @click="remove(mapping)">{{ labels.targetApiDelete }}</ConsoleActionButton></div></td></tr>
+          <tr v-for="pending in localDrafts" :key="pending.localId"><td>{{ labels.mappingConfigurationDraft }}</td><td><code>{{ pending.draft.mappingKey }}</code></td><td>{{ pending.draft.name }}</td><td><code>{{ pending.draft.targetApiKey }}</code></td><td>{{ bindingSummary(pending.draft.bindings) }}</td><td>{{ pending.draft.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td>{{ labels.mappingManualRunNone }}</td><td><div class="mapping-list-row-actions"><ConsoleActionButton size="small" tone="secondary" native-type="button" :disabled="!enabled || busy" @click="openDraft(pending.localId)">{{ labels.mappingValueRuleConfigure }}</ConsoleActionButton><ConsoleActionButton size="small" tone="danger" native-type="button" :disabled="!enabled || busy" @click="emit('remove-draft', pending.localId)">{{ labels.mappingConfigurationRemoveDraft }}</ConsoleActionButton></div></td></tr>
+          <tr v-for="mapping in configurations" :key="mapping.id"><td>{{ labels.mappingConfigurationSavedState }}</td><td><code>{{ mapping.mappingKey }}</code></td><td>{{ mapping.name }}</td><td><code>{{ mapping.targetApiKey }}</code></td><td>{{ bindingSummary(mapping.bindings) }}</td><td>{{ mapping.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td><div class="mapping-manual-run-result"><span>{{ manualRunStatus(mapping) }}</span><small v-if="manualRunUnresolved(mapping)">{{ manualRunUnresolved(mapping) }}</small></div></td><td><div class="mapping-list-row-actions"><ConsoleActionButton size="small" tone="secondary" :disabled="!enabled || busy" @click="emit('preview-saved', mapping.id)">{{ labels.localSavedPreview }}</ConsoleActionButton><ConsoleActionButton size="small" tone="secondary" native-type="button" :disabled="!enabled || busy" @click="openEditor(mapping.id)">{{ labels.targetApiEdit }}</ConsoleActionButton><ConsoleActionButton size="small" tone="danger" native-type="button" :disabled="!enabled || busy" @click="remove(mapping)">{{ labels.targetApiDelete }}</ConsoleActionButton></div></td></tr>
         </tbody>
       </table></div>
       <p v-if="!configurations.length && !localDrafts.length" class="empty-state">{{ labels.mappingConfigurationsEmpty }}</p>

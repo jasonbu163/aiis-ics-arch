@@ -3,6 +3,7 @@
   <template v-if="local">
 
     <ConsoleCard title-key="common.local.pointsGroups" body-class="console-card__body--table">
+      <template #actions><ConsoleActionButton label-key="plc.naming.resetPointWidths" @click="resetPointWidths" /></template>
       <template #tools>
         <ElForm label-position="top" class="daa-local-filters" @submit.prevent>
           <ElFormItem :label="t('common.local.plc')"><ElSelect v-model="local.selectedPlc" :disabled="!!pointEditor" append-to="#daa-feedback" @change="changePointScope"><ElOption v-for="p in local.plcs" :key="p.id" :label="p.name" :value="p.id" /></ElSelect></ElFormItem>
@@ -10,23 +11,26 @@
           <ElFormItem :label="t('common.local.filter')"><ElInput v-model="local.query" clearable @input="local.pointPage = 1" /></ElFormItem>
         </ElForm>
       </template>
-      <div class="console-action-group daa-name-tools"><span>{{ t('plc.naming.selected', { count: local.selectedPoints.length }) }}</span><ConsoleActionButton label-key="plc.naming.preview" :disabled="local.busy || local.dirty || local.editing || !local.selectedPoints.length" @click="local.previewNames" /></div>
+      <el-alert v-if="local.pointEditUnknown" :title="t('plc.naming.editResultUnknown')" type="warning" :closable="false" show-icon><ConsoleActionButton label-key="plc.naming.reloadAfterUnknown" :disabled="local.busy" @click="local.reload" /></el-alert>
+      <el-alert v-if="local.catalogUnknown" :title="t('plc.catalog.unknown')" type="warning" :closable="false" show-icon><ConsoleActionButton label-key="plc.naming.reloadAfterUnknown" :disabled="local.busy" @click="local.reload" /></el-alert>
+      <div class="console-action-group daa-name-tools"><span>{{ t('plc.naming.selected', { count: local.selectedPoints.length }) }}</span><ConsoleActionButton label-key="plc.naming.preview" :disabled="local.busy || local.dirty || local.editing || local.mutationUnknown || !local.selectedPoints.length" @click="local.previewNames" /></div>
       <PointNamePreviewDialog :local="local" />
       <ConsoleTableShell v-model:current-page="local.pointPage" v-model:page-size="local.pointPageSize" :page-sizes="[10,20,50]" :total="local.points.length" layout="total, sizes, prev, pager, next">
-        <el-table :data="local.pagedPoints" row-key="id" :empty-text="t(local.draft ? 'common.local.emptyPoints' : 'common.feedback.notLoaded')" :tooltip-options="{ appendTo: '#daa-feedback' }">
-          <el-table-column :label="t('plc.naming.select')" width="92">
+        <el-table :key="tableVersion" border :data="local.pagedPoints" row-key="id" :empty-text="t(local.draft ? 'common.local.emptyPoints' : 'common.feedback.notLoaded')" :tooltip-options="{ appendTo: '#daa-feedback' }" @header-dragend="resizePointColumn">
+          <el-table-column :label="t('plc.naming.select')" width="92" :resizable="false">
             <template #header><ElCheckbox :model-value="pageSelection.checked" :indeterminate="pageSelection.indeterminate" :disabled="local.busy || local.editing || !local.pagedPoints.length" :aria-label="t('plc.naming.selectPage')" :title="t('plc.naming.selectPage')" @change="selectPageNames(!!$event)" /></template>
             <template #default="{ row }"><ElCheckbox :model-value="local.selectedNameIds.includes(row.id)" :disabled="local.busy || local.editing" :aria-label="t('plc.naming.selectPoint', { path: row.sourcePath })" @change="local.toggleNamePoint(row.id, !!$event)" /></template>
           </el-table-column>
-          <el-table-column :label="t('plc.naming.technicalName')" min-width="210"><template #default="{ row }"><strong>{{ row.name || t('plc.naming.modes.pending') }}</strong><small class="muted-cell">{{ row.sourcePath }}</small><el-tag size="small" effect="plain" :type="row.nameMode === 'pending' ? 'warning' : 'info'">{{ t('plc.naming.modes.' + (row.nameMode ?? 'legacy')) }}</el-tag></template></el-table-column>
-          <el-table-column prop="dataType" :label="t('common.local.type')" min-width="90" />
-          <el-table-column :label="t('common.local.addressSummary')" min-width="145"><template #default="{ row }"><span v-if="row.address?.confirmed">DB{{ local.draft?.dbs.find(d => d.id === row.dbId)?.number }} / {{ row.address.offset }}<template v-if="row.address.bit !== null">.{{ row.address.bit }}</template></span><el-tag v-else type="warning" effect="plain">{{ t('common.local.addressUnconfirmed') }}</el-tag><small v-if="row.address?.origin === 'manual'" class="muted-cell">{{ t('common.local.protected') }}</small></template></el-table-column>
-          <el-table-column :label="t('common.local.group')" min-width="135"><template #default="{ row }">{{ local.draft?.groups.find(g => g.id === row.groupId)?.name ?? t('common.local.unassigned') }}</template></el-table-column>
-          <el-table-column :label="t('common.local.enabled')" width="90"><template #default="{ row }"><el-tag :type="row.enabled ? 'success' : 'info'" effect="plain">{{ local.label(String(row.enabled)) }}</el-tag></template></el-table-column>
-          <el-table-column :label="t('common.local.actions')" width="260">
+          <el-table-column column-key="name" :label="t('plc.naming.technicalName')" :width="widths.name" :min-width="160"><template #default="{ row }"><strong>{{ row.name || t('plc.naming.modes.pending') }}</strong><small class="muted-cell">{{ row.sourcePath }}</small><el-tag size="small" effect="plain" :type="row.nameMode === 'pending' ? 'warning' : 'info'">{{ t(row.address?.origin === 'catalog' ? 'plc.catalog.catalogOrigin' : 'plc.naming.modes.' + (row.nameMode ?? 'legacy')) }}</el-tag></template></el-table-column>
+          <el-table-column column-key="displayName" :label="t('plc.naming.displayName')" :width="widths.displayName" :min-width="140"><template #default="{ row }">{{ local.draft?.pointDisplayNames?.[row.id]?.[locale === 'zh-CN' ? 'zh-CN' : 'en-US'] ?? '' }}</template></el-table-column>
+          <el-table-column column-key="dataType" prop="dataType" :label="t('common.local.type')" :width="widths.dataType" :min-width="80" />
+          <el-table-column column-key="address" :label="t('common.local.addressSummary')" :width="widths.address" :min-width="120"><template #default="{ row }"><span v-if="row.address?.confirmed">DB{{ local.draft?.dbs.find(d => d.id === row.dbId)?.number }} / {{ row.address.offset }}<template v-if="row.address.bit !== null">.{{ row.address.bit }}</template></span><el-tag v-else type="warning" effect="plain">{{ t('common.local.addressUnconfirmed') }}</el-tag><small v-if="row.address?.origin === 'manual'" class="muted-cell">{{ t('common.local.protected') }}</small></template></el-table-column>
+          <el-table-column column-key="group" :label="t('common.local.group')" :width="widths.group" :min-width="110"><template #default="{ row }">{{ local.draft?.groups.find(g => g.id === row.groupId)?.name ?? t('common.local.unassigned') }}</template></el-table-column>
+          <el-table-column column-key="enabled" :label="t('common.local.enabled')" :width="widths.enabled" :min-width="80"><template #default="{ row }"><el-tag :type="row.enabled ? 'success' : 'info'" effect="plain">{{ local.label(String(row.enabled)) }}</el-tag></template></el-table-column>
+          <el-table-column :label="t('common.local.actions')" width="260" :resizable="false">
             <template #default="{ row }">
               <div class="row-actions">
-                <ConsoleActionButton size="small" :label-key="local.dirty ? 'common.local.saveAndEdit' : 'common.local.edit'" :disabled="local.busy || local.editing || !!pointEditor" @click="editLocalPoint(row)" />
+                <ConsoleActionButton size="small" :label-key="local.dirty ? 'common.local.saveAndEdit' : 'common.local.edit'" :disabled="local.busy || local.editing || local.mutationUnknown || !!pointEditor" @click="editLocalPoint(row)" />
                 <ConsoleActionButton size="small" label-key="common.local.diagnose" :disabled="local.busy || local.editing || !!pointDiagnosis || !local.view?.active" @click="startPointDiagnosis(row)" />
               </div>
             </template>
@@ -58,24 +62,30 @@
         <ElDialog :model-value="!!pointEditor" :title="t('common.local.editPoint') + ' · ' + (pointEditor?.sourcePath ?? '')" :append-to-body="false" :close-on-click-modal="false" :close-on-press-escape="!local.busy" :show-close="!local.busy" width="min(780px, calc(100vw - 32px))" class="daa-name-dialog" @update:model-value="$event || cancelLocalPoint()">
           <div v-if="pointEditor && pointEditor.address" class="console-stack">
             <el-alert v-if="local.error" :title="local.label(local.error)" type="error" :closable="false" show-icon />
+            <el-alert v-if="local.pointEditUnknown" :title="t('plc.naming.editResultUnknown')" type="warning" :closable="false" show-icon><ConsoleActionButton label-key="plc.naming.reloadAfterUnknown" :disabled="local.busy" @click="local.reload" /></el-alert>
             <p class="daa-capability-note">{{ t('common.local.editHint') }}</p>
         <ElForm :disabled="local.busy" label-position="top" class="daa-local-form-grid" @submit.prevent>
-          <ElFormItem :label="t('plc.naming.technicalName')"><ElInput v-model="pointEditor.name" /></ElFormItem>
+          <ElFormItem :label="t('plc.naming.technicalName')"><ElInput v-model="pointEditor.name" :disabled="catalogPoint" /></ElFormItem>
+          <ElFormItem :label="t('plc.naming.displayNameZh')"><ElInput v-model="pointEditorNames['zh-CN']" /></ElFormItem>
+          <ElFormItem :label="t('plc.naming.displayNameEn')"><ElInput v-model="pointEditorNames['en-US']" /></ElFormItem>
           <ElFormItem :label="t('common.local.group')"><ElSelect :model-value="pointEditor.groupId ?? ''" @update:model-value="pointEditor.groupId = String($event) || null" append-to="#daa-feedback"><ElOption :label="t('common.local.unassigned')" value="" /><ElOption v-for="g in local.groups" :key="g.id" :label="g.name" :value="g.id" /></ElSelect></ElFormItem>
           <ElFormItem :label="t('common.local.enabled')"><ElSwitch v-model="pointEditor.enabled" /></ElFormItem>
-          <ElFormItem :label="t('common.local.offset')"><ElInputNumber v-model="pointEditor.address.offset" :min="0" :max="65535" :precision="0" controls-position="right" @change="manualPointAddress" /></ElFormItem>
-          <ElFormItem v-if="pointEditor.dataType === 'BOOL'" :label="t('common.local.bit')"><ElInputNumber :model-value="pointEditor.address.bit ?? 0" @update:model-value="pointEditor.address.bit = Number($event)" :min="0" :max="7" :precision="0" controls-position="right" @change="manualPointAddress" /></ElFormItem>
-          <ElFormItem :label="t('common.local.reason')"><ElInput v-model="pointEditor.address.reason" @input="manualPointAddress" /></ElFormItem>
-          <ElFormItem :label="t('common.local.confirmed')"><ElSwitch v-model="pointEditor.address.confirmed" /></ElFormItem>
+          <ElFormItem :label="t('common.local.offset')"><ElInputNumber v-model="pointEditor.address.offset" :disabled="catalogPoint" :min="0" :max="65535" :precision="0" controls-position="right" @change="manualPointAddress" /></ElFormItem>
+          <ElFormItem v-if="pointEditor.dataType === 'BOOL'" :label="t('common.local.bit')"><ElInputNumber :model-value="pointEditor.address.bit ?? 0" :disabled="catalogPoint" @update:model-value="pointEditor.address.bit = Number($event)" :min="0" :max="7" :precision="0" controls-position="right" @change="manualPointAddress" /></ElFormItem>
+          <ElFormItem :label="t('common.local.reason')"><ElInput v-model="pointEditor.address.reason" :disabled="catalogPoint" @input="manualPointAddress" /></ElFormItem>
+          <ElFormItem :label="t('common.local.confirmed')"><ElSwitch v-model="pointEditor.address.confirmed" :disabled="catalogPoint" @change="addressTouched = true" /></ElFormItem>
           <ElFormItem :label="t('common.local.comment')" class="daa-local-form-wide"><ElInput v-model="pointEditor.comment" type="textarea" :rows="2" /></ElFormItem>
         </ElForm>
+        <p v-if="!displayNamesValid" class="daa-capability-note">{{ t('plc.naming.displayNameLimit') }}</p>
+        <p v-if="catalogPoint" class="daa-capability-note">{{ t('plc.catalog.lockedFields') }}</p>
+        <p v-if="pointEditor.id in (local.draft?.pointLegacyDisplayNames ?? {})" class="daa-capability-note">{{ t('plc.catalog.legacy') }}: {{ local.draft?.pointLegacyDisplayNames?.[pointEditor.id] }}</p>
         <p class="daa-capability-note">{{ t('plc.naming.editHint') }}</p>
         <p v-if="local.namePreviewBusy">{{ t('plc.naming.previewing') }}</p>
-        <p v-for="row in local.namePreview?.rows ?? []" :key="row.pointId" class="daa-name-diff">{{ row.oldName || '—' }} → <strong>{{ row.proposedName || t('plc.naming.modes.pending') }}</strong> · {{ t('plc.naming.modes.' + (row.proposedMode ?? 'legacy')) }}</p>
+        <p v-for="row in local.namePreview?.rows ?? []" :key="row.pointId" class="daa-name-diff">{{ row.oldName || '—' }} → <strong>{{ row.proposedName || t('plc.naming.modes.pending') }}</strong> · {{ t(catalogPoint ? 'plc.catalog.catalogOrigin' : 'plc.naming.modes.' + (row.proposedMode ?? 'legacy')) }}</p>
         <p v-for="(issue, i) in local.namePreview?.readiness ?? []" :key="i">{{ local.label(issue.code) }} · {{ issue.path }}</p>
-        <details class="daa-details"><summary>{{ t('common.local.identityDetails') }}</summary><code>{{ pointEditor.id }}</code><p>{{ pointEditor.dataType }} · {{ t(pointEditor.address.origin === 'manual' ? 'common.local.manualOrigin' : 'common.local.inferredOrigin') }}</p></details>
+        <details class="daa-details"><summary>{{ t('common.local.identityDetails') }}</summary><code>{{ pointEditor.id }}</code><p>{{ pointEditor.dataType }} · {{ t(catalogPoint ? 'plc.catalog.catalogOrigin' : pointEditor.address.origin === 'manual' ? 'common.local.manualOrigin' : 'common.local.inferredOrigin') }}</p></details>
           </div>
-          <template #footer><div class="console-action-group"><ConsoleActionButton label-key="common.local.cancelEdit" :disabled="local.busy" @click="cancelLocalPoint" /><ConsoleActionButton label-key="common.local.save" :disabled="local.busy || local.namePreviewBusy || !local.namePreview?.canConfirm" tone="primary" @click="applyLocalPoint" /></div></template>
+          <template #footer><div class="console-action-group"><ConsoleActionButton label-key="common.local.cancelEdit" :disabled="local.busy" @click="cancelLocalPoint" /><ConsoleActionButton label-key="common.local.save" :disabled="local.busy || local.mutationUnknown || !displayNamesValid || local.namePreviewBusy || !local.namePreview?.canConfirm" tone="primary" @click="applyLocalPoint" /></div></template>
         </ElDialog>
       </Teleport>
       <ElCollapse>
@@ -85,7 +95,7 @@
         <ElCollapseItem name="offsets" :title="t('common.local.offsetTools')">
           <div class="console-stack">
           <p class="daa-capability-note">{{ t('common.local.pointLimits') }}</p><p v-if="local.offsets.length" class="daa-capability-note">{{ t('plc.sourceImport.layoutProfile', { profile: local.offsets[0]?.profile }) }}</p><el-alert v-if="local.dirty || local.editing" :title="t('common.local.saveBeforeTools')" type="warning" :closable="false" />
-          <div class="console-action-group"><ConsoleActionButton label-key="common.local.previewOffsets" :disabled="local.busy || local.dirty || local.editing || !local.selectedDb" @click="local.infer(false)" /></div>
+          <div class="console-action-group"><ConsoleActionButton label-key="common.local.previewOffsets" :disabled="local.busy || local.dirty || local.editing || !local.selectedDb || selectedDbIsCatalog" @click="local.infer(false)" /></div>
           </div>
           <Teleport to="#daa-feedback"><ElDialog v-model="local.offsetPreviewOpen" :title="t('common.local.previewOffsets')" :append-to-body="false" :close-on-click-modal="false" :show-close="!local.busy" :close-on-press-escape="!local.busy" width="min(1000px, calc(100vw - 32px))" class="daa-import-dialog">
             <p class="daa-capability-note">{{ t('plc.sourceImport.layoutProfile', { profile: local.offsets[0]?.profile ?? '' }) }}</p>
@@ -109,7 +119,8 @@ import { ref, watch, onUnmounted, nextTick } from 'vue';
 import { ElAlert, ElCheckbox, ElDialog, ElForm, ElFormItem, ElInput, ElInputNumber, ElSelect, ElOption, ElSwitch, ElCollapse, ElCollapseItem, ElTree } from 'element-plus';
 import SourceImportPanel from '../../components/SourceImportPanel.vue';
 import PointNamePreviewDialog from '../../components/PointNamePreviewDialog.vue';
-import type { Point } from '../../../../services/localAcquisition';
+import type { Point, PointDisplayNames } from '../../../../services/localAcquisition';
+import { loadWidths, saveWidth, resetWidths, widthKey } from '../../../../console/tableWidths';
 import { sampleValue } from '../../../../console/sampleDetails';
 import { formatBusinessTime } from '../../../../console/time';
 
@@ -122,7 +133,14 @@ import { useI18n } from 'vue-i18n';
 import ConsoleActionButton from '../../../../components/console/ConsoleActionButton.vue';
 import ConsoleCard from '../../../../components/console/ConsoleCard.vue';
 import ConsoleTableShell from '../../../../components/console/ConsoleTableShell.vue';
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const columns = [{ id: 'name', width: 210, min: 160 }, { id: 'displayName', width: 180, min: 140 }, { id: 'dataType', width: 90, min: 80 }, { id: 'address', width: 145, min: 120 }, { id: 'group', width: 135, min: 110 }, { id: 'enabled', width: 90, min: 80 }];
+let storage: Storage | undefined;
+try { storage = window.localStorage; } catch { /* 无存储时使用默认列宽。 */ }
+const widthsKey = widthKey('com.aiis.aw.dataacquisitionagent', 'plc.points');
+const widths = ref(loadWidths(storage, widthsKey, columns)), tableVersion = ref(0);
+function resizePointColumn(width: number, _old: number, column: { columnKey?: string }) { widths.value = saveWidth(storage, widthsKey, columns, widths.value, column.columnKey ?? '', width); tableVersion.value++; }
+function resetPointWidths() { widths.value = resetWidths(storage, widthsKey, columns); tableVersion.value++; }
 const pageSelection = computed(() => {
     const points = local?.pagedPoints ?? [];
     const count = points.filter(p => local?.selectedNameIds.includes(p.id)).length;
@@ -137,6 +155,11 @@ async function removeLocalGroup(id: string) {
 }
 
 const pointEditor = ref<Point | null>(null);
+const catalogPoint = computed(() => pointEditor.value?.address?.origin === 'catalog');
+const selectedDbIsCatalog = computed(() => !!local?.draft?.catalogBindings?.some(binding => binding.localDbId === local.selectedDb));
+const pointEditorNames = ref<PointDisplayNames>({ 'zh-CN': '', 'en-US': '' });
+const addressWasMissing = ref(false), addressTouched = ref(false);
+const displayNamesValid = computed(() => Object.values(pointEditorNames.value).every(value => new TextEncoder().encode(value).length <= 256));
 interface DiagnosisFact {
     definition: Pick<Point, 'id' | 'plcId' | 'address' | 'dataType'>;
     value: unknown;
@@ -195,10 +218,13 @@ async function editLocalPoint(p: Point) {
     if (!copy) return;
     // 新保存回执的scope watcher先完成，避免其关闭随后打开的弹窗。
     await nextTick();
+    addressWasMissing.value = !copy.address;
+    addressTouched.value = false;
     if (!copy.address) copy.address = { offset: 0, bit: copy.dataType === 'BOOL' ? 0 : null, confirmed: false, origin: 'manual', reason: '' };
+    pointEditorNames.value = { ...(local?.draft?.pointDisplayNames?.[copy.id] ?? { 'zh-CN': '', 'en-US': '' }) };
     pointEditor.value = copy;
 }
-function manualPointAddress() { if (pointEditor.value?.address) { pointEditor.value.address.origin = 'manual'; pointEditor.value.address.confirmed = false; } }
+function manualPointAddress() { if (pointEditor.value?.address) { addressTouched.value = true; pointEditor.value.address.origin = 'manual'; pointEditor.value.address.confirmed = false; } }
 function cancelLocalPoint() { pointEditor.value = null; local?.finishPointEdit(); }
 async function applyLocalPoint() {
     if (await local?.confirmNames()) pointEditor.value = null;
@@ -206,7 +232,7 @@ async function applyLocalPoint() {
 
 watch(() => [local?.view, local?.selectedPlc, local?.selectedDb], cancelLocalPoint, { flush: 'sync' });
 
-watch(pointEditor, v => { if (local) { local.editing = !!v; local.stagePointEdit(v); } }, { deep: true, flush: 'sync' });
+watch([pointEditor, pointEditorNames, addressTouched], ([v, names]) => { if (local) { local.editing = !!v; const candidate = v && addressWasMissing.value && !addressTouched.value ? { ...v, address: null } : v; local.stagePointEdit(displayNamesValid.value ? candidate : null, names); } }, { deep: true, flush: 'sync' });
 onUnmounted(() => {
     closePointDiagnosis();
     cancelLocalPoint();

@@ -282,6 +282,8 @@ pub fn preview(service: &Configuration, mut intent: ImportIntent) -> Result<Impo
                 id: uuid(),
                 name: String::new(),
                 display_name: leaf.comment.clone(),
+                display_names: None,
+                description: None,
                 data_type: leaf.data_type.clone(),
                 enabled: true,
                 source_path: leaf.path.clone(),

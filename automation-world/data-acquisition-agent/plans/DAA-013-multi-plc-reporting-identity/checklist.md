@@ -1,14 +1,14 @@
 Task ID: DAA-013
 Revision: r1
-Status: qa_passed
+Status: owner_accepted
 Owner Role: Verification
 Allowed Writers: Verification, Human Owner
-Handoff: QA6 通过上报确认可读性增量。DAA-013 r1 精确候选交 Human Owner 最终验收。
+Handoff: Human Owner 已最终验收 DAA-013 r1；Windows 原生验证后续安排。
 Workflow Mode: STD
 Fresh Context: yes
 Spec SHA-256: `fc9d5deba6245f4f0c457bc6ee26673298361f08be60b107d6b3d09704a82bb8`
 Development handoff SHA-256: `92747a78a4f04418134d858e112bfb495bf08f8e540ca931a0d00673dbb23c4f`
-Updated: 2026-11-13 Asia/Shanghai
+Updated: 2026-11-16 Asia/Shanghai
 
 # DAA-013 r1 独立验证 QA1
 
@@ -300,3 +300,15 @@ macOS 15.7.7 arm64，Node v22.19.0、pnpm 11.11.0、Vite 5.4.21，使用仓库�
 本轮只运行前端静态检查、生产构建与合成浏览器，实际 `.local/dev`、私有 env、原生 Tauri、数据库、用户服务、后端和设备均在本轮验证边界外。Rust/MySQL 与 ARCH-ACQ-004 联合测试证据沿各自原记录，Windows 原生和实际采用仍待相应验证与决定。
 
 QA6 自有 `$QA6=/private/tmp/daa013-r1-qa6.6KGyRV0c` 保存独立源码、构建、临时探针与合成截图；Chrome 测试会话已关闭，随机静态端口已停止监听。截图 SHA-256 分别为 `22fb9ba68c90dcc41d09ed40e0988731bd33e5cdbf8980af9342f9653f47ddbd`（中文浅色开始）和 `af5441a96870a4a1550287082f884344549dbc9af7c94fecac1e82d97fec9df2`（英文深色重绑）。必要行为、版本与摘要均已持久化。本轮已完成对 Development 临时根 `/private/tmp/daa013-r1-confirm-NV212D` 的复核，协调者确认归属、无运行占用且 Human Owner 或后续任务无需再查看截图和夹具后，可回收两处临时根。Verification 将精确候选和本轮限制交 Human Owner 最终验收。
+
+## Human Owner 最终验收 — DAA-013 r1
+
+2026-11-16（Asia/Shanghai），Human Owner 在会话中作出明确决定，由协调者转交；原话如下：
+
+> 验收 DAA-012 r1 和 DAA-013 r1，范围以各自的独立验证记录为准；Windows 原生验证后续安排，留下操作文档，后续在window环境直接操作。
+
+**`owner_accepted`（DAA-013 r1）**。验收范围以本清单各轮适用于对应候选的独立记录为准：QA3 的多 PLC 身份、合成 SQLite、隔离回环 HTTP 和故障时序，QA5 的指南返工，以及 QA6 的确认界面、合成 IPC 和前端增量均为 `qa_passed`。QA1、QA2 和 QA4 的 `qa_failed` 及其返工、关闭证据完整保留；QA6 所记 Esc 关闭后焦点落回 `BODY` 的既有限制仍保留。
+
+本次只登记 Owner 决定并只读核对已有记录，没有重跑构建、测试、应用或原生 Windows，也没有操作数据库、后端、设备或既有 profile。所核对的原独立 QA 临时日志目录已不存在；本次依据上文持久化的独立验证记录及摘要。当前工作树 HEAD 为 `21cd789277695bbafaa55c24e39261fc7247f9b0`；以 QA6 的 14 项交接 SHA-256 只读比对时，12 项现有文件摘要已变化，另两份历史 Stage C 指南在当前工作树已删除。旧指南版本的追溯见 [DAA-016 交接](../DAA-016-docs-closeout/tasks.md#2-历史引用及版本追溯)；不能将历史 QA 外推为对后续工作树字节的新验证。登记前 `git diff --check` 退出 0。
+
+Windows 原生验证未进行，由 Human Owner 后续安排和操作。[Windows 原生验证记录单](../../WINDOWS_NATIVE_VALIDATION.zh-CN.md)目前以 DAA-010 r5 为依据；用于本任务前仍须按实际候选核对 DAA-013 的适用步骤与证据。真实旧二进制降级、真实 profile、实际后端、MySQL、DS/PLC、部署和发布仍按各自记录处理；本次验收不代表实际环境采用或整阶段验收。

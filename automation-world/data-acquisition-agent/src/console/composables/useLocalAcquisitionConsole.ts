@@ -2,7 +2,7 @@
 import { computed, h, watch, onMounted, onUnmounted, reactive, ref, type InjectionKey } from 'vue';
 import { ElMessageBox } from 'element-plus';
 import { useI18n } from 'vue-i18n';
-import { bootstrap, localCall, LocalCommandError, type Configuration, type ConfigurationView, type Snapshot, type StartupState, type ImportPreview, type Source, type Offset, type Point, type Operation, type History, type RawSample, type LogRow, type Identification, type BlockMapping, type NameRequest, type NamePreview, previewPointNames, confirmPointNames } from '../../services/localAcquisition';
+import { bootstrap, localCall, LocalCommandError, type Configuration, type ConfigurationView, type Snapshot, type StartupState, type ImportPreview, type Source, type Offset, type Point, type PointDisplayNames, type Operation, type History, type RawSample, type LogRow, type Identification, type BlockMapping, type NameRequest, type NamePreview, type CatalogConnection, type CatalogInput, type CatalogPreview, previewPointNames, confirmPointNames } from '../../services/localAcquisition';
 import * as facts from '../../services/factsDelivery';
 import { historyBoundary } from '../time';
 export const localConsoleKey: InjectionKey<LocalConsole> = Symbol('daa-local-owner');
@@ -154,10 +154,79 @@ export function useLocalAcquisitionConsole() {
     const identification = ref<Identification | null>(null), mappings = ref<BlockMapping[]>([]), importPage = ref(1), importPageSize = ref(10);
     const sourcePreviewOpen = ref(false), offsetPreviewOpen = ref(false), sourceStructureOpen = ref(false);
     const rawProofs = ref<Array<{ sha256: string; bytes: number }>>([]);
+    const catalogDialogOpen = ref(false), catalogPreview = ref<CatalogPreview | null>(null), catalogTarget = ref<CatalogConnection | null>(null), catalogConfirmed = ref(false);
+    let catalogBytes: number[] | null = null, catalogFile: File | null = null, catalogFilename = '', catalogInput: CatalogInput | null = null, settingCatalogTarget = false;
+    function invalidateCatalogPreview() { catalogPreview.value = null; catalogInput = null; catalogConfirmed.value = false; }
+    function openCatalog() {
+        if (busy.value || dirty.value || editing.value || mutationUnknown.value || !view.value) return;
+        catalogDialogOpen.value = true; error.value = '';
+    }
+    function closeCatalog() {
+        if (busy.value) return;
+        catalogDialogOpen.value = false; invalidateCatalogPreview(); catalogBytes = null; catalogFile = null; catalogFilename = '';
+        settingCatalogTarget = true; catalogTarget.value = null; settingCatalogTarget = false;
+        void localCall('daa_cancel_catalog').catch(() => undefined);
+    }
+    async function makeCatalogPreview() {
+        if (!view.value || !catalogBytes || dirty.value || editing.value || mutationUnknown.value) throw new Error('unsaved_changes');
+        const input: CatalogInput = { bytes: catalogBytes, filename: catalogFilename, expectedEtag: view.value.etag, target: catalogTarget.value ? clone(catalogTarget.value) : null };
+        const result = await localCall<CatalogPreview>('daa_preview_catalog', input);
+        settingCatalogTarget = true;
+        catalogTarget.value = { host: result.target.host, port: result.target.port, rack: result.target.rack, slot: result.target.slot };
+        settingCatalogTarget = false;
+        catalogInput = input; catalogPreview.value = result; catalogConfirmed.value = false;
+    }
+    async function readCatalogFile(event: Event) {
+        const picker = event.target as HTMLInputElement, file = picker.files?.[0];
+        if (!file) return;
+        invalidateCatalogPreview(); catalogBytes = null; catalogFile = null; catalogFilename = '';
+        settingCatalogTarget = true; catalogTarget.value = null; settingCatalogTarget = false;
+        await perform(async () => {
+            if (file.size > 1048576 || file.size === 0) throw new Error('catalog_size_invalid');
+            const bytes = new Uint8Array(await file.slice(0, 1048577).arrayBuffer());
+            if (!bytes.length || bytes.length > 1048576 || bytes.length !== file.size) throw new Error('catalog_file_changed');
+            catalogBytes = Array.from(bytes); catalogFile = file; catalogFilename = file.name;
+            await makeCatalogPreview();
+        });
+        picker.value = '';
+    }
+    async function previewCatalog() {
+        invalidateCatalogPreview();
+        await perform(makeCatalogPreview);
+    }
+    async function confirmCatalog() {
+        const input = catalogInput, preview = catalogPreview.value, file = catalogFile;
+        if (!input || !preview || !file || !catalogConfirmed.value || mutationUnknown.value || dirty.value || editing.value) return;
+        await perform(async () => {
+            let current: Uint8Array | null = null;
+            try { current = new Uint8Array(await file.slice(0, 1048577).arrayBuffer()); } catch { /* 文件失效与文件变化一样需要重新选择。 */ }
+            if (!current || current.length !== input.bytes.length || current.some((byte, index) => byte !== input.bytes[index])) {
+                invalidateCatalogPreview(); catalogBytes = null; catalogFile = null; catalogFilename = '';
+                settingCatalogTarget = true; catalogTarget.value = null; settingCatalogTarget = false;
+                await localCall('daa_cancel_catalog').catch(() => undefined);
+                throw new Error('catalog_file_changed');
+            }
+            if (catalogInput !== input || catalogPreview.value?.previewToken !== preview.previewToken || !catalogConfirmed.value || mutationUnknown.value || dirty.value || editing.value) throw new Error('catalog_preview_conflict');
+            try {
+                const result = await localCall<ConfigurationView>('daa_confirm_catalog', { input, previewToken: preview.previewToken });
+                accept(result); selectedPlc.value = preview.catalog.origin.plc_id; selectedDb.value = '';
+                catalogDialogOpen.value = false; invalidateCatalogPreview(); catalogBytes = null; catalogFile = null; catalogFilename = '';
+                notice.value = 'saved';
+            } catch (e) {
+                invalidateCatalogPreview();
+                const rejectedBeforeCommit = ['catalog_preview_required', 'catalog_preview_conflict', 'draft_conflict', 'catalog_identity_conflict', 'catalog_origin_conflict', 'duplicate_endpoint', 'request_limits', 'invalid_request'];
+                if (!(e instanceof LocalCommandError) || e.commitUnknown || !rejectedBeforeCommit.includes(e.message)) catalogUnknown.value = true;
+                throw e;
+            }
+        });
+    }
+    watch(catalogTarget, () => { if (!settingCatalogTarget) invalidateCatalogPreview(); }, { deep: true, flush: 'sync' });
     const importRows = computed(() => (identification.value?.blocks ?? []).filter(b => b.blockKey.kind === 'DATA_BLOCK').map(b => ({ block: b, mapping: mappings.value.find(m => m.sourceIndex === b.sourceIndex && m.blockKey.name === b.blockKey.name)! })));
     const pagedImportRows = computed(() => importRows.value.slice((importPage.value - 1) * importPageSize.value, importPage.value * importPageSize.value));
 
     const selectedNameIds = ref<string[]>([]), namePreview = ref<NamePreview | null>(null), namePreviewOpen = ref(false), namePreviewBusy = ref(false), namePage = ref(1), namePageSize = ref(10), pointPageSize = ref(20);
+    const pointEditUnknown = ref(false), catalogUnknown = ref(false);
+    const mutationUnknown = computed(() => pointEditUnknown.value || catalogUnknown.value);
     let nameInput: NameRequest | null = null, nameEpoch = 0;
     let nameTimer: ReturnType<typeof setTimeout> | undefined;
     const pagedNames = computed(() => namePreview.value?.rows.slice((namePage.value - 1) * namePageSize.value, namePage.value * namePageSize.value) ?? []);
@@ -165,16 +234,17 @@ export function useLocalAcquisitionConsole() {
     function closeNames() { namePreviewOpen.value = false; invalidateNames(); }
     function toggleNamePoint(id: string, selected: boolean) { invalidateNames(); selectedNameIds.value = selected ? [...new Set([...selectedNameIds.value, id])] : selectedNameIds.value.filter(p => p !== id); }
     async function previewNames() {
+        if (mutationUnknown.value) return;
         await perform(async () => {
             invalidateNames(); if (!view.value || dirty.value || editing.value) throw new Error('unsaved_changes');
             const input: NameRequest = { expectedEtag: view.value.etag, plcId: selectedPlc.value, pointIds: [...selectedNameIds.value], intent: 'generate', patch: null };
             const result = await previewPointNames(input); nameInput = input; namePreview.value = result; namePage.value = 1; namePreviewOpen.value = true;
         });
     }
-    function stagePointEdit(point: Point | null) {
-        invalidateNames(); if (!point || !view.value || !available) return;
+    function stagePointEdit(point: Point | null, displayNames?: PointDisplayNames) {
+        invalidateNames(); if (!point || !view.value || !available || mutationUnknown.value) return;
         const epoch = nameEpoch;
-        const input: NameRequest = { expectedEtag: view.value.etag, plcId: point.plcId, pointIds: [point.id], intent: 'edit', patch: { name: point.name, comment: point.comment, enabled: point.enabled, groupId: point.groupId, address: clone(point.address) } };
+        const input: NameRequest = { expectedEtag: view.value.etag, plcId: point.plcId, pointIds: [point.id], intent: 'edit', patch: { name: point.name, comment: point.comment, enabled: point.enabled, groupId: point.groupId, address: clone(point.address), ...(displayNames ? { displayNames: clone(displayNames) } : {}) } };
         namePreviewBusy.value = true;
         nameTimer = setTimeout(async () => {
             try { const result = await previewPointNames(input); if (epoch === nameEpoch) { nameInput = input; namePreview.value = result; } }
@@ -185,10 +255,16 @@ export function useLocalAcquisitionConsole() {
     async function confirmNames() {
         let saved = false;
         const input = nameInput, preview = namePreview.value;
-        if (!input || !preview?.canConfirm || namePreviewBusy.value) return false;
+        if (mutationUnknown.value || !input || !preview?.canConfirm || namePreviewBusy.value) return false;
         await perform(async () => {
-            const result = await confirmPointNames(input, preview);
-            invalidateNames(); namePreviewOpen.value = false; accept(result); notice.value = 'saved'; saved = true;
+            try {
+                const result = await confirmPointNames(input, preview);
+                invalidateNames(); namePreviewOpen.value = false; accept(result); notice.value = 'saved'; saved = true;
+            } catch (e) {
+                invalidateNames();
+                if (!(e instanceof LocalCommandError) || e.commitUnknown || ['storage_pending', 'local_operation_failed'].includes(e.message)) pointEditUnknown.value = true;
+                throw e;
+            }
         });
         return saved;
     }
@@ -205,7 +281,8 @@ export function useLocalAcquisitionConsole() {
         if (!code)
             return '—';
         const key = 'common.local.codes.' + code.split(':')[0];
-        return te(key) ? t(key) : t('common.local.code', { code });
+        const catalogKey = 'plc.catalog.errors.' + code.split(':')[0];
+        return te(catalogKey) ? t(catalogKey) : te(key) ? t(key) : t('common.local.code', { code });
     };
     const plcs = computed(() => draft.value?.plcs ?? []), dbs = computed(() => draft.value?.dbs.filter(d => !selectedPlc.value || d.plcId === selectedPlc.value) ?? []), groups = computed(() => draft.value?.groups.filter(g => g.plcId === selectedPlc.value) ?? []);
     const points = computed(() => draft.value?.points.filter(p => (!selectedPlc.value || p.plcId === selectedPlc.value) && (!selectedDb.value || p.dbId === selectedDb.value) && [p.sourcePath, p.name, p.dataType, p.comment].some(v => v.toLowerCase().includes(query.value.toLowerCase()))) ?? []);
@@ -283,6 +360,8 @@ export function useLocalAcquisitionConsole() {
     }
     function accept(v: ConfigurationView) {
         invalidateNames();
+        pointEditUnknown.value = false;
+        catalogUnknown.value = false;
         editing.value = false;
         view.value = v;
         draft.value = clone(v.draft);
@@ -325,6 +404,7 @@ export function useLocalAcquisitionConsole() {
     // Candidate stays detached until Rust/CAS returns a committed configuration.
     async function saveCandidate(candidate: Configuration) {
         invalidateNames();
+        if (mutationUnknown.value) return false;
         let saved = false;
         await perform(async () => {
             if (!view.value) return;
@@ -339,7 +419,7 @@ export function useLocalAcquisitionConsole() {
     }
     async function save() { if (draft.value) return saveCandidate(draft.value); return false; }
     async function preparePointEdit(id: string): Promise<Point | null> {
-        if (busy.value || editing.value) return null;
+        if (busy.value || editing.value || mutationUnknown.value) return null;
         if (!draft.value?.points.some(p => p.id === id && p.plcId === selectedPlc.value)) return null;
         // 行按钮明确显示“保存草稿并编辑”；保留待保存组/周期，再用新ETag进行单点预览。
         if (dirty.value && !await save()) return null;
@@ -350,6 +430,7 @@ export function useLocalAcquisitionConsole() {
     }
     function finishPointEdit() { editing.value = false; invalidateNames(); }
     async function activate(rollback = false) {
+        if (mutationUnknown.value) return;
         await perform(async () => {
             if (!view.value)
                 return;
@@ -370,6 +451,19 @@ export function useLocalAcquisitionConsole() {
     function removePlc(id: string) {
         if (!draft.value)
             return;
+        if (draft.value.pointDisplayNames) {
+            for (const point of draft.value.points.filter(p => p.plcId === id)) delete draft.value.pointDisplayNames[point.id];
+            if (!Object.keys(draft.value.pointDisplayNames).length) delete draft.value.pointDisplayNames;
+        }
+        const dbIds = new Set(draft.value.dbs.filter(d => d.plcId === id).map(d => d.id));
+        if (draft.value.pointLegacyDisplayNames) {
+            for (const point of draft.value.points.filter(p => p.plcId === id)) delete draft.value.pointLegacyDisplayNames[point.id];
+            if (!Object.keys(draft.value.pointLegacyDisplayNames).length) delete draft.value.pointLegacyDisplayNames;
+        }
+        if (draft.value.catalogBindings) {
+            draft.value.catalogBindings = draft.value.catalogBindings.filter(binding => !dbIds.has(binding.localDbId));
+            if (!draft.value.catalogBindings.length) delete draft.value.catalogBindings;
+        }
         draft.value.plcs = draft.value.plcs.filter(p => p.id !== id);
         draft.value.dbs = draft.value.dbs.filter(p => p.plcId !== id);
         draft.value.points = draft.value.points.filter(p => p.plcId !== id);
@@ -484,6 +578,7 @@ export function useLocalAcquisitionConsole() {
         input.value = '';
     }
     async function importSources(confirm = false) {
+        if (mutationUnknown.value) return;
         await perform(async () => {
             if (dirty.value || editing.value) throw new Error('unsaved_changes');
             if (!view.value) return;
@@ -498,6 +593,7 @@ export function useLocalAcquisitionConsole() {
         });
     }
     async function infer(confirm = false) {
+        if (mutationUnknown.value) return;
         invalidateNames();
         await perform(async () => {
             if (dirty.value || editing.value) throw new Error('unsaved_changes');
@@ -514,6 +610,7 @@ export function useLocalAcquisitionConsole() {
     watch(dirty, () => { if (!editing.value) invalidateNames(); });
     watch([sources, mappings, selectedPlc], invalidateImport, { deep: true });
     watch([dirty, editing, () => view.value?.etag, selectedDb], () => { preview.value = null; offsets.value = []; });
+    watch([dirty, editing, () => view.value?.etag], invalidateCatalogPreview);
     function address(p: Point) {
         if (!p.address)
             p.address = { offset: 0, bit: p.dataType === 'BOOL' ? 0 : null, confirmed: false, origin: 'manual', reason: '' };
@@ -596,5 +693,5 @@ export function useLocalAcquisitionConsole() {
         if (nameTimer) clearTimeout(nameTimer);
         closeDiagnostic();
     });
-    return reactive({ startup, startupBusy, startupError, startupSaved, loadStartup, saveStartup, factsReadMode, factsReadFrom, factsReadTo, factsReadPage, factsReadError, openFactsRead, deliveryKind, deliveryState, deliverySaveError, deliverySnapshotError, delivery, deliverySettings, deliveryPage, deliveryPageSize, deliveryPageNumber, deliveryCursors, deliveryDialog, deliveryDetail, sourceMaterial, loadDeliveries, deliveryControl, editDelivery, saveDelivery, inspectDelivery, rebindDelivery, showSourceMaterial, previewFacts, testFacts, selectedPoints, preparePointEdit, finishPointEdit, selectedNameIds, namePreview, namePreviewOpen, namePreviewBusy, namePage, namePageSize, pagedNames, pointPageSize, closeNames, invalidateNames, toggleNamePoint, previewNames, stagePointEdit, confirmNames, sourcePreviewOpen, offsetPreviewOpen, sourceStructureOpen, identification, mappings, importPage, importPageSize, importRows, pagedImportRows, invalidateImport, changeImportTarget, available, editing, dirty, confirmAction, conflictVersion, snapshotError, selectedTargets, bootstrap, view, draft, snapshot, busy, error, notice, selectedPlc, selectedDb, query, pointPage, preview, offsets, sources, history, historyFilter, historyPage, historyPageSize, historyPreviousAvailable, historyNextAvailable, historyPreviousBounded, raw, rawSampleId, logs, label, plcs, dbs, groups, points, pagedPoints, perform, refresh, reload, save, saveCandidate, activate, addPlc, removePlc, addGroup, removeGroup, plcDiagnostic, startDiagnostic, closeDiagnostic, control, readFiles, importSources, infer, address, manual, bulk, loadHistory, inspect, loadLogs, state, formatBytes });
+    return reactive({ startup, startupBusy, startupError, startupSaved, loadStartup, saveStartup, factsReadMode, factsReadFrom, factsReadTo, factsReadPage, factsReadError, openFactsRead, deliveryKind, deliveryState, deliverySaveError, deliverySnapshotError, delivery, deliverySettings, deliveryPage, deliveryPageSize, deliveryPageNumber, deliveryCursors, deliveryDialog, deliveryDetail, sourceMaterial, loadDeliveries, deliveryControl, editDelivery, saveDelivery, inspectDelivery, rebindDelivery, showSourceMaterial, previewFacts, testFacts, selectedPoints, preparePointEdit, finishPointEdit, selectedNameIds, namePreview, namePreviewOpen, namePreviewBusy, pointEditUnknown, catalogUnknown, mutationUnknown, catalogDialogOpen, catalogPreview, catalogTarget, catalogConfirmed, openCatalog, closeCatalog, readCatalogFile, previewCatalog, confirmCatalog, namePage, namePageSize, pagedNames, pointPageSize, closeNames, invalidateNames, toggleNamePoint, previewNames, stagePointEdit, confirmNames, sourcePreviewOpen, offsetPreviewOpen, sourceStructureOpen, identification, mappings, importPage, importPageSize, importRows, pagedImportRows, invalidateImport, changeImportTarget, available, editing, dirty, confirmAction, conflictVersion, snapshotError, selectedTargets, bootstrap, view, draft, snapshot, busy, error, notice, selectedPlc, selectedDb, query, pointPage, preview, offsets, sources, history, historyFilter, historyPage, historyPageSize, historyPreviousAvailable, historyNextAvailable, historyPreviousBounded, raw, rawSampleId, logs, label, plcs, dbs, groups, points, pagedPoints, perform, refresh, reload, save, saveCandidate, activate, addPlc, removePlc, addGroup, removeGroup, plcDiagnostic, startDiagnostic, closeDiagnostic, control, readFiles, importSources, infer, address, manual, bulk, loadHistory, inspect, loadLogs, state, formatBytes });
 }

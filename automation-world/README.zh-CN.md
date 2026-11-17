@@ -22,7 +22,7 @@ CA 冻结不停止现有运行或切换生产链路。原 DTB TSS 完整保留�
 | DAA | com.aiis.aw.dataacquisitionagent | 15191 / 14191 | DAA_* / daa.* |
 | SMA | com.aiis.aw.semanticmappingagent | 15192 / 14192 | SMA_* / sma.* |
 
-DAA/SMA只读取自身根`.env`或显式绝对`DAA_ENV_FILE` / `SMA_ENV_FILE`，不搜索父目录。绝对`DAA_PROFILE_DIR` / `SMA_PROFILE_DIR`选择独立本地数据。DAA的UI/Rust拥有`config.sqlite` / `runtime.sqlite`；普通YAML runtime/迁入及直库writer已退役，历史私有回执受保护。SMA Rust拥有`configuration.sqlite3`中的完整单文档及revision/CAS；技术启动JSON与`sma.*` UI偏好独立，均不能授权投递。Simulation、事实生产和内置帮助已退役。正常manual/start/resume/auto-start在HTTP/spawn前拒绝，旧偏好或HTTP gate开启也不能放行。配置维护/纯预览离线完成，显式只读HTTP检查仍受自身gate控制。真实配置和日志不提交。
+DAA/SMA只读取自身根`.env`或显式绝对`DAA_ENV_FILE` / `SMA_ENV_FILE`，不搜索父目录。`DAA_PROFILE_DIR`接受绝对字面路径或以所选配置文件目录为基准的相对字面路径；`SMA_PROFILE_DIR`仍以绝对路径选择独立本地数据。DAA的UI/Rust拥有`config.sqlite` / `runtime.sqlite`；普通YAML runtime/迁入及直库writer已退役，历史私有回执受保护。SMA Rust拥有`configuration.sqlite3`中的完整单文档及revision/CAS；技术启动JSON与`sma.*` UI偏好独立，均不能授权投递。Simulation、事实生产和内置帮助已退役。正常manual/start/resume/auto-start在HTTP/spawn前拒绝，旧偏好或HTTP gate开启也不能放行。配置维护/纯预览离线完成，显式只读HTTP检查仍受自身gate控制。真实配置和日志不提交。
 
 ## 演进与证据
 

@@ -69,6 +69,10 @@ PLC facts v2 defines the raw sample intake for DAA and external producers and th
 
 [Business integration v1](published/http-api/business-integration-v1/README.md) publishes the eight typed anonymous business operations, closed schemas, examples and digest vectors. [BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/checklist.md) passed approved isolated A+B verification; Owner acceptance, real target/time adoption and DAA/SMA wiring remain pending. Defaults stay closed/unadopted. The AW demand remains proposed as its own document status; it is not a claim that these providers do not exist.
 
+[Equipment observation ingest v1](published/http-api/equipment-observation-v1/README.md) describes scoped metric discovery and independent latest/history writes, including synthetic vectors and the private profile format. Source delivery does not establish SMA product integration or field adoption.
+
+[Equipment observation and energy ingest v2](published/http-api/equipment-observation-v2/README.md) describes the r10 source-independent multi-region bundle and independent meter samples. The v1 document remains a historical contract; only previously stored identical v1 events are eligible for replay.
+
 ## Generic task workflow candidate
 
 [Generic task workflow v1](published/http-api/generic-task-workflow-v1/README.md) contains the registered Plan/Performance source contract and synthetic A/B examples for ARCH-TASK-001 r1. The four historical performance operations in business integration v1 retire with this candidate; equipment and monitor operations remain. Deployment, verification and Owner acceptance are separate.

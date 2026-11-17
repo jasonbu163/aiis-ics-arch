@@ -67,7 +67,17 @@ export async function testBackendOpenApi(
   profile: BackendConnectionProfile,
 ): Promise<BackendOpenApiResult> {
   await requireExternalIo();
-  const baseUrl = formatBackendBaseUrl(profile);
+  return requestBackendOpenApi(formatBackendBaseUrl(profile), false);
+}
+
+/** The connection page probes a draft without following redirects. */
+export async function testBackendDraftOpenApi(profile: BackendConnectionProfile): Promise<BackendOpenApiResult> {
+  const baseUrl = formatBackendOpenApiBaseUrl(profile);
+  await requireExternalIo();
+  return requestBackendOpenApi(baseUrl, true);
+}
+
+async function requestBackendOpenApi(baseUrl: string, rejectRedirect: boolean): Promise<BackendOpenApiResult> {
   const controller = new AbortController();
   const timeoutId = globalThis.setTimeout(() => controller.abort(), OPENAPI_REQUEST_TIMEOUT_MS);
 
@@ -75,6 +85,7 @@ export async function testBackendOpenApi(
     const response = await fetch(`${baseUrl}/openapi.json`, {
       headers: { accept: "application/json" },
       signal: controller.signal,
+      ...(rejectRedirect ? { redirect: "error" as const } : {}),
     });
     if (!response.ok) throw new Error(`OPENAPI_REQUEST_FAILED:${response.status}`);
 
@@ -101,6 +112,28 @@ export async function testBackendOpenApi(
   } finally {
     globalThis.clearTimeout(timeoutId);
   }
+}
+
+/** The test address accepts a single host and cannot redirect to another target. */
+export function formatBackendOpenApiBaseUrl(profile: BackendConnectionProfile): string {
+  if (profile.scheme !== "http" && profile.scheme !== "https") throw new Error("BACKEND_ADDRESS_INVALID");
+  const host = typeof profile.host === "string" ? profile.host.trim() : "";
+  if (!host) throw new Error("BACKEND_HOST_REQUIRED");
+  if (/[\s/@\\?#%]/u.test(host)) throw new Error("BACKEND_ADDRESS_INVALID");
+  if (host.includes(":")) {
+    if (!/^\[[0-9a-f:.]+\]$/i.test(host)) throw new Error("BACKEND_ADDRESS_INVALID");
+  } else if (!/^[\p{L}\p{N}.-]+$/u.test(host)) {
+    throw new Error("BACKEND_ADDRESS_INVALID");
+  }
+  const baseUrl = formatBackendBaseUrl({ ...profile, host });
+  const hostname = new URL(baseUrl).hostname;
+  if (!hostname.startsWith("[")) {
+    const hostLabels = hostname.replace(/\.$/, "").split(".");
+    if (hostname.length > 253 || hostLabels.some(label => !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/i.test(label))) {
+      throw new Error("BACKEND_ADDRESS_INVALID");
+    }
+  }
+  return baseUrl;
 }
 
 export function formatBackendBaseUrl(profile: BackendConnectionProfile): string {

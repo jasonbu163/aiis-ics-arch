@@ -47,6 +47,27 @@ pub fn revision(c: &Connection, id: &str) -> Result<Workspace, String> {
     validate_references(c, &workspace)?;
     Ok(workspace)
 }
+pub fn revision_snapshot(c: &Connection, id: &str) -> Result<super::RevisionSnapshot, String> {
+    let (payload, sha, seq, created): (Vec<u8>, String, i64, String) = c
+        .query_row(
+            "SELECT payload,sha256,saved_seq,created_utc FROM configuration_revisions WHERE revision_id=?1",
+            [id],
+            |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?)),
+        )
+        .map_err(|_| "revision_not_found")?;
+    let workspace = decode(payload.clone(), sha.clone())?;
+    validate_references(c, &workspace)?;
+    Ok(super::RevisionSnapshot {
+        revision: super::RevisionInfo {
+            revision_id: id.into(),
+            saved_seq: seq.to_string(),
+            sha256: sha,
+            created_utc: created,
+        },
+        payload,
+        workspace,
+    })
+}
 pub fn selections(c: &Connection) -> Result<Vec<Selection>, String> {
     let mut q=c.prepare("SELECT instance_id,revision_id,slice_sha256,previous_revision_id,selection_etag FROM instance_selection ORDER BY instance_id LIMIT 9").map_err(|_|"storage_reference")?;
     let rows = q

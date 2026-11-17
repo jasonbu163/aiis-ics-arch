@@ -27,6 +27,8 @@ pub struct App {
     pub load_errors: Mutex<BTreeMap<String, String>>,
     // 仅串行化版本引用/加载提交；stop和S7 IO从不等待此锁。
     pub revision_control: Mutex<()>,
+    // 导出预览只在内存中短期保存；不占用用户版本或改变配置。
+    pub catalog_exports: Mutex<crate::services::catalog_export::CatalogExports>,
 }
 impl App {
     pub fn open(profile: &Path) -> Result<Self, String> {
@@ -60,6 +62,7 @@ impl App {
             })),
             load_errors: Mutex::new(BTreeMap::new()),
             revision_control: Mutex::new(()),
+            catalog_exports: Mutex::new(Default::default()),
         };
         out.events.put(json!({"event":"runtime_thread_budget","host":host,"fixedThreads":fixed_threads,"fixedIncludes":"main-process host/SQL/logging/resource/control; owners/listeners/reapers/TCP separate","externalWebKitXpcIncluded":false,"threadLimit":64}));
         for selection in out.configuration.store.selections()? {

@@ -115,6 +115,12 @@ pub(crate) fn dispatch(
                 value(engine.import_selected(r)?)
             }
         }
+        "daa_preview_catalog" => value(engine.preview_catalog(parse(request)?)?),
+        "daa_confirm_catalog" => value(engine.confirm_catalog(parse(request)?)?),
+        "daa_cancel_catalog" => {
+            *engine.catalog_preview.lock().unwrap() = None;
+            Ok(json!({}))
+        }
         "daa_preview_offsets" => {
             let r: Offsets = parse(request)?;
             value(engine.offsets_at(r.db_id, r.expected_etag)?)
@@ -210,6 +216,7 @@ pub(crate) fn failure(engine: &LocalEngine, code: String) -> LocalFailure {
         "activation_conflict",
         "revision_conflict",
         "import_preview_conflict",
+        "catalog_preview_conflict",
     ]
     .contains(&code.as_str())
     {
@@ -267,6 +274,27 @@ pub(crate) async fn daa_import_sources(
     request: Value,
 ) -> IpcResult {
     invoke(state, "daa_import_sources", request).await
+}
+#[tauri::command]
+pub(crate) async fn daa_preview_catalog(
+    state: tauri::State<'_, LocalState>,
+    request: Value,
+) -> IpcResult {
+    invoke(state, "daa_preview_catalog", request).await
+}
+#[tauri::command]
+pub(crate) async fn daa_confirm_catalog(
+    state: tauri::State<'_, LocalState>,
+    request: Value,
+) -> IpcResult {
+    invoke(state, "daa_confirm_catalog", request).await
+}
+#[tauri::command]
+pub(crate) async fn daa_cancel_catalog(
+    state: tauri::State<'_, LocalState>,
+    request: Value,
+) -> IpcResult {
+    invoke(state, "daa_cancel_catalog", request).await
 }
 #[tauri::command]
 pub(crate) async fn daa_preview_offsets(

@@ -69,6 +69,10 @@ PLC 事实 v2 定义 DAA 和外部程序的原值上报及按 PLC/DB 范围读�
 
 [业务集成v1](published/http-api/business-integration-v1/README.zh-CN.md)发布八路typed匿名业务入口、闭合schema、样例和摘要向量。[BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/checklist.md)已通过获批隔离A+B验证；Owner终验、真实目标/时间采用及DAA/SMA接线待定，默认仍关闭/未采用。AW需求保留自身proposed状态，不据此声称这些provider不存在。
 
+[设备观察写入 v1](published/http-api/equipment-observation-v1/README.zh-CN.md)说明授权指标发现、独立实时与历史写入，并提供合成向量和私有配置格式；源码交付不代表 SMA 产品联调或现场采用。
+
+[设备观察与能耗写入 v2](published/http-api/equipment-observation-v2/README.zh-CN.md)说明 r10 来源无关的多区域整包及独立表计样本。v1 文档保留历史合同，仅已存的相同 v1 事件可按原规则重放。
+
 ## 通用任务流程候选合同
 
 [通用任务流程 v1](published/http-api/generic-task-workflow-v1/README.zh-CN.md)保存 ARCH-TASK-001 r1 实际注册的计划/实绩源码合同和 A/B 合成样例。业务集成 v1 的四条历史实绩操作随本候选退出，设备和监控操作保留。部署、独立验证和 Human Owner 终验分别进行。

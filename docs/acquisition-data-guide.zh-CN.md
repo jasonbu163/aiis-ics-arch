@@ -1,5 +1,7 @@
 # 采集数据模块原理与使用
 
+[English](acquisition-data-guide.md)
+
 本文介绍 PLC 数据从来源登记、采集、上报到查询的流程，适合 DAA、第三方采集程序及读取原值的程序使用。具体字段和错误码以[采集数据接口合同](../contracts/published/http-api/plc-facts-v2/README.zh-CN.md)及[来源管理 API 合同](../contracts/published/http-api/plc-facts-v2/openapi-acquisition-sources-r4.json)为准。
 
 以下说明包含 ARCH-ACQ-005 r1 的来源删除和独立历史查询；实际环境须采用对应源码，既有环境仍按原版本运行。 [目标迁移与恢复](../backend/scripts/plc_facts_maintenance/README.zh-CN.md#r3-单表迁移与恢复)
@@ -191,6 +193,8 @@ DAA 从已生效的本机采集配置生成样本，保存本机记录并按所�
 ```
 
 后端按实际 JSON 正文字节判断同一份样本。重试时保留原正文，字段顺序、空格、可选字段的省略与 `null` 都沿用第一次发送的内容。在来源仍被准入且样本未过期时，相同 ID 使用不同正文或不同样本占用同一流序号会返回 `409`；旧身份已被接管可返回 `403`，已到有效截止可返回 `410`。 [回执与错误码](../contracts/published/http-api/plc-facts-v2/README.zh-CN.md#提交与补传)
+
+<a id="7-从采集到上报核对一份样本"></a>
 
 ## 7. 核对一份样本
 

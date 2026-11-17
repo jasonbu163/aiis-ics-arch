@@ -17,6 +17,7 @@ function loadConsoleHelper(name) {
 }
 const time = loadConsoleHelper('time');
 const sampleDetails = loadConsoleHelper('sampleDetails');
+const tableWidths = loadConsoleHelper('tableWidths');
 class LocalCommandError extends Error {
     constructor(code, currentEtag = null) { super(code); this.currentEtag = currentEtag; }
 }
@@ -26,11 +27,14 @@ function initial() {
     return {etag:'e1',issues:[],active:null,loaded:null,used:null,previous:null,phase:'loaded',draft:{schemaVersion:1,plcs:[{id:'A',name:'A'},{id:'B',name:'B'}],dbs:[{id:'DB71',plcId:'A',number:71,name:'Alpha'},{id:'DB88',plcId:'A',number:88,name:'Beta'},{id:'B-DB71',plcId:'B',number:71,name:'Other'}],groups:[{id:'fast',plcId:'A',name:'Fast_500',intervalMs:500,enabled:true},{id:'slow',plcId:'A',name:'Slow_1000',intervalMs:1000,enabled:true}],points,sources:[],storage:{}}};
 }
 async function fixture(t) {
-    const server={view:initial(),calls:[],previews:[],failSave:null,operations:[],diagnose:null,testConnection:null,readFacts:null};
+    const server={view:initial(),calls:[],previews:[],failSave:null,failConfirm:null,failReload:null,operations:[],diagnose:null,testConnection:null,readFacts:null};
     const service={bootstrap:{localStorage:true,origin:'fixture'},LocalCommandError,
         async localCall(command,request) {
             server.calls.push({command,request:clone(request??null)});
-            if(command==='daa_get_configuration') return clone(server.view);
+            if(command==='daa_get_configuration') {
+                if(server.failReload) { const error=server.failReload;server.failReload=null;throw error; }
+                return clone(server.view);
+            }
             if(command==='daa_get_local_snapshot') return { operations: clone(server.operations) };
             if(command==='daa_diagnose_point' && server.diagnose) return server.diagnose();
             if(command==='daa_test_connection' && server.testConnection) return server.testConnection();
@@ -47,8 +51,15 @@ async function fixture(t) {
             return {canConfirm:true,rows:[],readiness:[],previewToken:'owned-token'};
         },
         async confirmPointNames(request) {
+            if(server.failConfirm) { const error=server.failConfirm;server.failConfirm=null;throw error; }
             assert.equal(request.expectedEtag,server.view.etag);
-            Object.assign(server.view.draft.points.find(p=>p.id===request.pointIds[0]),clone(request.patch));
+            const {displayNames,...patch}=clone(request.patch);
+            Object.assign(server.view.draft.points.find(p=>p.id===request.pointIds[0]),patch);
+            if(displayNames) {
+                const names=server.view.draft.pointDisplayNames??={};
+                if(displayNames['zh-CN']||displayNames['en-US']) names[request.pointIds[0]]=displayNames;
+                else delete names[request.pointIds[0]];
+            }
             server.view.etag='e'+(Number(server.view.etag.slice(1))+1);
             return clone(server.view);
         }};
@@ -89,6 +100,7 @@ function mountLocalScript(t, fixture, path = 'app/plc/views/points/index.vue') {
         if(id.endsWith('/composables/useLocalAcquisitionConsole')) return fixture.ownerModule;
         if(id.endsWith('/console/sampleDetails')) return sampleDetails;
         if(id.endsWith('/console/time')) return time;
+        if(id.endsWith('/console/tableWidths')) return tableWidths;
         return {default:{}};
     },module,module.exports);
     const node=type=>({type,children:[],parent:null});
@@ -120,6 +132,65 @@ test('batch grouping uses checked IDs across filters/pages and excludes another 
     for(const p of local.draft.points) assert.equal(p.groupId,['p0','p2'].includes(p.id)?'slow':'fast',p.id);
     local.bulk(null,false);
     for(const p of local.draft.points) assert.equal(p.enabled,!['p0','p2'].includes(p.id),p.id);
+});
+test('point names are edited independently and an absent address stays absent',async t=>{
+    const f=await fixture(t), {local,server}=f, script=mountLocalScript(t,f);
+    server.view.draft.points[0].address=null;
+    local.draft.points[0].address=null;
+    await script.editLocalPoint(local.draft.points[0]);
+    script.pointEditorNames.value['zh-CN']=' 中文 ';
+    script.pointEditorNames.value['en-US']=' English ';
+    await new Promise(resolve=>setTimeout(resolve,220));
+    const preview=server.previews.at(-1);
+    assert.equal(preview.patch.address,null);
+    assert.deepEqual(preview.patch.displayNames,{'zh-CN':' 中文 ','en-US':' English '});
+    assert.equal(server.view.draft.pointDisplayNames,undefined);
+    assert.equal(await local.confirmNames(),true);
+    assert.equal(server.view.draft.points[0].address,null);
+    assert.equal(server.view.draft.points[0].comment,'');
+    assert.deepEqual(server.view.draft.pointDisplayNames.p0,{'zh-CN':' 中文 ','en-US':' English '});
+    assert.equal('displayNames' in server.view.draft.points[0],false);
+});
+test('overlong UTF-8 names cannot reuse a valid preview and cancellation does not save',async t=>{
+    const f=await fixture(t), {local,server}=f, script=mountLocalScript(t,f);
+    await script.editLocalPoint(local.draft.points[0]);
+    await new Promise(resolve=>setTimeout(resolve,220));
+    assert.equal(local.namePreview.canConfirm,true);
+    script.pointEditorNames.value['zh-CN']='中'.repeat(86);
+    assert.equal(script.displayNamesValid.value,false);
+    assert.equal(local.namePreview,null);
+    script.cancelLocalPoint();
+    assert.equal(server.view.etag,'e1');
+    assert.equal(server.view.draft.pointDisplayNames,undefined);
+});
+test('an unknown point commit requires reloading before further configuration operations',async t=>{
+    const f=await fixture(t), {local,server}=f, script=mountLocalScript(t,f);
+    await script.editLocalPoint(local.draft.points[0]);
+    script.pointEditorNames.value['en-US']='ready';
+    await new Promise(resolve=>setTimeout(resolve,220));
+    server.failConfirm=new LocalCommandError('storage_pending');
+    assert.equal(await local.confirmNames(),false);
+    assert.equal(local.pointEditUnknown,true);
+    script.cancelLocalPoint();
+    assert.equal(await local.preparePointEdit('p0'),null);
+    const calls=server.calls.length, previews=server.previews.length;
+    local.selectedNameIds=['p0'];local.selectedDb='DB71';
+    await local.previewNames();
+    assert.equal(await local.confirmNames(),false);
+    await local.save();await local.activate();await local.importSources(true);await local.infer(true);
+    assert.equal(server.previews.length,previews);
+    assert.equal(server.calls.length,calls);
+    await local.loadHistory(); // 后续无关的读取错误不能覆盖未知提交状态。
+    assert.equal(local.pointEditUnknown,true);
+    server.failReload=new LocalCommandError('local_operation_failed');
+    await local.reload();
+    assert.equal(local.pointEditUnknown,true);
+    const afterFailedReload=server.calls.length;
+    await local.save();
+    assert.equal(server.calls.length,afterFailedReload);
+    await local.reload();
+    assert.equal(local.pointEditUnknown,false);
+    assert.ok(await local.preparePointEdit('p0'));
 });
 test('empty selection, invalid group, busy state and open editor cannot mutate groups',async t=>{
     const {local}=await fixture(t);const before=clone(local.draft);

@@ -138,6 +138,7 @@ h1,h2,h3,p { margin-top:0; }
 .daa-reporting-stat__label { display:flex; flex-wrap:wrap; align-items:center; gap:6px; color:var(--agent-text-muted); }
 .daa-reporting-stat strong { font-size:24px; line-height:1.2; font-variant-numeric:tabular-nums; }
 .daa-reporting-stat:last-child .daa-help-text { left:auto; right:0; }
+.daa-startup { position:relative; z-index:1; overflow:visible; }
 .daa-startup-heading { display:flex; align-items:center; gap:10px; }
 .daa-startup-title,.daa-startup-collapse { border:0; background:transparent; color:inherit; cursor:pointer; }
 .daa-startup-title { padding:0; font:inherit; font-weight:inherit; }

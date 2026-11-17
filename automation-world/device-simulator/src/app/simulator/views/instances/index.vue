@@ -4,6 +4,7 @@
     <ConfigRevisionBar />
     <ConsoleCard title-key="simulator.instances">
       <template #actions>
+        <ConsoleActionButton label-key="simulator.catalog.open" data-testid="catalog-export-open" :disabled="local.busy" @click="catalogOpen=true" />
         <ConsoleActionButton label-key="simulator.createInstance" data-testid="instance-add" :disabled="local.busy||!local.draft||local.draft.instances.length>=8" @click="create" />
       </template>
       <el-empty :image-size="64" v-if="!local.draft?.instances.length" :description="t('simulator.emptyInstances')" />
@@ -68,6 +69,7 @@
     </el-dialog>
     <ApplyPreviewDialog :preview="candidate" :busy="local.busy" @cancel="cancelApply" @confirm="apply" @retention="previewApply(revision, $event)" />
     <RevisionOperationDialog :preview="deletePreview" :busy="local.busy" :blocked="blocked" :unknown="local.unknown" :instances="local.draft?.instances" @cancel="cancelDelete" @confirm="deleteRevision" />
+    <CatalogExportDialog v-model="catalogOpen" :revisions="local.configuration?.revisions || []" :offset="local.revisionOffset" :total="local.configuration?.revisionTotal || 0" @page="local.pageRevisions" />
   </section>
 </template>
 <script setup lang="ts">
@@ -85,8 +87,10 @@ import ConfigRevisionBar from '../../../../components/console/ConfigRevisionBar.
 import InstanceEditor from '../../components/InstanceEditor.vue';
 import ApplyPreviewDialog from '../../components/ApplyPreviewDialog.vue';
 import RevisionOperationDialog from '../../components/RevisionOperationDialog.vue';
+import CatalogExportDialog from '../../components/CatalogExportDialog.vue';
 const local = inject(simulatorKey)!, { t } = useI18n(), editorOpen = ref(false), editor = ref<ipc.Instance | null>(null), deleting = ref<ipc.Instance | null>(null), candidate = ref<ipc.Preview | null>(null);
 const revision = ref(''), deletePreview = ref<ipc.Preview | null>(null);
+const catalogOpen = ref(false);
 const checked = ref<ipc.Revision[]>([]);
 let disposed = false;
 onMounted(() => { void local.pageRevisions(local.revisionOffset); });

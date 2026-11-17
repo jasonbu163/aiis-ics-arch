@@ -13,5 +13,6 @@ test-automation= ["ds-runtime/test-automation"]
 tauri= { version = "=2.11.3", features = [] }
 serde= {version="=1.0.228",features= ["derive"] }
 ds-runtime= {version="=0.1.0",path="../runtime"}
+tauri-plugin-dialog = { version = "=2.7.2", default-features = false }
 [build-dependencies]
 tauri-build= { version = "=2.6.3", features = [] }

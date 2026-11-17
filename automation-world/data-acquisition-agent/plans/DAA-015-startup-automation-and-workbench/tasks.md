@@ -5,11 +5,11 @@ Owner Role: Development
 Allowed Writers: Development, Human Owner
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
-Handoff: QA2 的 F-003/F-004/F-005 已按 r1 返工；以第 7 节新候选与自检交 fresh-context Verification 重新核验
+Handoff: QA3 的 F-006 已按 r1 返工；以第 8 节新候选与自检交 fresh-context Verification 重新核验
 
 # DAA-015 r1 Development 交接
 
-第 1–5 节保留 QA1 之前的候选和自检历史，第 6 节保留 QA2 之前的返工交接；当前有效的 Development 返工交接与文件摘要见第 7 节。QA1、QA2 已记录 qa_failed，新的独立验证和 Human Owner 最终验收待进行。
+第 1–5 节保留 QA1 之前的候选和自检历史，第 6、7 节保留 QA2、QA3 之前的返工交接；当前有效的 Development 返工交接与文件摘要见第 8 节。QA1、QA2、QA3 已记录 qa_failed，新的独立验证和 Human Owner 最终验收待进行。
 
 ## 1. 范围与起点
 
@@ -157,4 +157,48 @@ QA2 在 [checklist.md](checklist.md) 记录 F-003、F-004、F-005 并退回 Deve
 | `tests/facts-delivery.test.mjs` | `3eb20e2453287caa6c445fccff280eadfa4b19e8162cdd9d60cae28a567cf6fb` | `70dc7988fb023899acdb4bc8c3744253a096172c3bdfefa94ec258ff49295da9` |
 
 本轮未读取或操作现有 `.local/dev`、dev API/数据库、真实配置、样本或 PLC，未启动 Docker/MySQL/系统原生窗口。`/private/tmp/daa015-dev.DgUHuY` 为本任务所有，原始与多轮候选快照、补丁、测试及构建产物暂留给新一轮 QA；完成核验且无继续依赖后由协调者核对进程和归属后回收。QA1、QA2 独立证据目录未修改或清理。Mac/Windows 原生窗口、真实设备/后端、部署及 Human Owner 最终验收均不在本次证据之内。
+
+## 8. QA3 返工及新的 developer_handoff
+
+QA3 在 [checklist.md](checklist.md) 记录 F-006 并退回 Development。本节为已批准 r1 内返工，保留前几轮历史，不修改规格或 QA 文件。批准 spec SHA-256 `f571dd51dbed26a3d59f70e78253dc6e47bb89a61453e8c3ed2a97773910340d`；正式交付树 `/Users/jason/Desktop/DreamCode/aiis-ics-arch` 的 HEAD 仍为 `fd999224a8756feda314a33148304b4bf3461876`。返工前检查 QA3 交接的 34 个候选文件摘要全部匹配，`lsof -nP -iTCP:15191 -sTCP:LISTEN` 无监听；正式 DAA 保持停止。
+
+自动连接的来源现在独立于自动采集 pending 状态保留。同端点激活保留当前连接，但不会把自动连接变成人工连接；后续更换端点或禁用时撤销旧自动连接意图，手动暂停采集保留现连且不丢失该来源。显式人工连接仍按人工意图保留。若自动采集已开始，而用户又明确手动连接，变更端点后保留人工连接意图，但不把旧自动采集带到新端点。
+
+**Development 自检（非独立 QA）**，命令均在 DAA 目录执行。`TMPDIR=/private/tmp/daa015-dev.DgUHuY/daa-008-r2-a-fixtures` 为任务专属合成 profile；PLC 与上报传输使用内存替身：
+
+| 命令或检查 | 结果 |
+| --- | --- |
+| `TMPDIR=/private/tmp/daa015-dev.DgUHuY/daa-008-r2-a-fixtures cargo test --manifest-path src-tauri/Cargo.toml --offline --locked --lib startup_connection_origin_survives_same_endpoint_activation_and_pause -- --test-threads=1` | exit 0，1/1。经 `local_recovery::open` 和两次真实配置保存/激活，覆盖低容量 pending、已连接后手动暂停、明确手动连接、禁用后重启用、已经自动采集，以及自动采集中明确手动连接后更换端点。 |
+| 同一 Cargo 命令过滤器换为 `startup_` | exit 0，10/10，包含四开关组合、QA1 离线暂停、QA2 单次变更与人工连接、旧 profile 及自动上报身份、目标和回执保护。 |
+| 同一 Cargo 命令分别过滤 `runtime2_and_3_keep_local_collection_and_refuse_v2_delivery` 与 `dispatch_rechecks_` | 均 exit 0，分别 1/1、2/2；兼容本地采集边界及发送前目标/来源检查通过。 |
+| `node --test tests/startup-settings.test.mjs tests/facts-delivery.test.mjs`；`node /private/tmp/daa015-qa2.TJ14Wm/ui-probe.cjs` | 均 exit 0，前者 12/12；后者复验中英文两页面折叠、上报快照失败和恢复。Vue、IPC 边界均为合成替身，不是原生窗口。 |
+| `cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check`；`cargo check --manifest-path src-tauri/Cargo.toml --offline --locked --features rust-snap7-driver` | 均 exit 0。生产 S7 feature 仅编译未连接设备；测试构建仍有原有 `empty_for_test` 未使用告警。 |
+| 触达文件 `git diff --check`、两份补丁 `git apply --check --reverse`、34 文件 SHA 比较 | 均 exit 0；正式树与新清单无不匹配。 |
+
+**精确候选**：原始起点、QA1–QA3 证据及补丁均保留。当前 34 文件清单 `/private/tmp/daa015-dev.DgUHuY/daa015-qa4-manifest.json` 的 SHA-256 为 `52001c772e90de2c010807b3cd81e564a6ef221e69b5def9200fc9f194650648`。起点→当前 `daa015-qa4-source.patch` SHA-256 `cef29a63dbdacd12b3c2c236d5b197dfe26d93f65340caf4e1e0493d076c1063`；QA3→当前 2 文件增量 `daa015-qa3-rework.patch` SHA-256 `e38f303fec5b6561e580252497798c14f538af213d01562ecb191629841ebddf`。两份补丁均反向核对正式树成功，任务记录及协调者维护的 PLAN 索引不列入源码清单。
+
+| 返工文件（相对 DAA 根） | QA3 SHA-256 | 当前候选 SHA-256 |
+| --- | --- | --- |
+| `src-tauri/src/infrastructure/local_store/tests.rs` | `0f8a2dabebd16366d3ecf81eaafbe50e1d92d3b97426795c6eb52db436f3fc47` | `0e145502b08d7f26a28f3e1432780e8a21dddae67afa9758ed76287cd5e5065e` |
+| `src-tauri/src/services/local_supervisor.rs` | `9970d8693ee90275ba6912e18eba17cd05b1f7425cbe5860e91c93db377fde8b` | `4527b9c0ce77315d06c9ba299ed01c1bf7ab583e031c11007a51a1a7c8f49395` |
+
+本轮未读取或操作现有 `.local/dev`、dev API/数据库、真实配置、样本或 PLC，未启动 Docker、MySQL 或系统原生窗口。`/private/tmp/daa015-dev.DgUHuY` 的任务专属起点、多轮候选、补丁与夹具暂留给新一轮 QA；完成核验且无继续依赖后由协调者检查归属与占用再回收。QA1–QA3 独立证据未修改或清理。Mac/Windows 原生窗口、真实设备/后端、部署及 Human Owner 最终验收均不在本次证据之内。
+
+## 9. 验收后证据归档
+
+按 Human Owner 清理本轮临时测试资料的要求，已将 QA4 当时候选的清单及起点差异精确归档，以便临时目录回收后仍可核对。归档仅反映 QA4 当时候选，不包含其后按 DIRECT 完成的界面调整，也不改变本任务原有交接及验收状态。
+
+- [QA4 候选清单](evidence/daa015-qa4-manifest.json)：SHA-256 `52001c772e90de2c010807b3cd81e564a6ef221e69b5def9200fc9f194650648`。
+- [QA4 候选源码差异](evidence/daa015-qa4-source.patch)：SHA-256 `cef29a63dbdacd12b3c2c236d5b197dfe26d93f65340caf4e1e0493d076c1063`。
+
+源文件和归档文件的摘要均已核对一致；对身份标识、地址及常见凭据格式进行检查，未发现实机身份或密钥，补丁中的 UUID 是源码内部固定标识，测试地址与接入身份为合成值。临时资源的实际回收由协调者按归属及占用状态处理。
+
+## 10. 验收后手册按钮文案同步
+
+按 Human Owner 指示，在 DAA-016 文档实施与独立复核后，将两份 DAA 手册中的上报按钮名称与当前界面同步：中文为「启动上报」，英文为 **Start reporting**。已核对共用上报卡使用 `common.delivery.startOrResume`，且中英文 locale 的对应值一致。
+
+自检：两份手册各仅作一次精确替换，旧按钮名称均已移除；将替换逆转后分别与修改前 SHA-256 一致，两份手册各 9 个 Markdown 链接完全保留，包括 DAA-016 已更新的导航链接。`git diff --check` 对两份手册及本记录退出 0；未修改 DAA-016 任务文件或源码。
+
+- [中文手册](../../USER_GUIDE.zh-CN.md) SHA-256：`ec4cd783a546486c68be598770c9ba99391d6cb90682be3c2ebd5af85a63210b`。
+- [英文手册](../../USER_GUIDE.md) SHA-256：`1aa85cf01edfee3cbd43d7ce70df4e27f0476bb537fe80b77c5b21ea97574d09`。
 

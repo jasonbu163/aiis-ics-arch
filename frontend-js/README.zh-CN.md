@@ -223,10 +223,14 @@ runtime。runtime 不挂载源码或 `node_modules`，`/api/v1` 反向代理到 
 
 ## 业务观测来源选择
 
-设备三看板及 monitor 曲线页通过 URL 保存`dataSource=legacy|http`和`equipmentId`。
-默认legacy并说明旧数据未标识业务设备；HTTP必须显式填写获scope批准的业务键。
-非法来源、空设备、空数据、403及故障均不切换来源或使用诊断mock。切换清空前数据，请求代次阻止晚响应覆盖新选择。
-缺测保持缺测/曲线断点，真实0正常显示。
+设备状态四页按设备范围读取最新快照并显示配置的卡片；温度、传动和清洗监控从单独留存的过程样本
+显示配置的曲线；能耗样本独立于任务。管理员配置稳定指标键、名称、卡片和曲线。缺测保持缺测和曲线
+断点，真实的 0 正常显示。当前页面不使用 URL 的 `dataSource=legacy|http` 切换或默认读取 legacy 数据；
+既有历史合同和原能耗统计继续遵循各自已说明的边界。
+
+来源无关的 [v2 机器合同](../contracts/published/http-api/equipment-observation-v2/README.zh-CN.md)
+规定 SMA、第三方及其他程序经授权的 HTTP 上报；它不代表某个 SMA 或 PLC 已完成接入。配置、显示、
+历史留存及访问权限参见 [r10 使用说明](../docs/equipment-status-process-monitoring.zh-CN.md#r10-guide)。
 
 旧卷材实绩来源选择、重量编辑、过程弹窗、分卷、打印与效率页面已退出。通用[计划/实绩流程](../contracts/published/http-api/generic-task-workflow-v1/README.zh-CN.md)按任务绑定版本读取字段，沿用列表路径、上海业务时间及本机列宽和草稿偏好。浏览器/API/数据库运行证明仍为另批验证 gate。
 

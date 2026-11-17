@@ -6,7 +6,9 @@
 
 | 任务 | 状态 | 范围入口 | 后续记录 |
 | --- | --- | --- | --- |
-| DS-002 多协议设备模拟与设备读写调试设计 | `draft` | [r1 spec](DS-002-multi-protocol-simulation-and-device-debugging/spec.md) | 实际PM设计待Human Owner精确批准；后续实施阶段分别批准。tasks.md待精确实施范围获批后由Development创建，checklist.md待真实交接后由fresh-context Verification创建；当前两份文档均未创建。 |
+| DS-004 点位中英文显示名 | `qa_blocked`（r2） | [r2 spec](DS-004-bilingual-point-display-names/spec.md) | [Development 记录](DS-004-bilingual-point-display-names/tasks.md)；[Verification checklist](DS-004-bilingual-point-display-names/checklist.md)；r1 的 QA3 `qa_failed`，r2 的 QA4 `qa_blocked`。 |
+| DS-003 按 PLC 导出点位 JSON | `qa_passed` | [r5 spec](DS-003-plc-json-export/spec.md) | [Development 记录](DS-003-plc-json-export/tasks.md)；[QA1 失败、QA2 通过](DS-003-plc-json-export/checklist.md)；待 Owner 验收。 |
+| DS-002 Modbus TCP 模拟与 S7 兼容 | `draft` | [r2 spec](DS-002-multi-protocol-simulation-and-device-debugging/spec.md) | 待批准 A0 和 A1 实施范围，A0 通过后才进入 A1。实施记录在获批后创建，核验记录在实施交接后创建。设备读写调试列入后续阶段。 |
 | DS-001 策略表格、批量编辑与界面整改 | `owner_accepted` | [r1 spec](DS-001-policy-table-and-usability/spec.md) | Human Owner于2026-10-27最终接受当前版本，见[验收/收尾](DS-001-policy-table-and-usability/spec.md#owner-acceptance-ds001)。[实施/自检记录](DS-001-policy-table-and-usability/tasks.md)及[纯文字手册](../USER_GUIDE.zh-CN.md)保留；独立QA/checklist未执行（本任务例外）。 |
 | 关联aiis-ics-arch::DAA-007 r2启动增量 | `owner_accepted` | [DAA唯一spec](../../data-acquisition-agent/plans/DAA-007-ds-joint-validation-and-time-contract/spec.md) | 关联DAA-007 r2及本次受控阶段B已于2026-10-30验收。DS启动配置增量按DAA记录接受，不倒记为DS旧QA/接受。历史限制保留，阶段C/自动启动/现场另项。 |
 

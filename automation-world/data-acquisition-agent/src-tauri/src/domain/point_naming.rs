@@ -18,6 +18,13 @@ where
 {
     Option::<T>::deserialize(d).map(Some)
 }
+fn non_null<'de, D, T>(d: D) -> Result<Option<T>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+    T: Deserialize<'de>,
+{
+    T::deserialize(d).map(Some)
+}
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(crate) struct PointPatch {
@@ -36,6 +43,12 @@ pub(crate) struct PointPatch {
         skip_serializing_if = "Option::is_none"
     )]
     pub address: Option<Option<Address>>,
+    #[serde(
+        default,
+        deserialize_with = "non_null",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub display_names: Option<PointDisplayNames>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]

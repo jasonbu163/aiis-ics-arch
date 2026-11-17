@@ -173,3 +173,91 @@ R06 / AC09 保留 QA1 的 GET 限制。当前旧 `daa_test_facts_endpoint` IPC �
 - Darwin arm64，Node `v22.19.0`，pnpm `11.11.0`。`node --test tests/facts-delivery.test.mjs tests/sample-details.test.mjs tests/time-and-history-preferences.test.mjs` 退出 0，17/17。真实弹窗 setup 切换两台 PLC 并共同保存各自绑定，覆盖 DB、重复、无效标识和实例变更。真实 composable 和 facade 经模拟 IPC 复验开始及继续都提交两台 PLC 的来源，确认文字包含完整地址、合同、实例、来源、合格历史待传样本及人工核对提醒。
 - `node --input-type=commonjs` 内联核验退出 0。以项目实际 i18n 装配及编译的 Vue 设置模板在内存切换中英文，656 个 `common` 叶键对称。两种语言均渲染“选择要配置的 PLC”及逐台填写说明，确认消息四个参数均完成插值。该轮复跑为源码与合成组件层，正式构建见 Development 原记录。
 - 供 Human Owner 审阅。任务总体仍为 `qa_failed`，F-R5-QA2-001 待处理。Mac 原生完整验证、Windows AC08 及实际 dev 采用各按原门槛处理。本轮未启动原生应用或访问后端、MySQL、Docker、设备和现有 `.local/dev`，无临时产物。
+
+## DAA-010 r8 独立验证（QA1，2026-11-16）
+
+**Verdict：`qa_failed`。** F-R8-QA1-001 是本轮交付的配置示例与已保存自动启动行为不一致。路径解析、单次合成 profile 冷重开和文档链接的独立检查结果如下；它们不覆盖或取消该失败。r5 QA2 的 `qa_failed`、F-R5-QA2-001 及其原证据继续保留。当前发现交回 Development；修正并重新交接后须进行新的 fresh-context Verification，再交 Human Owner 决定最终验收。
+
+### 验证输入与范围
+
+- 命名 Verification 在 fresh context、`contract_only` 下，独立阅读根契约、canonical workflow、相关双语 README/PLAN、完整任务 bundle、正式工作树及差异。按本轮表面使用 `project-governance`、`aiis`、`desktop-tauri`、`rust-runtime`、`code-document-indexer`。本角色只追加本 checklist，不修改其他角色文档或实现。
+- 目标为正式树 HEAD `21cd789277695bbafaa55c24e39261fc7247f9b0` 加未提交内容；HEAD 不能单独标识候选。开始前重算 `spec.md` SHA-256 `dd319580fd81bb119312f495d17bd81d85a78955ece68e26477bbfd792b5d6fb`、`tasks.md` `2c69388944f8cb22d090aa0c2e9f75b1610b2fa786b2588a3e59be176915a0a3`、原 `checklist.md` `1fc97cc24b64ecdbfb015f150e16e75a74b64018968027eb4a486eadebc58d31`，均与精确 handoff 一致。独立重算 handoff 表中 10 个实现/文档文件摘要均匹配；三个 Rust 文件联合 `git diff` SHA-256 `d8901b940f18cbab29437018366c48b029509c8bbb4a9253365c65d9fba58c8e` 一致。按交接划定 r8 归属，不把共享脏树全部差异归给本任务。
+- r8 §6 记录 Human Owner 的精确范围批准及对 §2 限定风险的接受，不是最终验收。r8 §3 将 `.env.example` 列为本轮触达的说明面，§2 要求保留 DAA-015 已保存采集/上报启动开关行为，§5 要求核对数据与使用说明。
+
+### F-R8-QA1-001 配置示例错误描述重开后的自动启动
+
+[`.env.example` 第 17–18 行](../../.env.example#L17)无条件写明启动或重开保持断开、停止，并要求在工作台显式连接和采集。但 [DAA README](../../README.md#start) 正确说明采集和上报默认停止、工作台可为下次启动分别开启；[普通恢复入口](../../src-tauri/src/services/local_recovery.rs)在非验证模式调用 `startup_automation()`，[实现](../../src-tauri/src/services/local_startup.rs)根据已保存的 `auto_collect` 和 `auto_report` 分别请求自动采集与自动上报，仍受各自现有准入条件约束。[DAA-015 QA4](../DAA-015-startup-automation-and-workbench/checklist.md#独立验证-qa42026-11-14asiashanghai)记录了四种开关组合的独立合成验证。
+
+该错误语句已存在于当前 HEAD 的示例文件，并非本轮新增代码回归；但它仍在本轮修改并交付的路径示例中，与 r8 明确保留既有启动开关的使用语义冲突。使用者按示例复用已有 profile 时，不能据此假定重开后一定保持停态。本轮未启动现有 profile 或验证任何实际设备动作。需要 Development 在获批 `.env.example` 范围内使说明与实际默认值及已保存开关一致，并保持中英文说明一致，再提交新精确候选复验。
+
+### r8 验收逐项与独立命令
+
+环境为 macOS 15.7.7 / Darwin 24.6.0 arm64，rustc/cargo 1.89.0，已安装 target 仅 `aarch64-apple-darwin`。QA 使用 `mktemp -d /private/tmp/daa010-r8-qa.XXXXXXXX` 新建的 `/private/tmp/daa010-r8-qa.VJzhCOl6`，UID 501、mode 0700；从正式树已有的忽略构建缓存以 `cp -cR` 克隆到该根的 `target`，不复用 Development 临时根。Cargo 使用 `env -i`、锁定离线依赖、独立 `CARGO_TARGET_DIR` 和 `TMPDIR=<QA根>/daa-008-r2-a-tests`；没有读取实际 `.env` 或 profile。
+
+| 核对 | 独立结果 |
+| --- | --- |
+| 配置来源、基准与优先级 | DAA 目录执行 `cargo test --manifest-path src-tauri/Cargo.toml --locked --offline --lib --no-default-features --features rust-snap7-driver startup_env_ -- --test-threads=1`，退出 0，5/5；其中两个不同 cwd 的子进程各 1/1。覆盖默认文件缺失、默认/显式选中文件中的相对值、进程相对覆盖、空白回退和默认值、绝对值、重复键、无效文件、上级路径、占位符及所测 symlink。检查 `local_bootstrap::load` 将解析结果传给普通启动；不存在的新目录在解析阶段未被拒绝。测试构建有既有 `empty_for_test` 未使用告警。 |
+| 既有合成 profile 身份 | 同一环境下使用完整过滤器 `infrastructure::local_store::profile_contract_tests::profile_contract_relative_and_absolute_configuration_reopen_same_profile -- --exact --test-threads=1`，退出 0，1/1。这是本轮唯一的合成 profile/SQLite 检查：对同一预建目录，相对值创建并保存合成配置/样本，再用绝对值冷重开，核对配置正文、非空样本正文及摘要、实例和封存凭据；测试自行删除其合成 profile 与环境文件。不证明真实 profile、排队/回执全矩阵或设备链路。 |
+| 构建、格式、链接 | `cargo check --manifest-path src-tauri/Cargo.toml --locked --offline --no-default-features --features rust-snap7-driver --bin aiis-data-acquisition-agent` 退出 0；为调用实际 `prepare_runtime` 的隔离探针另运行相同锁定/feature 条件的 `cargo build ... --lib`，退出 0，均未启动应用。`rustfmt --edition 2021 --check --config skip_children=true` 对三份交付 Rust 文件退出 0；交付路径限定的 `git diff --check` 退出 0。独立 Python 扫描 AW/DAA 的六份双语 Markdown：70 个本地链接、14 个 Markdown 标题或显式锚点，0 问题，退出 0；未请求外部网页。 |
+| 文档及上层范围 | 双语 README/手册和示例说明相对路径基准、优先级、Mac 新目录预建、既有目录保全及 Windows 待验；AW 双语 diff 仅更正 DAA 路径表述，SMA 表述未改。但示例另有 F-R8-QA1-001 的错误启动陈述，因此本项失败。 |
+| 符号链接边界 | 实际源码路径与独立探针结果见下；所测相对链接最终在原存储准入中拒绝且未创建文件。Windows 专用不完整路径断言由 `cfg(windows)` 包围，本机未编译或执行该分支。 |
+
+上述 Cargo 命令的共同环境为 `env -i PATH="$PATH" CARGO_HOME=/Users/jason/.cargo RUSTUP_HOME=/Users/jason/.rustup TMPDIR=/private/tmp/daa010-r8-qa.VJzhCOl6/daa-008-r2-a-tests CARGO_TARGET_DIR=/private/tmp/daa010-r8-qa.VJzhCOl6/target TZ=Asia/Shanghai`。配置测试日志 SHA-256 `df7a9a74a43d47fac81cb78006575ae96274ce137d58e933e41ce14b491edfe2`，profile 测试日志 `07e592a0bb4582494bdf37737e2ebd45dd7d57d0d22e55aaad1006ed06688c8f`，Cargo check 日志 `484a670d162eca7bafb7770726a1372c85bc78dc55343342175b718cf5ccdf5b`。shell 初始化曾输出 `/bin/ps: Operation not permitted`；上述命令及实际测试均正常结束，不能据此声称进程枚举能力完整。
+
+**末尾 symlink 的分层验证。** QA 自有空目录中建立指向同一自有空目标的 `alias`。用从正式候选重新构建的库链接一个只调用公开 `prepare_runtime(Vec::new())` 的临时探针：文件值 `alias` 与 `alias/./child` 分别返回 `profile_symlink:DAA_PROFILE_DIR`，文件值 `alias/`、`alias/.` 及进程值 `alias/.` 却返回 `Ok(())`。这是配置层 `Path::ancestors()` 对末尾斜杠/点的观察，不应写成配置层已拒绝。对同一合成路径，独立调用实际 Cargo 测试二进制的 `profile_contract_child`（`DAA_008_R2_CHILD=init`，`DAA_008_R2_PROFILE=<QA合成alias>/.`，`--exact ...::profile_contract_child --nocapture`），实际 `Stores::open` 返回 `time_profile_unsupported:profile_symlink`；子测试因 `unwrap` 该预期拒绝而退出 101，外层断言错误及目标目录仍为空后退出 0。子日志 SHA-256 `bc6424725e927ffe0f6ffb6f93ddb337340cd338aba5c068a4c391ffc549cd57`。源码路径为 `LocalEngine::open → Stores::open → admit → canonical`，拒绝先于 profile 锁、SQLite 和日志创建；本次探针分两个进程调用配置入口和存储工厂，没有启动 GUI。旧 HEAD 的绝对 `alias/.` 在配置层同样返回 `Ok`；无本轮业务写入绕过的证据，也不将此配置层缺口称作已修复。
+
+### 既有证据的候选关联与限制
+
+- 独立阅读 DAA-014 人工手测记录：6 条待发送及 1 条未知恢复后共 7 条确认，随后累计 31 条包含这 7 条；仅原未知和一条新样本按 `sampleId` 抽查回执及 Web 值/质量。它是 Owner 手测转交，不是本轮 QA 或 31 条逐条对账。将两份现行手册仅在内存逆向本轮配置段后，重算英文 `7cc06f6f74d57b6afd07aac034b0b3cded75e7daecbf3ef307f4780501528ba9`、中文 `bbf783fd15f213af53d49ce4f71546ca99fcac905e41d03240f3ccccdd2f183e`，与 DAA-014 记录一致；这只建立文档关联。
+- DAA-010 r5 的 17 条合成样本是较早候选的 Owner 操作及 Development 对账；QA2 是独立但不同候选的记录。r5 QA1 rework 的 `profile_contract.rs` SHA 为 `5a1d344176e235d9bafb83294473e423dd971fcafa0c607fd12b72fccaacf8a0`，当前为 `4d3f56e16ba0deb522b7842d817d0afdc7a600b20d8a59d939479fd163c520d5`，不能宣称旧路径/故障矩阵对当前候选逐字节复验。DAA-012 的预建 profile 初始化与冷重开按其原候选和实际范围引用；本轮的合成重开结果单独见上。
+- 独立重算 DAA-015 QA4 归档清单 SHA-256 `52001c772e90de2c010807b3cd81e564a6ef221e69b5def9200fc9f194650648`，34 项中当前 28 项相同、6 项不同、0 缺失；不同项为四份 DAA README/手册、`StartupSettings.vue`、`app.css`。清单不含本轮配置解析文件，故不能将 QA4 整体称为 r8 独立验证。DAA-015 的 Owner 自动采集/上报反馈仍是原记录中的自述，不补写目标、样本或回执。
+- F-R5-QA2-001 的首次自动创建目录竞态**未修复**。本轮 Mac 受控前提是使用者先在自己控制且可写的父目录预建空 profile，确认实际所选目录，并在首次启动期间不移动或替换父目录及 profile；这只绕开原发现的特定创建窗口，不证明其他替换安全，也不是程序强制检查。已有兼容 profile 保留原路径和数据；本次没有检查真实目录。
+- 未重跑既有 dev 或 17 条隔离联调，也未运行全套测试、DAA/DS GUI、后端、MySQL、Docker 或设备；未操作现有 `.local/dev`、真实配置、历史及数据库。Windows 10/11 原生路径/锁/重开/补传/热 journal 和界面仍按 [记录单](../../WINDOWS_NATIVE_VALIDATION.zh-CN.md)后续实测；安装版 `.env`、实际采用、现场/生产和完整阶段 C 不在本轮结论内。
+
+### 交接与资源
+
+将 F-R8-QA1-001 的原文位置、已保存开关证据和所需说明修正交 Development；重新 handoff 后由新的 fresh-context Verification 审核精确候选。本 `qa_failed` 供 Human Owner 知悉，不能进入最终验收或推定 r5 已通过。
+
+QA 专属根 `/private/tmp/daa010-r8-qa.VJzhCOl6` 由本次 Verification 创建，含克隆 Cargo 构建缓存、定向测试日志、仅用合成路径的配置/链接探针及空目标；无本轮常驻服务，`lsof -nP +D` 对该根退出 1 且无匹配输出。上述命令、断言和必要摘要已持久记录，本结论不以临时文件为唯一证据。按协调者指示本角色不回收该根；由协调者在后续返工/验收及证据依赖结束后核对归属和占用并决定回收。未创建分支或 worktree。
+
+追加后核对：本角色首次用标题分割历史前缀时多计了新增的分隔换行，比较脚本退出 1；改为按 `git show HEAD:<checklist>` 的原始长度比较，退出 0，原 39467 字节完整保留，SHA-256 仍为 `1fc97cc24b64ecdbfb015f150e16e75a74b64018968027eb4a486eadebc58d31`。交付 10 文件及 `spec.md` / `tasks.md` 摘要与 handoff 仍一致；本 checklist 的 `git diff --check` 退出 0。
+
+## DAA-010 r8 独立验证（QA2，2026-11-16）
+
+**Verdict：`qa_passed`，限 r8 获批的路径兼容与 Mac 受控范围。** F-R8-QA1-001 的示例启动说明已关闭；上方 r8 QA1 的 `qa_failed` 与 r5 QA2 的 `qa_failed` 和 F-R5-QA2-001 均原样保留。此结论交 Human Owner 决定 r8 最终验收，不代表 r5 各项全部通过或底层竞态已修复。
+
+### 验证输入与候选关联
+
+- 新一轮 fresh-context Verification 按 `contract_only` 独立读取项目契约、canonical workflow、相关 README/PLAN、任务 bundle、r8 批准与原始及返工交接、QA1 和 r5 QA2 记录，复核正式树及差异。按本轮表面使用 `project-governance`、`aiis`、`rust-runtime`、`desktop-tauri`、`code-document-indexer`，只追加本 checklist。环境为 macOS 15.7.7（24G720）/ Darwin 24.6.0 arm64，Rust/Cargo 1.89.0；本机唯一已安装 Rust target 为 `aarch64-apple-darwin`。
+- `git rev-parse HEAD` 为 `21cd789277695bbafaa55c24e39261fc7247f9b0`，候选仍为正式树加未提交改动，HEAD 单独不能固定候选。追加前 `shasum -a 256` 重算：获批 `spec.md` `dd319580fd81bb119312f495d17bd81d85a78955ece68e26477bbfd792b5d6fb`；返工后 `tasks.md` `292a34a9d54f902e57339365fca66d9036c05d49acd3e88e3714ce041c558f5c`；含 QA1 的原 `checklist.md` `5e3e3fc397e1b6285a29c6fbbe4b24a72b0f8aea803a1c1bbba237fc36ea9ae3`；返工后 `.env.example` `fb7f4403ae37726ee2638e6ae4dae2f9dfc971fefd3ff711a4277f1940202b1c`，均与交接相符。
+- 使用 `python3 -B -` 在内存中将示例新六行替换回 QA1 原两行，恢复后的完整文件 SHA-256 `2bd8ea520360242969b267938ac8a6229fd976df12a5bcaa6c01d9491ca0a223`，与 QA1 交付清单一致；仅一个实际 `DAA_PROFILE_DIR=` 赋值。相同方式按新返工标题切分 `tasks.md`，追加前 154832 字节 SHA-256 `2c69388944f8cb22d090aa0c2e9f75b1610b2fa786b2588a3e59be176915a0a3`，与 QA1 所用的 tasks 一致。两项断言均退出 0。
+- 重算原交付清单其余九个文件，均与 [r8 原交接](tasks.md#daa-010-r8-development-self-check-与-developer_handoff2026-11-16)及 QA1 相同：AW 双语 README、DAA 双语 README/手册和三个 Rust 文件。三个 Rust 文件相对 HEAD 的联合 `git diff | shasum -a 256` 为 `d8901b940f18cbab29437018366c48b029509c8bbb4a9253365c65d9fba58c8e`。AW 双语差异仅更新 DAA 路径说明，SMA 规则未改。当前 `profile_contract.rs` 为 `4d3f56e16ba0deb522b7842d817d0afdc7a600b20d8a59d939479fd163c520d5`。
+- 重算 [DAA-015 QA4 归档清单](../DAA-015-startup-automation-and-workbench/evidence/daa015-qa4-manifest.json) SHA-256 `52001c772e90de2c010807b3cd81e564a6ef221e69b5def9200fc9f194650648`，逐项比较当前树为 28 相同、6 不同、0 缺失，与 QA1 观察一致；相同项包含 `local_recovery.rs`、`local_startup.rs`、`local_runtime.rs`、存储 `configuration.rs`、`local_supervisor.rs`、`sample_upload.rs` 和受影响 Rust 测试。六项为四份 DAA 文档、`StartupSettings.vue` 和 `app.css`，它们与 DAA-015 QA4 的差异不能据此被称为 QA1 后均未变化。QA1 没有保存整个共享工作树逐文件摘要，因此本轮只证明上述可比候选及证据的关联，不宣称树上所有其他文件在 QA1 后逐字节未变。共享工作树的其他并行改动未归属本任务。
+
+### 验收对照
+
+| 项目 | 独立核对结果 |
+| --- | --- |
+| F-R8-QA1-001、默认及保存行为 | 通过。新中英文示例均写明采集和上报启动开关默认关闭、自动采集关闭时手动连接采集、启动分别遵循已保存开关和各自既有准入条件；不再无条件宣称重开必停。`StartupSettings::default()` 两项为 `false`，无记录时存储返回该默认；普通 `local_recovery::open` 在非 validation 模式调用 `startup_automation`，后者分别按 `auto_collect` 与 `auto_report` 请求原动作并记录失败。示例与 [英文手册](../../USER_GUIDE.md)及[中文手册](../../USER_GUIDE.zh-CN.md)的分别启用、下次启动及保存不影响当前运行的说明一致，不保证实际动作一定成功。DAA-015 QA4 的四组合是原候选合成验证；其 Owner 自动启动反馈仍按原记录的自述范围使用。 |
+| 路径配置及同一 profile | 采用上方逐文件摘要和日志关联，复用 r8 QA1 在独立根以 `cargo test --manifest-path src-tauri/Cargo.toml --locked --offline --lib --no-default-features --features rust-snap7-driver startup_env_ -- --test-threads=1` 的 5/5，以及完整过滤器 `infrastructure::local_store::profile_contract_tests::profile_contract_relative_and_absolute_configuration_reopen_same_profile -- --exact --test-threads=1` 的 1/1；两者原记录 exit 0。本轮只读重算原日志 SHA 分别为 `df7a9a74a43d47fac81cb78006575ae96274ce137d58e933e41ce14b491edfe2`、`07e592a0bb4582494bdf37737e2ebd45dd7d57d0d22e55aaad1006ed06688c8f`，并读取测试结果。该一次合成重开核对原配置、非空样本及摘要、实例和 sealed 凭据，不扩大到真实 profile、完整回执矩阵或设备链路。 |
+| 格式、编译和文档 | r8 QA1 的定向 `rustfmt`、交付路径 `git diff --check`、六份双语 Markdown 的 70 个本地链接和 14 个锚点检查均 exit 0；`cargo check --manifest-path src-tauri/Cargo.toml --locked --offline --no-default-features --features rust-snap7-driver --bin aiis-data-acquisition-agent` 及探针所需 `cargo build ... --lib` 均 exit 0。只读重算 check 日志 SHA `484a670d162eca7bafb7770726a1372c85bc78dc55343342175b718cf5ccdf5b` 并确认其完成输出。本轮对 r8 交付路径、tasks 和 checklist 运行 `git diff --check`，退出 0；未因只改示例注释而重复 QA1 的测试、编译或链接扫描。 |
+| 符号链接 | 保留 QA1 的实际分层观察：`alias/`、`alias/.` 在所测配置入口可返回成功，不能声称配置层已拒绝；对同一合成链接，实际存储工厂的探针在锁、SQLite、日志创建前拒绝。只读核对原 store 子测试日志 SHA `bc6424725e927ffe0f6ffb6f93ddb337340cd338aba5c068a4c391ffc549cd57` 和 `time_profile_unsupported:profile_symlink`；子测试因 `unwrap` 预期拒绝退出 101，外层断言按 QA1 记录 exit 0。源码正常入口为 `LocalEngine::open → Stores::open → admit → canonical`，`Stores::open` 先 `admit`，再连接双库及初始化日志；QA1 配置入口和存储工厂是两个进程的探针，没有启动完整 GUI 链路。此为所测路径的写前拒绝，不是配置层缺口或所有竞态已修复。 |
+| Mac 前提与历史证据 | Human Owner 在 r8 §6 已明确接受 §2 的限定风险和受控使用条件，尚未作 r8 最终验收。F-R5-QA2-001 的首次自动创建目录替换窗口仍未修复；新 Mac profile 须先在自己控制、可写的父目录预建并确认空根，首次启动期间不移动或替换父目录及 profile。这只绕开该特定窗口，不是程序强制检查，也不证明其他替换安全；已有兼容 profile 原路径与数据保持原状。DAA-014 的 7 和累计 31 条及其中两条抽查、r5 的 17 条和 DAA-012 的旧候选证据继续按 QA1 所列来源与限制引用，不冒充本轮独立联调。 |
+
+### 交接、限制与资源
+
+将本 r8 QA2 结论交 Human Owner 做最终验收；没有新的 Development failure。本轮未重跑 dev/17 条联调或全套测试，未启动 DAA/DS GUI、后端、MySQL、Docker 或设备，未操作现有 `.local/dev`、真实配置、历史和数据库。Windows 10/11 原生路径、锁、重开、补传、热 journal 和界面仍待按[记录单](../../WINDOWS_NATIVE_VALIDATION.zh-CN.md)实测；安装版 `.env`、实际环境采用、现场/生产及完整阶段 C 均不由本次 QA 证明。
+
+本 QA2 为只读复核和本 checklist 追加，未新建临时根、进程、分支或 worktree。QA1 专属 `/private/tmp/daa010-r8-qa.VJzhCOl6` 和 Development 专属 `/private/tmp/daa010-r8-dev.hYP5gNUZ` 在本次只读检查时仍存在；前者包含原测试日志与探针，必要结果和摘要已记入 checklist，均不以临时文件为唯一证据。Verification 不回收，交协调者在确认任务归属、占用及证据依赖后处理。
+
+追加审计：以 QA2 标题前的原始字节复算，QA1 前缀 51422 字节的 SHA-256 仍为 `5e3e3fc397e1b6285a29c6fbbe4b24a72b0f8aea803a1c1bbba237fc36ea9ae3`；QA2 新增的 5 个本地链接文件目标均存在。`git diff --check` 对本 checklist 和交付路径退出 0。复核 `spec.md`、`tasks.md`、`.env.example` 及 HEAD 仍与本节候选摘要一致。
+
+## DAA-010 r8 Human Owner 最终验收（Mac 受控范围）
+
+2026-11-16（Asia/Shanghai），Human Owner 在当前会话对 DAA-010 r8 作出以下最终验收决定：
+
+> 好的，验收 DAA-010 r8 的 Mac 受控范围，Windows 原生验证后续安排。
+
+**状态：`owner_accepted`，仅限 DAA-010 r8 的 Mac 受控范围。** 上方 r8 QA2 的 `qa_passed`、r8 QA1 和 r5 QA2 的 `qa_failed` 及其原始证据均保持不变。F-R5-QA2-001 的首次自动创建目录替换竞态仍未修复；首次使用新的 Mac profile 须在使用者控制且可写的父目录预建并确认空 profile 根，首次启动期间不移动或替换父目录及 profile。该前提只绕开所记录的特定自动创建窗口，并非程序强制检查，也不证明其他替换安全；已有兼容 profile 原样沿用。
+
+Windows 原生验证后续安排；实际环境采用、安装版 `.env`、现场/生产和完整阶段 C 不由本次验收涵盖。本记录仅转录 Human Owner 的真实决定，未运行测试或操作现有 dev 环境。

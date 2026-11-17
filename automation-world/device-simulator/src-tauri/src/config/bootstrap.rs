@@ -1,4 +1,5 @@
-//! 普通源码启动：process > 自身.env > Tauri默认profile；自动化manifest保持权威。
+//! 普通源码启动按进程环境、本工程 .env、Tauri 默认值的顺序选择 profile。
+//! 相对路径以 .env 所在的 DS 工程目录为基准。自动化启动仍使用 manifest。
 use serde::Serialize;
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -63,10 +64,29 @@ fn ordinary_profile(
         .as_deref()
         .filter(|v| !v.trim().is_empty())
         .or_else(|| file_profile.as_deref().filter(|v| !v.trim().is_empty()));
-    if explicit.is_some_and(|v| v.contains(['$', '~', '<', '>'])) {
+    let Some(explicit) = explicit.map(str::trim) else {
+        return ds_runtime::config::profile::resolve(default, None);
+    };
+    let path = std::path::Path::new(explicit);
+    let absolute = if path.is_absolute() {
+        path.to_path_buf()
+    } else {
+        // 上级目录和 Windows 根路径、盘符相对路径不能用于拼接工程目录。
+        if !path.components().all(|part| {
+            matches!(
+                part,
+                std::path::Component::Normal(_) | std::path::Component::CurDir
+            )
+        }) {
+            return Err("profile_absolute_required".into());
+        }
+        root.join(path)
+    };
+    let literal = absolute.to_str().ok_or("profile_invalid:DS_PROFILE_DIR")?;
+    if literal.contains(['$', '~', '<', '>']) {
         return Err("profile_literal_required:DS_PROFILE_DIR".into());
     }
-    ds_runtime::config::profile::resolve(default, explicit.map(str::trim))
+    ds_runtime::config::profile::resolve(default, Some(literal))
 }
 
 #[cfg(any(test, not(feature = "test-automation")))]
@@ -129,8 +149,24 @@ mod startup_env_tests {
             ordinary_profile(&default, Some(process.clone().into_os_string()), &root).unwrap(),
             process
         );
+        for literal in [".local/dev", "./.local/dev"] {
+            fs::write(root.join(".env"), format!("DS_PROFILE_DIR={literal}\n")).unwrap();
+            assert_eq!(
+                ordinary_profile(&default, None, &root).unwrap(),
+                root.join(".local/dev")
+            );
+        }
+        assert_eq!(
+            ordinary_profile(&default, Some(".local/override".into()), &root).unwrap(),
+            root.join(".local/override")
+        );
+        assert_eq!(
+            ordinary_profile(&default, Some(process.clone().into_os_string()), &root).unwrap(),
+            process
+        );
         for bad in [
-            "relative",
+            "../escape",
+            "nested/../escape",
             "$HOME/profile",
             "${HOME}/profile",
             "~/profile",
@@ -153,6 +189,11 @@ mod startup_env_tests {
             let link = root.join("link");
             symlink(&root, &link).unwrap();
             assert!(ordinary_profile(&default, Some(link.into_os_string()), &root).is_err());
+            fs::write(root.join(".env"), "DS_PROFILE_DIR=link/dev\n").unwrap();
+            assert_eq!(
+                ordinary_profile(&default, None, &root).unwrap_err(),
+                "profile_symlink"
+            );
             fs::remove_file(root.join(".env")).unwrap();
             symlink(root.join("missing-target"), root.join(".env")).unwrap();
             assert!(ordinary_profile(&default, None, &root).is_err());
@@ -165,7 +206,7 @@ mod startup_env_tests {
         fs::remove_file(root.join(".env")).unwrap();
         fs::create_dir(root.join(".env")).unwrap();
         assert!(ordinary_profile(&default, None, &root).is_err());
-        assert!(!default.exists() && !file_profile.exists());
+        assert!(!default.exists() && !file_profile.exists() && !root.join(".local").exists());
         fs::remove_dir_all(root).unwrap();
     }
 }
