@@ -72,31 +72,31 @@ def test_composition_rejects_invalid_input_before_registration(monkeypatch, test
 def test_warnings_once_and_apps_keep_separate_policy(monkeypatch):
     events = []
     monkeypatch.setattr(registrar, 'log_event', lambda *args, **kw: events.append((args, kw)))
-    monkeypatch.setattr(settings, 'SUPERVISOR_API_PERMISSIONS_JSON', '["monitor","aiis_demo","unknown"]')
+    monkeypatch.setattr(settings, 'SUPERVISOR_API_PERMISSIONS_JSON', '["equipment-observation-read","aiis_demo","monitor"]')
     first = registrar.create_app(testing=True)
     first_request = Request({'type': 'http', 'app': first})
-    assert get_role_permissions('supervisor', first_request) == ['monitor']
+    assert get_role_permissions('supervisor', first_request) == ['equipment-observation-read']
     assert len(events) == 2
     assert all(args[0] == 'WARNING' for args, _ in events)
     assert {kw['reason'] for _, kw in events} == {'unknown_permission', 'disabled_module'}
     monkeypatch.setattr(settings, 'SUPERVISOR_API_PERMISSIONS_JSON', '[]')
     second = registrar.create_app(testing=True)
     assert get_role_permissions('supervisor', Request({'type': 'http', 'app': second})) == []
-    monkeypatch.setattr(settings, 'OPERATOR_API_PERMISSIONS_JSON', '["monitor"]')
+    monkeypatch.setattr(settings, 'OPERATOR_API_PERMISSIONS_JSON', '["equipment-observation-read"]')
     with pytest.raises(ValueError):
         registrar.create_app(testing=True)
     for _ in range(3):
-        assert get_role_permissions('supervisor', first_request) == ['monitor']
+        assert get_role_permissions('supervisor', first_request) == ['equipment-observation-read']
     assert len(events) == 2
 
 
 @pytest.mark.asyncio
 async def test_requests_disabled_routes_and_authenticated_only(monkeypatch):
-    monkeypatch.setattr(settings, 'SUPERVISOR_API_PERMISSIONS_JSON', '["monitor"]')
+    monkeypatch.setattr(settings, 'SUPERVISOR_API_PERMISSIONS_JSON', '["equipment-observation-read"]')
     app = registrar.create_app(testing=True)
 
     @app.get('/permission-probe', dependencies=[])
-    async def protected(actor=Depends(require_permissions('monitor'))):
+    async def protected(actor=Depends(require_permissions('equipment-observation-read'))):
         return {'role': actor.role}
 
     @app.get('/login-probe')

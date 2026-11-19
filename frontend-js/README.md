@@ -2,6 +2,8 @@
 
 Chinese version: [README.zh-CN.md](README.zh-CN.md)
 
+Energy statistics are served at `/monitor/consumption` with the sole page grant `monitor.energy`. The old `/monitor/energy` URL is retired. A deployment still using `monitor.consumption` requires explicit owner review and grant migration. The page grant adds no API permission, meter scope or management access. [Retirement specification](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+
 This is the JavaScript Vue 3 + Vite Core frontend template. It contains login, the authenticated shell, system pages, the generic Plan/Performance pages and shared infrastructure. Consuming projects add business modules under src/app/<module>/.
 
 ## Stable boundaries
@@ -253,6 +255,6 @@ defines authorized HTTP ingestion for SMA, third parties and other programs; it 
 SMA or PLC has been integrated. See the [r10 guide](../docs/equipment-status-process-monitoring.md#r10-guide) for
 configuration, display, history and access.
 
-The old coil performance source selector, weight edit, process dialog, split, print and efficiency pages are retired. Generic [Plan/Performance workflow](../contracts/published/http-api/generic-task-workflow-v1/README.md) uses task-bound definitions, the existing list paths, Shanghai business times, local table widths and draft preservation. Browser/API/database runtime proof remains a separately approved verification gate.
+The [Plan and Performance candidate](../contracts/published/http-api/generic-task-workflow-v2/README.md) uses current field definitions and the existing list routes. Both pages display Shanghai business times and remember column widths locally. Administrators have separate local-field controls and share one settings dialog for shared fields. Performance detail can open ordinary plan creation when no plan exists.
 
-Administrators can consult the [Plan and Performance field settings guide (Chinese)](FIELD_SETTINGS_GUIDE.zh-CN.md) for field groups, options, versions, retirement and integration mappings.
+See the [field settings guide (Chinese)](FIELD_SETTINGS_GUIDE.zh-CN.md) for field groups, editing, display, deactivation and deletion.

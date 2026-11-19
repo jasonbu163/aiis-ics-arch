@@ -72,7 +72,7 @@ Point.name为ASCII技术名，sourcePath原路径与稳定ID分开；唯一可�
 
 可选的配置级 `pointDisplayNames` 按现有本地点 ID 保存严格的 `zh-CN` / `en-US` 双字符串，每种语言最多 256 个 UTF-8 字节；未设置显示为空。单点编辑把双语值纳入同一命名预览和草稿 CAS，不属于 Point 或 PointFact。新配置 context 可以包含映射；当前 v2 上报正文不携带它。历史 v1 的 test-only 批次构造按原合同保留完整 context，不是产品发送路径。不要假设旧二进制能打开带此元数据的 profile。
 
-DAA-017 候选仅在新建 PLC 时接收 DS 的 `aiis.plc_points` JSON。一份按 PLC 的 SourceDocument 保存输入原字节和 SHA；多个 DB 共用来源，可选 `catalogBindings` 记录完整 DB / 点身份。保存和激活前重验归档原文、来源摘要、身份、类型、地址和布局；旧 DB/UDT 验证仍走原分支。`pointLegacyDisplayNames` 独立保留未标记语言的旧名称，不进入双语字段或 PointFact。源启用事实保留于归档，新本地 PLC 与点默认停用。来源或身份冲突直接拒绝，不合并覆盖。SQLite 物理 DDL 与既有 schema 版本不变；旧二进制兼容未验证。
+DAA-019 新建 PLC 时接受 `device_simulator` 与 `data_acquisition_agent` 的 PLC JSON。按 PLC 的 SourceDocument 保存原字节和 SHA；catalogBindings 保存外部 DB/点 ID 到本地 ID 的完整映射。当前身份或端点冲突会拒绝；来源仅存在历史时，明确选择后分配新的本地 PLC/DB/点/来源身份，原物理归档及历史保持。可按已保存草稿或活动版本导出完整校验后的点集，保留映射来源并记录实际 payload SHA。源启用值保留在归档，新 PLC 与点默认停用。SQLite 物理 DDL 和 schema 版本不变；旧二进制兼容未验证。
 
 ## DAA-007 新空时间合同
 

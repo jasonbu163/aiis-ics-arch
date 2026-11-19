@@ -29,6 +29,17 @@ struct Substitute {
 #[cfg(unix)]
 #[test]
 fn daa017_catalog_sample_fake_transport_excludes_bilingual_names() {
+    catalog_sample_fake_transport(false);
+}
+
+#[cfg(unix)]
+#[test]
+fn daa019_catalog_sample_fake_transport_excludes_bilingual_names() {
+    catalog_sample_fake_transport(true);
+}
+
+#[cfg(unix)]
+fn catalog_sample_fake_transport(daa_producer: bool) {
     use crate::{
         config::local_bootstrap::Bootstrap,
         domain::{
@@ -93,7 +104,15 @@ fn daa017_catalog_sample_fake_transport_excludes_bilingual_names() {
     .unwrap();
     source["dbs"][0]["points"][0]["display_names"] =
         json!({"zh-CN":"目录中文哨兵_DAA017","en-US":"CATALOG_EN_SENTINEL_DAA017"});
+    if daa_producer {
+        source["export"]["producer"] = json!("data_acquisition_agent");
+        source["export"]["config_state"] = json!("saved_draft");
+        for db in source["dbs"].as_array_mut().unwrap() {
+            db.as_object_mut().unwrap().remove("source_enabled");
+        }
+    }
     let input = CatalogRequest {
+        as_new_local_instance: false,
         bytes: serde_json::to_vec(&source).unwrap(),
         filename: "synthetic.json".into(),
         expected_etag: engine.configuration().unwrap().etag,

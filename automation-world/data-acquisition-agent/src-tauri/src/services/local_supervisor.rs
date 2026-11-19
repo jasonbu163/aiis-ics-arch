@@ -67,6 +67,7 @@ pub(crate) struct LocalEngine {
     pub gate: Mutex<Gate>,
     pub gate_changed: Condvar,
     pub activation: Mutex<()>,
+    pub configuration_mutation: Mutex<()>,
     pub stopped: AtomicBool,
     pub log: Arc<LocalLog>,
     pub active_io: Mutex<BTreeMap<String, (Instant, u64)>>,
@@ -81,6 +82,7 @@ pub(crate) struct LocalEngine {
     >,
     pub name_preview: Mutex<Option<crate::domain::point_naming::CachedNames>>,
     pub catalog_preview: Mutex<Option<super::catalog_import::CachedCatalog>>,
+    pub catalog_exports: Mutex<super::catalog_export::CatalogExports>,
     pub offset_preview: Mutex<Option<(String, String, String, Instant)>>,
     pub startup_errors: Mutex<BTreeMap<String, String>>,
     #[cfg(any(test, feature = "local-validation"))]
@@ -149,6 +151,7 @@ impl LocalEngine {
             }),
             gate_changed: Condvar::new(),
             activation: Mutex::new(()),
+            configuration_mutation: Mutex::new(()),
             stopped: AtomicBool::new(false),
             log,
             import_preview: Mutex::new(None),
@@ -156,6 +159,7 @@ impl LocalEngine {
             startup_errors: Mutex::new(BTreeMap::new()),
             name_preview: Mutex::new(None),
             catalog_preview: Mutex::new(None),
+            catalog_exports: Mutex::new(Default::default()),
             active_io: Mutex::new(BTreeMap::new()),
             cached_snapshot: Mutex::new(None),
             #[cfg(any(test, feature = "local-validation"))]

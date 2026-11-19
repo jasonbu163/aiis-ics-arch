@@ -260,3 +260,38 @@ c2426485fb919496a1573ac1202309db57cd993e0df9313e8a85807cdac3a7e5  runtime/tests/
 ```
 
 This is `developer_handoff`, not a QA verdict or Human Owner acceptance. Fresh-context Verification must assess this exact candidate, especially the limited close gate, FIFO proof and late/unknown branches. DS4-07 actual macOS UI/top-bar/column resizing and restart/reset, ordinary `pnpm tauri dev`, and native close/reopen remain unexecuted. GUI/CUA remains paused due to the separately recorded DAA isolation event; do not use old pre-r2 native binaries as evidence. The task-owned `/private/tmp/ds-004-r1-dev.G6mp7M/r2/` profiles, logs and output and the earlier task-owned target/compatibility artifacts remain for QA; reclaim only after coordinator/QA confirms no evidence or running-process dependency. Newly created synthetic SQLite profiles used the unchanged initial schema only; no user profile, existing database migration, real PLC, external delivery, import/export, deployment or release occurred.
+
+## DS-004 r3 文档收尾与 Development 交接（2026-11-18，Asia/Shanghai）
+
+`device-simulator::DS-004 r3` 的活动 [spec](spec.md) 状态为 `owner_approved`，批准后 SHA-256 为 `92507578ef3e1da050d6d192f8612732cffd6c42a7fdee6d502a09954b81210e`。关联父 [aiis-ics-arch::ARCH-PLC-001 r8 spec](../../../plans/ARCH-PLC-001-shared-plc-point-json/spec.md) 状态也为 `owner_approved`，批准后 SHA-256 为 `38085d5f0dd5d9db444008b9e04963371ddff3995cbb050641281ce6517931e5`。Human Owner 审阅五份具体收尾草案后回复“批准这组收尾草案”，同一决定分别批准精确版本和版本衔接，各自仍履行独立的 Development、Verification、Human Owner 最终验收。r1、r2 分别有历史实施范围批准，见本任务 spec 的历史附录。以上 r2 元数据、正文及其原时点的 handoff 全文保留。本追加段记录 r3 的 `developer_handoff`。尚待独立 r3 文档 verdict 和 Human Owner 最终决定。
+
+### 既有证据
+
+| 来源 | 已记录的观察及适用范围 |
+| --- | --- |
+| Human Owner 手动报告 | 在 DS 和 DAA 各自的 `.local/dev` 中做过中英文切换及 `display_name` 相关操作。按本人用词引用，具体指旧无语言 `displayName` 还是新 `displayNames` 的哪些状态并无完整记录。仅有已报告的操作范围，保存重开、未设字段的全部组合和异常行为缺少同等证据。证据入口为本任务 spec §2.1 和父 r8 §2。 |
+| 历史 Development 自检 | 上文 r2 在当时正式树验证 Rust 保存与故障注入、容量、合成 profile 兼容/锁、Vue 内存状态和关闭门禁，并做过类型、格式和构建检查。4,096 点有 r2 成功保存样本，也有早期已提交但回执未知的样本。读回给出当前状态，原请求成败仍需独立证据；合成进程与内存调用不能覆盖实际 Tauri IPC 或窗口生命周期。 |
+| 历史独立 Verification | [原 checklist](checklist.md) 记录 QA1 `qa_failed`（F1，已提交的保存遇未知回执却显示失败，刷新也未重读草稿），QA2 `qa_failed`（F2，之后的已知控制拒绝覆盖先前未知回执，核对保存后错误解除保护），QA3 `qa_failed`（F3，普通命名预览/草稿读取清除其他未知回执；F4，保存期间遇未知预览释放仍可放行关闭）。QA4 对 r2 的精确候选，以离线 Rust、合成 profile、受控故障、同 Store FIFO 和内存 UI 单窗口屏障复核所列路径，整体 verdict 为 `qa_blocked`。无保存直接交错的旧通用 F3 风险在 r2 范围外，未声称修复；原生 DS4-07 和真实关闭/同 profile 重开仍缺证。checklist 后续的协调者配置、AX、WebKit 探针保留各自来源、失败/有限成功和证据边界，不能解除该门禁。 |
+| Owner 文件往返和历史文件核对 | Owner 报告实际做过 DAA→DS→DAA 往返，DAA 当前同源拒绝，选择新的本机实例后成功并自动选中、显示 4 点。[DS-005 checklist](../DS-005-plc-json-bidirectional/checklist.md) 和 [DAA-019 checklist](../../../data-acquisition-agent/plans/DAA-019-plc-json-bidirectional/checklist.md) 分别保留当时记录。DAA-019 QA3 对三份当时文件只读比较，剔除导出头、连接目标和两端启用字段，按外部 DB/点 ID 排序后，外部身份、技术字段、双语和描述相同。同一 L2 的原生 IPC 返回值未直接截获，不能拼接后来轮次的自动选中或文档检查补证。旧轮 context、样本其他列及 `sample_delivery` 缺前测逐行基线；QA3 新一轮所列 37 表自身前后可比且有新增行。对应旧往返文件、基线和固定前序候选已按 Owner 要求清理，现仅引用存续文档、摘要及历史清理记录。 |
+| 协调者既有本机只读观察 | 据父 r8 §2 及其中定位的既有私有会话，2026-11-18 DAA dev 的 seq 91–103 共 13 条真实 v2 上报，均有匹配 `sampleId` 的 `status=committed` 回执，`outcome` 为 `created` 或 `duplicate`。当时所核 MySQL 历史来源身份、正文 SHA、点技术名称/类型/值/质量匹配；所核时点 latest 三点 `good`、最新 seq 103。样本配置一个实际点的双语显示名均非空，13 份请求正文未见对应字段和文本；服务端所核点数据未见显示类字段且所核点字段和值一致，未搜索服务端任意字段文本。本轮 Development 只核对私有会话已留存的脚本判定和输出摘要所在记录（父 r8 §2 所指约 28239–28242、28257–28260 行），未亲历 Owner 操作或原始上报核查。仅能说明该次 DAA 实测样本和观察时点。 |
+
+QA4 的原生隔离事故来自另一任务，退出后疑似重新绑定或启动至默认真实 DAA profile，影响仍未知。旧记录没有建立零写入或无影响的结论。当前仍缺 DS 普通 `pnpm tauri dev` 原生入口回归、完整原生双语编辑/各字段与切换前后状态、原生拖动/正常重启后列宽回读与复位、正常关闭和同一 profile 重开、崩溃/强退/关窗失败等时序、实际 Tauri IPC/JoinError 和跨进程原子性证据。终结与清理未证明时，未知回执保护可能持续阻止冲突保存，关窗时显式放弃可能丢失本窗口输入或未决记录。合成旧二进制探针曾保留历史字节并在所试新字段下返回 `storage_payload`、未误开空 profile；旧二进制的源码构建身份依历史 Development 交接，旧普通原生应用及其他 profile 的兼容和恢复依然缺证。仅依据当前资料无法倒推事故影响、旧轮历史前值或所有上报路径；真实 PLC、FF/CA、Windows/其他平台、长稳、生产采用、发布和部署超出本 r3 范围。
+
+### 精确工作树、候选与 DEV self-check
+
+- QA4 当时交付为正式树未提交候选，base HEAD `21cd789277695bbafaa55c24e39261fc7247f9b0`。批准后 r2 spec SHA-256 为 `c3e719d6373c70d4fe45df289a26cd83f104e88878b74693900f76533509c267`。按上文 r2 表原顺序，以「小写文件 SHA-256、两个 ASCII 空格、模块相对路径、LF」编码，历史 15 项清单 SHA-256 为 `eeee96a3206739ae1de678166123d742d9d3a9e9d010d3f90fc36c92af70f257`，与原 checklist 一致。写前 tasks SHA-256 `3d9f21a1c276b8f7faa44b981f57b4a73d2195f77ce36d994b61981626452e23` 与 QA4 所记一致；写前 checklist SHA-256 `1779106e07420c4bcdb9100a06bf7f2a6d69ee0c95729cc1ee1137fae6b01d7d` 包含 QA4 后的历史追加。
+- 本 r3 文档交付在正式工作树 `/Users/jason/Desktop/DreamCode/aiis-ics-arch`，分支 `main`，HEAD `f7c5608c0e433612b15821a578a7ef3e4f155cdb`，有既存及并行未提交改动。用 `git rev-parse HEAD`、`git branch --show-current`、`git status --short`、`git show HEAD:<path>` 和 Python 3 标准库 `hashlib` 检查候选。HEAD 中 9/15 与 QA4 清单相同，当前正式树为 4/15 相同（`runtime/src/services/source_import.rs`、`src/App.vue`、`src/app/simulator/views/points/index.vue`、`runtime/tests/point_display_names.rs`），按同顺序复算当前 15 项清单 SHA-256 为 `95003a2a8531dedbfa23cc998a8ad154c20c38f5ed3af9e18df143c6102687d6`。差异身份以逐路径原字节为准，不能从共享文件完整摘要判断每行变更归属。Owner 手动报告未经二进制/IPC 指纹固定；无证据将其绑定为 QA4 或当前完整组合树的运行。
+- 后继 [ARCH-PLC-002 r1 tasks](../../../plans/ARCH-PLC-002-plc-json-export-feedback/tasks.md) 和 [checklist](../../../plans/ARCH-PLC-002-plc-json-export-feedback/checklist.md) 保留正式树同一 HEAD 下当时的 23 文件 QA2 候选、QA1 失败、QA2 `qa_passed` 与 Human Owner 对导出命名及反馈的 `owner_accepted`。以 DS 表和返工替换表复算，当前 DS 侧 10/12 文件与该 QA2 摘要一致；余下两份 `USER_GUIDE*.md` 的当前摘要均符合 DS-005 checklist 末尾 F-GUIDE-004 限定复验。该后继任务验收仍仅适用于其范围和历史交付身份；前序固定快照清理后无需重造。DS-004 r2 整体、当前组合树运行和本次 r3 独立文档复核各有自己的证据。
+- 此角色只追加本 `tasks.md`。用 `shasum -a 256` 核对两份已批准 spec 和角色文档，以 Python 3 标准库 `pathlib`、`hashlib`、`re` 核对新增本地文件链接及写前前缀字节，以 `git diff --check -- automation-world/device-simulator/plans/DS-004-bilingual-point-display-names/tasks.md` 检查空白，均无诊断。正文引用历史结果。本轮不运行或重跑测试、构建、应用、GUI/CUA；未访问 `.local/dev`、profile、SQLite/MySQL、PLC、网络，未发起上报、修改数据或生成测试工件，也未要求 Owner 重复操作。
+
+### r3 `developer_handoff`
+
+交 fresh-context Verification 按 [本任务 r3 spec](spec.md) 的 R3-01～06 复核。实际变更只含 `automation-world/device-simulator/plans/DS-004-bilingual-point-display-names/tasks.md` 的本附录；以上批准摘要、工作树 HEAD、写前字节摘要与历史及当前源文件清单可定位各份证据。Verification 可核对现存文件、相关任务记录及父 r8 私有证据的既有定位；若私有会话原记录无法访问，注明实际可核对资料。已删除工件、同次 L2 IPC、旧轮基线以及未经实测的原生和异常行为保留原有边界。由 Verification 独立追加文档 verdict，再交 Human Owner 决定是否最终接受这个有界收尾。
+
+### r3 文档计数更正与新 `developer_handoff`
+
+第一轮独立文档复核发现 F-R3-01，见 [checklist.md](checklist.md)。上文将固定 HEAD 中与 QA4 候选字节相同的文件误记为 9/15，正确为 **8/15**；当前正式工作树为 **4/15**。此处更正文档计数。第一轮 r3 文档 `qa_failed`、历史产品 QA4 `qa_blocked` 和原有风险仍以各自记录为准，Human Owner 最终验收待定。
+
+按上文 r2 的 15 个路径原顺序，用 `git show <固定 HEAD>:<仓库相对路径>` 取 Git 对象原字节，以 Python 3 `hashlib.sha256` 逐项比对并计数。固定 HEAD `f7c5608c0e433612b15821a578a7ef3e4f155cdb` 的 7 个差异路径为 `src/services/deviceSimulator.ts`、`src/app/simulator/locales/en-US.json`、`src/app/simulator/locales/zh-CN.json`、`src/styles/app.css`、`USER_GUIDE.md`、`USER_GUIDE.zh-CN.md`、`CODE_INDEX.md`。按「小写文件 SHA-256、两空格、模块相对路径、LF」计算，固定 HEAD 的 15 项清单 SHA-256 为 `bf50aacd2b2235d882c907cd3a85f4ee59b6635cf71467b8294392d6d22c10e1`，原 QA4 清单为 `eeee96a3206739ae1de678166123d742d9d3a9e9d010d3f90fc36c92af70f257`，当前工作树清单为 `95003a2a8531dedbfa23cc998a8ad154c20c38f5ed3af9e18df143c6102687d6`。
+
+正式交付仍是 `/Users/jason/Desktop/DreamCode/aiis-ics-arch` 的 `main` 上述 HEAD 的未提交文档。批准后 [DS-004 r3 spec](spec.md) SHA-256 为 `92507578ef3e1da050d6d192f8612732cffd6c42a7fdee6d502a09954b81210e`。本轮只追加 `tasks.md` 本节，写前完整前缀 SHA-256 为 `bcab509c6843cd7a8139cc3abf7e0d331b22af847fdfbc01c49c3703c37446fd`。逐项摘要复算、前缀核对及 `git diff --check -- automation-world/device-simulator/plans/DS-004-bilingual-point-display-names/tasks.md` 均退出 0。只读检查既有文档、候选文件和 Git 对象，未运行产品测试或构建，未访问应用、GUI、数据库或创建测试资源。将原文与本更正一并交 fresh-context Verification，按 R3-01～06 复核更正后的精确交接并保留第一轮文档 verdict。

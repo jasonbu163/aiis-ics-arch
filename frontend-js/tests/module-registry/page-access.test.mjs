@@ -42,8 +42,8 @@ test('admin, supervisor, operator and unknown share route/menu/default decisions
   const grants = parseRolePageAccess(env(['plan.list', 'performance.list'], ['plan.list']), registry)
   const matrix = {
     admin: { paths: [
-      '/plan/list', '/performance/list', '/monitor/temperature', '/monitor/consumption', '/monitor/drive',
-      '/monitor/cleaning', '/monitor/observations/admin', '/monitor/observations/data', '/monitor/energy', '/equipment/production-parameters', '/equipment/drive',
+      '/plan/list', '/plan/shared-fields', '/performance/list', '/performance/shared-fields', '/monitor/temperature', '/monitor/consumption', '/monitor/drive',
+      '/monitor/cleaning', '/monitor/observations/admin', '/monitor/observations/data', '/equipment/production-parameters', '/equipment/drive',
       '/equipment/temperature', '/equipment/cleaning', '/equipment/observations/admin', '/equipment/observations/data',
       '/auxiliary/stop', '/auxiliary/shift', '/auxiliary/price', '/quality/list', '/quality/spc',
       '/quality/control/:id', '/system/user', '/maintenance/log'
@@ -61,15 +61,19 @@ test('admin, supervisor, operator and unknown share route/menu/default decisions
   }
 })
 
-test('legacy energy page stays reachable only for the original grant', () => {
+test('the existing page grant selects the sole current energy page', () => {
   const grants = parseRolePageAccess(env(['monitor.energy'], ['monitor.energy']), registry)
-  const access = { isAdmin: false, hasPageAccess: id => grants.operator.includes(id) }
-  const legacy = registry.routeRecords.find(route => route.meta.pageId === 'monitor.energy')
-  const modern = registry.routeRecords.find(route => route.meta.pageId === 'monitor.consumption')
-  assert.equal(legacy.path, '/monitor/energy')
-  assert.equal(canAccessRoute(legacy, access), true)
-  assert.equal(canAccessRoute(modern, access), false)
-  assert.ok(accessibleNavigation(registry, access).flatMap(group => group.children).some(leaf => leaf.route.meta.pageId === 'monitor.energy'))
+  const page = registry.routeRecords.find(route => route.meta.pageId === 'monitor.energy')
+  assert.equal(page.path, '/monitor/consumption')
+  assert.equal(registry.routeRecords.some(route => route.path === '/monitor/energy'), false)
+  assert.throws(() => parseRolePageAccess(env(['monitor.consumption'], []), registry), /monitor\.consumption/)
+  for (const role of ['supervisor', 'operator']) {
+    const access = { isAdmin: false, hasPageAccess: id => grants[role].includes(id) }
+    assert.equal(canAccessRoute(page, access), true)
+    assert.ok(accessibleNavigation(registry, access).flatMap(group => group.children).some(leaf => leaf.route === page))
+  }
+  assert.equal(canAccessRoute(page, { isAdmin: true, hasPageAccess: () => false }), true)
+  assert.equal(canAccessRoute(page, { isAdmin: false, hasPageAccess: () => false }), false)
 })
 
 test('Vite shared env, local/mode and process priority feed the same checker', async () => {

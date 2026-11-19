@@ -4,10 +4,101 @@ use crate::domain::{
     local_configuration::{
         id, validate_display_names, validate_for_runtime, Configuration, LocalResult,
     },
-    local_runtime::{ConfigurationView, StartupSettings, STARTUP_PRIVATE_ID, STARTUP_PRIVATE_NAME},
+    local_runtime::{
+        ConfigurationSnapshot, ConfigurationView, StartupSettings, STARTUP_PRIVATE_ID,
+        STARTUP_PRIVATE_NAME,
+    },
     local_sample::{digest, encode, now},
 };
 use rusqlite::{params, OptionalExtension};
+fn collect_configuration_ids(c: &Configuration, out: &mut std::collections::BTreeSet<String>) {
+    out.extend(c.plcs.iter().map(|v| v.id.clone()));
+    out.extend(c.dbs.iter().map(|v| v.id.clone()));
+    out.extend(c.points.iter().map(|v| v.id.clone()));
+    out.extend(c.groups.iter().map(|v| v.id.clone()));
+    out.extend(c.sources.iter().map(|v| v.id.clone()));
+}
+
+/// 只检查实际引用本地 PLC 的历史字段；sample/cycle/receipt 自身 ID 属于独立命名空间。
+pub(super) fn runtime_local_identity_conflict(
+    runtime: &rusqlite::Connection,
+    ids: &std::collections::BTreeSet<String>,
+) -> LocalResult<bool> {
+    let version: u32 = runtime
+        .query_row("PRAGMA user_version", [], |row| row.get(0))
+        .map_err(sql_error)?;
+    let ddl = match version {
+        2 => super::schema::runtime_sql(),
+        3 => super::schema::runtime_v3_sql(),
+        4 => super::schema::runtime_v4_schema(runtime)?,
+        _ => return Err("schema_structure_mismatch".into()),
+    };
+    super::schema::verify_structure(runtime, &ddl)?;
+    let encoded = encode(ids)?;
+    for (table, column, optional) in [
+        ("plc_sources", "plc_id", false),
+        ("collection_cycles", "plc_id", false),
+        ("samples", "plc_id", false),
+        ("reporting_bindings", "local_plc_id", true),
+        ("reporting_generations", "local_plc_id", true),
+        ("reporting_disabled", "local_plc_id", true),
+    ] {
+        let exists: bool = runtime
+            .query_row(
+                "SELECT EXISTS(SELECT 1 FROM sqlite_schema WHERE type='table' AND name=?1)",
+                [table],
+                |row| row.get(0),
+            )
+            .map_err(sql_error)?;
+        if !exists && optional {
+            continue;
+        }
+        if !exists {
+            return Err("schema_structure_mismatch".into());
+        }
+        let query = format!("SELECT EXISTS(SELECT 1 FROM {table} WHERE {column} IN (SELECT value FROM json_each(?1)))");
+        if runtime
+            .query_row(&query, [&encoded], |row| row.get::<_, bool>(0))
+            .map_err(sql_error)?
+        {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+fn catalog_origin(
+    c: &Configuration,
+    plc_id: &str,
+    instance: &str,
+) -> LocalResult<crate::domain::plc_catalog::Origin> {
+    use crate::domain::plc_catalog::{self, Origin};
+    let mut origin = None;
+    for binding in &c.catalog_bindings {
+        let Some(db) = c
+            .dbs
+            .iter()
+            .find(|d| d.id == binding.local_db_id && d.plc_id == plc_id)
+        else {
+            continue;
+        };
+        let source = c
+            .sources
+            .iter()
+            .find(|s| s.id == db.source_id)
+            .ok_or("catalog_source_invalid")?;
+        let parsed = plc_catalog::parse(source.content.as_bytes())?.0.origin;
+        if origin.as_ref().is_some_and(|old| old != &parsed) {
+            return Err("catalog_origin_conflict".into());
+        }
+        origin = Some(parsed);
+    }
+    Ok(origin.unwrap_or_else(|| Origin {
+        kind: "data_acquisition_agent".into(),
+        profile_id: instance.into(),
+        plc_id: plc_id.into(),
+    }))
+}
 impl Stores {
     /// 复用配置库的受保护私有记录，避免改写草稿、活动版本或旧库 DDL。
     pub fn startup_settings(&self) -> LocalResult<StartupSettings> {
@@ -113,6 +204,50 @@ impl Stores {
             previous,
             used,
             phase: "stopped".into(),
+            imported_local_plc_id: None,
+        })
+    }
+    /// 读取持久 payload 原字节计算摘要，不从内存草稿重新序列化。
+    pub fn catalog_export_snapshot(&self, state: &str) -> LocalResult<ConfigurationSnapshot> {
+        let view = self.configuration()?;
+        let (revision, payload, configuration) = match state {
+            "saved_draft" => {
+                let (etag, raw): (String, String) = self
+                    .config
+                    .query_row(
+                        "SELECT etag,payload FROM configuration_draft WHERE id=1",
+                        [],
+                        |r| Ok((r.get(0)?, r.get(1)?)),
+                    )
+                    .map_err(sql_error)?;
+                if etag != view.etag {
+                    return Err("draft_conflict".into());
+                }
+                (etag, raw, view.draft.clone())
+            }
+            "active_revision" => {
+                let revision = view.active.clone().ok_or("active_missing")?;
+                let raw: String = self
+                    .config
+                    .query_row(
+                        "SELECT payload FROM configuration_revisions WHERE id=?1",
+                        [&revision],
+                        |r| r.get(0),
+                    )
+                    .map_err(sql_error)?;
+                let configuration = self.revision(&revision)?;
+                (revision, raw, configuration)
+            }
+            _ => return Err("invalid_request".into()),
+        };
+        Ok(ConfigurationSnapshot {
+            state: state.into(),
+            revision,
+            payload_sha256: digest(&payload),
+            configuration,
+            instance: self.instance.clone(),
+            active: view.active,
+            used: view.used,
         })
     }
     fn verify_catalog_archives(&self, c: &Configuration) -> LocalResult<()> {
@@ -138,34 +273,60 @@ impl Stores {
         }
         Ok(())
     }
-    /// 在同一个串行存储任务内重查现有身份、历史上下文和来源归档，再由调用方执行草稿 CAS。
-    pub fn ensure_catalog_new(
+    /// 检查当前版本与被保留的历史；不以文件名、地址或显示名称推断来源身份。
+    pub fn catalog_history(
         &self,
-        source: &crate::domain::local_configuration::SourceDocument,
-    ) -> LocalResult<()> {
+        catalog: &crate::domain::plc_catalog::Catalog,
+        target: &crate::domain::plc_catalog::Connection,
+        loaded: Option<&Configuration>,
+    ) -> LocalResult<bool> {
+        Ok(self.catalog_inventory(catalog, target, loaded)?.0)
+    }
+
+    fn catalog_inventory(
+        &self,
+        catalog: &crate::domain::plc_catalog::Catalog,
+        target: &crate::domain::plc_catalog::Connection,
+        loaded: Option<&Configuration>,
+    ) -> LocalResult<(bool, std::collections::BTreeSet<String>)> {
         use std::collections::BTreeSet;
-        let (catalog, _, sha) = crate::domain::plc_catalog::parse(source.content.as_bytes())?;
-        if sha != source.sha256 {
-            return Err("catalog_source_invalid".into());
-        }
-        let mut ids: BTreeSet<String> =
-            BTreeSet::from([catalog.origin.plc_id.clone(), source.id.clone()]);
-        for db in &catalog.dbs {
-            ids.insert(db.id.clone());
-            ids.extend(db.points.iter().map(|point| point.id.clone()));
-        }
-        let conflicts = |c: &Configuration| {
-            c.plcs.iter().any(|v| ids.contains(&v.id))
-                || c.dbs.iter().any(|v| ids.contains(&v.id))
-                || c.points.iter().any(|v| ids.contains(&v.id))
-                || c.groups.iter().any(|v| ids.contains(&v.id))
-                || c.sources.iter().any(|v| ids.contains(&v.id))
-        };
         let current = self.configuration()?;
-        if ids.contains(&self.instance) || ids.contains(&current.etag) || conflicts(&current.draft)
-        {
+        let mut occupied = BTreeSet::from([self.instance.clone(), current.etag.clone()]);
+        let mut active = vec![current.draft.clone()];
+        if let Some(revision) = &current.active {
+            active.push(self.revision(revision)?);
+        }
+        if let Some(configuration) = loaded {
+            active.push(configuration.clone());
+        }
+        let target_endpoint = format!(
+            "{}:{}:{}/{}",
+            target.host, target.port, target.rack, target.slot
+        );
+        for c in &active {
+            collect_configuration_ids(c, &mut occupied);
+            for plc in &c.plcs {
+                if catalog_origin(c, &plc.id, &self.instance)? == catalog.origin {
+                    return Err("catalog_origin_conflict".into());
+                }
+                if plc.endpoint() == target_endpoint {
+                    return Err("duplicate_endpoint".into());
+                }
+            }
+        }
+        let external_ids: BTreeSet<_> = std::iter::once(catalog.origin.plc_id.clone())
+            .chain(catalog.dbs.iter().map(|db| db.id.clone()))
+            .chain(
+                catalog
+                    .dbs
+                    .iter()
+                    .flat_map(|db| db.points.iter().map(|point| point.id.clone())),
+            )
+            .collect();
+        if external_ids.iter().any(|id| occupied.contains(id)) {
             return Err("catalog_identity_conflict".into());
         }
+        let mut historical = false;
         for (connection, table, key) in [
             (&self.config, "configuration_revisions", "id"),
             (&self.runtime, "configuration_contexts", "revision"),
@@ -183,8 +344,15 @@ impl Stores {
                 }
                 let old: Configuration =
                     serde_json::from_str(&raw).map_err(|_| "configuration_corrupt")?;
-                if ids.contains(&old_id) || conflicts(&old) {
-                    return Err("catalog_identity_conflict".into());
+                crate::domain::plc_catalog::verify_bindings(&old)
+                    .map_err(|_| "configuration_corrupt")?;
+                self.verify_catalog_archives(&old)?;
+                occupied.insert(old_id);
+                collect_configuration_ids(&old, &mut occupied);
+                for plc in &old.plcs {
+                    if catalog_origin(&old, &plc.id, &self.instance)? == catalog.origin {
+                        historical = true;
+                    }
                 }
             }
         }
@@ -197,12 +365,12 @@ impl Stores {
             let old_id: String = row.get(0).map_err(sql_error)?;
             let old_sha: String = row.get(1).map_err(sql_error)?;
             let content: String = row.get(2).map_err(sql_error)?;
-            if ids.contains(&old_id) || old_sha == sha {
-                return Err("catalog_identity_conflict".into());
-            }
-            if let Ok((old, _, _)) = crate::domain::plc_catalog::parse(content.as_bytes()) {
-                if old.origin == catalog.origin {
-                    return Err("catalog_origin_conflict".into());
+            occupied.insert(old_id);
+            if old_sha == digest(&content) {
+                if let Ok((old, _, _)) = crate::domain::plc_catalog::parse(content.as_bytes()) {
+                    if old.origin == catalog.origin {
+                        historical = true;
+                    }
                 }
             }
         }
@@ -216,10 +384,78 @@ impl Stores {
             })
             .map_err(sql_error)?;
         for row in rows {
-            let (plc_id, generation) = row.map_err(sql_error)?;
-            if ids.contains(&plc_id) || ids.contains(&generation) {
-                return Err("catalog_identity_conflict".into());
+            let (plc, generation) = row.map_err(sql_error)?;
+            occupied.insert(plc);
+            occupied.insert(generation);
+        }
+        Ok((historical, occupied))
+    }
+
+    /// 在串行存储任务中重新检查预览身份，然后由调用方进行草稿 CAS。
+    pub fn ensure_catalog_new(
+        &self,
+        source: &crate::domain::local_configuration::SourceDocument,
+        candidate: &Configuration,
+        loaded: Option<&Configuration>,
+    ) -> LocalResult<()> {
+        let (catalog, _, sha) = crate::domain::plc_catalog::parse(source.content.as_bytes())?;
+        if sha != source.sha256 {
+            return Err("catalog_source_invalid".into());
+        }
+        let plc = candidate
+            .plcs
+            .iter()
+            .find(|p| p.id == source.plc_id)
+            .ok_or("catalog_source_invalid")?;
+        let target = crate::domain::plc_catalog::Connection {
+            host: plc.host.clone(),
+            port: plc.port,
+            rack: plc.rack,
+            slot: plc.slot,
+            local_tsap: None,
+            remote_tsap: None,
+        };
+        let (historical, occupied) = self.catalog_inventory(&catalog, &target, loaded)?;
+        let remapped = source.plc_id != catalog.origin.plc_id;
+        if historical != remapped {
+            return Err(if historical {
+                "catalog_history_choice_required"
+            } else {
+                "catalog_identity_conflict"
             }
+            .into());
+        }
+        let mut local =
+            std::collections::BTreeSet::from([source.id.clone(), source.plc_id.clone()]);
+        for binding in candidate
+            .catalog_bindings
+            .iter()
+            .filter(|b| b.source_id == source.id)
+        {
+            local.insert(binding.local_db_id.clone());
+            local.extend(
+                binding
+                    .point_mappings
+                    .iter()
+                    .map(|mapping| mapping.local_point_id.clone()),
+            );
+        }
+        if local.iter().any(|id| occupied.contains(id))
+            || runtime_local_identity_conflict(&self.runtime, &local)?
+        {
+            return Err("catalog_identity_conflict".into());
+        }
+        let archived: Option<String> = self
+            .config
+            .query_row(
+                "SELECT content FROM source_documents WHERE sha256=?1",
+                [&sha],
+                |r| r.get(0),
+            )
+            .optional()
+            .map_err(sql_error)?;
+        if archived.as_ref().is_some_and(|old| old != &source.content) {
+            return Err("catalog_source_invalid".into());
         }
         Ok(())
     }
@@ -532,19 +768,26 @@ impl Stores {
         for s in view.draft.sources {
             hashes.insert(s.sha256);
         }
-        let rows = self
-            .config
-            .prepare("SELECT payload FROM configuration_revisions")
-            .map_err(sql_error)?
-            .query_map([], |r| r.get::<_, String>(0))
-            .map_err(sql_error)?
-            .collect::<Result<Vec<_>, _>>()
-            .map_err(sql_error)?;
-        for row in rows {
-            let c: Configuration =
-                serde_json::from_str(&row).map_err(|_| "configuration_corrupt")?;
-            for s in c.sources {
-                hashes.insert(s.sha256);
+        // 样本仍引用 runtime context 时，其来源归档不能因配置版本被裁剪而消失。
+        for (connection, table) in [
+            (&self.config, "configuration_revisions"),
+            (&self.runtime, "configuration_contexts"),
+        ] {
+            let mut statement = connection
+                .prepare(&format!("SELECT payload,sha256 FROM {table}"))
+                .map_err(sql_error)?;
+            let mut rows = statement.query([]).map_err(sql_error)?;
+            while let Some(row) = rows.next().map_err(sql_error)? {
+                let payload: String = row.get(0).map_err(sql_error)?;
+                let sha: String = row.get(1).map_err(sql_error)?;
+                if digest(&payload) != sha {
+                    return Err("configuration_corrupt".into());
+                }
+                let c: Configuration =
+                    serde_json::from_str(&payload).map_err(|_| "configuration_corrupt")?;
+                for s in c.sources {
+                    hashes.insert(s.sha256);
+                }
             }
         }
         let old = self

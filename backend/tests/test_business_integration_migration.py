@@ -3,17 +3,12 @@ import pytest
 from sqlalchemy import ForeignKeyConstraint, UniqueConstraint
 from sqlalchemy.dialects.mysql import dialect
 from sqlalchemy.schema import CreateTable
-from app.equipment.models.integration import EquipmentIntegrationReceipt
-from app.monitor.models.integration import MonitorIntegrationReceipt
 
 pytestmark = pytest.mark.no_db
-MODELS = (EquipmentIntegrationReceipt, MonitorIntegrationReceipt)
 HISTORICAL_TABLES = {"equipment_integration_receipts", "performance_integration_receipts", "monitor_integration_receipts", "performance_integration_observation_events"}
 
 
-@pytest.mark.parametrize("model", MODELS)
-def test_static_mysql_declarations_only(model):
-    table = model.__table__
+def assert_static_mysql_declaration(table):
     sql = str(CreateTable(table).compile(dialect=dialect()))
     assert "DATETIME(3)" in sql and "UTC_TIMESTAMP" not in sql
     assert "CASCADE" not in sql and "actor_user_id" not in table.c
@@ -53,8 +48,9 @@ def test_exact_chained_64_71_75_stages_and_four_table_parity():
     integration=migrations[-1];integration.op=recorder;integration.upgrade()
     assert len(recorder.metadata.tables)==75
     assert HISTORICAL_TABLES <= set(recorder.metadata.tables)
-    for model in MODELS:
-        assert _table_signature(recorder.metadata.tables[model.__tablename__])==_table_signature(model.__table__)
+    for name in HISTORICAL_TABLES:
+        assert_static_mysql_declaration(recorder.metadata.tables[name])
+    assert HISTORICAL_TABLES.isdisjoint(Base.metadata.tables)
     for name,signature in old.items():assert _table_signature(recorder.metadata.tables[name])==signature
     successor=by_revision['2c4e6a8b0d12']
     assert successor.revision=='2c4e6a8b0d12' and successor.down_revision=='1b3d5f7a9c20'

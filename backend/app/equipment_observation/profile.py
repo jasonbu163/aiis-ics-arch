@@ -12,7 +12,7 @@ from settings import resolve_env_file
 from common.integration.envelope import identifier as core_identifier
 from .domain import ObservationError
 
-REVISIONS = ("8c0e2a4d6f18", "9d1f3a5c7e20")
+REVISIONS = ("c9e1a3b5d720",)
 
 
 def valid_identifier(value, limit=64):
@@ -64,7 +64,7 @@ def parse_profile(document):
             raise ValueError("invalid legacy device")
         if timings.issubset(entry) and any(type(entry[k]) is not int or not 1 <= entry[k] <= 86400 for k in timings):
             raise ValueError("invalid device timing")
-        if target["schemaRevision"] == "9d1f3a5c7e20" and not timings.issubset(entry):
+        if not timings.issubset(entry):
             raise ValueError("r10 device timing must be explicit")
         devices[entry["equipmentId"]] = entry
     read_scopes = document["readScopes"]

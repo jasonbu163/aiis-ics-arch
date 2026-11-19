@@ -209,3 +209,20 @@ Human Owner 选择继续先完成双语验收。下述为本会话 coordinator �
    前者用内存 `Capture` transport 检查旧、新及冻结重试的 v2 正文不含 `displayNames`；后者检查旧 v1 引擎不 dispatch。没有真实 POST 或 PLC 操作。Coordinator 报告自有系统临时根及 canary 目录已清理。
 
 上述结果不解除普通 native 和原生 UI 的 blocker，不构成新、旧普通程序兼容验收；所有已有证据和此前隔离事故的未知影响保留。当前状态继续为 **`qa_blocked`**，最终验收由 Human Owner 决定。
+
+## DAA-018 r4 独立文档复核（2026-11-18，Asia/Shanghai）
+
+**Verdict：`qa_passed`，仅适用于 `aiis-ics-arch::DAA-018 r4` 文档收尾。** fresh-context Verification 在 Development 交接后核对 [spec](spec.md)、[tasks](tasks.md)、本文件原记录、父规格和获准会话摘录。原 r3 QA1 失败和 QA2 阻塞继续按原记录解释。Human Owner 尚待决定是否接受以下范围及风险。
+
+| 标准 | 独立文档复核结果 |
+| --- | --- |
+| D18C-01 | 通过。r1、r2、r3 均有各自范围批准。r1 在命名预览文件白名单处阻塞，r2 在旧 v1 冻结正文合同处阻塞，r3 批准后开发、返工。QA1 的 F-QA1-001 普通保存绕过双语预览导致 `qa_failed`，QA2 定向负例验证返工后未复现，整体仍为 `qa_blocked`。旧 spec 全文、tasks 前缀、checklist 前缀分别与 HEAD 对应原件逐字节相符。 |
+| D18C-02 | 通过。Owner 自报本机开发 profile 的显示名显示与中英文切换成功。r3 Development 自检、QA1/QA2 的合成独立检查和协调者的既有本机观察均可分别追溯。本轮 QA 实际查看的是文档和历史报告。 |
+| D18C-03 | 通过。读取 spec §2 定位会话约 28239–28242、28257–28260、28278 行。协调者于 2026-11-18 14:40–14:42 对同配置同来源的 seq 91–103 共 13 条逐条核对，正文和回执 SHA 校验有效，各有匹配的 committed 回执，outcome 为 created 或 duplicate。该配置至少一个点的两种显示名均非空。13 份上传正文均无显示名字段或对应两种文本。MySQL history 13 条来源身份、请求 SHA、所核三个技术点的名称、类型、值及质量相符，点集均未见 display 类字段，其他字符串未做通搜。latest 三点质量 good，seq 103；协调者报告同时段 DS 日志未见 WARN/ERROR。仅采信该时窗、配置、样本的既有观察。 |
+| D18C-04 | 通过。旧 QA 的 fake Capture 在当时合成候选截获旧 NeverSent 转 v2、新样本及冻结重试；与 13 条实际本机 v2 分开。旧 v1 test-only 本地冻结构造的完整 contextUtf8 可含双语，生产账本另有本地重构及校验。旧 v1 外发停用；保留原字节和 SHA。未知回执、其他外发分支、旧样本和冻结重试的真实网络行为仍无本轮证明。 |
+| D18C-05 | 通过。旧普通 native 对新字段的安全拒绝、无误采、无空库未证。旧 validation 的拒绝和新 validation 单次读取零写覆盖有限；启动、退出曾写事件、元数据及日志。最终原生编辑、取消、保存重开、完整顶栏行为、列宽拖拽、切页及跨重启保持、复位与旧功能回归仍缺独立证据。候选退出后 CUA 可能重启或绑定默认真实 profile，路径、写入及影响未知。旧临时工件已按 Owner 要求清理，已无法从原件复核。 |
+| D18C-06 | 通过。核对持久记录和已授权既有会话，不重跑测试、构建、GUI、IPC、数据库、设备或网络操作，未访问运行 profile、发送上报或要求 Owner 复做。本轮无临时资源。 |
+| D18C-07 | 通过。独立核对正式树 main / f7c5608c0e433612b15821a578a7ef3e4f155cdb。QA2 历史 20 项候选与现树仅 5 项摘要一致，15 项不同，现清单 SHA-256 为 `7cca9b7b6861f688338ac2957621e107bee81323a11a18516a21317b3cee4da3`。后继任务的验收归其自身。缺失人工操作及 13 条实际上报所用二进制与当前源码的精确绑定；当前组合树、r3 DA18-01–10 整体、Windows/VM、真实 PLC、长稳和生产均未获本轮产品验证。 |
+| D18C-08 | 通过。Owner「批准这组收尾草案」覆盖本 r4、ARCH-PLC-001 r8 及其衔接。各范围独立获批。风险接受与最终验收交 Human Owner。 |
+
+Darwin arm64，正式树。以 `shasum -a 256` 核得 r4 spec 为 `67703c4552e7f25335cc63993b3366ed20f9a0d9c3a39a1b972dcaf17729ebf9`、Development tasks 为 `ca5361b254c5d931348bb66d897573bd47856c2461a23fc09c7a1d3aafc13141`、父 r8 spec 为 `38085d5f0dd5d9db444008b9e04963371ddff3995cbb050641281ce6517931e5`，本次追加前 checklist 为 `94095d9297b904bb12bc688e290934fa46a43074d7357e8229b9c1bdaa0068f5`。以 Python 3 标准库、git show HEAD、git rev-parse HEAD 核对历史字节、候选清单、会话摘要及 Development 追加段六个相对链接，均可定位；git diff --check 限本任务目录通过。上述文档命令退出码 0。独立文档复核无 blocker，未创建运行或测试资源。

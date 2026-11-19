@@ -1,7 +1,7 @@
 """字段配置 API 请求结构，保留字段键和语言键原样。"""
 from datetime import datetime
 import re
-from typing import Annotated, Any, Literal
+from typing import Annotated, Generic, Literal, TypeVar
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, StrictBool, StrictInt
 from app.task.errors import TaskErrorCode
 
@@ -43,16 +43,60 @@ class FieldChange(BaseModel):
 
 class ConfigSave(BaseModel):
     model_config = ConfigDict(extra='forbid')
-    module: Literal['plan', 'performance']
-    fieldConfigVersion: StrictInt = Field(ge=1)
-    configRevision: str
+    module: Literal['plan', 'performance', 'shared']
+    configRevision: str = Field(pattern=r'^[1-9][0-9]{0,19}$')
     changes: list[FieldChange] = Field(max_length=200)
 
 
-class Envelope(BaseModel):
+class FieldDelete(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    scope: Literal['shared_sync', 'plan_local', 'performance_local']
+    slotNo: StrictInt = Field(ge=1, le=100)
+    name: str = Field(pattern=r'^[a-z][A-Za-z0-9_]{0,63}$')
+    configRevision: str = Field(pattern=r'^[1-9][0-9]{0,19}$')
+
+
+class FieldDefinitionResult(BaseModel):
+    scope: Literal['shared_sync', 'plan_local', 'performance_local']
+    slotNo: int
+    name: str
+    type: Literal['string', 'number', 'boolean']
+    labels: dict[Literal['zh-CN', 'en-US'], str]
+    unit: str | None
+    enabled: bool
+    isNullable: bool
+    syncEnabled: bool | None
+    performanceOwner: Literal['order_snapshot', 'automated', 'manual'] | None
+    planEditable: bool | None
+    performanceEditable: bool | None
+    planVisible: bool | None
+    performanceVisible: bool | None
+    planOrder: int | None
+    performanceOrder: int | None
+
+
+class FieldConfigResult(BaseModel):
+    configVersion: int
+    configRevision: str
+    fields: list[FieldDefinitionResult]
+
+
+class FieldDeleteResult(BaseModel):
+    configVersion: int
+    configRevision: str
+    outcome: Literal['deleted']
+    scope: Literal['shared_sync', 'plan_local', 'performance_local']
+    slotNo: int
+    name: str
+
+
+Payload = TypeVar('Payload')
+
+
+class Envelope(BaseModel, Generic[Payload]):
     code: int = 200
     message: str = 'success'
-    data: Any
+    data: Payload
     timestamp: int
 
 
@@ -62,4 +106,5 @@ class ErrorEnvelope(BaseModel):
     message: str
     data: None = None
     errorCode: TaskErrorCode
+    details: dict[str, str]
     timestamp: int

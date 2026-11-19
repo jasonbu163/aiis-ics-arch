@@ -75,7 +75,12 @@ pub(crate) struct CatalogDb {
     pub name: String,
     pub number: u16,
     pub size_bytes: u32,
-    pub source_enabled: bool,
+    #[serde(
+        default,
+        deserialize_with = "present",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub source_enabled: Option<bool>,
     pub points: Vec<CatalogPoint>,
 }
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -136,7 +141,7 @@ pub(crate) struct PointMapping {
     pub catalog_point_id: String,
 }
 
-fn canonical_id(value: &str) -> bool {
+pub(crate) fn canonical_id(value: &str) -> bool {
     uuid::Uuid::parse_str(value)
         .map(|id| {
             id.get_version_num() == 4
@@ -220,8 +225,14 @@ impl Catalog {
                 self.origin.kind.as_str(),
                 "device_simulator" | "data_acquisition_agent"
             )
-            || self.export.producer != "device_simulator"
-            || self.export.config_state != "saved_revision"
+            || !matches!(
+                (
+                    self.export.producer.as_str(),
+                    self.export.config_state.as_str()
+                ),
+                ("device_simulator", "saved_revision")
+                    | ("data_acquisition_agent", "saved_draft" | "active_revision")
+            )
             || !canonical_id(&self.origin.profile_id)
             || !canonical_id(&self.origin.plc_id)
             || !canonical_id(&self.export.profile_id)
@@ -258,6 +269,7 @@ impl Catalog {
                 || !db_numbers.insert(db.number)
                 || !(1..=65536).contains(&db.size_bytes)
                 || db.points.is_empty()
+                || (self.export.producer == "device_simulator") != db.source_enabled.is_some()
             {
                 return Err("catalog_db_invalid".into());
             }
@@ -326,6 +338,18 @@ impl Catalog {
 pub(crate) fn verify_bindings(c: &Configuration) -> Result<BTreeSet<String>, String> {
     let mut by_source: BTreeMap<&str, Vec<&CatalogBinding>> = BTreeMap::new();
     let mut db_ids = BTreeSet::new();
+    let mut identity_counts = BTreeMap::<&str, usize>::new();
+    for id in c
+        .plcs
+        .iter()
+        .map(|v| v.id.as_str())
+        .chain(c.dbs.iter().map(|v| v.id.as_str()))
+        .chain(c.points.iter().map(|v| v.id.as_str()))
+        .chain(c.groups.iter().map(|v| v.id.as_str()))
+        .chain(c.sources.iter().map(|v| v.id.as_str()))
+    {
+        *identity_counts.entry(id).or_default() += 1;
+    }
     for binding in &c.catalog_bindings {
         if binding.source_kind != "exchange_json" || !db_ids.insert(binding.local_db_id.clone()) {
             return Err("catalog_binding_invalid".into());
@@ -345,10 +369,26 @@ pub(crate) fn verify_bindings(c: &Configuration) -> Result<BTreeSet<String>, Str
         let src = sources[0];
         let (catalog, _, sha) = parse(src.content.as_bytes())?;
         let local_plcs: Vec<_> = c.plcs.iter().filter(|p| p.id == src.plc_id).collect();
+        let remapped = src.plc_id != catalog.origin.plc_id;
+        let external_ids: BTreeSet<_> = std::iter::once(catalog.origin.plc_id.as_str())
+            .chain(catalog.dbs.iter().map(|d| d.id.as_str()))
+            .chain(
+                catalog
+                    .dbs
+                    .iter()
+                    .flat_map(|d| d.points.iter().map(|p| p.id.as_str())),
+            )
+            .collect();
+        let mut local_ids = BTreeSet::from([src.plc_id.as_str(), src.id.as_str()]);
+        let mut mapped_dbs = BTreeSet::new();
         if src.sha256 != sha
             || src.db_number.is_some()
             || src.lineage_id.is_some()
-            || src.plc_id != catalog.origin.plc_id
+            || !canonical_id(&src.plc_id)
+            || !canonical_id(&src.id)
+            || local_ids.len() != 2
+            || (remapped && external_ids.contains(src.plc_id.as_str()))
+            || external_ids.contains(src.id.as_str())
             || local_plcs.len() != 1
             || !origins.insert(catalog.origin.clone())
             || bindings.len() != catalog.dbs.len()
@@ -374,7 +414,17 @@ pub(crate) fn verify_bindings(c: &Configuration) -> Result<BTreeSet<String>, Str
                 .iter()
                 .find(|d| d.id == b.origin_db_id)
                 .ok_or("catalog_binding_invalid")?;
-            if dbs.len() != 1 || b.source_sha256 != sha || b.local_db_id != b.origin_db_id {
+            if dbs.len() != 1
+                || b.source_sha256 != sha
+                || !canonical_id(&b.local_db_id)
+                || !local_ids.insert(b.local_db_id.as_str())
+                || !mapped_dbs.insert(b.origin_db_id.as_str())
+                || (if remapped {
+                    external_ids.contains(b.local_db_id.as_str())
+                } else {
+                    b.local_db_id != b.origin_db_id
+                })
+            {
                 return Err("catalog_binding_invalid".into());
             }
             let db = dbs[0];
@@ -404,7 +454,13 @@ pub(crate) fn verify_bindings(c: &Configuration) -> Result<BTreeSet<String>, Str
                     .find(|p| p.id == mapping.catalog_point_id)
                     .ok_or("catalog_binding_invalid")?;
                 let address = point.address.as_ref().ok_or("catalog_binding_invalid")?;
-                if mapping.local_point_id != mapping.catalog_point_id
+                if !canonical_id(&mapping.local_point_id)
+                    || !local_ids.insert(mapping.local_point_id.as_str())
+                    || (if remapped {
+                        external_ids.contains(mapping.local_point_id.as_str())
+                    } else {
+                        mapping.local_point_id != mapping.catalog_point_id
+                    })
                     || !mapped.insert(mapping.catalog_point_id.as_str())
                     || !catalog_points.insert(point.id.clone())
                     || point.plc_id != src.plc_id
@@ -423,6 +479,12 @@ pub(crate) fn verify_bindings(c: &Configuration) -> Result<BTreeSet<String>, Str
                     return Err("catalog_binding_invalid".into());
                 }
             }
+        }
+        if local_ids
+            .iter()
+            .any(|id| identity_counts.get(id) != Some(&1))
+        {
+            return Err("catalog_binding_invalid".into());
         }
     }
     if c.points.iter().any(|p| {
@@ -590,6 +652,35 @@ mod tests {
             .unwrap()
             .remove("en-US");
         rejected(value);
+    }
+
+    #[test]
+    fn daa019_producer_controls_db_enabled_presence() {
+        let mut value: Value = serde_json::from_slice(VALID).unwrap();
+        value["export"]["producer"] = json!("data_acquisition_agent");
+        value["export"]["config_state"] = json!("saved_draft");
+        for db in value["dbs"].as_array_mut().unwrap() {
+            db.as_object_mut().unwrap().remove("source_enabled");
+        }
+        assert!(parse(serde_json::to_string(&value).unwrap().as_bytes()).is_ok());
+        value["export"]["config_state"] = json!("active_revision");
+        assert!(parse(serde_json::to_string(&value).unwrap().as_bytes()).is_ok());
+        let mut bad = value.clone();
+        bad["dbs"][0]["source_enabled"] = json!(false);
+        rejected(bad);
+        let mut bad = value.clone();
+        bad["dbs"][0]["source_enabled"] = Value::Null;
+        rejected(bad);
+        let mut bad = value.clone();
+        bad["dbs"][0]["points"][0]
+            .as_object_mut()
+            .unwrap()
+            .remove("source_enabled");
+        rejected(bad);
+        let mut bad = value;
+        bad["export"]["producer"] = json!("device_simulator");
+        bad["export"]["config_state"] = json!("saved_revision");
+        rejected(bad);
     }
 
     #[test]

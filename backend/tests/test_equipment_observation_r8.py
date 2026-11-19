@@ -12,13 +12,10 @@ from sqlalchemy.dialects import mysql
 from app.equipment_observation.domain import ObservationError
 from app.equipment_observation.schemas import SlotPatch
 from app.equipment_observation.services.configuration import update_binding
-from app.equipment_observation.services import ingest as ingest_service
-from app.equipment_observation.services import ingest_v2
 from app.equipment_observation.services.reads import sample_data
 from app.equipment_observation.services import reads
 from app.equipment_observation.models import LatestSnapshot
 from app.plc_facts.crud.async_v2 import target_now
-from app.plc_facts.services import observation_evidence as evidence_service
 from app.plc_facts.services.observation_evidence import _source
 from app.plc_facts.v2_config import load_profile
 from app.plc_facts.v2_domain import V2Error
@@ -181,79 +178,3 @@ async def test_empty_and_scoped_admin_record_queries_are_fail_closed(monkeypatch
     with pytest.raises(ObservationError) as error:
         await reads.detail(DB(), scoped, user, 'latest', 9)
     assert error.value.status == 404
-
-
-@pytest.mark.asyncio
-async def test_sma_task_and_metric_points_must_belong_to_same_current_sample(monkeypatch):
-    now = datetime(2026, 11, 16, 10, 30)
-    binding = {'plcId': 'plc', 'dbNumber': 21, 'taskPointId': 'task', 'idleValue': '', 'maxTaskAgeSeconds': 60}
-    points = [{'pointId': 'task', 'dataType': 'STRING[50]', 'value': '000042', 'quality': 'good', 'observedAt': '2026-11-16T10:30:00+08:00'},
-              {'pointId': 'actual', 'dataType': 'REAL', 'value': 1, 'quality': 'good', 'observedAt': '2026-11-16T10:30:00+08:00'}]
-    row = SimpleNamespace(instance_id=b'instance', sample_id=b'sample', plc_id=b'plc', db_number=21,
-                          source_generation=b'generation', source_seq=1, sampled_at=now, config_revision=b'r1', points_json=points)
-    async def target(db, target): return now
-    async def source(db, binding): return ('instance', 'generation')
-    monkeypatch.setattr(evidence_service, '_profile', lambda: {'target': {}})
-    monkeypatch.setattr(evidence_service, 'probe_target', target)
-    monkeypatch.setattr(evidence_service, '_source', source)
-    class Result:
-        def scalar_one_or_none(self): return row
-    class DB:
-        async def execute(self, query): return Result()
-    refs = [{'kind': 'plc_fact', 'instanceId': 'instance', 'plcId': 'plc', 'sampleId': 'sample', 'pointId': point}
-            for point in ('task', 'actual')]
-    accepted = await evidence_service.confirm_task(DB(), binding, '000042', now, refs, 'sma')
-    assert accepted['pointId'] == 'task' and accepted['sourceGeneration'] == 'generation'
-    assert not await evidence_service.confirm_task(DB(), binding, '000042', now, [dict(refs[0], pointId='other')], 'sma')
-    assert not await evidence_service.confirm_task(DB(), binding, '000042', now, [refs[0], dict(refs[1], sampleId='other')], 'sma')
-    assert not await evidence_service.confirm_task(DB(), binding, '000042', now, [dict(refs[0], sourceGeneration='retired')], 'sma')
-
-
-@pytest.mark.asyncio
-async def test_newer_bad_task_cannot_fall_back_to_older_good_task(monkeypatch):
-    now = datetime(2026, 11, 16, 10, 30)
-    binding = {'plcId': 'plc', 'dbNumber': 21, 'taskPointId': 'task', 'idleValue': '', 'maxTaskAgeSeconds': 60}
-    def sample(seconds, quality, sequence):
-        from datetime import timedelta
-        observed = now - timedelta(seconds=seconds)
-        return SimpleNamespace(instance_id=b'instance', sample_id=f'sample{sequence}'.encode(), plc_id=b'plc', db_number=21,
-                               source_generation=b'generation', source_seq=sequence, id=sequence,
-                               points_json=[{'pointId': 'task', 'dataType': 'STRING[50]', 'value': '000042',
-                                             'quality': quality, 'observedAt': observed.isoformat() + '+08:00'}])
-    async def target(db, target): return now
-    async def source(db, binding): return ('instance', 'generation')
-    monkeypatch.setattr(evidence_service, '_profile', lambda: {'target': {}})
-    monkeypatch.setattr(evidence_service, 'probe_target', target)
-    monkeypatch.setattr(evidence_service, '_source', source)
-    class Result:
-        def scalars(self): return self
-        def all(self): return [sample(10, 'good', 1), sample(2, 'bad', 2)]
-    class DB:
-        async def execute(self, query): return Result()
-    assert not await evidence_service.confirm_task(DB(), binding, '000042', now, [], 'external')
-
-
-@pytest.mark.asyncio
-async def test_confirmed_receipt_replays_after_task_evidence_expires(monkeypatch):
-    producer = {'producerId': 'vendor', 'kind': 'external', 'sourceId': 'source', 'mappingId': 'mapping', 'mappingRevision': 'r1',
-                'grants': [{'equipmentId': 'line', 'groupKey': 'temperature', 'target': 'latest', 'metricKeys': ['actual']}]}
-    body = {'sourceRefs': [{'kind': 'external_event', 'sourceEventId': 'sample'}],
-            'data': {'taskNo': '000042', 'sampledAt': '2026-11-16T10:30:00+08:00', 'values': {'actual': 0}}}
-    normalized = ingest_service.normalize(body, producer, 'latest')
-    normalized['mappingId'], normalized['mappingRevision'] = 'mapping', 'r1'
-    previous = SimpleNamespace(target='latest', producer_id='vendor', event_id=normalized['eventId'],
-                               request_digest=ingest_service.fingerprint(normalized), mapping_id='mapping', mapping_revision='r1',
-                               outcome='stored', result_record_id=9, contract_version='aiis.metric-ingest/v1', result_version='r8')
-    class Result:
-        def scalar_one_or_none(self): return previous
-    class DB:
-        async def execute(self, query): return Result()
-        async def rollback(self): pass
-    async def target(db, target): return datetime(2026, 11, 16, 11)
-    monkeypatch.setattr(ingest_v2, 'probe_target', target)
-    result = await ingest_v2.legacy_replay(DB(), {'target': {}}, producer, 'latest', body)
-    assert result['outcome'] == 'stored' and result['recordId'] == '9'
-    changed = {**body, 'data': {**body['data'], 'values': {'actual': 1}}}
-    with pytest.raises(ObservationError) as error:
-        await ingest_v2.legacy_replay(DB(), {'target': {}}, producer, 'latest', changed)
-    assert error.value.status == 409 and error.value.reason == 'event_conflict'

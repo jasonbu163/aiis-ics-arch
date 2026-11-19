@@ -2,6 +2,8 @@
 
 [中文](equipment-status-process-monitoring.zh-CN.md) · [Project documentation](README.md) · [ARCH-OBS-001 specification](../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md)
 
+The `equipment_observation` module serves current device, process and meter observations via `equipment_status_main`, `process_monitor_main` and `energy_consumption_main`. The retired archive queries, collector status and old device/process/energy routes are absent from current source. The post-retirement observation profile requires schema revision `c9e1a3b5d720`; the two device observation writes accept only v2. Target adoption is recorded in the task. Energy statistics are served at `/monitor/consumption` with the sole page grant `monitor.energy`. The old `/monitor/energy` URL is retired. A deployment still using `monitor.consumption` requires explicit owner review and grant migration. The page grant adds no API permission, meter scope or management access. [Retirement specification](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+
 2026-11-17 (Asia/Shanghai). R10 is the current contract; prior sections remain historical. Independent verification, Human Owner final acceptance, field integration and production deployment are separate.
 
 <a id="r10-guide"></a>

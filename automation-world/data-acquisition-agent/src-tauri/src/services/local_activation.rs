@@ -23,6 +23,10 @@ impl LocalEngine {
             .activation
             .try_lock()
             .map_err(|_| "activation_pending")?;
+        let _mutation = self
+            .configuration_mutation
+            .lock()
+            .map_err(|_| "configuration_busy")?;
         let view = self.configuration()?;
         if view.etag != etag || view.active != expected {
             return Err("activation_conflict".into());

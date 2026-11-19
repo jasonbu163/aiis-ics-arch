@@ -10,13 +10,11 @@ from pydantic import ValidationError
 from common.integration.canonical import canonical_bytes, integration_digests
 from common.integration.envelope import source_time, shanghai_time, validate_source_clock
 from common.integration.http import strict_json, IntegrationPayloadError
-from app.equipment.schemas.integration import TemperatureRequest, DriveRequest, ProductionParameterRequest
 from app.performance.schemas.integration import ProductionObservationRequest, ProcessTemperatureRequest, ProcessTensionRequest, ProcessSpeedRequest
-from app.monitor.schemas.integration import ProcessCurveRequest
 
 pytestmark = pytest.mark.no_db
-REQUESTS = (TemperatureRequest, DriveRequest, ProductionParameterRequest, ProductionObservationRequest,
-            ProcessTemperatureRequest, ProcessTensionRequest, ProcessSpeedRequest, ProcessCurveRequest)
+REQUESTS = {3: ProductionObservationRequest, 4: ProcessTemperatureRequest,
+            5: ProcessTensionRequest, 6: ProcessSpeedRequest}
 RESOURCES = ("temperature", "drive", "production_parameters", "production_observation",
              "process_temperature", "process_tension", "process_speed", "process_curve")
 
@@ -42,8 +40,8 @@ def example(index=1):
             "sourceId": "源_x", "sourceEventId": "event"}], "data": data}
 
 
-@pytest.mark.parametrize("index", range(8))
-def test_eight_explicit_schemas_and_missing_zero(index):
+@pytest.mark.parametrize("index", tuple(REQUESTS))
+def test_historical_performance_schemas_and_missing_zero(index):
     request = REQUESTS[index].model_validate(example(index))
     assert request.data.equipment_id == "line-demo"
     assert request.data.quality == "good"
@@ -69,7 +67,7 @@ def test_raw_size_depth_and_original_decimal():
         assert error.value.status == 413
 
 
-@pytest.mark.parametrize("index", range(8))
+@pytest.mark.parametrize("index", tuple(REQUESTS))
 @pytest.mark.parametrize("mutation", ("unknown", "snake", "null", "bool", "string", "version", "identity"))
 def test_all_schemas_reject_invalid_inputs(index, mutation):
     payload = example(index)
@@ -93,46 +91,6 @@ def test_frozen_simple_vector(raw, canonical, digest):
     assert hashlib.sha256(canonical).hexdigest() == digest
 
 
-def test_float32_exact_vector_presence_and_metadata_boundaries():
-    payload = example()
-    request = DriveRequest.model_validate(payload)
-    assert canonical_bytes({"n": request.data.tv}) == b'{"n":0.100000001490116119384765625}'
-    original = integration_digests(request, "drive")
-    variant = deepcopy(payload); variant.update(eventId="event-2", mappingRevision="r2")
-    changed = integration_digests(DriveRequest.model_validate(variant), "drive")
-    assert original[0] != changed[0] and original[1] == changed[1]
-    variant = deepcopy(payload); variant["data"]["km"] = 0
-    assert integration_digests(DriveRequest.model_validate(variant), "drive")[1] != original[1]
-    assert integration_digests(request, "drive", 101) != original
-    variant = deepcopy(payload); variant["data"]["sampledAt"] = "2026-11-04T02:00:00.123Z"
-    assert integration_digests(DriveRequest.model_validate(variant), "drive") == original
-    variant["sourceRefs"].append({"kind": "plc_fact", "instanceId": "i", "plcId": "p", "sampleId": "s", "pointId": "原_点", "observedAt": "2026-11-04T02:00:00.123456789Z"})
-    forward = DriveRequest.model_validate(variant)
-    variant["sourceRefs"].reverse()
-    assert integration_digests(forward, "drive") == integration_digests(DriveRequest.model_validate(variant), "drive")
-    assert forward.source_refs[-1].observed_at == "2026-11-04T10:00:00.123456789+08:00"
-    variant["sourceRefs"].append(deepcopy(variant["sourceRefs"][0]))
-    with pytest.raises(ValidationError): DriveRequest.model_validate(variant)
-
-
-@pytest.mark.parametrize("index, field, value", [(0,"zone1Set",Decimal("1.00000000001")),
-    (0,"zone1Set",Decimal("1e20")), (1,"tv",Decimal("1e-46")), (1,"tv",Decimal("3.5e38")),
-    (2,"weight",-1), (3,"weight",Decimal("1000000")), (3,"density",Decimal("1.0001")),
-    (4,"duration",Decimal("0.1")), (5,"setTension",-1), (6,"setSpeed",Decimal("0.001")),
-    (7,"z6TempAct",Decimal("1.5")), (7,"z6TempAct",2147483648)])
-def test_technical_numeric_domains(index, field, value):
-    payload = example(index); payload["data"][field] = value
-    with pytest.raises(ValidationError): REQUESTS[index].model_validate(payload)
-
-
-def test_temperature_exact_decimal_does_not_require_binary64_roundtrip():
-    payload = example(0)
-    payload["data"]["zone1Set"] = Decimal("123456789.1234567891")
-    request = TemperatureRequest.model_validate(payload)
-    assert request.data.zone1_set == Decimal("123456789.1234567891")
-    assert b'123456789.1234567891' in canonical_bytes(request.model_dump(by_alias=True, exclude_unset=True))
-
-
 def test_production_status_and_process_order():
     payload = example(3); payload["data"] = {"equipmentId":"line-demo", "quality":"good", "sampledAt":"2026-11-04T10:00:00+08:00", "observationStatus":"unknown", "coilNo":None}
     ProductionObservationRequest.model_validate(payload)
@@ -154,14 +112,6 @@ def test_time_precision_and_injected_database_clock():
         with pytest.raises(ValueError): source_time(value)
 
 
-def test_independently_constructed_complete_digest_vector():
-    payload = example()
-    payload["data"]["tv"] = 0
-    assert integration_digests(DriveRequest.model_validate(payload), "drive") == (
-        'sha256:8ce846b2554fb5a2d0e74c9c70da5be7aa9bfa2d528c69f76a81b8784dd83f58',
-        'sha256:b045713d63eea8316ec0e81cb6054ede59d15efec94cacf587bb33d5adb81a5a')
-
-
 # Exact integer construction of the two sides of |F-N|*1e6 <= |N| for F=2^-149.
 # Each N has 256 significand digits; expectations use Fraction, never a larger Decimal context.
 def float_precision_vectors():
@@ -175,7 +125,7 @@ def float_precision_vectors():
             (Decimal(f'{lower_outside}e-300'),False),(Decimal(f'{lower_outside+1}e-300'),True)]
 
 
-@pytest.mark.parametrize('owner',('equipment','performance','monitor'))
+@pytest.mark.parametrize('owner',('performance',))
 @pytest.mark.parametrize('precision',(6,28,50,200,400))
 def test_float_256_digit_error_boundary_uses_exact_integer_ratio(owner,precision):
     from decimal import localcontext
@@ -198,23 +148,3 @@ def test_float_256_digit_error_boundary_uses_exact_integer_ratio(owner,precision
         assert helper(Decimal('-0'))==0
         assert helper(Decimal('3.4028234663852886e38'))==Decimal.from_float(__import__('struct').unpack('!f',bytes.fromhex('7f7fffff'))[0])
         with pytest.raises(ValueError):helper(Decimal('1e-46'))
-
-
-@pytest.mark.parametrize('index,field',((1,'tv'),(7,'lineSpeedSet')))
-async def test_float_exact_precision_boundary_is_rejected_before_unadopted_gate(index,field,monkeypatch):
-    from core.registrar import create_app
-    from tests.test_business_integration_api import PATHS,OWNERS
-    from httpx import AsyncClient,ASGITransport
-    from importlib import import_module
-    owner=OWNERS[index];prefix=owner.upper()+'_INTEGRATION_'
-    for key,value in {'ENABLED':'True','EQUIPMENT_IDS_JSON':'["line-demo"]','PRODUCER_IDS_JSON':'["sma-demo"]','STORAGE_PROFILE':'unadopted','ADOPTION_FILE':''}.items():monkeypatch.setenv(prefix+key,value)
-    async def denied():pytest.fail('session entered before numeric/adoption validation')
-    monkeypatch.setattr(import_module(f'app.{owner}.api.integration'),'get_db_session',denied)
-    app=create_app(testing=True)
-    async with AsyncClient(transport=ASGITransport(app=app),base_url='http://fixture')as client:
-        for number,permitted in float_precision_vectors():
-            body=example(index);body['data'][field]=number
-            raw=canonical_bytes(body);assert len(raw)<65536
-            response=await client.post('/api/v1/integration/'+PATHS[index],content=raw,headers={'content-type':'application/json'})
-            assert response.status_code==(503 if permitted else 422)
-            assert response.json()['errorCode']==owner+('.integration_not_ready'if permitted else'.integration_invalid_request')

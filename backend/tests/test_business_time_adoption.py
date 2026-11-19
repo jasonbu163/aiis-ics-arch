@@ -37,8 +37,15 @@ def test_plan_is_finite_candidate_and_unknown_never_adopts():
     with pytest.raises(ValueError):module.plan(inspection,classification)
 
 
-def test_tool_only_declared_profiles_and_same_session_probe():
-    module=tool()
-    for owner in ("equipment","performance","monitor"):
-        profile,probe=module.load_owner(owner)
-        assert profile["profileId"]=="be010.fixed-columns/v1" and callable(probe)
+@pytest.mark.parametrize("owner", ("equipment", "monitor"))
+def test_retired_owner_rejected_before_configuration(owner, monkeypatch):
+    module = tool()
+    monkeypatch.setattr(module, "config", lambda *_: pytest.fail("retired owner read target"))
+    with pytest.raises(SystemExit) as error:
+        module.main(["inspect", "--module", owner])
+    assert error.value.code == 2
+
+
+def test_performance_maintenance_export_status_unchanged():
+    with pytest.raises(ValueError, match="owner maintenance export unavailable"):
+        tool().load_owner("performance")

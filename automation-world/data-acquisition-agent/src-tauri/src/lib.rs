@@ -103,6 +103,7 @@ pub fn run() {
     };
     let shutdown = local.clone();
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .manage(commands::local_acquisition::LocalState {
             bootstrap,
             engine: local,
@@ -120,6 +121,11 @@ pub fn run() {
             commands::local_acquisition::daa_preview_catalog,
             commands::local_acquisition::daa_confirm_catalog,
             commands::local_acquisition::daa_cancel_catalog,
+            commands::catalog_export::daa_catalog_export_inspect,
+            commands::catalog_export::daa_catalog_export_preview,
+            commands::catalog_export::daa_catalog_export_directory,
+            commands::catalog_export::daa_catalog_export_commit,
+            commands::catalog_export::daa_catalog_export_cancel,
             commands::local_acquisition::daa_preview_offsets,
             commands::local_acquisition::daa_confirm_offsets,
             commands::local_acquisition::daa_activate_configuration,

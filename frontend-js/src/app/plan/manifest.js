@@ -22,6 +22,19 @@ export const planModule = {
         parentTitleKey: 'plan.title',
         navigation: { visible: true, order: 10, icon: 'Calendar' }
       }
+    },
+    {
+      path: 'plan/shared-fields',
+      name: 'PlanSharedFields',
+      component: () => import('@/app/plan/views/shared-fields/index.vue'),
+      props: { module: 'plan' },
+      meta: {
+        titleKey: 'plan.workflow.sharedFieldSettings',
+        pageId: 'plan.shared-fields',
+        parentTitleKey: 'plan.title',
+        requiresAdmin: true,
+        navigation: { visible: true, order: 20, icon: 'Setting' }
+      }
     }
   ]
 }

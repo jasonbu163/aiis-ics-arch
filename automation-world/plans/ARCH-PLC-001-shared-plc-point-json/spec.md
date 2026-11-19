@@ -1,4 +1,250 @@
 Task ID: ARCH-PLC-001
+Revision: r8
+Status: owner_approved
+Owner Role: PM
+Allowed Writers: PM, Human Owner
+Handoff: Human Owner 已精确批准 ARCH-PLC-001 r8 收尾范围及版本衔接 -> Development 记录文档交接 -> fresh-context Verification 独立文档核对 -> Human Owner 最终验收
+Workflow Mode: STD
+Execution Mode: agent_team_same_session
+Task Namespace: aiis-ics-arch
+Classification: root
+Capability: DS 与 DAA 的逐 PLC S7 点位 JSON 双向交换设计及有界证据收尾
+Owner: Automation World / Device Simulator 与 Data Acquisition Agent
+Acceptance Chain Reference: Development Lifecycle Workflow；本设计与各实施任务分别精确范围批准、Development、fresh-context Verification 和 Human Owner 最终验收。
+Related Task: device-simulator::DS-003 r5; aiis-ics-arch::DAA-017 r5; device-simulator::DS-004; aiis-ics-arch::DAA-018; device-simulator::DS-005; aiis-ics-arch::DAA-019; aiis-ics-arch::ARCH-PLC-002 r1
+
+# ARCH-PLC-001 r8：既有证据的有界收尾（范围已批准）
+
+## 1. 目标与范围
+
+Human Owner 要求按 STD 整理验收范围及未验证边界，使用已完成的人工操作和本机真实上报证据收尾，不再重复测试，保留历史记录与现有数据。本 r8 是**文档及证据边界收尾规格**，不是新增软件开发或对原设计各项功能全部通过的声明。r7 §§2–3 及更早设计记录的产品合同继续作为设计依据；仅本次收尾的证据与验收路径改为下文。r7 A06、A08 及其他需新增实测才能满足的历史条件，不再作为本次文档收尾的必做测试；其未证明部分必须如实列出，不能改写为已通过。原 r7 及其全部更早历史和已批准事实以原字节保留于附录。
+
+本任务不继承其他任务的 QA 或最终验收，也不以本父任务的批准替代它们的批准。实际实施面仍归各子任务；本父任务现无 `tasks.md` 或 `checklist.md`，r8 已精确批准，按 STD 分别创建。本轮不新增或运行测试、构建、GUI、IPC、数据库/profile 操作或真实上报；不要求用户重复操作、重上报或重新生成已清理工件。
+
+## 2. 已有证据及身份
+
+1. [DS-003 r5](../../device-simulator/plans/DS-003-plc-json-export/checklist.md) 与 [DAA-017 r5](../../data-acquisition-agent/plans/DAA-017-plc-json-import/checklist.md) 已各自记载 QA2 `qa_passed`，Human Owner 最终验收待定；其 QA1 失败及 QA2 原阻塞按原记录保留。这是各自精确历史候选的结论，不自动证明本次组合工作树或其他任务通过。
+2. Human Owner 报告曾在 DS/DAA 操作中英文切换和 DAA→DS→DAA 文件往返；在 DAA 看到当前同源拒绝、选择历史新本机实例成功且自动选中、显示 4 点。运行与界面观察归 Human Owner；协调者和 Development 的各自只读比对按原 [DS-005](../../device-simulator/plans/DS-005-plc-json-bidirectional/tasks.md)、[DAA-019](../../data-acquisition-agent/plans/DAA-019-plc-json-bidirectional/tasks.md) 及其 checklist 所记身份和范围引用。未截获该次原生 IPC 返回，不能把界面报告和其他次操作拼成同一 L2 的 IPC 证明。后来的前后基线只能说明该轮可比范围，不能倒证旧轮缺失的逐行前值。
+3. 协调者转述 2026-11-18 一次本机只读核对：DAA dev 的 seq 91–103 共 13 条样本均有匹配 `sampleId` 的 `committed` 回执，outcome 为 `created` 或 `duplicate`，正文和回执 SHA 与存储一致；相同 13 条在本机 MySQL `plc_facts_history` 中的来源身份、正文 SHA 和点位名称/类型/值/质量均匹配。该样本配置中有一个实际点的中英显示名均非空；请求正文未见显示名字段和对应文本；服务端保存点数据未见显示名字段，所核点字段和值一致。`plc_facts_latest` 有 3 点质量为 `good`、最新 seq 103，`plc_source_registry` 绑定匹配；同期 DS 日志无 WARN/ERROR。最后 3 条在 14:39 获回执后，目标 PLC/DB 待发为 0；另有 44 条历史 local-only，不属于待发。此为**协调者报告的特定样本、环境和时点**，本 PM 未亲自核验该数据库、运行日志或界面，后续文档 QA 也不重新操作，不代表所有样本、路径或时段。私有证据定位：本机 `~/.codex/sessions/2026/11/16/rollout-2026-11-16T09-24-47-01a1e1f4-eb7e-74d2-b055-3696e1a855ec.jsonl` 约第 28239–28242 行为样本/回执及 MySQL 比对、28257–28260 行为双语排除核对；行号可能变化，应按内容定位。该会话可能含私有信息，只引用脱敏定位与归属，不得将原始业务正文、点值、地址、身份或凭据复制入仓；若后续无法访问，不得声称已复验。
+4. [DS-004 r2](../../device-simulator/plans/DS-004-bilingual-point-display-names/checklist.md)、[DAA-018 r3](../../data-acquisition-agent/plans/DAA-018-bilingual-point-display-names/checklist.md)、[DS-005 r2](../../device-simulator/plans/DS-005-plc-json-bidirectional/checklist.md)、[DAA-019 r2](../../data-acquisition-agent/plans/DAA-019-plc-json-bidirectional/checklist.md) 的整体 `qa_blocked` 和原 `qa_failed` 历史保留；各项局部复验通过只覆盖原记录所述范围。先前临时文件已按 Owner 要求清理，保留的 checklist 摘要是历史记录，不声称可以重新检查原始工件。[ARCH-PLC-002 r1](../ARCH-PLC-002-plc-json-export-feedback/checklist.md) 已独立 `owner_accepted`，本任务不改写其范围、证据或决定。
+
+## 3. 明确未验证与风险
+
+- DS-005 / DAA-019 原 r7 A06 的同一 L2 原生 IPC 返回及旧轮 context、样本其他列和 `sample_delivery` 前测逐行基线没有完整证据；上述人工观察和后续轮次比对不能补造缺失事实。不能据此宣称原 A06 整项通过或旧历史逐行前后完全不变。
+- DS-004 原 QA4 的原生编辑、列宽跨重启/复位、普通入口、正常关闭与同一 profile 重开等仍未完整证明；其无保存直接交错的旧通用 F3 不声称已修复。DAA-018 原 QA2 的旧普通 native 对新字段安全拒绝、不误采/不误建空库及完整原生交互仍未证明。人工语言切换只按实际报告范围使用，不补齐未观察项。此前隔离事件的具体影响未知，原记录保留，不宣称零写。
+- 上报样本不证明所有路径均不携带显示名，也不证明旧普通程序兼容、未知回执/异常时序、真实 PLC、Windows/VM、长稳、生产部署或现场采用。各任务在各自记录中保留更细的证据层级与限制。
+
+## 4. 本次验收标准与交接
+
+| 编号 | 文档收尾验收标准 |
+| --- | --- |
+| C01 | 分别列出各 Task ID、精确 Revision、当前历史 QA verdict、待决最终验收及其证据链接；保留旧批准、失败、阻塞和已接受事实，不因本修订改变原时点结论。 |
+| C02 | 区分 Human Owner 界面报告、协调者本机只读上报核对、Development 自检与历史独立 QA；记录 §2 的样本边界、已清理工件和不可复验的限制，不将转述写成文档核验者亲见。 |
+| C03 | 对原 r7 A06/A08 及关联任务遗留缺口标为未证明，列明 §3 的风险，不把样本、文件投影、合成测试、不同轮次或原生界面观察混称；不要求补测。 |
+| C04 | 对照本 spec、现存 bundle 和文档 diff 独立核对 C01–C03 及实际交接范围；记录无法核实的来源、缺失证据和未运行项。文档事实不一致或无法满足本 r8 标准时如实给出 `qa_failed` / `qa_blocked`，不得强行通过。 |
+| C05 | 明确分别申请 `device-simulator::DS-004 r3`、`aiis-ics-arch::DAA-018 r4`、`device-simulator::DS-005 r3`、`aiis-ics-arch::DAA-019 r3` 的精确范围批准及各自验收衔接；这四项须以各自 PM 草案为准，不因父 r8 获批而获批。DS-003 r5 / DAA-017 r5 的既有 QA2 可交各自 Owner 终验，不重跑，不将其 QA 传递给新候选。 |
+
+Human Owner 已精确批准 `aiis-ics-arch::ARCH-PLC-001 r8`，Development 仅在本父任务新建 `tasks.md`，从现存任务记录与协调者提供的报告整理上述证据来源、已清理工件、候选及风险，注明未运行测试并交接；不改应用、测试、手册、配置或其他任务文件。协调者按权限和任务实际状态做必要索引机械同步。随后由 fresh-context Verification 只读审阅上述文档、证据归属及允许的文档 diff，在本父任务新建 `checklist.md` 给出**本 r8 文档收尾** verdict；不访问 `.local/dev`、数据库、GUI、原生程序、PLC 或网络，不重跑测试。文档 `qa_passed` 只表示本 r8 的 C01–C05 收尾记录通过，不表示 r7 原 A06/A08、子任务产品功能或真实场景通过；缺证据必须如实记录。
+
+各子任务分别由其 PM 修订、精确批准、Development 记录和 fresh-context Verification 按批准范围评估；最后由 Human Owner 对各精确版本分别决定是否接受其已列风险及最终验收。本次范围批准不等于 QA、例外接受或最终验收；任何发布、部署、数据库写入、数据迁移、真实设备操作和新的外部发送另需明确授权。角色为 contract_only，不代表平台 ACL 或自动路由。PM 适用 `aiis`、`project-governance`；后续仅文档角色按实际触达面选择适用 skill，不替产品测试背书。
+
+## 5. Human Owner 精确范围批准
+
+2026-11-18（Asia/Shanghai），Human Owner 审阅整组收尾草案后，经协调者转达明确回复：
+
+> 批准这组收尾草案
+
+该决定精确批准 `aiis-ics-arch::ARCH-PLC-001 r8`、`device-simulator::DS-004 r3`、`device-simulator::DS-005 r3`、`aiis-ics-arch::DAA-018 r4`、`aiis-ics-arch::DAA-019 r3` 及其版本衔接；审阅前本 r8 草案 SHA-256 为 `a0fdfabbaeebdd95f8bc39fd9f2a0c3b974c13ec5a6b15fe39b6b834aba0eac3`。四个实施任务的批准分别在各自 `spec.md` 记录。本决定只批准已审阅的收尾范围，不是 QA 通过、未验证风险的最终接受或 Human Owner 最终验收；§2–§4 的证据层级、未验证边界和原有失败/阻塞保持。按上述 Development 文档交接、fresh-context Verification 独立文档核对及各自 Human Owner 最终验收接续，不重复测试或操作现有应用、数据库与数据。
+
+## 附录：已批准 ARCH-PLC-001 r7 完整原文及全部历史
+
+以下围栏内完整保留写前 r7 原始 UTF-8 字节（含末尾换行），SHA-256 为 `8c1e3f11da7b2784c95df2008d095a1ca1c34d0ad3ac78e90ec2ada426497b59`。历史时态、范围批准和状态只表示各自时点，不是 r8 已批准。
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~markdown
+Task ID: ARCH-PLC-001
+Revision: r7
+Status: owner_approved
+Owner Role: PM
+Allowed Writers: PM, Human Owner
+Handoff: Human Owner 已精确批准 ARCH-PLC-001 r7、device-simulator::DS-005 r2、aiis-ics-arch::DAA-019 r2 及版本衔接 -> 各任务 Development 接续 -> fresh-context Verification -> Human Owner 分别最终验收
+Workflow Mode: STD
+Execution Mode: agent_team_same_session
+Task Namespace: aiis-ics-arch
+Classification: root
+Capability: DS 与 DAA 的逐 PLC S7 点位 JSON 双向交换详细设计
+Owner: Automation World / Device Simulator 与 Data Acquisition Agent
+Acceptance Chain Reference: Development Lifecycle Workflow；本设计和两个实施任务的精确范围批准、各自 Development、fresh-context Verification 与 Human Owner 最终验收分别记录。
+Related Task: device-simulator::DS-005 r2; aiis-ics-arch::DAA-019 r2; device-simulator::DS-003 r5; aiis-ics-arch::DAA-017 r5; device-simulator::DS-004 r2; aiis-ics-arch::DAA-018 r3
+
+# ARCH-PLC-001 r7：双向 PLC JSON 的安全验收衔接（已批准）
+
+## 1. 范围与当前事实
+
+本 r7 仅修订已批准设计的 A06 验收环境与步骤，已获 Human Owner 精确批准；原 r6 设计、两端 r1 实施范围及其批准事实保留，产品功能、数据保护和其余验收不变。用户要求：DAA「PLC 配置」页头与 DS「实例」页头均有「导入 PLC JSON」「导出 PLC JSON」；导出时按 PLC 实例勾选，一台一个完整文件；DS→DAA 已有能力须保留，新增 DAA→DS，并使从 DAA 导入的实例能够由 DS 导出相同合同。显示名未设置时留空，不能进入 DAA 实际 v2 上报。FF/CA 暂不处理。
+
+既有 DS-003 r5 和 DAA-017 r5 各自 `qa_passed`、待 Human Owner 最终验收；它们的精确范围、QA1 失败、QA2 阻塞与通过证据保持在各自 bundle，不能把新候选的结果倒记给旧候选。DS-004 r2、DAA-018 r3 仍各自 `qa_blocked`，本设计不改变其状态。原 r5 的 JSON、双语、物理布局、来源和真实上报保护规则继续适用，但以下条款明确接替 r5 中“DAA 不导出、DS 不导入、DAA 仅接受 DS producer、历史身份一律拒绝”的本期限定。r6 及其所含 r5 完整历史按原字节封存在本文附录；子任务采用自己的 Task ID / Revision，不继承批准或验收。
+
+本 r7 仅规定跨端合同及边界；软件实施及验收衔接分别以 [DS-005 r2](../../device-simulator/plans/DS-005-plc-json-bidirectional/spec.md)、[DAA-019 r2](../../data-acquisition-agent/plans/DAA-019-plc-json-bidirectional/spec.md) 为准。此前两项 r1 已精确批准并已有 Development 候选，相关实现和自检不是独立 QA；本 r7 和两项 r2 已获 Human Owner 分别精确批准。两端候选共同组成闭环，任一侧未通过时不得宣称整体通过。
+
+## 2. 文件和用户操作合同
+
+1. 两端仍使用附录 A 中 r6 所封存的 r5 §4 的 `format=aiis.plc_points`、整数 `schema_version=1`，每文件一 PLC、完整 DB/点（含停用点），不制造筛选版。严格编码、1 MiB / 层级 16 / 32 DB / 4096 点、字段闭合、UUID v4、类型/地址/重叠、TSAP 和源校验继续按 r5。两端导入器均接受符合该合同的 `device_simulator` 与 `data_acquisition_agent` producer，而非用 origin 推断 producer。出现不满足合同或本地约束的内容应定位并拒绝，不静默裁剪、猜测或改名。
+2. DS 导出选择真实 `saved_revision`；DAA 导出由用户选 `saved_draft` 或 `active_revision`，读取所选持久配置的实际 payload 字节、标识及 SHA，不混入尚未保存的界面编辑。DAA 普通 DB/UDT 来源与已导入 catalog 来源，只要是符合合同的已保存配置，都必须可导出；不是只支持 DS catalog。实际导出者的 `export.producer`、profile、版本、真实 `+08:00` 生成时间与所选 payload 摘要须如实填写；草稿 ETag 不称为不可变 revision。
+3. `origin` 为外部 PLC 身份命名空间，DS/DAA 转发均保留既有 origin 与 DB/点外部 ID；本地独立创建的 DAA PLC 以真实 DAA profile/PLC 创建 origin。DB 和点 ID、技术名、类型、地址、启停声明、`source_path`、双语显示名、旧无语言名称及独立 description 均按各自真实配置和合同表达。DAA 的 `comment` 映射 description；不可从旧名称或另一语言猜值。DAA 导出省略 DB 层 `source_enabled`，点层取其当前 Point.enabled；DS 导出两层取自身实际 enabled。两者本地启停含义不同；导入时不据对方标志自动授予采集、模拟或写入许可。
+4. 两端导出在各自页面入口提供实例勾选、版本/内容预览和显式目标目录；沿用 DS-003 r5 的无覆盖、原子发布、取消不留半文件、逐实例报告与真实版本差异提示。不得在界面数据中拼接未校验的文件，亦不静默保存/激活草稿。新文件选目录的授权仅限本次用户选择，不提供任意前端路径访问。
+5. DS 导入一份 DS 或 DAA 文件，仅新建实例草稿。客户端地址只作为来源信息展示，不作为本机监听地址、也不试连；用户必须显式确认模拟监听 IP/端口及 rack/slot，冲突拒绝。新实例不自动启动，DB/点默认停用，策略/初值/权限不从 DAA 采集启用推断。按自身正常名称和布局确认及版本保存流程处理。保存原 JSON 字节/SHA、外部 origin 和逐 DB/点映射，目录来源不得冒称 TIA 源文件；导出该实例时仍保留外部 origin/ID，真实 producer 为 DS。
+6. DAA 导入一份 DS 或 DAA 文件，预览原文件、外部身份、全部点、双语、description、目标地址及冲突；确认只原子提交一个新 PLC 草稿，默认停用、未分组、不连接、不采集、不上报、不自动激活。无历史/当前身份冲突时可沿用既有 DAA-017 的原 ID 新建规则。端点冲突由用户修改并重新预览；不允许覆盖、合并或重写当前实例。与当前草稿、active 或正在运行的实例为同一 origin/身份时拒绝；仅移除草稿但 active 仍有原实例时，提示先由用户按现有流程停采/断连并显式激活移除后的配置，再重试，不自动操作。
+
+## 3. 已有历史的安全再导入
+
+DAA 现有 `ensure_catalog_new` 还检查配置历史、runtime context、来源归档和 `plc_sources`；因此原实例删除后仍可能与历史冲突。直接复用旧本地 PLC ID 可能沿用采集 generation 或上报绑定，不能用“删除历史”或静默复用解决。
+
+当相同外部 origin 或 PLC/DB/点身份只存在于历史，而当前草稿、active 和正在运行配置均无该实例、目标端点可用时，允许用户在预览中显式选择 **“作为新的本机实例导入”**。系统为新 PLC、DB、点及来源对象创建不与当前和历史对象冲突的全新本地 UUID，完整持久保存外部 origin、外部 DB/点 ID → 新本地 ID 映射和输入原字节/SHA；每次预览/确认以源字节、端点、草稿 ETag 及映射绑定并重验，取消、过期、并发或失败无部分写入。显示外部身份与新本地身份的含义及新旧历史分开，用户不确认则拒绝。只在历史出现相同文件 SHA 时可按真实字节校验复用物理内容归档，但不得覆盖其原 ID、元数据或历史；新的逻辑来源/映射仍须独立且可追溯。
+
+新本机身份不继承旧 PLC 的采集 generation/sequence、样本、队列、回执、reporting binding 或已冻结正文；默认无上报绑定、未分组且停用。旧历史保持原身份并可按原有规则查询；界面不能宣称自动合并历史。之后的采集/上报须按既有显式配置和审批边界操作，导入和激活本身不发送真实请求。导出此实例时通过持久映射恢复外部 origin/DB/点 ID，并如实反映 DAA 当前自身点启用值，不能输出新本地 ID 冒充外部 ID。若现有存储、原文件完整性、映射重验、旧上报绑定隔离或原子性无法安全满足，停止并回 PM；不改变历史、不做数据库物理 DDL 或迁移来绕过。
+
+## 4. 验收与实际测试路径
+
+| 编号 | 必须可观察的结果 |
+| --- | --- |
+| A01 | DAA PLC 配置页头及 DS 实例页头均有明确中英导入/导出入口；导出按保存来源勾选实例，一台一份；旧 DB/UDT 导入不受影响，DAA 不同时挂载重复目录弹窗。 |
+| A02 | DAA 原生 DB/UDT 配置及 catalog 配置均可导出完整合同；DS 导入文件并保存版本后重新导出，外部 origin、DB/点 ID、技术字段、双语、独立描述和空值真实保留；producer / 启停语义按实际导出方表达。 |
+| A03 | 两端接受合规双 producer；重复键/未知字段、非法 UUID、错类型、越界/重叠、超限、缺失绑定与篡改归档按本端合同拒绝。DAA 对其当前模型不能表达的非默认 TSAP 明确拒绝；DS 对自身可表达的 TSAP 不得无故拒绝，对无法表达的值须提示并阻断，不能静默改写。DS 保留完整 256 字节旧无语言显示名不截断。 |
+| A04 | 当前同源或身份、端点冲突明确阻断；历史同源仅经显式选择创建全新本地身份，双向映射、源归档、重开及再次导出保持；旧历史、来源、采样 generation/sequence、队列、回执和上报绑定保持，新实例不继承绑定。 |
+| A05 | 同一保存版本多次导出、取消、同名文件及多选部分失败分别可核查；只读导出不改变配置、来源、selected/loaded 或运行。实际文件 SHA 随真实导出时间可不同，不将不同时间的整文件哈希要求相等。 |
+| A06 | 按 §4.1 分别完成自有合成 profile 的真实持久化激活/历史隔离验证，以及两端 `.local/dev` 原生界面实际 DAA→DS→DAA 文件往返；另用真实 DAA 普通 DB/UDT 来源文件完成 DS 导入。三部分分别记录证据，任何必要部分不满足即 blocked；不以服务级检查、fixture 或预览冒充原生提交。 |
+| A07 | 测试开始前核对应用、进程、profile、活动版本、原实例与自动连接/采集/上报；确认 DAA 原 `DEV-PLC-A` 及其配置、历史、样本、队列与回执不被修改或删除。只使用可识别合成对象、已确认的本地输出目录和 loopback 示例；无法保证旧实例不受触发时停止，不调整原有设置来强行继续。正常新草稿、revision、来源归档和审计可能增加，不能说整个 profile 零写。 |
+| A08 | 既有 DS→DAA 真实文件导入及原 DB/UDT 功能做针对性回归；中英文/未设值和 DAA 实际 v2 构造路径以假 transport 证实显示名不外发，不执行真实 POST。相关构建/单元与必要的 macOS 原生页面检查由 Development 和 fresh Verification 记录；不以旧候选 QA 替代新候选。 |
+| A09 | 两端用户手册按实际行为说明版本选择、地址确认、冲突、新本机身份与历史不合并、清理及实测限制；仅通过正常应用清理本任务合成对象，已成为历史的来源和记录保留。Windows、VM、真实 PLC、生产部署与真实上报不为本轮前置。 |
+
+### 4.1 r7 已批准的三部分验证及证据边界
+
+**A. 自有合成 profile：激活与历史隔离。** 在自有临时合成 profile 通过实际存储和应用服务保存并激活独立测试 PLC，形成旧配置与 runtime context；再移除它、保存并显式激活移除后的配置，随后实际以新本地身份导入，验证原身份、配置、样本、上报绑定、队列与回执独立保留，新 PLC/DB/点及来源本地身份不继承旧 generation/sequence 或绑定，新实例和点默认停用、未分组。合成样本及回执只能通过自有测试数据和 fake transport 制造，不连接真实设备、不发真实 POST。Development 现有针对性服务级检查若对应最终候选，可作为 Development 证据，由 fresh-context Verification 独立复核；服务级操作不称为 GUI。临时 profile 归任务所有，使用后按实际证据依赖和资源规则回收。
+
+**B. 两端 `.local/dev`：真实原生文件往返。** 只复用前次 DAA-017 QA 中本线程建立、已实际激活且已安全移出的独立合成 PLC `e1dc3ad5-305f-4367-af1b-92333a582730` 的真实历史；其原 DS JSON 在历史来源归档，SHA-256 为 `5198f7fef382f9524b81c66275b76cbdb779deb7741df16d3005f809bf6662e3`。先只读核对该合成文件、来源 SHA、外部 origin/DB/点 ID、已保存 context 和先前 11 条 local-only 样本；可将**该确认属旧测试的合成 JSON**只读提取至本任务临时目录，不复制或修改用户旧数据库、配置或历史。旧 QA 已发生激活与采集，不得改写成本轮行为。
+
+在核对后的 DAA 正式原生界面，从该合成 JSON 按“新本机实例”确认导入当前草稿，记录实际新本地 PLC/DB/点 ID L1；原目标端点若冲突，由用户选择经确认且未占用的 loopback 端点重新预览，不改既有实例。从 DAA 的 `saved_draft` 实际导出文件 F1。经 DS 正式原生界面使用 F1 新建测试实例、显式填写自有 loopback 监听信息、完成原有名称/布局确认并保存 DS 版本，再导出真实文件 F2。DAA 当前同源 L1 仍在草稿时对 F2 应明确拒绝；随后通过 DAA UI 只移除 L1 并保存草稿，不激活，使用 F2 真正确认新建 L2，核对 L2 与 L1 及原历史本机 ID 均不同、`importedLocalPlcId` 和选中项为 L2；外部 origin、DB/点外部 ID、类型、地址、双语及 description 保持且真实 producer/启用语义各自正确。对 L2 的 DAA 再导出按 D19-04 复核映射。记录 F1/F2 的原始文件 SHA、来源版本及逐项证据，不能用手写文件或仅预览替代实际提交。
+
+本部分 **DAA 全程不激活、不采集、不上报**，不启动 DS 模拟或连接真实 PLC；不创建 DAA configuration revision，也不删旧版本。开始和结束核对已有 8 个配置版本的 ID / payload SHA、相关 context、原合成样本/归档和 `DEV-PLC-A` 草稿、active、来源及上报队列/回执保持；正常审计和只属于本任务的草稿/来源操作如实记录，不说整个 profile 零写。实际启动前重核应用、profile、进程、自动连接/采集/上报及未完成的 activation intent；待恢复或状态不明则停止，不通过更改用户数据绕过。DS 保存版本前核对不会裁剪任何既有历史。测试后仅通过正常应用移除 L2 与任务自建 DS 实例、保存草稿；已引用的任务历史及归档依规则保留，临时实际文件仅在无证据依赖时清理。无法安全操作或原生 GUI 无法完成即 blocked。
+
+**C. 真实 DB/UDT 来源：DS05-02。** 在不修改 DAA `DEV-PLC-A` 的前提下，由 DAA UI 从该 PLC 的已保存普通 DB/UDT 来源只读导出一份真实完整文件；用该文件在空闲的 DS 新建**本任务测试实例**，显式确认自有 loopback 模拟监听地址，不再次提供 DB/UDT，按 DS 现有确认流程保存并重导。核对 BOOL/INT/REAL、双语、独立 description、外部身份、类型及地址满足 DS05-02/03；来源标注为该既有 DB/UDT 配置，不把其内容冒称合成，也不把 catalog 来源冒称 DB/UDT。DS 重导的实际文件交 DAA 原生界面预览时，当前 `DEV-PLC-A` 同源，应明确拒绝、不提交；该拒绝不能代替 B 的实际新实例导入。该 DS 测试实例为本任务新建对象、保持停机；不连接该文件中的原客户端地址。此有限只读输入符合 A07 对既有 `DEV-PLC-A` 的保护；A07 的任务测试对象仍需可识别、不得覆盖已有对象。实际文件仅供本次验证，不进入仓库，确认无证据依赖后安全清理。
+
+上述 `.local/dev` 及自有临时 profile 使用、测试对象清理为用户已授权的环境范围；本 r7 及两项 r2 验收衔接已获精确批准。不能删除整个 profile、任意既有实例或历史；测试目标、端口、待恢复激活或安全隔离不明确时停止。先前界面隔离事件及未完成的基础任务验证不因本 r7 消失。
+
+## 5. 执行边界、风险与 handoff
+
+- Human Owner 曾分别精确批准 DS-005 r1、DAA-019 r1 和 r6 的旧任务顺序衔接；r1 候选及 Development 自检按各自 tasks 原记录保留。本次 A06 变更属于实质验收修订，Human Owner 已精确批准本 r7、DS-005 r2、DAA-019 r2 及版本衔接，Development 按各自文件 allowlist 接续；沿用原顺序，不以 DS-003 r5、DAA-017 r5、DS-004 r2 或 DAA-018 r3 的最终验收作为新任务开工前置。协调共享文件与最终组合候选；旧 QA 及各任务 Human Owner 最终验收独立保留。
+- 导入更换本地身份是为隔离历史而设计的显式新建，不是原实例更新、历史恢复或自动上报续传。真实项目启用或重新绑定上报仍走既有流程与独立 gate。旧版二进制读取新增配置元数据的兼容性须实测或如实标明，不得推断；物理 DDL、迁移、真实设备、外部 POST、FF/CA、发布及生产采用均不包含在内。
+- PM 使用 `aiis`、`project-governance` 收敛合同；交 Development 按各子任务加载 `plc-point-mapping`、`rust-runtime`、`desktop-tauri`、`frontend-ui`、`i18n-workflow`、`code-document-indexer`，Verification 以 fresh context 独立复核。项目角色为 contract_only；角色约定和 diff 审计不证明平台 ACL 或自动路由。
+- 原 r6 与两项 r1 的批准事实见下节及附录；本 r7、DS-005 r2、DAA-019 r2 的精确批准见 §7。
+
+## 6. r6 Human Owner 精确范围批准（历史）
+
+2026-11-17（Asia/Shanghai），Human Owner 审阅协调者列明的三个精确版本后明确回复：
+
+> 批准三个版本，继续开发
+
+该决定精确批准 `aiis-ics-arch::ARCH-PLC-001 r6` 设计、`device-simulator::DS-005 r1` 和 `aiis-ics-arch::DAA-019 r1` 各自实施范围，以及 §5 所述旧任务时序衔接。审阅时完整草案 SHA-256：ARCH-PLC-001 r6 为 `69c744e82077e7c21dff8032ad0231d9ea0814bdb0f684e0f9630ba3d81d4180`；DS-005 r1 为 `23e9538ceab3d51ad49f05f8cb24a2aa3f6298c19ea77e06a4d738f6a9e62190`；DAA-019 r1 为 `576646f841feebf06258435a7dc0f089d7e40be5c96da6676a204eb318161529`。
+
+当时各任务按各自已批准 allowlist 进入 Development；本次验收修订已获新版本批准，接续后进行 fresh-context Verification 和 Human Owner 最终验收。此决定不改变旧任务独立 QA / Owner 状态，不批准真实设备、真实 POST、物理 DDL、历史删除、FF/CA、发布或生产采用。
+
+
+## 7. r7 修订及 Human Owner 精确批准
+
+2026-11-17，协调者只读核对 DAA `.local/dev` 已有 8 个配置版本；当前激活的 `prune_config` 使用 `skip(8)`，继续激活可能裁剪已有用户旧版本，不能满足原 r6 A06 与 A07 同时保护历史的要求。本 r7 只把 A06 的激活与历史证明移到自有合成 profile，并以既有旧测试的真实历史和两端原生文件往返验证当前实际环境；补充真实 DB/UDT 来源文件的 DS 验证。原 A01–A05、A07–A09、产品合同和数据保护不变。原 r6、DS-005 r1、DAA-019 r1 以及其批准、Development 候选和证据不倒改。
+
+2026-11-18（Asia/Shanghai），Human Owner 审阅三个精确版本后明确回复：
+
+> 批准 ARCH-PLC-001 r7、DS-005 r2、DAA-019 r2 及版本衔接，继续完成联测和清理。
+
+该决定精确批准 `aiis-ics-arch::ARCH-PLC-001 r7`、`device-simulator::DS-005 r2`、`aiis-ics-arch::DAA-019 r2` 及版本/既有实施衔接。审阅时完整草案 SHA-256：ARCH-PLC-001 r7 为 `e9ed70a41b1f7255dbc65ddbc83f4c58db1900cd4e172dddc48f39a99f170cd9`；DS-005 r2 为 `bb94ef1d1b6cc2a88deeb7e984d4e69b98d79412b711fb0c9e46ddf706c93ceb`；DAA-019 r2 为 `48721591ef64ab11100977858c58f51deea08ade5caf26bfe0618d692ed53705`。各任务 Development 接续、fresh-context Verification 和 Human Owner 最终验收仍各自独立；本批准不代表 QA 或最终验收，也不授权真实设备、真实 POST、物理 DDL、删除用户历史、FF/CA 或发布。
+
+## 附录 A：已批准 ARCH-PLC-001 r6 完整原文（含全部历史）
+
+写前完整 SHA-256：`0eb0c10e70507903347b216d2ac712add430fc4511b251a2ad93e00e19ce1408`。围栏内保留原始 UTF-8 字节及末尾换行，含 r5 及更早历史；本 r7 已获精确范围批准。
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~markdown
+Task ID: ARCH-PLC-001
+Revision: r6
+Status: owner_approved
+Owner Role: PM
+Allowed Writers: PM, Human Owner
+Handoff: Human Owner 已精确批准 ARCH-PLC-001 r6、device-simulator::DS-005 r1、aiis-ics-arch::DAA-019 r1 及旧任务时序衔接 -> 各任务 Development -> fresh-context Verification -> Human Owner 分别最终验收
+Workflow Mode: STD
+Execution Mode: agent_team_same_session
+Task Namespace: aiis-ics-arch
+Classification: root
+Capability: DS 与 DAA 的逐 PLC S7 点位 JSON 双向交换详细设计
+Owner: Automation World / Device Simulator 与 Data Acquisition Agent
+Acceptance Chain Reference: Development Lifecycle Workflow；本设计和两个实施任务的精确范围批准、各自 Development、fresh-context Verification 与 Human Owner 最终验收分别记录。
+Related Task: device-simulator::DS-005 r1; aiis-ics-arch::DAA-019 r1; device-simulator::DS-003 r5; aiis-ics-arch::DAA-017 r5; device-simulator::DS-004 r2; aiis-ics-arch::DAA-018 r3
+
+# ARCH-PLC-001 r6：同一 PLC JSON 的双向交换（设计范围已批准）
+
+## 1. 范围与当前事实
+
+本 r6 设计范围已获 Human Owner 精确批准；本决定不代表最终验收。用户要求：DAA「PLC 配置」页头与 DS「实例」页头均有「导入 PLC JSON」「导出 PLC JSON」；导出时按 PLC 实例勾选，一台一个完整文件；DS→DAA 已有能力须保留，新增 DAA→DS，并使从 DAA 导入的实例能够由 DS 导出相同合同。显示名未设置时留空，不能进入 DAA 实际 v2 上报。FF/CA 暂不处理。
+
+既有 DS-003 r5 和 DAA-017 r5 各自 `qa_passed`、待 Human Owner 最终验收；它们的精确范围、QA1 失败、QA2 阻塞与通过证据保持在各自 bundle，不能把新候选的结果倒记给旧候选。DS-004 r2、DAA-018 r3 仍各自 `qa_blocked`，本设计不改变其状态。原 r5 的 JSON、双语、物理布局、来源和真实上报保护规则继续适用，但以下条款明确接替 r5 中“DAA 不导出、DS 不导入、DAA 仅接受 DS producer、历史身份一律拒绝”的本期限定。r5 及其完整历史按原字节封存在本文附录；子任务采用自己的 Task ID / Revision，不继承批准或验收。
+
+本 r6 仅规定跨端合同及边界；软件实现分别以 [DS-005 r1](../../device-simulator/plans/DS-005-plc-json-bidirectional/spec.md)、[DAA-019 r1](../../data-acquisition-agent/plans/DAA-019-plc-json-bidirectional/spec.md) 为准。两端均为独立拥有者和验收链；Human Owner 本次已分别精确批准两项 r1。两端候选共同组成闭环，任一侧未通过时不得宣称整体通过。
+
+## 2. 文件和用户操作合同
+
+1. 两端仍使用附录 r5 §4 的 `format=aiis.plc_points`、整数 `schema_version=1`，每文件一 PLC、完整 DB/点（含停用点），不制造筛选版。严格编码、1 MiB / 层级 16 / 32 DB / 4096 点、字段闭合、UUID v4、类型/地址/重叠、TSAP 和源校验继续按 r5。两端导入器均接受符合该合同的 `device_simulator` 与 `data_acquisition_agent` producer，而非用 origin 推断 producer。出现不满足合同或本地约束的内容应定位并拒绝，不静默裁剪、猜测或改名。
+2. DS 导出选择真实 `saved_revision`；DAA 导出由用户选 `saved_draft` 或 `active_revision`，读取所选持久配置的实际 payload 字节、标识及 SHA，不混入尚未保存的界面编辑。DAA 普通 DB/UDT 来源与已导入 catalog 来源，只要是符合合同的已保存配置，都必须可导出；不是只支持 DS catalog。实际导出者的 `export.producer`、profile、版本、真实 `+08:00` 生成时间与所选 payload 摘要须如实填写；草稿 ETag 不称为不可变 revision。
+3. `origin` 为外部 PLC 身份命名空间，DS/DAA 转发均保留既有 origin 与 DB/点外部 ID；本地独立创建的 DAA PLC 以真实 DAA profile/PLC 创建 origin。DB 和点 ID、技术名、类型、地址、启停声明、`source_path`、双语显示名、旧无语言名称及独立 description 均按各自真实配置和合同表达。DAA 的 `comment` 映射 description；不可从旧名称或另一语言猜值。DAA 导出省略 DB 层 `source_enabled`，点层取其当前 Point.enabled；DS 导出两层取自身实际 enabled。两者本地启停含义不同；导入时不据对方标志自动授予采集、模拟或写入许可。
+4. 两端导出在各自页面入口提供实例勾选、版本/内容预览和显式目标目录；沿用 DS-003 r5 的无覆盖、原子发布、取消不留半文件、逐实例报告与真实版本差异提示。不得在界面数据中拼接未校验的文件，亦不静默保存/激活草稿。新文件选目录的授权仅限本次用户选择，不提供任意前端路径访问。
+5. DS 导入一份 DS 或 DAA 文件，仅新建实例草稿。客户端地址只作为来源信息展示，不作为本机监听地址、也不试连；用户必须显式确认模拟监听 IP/端口及 rack/slot，冲突拒绝。新实例不自动启动，DB/点默认停用，策略/初值/权限不从 DAA 采集启用推断。按自身正常名称和布局确认及版本保存流程处理。保存原 JSON 字节/SHA、外部 origin 和逐 DB/点映射，目录来源不得冒称 TIA 源文件；导出该实例时仍保留外部 origin/ID，真实 producer 为 DS。
+6. DAA 导入一份 DS 或 DAA 文件，预览原文件、外部身份、全部点、双语、description、目标地址及冲突；确认只原子提交一个新 PLC 草稿，默认停用、未分组、不连接、不采集、不上报、不自动激活。无历史/当前身份冲突时可沿用既有 DAA-017 的原 ID 新建规则。端点冲突由用户修改并重新预览；不允许覆盖、合并或重写当前实例。与当前草稿、active 或正在运行的实例为同一 origin/身份时拒绝；仅移除草稿但 active 仍有原实例时，提示先由用户按现有流程停采/断连并显式激活移除后的配置，再重试，不自动操作。
+
+## 3. 已有历史的安全再导入
+
+DAA 现有 `ensure_catalog_new` 还检查配置历史、runtime context、来源归档和 `plc_sources`；因此原实例删除后仍可能与历史冲突。直接复用旧本地 PLC ID 可能沿用采集 generation 或上报绑定，不能用“删除历史”或静默复用解决。
+
+当相同外部 origin 或 PLC/DB/点身份只存在于历史，而当前草稿、active 和正在运行配置均无该实例、目标端点可用时，允许用户在预览中显式选择 **“作为新的本机实例导入”**。系统为新 PLC、DB、点及来源对象创建不与当前和历史对象冲突的全新本地 UUID，完整持久保存外部 origin、外部 DB/点 ID → 新本地 ID 映射和输入原字节/SHA；每次预览/确认以源字节、端点、草稿 ETag 及映射绑定并重验，取消、过期、并发或失败无部分写入。显示外部身份与新本地身份的含义及新旧历史分开，用户不确认则拒绝。只在历史出现相同文件 SHA 时可按真实字节校验复用物理内容归档，但不得覆盖其原 ID、元数据或历史；新的逻辑来源/映射仍须独立且可追溯。
+
+新本机身份不继承旧 PLC 的采集 generation/sequence、样本、队列、回执、reporting binding 或已冻结正文；默认无上报绑定、未分组且停用。旧历史保持原身份并可按原有规则查询；界面不能宣称自动合并历史。之后的采集/上报须按既有显式配置和审批边界操作，导入和激活本身不发送真实请求。导出此实例时通过持久映射恢复外部 origin/DB/点 ID，并如实反映 DAA 当前自身点启用值，不能输出新本地 ID 冒充外部 ID。若现有存储、原文件完整性、映射重验、旧上报绑定隔离或原子性无法安全满足，停止并回 PM；不改变历史、不做数据库物理 DDL 或迁移来绕过。
+
+## 4. 验收与实际测试路径
+
+| 编号 | 必须可观察的结果 |
+| --- | --- |
+| A01 | DAA PLC 配置页头及 DS 实例页头均有明确中英导入/导出入口；导出按保存来源勾选实例，一台一份；旧 DB/UDT 导入不受影响，DAA 不同时挂载重复目录弹窗。 |
+| A02 | DAA 原生 DB/UDT 配置及 catalog 配置均可导出完整合同；DS 导入文件并保存版本后重新导出，外部 origin、DB/点 ID、技术字段、双语、独立描述和空值真实保留；producer / 启停语义按实际导出方表达。 |
+| A03 | 两端接受合规双 producer；重复键/未知字段、非法 UUID、错类型、越界/重叠、超限、缺失绑定与篡改归档按本端合同拒绝。DAA 对其当前模型不能表达的非默认 TSAP 明确拒绝；DS 对自身可表达的 TSAP 不得无故拒绝，对无法表达的值须提示并阻断，不能静默改写。DS 保留完整 256 字节旧无语言显示名不截断。 |
+| A04 | 当前同源或身份、端点冲突明确阻断；历史同源仅经显式选择创建全新本地身份，双向映射、源归档、重开及再次导出保持；旧历史、来源、采样 generation/sequence、队列、回执和上报绑定保持，新实例不继承绑定。 |
+| A05 | 同一保存版本多次导出、取消、同名文件及多选部分失败分别可核查；只读导出不改变配置、来源、selected/loaded 或运行。实际文件 SHA 随真实导出时间可不同，不将不同时间的整文件哈希要求相等。 |
+| A06 | 在经确认的两端 `.local/dev` 通过应用完成一次**真实文件** DAA→DS→DAA：使用独立合成 PLC，先保存并显式激活一次以形成历史，但不连接、不采集、不上报；DAA 导出；DS 导入并保存，DS 导出；DAA 通过正常 UI 移除该测试 PLC、保存并显式激活移除后的配置，保留历史，再以新本机身份实际导入 DS 原文件并核对完整内容与身份映射。先证明当前同源拒绝；非手写 fixture、非只解析/预览。若测试环境/历史冲突无法安全处理，明确 blocked。 |
+| A07 | 测试开始前核对应用、进程、profile、活动版本、原实例与自动连接/采集/上报；确认 DAA 原 `DEV-PLC-A` 及其配置、历史、样本、队列与回执不被修改或删除。只使用可识别合成对象、已确认的本地输出目录和 loopback 示例；无法保证旧实例不受触发时停止，不调整原有设置来强行继续。正常新草稿、revision、来源归档和审计可能增加，不能说整个 profile 零写。 |
+| A08 | 既有 DS→DAA 真实文件导入及原 DB/UDT 功能做针对性回归；中英文/未设值和 DAA 实际 v2 构造路径以假 transport 证实显示名不外发，不执行真实 POST。相关构建/单元与必要的 macOS 原生页面检查由 Development 和 fresh Verification 记录；不以旧候选 QA 替代新候选。 |
+| A09 | 两端用户手册按实际行为说明版本选择、地址确认、冲突、新本机身份与历史不合并、清理及实测限制；仅通过正常应用清理本任务合成对象，已成为历史的来源和记录保留。Windows、VM、真实 PLC、生产部署与真实上报不为本轮前置。 |
+
+上述 `.local/dev` 使用与本任务合成对象清理已有用户授权；执行前必须重新核对现状。不能删除整个 profile、任意既有实例或历史；测试目标、端口或安全隔离不明确时停止。先前界面隔离事件及未完成的基础任务验证不因本 r6 消失。
+
+## 5. 执行边界、风险与 handoff
+
+- Human Owner 已分别精确批准 DS-005 r1、DAA-019 r1 及本 r6 的顺序衔接，两项新任务可按各自范围实施，不以 DS-003 r5、DAA-017 r5、DS-004 r2 或 DAA-018 r3 的最终验收作为开工前置。各任务按自己的文件 allowlist、风险和独立 QA 执行；涉及相同工作树时协调共享文件和最终组合候选，不能覆盖并行变更。两项原 r5 QA 和最终验收独立保留，不因新 r1 被自动验收或作废。
+- 导入更换本地身份是为隔离历史而设计的显式新建，不是原实例更新、历史恢复或自动上报续传。真实项目启用或重新绑定上报仍走既有流程与独立 gate。旧版二进制读取新增配置元数据的兼容性须实测或如实标明，不得推断；物理 DDL、迁移、真实设备、外部 POST、FF/CA、发布及生产采用均不包含在内。
+- PM 使用 `aiis`、`project-governance` 收敛合同；交 Development 按各子任务加载 `plc-point-mapping`、`rust-runtime`、`desktop-tauri`、`frontend-ui`、`i18n-workflow`、`code-document-indexer`，Verification 以 fresh context 独立复核。项目角色为 contract_only；角色约定和 diff 审计不证明平台 ACL 或自动路由。
+- 本 r6 于 2026-11-17 先形成草案；当时用户“开搞吧”未被记录为对尚未审阅的 r6 / r1 的精确批准。其后 Human Owner 作出的精确批准见下节。
+
+## 6. Human Owner 精确范围批准
+
+2026-11-17（Asia/Shanghai），Human Owner 审阅协调者列明的三个精确版本后明确回复：
+
+> 批准三个版本，继续开发
+
+该决定精确批准 `aiis-ics-arch::ARCH-PLC-001 r6` 设计、`device-simulator::DS-005 r1` 和 `aiis-ics-arch::DAA-019 r1` 各自实施范围，以及 §5 所述旧任务时序衔接。审阅时完整草案 SHA-256：ARCH-PLC-001 r6 为 `69c744e82077e7c21dff8032ad0231d9ea0814bdb0f684e0f9630ba3d81d4180`；DS-005 r1 为 `23e9538ceab3d51ad49f05f8cb24a2aa3f6298c19ea77e06a4d738f6a9e62190`；DAA-019 r1 为 `576646f841feebf06258435a7dc0f089d7e40be5c96da6676a204eb318161529`。
+
+各新任务按各自已批准 allowlist 进入 Development，之后进行 fresh-context Verification 和 Human Owner 最终验收。此决定不改变旧任务独立 QA / Owner 状态，不批准真实设备、真实 POST、物理 DDL、历史删除、FF/CA、发布或生产采用。
+
+## 附录 A：ARCH-PLC-001 r5 原文与历史（仅历史，非当前活动规格）
+
+写入前完整 SHA-256：`5d27670905ad0ab3cda4490292299e6ace21906a9593191de319a47b887083cf`。围栏内按写前原始 UTF-8 字节及末尾换行保留，内含更早批准与历史；r6 条款与其冲突处以本次已批准的 r6 为接续。
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~markdown
+Task ID: ARCH-PLC-001
 Revision: r5
 Status: owner_approved
 Owner Role: PM
@@ -1505,3 +1751,6 @@ PM 已只读核对根契约、workflow、项目现有 DS/DAA/FF 设计入口、D
 ~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -2,6 +2,8 @@
 
 [English](equipment-status-process-monitoring.md) · [项目文档目录](README.zh-CN.md) · [ARCH-OBS-001 规格](../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md)
 
+当前设备、过程和能耗由 `equipment_observation` 注册，分别使用 `equipment_status_main`、`process_monitor_main` 和 `energy_consumption_main`。清退后的观测源码要求目标 revision `c9e1a3b5d720`，两条设备观测写入仅接受 v2，旧 collector 状态、常规旧设备／过程／能耗路由和 r8 归档查询已退出源码。真实目标采用状态由任务记录维护。 过程监控的能耗统计页面地址为 `/monitor/consumption`，唯一页面授权键为 `monitor.energy`。旧直链 `/monitor/energy` 已退出。已有 `monitor.consumption` 的部署须由负责人审查并显式处理，页面权限不会增加 `energy-consumption-read`、表计范围或管理权限。 [清退规格](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+
 2026-11-17（Asia/Shanghai）。当前合同为 r10；既往章节作为历史保留。独立核验、Human Owner 最终验收、现场联调及生产部署分别记录。
 
 <a id="r10-guide"></a>

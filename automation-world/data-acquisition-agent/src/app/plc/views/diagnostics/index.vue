@@ -2,7 +2,9 @@
 <template>
   <template v-if="local">
     <ConsoleCard title-key="common.local.plcConfiguration" body-class="console-card__body--table">
-      <template #actions><ConsoleActionButton label-key="common.local.addPlc" tone="primary" :disabled="local.busy || !!plcEditor || local.plcs.length >= 4" @click="addLocalPlc" /></template>
+      <template #actions><div class="console-action-group"><ConsoleActionButton label-key="plc.catalog.open" :disabled="local.busy || local.dirty || local.editing || local.mutationUnknown || !local.view" @click="local.openCatalog" /><ConsoleActionButton label-key="plc.catalogExport.open" :disabled="local.busy || local.editing || local.mutationUnknown || !local.view" @click="exportOpen = true" /><ConsoleActionButton label-key="common.local.addPlc" tone="primary" :disabled="local.busy || !!plcEditor || local.plcs.length >= 4" @click="addLocalPlc" /></div></template>
+      <CatalogImportDialog :local="local" />
+      <CatalogExportDialog v-if="exportOpen" :local="local" @close="exportOpen = false" />
       <template #tools><div class="console-stack"><p class="daa-capability-note">{{ t('common.local.workflowHint') }}</p><div class="console-action-group"><ConsoleActionButton label-key="common.local.configurePoints" :disabled="!local.plcs.length || !!plcEditor || local.busy" @click="emit('open-points')" /></div><p class="daa-capability-note">{{ t('common.local.plcLimits') }}</p></div></template>
       <ConsoleTableShell :current-page="1" :page-size="4" :total="local.plcs.length" :pagination="false">
         <el-table :data="local.plcs" row-key="id" :empty-text="t(local.draft ? 'common.local.emptyPlcs' : 'common.feedback.notLoaded')" :tooltip-options="{ appendTo: '#daa-feedback' }">
@@ -68,6 +70,8 @@
 import { computed, ref, watch, onUnmounted } from 'vue';
 import { ElAlert, ElDialog, ElForm, ElFormItem, ElInput, ElInputNumber, ElSwitch } from 'element-plus';
 import ConsoleTableShell from '../../../../components/console/ConsoleTableShell.vue';
+import CatalogImportDialog from '../../components/CatalogImportDialog.vue';
+import CatalogExportDialog from '../../components/CatalogExportDialog.vue';
 import type { Plc } from '../../../../services/localAcquisition';
 import { formatBusinessTime } from '../../../../console/time';
 
@@ -80,6 +84,7 @@ import ConsoleCard from '../../../../components/console/ConsoleCard.vue';
 import ConsoleActionButton from '../../../../components/console/ConsoleActionButton.vue';
 const emit = defineEmits<{ 'open-points': [] }>();
 const { t } = useI18n();
+const exportOpen = ref(false);
 
 interface ConnectionTestResult {
     testId: string;

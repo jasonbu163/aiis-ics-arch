@@ -77,8 +77,8 @@ JSON 数组，缺省 `[]`（不授予配置型权限）。key 精确、区分大
 只有这两个角色使用数组；未知角色拒绝授权。
 
 ~~~dotenv
-SUPERVISOR_API_PERMISSIONS_JSON='["monitor","control-agent-read"]'
-OPERATOR_API_PERMISSIONS_JSON='["monitor"]'
+SUPERVISOR_API_PERMISSIONS_JSON='["monitor-observation-read","control-agent-read"]'
+OPERATOR_API_PERMISSIONS_JSON='["monitor-observation-read"]'
 ~~~
 
 operator 的**原始配置集合必须是 supervisor 原始配置集合的子集**。operator 获得的每个 key
@@ -139,7 +139,7 @@ key 同时存在；不兼容合并、不选择新旧优先级。三份公开示�
 1. 审核旧对象，保持各角色成员不变。例如：
 
    ~~~dotenv
-   ROLE_API_PERMISSIONS_JSON='{"supervisor":["monitor","control-agent-read"],"operator":["monitor"]}'
+   ROLE_API_PERMISSIONS_JSON='{"supervisor":["monitor-observation-read","control-agent-read"],"operator":["monitor-observation-read"]}'
    ~~~
 
 2. 删除/注释 dotenv 的旧赋值，并从进程环境移除旧变量；写入上方两个数组。确认 operator 是
@@ -284,11 +284,7 @@ MySQL root 维护通过 `MYSQL_ROOT_USER`/`MYSQL_ROOT_PASSWORD` 和 `MYSQL_HOST`
 应关闭 reset。授权数组不创建账号、不更新口令。维护是需要独立操作授权的数据库写入；其入口
 会先执行上方说明的权限配置校验。
 
-通用当前模块授权示例为 supervisor `["monitor","system","control-agent-read"]`、operator
-`["monitor"]`。`monitor` 权限提供 GET `/monitor/collector/status`；旧 realtime 快照路径已退役。`system` 包含用户管理写入，
-仍受独立 actor 限制；`control-agent-read` 是 action-scope 查询。这是显式授权选择，不是公开模板
-安全 `[]` 缺省。本轮获批本机三环境迁移为 host/prod operator 新增 monitor，dev supervisor 新增
-三项且 operator 新增 monitor；不是单纯等值变量改名。未来在同 key 下新增接口需要重新审查。
+过程读取使用 `monitor-observation-read`，设备状态读取使用 `equipment-observation-read`，表计读取使用 `energy-consumption-read`，并分别核对设备或表计范围。部署配置中若还有旧 `monitor` 权限，应在获批维护中审查并移除；本次没有自动添加替代权限。
 
 小时能源价沿用三API路径，按上海observedAt归桶；显式后继b8d0f2a4c6e8令完整metadata为十六表，原追加记录全留。采用前阅读[模块合同与独立gate归并SQL](app/energy/README.zh-CN.md)，源码验证不授权真实迁移或部署。
 
@@ -297,6 +293,8 @@ MySQL root 维护通过 `MYSQL_ROOT_USER`/`MYSQL_ROOT_PASSWORD` 和 `MYSQL_HOST`
 [v1 Python模块合同](app/MODULE_CONTRACT.zh-CN.md)定义依赖、导出、错误和冲突预检。显式d2f4a6b8c0e2在受保护16表后新增42表（回迁fixture共58）；HR保持关闭，import/GET不seed或应用结构。真实MySQL/Docker/运行动作仍分别经过后续gate。
 
 ## 完整温控样本试点
+
+历史记录。下列入口、配置和表结构仅对应原实现时点。
 
 [equipment模块](app/equipment/README.zh-CN.md)新增独立async POST/GET /equipment/temperature-samples，逐样本保存完整精确值与投递回执；独立read/ingest权限及唯一空值拒绝设备scope。显式e4f6a8b0c2d4接d2新增两表（BE003 fixture60），原58表回迁子集和旧temperature-control/Projection/前端来源不改。settings.resolve_env_file() -> Path仅公开路径选择，其他私有Settings不开放。数据库/Docker和真实采用仍须具体批准。
 
@@ -310,6 +308,8 @@ BE003历史检查点新增后每公开env example共69项；当前分组见下�
 
 
 ## HTTP映射业务观测
+
+历史记录。下列入口、配置和表结构仅对应原实现时点。
 
 equipment、performance与monitor分别拥有HTTP观测域，每个模块仅接受一个精确且区分大小写的业务设备键：
 `EQUIPMENT_MAPPING_INGEST_ID`、`PERFORMANCE_MAPPING_INGEST_ID`、`MONITOR_MAPPING_INGEST_ID`。
@@ -330,6 +330,8 @@ Numeric保持声明的小数位；FLOAT采用有界binary32规范化，相对误
 
 
 ## 匿名业务集成源码
+
+历史记录。下列入口、配置和表结构仅对应原实现时点。
 
 [ARCH-BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/spec.md)把八路typed匿名POST接入owner本地async Service/CRUD及既有业务表。[闭合provider](../contracts/published/http-api/business-integration-v1/README.zh-CN.md)定义严格JSON number、typed成功/错误壳、双摘要、存在集合/单位与永久最小回执。旧 JWT/admin/permission/scope 及 owner 本地业务时间边界保留。producer/source只是准入声明，不是身份认证。
 
@@ -353,10 +355,14 @@ Numeric保持声明的小数位；FLOAT采用有界binary32规范化，相对误
 
 后继 `4e6a8b0d2f14` 为两张事实表改名并扩展可空历史元数据；目标、维护窗口、分阶段恢复及来源采用按 [ARCH-ACQ-003 r2](../plans/ARCH-ACQ-003-acquisition-data-optional-filters/spec.md) 执行。
 
-## 通用任务流程候选
+## 设备、过程与能耗的当前入口
 
-ARCH-TASK-001 r1 用[通用任务流程](../contracts/published/http-api/generic-task-workflow-v1/README.zh-CN.md)替换旧卷材计划与实绩入口。`app/task` 拥有字段版本、集成资格和 `task.*` 错误；计划拥有下发及动作证据；实绩拥有完整快照，并在同事务调用计划回写。旧报表、首页路由及旧实绩模型导入退出；独立质量、采集、设备和监控保持各自边界。
+当前设备、过程和能耗由 `equipment_observation` 注册，分别使用 `equipment_status_main`、`process_monitor_main` 和 `energy_consumption_main`。清退后的观测源码要求目标 revision `c9e1a3b5d720`，两条设备观测写入仅接受 v2，旧 collector 状态、常规旧设备／过程／能耗路由和 r8 归档查询已退出源码。真实目标采用状态由任务记录维护。 [清退规格](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
 
-候选后继 `5f7a9c1e3b25` 要求精确前驱 `4e6a8b0d2f14`、显式目标身份和在线空表/依赖预检。MySQL DDL 不具事务回滚，迁移不提供自动 downgrade。实际操作前须阅读已批准任务的切换与恢复方案；源码和 OpenAPI 生成不授权 DDL、重启或更改真实配置。
+## 通用任务流程 v2 候选
 
-私有 `TASK_INTEGRATION_PROFILE_FILE` 登记目标/版本的下发字段、PLC 序号上限和来源。`TASK_INTEGRATION_ENABLED` 默认关闭，只控制免前端 token 的集成入口；关闭时登录用户创建计划仍需已登记的项目映射。保留所有在用版本的目标映射和自动来源，变更流使用新版本。样例版本、角色授予、错误及 MES/CA/FF/DAA/SMA 全流程见合同。
+[计划与实绩 v2 候选](../contracts/published/http-api/generic-task-workflow-v2/README.zh-CN.md)按当前字段定义处理部分更新，计划支持普通分页查询。有效的自动实绩请求在存在同号计划时同事务回写。计划、实绩和任务模块分别维护业务入口与字段配置。r1 下发和动作数据可供历史对账，[v1 合同](../contracts/published/http-api/generic-task-workflow-v1/README.zh-CN.md)继续作为历史调用依据。
+
+仅向前的后继候选 `ae20b4d6f831` 接续 `9d1f3a5c7e20`。执行前须精确识别目标，并核实历史、依赖与时区证据。它补录字段配置使用证据并调整任务约束。MySQL DDL 可能分段提交，操作前按[任务切换提案](../plans/ARCH-TASK-001-generic-plan-performance/tasks.md)取得相应授权。采集事实、设备观测及业务时间采用仍要求 profile 和真实目标匹配，并具备有效证据。
+
+通用任务集成依赖项目可信网络边界。r1 任务集成 profile、下发与来源登记属历史流程。网页入口仍要求登录及角色授予，字段设置仅管理员可写入。

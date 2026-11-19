@@ -9,7 +9,7 @@ use ds_runtime::{
     services::catalog_export::{self, PreviewIntent, RevisionIntent, TokenIntent},
 };
 use serde_json::{json, Value};
-use std::{fs, path::PathBuf};
+use std::{collections::BTreeMap, fs, path::PathBuf};
 
 fn root() -> PathBuf {
     let root =
@@ -77,11 +77,29 @@ fn setup() -> (PathBuf, App, Workspace, String) {
     (root, app, workspace, revision)
 }
 fn prepare(app: &App, revision: &str, targets: Vec<Target>) -> Value {
+    let filenames = targets
+        .iter()
+        .map(|target| {
+            (
+                target.instance_id.clone(),
+                format!("{}.json", target.instance_id),
+            )
+        })
+        .collect();
+    prepare_named(app, revision, targets, filenames)
+}
+fn prepare_named(
+    app: &App,
+    revision: &str,
+    targets: Vec<Target>,
+    filenames: BTreeMap<String, String>,
+) -> Value {
     catalog_export::preview(
         app,
         PreviewIntent {
             revision_id: revision.into(),
             targets,
+            filenames,
         },
     )
     .unwrap()
@@ -557,6 +575,7 @@ fn invalid_endpoint_numbers_are_reported_per_instance_without_valid_fallback() {
         workspace.instances[0].id.clone(),
         workspace.instances[1].id.clone(),
     ];
+    let filenames = json!({(ids[0].as_str()):format!("{}.json", ids[0]),(ids[1].as_str()):format!("{}.json", ids[1])});
     let valid = |id: &str| json!({"instanceId":id,"host":"127.0.0.1","port":32194,"rack":0,"slot":1,"connectionConfirmed":true,"loadedDifferenceConfirmed":true});
     for field in ["port", "rack", "slot"] {
         for bad in [
@@ -570,7 +589,7 @@ fn invalid_endpoint_numbers_are_reported_per_instance_without_valid_fallback() {
             let mut first = valid(&ids[0]);
             first[field] = bad;
             let intent: PreviewIntent = serde_json::from_value(
-                json!({"revisionId":revision,"targets":[first,valid(&ids[1])]}),
+                json!({"revisionId":revision,"targets":[first,valid(&ids[1])],"filenames":filenames}),
             )
             .unwrap();
             let preview = catalog_export::preview(&app, intent).unwrap();
@@ -595,7 +614,7 @@ fn invalid_endpoint_numbers_are_reported_per_instance_without_valid_fallback() {
         let mut missing = valid(&ids[0]);
         missing.as_object_mut().unwrap().remove(field);
         let intent: PreviewIntent = serde_json::from_value(
-            json!({"revisionId":revision,"targets":[missing,valid(&ids[1])]}),
+            json!({"revisionId":revision,"targets":[missing,valid(&ids[1])],"filenames":filenames}),
         )
         .unwrap();
         let preview = catalog_export::preview(&app, intent).unwrap();
@@ -614,9 +633,10 @@ fn invalid_endpoint_numbers_are_reported_per_instance_without_valid_fallback() {
     }
     let mut invalid = valid(&ids[0]);
     invalid["port"] = Value::Null;
-    let intent: PreviewIntent =
-        serde_json::from_value(json!({"revisionId":revision,"targets":[invalid,valid(&ids[1])]}))
-            .unwrap();
+    let intent: PreviewIntent = serde_json::from_value(
+        json!({"revisionId":revision,"targets":[invalid,valid(&ids[1])],"filenames":filenames}),
+    )
+    .unwrap();
     let preview = catalog_export::preview(&app, intent).unwrap();
     let out = root.join("output");
     fs::create_dir(&out).unwrap();
@@ -633,6 +653,155 @@ fn invalid_endpoint_numbers_are_reported_per_instance_without_valid_fallback() {
     assert_eq!(result["committed"], true);
     assert!(!out.join(format!("{}.json", ids[0])).exists());
     assert!(out.join(format!("{}.json", ids[1])).exists());
+    teardown(root, app);
+}
+
+#[test]
+fn invalid_and_duplicate_filenames_do_not_get_a_preview_ticket() {
+    let (root, app, workspace, revision) = setup();
+    let first = &workspace.instances[0].id;
+    let second = &workspace.instances[1].id;
+    let names = [
+        ("".into(), "required"),
+        (".JSON".into(), "required"),
+        ("   .json".into(), "required"),
+        ("plain".into(), "extension"),
+        ("中".repeat(84) + ".json", "length"),
+        ("../escaped.json".into(), "characters"),
+        ("/tmp/escape.json".into(), "characters"),
+        ("a\\b.json".into(), "characters"),
+        ("a<>:\"|?*.json".into(), "characters"),
+        ("a\0.json".into(), "characters"),
+        ("a\u{1f}.json".into(), "characters"),
+        ("a\u{7f}.json".into(), "characters"),
+        ("trailing .json".into(), "ending"),
+        ("trailing..json".into(), "ending"),
+        ("cOn.export.json".into(), "reserved"),
+        ("CoM9.JSON".into(), "reserved"),
+        ("LpT1.json".into(), "reserved"),
+        ("__daa_yaml_migration_v1__sample.json".into(), "reserved"),
+        ("__daa_startup_settings_v1__sample.json".into(), "reserved"),
+    ];
+    for (name, reason) in names {
+        let invalid = prepare_named(
+            &app,
+            &revision,
+            vec![target(first)],
+            [(first.clone(), name)].into(),
+        );
+        assert!(invalid.get("token").is_none());
+        assert_eq!(
+            invalid["filenameErrors"],
+            json!([{"instanceId":first,"code":format!("catalog_filename_{reason}")}])
+        );
+    }
+    let duplicate = prepare_named(
+        &app,
+        &revision,
+        vec![target(second), target(first)],
+        [
+            (first.clone(), "温度.JSON".into()),
+            (second.clone(), "温度.json".into()),
+        ]
+        .into(),
+    );
+    assert!(duplicate.get("token").is_none());
+    let issues = duplicate["filenameErrors"].as_array().unwrap();
+    for id in [first, second] {
+        assert!(issues.contains(&json!({"instanceId":id,"code":"catalog_filename_duplicate"})));
+    }
+    assert_eq!(
+        catalog_export::preview(
+            &app,
+            PreviewIntent {
+                revision_id: revision,
+                targets: vec![target(first)],
+                filenames: [(second.clone(), "wrong.json".into())].into(),
+            }
+        )
+        .unwrap_err(),
+        "catalog_selection"
+    );
+    teardown(root, app);
+}
+
+#[test]
+fn custom_names_bind_to_ids_and_preserve_json_during_partial_export() {
+    let (root, app, workspace, revision) = setup();
+    let first = &workspace.instances[0];
+    let second = &workspace.instances[1];
+    let targets = vec![target(&second.id), target(&first.id)];
+    let original = prepare(&app, &revision, targets.clone());
+    let first_filename = "车间出料.JSON";
+    let second_filename = "warehouse.json";
+    let renamed = prepare_named(
+        &app,
+        &revision,
+        targets,
+        [
+            (first.id.clone(), first_filename.into()),
+            (second.id.clone(), second_filename.into()),
+        ]
+        .into(),
+    );
+    for index in 0..2 {
+        let without_export_time = |preview: &Value| {
+            let mut document = preview["rows"][index]["document"].clone();
+            document["export"]
+                .as_object_mut()
+                .unwrap()
+                .remove("exported_at");
+            document
+        };
+        assert_eq!(
+            without_export_time(&original),
+            without_export_time(&renamed)
+        );
+    }
+    let output = root.join("output");
+    fs::create_dir(&output).unwrap();
+    fs::write(output.join(second_filename), b"already there").unwrap();
+    let old = token(&original);
+    catalog_export::choose_directory(&app, &old, &output).unwrap();
+    catalog_export::clear_directory(&app, &old).unwrap();
+    assert_eq!(
+        catalog_export::commit(&app, TokenIntent { token: old }).unwrap_err(),
+        "catalog_directory_required"
+    );
+    let ticket = token(&renamed);
+    let directory = catalog_export::choose_directory(&app, &ticket, &output).unwrap();
+    assert_eq!(
+        directory["rows"][0],
+        json!({"instanceId":second.id,"name":second.name,"filename":second_filename,"conflict":true,"valid":true})
+    );
+    assert_eq!(
+        directory["rows"][1],
+        json!({"instanceId":first.id,"name":first.name,"filename":first_filename,"conflict":false,"valid":true})
+    );
+    let result = catalog_export::commit(&app, TokenIntent { token: ticket }).unwrap();
+    assert_eq!(result["rows"][0]["errorCode"], "catalog_target_exists");
+    assert_eq!(result["rows"][0]["result"], "failed");
+    assert_eq!(result["rows"][1]["result"], "written");
+    assert_eq!(result["rows"][1]["filename"], first_filename);
+    assert_eq!(result["rows"][1]["name"], first.name);
+    let bytes = fs::read(output.join(first_filename)).unwrap();
+    assert_eq!(
+        configuration::hash_bytes(&bytes),
+        result["rows"][1]["fileSha256"].as_str().unwrap()
+    );
+    assert_eq!(
+        result["rows"][1]["fileSha256"],
+        renamed["rows"][1]["fileSha256"]
+    );
+    assert_eq!(
+        serde_json::from_slice::<Value>(&bytes).unwrap(),
+        renamed["rows"][1]["document"]
+    );
+    assert_eq!(
+        fs::read(output.join(second_filename)).unwrap(),
+        b"already there"
+    );
+    assert_eq!(fs::read_dir(&output).unwrap().count(), 2);
     teardown(root, app);
 }
 

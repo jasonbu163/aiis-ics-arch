@@ -328,7 +328,7 @@ pub(crate) fn segments(c: &Configuration, g: &Group) -> LocalResult<Vec<Segment>
     }
     Ok(out)
 }
-fn leaf_matches(nodes: &[FieldNode], path: &str, typ: &str) -> bool {
+pub(crate) fn leaf_matches(nodes: &[FieldNode], path: &str, typ: &str) -> bool {
     nodes.iter().any(|n| {
         if n.children.is_empty() {
             n.path == path && n.data_type == typ

@@ -155,6 +155,7 @@ export function useLocalAcquisitionConsole() {
     const sourcePreviewOpen = ref(false), offsetPreviewOpen = ref(false), sourceStructureOpen = ref(false);
     const rawProofs = ref<Array<{ sha256: string; bytes: number }>>([]);
     const catalogDialogOpen = ref(false), catalogPreview = ref<CatalogPreview | null>(null), catalogTarget = ref<CatalogConnection | null>(null), catalogConfirmed = ref(false);
+    const catalogAsNew = ref(false);
     let catalogBytes: number[] | null = null, catalogFile: File | null = null, catalogFilename = '', catalogInput: CatalogInput | null = null, settingCatalogTarget = false;
     function invalidateCatalogPreview() { catalogPreview.value = null; catalogInput = null; catalogConfirmed.value = false; }
     function openCatalog() {
@@ -164,12 +165,13 @@ export function useLocalAcquisitionConsole() {
     function closeCatalog() {
         if (busy.value) return;
         catalogDialogOpen.value = false; invalidateCatalogPreview(); catalogBytes = null; catalogFile = null; catalogFilename = '';
+        catalogAsNew.value = false;
         settingCatalogTarget = true; catalogTarget.value = null; settingCatalogTarget = false;
         void localCall('daa_cancel_catalog').catch(() => undefined);
     }
     async function makeCatalogPreview() {
         if (!view.value || !catalogBytes || dirty.value || editing.value || mutationUnknown.value) throw new Error('unsaved_changes');
-        const input: CatalogInput = { bytes: catalogBytes, filename: catalogFilename, expectedEtag: view.value.etag, target: catalogTarget.value ? clone(catalogTarget.value) : null };
+        const input: CatalogInput = { bytes: catalogBytes, filename: catalogFilename, expectedEtag: view.value.etag, target: catalogTarget.value ? clone(catalogTarget.value) : null, asNewLocalInstance: catalogAsNew.value };
         const result = await localCall<CatalogPreview>('daa_preview_catalog', input);
         settingCatalogTarget = true;
         catalogTarget.value = { host: result.target.host, port: result.target.port, rack: result.target.rack, slot: result.target.slot };
@@ -180,12 +182,22 @@ export function useLocalAcquisitionConsole() {
         const picker = event.target as HTMLInputElement, file = picker.files?.[0];
         if (!file) return;
         invalidateCatalogPreview(); catalogBytes = null; catalogFile = null; catalogFilename = '';
+        catalogAsNew.value = false;
         settingCatalogTarget = true; catalogTarget.value = null; settingCatalogTarget = false;
         await perform(async () => {
             if (file.size > 1048576 || file.size === 0) throw new Error('catalog_size_invalid');
             const bytes = new Uint8Array(await file.slice(0, 1048577).arrayBuffer());
             if (!bytes.length || bytes.length > 1048576 || bytes.length !== file.size) throw new Error('catalog_file_changed');
             catalogBytes = Array.from(bytes); catalogFile = file; catalogFilename = file.name;
+            // 即使预览因端点冲突被拒，仍允许用户修改文件中声明的目标并重新预览；后端仍完整解析和校验原字节。
+            try {
+                const target = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes))?.plc?.connection;
+                if (target && typeof target.host === 'string' && Number.isInteger(target.port) && Number.isInteger(target.rack) && Number.isInteger(target.slot)) {
+                    settingCatalogTarget = true;
+                    catalogTarget.value = { host: target.host, port: target.port, rack: target.rack, slot: target.slot };
+                    settingCatalogTarget = false;
+                }
+            } catch { /* 后端负责报告编码或格式错误。 */ }
             await makeCatalogPreview();
         });
         picker.value = '';
@@ -209,7 +221,8 @@ export function useLocalAcquisitionConsole() {
             if (catalogInput !== input || catalogPreview.value?.previewToken !== preview.previewToken || !catalogConfirmed.value || mutationUnknown.value || dirty.value || editing.value) throw new Error('catalog_preview_conflict');
             try {
                 const result = await localCall<ConfigurationView>('daa_confirm_catalog', { input, previewToken: preview.previewToken });
-                accept(result); selectedPlc.value = preview.catalog.origin.plc_id; selectedDb.value = '';
+                if (!result.importedLocalPlcId || !result.draft.plcs.some(plc => plc.id === result.importedLocalPlcId)) throw new Error('catalog_result_unknown');
+                accept(result); selectedPlc.value = result.importedLocalPlcId; selectedDb.value = '';
                 catalogDialogOpen.value = false; invalidateCatalogPreview(); catalogBytes = null; catalogFile = null; catalogFilename = '';
                 notice.value = 'saved';
             } catch (e) {
@@ -693,5 +706,5 @@ export function useLocalAcquisitionConsole() {
         if (nameTimer) clearTimeout(nameTimer);
         closeDiagnostic();
     });
-    return reactive({ startup, startupBusy, startupError, startupSaved, loadStartup, saveStartup, factsReadMode, factsReadFrom, factsReadTo, factsReadPage, factsReadError, openFactsRead, deliveryKind, deliveryState, deliverySaveError, deliverySnapshotError, delivery, deliverySettings, deliveryPage, deliveryPageSize, deliveryPageNumber, deliveryCursors, deliveryDialog, deliveryDetail, sourceMaterial, loadDeliveries, deliveryControl, editDelivery, saveDelivery, inspectDelivery, rebindDelivery, showSourceMaterial, previewFacts, testFacts, selectedPoints, preparePointEdit, finishPointEdit, selectedNameIds, namePreview, namePreviewOpen, namePreviewBusy, pointEditUnknown, catalogUnknown, mutationUnknown, catalogDialogOpen, catalogPreview, catalogTarget, catalogConfirmed, openCatalog, closeCatalog, readCatalogFile, previewCatalog, confirmCatalog, namePage, namePageSize, pagedNames, pointPageSize, closeNames, invalidateNames, toggleNamePoint, previewNames, stagePointEdit, confirmNames, sourcePreviewOpen, offsetPreviewOpen, sourceStructureOpen, identification, mappings, importPage, importPageSize, importRows, pagedImportRows, invalidateImport, changeImportTarget, available, editing, dirty, confirmAction, conflictVersion, snapshotError, selectedTargets, bootstrap, view, draft, snapshot, busy, error, notice, selectedPlc, selectedDb, query, pointPage, preview, offsets, sources, history, historyFilter, historyPage, historyPageSize, historyPreviousAvailable, historyNextAvailable, historyPreviousBounded, raw, rawSampleId, logs, label, plcs, dbs, groups, points, pagedPoints, perform, refresh, reload, save, saveCandidate, activate, addPlc, removePlc, addGroup, removeGroup, plcDiagnostic, startDiagnostic, closeDiagnostic, control, readFiles, importSources, infer, address, manual, bulk, loadHistory, inspect, loadLogs, state, formatBytes });
+    return reactive({ startup, startupBusy, startupError, startupSaved, loadStartup, saveStartup, factsReadMode, factsReadFrom, factsReadTo, factsReadPage, factsReadError, openFactsRead, deliveryKind, deliveryState, deliverySaveError, deliverySnapshotError, delivery, deliverySettings, deliveryPage, deliveryPageSize, deliveryPageNumber, deliveryCursors, deliveryDialog, deliveryDetail, sourceMaterial, loadDeliveries, deliveryControl, editDelivery, saveDelivery, inspectDelivery, rebindDelivery, showSourceMaterial, previewFacts, testFacts, selectedPoints, preparePointEdit, finishPointEdit, selectedNameIds, namePreview, namePreviewOpen, namePreviewBusy, pointEditUnknown, catalogUnknown, mutationUnknown, catalogDialogOpen, catalogPreview, catalogTarget, catalogConfirmed, catalogAsNew, openCatalog, closeCatalog, readCatalogFile, previewCatalog, confirmCatalog, namePage, namePageSize, pagedNames, pointPageSize, closeNames, invalidateNames, toggleNamePoint, previewNames, stagePointEdit, confirmNames, sourcePreviewOpen, offsetPreviewOpen, sourceStructureOpen, identification, mappings, importPage, importPageSize, importRows, pagedImportRows, invalidateImport, changeImportTarget, available, editing, dirty, confirmAction, conflictVersion, snapshotError, selectedTargets, bootstrap, view, draft, snapshot, busy, error, notice, selectedPlc, selectedDb, query, pointPage, preview, offsets, sources, history, historyFilter, historyPage, historyPageSize, historyPreviousAvailable, historyNextAvailable, historyPreviousBounded, raw, rawSampleId, logs, label, plcs, dbs, groups, points, pagedPoints, perform, refresh, reload, save, saveCandidate, activate, addPlc, removePlc, addGroup, removeGroup, plcDiagnostic, startDiagnostic, closeDiagnostic, control, readFiles, importSources, infer, address, manual, bulk, loadHistory, inspect, loadLogs, state, formatBytes });
 }

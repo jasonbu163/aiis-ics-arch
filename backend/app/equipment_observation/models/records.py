@@ -86,8 +86,8 @@ class Receipt(Base):
     mapping_revision = Column(String(32))
     source_refs = Column(JSON)
     task_evidence = Column(JSON)
-    contract_version = Column(String(32), nullable=False, server_default=text("'aiis.metric-ingest/v1'"))
-    result_version = Column(String(8), nullable=False, server_default=text("'r8'"))
+    contract_version = Column(String(32), nullable=False, server_default=text("'aiis.metric-ingest/v2'"))
+    result_version = Column(String(8), nullable=False, server_default=text("'r10'"))
     result_detail = Column(JSON)
     __table_args__ = (UniqueConstraint("target", "producer_id", "event_id", name="uq_obs_receipt_event"),)
 

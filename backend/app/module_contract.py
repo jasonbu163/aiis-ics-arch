@@ -21,7 +21,7 @@ PUBLIC_SYMBOLS = {
     "settings": ("settings.BACKEND_MOCK_ENABLED", "resolve_env_file"),
 }
 # 本批旧源码的有界兼容面；未来模块使用自有domain/data_keys及命名空间StrEnum。
-LEGACY_MODULES = ("dashboard", "equipment", "hr", "maintenance", "performance", "plan", "project", "quality", "reports", "auxiliary", "monitor", "energy")
+LEGACY_MODULES = ("dashboard", "hr", "maintenance", "performance", "plan", "project", "quality", "reports", "auxiliary", "energy")
 LEGACY_ERROR_OWNERS = {
     "performance_invalid_time_range": "performance",
     "plan_invalid_coil_no": "plan", "plan_coil_already_exists": "plan",
@@ -39,7 +39,6 @@ LEGACY_CORE_ERRORS = {"schema_maintenance_status_failed": "schema_maintenance", 
 # 冻结本批旧源码/Core内部接线额外import；新模块不得使用此兼容面。
 LEGACY_PUBLIC_COMPATIBILITY = {'auxiliary': ('common.data_keys:normalize_downtime_reason',),
  'energy': ('common.response:ResponseModel',),
- 'equipment': ('database:async_session_maker', 'projection.provenance_contract:get_expected_device_id'),
  'hr': ('common.data_keys:normalize_attendance_status',
         'common.data_keys:normalize_department_status',
         'common.data_keys:normalize_employee_status',
@@ -48,7 +47,6 @@ LEGACY_PUBLIC_COMPATIBILITY = {'auxiliary': ('common.data_keys:normalize_downtim
         'core.deps:get_db'),
  'maintenance': ('common.data_keys:maintenance_type_storage_values',
                  'common.data_keys:normalize_maintenance_type'),
- 'monitor': ('projection.provenance_contract:get_expected_device_id',),
  'performance': ('common.data_keys:PerformanceCurrentOperabilityStatus',
                  'common.data_keys:PerformanceDurationSource',
                  'common.data_keys:PerformanceEffectiveWeightSource',

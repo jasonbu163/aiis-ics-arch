@@ -25,8 +25,13 @@ def test_all_operations_match_58_tables_and_only_new_42_are_removed():
     for module in migrations:
         module.op = recorder; module.upgrade()
     assert len(recorder.metadata.tables) == 58
-    assert set(recorder.metadata.tables).issubset(Base.metadata.tables)
+    from tests.test_observation_retirement import RETIRED_TABLES
+    active = set(recorder.metadata.tables) - RETIRED_TABLES
+    assert active.issubset(Base.metadata.tables)
+    assert RETIRED_TABLES.isdisjoint(Base.metadata.tables)
     for name, table in recorder.metadata.tables.items():
+        if name in RETIRED_TABLES:
+            continue
         assert _table_signature(table) == _table_signature(Base.metadata.tables[name]), name
         str(CreateTable(table).compile(dialect=mysql.dialect()))
         for index in table.indexes:

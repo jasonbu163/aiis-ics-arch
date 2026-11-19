@@ -30,3 +30,8 @@ This index covers the bounded DS editing, version-management, table preference a
 | [CatalogExportDialog.vue](src/app/simulator/components/CatalogExportDialog.vue) | Revision, instance, client target and complete point preview, native directory choice and individual export receipts. |
 | [plc_catalog_export.rs tests](runtime/tests/plc_catalog_export.rs) | Synthetic SQLite, saved-byte hash, disabled points, conflicts, stale revisions and concurrent confirmation checks. |
 | [plc-catalog-export.test.mjs](tests/plc-catalog-export.test.mjs) | In-memory Vue checks for saved revision, explicit confirmations, cancellation and unknown receipt handling. |
+| [catalog_import.rs](runtime/src/services/catalog_import.rs) | Validates selected PLC JSON and explicit simulator listener; preserves external identities and atomically creates a new draft instance. |
+| [catalog_import.rs bridge](src-tauri/src/commands/catalog_import.rs) | Thin Tauri commands and native file selection; the frontend supplies no filesystem path. |
+| [CatalogImportDialog.vue](src/app/simulator/components/CatalogImportDialog.vue) | Native source selection, explicit listener and complete point preview, confirmation and cancellation. |
+| [plc_catalog_import.rs tests](runtime/tests/plc_catalog_import.rs) | Synthetic catalog import, source identity and mapping, listener confirmation, saved/reopened versions and negative cases. |
+| [plc-catalog-import.test.mjs](tests/plc-catalog-import.test.mjs) | In-memory Vue checks for file selection, explicit listener, draft confirmation, cancellation and receipt handling. |

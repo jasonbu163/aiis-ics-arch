@@ -252,14 +252,15 @@ test('actual source preserves Core route identity, shell locales and default-dis
   assert.deepEqual(registry.activeModuleNames.filter(name => name !== 'acquisition-data'), ['plan', 'performance', 'monitor', 'equipment', 'auxiliary', 'quality', 'system', 'maintenance'])
   assert.deepEqual(registry.routes.filter(route => !route.path.startsWith('acquisition-data/')).map(route => [route.name, route.path, route.meta.pageId]), [
     ['PlanList', 'plan/list', 'plan.list'],
+    ['PlanSharedFields', 'plan/shared-fields', 'plan.shared-fields'],
     ['PerformanceList', 'performance/list', 'performance.list'],
+    ['PerformanceSharedFields', 'performance/shared-fields', 'performance.shared-fields'],
     ['MonitorTemperature', 'monitor/temperature', 'monitor.temperature'],
-    ['MonitorEnergy', 'monitor/consumption', 'monitor.consumption'],
+    ['MonitorEnergy', 'monitor/consumption', 'monitor.energy'],
     ['MonitorDrive', 'monitor/drive', 'monitor.drive'],
     ['MonitorCleaning', 'monitor/cleaning', 'monitor.cleaning'],
     ['MonitorObservationAdmin', 'monitor/observations/admin', 'monitor.observations.admin'],
     ['MonitorObservationData', 'monitor/observations/data', 'monitor.observations.data'],
-    ['MonitorLegacyEnergy', 'monitor/energy', 'monitor.energy'],
     ['EquipmentProductionParameters', 'equipment/production-parameters', 'equipment.production-parameters'],
     ['EquipmentDrive', 'equipment/drive', 'equipment.drive'],
     ['EquipmentTemperature', 'equipment/temperature', 'equipment.temperature'],
@@ -307,13 +308,13 @@ test('five adapted modules retain order, owned bilingual titles and current visi
   ]
   const pages = [
     ['performance.list', 'performance.list', 10, 'List'],
+    ['performance.shared-fields', 'performance.workflow.sharedFieldSettings', 20, 'Setting'],
     ['monitor.temperature', 'monitor.temperature', 20, 'TrendCharts'],
-    ['monitor.consumption', 'monitor.energy', 30, 'Cpu'],
+    ['monitor.energy', 'monitor.energy', 30, 'Cpu'],
     ['monitor.drive', 'monitor.observation.drive', 40, 'TrendCharts'],
     ['monitor.cleaning', 'monitor.observation.cleaning', 50, 'TrendCharts'],
     ['monitor.observations.admin', 'monitor.observation.configManagement', 60, 'Setting'],
     ['monitor.observations.data', 'monitor.observation.dataManagement', 70, 'List'],
-    ['monitor.energy', 'monitor.observation.legacyEnergy', 80, 'Cpu'],
     ['equipment.production-parameters', 'equipment.productionParameters', 10, 'DataLine'],
     ['equipment.drive', 'equipment.drive', 20, 'Odometer'],
     ['equipment.temperature', 'equipment.temperature', 30, 'Operation'],

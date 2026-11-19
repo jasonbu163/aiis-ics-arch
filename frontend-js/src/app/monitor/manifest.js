@@ -2,7 +2,7 @@
  * 文件路径: /frontend-next-js/src/app/monitor/manifest.js
  * 功能描述: 过程监控模块前端 manifest，集中声明模块路由
  * 主要功能:
- *   - 暴露实时监控、温度监控和能耗监控页面路由定义
+ *   - 声明过程曲线、表计能耗及管理页面
  *   - 保持 router 实例和导航守卫仍由 src/router 统一管理
  */
 
@@ -29,7 +29,7 @@ export const monitorModule = {
       component: () => import('./views/observations/energy.vue'),
       meta: {
         titleKey: 'monitor.energy',
-        pageId: 'monitor.consumption',
+        pageId: 'monitor.energy',
         parentTitleKey: 'monitor.title',
         navigation: { visible: true, order: 30, icon: 'Cpu' }
       }
@@ -57,11 +57,6 @@ export const monitorModule = {
       component: () => import('./views/observations/data.vue'),
       meta: { titleKey: 'monitor.observation.dataManagement', pageId: 'monitor.observations.data', requiresAdmin: true,
         parentTitleKey: 'monitor.title', navigation: { visible: true, order: 70, icon: 'List' } }
-    },
-    {
-      path: 'monitor/energy', name: 'MonitorLegacyEnergy', component: () => import('./views/energy/index.vue'),
-      meta: { titleKey: 'monitor.observation.legacyEnergy', pageId: 'monitor.energy', parentTitleKey: 'monitor.title',
-        navigation: { visible: true, order: 80, icon: 'Cpu' } }
     }
   ]
 }

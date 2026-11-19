@@ -2,6 +2,8 @@
 
 English version: [README.md](README.md)
 
+过程监控的能耗统计页面地址为 `/monitor/consumption`，唯一页面授权键为 `monitor.energy`。旧直链 `/monitor/energy` 已退出。已有 `monitor.consumption` 的部署须由负责人审查并显式处理，页面权限不会增加 `energy-consumption-read`、表计范围或管理权限。 [清退规格](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+
 这是 JavaScript 形态的 Vue 3 + Vite Core 前端模板，包含登录、认证壳层、系统页面、通用计划/实绩页面和共享基础设施。使用方项目在 src/app/<module>/ 下增加业务模块。
 
 ## 稳定边界
@@ -232,6 +234,6 @@ runtime。runtime 不挂载源码或 `node_modules`，`/api/v1` 反向代理到 
 规定 SMA、第三方及其他程序经授权的 HTTP 上报；它不代表某个 SMA 或 PLC 已完成接入。配置、显示、
 历史留存及访问权限参见 [r10 使用说明](../docs/equipment-status-process-monitoring.zh-CN.md#r10-guide)。
 
-旧卷材实绩来源选择、重量编辑、过程弹窗、分卷、打印与效率页面已退出。通用[计划/实绩流程](../contracts/published/http-api/generic-task-workflow-v1/README.zh-CN.md)按任务绑定版本读取字段，沿用列表路径、上海业务时间及本机列宽和草稿偏好。浏览器/API/数据库运行证明仍为另批验证 gate。
+[计划与实绩候选](../contracts/published/http-api/generic-task-workflow-v2/README.zh-CN.md)按当前字段配置读取，沿用列表路径、上海业务时间和本机列宽。两页分别管理本地字段，通过同一设置弹窗管理共享字段。没有同号计划时，实绩详情可进入普通计划创建。
 
-管理员可参阅[计划与实绩字段设置使用说明](FIELD_SETTINGS_GUIDE.zh-CN.md)，了解字段组、勾选项、版本、停用和现场映射的关系。
+管理员可参阅[计划与实绩字段设置说明](FIELD_SETTINGS_GUIDE.zh-CN.md)了解字段组、编辑、显示、停用和删除口径。

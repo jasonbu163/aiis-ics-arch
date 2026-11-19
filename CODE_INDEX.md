@@ -30,12 +30,14 @@ source topology or important entrypoints change.
 - `backend/app/energy/crud/async_energy_price.py` / `services/async_energy_price.py` — async atomic hourly SQL, observedAt ordering and whole-group transaction.
 - `backend/alembic/versions/20261013_1200_a6c8e0f2b4d6_add_public_energy_prices.py` — one-table successor to the unchanged Core root.
 - `backend/tests/test_energy_price_api.py` / `test_energy_price_service.py` / `test_energy_price_migration.py` — no-DB HTTP, transaction, SQL and metadata checks.
-- `backend/app/monitor/` — collector health, monitoring queries and typed business integration.
 - `backend/app/equipment_observation/` — configurable equipment cards, multi-region history, independent energy statistics, administration and source-independent ingest.
 - `backend/app/equipment_observation/machine_openapi.py` — v2 machine request schemas shared by the live OpenAPI routes.
 - `backend/app/plc_facts/services/observation_evidence.py` — retained r8 task attribution helper; r10 observation ingest does not require PLC evidence.
 - `backend/alembic/versions/20261116_1800_8c0e2a4d6f18_add_equipment_observation.py` — explicit seven-table r8 successor.
 - `backend/alembic/versions/20261117_1200_9d1f3a5c7e20_observation_bundles.py` — guarded r10 bundle, archive and independent energy successor.
+- `backend/alembic/versions/20261118_1645_c9e1a3b5d720_retire_legacy_observation.py` — guarded forward retirement of 18 empty legacy tables; current receipts stay intact.
+- `backend/tests/test_observation_retirement.py` — source graph, metadata and the 22 retired operations.
+- [Historical observation regressions](backend/tests/historical_observation/README.md) — exact pre-retirement tests and pinned reproduction source.
 - `contracts/published/http-api/equipment-observation-v2/` — source-independent machine discovery, ingest, synthetic examples and private-profile template.
 - `backend/app/plc_facts/api/v2.py` — sample upload, exact point reads, scoped realtime browsing and sample history.
 - `backend/app/plc_facts/{api,schemas,models}/source_registry.py` and `{crud,services}/async_source_registry.py` — single-table registry, transactional admission, takeover and confirmed deletion.
@@ -146,11 +148,10 @@ documentation initialization in this repository.
 - `backend/app/module_contract.py` — public symbols and bounded legacy compatibility inventory.
 - `backend/app/module_preflight.py` — source dependencies/public symbols and actual route/model conflicts; help-only bare CLI.
 - `backend/app/auxiliary/api/auxiliary.py` / `models/auxiliary.py` / `services/async_auxiliary.py` — four non-price entities, read-only empty rules and explicit write transactions.
-- `backend/app/monitor/models/business_history.py` / `api/temperature.py` / `api/energy.py` — two history entities and independently guarded read queries.
-- `backend/app/{dashboard,energy,equipment,hr,maintenance,performance,plan,project,quality,reports}/manifest.py` — opt-in public business slices; HR disabled.
+- `backend/app/{dashboard,energy,hr,maintenance,performance,plan,project,quality,reports}/manifest.py` — opt-in public business slices; HR disabled.
 - `backend/alembic/versions/20261014_1600_d2f4a6b8c0e2_reintegrate_business_module_schema.py` — explicit 42-table successor, no seed.
 - `backend/tests/module_admission_fixtures.py` / `test_module_{contract,dependencies,conflicts,admission}.py` — reconstructable C2/E source profiles and admission matrices.
-- `backend/tests/test_business_module_{reintegration,migration,permissions}.py` / `test_auxiliary_business.py` / `test_monitor_business.py` — F schema/guard/zero-write regressions.
+- `backend/tests/test_business_module_{reintegration,migration,permissions}.py` / `test_auxiliary_business.py` — F schema/guard/zero-write regressions.
 - `frontend-js/src/app/auxiliary/views/shift/index.vue` / `tests/module-registry/shift-rule-empty-state.test.mjs` — legal unconfigured-rule state and existing-rule SFC regression.
 - `backend/tests_mysql/test_module_admission.py` / `test_business_module_reintegration.py` — opt-in disposable MySQL E/F entrypoints; no shared destructive fixtures, execution requires separate approval.
 
@@ -203,31 +204,19 @@ documentation initialization in this repository.
 
 ## ARCH-BE-003 complete temperature sample slice
 
-- `backend/app/equipment/config.py`, `error_codes.py`, `temperature_sample_domain.py`: module-local lazy scope, stable errors, strict decimal/time normalization and canonical fingerprint.
-- `backend/app/equipment/api/temperature_samples.py`, `temperature_http.py`: independent async POST/GET and local sanitized HTTP adapter.
-- `backend/app/equipment/schemas/temperature_sample_in.py`, `temperature_sample_query.py`, `temperature_sample_out.py`: strict camelCase complete sample/query/output contracts.
-- `backend/app/equipment/models/temperature_sample.py`: immutable observations and actor delivery receipts, exact decimals/UTC milliseconds/binary unique keys.
-- `backend/app/equipment/crud/async_temperature_sample.py`, `services/async_temperature_sample.py`: scoped SQL and atomic commit/rollback with bounded unique-race recovery.
 - `backend/alembic/versions/20261016_1600_e4f6a8b0c2d4_add_equipment_temperature_samples.py`: two-table explicit d2 successor; no old-row migration.
-- `backend/tests/test_equipment_temperature_api.py`, `test_equipment_temperature_service.py`, `test_equipment_temperature_migration.py`, `test_equipment_temperature_config.py`: no-DB HTTP/auth/transaction/config/recorder contracts.
+- `backend/tests/test_equipment_temperature_migration.py`: historical migration recorder.
 - `backend/tests_mysql/test_equipment_temperature.py`: separately gated disposable MySQL proof outside destructive shared conftest.
-- [Equipment guide](backend/app/equipment/README.md) / [中文说明](backend/app/equipment/README.zh-CN.md): separate old/new sources and runtime gates.
 
 
 ## Mapping business HTTP domains
 
-- `backend/app/{equipment,performance,monitor}/mapping_{config,domain,error_codes}.py` — local scopes, strict numbers/source times/presence fingerprints and stable errors.
-- `backend/app/{equipment,monitor}/models/mapping_ingest.py` — retained typed receipts; legacy performance receipt and watermark models are retired.
-- `backend/app/equipment/api/{mapping_samples,temperature_dashboard,mapping_http}.py` / `schemas/{drive_sample_in,production_parameter_sample_in,mapping_sample_query}.py` — equipment HTTP boundaries and complete-temperature read adapter.
-- `backend/app/equipment/services/{async_drive_sample,async_production_parameter_sample,async_temperature_dashboard}.py` / `crud/{async_drive_sample,async_production_parameter_sample,async_mapping_ingest}.py` — bounded merge/receipt transactions and scoped reads.
+- `backend/app/performance/mapping_{config,domain,error_codes}.py` — local scopes, strict numbers/source times/presence fingerprints and stable errors.
 - `backend/app/performance/api/{mapping_observations,process_samples,mapping_http}.py` / `schemas/{production_observation_in,process_sample_in,mapping_query}.py` — historical coil production/parent process inputs, no longer registered.
 - `backend/app/performance/services/{async_production_observation,async_process_sample,async_mapping_query}.py` / `crud/{async_production_observation,async_process_sample,async_mapping_ingest}.py` — historical coil performance implementation, no longer registered.
-- `backend/app/monitor/api/{process_curve_samples,mapping_http}.py` / `schemas/{process_curve_in,process_curve_query}.py` / `services/async_process_curve_sample.py` / `crud/{async_process_curve_sample,async_mapping_ingest}.py` — immutable complete-curve source domain and Shanghai-day reads.
 - `backend/alembic/versions/20261016_1900_f6a8c0e2b4d6_expand_mapping_business_api.py` — sole e4 successor, seven-table nullable HTTP increments, three receipts and observation state, guarded downgrade.
 - `frontend-js/src/components/BusinessDataSourceSelect.vue` / `src/utils/businessDataSource.mjs` — source/equipment URL selection and pure request-generation guard.
-- `backend/tests/test_mapping_{api,service,migration,compatibility}.py` / `test_{equipment,performance,monitor}_mapping.py` — no-DB source/HTTP/transaction/SQL/schema contracts.
 - `backend/tests_mysql/test_mapping_business_api.py` — separately gated BE006/64/f6 disposable MySQL entry, outside shared destructive fixtures.
-- `frontend-js/src/utils/businessDataSource.test.mjs` / `src/app/{equipment,monitor}/api/mapping-source.test.mjs` — source paths, empty selection and stale-response contracts.
 
 - `automation-world/data-acquisition-agent/src-tauri/src/domain/source_import.rs` — explicit per-block mapping, immutable lineage/UDT binding, identification and delta preview DTOs.
 - `automation-world/data-acquisition-agent/src-tauri/src/infrastructure/tia_source/{parser,reconcile,tests}.rs` — safe declaration boundaries/limited syntax, selected immutable-version reconciliation and preservation tests.
@@ -272,24 +261,12 @@ documentation initialization in this repository.
 - [backend/common/integration/envelope.py](backend/common/integration/envelope.py) — finite JSON/envelope/digest/receipt/HTTP primitives; no DB wiring.
 - [backend/common/integration/http.py](backend/common/integration/http.py) — finite JSON/envelope/digest/receipt/HTTP primitives; no DB wiring.
 - [backend/common/integration/receipt.py](backend/common/integration/receipt.py) — finite JSON/envelope/digest/receipt/HTTP primitives; no DB wiring.
-- [backend/app/equipment/api/integration.py](backend/app/equipment/api/integration.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
-- [backend/app/equipment/schemas/integration.py](backend/app/equipment/schemas/integration.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
-- [backend/app/equipment/models/integration.py](backend/app/equipment/models/integration.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
-- [backend/app/equipment/integration_config.py](backend/app/equipment/integration_config.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
-- [backend/app/equipment/integration_domain.py](backend/app/equipment/integration_domain.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
-- [backend/app/equipment/integration_error_codes.py](backend/app/equipment/integration_error_codes.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
 - [backend/app/performance/api/integration.py](backend/app/performance/api/integration.py) — historical coil integration source; retired from runtime assembly by ARCH-TASK-001.
 - [backend/app/performance/schemas/integration.py](backend/app/performance/schemas/integration.py) — historical coil integration source; retired from runtime assembly by ARCH-TASK-001.
 - [backend/app/performance/models/integration.py](backend/app/performance/models/integration.py) — historical coil integration source; retired from runtime assembly by ARCH-TASK-001.
 - [backend/app/performance/integration_config.py](backend/app/performance/integration_config.py) — historical coil integration source; retired from runtime assembly by ARCH-TASK-001.
 - [backend/app/performance/integration_domain.py](backend/app/performance/integration_domain.py) — historical coil integration source; retired from runtime assembly by ARCH-TASK-001.
 - [backend/app/performance/integration_error_codes.py](backend/app/performance/integration_error_codes.py) — historical coil integration source; retired from runtime assembly by ARCH-TASK-001.
-- [backend/app/monitor/api/integration.py](backend/app/monitor/api/integration.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
-- [backend/app/monitor/schemas/integration.py](backend/app/monitor/schemas/integration.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
-- [backend/app/monitor/models/integration.py](backend/app/monitor/models/integration.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
-- [backend/app/monitor/integration_config.py](backend/app/monitor/integration_config.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
-- [backend/app/monitor/integration_domain.py](backend/app/monitor/integration_domain.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
-- [backend/app/monitor/integration_error_codes.py](backend/app/monitor/integration_error_codes.py) — module-owned typed integration, isolated A+B QA passed; default-off / unadopted.
 - [backend/tests/test_business_integration_contract.py](backend/tests/test_business_integration_contract.py) — A0 no-DB validation and frozen public vectors.
 - [backend/tests/test_business_integration_api.py](backend/tests/test_business_integration_api.py) — A0 no-DB validation and frozen public vectors.
 - [backend/tests/test_business_integration_migration.py](backend/tests/test_business_integration_migration.py) — A0 no-DB validation and frozen public vectors.
@@ -315,11 +292,9 @@ Package `__init__.py` files, `mocks/` and `seeds/` are import-safe and do not ex
 
 - `backend/common/integration/storage.py` — pure adoption manifest/probe values, finite basis and Shanghai/legacy conversions; no IO/SQL.
 - `backend/common/integration/{envelope,receipt,http,canonical}.py` — strict numeric JSON/OpenAPI, typed success/receipt, complete dependency exit and frozen dual digests.
-- `backend/app/{equipment,performance,monitor}/integration_storage.py` — owner-fixed 13-table/41-column profile and read-only legacy views.
-- `backend/app/{equipment,performance,monitor}/crud/{async_integration,sync_integration}.py` — passed-session current-read adoption probes and owner async business/receipt SQL.
-- `backend/app/equipment/services/async_integration.py` — temperature immutability and drive/parameter NULL-fill transactions.
+- `backend/app/performance/integration_storage.py` — historical fixed-column profile and read-only legacy views.
+- `backend/app/performance/crud/{async_integration,sync_integration}.py` — passed-session current-read adoption probes and owner async business/receipt SQL.
 - `backend/app/performance/services/async_integration_{observation,process}.py` — historical coil integration services, no longer registered.
-- `backend/app/monitor/services/async_integration.py` — immutable 33-metric curve transactions and permanent source/mapping receipt.
 - `backend/alembic/versions/20261104_1400_1b3d5f7a9c20_add_business_integration_receipts.py` — exact four-table successor of BE009 0a2; rejects nonempty destructive downgrade.
 - `backend/scripts/business_time_adoption/main.py` — explicit read-only inspect/plan/verify, candidate reports, bare help without target/config IO.
 - `backend/tests/test_business_integration_{service,storage,provider}.py` — no-DB transaction/compatibility/time/typed provider tests.
@@ -330,10 +305,14 @@ Package `__init__.py` files, `mocks/` and `seeds/` are import-safe and do not ex
 
 ## ARCH-TASK-001 generic task workflow candidate
 
-- `backend/app/task/` — field definitions and revisions, target/version eligibility, authentication adapter and `task.*` errors.
-- `backend/app/plan/models/plan.py` / `services/async_workflow.py` / `api/routes.py` — generic plans, frozen dispatch attempts and audited manual actions.
-- `backend/app/performance/models/performance.py` / `services/async_workflow.py` / `api/routes.py` — automatic snapshots, manual values, supplement and atomic plan feedback.
-- `backend/alembic/versions/20261111_1400_5f7a9c1e3b25_generic_task.py` — guarded forward-only online successor for 19 empty legacy tables and six new task tables.
-- `frontend-js/src/app/plan/components/TaskPage.vue` / `TaskConfigDialog.vue` — shared generic list, detail, field settings, local widths and draft preferences.
-- `backend/tests/test_generic_task_source.py` — no-database task rules, registration, preflight and concurrent retry checks.
-- `contracts/published/http-api/generic-task-workflow-v1/` — registered OpenAPI subset and synthetic A/B integration examples.
+- `backend/app/task/` — current configuration, version and usage records, shared row queries, HTTP validation, permissions and `task.*` errors.
+- `backend/app/plan/models/plan.py` / `services/async_workflow.py` / `api/routes.py` — partial plan writes, query, historical dispatch storage and performance feedback.
+- `backend/app/performance/models/performance.py` / `services/async_workflow.py` / `api/routes.py` — partial performance reports, order snapshots, manual feedback and atomic plan synchronization.
+- `backend/alembic/versions/20261111_1400_5f7a9c1e3b25_generic_task.py` — historical r1 successor for 19 empty legacy tables and six task tables.
+- `backend/alembic/versions/20261118_1200_ae20b4d6f831_generic_task_r2.py` — guarded forward-only successor for task history, configuration-use evidence and task constraints.
+- `frontend-js/src/app/plan/components/TaskPage.vue` / `TaskConfigDialog.vue` — two lists, partial edits and local field management dialogs.
+- `frontend-js/src/app/plan/components/TaskFieldEditor.vue` / `frontend-js/src/app/plan/views/shared-fields/index.vue` — shared editor, one administrator page behind two module routes, and persistent table widths.
+- `frontend-js/src/app/plan/components/useTaskPagePadding.js` — adapts task pages to the application header height.
+- `backend/tests/test_generic_task_source.py`, `test_generic_task_flow.py`, `test_generic_task_migration_r3.py`, `test_generic_task_revision_guards.py` — offline task contracts, HTTP/ORM transaction checks, migration preflight and protected revision probes.
+- `contracts/published/http-api/generic-task-workflow-v1/` — historical contract and A/B integration examples.
+- `contracts/published/http-api/generic-task-workflow-v2/` — candidate OpenAPI and synthetic requests for the current flow.

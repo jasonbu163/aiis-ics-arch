@@ -538,3 +538,29 @@ test('fault-injected Rust receipt and persisted draft drive the real Vue state r
     assert.equal(await state.save(),false); assert.equal(saves,1); await state.refresh(); assert.equal(state.unknown.value,true);
     assert.equal(await state.reviewUncertainControls(),true); assert.equal(await state.acceptReviewedControls(),true); assert.equal(state.unknown.value,false);
 });
+
+test('legacy display name preserves 256 UTF-8 bytes and blocks the next byte', async () => {
+    const view = host({name:'Manual', manual:true, dataType:'INT', byte:0, bit:null, manualReason:'fixture', displayName:'x'.repeat(256)});
+    await view.open(); await view.click('point-confirm');
+    assert.equal(view.emitted.length,1); assert.equal(view.emitted[0].displayName,'x'.repeat(256));
+    await view.open(); await view.set('point-legacy-display-name','x'.repeat(257)); await view.click('point-confirm');
+    assert.equal(view.emitted.length,1); view.close();
+});
+
+test('catalog import unknown receipt freezes retries and reconciles the exact candidate', async () => {
+    let server=facts(), calls=0;
+    const state=stateHost({getConfiguration:async()=>clone(server),confirmCatalogImport:async(_file,preview)=>{calls++;server={...server,etag:'catalog-saved',workspace:clone(preview.workspace)};throw new StateFailure('save_receipt_unknown',null,true);}});
+    await state.reload(); const workspace=JSON.parse(JSON.stringify(state.draft.value));workspace.instances.push({id:'catalog',name:'Catalog',dbs:[]});
+    const preview={workspace,expectedEtag:'etag-before',token:'ticket',candidateSha256:'sha'};
+    assert.equal(await state.commitCatalogImport('file',preview),false);assert.equal(state.uncertainSave.value.reason,'save_receipt_unknown');assert.equal(state.draft.value.instances[1].id,'catalog');assert.equal(state.unknown.value,true);
+    assert.equal(await state.commitCatalogImport('file',preview),false);assert.equal(calls,1);assert.equal(await state.reviewUncertainSave(),true);assert.equal(state.saveReview.value.matchesSubmitted,true);
+    assert.equal(await state.acceptReviewedSave(),true);assert.equal(state.configuration.value.etag,'catalog-saved');assert.equal(state.uncertainSave.value,null);assert.equal(calls,1);
+});
+
+test('catalog import readback never replaces a concurrent local edit', async () => {
+    let server=facts(), committed=false, releaseRead, started; const readStarted=new Promise(resolve=>{started=resolve;});
+    const state=stateHost({getConfiguration:()=>committed?new Promise(resolve=>{releaseRead=resolve;started();}):Promise.resolve(clone(server)),confirmCatalogImport:async(_file,preview)=>{server={...server,etag:'catalog-saved',workspace:clone(preview.workspace)};committed=true;return {result:'saved',etag:'catalog-saved'};}});
+    await state.reload();const workspace=JSON.parse(JSON.stringify(state.draft.value));workspace.instances.push({id:'catalog',name:'Catalog',dbs:[]});const preview={workspace,expectedEtag:'etag-before',token:'ticket',candidateSha256:'sha'};
+    const saving=state.commitCatalogImport('file',preview);await readStarted;state.draft.value.instances[0].name='later local edit';releaseRead(clone(server));
+    assert.equal(await saving,false);assert.equal(state.draft.value.instances[0].name,'later local edit');assert.equal(state.draft.value.instances.length,1);assert.equal(state.uncertainSave.value.reason,'known_readback');
+});

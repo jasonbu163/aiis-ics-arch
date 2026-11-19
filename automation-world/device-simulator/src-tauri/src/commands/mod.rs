@@ -1,5 +1,6 @@
 //! Tauri薄命令与有界业务执行适配；观测记录真实IPC入口/回执，业务仍归共享Rust服务。
 pub mod catalog_export;
+pub mod catalog_import;
 pub mod configuration;
 pub mod import;
 pub mod queries;

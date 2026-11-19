@@ -6,7 +6,7 @@
         <el-input v-model="form.name" data-testid="point-name" maxlength="100" />
       </el-form-item>
       <el-form-item :label="t('simulator.displayName')">
-        <el-input v-model="form.displayName" data-testid="point-legacy-display-name" maxlength="200" />
+        <el-input v-model="form.displayName" data-testid="point-legacy-display-name" />
       </el-form-item>
       <el-form-item :label="t('simulator.displayNameZh')">
         <el-input v-model="displayNameZh" data-testid="point-display-name-zh" />
@@ -79,7 +79,7 @@ function commit() { if (!form.value) return false;
     return false;
 } const bytes = (value: string) => new TextEncoder().encode(value).length;
     invalid.value = false;
-    invalidMetadata.value = bytes(displayNameZh.value) > 256 || bytes(displayNameEn.value) > 256 || bytes(description.value) > 500;
+    invalidMetadata.value = bytes(form.value.displayName) > 256 || bytes(displayNameZh.value) > 256 || bytes(displayNameEn.value) > 256 || bytes(description.value) > 500;
     if (invalidMetadata.value) return false;
     if (displayNameZh.value || displayNameEn.value) form.value.displayNames = { 'zh-CN': displayNameZh.value, 'en-US': displayNameEn.value };
     else delete form.value.displayNames;

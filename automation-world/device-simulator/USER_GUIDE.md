@@ -6,19 +6,53 @@
 
 ## Quick operating flow
 
-1. **Start DS**: run `pnpm tauri dev` inside `automation-world/device-simulator`, reusing your existing data directory.
-2. **Create an instance**: Configuration → Instances → **Create instance**, enter its name and port → **Finish editing → Save draft**.
-3. **Add points**: DB points → select the instance → add a DB and manual points, or import DB/UDT files; confirm layouts and names.
-4. **Set behavior**: Simulation and access policies → **Edit policy** for each point; set mode, initial value and permissions → **Finish editing → Save draft and confirm selected initial values/policies**.
-5. **Save a version**: **Save draft → Save as version**, review the dialog → **Confirm save as version**.
-6. **Apply configuration**: stop the target; Instances → Configuration versions and loading → choose the instance → **Preview loading** in the intended row → review, acknowledge → **Load and remain stopped**.
-7. **Run the simulator**: Workbench → **Start**; use Online values to inspect points, current values and the actually loaded version.
+If DS is not running yet, run `pnpm tauri dev` from the project directory. Continue from an existing instance if you have one. Choose a route below, then [confirm layouts and names](#confirm-layout-and-names).
 
-Draft edits do not change runtime configuration. Saving a version still requires loading; loading still requires starting. Continue from existing objects instead of recreating them.
+| What you have | Where to start |
+| --- | --- |
+| No source files | [Create an instance and points manually](#quick-manual) |
+| TIA `.db` / `.udt` files | [Import points from DB / UDT files](#quick-tia) |
+| A PLC JSON exported by DS or DAA | [Create an instance from PLC JSON](#quick-json) |
 
-[First manual points](#manual-create) · [Save and first load](#save-and-load) · [Switch and roll back](#switch-version) · [Single/batch deletion](#version-management) · [Multi-DB/UDT import](#multi-db-import)
+<a id="quick-manual"></a>
 
-The detailed walkthrough creates three manual DB31 points, then imports Alpha/Beta/Measure. Names, ports and DB numbers are examples; inspect existing configuration before changing data used elsewhere. DS runs independently of DAA, SMA and Backend. DAA–DS reads into SQLite require separate approval; Stage C remains deferred. These are text-only instructions and expected results; section6 records documentation and acceptance boundaries.
+### 1. Create an instance and points manually
+
+1. Under **Configuration → Instances → Create instance**, enter a name, listener IPv4, port, rack and slot. Adjust other connection settings as needed. For connections on the same computer, use `127.0.0.1` and an available port. Choose **Finish editing → Save draft** and check that the instance appears.
+2. Under **DB points**, select the instance and choose **Add DB**. Enter the DB name, number and byte length. Choose **Add manual point**, enter the technical **Name**, type, byte address and **Manual address confirmation reason**. Also enter the bit for BOOL or the length for STRING. Add Chinese and English display names and a description as needed. Choose **Finish editing** for each point, then **Save draft**. [Manual entry example](#manual-create)
+
+<a id="quick-tia"></a>
+
+### 2. Import points from DB / UDT files
+
+1. Create and save the instance as in step 1 above, or use an existing one. Select it under **DB points** and choose **Save draft** if there are pending edits. In **DB / UDT source import**, choose the `.db` and required `.udt` files. For a first import, leave **New source lineage** selected and choose **Scan declarations**.
+2. Select the DB declarations, choose **Add DB** as the target and enter each DB number. Check the linked UDTs and supply any missing definitions. Choose **Preview import changes**, review the DB numbers and points, then **Confirm import and save draft**. Set any needed initial values separately in DS. [Multi-DB example](#multi-db-import)
+
+<a id="quick-json"></a>
+
+### 3. Create an instance from PLC JSON
+
+1. Save any pending draft edits. Under **Configuration → Instances → Import PLC JSON → Choose PLC JSON**, select a single-PLC file. Import creates the instance and DBs directly.
+2. Enter the DS loopback listener IP, an unused port, rack and slot, and check the listener acknowledgement. Choose **Preview all points**, review the DBs, points and TSAPs, then choose **Create draft instance**. The draft is saved with the DBs and points disabled. [JSON import details](#plc-json-import)
+
+<a id="confirm-layout-and-names"></a>
+
+### Confirm layouts and names
+
+1. Select the instance under **DB points** and **confirm all DB layouts first**. For manual or JSON DBs, choose **Confirm complete manual layout**, enter the reason for your check, and choose **Preview**. For a standard DB/UDT layout, choose **Preview standard layout**. In either case, check the DB length, types and byte/bit addresses before choosing **Confirm**. If standard layout is unavailable, enter the verified addresses and reasons, save the draft, then confirm the manual layout. [Layout example and limits](#multi-db-import)
+2. **Confirm names next.** For each DB, select points page by page, choose **Preview selected point names**, review each proposed technical name, then choose **Confirm**. The header selects the current page. Selections accumulate across pages, and switching DB clears them. For DB/UDT imports, cover every point, including disabled points. The JSON catalog shows the fixed names for the entire instance for review. Finish with **Save draft**.
+
+### Save a version, then export or run
+
+For export only, you can leave DBs and points disabled and start at step 2.
+
+1. **Confirm settings for simulation.** Under **DB points**, enable the required DBs. For each point to simulate, choose **Edit → Enabled → Finish editing**, then save the draft. Under **Simulation and access policies**, check mode, initial values and permissions. To make changes, use **Edit policy → Finish editing**. Filter to the enabled DBs, select all their points (including disabled points), and choose **Save draft and confirm selected initial values/policies**.
+2. **Save the version.** On **Instances**, choose **Save as version**, review the history cleanup list, then **Confirm save as version**.
+3. **Continue for your goal.**
+   - **Export.** Choose **Export PLC JSON**, select the version and instance, and edit the **JSON filename** if needed. Review and acknowledge the client target and TSAPs and any loaded-version difference shown. Choose **Preview all points** and review them, then choose **Choose output directory → Export valid files**. Look for **Written** on the instance row. [Export details](#plc-json-export)
+   - **Run.** Under **Configuration versions and loading**, select the stopped instance and choose **Preview loading** in the intended row. Review and acknowledge the list, then choose **Load and remain stopped**. Choose **Workbench → Start** and check the loaded version and points under **Online values**. [Save, first load and start](#save-and-load)
+
+If export validation fails, choose **Change selection** and check the reported item. For an unconfirmed layout or names, go back to **DB points**, confirm them, save a new version and select it. Saving a draft leaves the saved version and runtime configuration as they were. Selecting point rows applies the current action to them. Use the **Enabled** switch to enable them.
 
 ## 1. Preparation and separate actions
 
@@ -243,7 +277,7 @@ Versions store configuration and initial values, not historical runtime scenes. 
 | DB88 / 8 | bytes[3] | BYTE | 6 |
 | DB88 / 8 | bytes[4] | BYTE | 7 |
 
-2. REAL is at byte2 in this standard word layout; it is not forced to a4-byte boundary or proof of real TIA addresses. In each DB, select the whole current point page → **Preview selected point names** → review → **Confirm**. Expected structured names: `DB71_ready_Bool`, `DB71_count_Int`, `DB88_unit_running_Bool`, `DB88_unit_value_Real`; index fallbacks `DB88_B6_Byte`, `DB88_B7_Byte`. Check the actual candidate.
+2. REAL is at byte2 in this standard word layout; it is not forced to a4-byte boundary or proof of real TIA addresses. In this example, Alpha and Beta each fit on one page; select all points on each DB's page → **Preview selected point names** → review → **Confirm**. If a DB spans pages, select and accumulate every page until all its points, including disabled points, are covered before preview and confirmation. Switching DB clears the selection, so repeat for each DB. Every exported point must have a valid technical name. Expected structured names: `DB71_ready_Bool`, `DB71_count_Int`, `DB88_unit_running_Bool`, `DB88_unit_value_Real`; index fallbacks `DB88_B6_Byte`, `DB88_B7_Byte`. Check the actual candidate.
 3. Recovery: cancel any wrong address/type. Never infer complete layouts from selected leaves. A DB containing STRING requires manual addresses/reasons for its complete layout; this example does not extend into it.
 
 ### 3.3 DB inheritance, initial values and running
@@ -307,11 +341,24 @@ The 2026-10-30 documentation update adds the quick flow and version operations, 
 
 ## 7. Export a saved PLC revision and verify locally
 
-This describes the DS-003 development candidate. The task evidence records whether the native folder dialog and DS→DAA test were actually verified; these instructions do not establish verification or acceptance. Export reads one saved revision without saving the draft, loading or starting an instance. Each instance gets one complete file, including disabled DBs/points, bilingual display names, independent descriptions and any factual unmarked legacy name.
+For everyday export, start at step 3. Steps 1, 2, 6 and 7 are for optional local verification. Export produces one JSON per selected instance, using the chosen saved version. Each file includes disabled DBs and points, bilingual display names, descriptions and any available legacy name.
 
 1. Verify the DS process and the actual database path under **Logs and storage**. For this authorized local exercise, DS's own database should be `automation-world/device-simulator/.local/dev/device-simulator-v1/config.sqlite`. Stop if the process, existing instances or target cannot be identified. Do not inspect or copy `.env` contents, or overwrite existing instances, drafts or history. DAA uses its own `.local/dev`; the applications do not share a database.
-2. Create only a uniquely identified synthetic instance for this exercise, using an unused `127.0.0.1` port. Follow section 2 to create a manual DB with, for example, BOOL byte 0 bit 0, INT byte 2, REAL byte 4 and `STRING[10]` byte 8, with a DB length of at least 20. A separate disabled DB with a disabled point can verify completeness. Set bilingual names, a description and an empty language side. Confirm all names and DB layouts, save the draft and save a revision. For later reads, also confirm enabled initial values/policies and load the revision while stopped as in section 2. Record the revision UUID and synthetic instance UUID; leave other instances alone.
+2. Create a uniquely identified test instance on an unused `127.0.0.1` port. Follow section 2 to create a manual DB with, for example, BOOL byte 0 bit 0, INT byte 2, REAL byte 4 and `STRING[10]` byte 8, with a DB length of at least 20. Add a disabled point in a separate DB if you want to check export completeness. Enter display names and a description, leaving one language blank if desired. Confirm every DB layout first, then verify and confirm point names. Choose **Save draft**.
+   - **Export only.** Choose **Save as version** and continue to step 3.
+   - **Run the instance.** Follow section 2 to confirm initial values and policies for every point in each enabled DB, including disabled points. Then choose **Save as version** and load the newly saved version while stopped. If you already saved an export version, save another version after confirming initial values and policies, then load that new version.
+   - Record the version number, revision UUID and test instance UUID.
 3. Open **Configuration → Instances → Export PLC JSON** and select the saved revision. Its list comes from that revision; check each instance's current selected and actually loaded revision. Select the synthetic instance, check the client IPv4, port, rack/slot and calling/called TSAPs, and explicitly confirm the target. Separately acknowledge a different or unverifiable loaded revision. `127.0.0.1` is for the same computer only. Non-default TSAPs are retained in the file and cannot currently be imported by DAA for execution.
-4. Choose **Preview all points** and inspect every DB's size and enabled state and every point's program name, type, address, two display names, unmarked legacy name and description. Correct errors by DB/point UUID, save a revision and preview again. Choose **Choose output directory** and select a directory owned by this exercise in the native dialog; closing or canceling writes nothing. Existing target names are shown and rejected to protect the original; choose another directory. Other valid instances receive individual results. Choose **Export valid files**, then check each result and SHA-256. The filename is the instance UUID plus `.json`. If the result is unknown, inspect the selected directory and file hash before retrying.
-5. On macOS, run `shasum -a 256 "actual-selected-directory/instance-UUID.json"`, replacing the example with the actual path, and compare it with the displayed hash. Retain the file hash, revision UUID, instance UUID and observations; give DAA **that same file** to create the synthetic PLC. Export does not connect a device or prove physical layout. Before joint testing, verify existing DAA objects will not automatically collect or report; connect only the authorized local DS and do not send real reports.
-6. Once neither application needs the test, handle only objects and files clearly owned by this exercise: normally stop its instance and related connection, then remove test objects through the applications only where existing configuration is unaffected. Retain and record anything referenced by history, unsafe to delete or still needed as evidence. Never remove the entire `.local/dev`, pre-existing instances, saved revisions or history, or silently change other instance settings for cleanup.
+4. Review **JSON filename** for each selected instance. If the saved instance name already ends in `.json` (case insensitive), DS uses that name unchanged. Otherwise, DS appends `.json`. You can edit each full filename. Use distinct names even when ignoring case, and correct any error shown next to the field. The filename only names the output file. Choose **Preview all points** and inspect every DB's size and enabled state and every point's program name, type, address, two display names, unmarked legacy name and description. Correct errors by DB/point UUID, save a revision and preview again.
+5. Choose **Choose output directory** and select a directory owned by this exercise in the native dialog. Closing or canceling writes nothing. An existing target is marked as a conflict and kept intact. Choose **Change selection** to rename a file and preview again, or choose another folder. Choose **Export valid files**. The top of the dialog shows the overall outcome and counts. Check each instance's filename, status and SHA-256 for each successful write. With partial success, check the failed rows for their reasons. If any result is unknown, inspect the selected directory and file hash before starting another export.
+6. On macOS, run `shasum -a 256 "actual-selected-directory/your-filename.json"`, replacing the example with the actual path, and compare it with the displayed hash. Retain the file hash, revision UUID, instance UUID and observations; give DAA **that same file** to create the synthetic PLC. Export does not connect a device or prove physical layout. Before joint testing, verify existing DAA objects will not automatically collect or report; connect only the authorized local DS and do not send real reports.
+7. Once neither application needs the test, handle only objects and files clearly owned by this exercise: normally stop its instance and related connection, then remove test objects through the applications only where existing configuration is unaffected. Retain and record anything referenced by history, unsafe to delete or still needed as evidence. Never remove the entire `.local/dev`, pre-existing instances, saved revisions or history, or silently change other instance settings for cleanup.
+
+<a id="plc-json-import"></a>
+
+## 8. Create a simulator instance from PLC JSON
+
+1. On **Instances**, select **Import PLC JSON** and choose a complete single-PLC file exported by DS or DAA. Review the original byte count and SHA-256, external origin, source version, client target, and every DB and point, including bilingual names, unlabelled legacy name, independent description, source path and source-enabled flags. An omitted DB flag is shown as not provided. The source client address is displayed only; DS does not listen on or connect to it.
+2. Enter and confirm a separate simulator loopback IP, unused port, rack and slot, then check the client calling TSAP and server called TSAP. A non-default calling TSAP can be retained. Import is blocked when the called TSAP cannot be represented by the entered rack and slot. Resolve identity, source, endpoint or changed-file conflicts and select or preview again.
+3. Confirmation creates only a persisted draft; the instance is stopped and DBs and points are disabled. Source-enabled flags do not grant simulator, write or runtime permission. DS retains the original JSON and local/external identity mappings as a catalog source; it does not generate DB/UDT files or a TIA tree. Follow the [quick flow](#confirm-layout-and-names) to confirm all DB layouts first, then review and confirm names. Continue with initial values and policies, saving a version, export or loading and startup as needed. Catalog technical names, types, addresses and point membership cannot be changed; display metadata, enablement and simulator policies remain editable through the existing workflow.
+4. Exporting the saved revision preserves the external origin and DB/point identities; producer, revision digest and enabled flags describe the saved DS configuration. Selection, collision rejection, cancellation and unknown receipts follow section 7. Import/export does not prove physical PLC layout or field authorization; compatibility of old binaries with the optional catalog metadata has not been verified. A valid input is accepted even if a later complete DS export would exceed the 1 MiB file limit. That export is refused for the affected instance without truncation or overwrite; other valid selected instances can still be exported.

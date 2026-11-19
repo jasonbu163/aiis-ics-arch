@@ -225,3 +225,45 @@ Human Owner 已精确批准 DAA-018 r2 及版本衔接；批准后 `spec.md` 的
 Rust/Node 测试、类型检查、构建、采集与上报构造、旧二进制兼容及原生 UI 均 **not_run**；没有发起网络发送、设备操作、数据库迁移或读取用户真实 profile。不存在 DEV self-check 通过、`developer_handoff`、独立 QA 或 Human Owner 最终验收。
 
 下一 gate：协调者交 PM 形成可审阅的新 Revision；Human Owner 精确批准后，Development 依据获批范围继续。原有 r1 事实保留，不把该阻塞当作完成或自动扩大范围。
+
+## DAA-018 r4 文档收尾与 Development 交接
+
+2026-11-18（Asia/Shanghai）。本节记录 `aiis-ics-arch::DAA-018 r4` 的 `developer_handoff`。前文保留 r3 文档的原始首部和全部正文，追加前整文件 SHA-256 为 `b967c04be176b1a601d22d82ea14f24d2d944ff3388ab885db6b7d9febf4be93`。原 r3 [独立验证记录](checklist.md) 在本轮 DEV 读取时 SHA-256 为 `94095d9297b904bb12bc688e290934fa46a43074d7357e8229b9c1bdaa0068f5`。
+
+### 批准及历史（D18C-01、D18C-08）
+
+- Human Owner 已明确批准 [DAA-018 r4](spec.md)、[ARCH-PLC-001 r8](../../../plans/ARCH-PLC-001-shared-plc-point-json/spec.md) 及二者衔接。两个获批文件 SHA-256 分别为 `67703c4552e7f25335cc63993b3366ed20f9a0d9c3a39a1b972dcaf17729ebf9`、`38085d5f0dd5d9db444008b9e04963371ddff3995cbb050641281ce6517931e5`。本轮以 r4 §4 的文档标准交接证据和遗留风险。风险接受及最终验收待 Human Owner 另行决定。
+- r1、r2、r3 各自曾获范围批准。r1 先因单点命名预览所需文件超出白名单阻塞，r2 将对应文件和单次 CAS 纳入范围后又因旧 v1 冻结正文与验收冲突而阻塞。r3 及父设计 r4 的精确批准厘清旧 v1 本地构造与产品 v2 外发边界，Development 随后按当时规格交付并返工。批准原文与顺序变化见 [规格历史](spec.md) 和上文。
+- r3 独立 QA1 的原结论为 `qa_failed`。F-QA1-001 在合成 profile 复现普通 `daa_save_draft` 可绕过单点命名预览直接写入多台 PLC 的双语映射。历史 Development 返工及负例自检见上文。独立 QA2 对返工候选覆盖的普通保存负例未再复现该问题，整体仍为 `qa_blocked`。原失败、返工、阻塞、隔离事件及协调者追加的探针均按原时点保留。详见 [QA1 / QA2](checklist.md)。
+
+### 已有证据及边界（D18C-02 至 D18C-04）
+
+| 来源 | 观察及覆盖 |
+| --- | --- |
+| Human Owner 的本机人工报告 | Owner 报告 DAA `.local/dev` 的 `display_name` 显示和中英文切换成功。采用 [获批规格 §2](spec.md) 所收录的人工报告。证据覆盖所报告的显示及切换。编辑、取消、保存后重开、是否影响 ETag 或历史、列宽等均需各自的证据。 |
+| r3 Development 自检 | 上文保留当时离线 Rust、Node、类型与构建命令、退出码、候选和限制。样本、历史和冻结路径的 Dev 截获使用内存 transport。其结果归当时 Development。 |
+| r3 独立 QA 的合成 transport | QA1 / QA2 在各自候选用 fake `Capture` transport 截获旧 `NeverSent` 样本转 v2、新 revision 样本及冻结重试。所截获正文保留 `name`/value，v2 无 `comment`，两种显示名 sentinel 都未外发，冻结重试正文保持原字节。测试期间无真实 POST；所查旧账本复核和 runtime3 拒绝也只覆盖各自定向用例。 |
+| 协调者先前的本机只读核对 | 协调者对同一配置、同一来源绑定的真实 v2 `seq 91–103` 共 13 条做逐条核对。SQLite 保存的上传正文 SHA 可复算，13 条均有匹配且 SHA 校验有效的 `status=committed` 回执，`outcome` 为 `created` 或 `duplicate`。MySQL `plc_facts_history` 对应 13 条的来源身份、请求 SHA 及所核 3 点的技术点名、类型、值、质量相符。`plc_facts_latest` 的 3 点均为 `good`，最新 seq 为 103。该配置至少一实际点中英文显示名同时非空。13 份正文未见显示名字段或对应两种显示名文本，后端保存的 13 条点集未见显示名字段，且所核字段和值一致。后端点集其他字符串未做通用搜索。同一时段协同的 DS 日志未见 `WARN` / `ERROR`。 |
+
+本角色仅在指定现存会话中只读核对协调者的命令记录、输出摘要与最终汇报。脱敏定位为 `~/.codex/sessions/2026/11/16/rollout-2026-11-16T09-24-47-01a1e1f4-eb7e-74d2-b055-3696e1a855ec.jsonl` 的约 28239–28242 行（样本、回执与后端比对）、28257–28260 行（双语字段和文本排除），以及约 28278 行（观察汇总及 DS 日志边界）。原核对发生于 2026-11-18 14:40–14:42（Asia/Shanghai）。以上结论仅覆盖当时本机条件、该配置和样本窗。未取得把人工报告或该 13 条正文的运行二进制与当前源码逐字节绑定的指纹。
+
+旧 v1 的历史合成测试在本地生成冻结正文，完整 `contextUtf8` 可含两种显示名，context/body SHA 按旧合同校验。生产账本仍有本地重构和完整性校验。历史测试可用于说明本地构造，旧 v1 外发继续停用，禁止裁剪或重算旧 context、正文或 SHA 来掩盖差异。
+
+### 未验证项与资源（D18C-05、D18C-06）
+
+- 旧**普通 native** 程序面对新字段的安全拒绝、无误采和不误建空库未验证。QA2 的旧 `local-validation` 拒绝及新 `local-validation` 单次读取零写限于对应测试入口及所查合成 profile。实测启动与正常退出曾写入 `runtime_events`、退出元数据与日志，整个进程生命周期的零写结论不成立。
+- 最终候选原生编辑与取消、保存/重开、顶栏语言完整行为、列宽拖拽、切页和跨重启保持、恢复默认及旧功能回归未完成独立原生核验。早期非持久 WebKit 窗口只覆盖原记载的有限行为。
+- 旧原生隔离事件中，候选退出后 CUA 可能重新启动或绑定默认真实 profile。实际路径、启动/退出或其他写入、影响范围均未知。历史事故、后续探针和暂停事实见上文与 [checklist.md](checklist.md)。按 Owner 要求，旧任务临时工件已清理，原件已无法复核。本轮保留持久摘要和定位，没有找回或重建工件。
+- 13 条真实 v2 的观察不证明全量 v2 分支、未知回执、历史数据整体、已冻结重试和旧样本的真实网络行为，以及 Windows/VM、真实 PLC、长稳或生产/现场采用。
+
+### 正式工作树和候选标识
+
+- 正式交付工作树为 `/Users/jason/Desktop/DreamCode/aiis-ics-arch`，分支 `main`，HEAD `f7c5608c0e433612b15821a578a7ef3e4f155cdb`，含其他任务的未提交差异。本 r4 的唯一写入为 `automation-world/data-acquisition-agent/plans/DAA-018-bilingual-point-display-names/tasks.md` 的本节。
+- 原 r3 QA2 当时在 HEAD `21cd789277695bbafaa55c24e39261fc7247f9b0` 上以返工后 20 项清单 SHA-256 `663ab9df588127442dadef64aa1a750cc4a52a5cf425cd34f2ec7fdd237dea50` 核得 20/20 一致。当前重建该清单并对相同路径重算，5/20 与当时一致，15 项发生变化。以原顺序、每行「小写 SHA-256、两个空格、DAA 模块相对路径、LF」重算当前 20 项清单，SHA-256 为 `7cca9b7b6861f688338ac2957621e107bee81323a11a18516a21317b3cee4da3`。该重算只说明文件身份差异。
+- 后继 [ARCH-PLC-002 r1 独立记录](../../../plans/ARCH-PLC-002-plc-json-export-feedback/checklist.md) 的候选同属正式树 HEAD `f7c5608c0e433612b15821a578a7ef3e4f155cdb`，获批规格 SHA-256 `a4d2744297d3882f90c4f865d2ef8ec0b8e2f5ada30ce4fc754be4913ae2b349`，QA2 使用的 tasks SHA-256 `93fe10c0255cf3d31be01e30678cb83efdff08996dab81acf0bf389d25665ee7`。该轮验证了其相对固定前序基线的 12 项 DS 差异和 11 项 DAA 差异，后由 Owner 验收其 JSON 文件命名与结果反馈范围。本次把该任务 [Development 文件表](../../../plans/ARCH-PLC-002-plc-json-export-feedback/tasks.md) 的 11 项 DAA 变更与现树逐项重算，9/11 一致，差异为两份手册，现摘要对应 [DAA-019 r2 QA6](../DAA-019-plc-json-bidirectional/checklist.md) 核验的手册返修。后继任务的 QA 与接受仅归各自范围，当前组合树没有 DAA-018 端到端复验。
+
+### DEV self-check 和 handoff（D18C-06、D18C-07）
+
+在仓库根以 `git status --short --branch`、`git symbolic-ref --short HEAD`、`git rev-parse HEAD` 核对正式工作树。以 `shasum -a 256` 和 Python 3 标准库核对获批文件、历史字节、候选路径摘要、追加段新增相对链接及会话中脱敏的既有结果。以 `git diff --check -- automation-world/data-acquisition-agent/plans/DAA-018-bilingual-point-display-names/tasks.md` 检查本轮差异。上述文档检查退出码均为 0，路径摘要差异按上文记录。产品测试、构建、应用、GUI、IPC、profile、SQLite/MySQL、PLC、网络与实际发送均未执行或访问。没有创建测试资源，没有要求 Owner 重新操作。
+
+协调者据此将精确的 `aiis-ics-arch::DAA-018 r4` 交给 fresh-context Verification。复核输入为上述已批准规格 SHA、正式工作树、本节唯一追加的文档 diff、原 3MD 记录及已授权会话定位。Verification 独立核对 r4 文档收尾标准并记录 verdict，后续 Human Owner 决定是否接受列出的有限范围及风险。

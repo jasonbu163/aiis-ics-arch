@@ -1,4 +1,295 @@
 Task ID: ARCH-TASK-001
+Revision: r3
+Status: developer_handoff
+Owner Role: Development
+Allowed Writers: Development
+Handoff: R3-QA-F04 字段删除历史核验修复已交付。当前正式工作树和自检入口见 r3 第六次 developer_handoff。
+Workflow Mode: STD
+Execution Mode: agent_team_same_session
+Task Namespace: aiis-ics-arch
+Classification: root
+Capability: 通用计划与实绩、当前字段配置、同号实绩回写和受保护目标兼容
+Owner: AIIS ICS Architecture 计划与实绩模块
+Acceptance Chain Reference: spec.md 第 5、6 节、r2 第 8、9 节及 Development Lifecycle Workflow
+
+# r3 Development 记录
+
+2026-11-18。Human Owner 已明确批准精确 r3。获批草稿 SHA-256 为 `b62da9696a4641ca159b9dba6501bf2ee75aa139a8683ff8041619660683c893`，含批准记录的规格 SHA-256 为 `9307a205982c6952eb155c3bf91bfb84632670262c502b98cd5e52a2214cf3ff`。继续使用 r2 临时候选并保留下方 r2 暂停及 r1 记录。
+
+> **阅读顺序**　以下候选、离线自检、只读基线、切换提案及前置复核记录均形成于获批切换前。文中的“未整合”“未执行”和“待批准”均指当时状态。正式整合、迁移及验证的实际结果见后文“r3 获批切换和合成验收”和“developer_handoff — ARCH-TASK-001 r3”。
+
+## 精确候选与实施面（切换前记录）
+
+候选在 `/private/tmp/arch-task-001-r2.FeZuND/source`，正式源码基线为 `f7c5608c0e433612b15821a578a7ef3e4f155cdb`。候选保存 43 个修改与 10 个新增文件，逐文件 SHA-256 清单位于 `/private/tmp/arch-task-001-r2.FeZuND/candidate-inventory.sha256`，清单 SHA-256 为 `71a4835b7c6998f031ba38a55d1d7fdfc1636e603f6fce0c773821c6ad047d3c`。在候选目录运行 `shasum -a 256 -c ../candidate-inventory.sha256` 可复核内容。正式树未整合候选，只有本任务 Development 记录由 Development 写入。
+
+- `backend/app/plc_facts/v2_config.py`、`backend/app/equipment_observation/profile.py`、`backend/common/integration/storage.py` 是 r3 新增的三个精确许可文件。只增加 `ae20b4d6f831`，设备观测同时延续两项设备时序参数必填。三个目标守卫和设备/监控探针源码逐字节未改。
+- `backend/app/plan/` 内的 `api/routes.py`、`manifest.py`、`models/plan.py`、`schemas/workflow.py`、`services/async_workflow.py` 实现查询、部分写入、目标一致性、同号补建以及回写。
+- `backend/app/performance/` 内的 `api/routes.py`、`models/performance.py`、`schemas/workflow.py`、`services/async_workflow.py` 实现部分实绩上报、人工反馈、订单快照、观察时间和同事务回写。
+- `backend/app/task/` 内的 `api/routes.py`、`crud/async_records.py`、`domain.py`、`errors.py`、`http.py`、`manifest.py`、`models/__init__.py`、`models/fields.py`、`schemas/fields.py`、`schemas/workflow.py`、`services/async_fields.py` 实现当前配置、分组、历史快照、使用证据及删除。任务写入与配置变更以配置单例的数据库行作为首个锁，由同一事务持有直至提交。有意采用这一较简单的串行边界，因而不同任务号写入也可能在这一行上排队，实际 MySQL 竞争与锁时延待测。
+- `backend/alembic/versions/20261118_1200_ae20b4d6f831_generic_task_r2.py` 的精确前驱为 `9d1f3a5c7e20`。保留原行、字段历史和下发/动作证据，补录原绑定版本的使用记录，转换计划空状态，适配两主表约束。迁移是受控前向步骤，提供目标、历史、可见依赖检查，不提供自动降级。
+- `backend/tests/` 的 `test_generic_task_source.py`、`test_generic_task_flow.py`、`test_generic_task_migration_r3.py`、`test_generic_task_revision_guards.py`、`test_business_integration_storage.py`、`test_equipment_temperature_migration.py`、`test_legacy_acquisition_retirement.py`、`test_mapping_migration.py` 覆盖业务、HTTP、历史保护、精确 head 与版本兼容。
+- `frontend-js/src/app/plan/` 的 `api/index.js`、`components/TaskPage.vue`、`components/TaskConfigDialog.vue`、`locales/en-US.json`、`locales/zh-CN.json`，及 `frontend-js/src/app/performance/` 的 `api/index.js`、`locales/en-US.json`、`locales/zh-CN.json` 切换当前配置和字段写入、共享/本地设置、固定生产状态列及可调列宽，保留签入角色限制。共享设置组件使用计划模块词条，两个入口共享后端定义和本机列宽。验证入口为 `frontend-js/tests/module-registry/generic-task.test.mjs`。
+- `contracts/published/http-api/generic-task-workflow-v2/` 新增 `README.md`、`README.zh-CN.md`、`examples/requests.json` 及 `openapi.json`。同步 `contracts/README.md`、`contracts/README.zh-CN.md`，`backend/README.md`、`backend/README.zh-CN.md`，`frontend-js/README.md`、`frontend-js/README.zh-CN.md`、`frontend-js/FIELD_SETTINGS_GUIDE.zh-CN.md` 和 `CODE_INDEX.md`。已逐字节确认历史 Alembic 与 v1 合同共 34 个文件保持原样。
+
+可见的后端源码中，原任务 profile 的版本下发映射只由 r1 退役路径消费。r3 不再读取该 profile 作准入或执行下发，设备/采集守卫自身保持独立。其它使用稳定键的 MES/SMA 映射仍需操作者逐一核对，字段删除界面说明了该要求。
+
+## DEV 自检（切换前记录）
+
+- 后端在候选 `backend/` 以 `env -i`、127.0.0.1:1 的无效 MySQL 占位目标、`TESTING=true`、合成凭据、任务专属 `UV_CACHE_DIR` 运行。命令为 `uv run --offline --no-sync python -m pytest -q -rs -m no_db -p no:cacheprovider --tb=short`，后接 `tests/test_generic_task*.py` 和以下测试模块：`test_business_integration_storage.py`、`test_plc_facts_v2.py`、`test_acquisition_data_browse.py`、`test_acquisition_source_registry.py`、`test_equipment_observation_r10_flow.py`、`test_equipment_observation_r10.py`、`test_equipment_observation_r8.py`、`test_equipment_temperature_migration.py`、`test_legacy_acquisition_retirement.py`、`test_mapping_migration.py`、`test_business_integration_api.py`、`test_mapping_api.py`。结果 394 passed、14 skipped，退出 0；SQLite 适配器报告 1 条已有 datetime 弃用提示。14 项跳过分别是 BE-010 已退役的实绩探针/写入/GET（8 项）、BE-006 已退役的实绩映射（3 项）、仅从清退前候选运行的 BE012 B（1 项）、必须显式提供独立数据夹具的采集浏览（1 项）和只在不可变 f85bea8 基线上运行的 BE003/60（1 项）。
+- 候选 `uv run --offline --no-sync python -m app.module_preflight --project-root . --check-only`、`uv run --offline --no-sync alembic heads`、`uv run --offline --no-sync python -m compileall -q` 加本任务 Python 模块与迁移文件均退出 0。正式源码唯一 head `9d1f3a5c7e20`，候选唯一 head `ae20b4d6f831`。仅静态检查 Alembic 链。
+- 用进程内 HTTP 和内存 SQLite 执行合成数据端到端，覆盖三组各 100 槽、部分合并、合法零值、目标冲突、开完工/观测时间、快照、状态覆盖、无变化实绩仍回写、过期修订和历史字段保护。通过故障注入验证主事务回滚后两张主表和使用记录均保持原值。另用 MySQL 方言编译断言 `FOR UPDATE` 锁顺序，该断言只证明生成的 SQL。实际 MySQL 写入、竞争和异步事务回滚待具体批准。
+- 通过正常 FastAPI 注册提取 14 个路径、15 个操作、26 个 schema。测试对比实际路由的请求、响应、认证及 schema，并以 HTTP 重放七个合成请求。四个旧入口不进 OpenAPI，仍返回 410 且不触发数据库依赖。
+- 前端在候选以合成空页面授权数组、`VITE_API_BASE_URL=/api/v1`、`VITE_FRONTEND_MOCK_ENABLED=false`、`pnpm_config_verify_deps_before_run=false` 运行 `pnpm test:modules`，89 passed，退出 0。包括实际 Vue setup 的部分提交、共享与本地设置、删除、配置冲突草稿、列宽和双语词条。若需浏览器视觉与交互指标，用获批的既有 dev API/Web 做真实检查。候选 `pnpm build --outDir /private/tmp/arch-task-001-r2.FeZuND/frontend-dist-final` 退出 0，存在 Vite 大 chunk 提示。所核对候选的 10 份改动 Markdown 共有 215 个本地链接通过。
+- 较早集合额外运行 `tests/test_business_module_permissions.py`，其全量权限闭包审计对当前合同已有的免 Bearer `/api/v1/acquisition-data/options` 报错。将正式跟踪的 backend 复制到独立临时目录，以同一占位环境单跑原审计，对同一路径复现同一失败，退出 1。原审计与对应权限代码均保持，失败不计入本任务定向套件。
+- 逐文件白名单、内容摘要及 `git diff --no-index --check` 审计通过。真实数据库未执行测试夹具、迁移、DDL 或写入，未触碰设备。
+
+## 现有 dev 只读证据（切换前记录）
+
+通过正式 backend 的本机 dev 配置、连接超时和脱敏输出进行了只读核对。执行 `PYTHONDONTWRITEBYTECODE=1 backend/.venv/bin/python /private/tmp/arch-task-001-r2.FeZuND/readonly_dev_preflight.py`。默认沙箱内连接返回 MySQL 驱动码 2003，socket 返回 errno 1。经工具批准的只读重试退出 0。脚本启动 `START TRANSACTION READ ONLY`，只执行 SELECT（含候选 `_dependencies` 和 `_history`），最后 rollback。未运行迁移、fixture 或种子。输出仅为身份匹配、数量和聚合值。
+
+| 只读项 | 结果 |
+| --- | --- |
+| 真实目标 | 本机 dev 3307，实际 schema 与 dev 配置匹配，UUID 与 schema 的脱敏指纹 `b2c2262f59e55dc2`。MySQL 8.4.6，会话上海偏移 +28800 秒，唯一实际 head `9d1f3a5c7e20`。 |
+| 目标配置 | 正式 backend 的配置文件启用 PLC Facts 与设备观测。两份文件的目标 UUID、schema 及 revision 均与连接实际值匹配。设备、监控旧业务时间集成在该文件中未配置开关、采用 profile 或采用证明。运行进程对环境变量的覆盖尚未确认，须在窗口前核对，不能按文件状态推断有效状态。 |
+| 任务及配置 | 计划 2、实绩 2、下发记录 2、人工动作 0、配置状态 1、旧字段定义 10（v1 空、v2 有 4 项、当前 v3 有 6 项）。新版本台账和使用表尚不存在。计划旧空状态 0，同号已知目标冲突 0。 |
+| 保护数据 | 采集历史 73、采集最新 6、来源登记 3。设备状态快照、过程记录、采集回执及能耗行各 0。计数是只读瞬时快照，切换时须重做基线。 |
+| 迁移预检 | 历史定义、实际值/槽位及引用的只读检查通过，三份版本可判定；可见的视图、例程、事件、触发器和外键检查通过。实际执行前还需确认维护账号依赖可见性、外部客户端和历史时间证据。当前数据库会话时钟不足以证明全部历史行的原时区。 |
+
+发现 8000 有两个 Python 监听引用，后端工作目录为正式 `backend/`，按历史记录具备源码热更新。5190 当前没有监听。正式源码、实际配置或服务均未写入或切换，候选构建未开监听。
+
+## 可审阅的现有 dev 切换提案（切换前记录）
+
+以下各步仅拟议。请分别审批维护、源码整合和迁移、两份 profile 修改、启动以及受控合成数据写入。恢复、永久清理另行决定。如果任何一项身份或证据不能满足，停止在实际数据库或服务操作前。
+
+1. **冻结与基线。** 约定一次维护窗口和具体操作者，重认确切目标为当前已只读核对的本机 3307、脱敏指纹对应的 UUID 与 schema。重验 MySQL 8.4.6、+28800、单一前驱 `9d1f3a5c7e20`。用原启动环境确认应用真正采用的 profile、读写方和是否存在额外业务时间证明。停止现有 8000 对应的正式后端及外部调用方，以原终端正常停服。若执行时发现另有 Web 或数据库写入方，核清作用域和停写边界再继续。保持数据库进程在运行，维护窗口内暂停所有相关业务读写。数据库无应用事务后，在同一个只读一致性快照重跑身份、依赖、历史及数据摘要检查。检查视图、例程、事件、触发器、外键、消费者配置和下发历史，以及既有版本的时区来源证据。任何不能确认的依赖、历史定义/值/时区或目标冲突都须暂停并报告。
+2. **备份和可恢复性。** 维护批准后，用现有私有客户端配置和具备所需权限的维护账号对确切 schema 执行逻辑备份。拟用 `mysqldump --defaults-extra-file="$TASK_R3_MYSQL_CLIENT_CNF" --single-transaction --skip-lock-tables --set-gtid-purged=OFF --routines --events --triggers --databases "$TASK_R3_SCHEMA"` 将 stdout 保存到事先指定的私有目录。先确认权限、快照范围和剩余空间。备份持久化到任务范围内的受控私有路径，权限 0600，核对退出码、有效大小、完成标记和 SHA-256，确认旧 Alembic、业务表数据、约束及对象定义可提取。用户选定同一 dev，当前不准备临时数据库恢复演练。若无法确认备份完整、恢复步骤或一致停写能力，停止迁移。私密备份两份源 profile、当前后端和前端运行配置以及 53 个目的源码路径的既有内容/不存在状态，保存当前正式工作树文件摘要和配置摘要，不记凭据。对任务表、全部历史配置和采集/设备保护数据以主键排序的规范化行序列计算私有 SHA-256，记录数目和摘要，真实行数据不进任务记录。旧计划若确有空状态，额外计算只按候选规则替换计划状态后的预期摘要并单列记录。
+3. **整合源码与精确后继。** 服务及调用方停住后，复核候选清单 SHA 和全部 53 文件内容，在正式树逐路径确认任何并行编辑，发现冲突先停。只将清单文件从候选整合到正式树。保留正式树中的其它差异，不覆盖 `.env`、运行数据和 profiles，不推送 Git。以 `shasum -a 256 -c` 复核，复跑正式后端模块预检、Alembic 唯一候选 head 和前端构建。经迁移批准后，在正式 `backend/` 及原有 dev 环境中设置 `TASK_R2_SERVER_UUID`、`TASK_R2_SCHEMA`、`TASK_R2_OPERATION_ID`；仅有历史来源证据时设置 `TASK_R2_HISTORY_TIME_VERIFIED=Asia/Shanghai`。明确执行 `uv run --no-sync alembic upgrade ae20b4d6f831`，记录开始/完成时间、阶段、退出码和操作 ID。等待确认唯一实际 head 为 `ae20b4d6f831`，核对 schema 约束、版本台账（当前只读基线预期 3 行）与使用证据（当前已知 2 计划、2 实绩、2 下发，共 6 个引用），并确认旧值、批次和动作、版本和保护对象的行数/摘要一致。以执行窗口的实际基线为准。
+4. **采用目标同步并恢复服务。** 批准后，把仍启用且与该服务器和 schema 精确匹配的两份 profile 的 `target.schemaRevision` 分别从 `9d1f3a5c7e20` 原子替换为 `ae20b4d6f831`，应用启动前验证两份文件的其它键与安全权限逐项一致。两份 profile 始终保留可恢复原件，启用开关、鉴权和设备时序不变。若确认已存在同库设备/监控业务时间采用证明，必须先核对其固定列摘要、报告和备份证据并单独批准重新验证与采用操作。原证明保留，不能通过改写版本冒充新目标采用。未采用或关闭的集成继续保持原样。三者一致且对账完成后，根据明确批准从正常入口启动 8000 后端（正式 `backend/` 的 `uv run --no-sync run.py`），在确认实际前端采用方式后才启动获批 Web 进程（若采用宿主源码模式，则为正式 `frontend-js/` 的 `pnpm dev`，既有 dev 预期端口 5190，启动前再次核实端口和代理 8000）。设备读写和其它外部调用保持暂停，先复核基本就绪和保护 API 只读行为。
+5. **合成验证。** 写入批准后，记录唯一 `GTR3-<RUN>-*` 任务号、`R3-DEMO-<RUN>` 目标和字段组/槽位/双语标签。先筛选冲突，只有空槽才登记 `r3<Run>Product`、`r3<Run>Length`、计划/实绩本地项等合成字段，避免触达已有任务。分别测试计划先于实绩、实绩先于计划的默认和显式回填、版本/状态/时间边界、权限、停用/恢复、空及有值的历史使用保护；独立 HTTP 会话并发发送同号请求，读取及 SQL 对账须证明两表单行、同步符合任一实际顺序、不同槽位更新均保留。 同一窗口用两个已登记的不同合成任务号，各执行一条顺序对照请求，再各执行一条并发请求，记录客户端单次耗时、同批总耗时及在维护连接可观察时的锁等待。该探针有意低量且短时，不施压既有任务、不预设性能阈值。前后对账用户已有任务、旧配置/历史及受保护采集设备数据，实际配置变更仅创建或停用已登记的合成字段，不修改现有业务值。实际 MySQL 失败注入若需事务连接，另批准一次独立测试进程，仅对已登记合成任务打开事务，以候选服务在实绩 flush 与计划写回之间抛出合成错误，强制回滚并对账。正式服务无需注入或改源码。使用真实浏览器核对管理员入口、两组本地/同一共享设置、双语、列宽、刷新和配置冲突。对两种已启用采集和观测按现行授权做读、匿名/未授权拒绝及已有记录摘要复核。需真实写入接口确认时再单独审批合成来源，禁止对现场设备操作。发布态证据只记录脱敏结果，完成后再恢复其余调用。
+6. **合成数据与清理。** 优先保留带标记且已登记的合成任务、字段版本及使用记录供 QA 对账。只有经同一写入窗口明确批准，才对已登记的合成字段执行停用；现有字段定义维持原样。合成字段一旦被使用便按规格保留历史。任务 API 无删除入口，后续如需移除某批合成记录，先审批精确主键清单、证据的保留办法和独立清理事务。禁止清库、批量删除、回退字段历史版本或回收其它任务资源。
+7. **失败恢复。** 若迁移前失败，保持停写并核对未发生任何 DDL/写入。仅在确认旧数据库仍是 `9d1f3a5c7e20` 且无已接受新写入时，另行批准原源码和旧配置复原，再按原启动方式恢复。若迁移或配置切换进行中失败，所有来源和受影响读写继续暂停；记录实际 DDL、Alembic head、两张台账及主表约束、状态/值及文件摘要，保全当前数据库和新增数据。MySQL DDL 可能已经提交部分步骤，不能用事务回滚、降级命令或盲目重试代替恢复。依现况选择经批准的向前修复或按已审阅备份恢复，同步源码、目标 profile、采用证据和实际 head，重新做完整数据对账和保护验证，才能再次恢复服务。任何 restore、DDL 修补或重试需单独明确授权。
+
+## 仍待执行（切换前记录）
+
+候选整合、上述实际 dev 操作、正式 MySQL 事务与竞争、真实浏览器、保护数据前后摘要和已启用接口切换回归均未执行。两张主表的历史写入时区证据和实际进程环境覆盖须在窗口前确认，见补充复核。候选源码、精确文件摘要与自检产物保留在本任务临时目录，正式整合及证据审查结束后才回收。现阶段没有 `developer_handoff` 或独立 QA 结论。
+
+## r3 补充 DEV 自检与切换前置复核（切换前记录）
+
+### 候选前端 Chrome
+
+执行 `node /private/tmp/arch-task-001-r2.FeZuND/browser/smoke.cjs`，使用本机缓存 Playwright `1.64.0-alpha-1789764292000` 和 Chrome `157.0.8103.79` 的独立浏览器上下文。脚本从冻结候选的 `frontend-dist-final` 提供临时静态服务 `127.0.0.1:18743`，用假管理员、固定合成行、字段和错误信封拦截全部 API。浏览器页面无外部请求、未访问正式 8000、现有 dev 库和真实账号。沙箱外运行使用工具的本机临时端口批准。
+
+首轮退出 1，由中文新增按钮定位文字错误引起桌面后续步骤阻塞，且 390 px 时展开的既有应用侧栏压缩了主内容区域。仅修正临时探针的实际词条，并在窄屏操作既有侧栏收起控件。修正轮 20/20，增强轮重复核对最后一个非固定列和页面刷新后的列宽，仍为 20/20、退出 0。
+
+两模块在 1360×900 和 390×844 四个组合均实际渲染。标题与操作、筛选、表格与分页三段按垂直顺序出现。计划和实绩各显示一项对应本地字段，两个共享设置显示相同九项字段。横向滚动到末端后，最后一个非固定的实绩列顺序表头进入可视区域。实际列宽从 190 px 拖到 235 px，页面刷新并重开后保留，恢复默认回到 190 px，保留打开的草稿。关闭再打开后草稿丢弃。合成 HTTP 409 显示配置冲突并保存当前草稿。实际点按语言按钮并双向切换中英文。增强轮 44 份请求由本机 mock 完整处理，页面异常、未知 API、外部页面请求均为 0。
+
+脱敏结果和截图在 `/private/tmp/arch-task-001-r2.FeZuND/browser/`，`result.json` SHA-256 为 `ab03c7a573efe7105c73723b173718d25299015dba45ff0074a6af0f5b74fc19`。三轮均关闭各浏览器上下文、浏览器与自有临时静态服务。`lsof -nP -iTCP:18743 -sTCP:LISTEN -Fpcn` 退出 1且无输出，无剩余监听。真实 dev 浏览器与受保护 API 验收仍待实际批准切换后完成。
+
+### 备份准备与历史时间
+
+`mysql --version`、`mysqldump --version` 和 `df -h /private/tmp` 退出 0。两客户端均为 Homebrew arm64 9.3.0。验证备份客户端参数解析的命令为 `mysqldump --no-defaults --no-login-paths --single-transaction --skip-lock-tables --set-gtid-purged=OFF --no-tablespaces --hex-blob --routines --events --triggers --databases --help`，退出 0。只执行帮助，未转储 DB。
+
+执行 `PYTHONDONTWRITEBYTECODE=1 backend/.venv/bin/python /private/tmp/arch-task-001-r2.FeZuND/readonly_backup_history.py`，退出 0。它对已核对的目标使用 `START TRANSACTION READ ONLY`，仅查询身份、权限、元数据、计数与时间证据，对照后 rollback。原生客户端认证探针是 `mysql --defaults-file=/dev/fd/<匿名配置读句柄> --no-login-paths --protocol=TCP --connect-timeout=4 --batch --skip-column-names --execute <只读事务 SELECT VERSION 与目标检查>`，以管道注入已配置认证，不在命令行、文件或输出中保留凭据。只读原生认证退出 0。 `SHOW GRANTS FOR CURRENT_USER()` 仅输出脱敏摘要，确认本目标 schema 的 `ALL PRIVILEGES`、全局 `USAGE`、未启用额外角色。Schema 共有 73 张可见 InnoDB 基表，可见视图、例程、事件、触发器均为 0，分区元数据未发现具名表空间，GTID 未开启。表和索引估算 2,932,736 字节，临时卷可用约 332 GiB，正式私有备份路径另在窗口确认。
+
+当前无现成的命名备份选项文件、默认选项文件或登录路径文件。维护方案可用已验证的匿名描述符传递认证，或由授权操作者在实际窗口以 0600 私有选项文件提供同一受核对目标，备份输出同样以受控权限写入。因当前账户无全局管理权限，方案增加已验证可解析的 `--no-tablespaces` 以及 `--hex-blob`，在停写后复核无需要额外备份的表空间或不可见对象。现有 auth 探针使客户端登录可复核，实际转储成功、全对象可见性、备份落盘及恢复仍待窗口执行与核对。
+
+历史核对使用 r1 [切换记录](../../backend/data/maintenance-evidence/arch-task-001-r1-dev3307/operation.json)、[留存的 Owner A/B 探针记录](../../backend/data/maintenance-evidence/arch-task-001-r1-dev3307/owner-ab-UAT49A9A1/browser-and-http.json)、r1 源码的 `DATETIME(6)` / `CURRENT_TIMESTAMP(6)`、来源时间转换和保留的已有应用日志。对应当前已存计划 2、实绩 2 与批次 2，任务身份集合与该归档测试一致，无额外批次。18 项 SQL 墙上时间与 r1 HTTP 快照一致。原带时区的实绩输入确认三个非空业务时间（两项观测、一项完工），两项开工和另一项完工仍为空；未补造。两项历史回执时间与带时区的归档响应相等，归档无该两项原始请求体，响应不算独立输入证据。
+
+`performance_schema.variables_info` 显示最近全局时区设置为 `DYNAMIC`，设置时间早于 r1 迁移，也早于五张含时间的表的最早值。全局和此次会话为 `SYSTEM`，系统简称 `CST`，会话实测偏移 +28800 秒。r1 切换记录也为 +08。查到的 r1 应用引擎/会话源码未设置 `session time_zone`。这些事实支持正常 r1 写入使用上海时间。仍需确认现存记录的所有相关写入是否只经过该应用默认数据库会话；目前没有历史会话记录能排除覆盖、直接 SQL 或导入。保留的两条独立带时间戳的应用日志中，一条与 B 实绩最终更新时间相差 10 ms，另一条是 A 早一次更新，距最终状态约 29.88 秒。r1 HTTP 序列化会给无时区 SQL 值附上上海口径，因此只读值和 HTTP 展示一致也不能单独作为历史写入时区的证据。
+
+| 表 | 行数与历史时间证据 | 对本次迁移的影响 |
+| --- | --- | --- |
+| `plan_main` | 2 行，创建、更新均非空，共 4 值。均与归档 HTTP 一致，仍无独立写入会话时间对照。 | 两主表的历史时间继续被当前 API 解释或筛选，4 值待确认。 |
+| `performance_main` | 2 行，创建、更新共 4 非空值，B 最后更新时间得到独立日志印证，其余 3 待确认。来源时间有 3 个非空和 3 个空值，已按原输入对账。 | 3 个数据库生成值待确认，来源时间已有证据。 |
+| `plan_dispatch_attempts` | 2 行，领取和更新共 4 个数据库生成值无独立时钟；2 个回执值匹配归档响应。 | 仅按原值保存并对账，候选不转换或重新解释历史批次时间。 |
+| `plan_action_events` | 0 行，无现存历史时间。 | 核对行数和结构，保留历史表。 |
+| `task_field_config_state`、`task_field_definitions` | 分别 1、10 行，创建及更新共 22 个数据库生成值；无逐值历史外部时钟。 | 候选按原值保留配置历史，以配置身份和版本建立使用证据，不解释或转换配置时间。 |
+
+本次迁移/解释直接相关的未决时间是两主表 7 个数据库生成值。全局历史符合上海时区的旁证已找到，运行写入链仍未完全确认。执行前须通过已归档运行记录、写入者来源和数据库会话证据核定，不设置 `TASK_R2_HISTORY_TIME_VERIFIED` 以假定通过。若仍不能可靠核定，保持迁移阻塞；不调整、重置或删除任何历史行。批次、动作、旧配置等只保留的时间按原值对账，不新增独立时区验收前提。只读探针未写数据库、配置和正式服务。脱敏汇总 `/private/tmp/arch-task-001-r2.FeZuND/readonly-backup-history.json` SHA-256 为 `d772bc644be9c387ec57b5f17963490364be3e06579599ed8bb2dbe280ec24ac`。
+
+候选根执行 `shasum -a 256 -c ../candidate-inventory.sha256`，53/53 一致、退出 0。冻结清单 SHA-256 仍为 `71a4835b7c6998f031ba38a55d1d7fdfc1636e603f6fce0c773821c6ad047d3c`。
+
+
+## r3 获批切换和合成验收
+
+2026-11-18，Human Owner 在审阅本任务的具体 dev 操作后回复“批准切换和合成验收”。已在获批本机 MySQL 8.4.6 dev 目标（端口 3307，脱敏指纹 `b2c2262f59e55dc2`）执行备份、正式源码整合、精确 Alembic 后继、两份匹配 profile 版本更新、恢复 API 和标记合成验收。保留原 2 个计划、2 个实绩、2 个下发批次及既有事实。业务合成任务和字段均走正式 API 路由。原始业务数据和环境配置未写入 Git。
+
+### 历史时间、备份及恢复记录
+
+- 两主表原有四行的 8 个非空 `created_at`、`updated_at` 均与已归档 r1 A/B 行身份和响应一致。只读检查 MySQL ROW/FULL binlog 的四个日志（7,850,460 字节），匹配 14 个相关行事件。以 `TZ=UTC` 读取，使用行事件对应事务的原始 `SET TIMESTAMP` epoch 交叉核对，再按上海偏移转换一次。4 个创建时间与对应 INSERT 匹配，4 个更新时间与相应行事件匹配，最接近的独立对照绝对误差为 435–971 ms，处于事件秒级精度以内。由此证实上文 7 个待定值的上海口径。binlog 无行查询标注，无法据此确认旧数据的客户端身份。此检查不落原始行或日志，也未写库。第一次全量读取遇非 UTF-8 输出，退出 1，按原始事件解析允许替换无关坏字节后成功。最终 `binlog_history_readonly.py --metadata-only` 及 `binlog_history_readonly.py` 退出 0，脱敏汇总 SHA-256 为 `e14487273077a2ffce7efb4d52169cda1ab3da3d3da3f60adcea185b1cd99452`。
+- 首次短时停写时，普通账号备份受权限限制。维护账号 `retry_dump.py` 原生退出 2，MySQL 1109 指向 `information_schema.LIBRARIES`。在源码、配置和数据库均未改动时，以原命令 `uv run --offline --no-sync run.py` 恢复 8000，并核对 /health 为 200、旧 head 与数据仍一致。再在在线只读窗口用 `verify_dump_compatibility.py` 复现客户端 9.3.0 对 MySQL 8.4.6 的 `--routines` 兼容错误（原生退出 2）。维护账号确认有完整可见性且目标无 routines 后，改用 `--skip-routines`，保留 `--triggers --events`，结合 `--single-transaction --skip-lock-tables --set-gtid-purged=OFF --no-tablespaces --hex-blob`。修正后的在线一致转储及验证原生退出 0，预演 SQL 摘要为 `8169dbe680063fe8efdfcab0dff94fc5d3508b50629dbc6a6e285902776e75ac`。
+- 再次验证 8000 原运行身份并暂停，`pause_final_backup.py` 退出 0。目标无其他连接工作，正式一致转储前后均确认 73 表、13 非空表，views、triggers、events、routines 均 0，摘要一致。SQL 文件 260,584 字节，包含 73 表定义、13 个非空表的 INSERT 和正常结束标记，SHA-256 `9fa873221a3bf5c6c637603dcad65312c625ec22b97f6540e648bd547a48dae8`。未执行还原演练。
+- 在迁移和 profile 改动之前，以 `persist_verified_backups.py` 将数据库转储、两个 profile 原件、现有环境配置备份、43 个修改文件的原字节和 10 个原本不存在的路径清单复制到受控持久目录 `backend/data/maintenance-evidence/arch-task-001-r3-dev3307/`。目录为 0700、文件为 0600，逐项复制前后散列一致，命令退出 0。正式源码前像清单 SHA-256 为 `7d1095be0d7429f281a47cbd03c1a213f708e0b2eb5a2bf873dfa3115abda4f2`。该目录受 Git 忽略。恢复需要先停止任务写入、核验目标指纹和备份，以及另行批准实际恢复操作。MySQL DDL 非事务，迁移异常后以日志、版本和结构判断停写保全，不自动降级或重跑。
+- `integrate_candidate.py` 仅复制获批 53 个源码文件，退出 0。在正式树核对工作树基线 `f7c5608c0e433612b15821a578a7ef3e4f155cdb`、53 文件逐字节等同候选，无任务外源码改动。可从项目根运行 `shasum -a 256 -c backend/data/maintenance-evidence/arch-task-001-r3-dev3307/development-delivery-files.sha256`，交付清单 SHA-256 `71a4835b7c6998f031ba38a55d1d7fdfc1636e603f6fce0c773821c6ad047d3c`。正式 `uv run --offline --no-sync python -m app.module_preflight --project-root . --check-only`、编译、`uv run --offline --no-sync alembic heads` 与 `pnpm build --outDir /private/tmp/arch-task-001-r2.FeZuND/dev-window-20261118/formal-dist` 均退出 0。Vite 报已有的大块体积提示。
+- 维护操作 `ARCH-TASK-001-R3-DEV3307` 以 `migrate_exact_r3.py` 运行 `uv run --offline --no-sync alembic upgrade ae20b4d6f831`，退出 0。实际唯一前驱 `9d1f3a5c7e20`，唯一现行 head `ae20b4d6f831`。启动命令才设置进程级 `TASK_R2_HISTORY_TIME_VERIFIED=Asia/Shanghai`。切换前紧邻 DDL 的只读查询确认历史计划无 NULL 状态。DDL 时间为 07:44:57.021842–07:44:59.604063 UTC。紧邻迁移前后逐表散列的 72 张旧数据表全部一致，旧 `alembic_version` 仅变上述一行。迁移建立 3 个旧配置版本与 6 条历史任务/批次引用使用证据。日志与 `migration-operation.json` 均已持久化，SHA-256 分别为 `e12e4e347de46918b33a26385221238a45ed02c389a5039c0f87f2df62e721dc` 与 `6ffcaeb668275a16cea4ee48e1122c61eb56ecdb5827222306c65c4d118e16e7`。
+- `adopt_profiles_resume.py` 退出 0，逐项确认实际 server 指纹、schema、MySQL、时钟、唯一迁移 head 和进程启用配置匹配。两份已启用的 PLC Facts 和设备观测 profile 仅变更 `target.schemaRevision`。未启用的独立业务时间采用仍保留原状。恢复后的同项目 8000 以原 `run.py` 启动方式运行并验证 /health 200。既有 5190 Vite 已确认属于正式项目，保持运行并验证首页 200。合成运行产物与浏览器会话用完已关闭，临时 mock 端口 18743 已回收。保留候选和临时探针至独立 QA 复核完毕，开发备份目录按任务证据长期保全。
+
+### DEV 自检覆盖
+
+下列实时报告在上述受控目录下。开发执行脚本位于 `/private/tmp/arch-task-001-r2.FeZuND/`，以项目 `backend/.venv/bin/python` 运行。真实 dev 检查只以 GTR3 标记的三单及字段为测试输入。独立测试进程只注入内存等待或故障。
+
+| 验收 | DEV 自检证据与限制 |
+| --- | --- |
+| R3-AC01 | 正式迁移、唯一前驱与后继、两份 profile 生效、53 文件交付散列和历史迁移/合同的原字节核对完成。三处兼容只增加精确 head，设备观测沿用现有参数要求。 |
+| R3-AC02–AC04 | 候选与正式树内容逐文件比对一致。合成定向 suite 核查各原有/新增 revision、未知、多 head、版本匹配、数据库类型、目标与时区。设备观测覆盖两项时序参数及原权限。业务时间证明覆盖设备、监控、历史实绩格式，以及目标、固定列与时基等拒绝条件。实际 dev 未启用的业务时间采用保留原态。 |
+| R3-AC05–AC06 | 已通过获批备份、切换、只读保护回归和真实 8000 的准入对照。认证设备组读 200，匿名受限读 401，已登记采集浏览与选项正常读 200，管理与机器探测继续受认证保护。无真实设备或采集写入。并行设备配置的只读对账另见下文。 |
+| R3-AC07、R2-AC15 | 冻结候选后端 394 passed、14 skipped，前端 89 项通过和正式树 Vite 构建成功。跳过原因见上文，同环境旧权限审计对采集 options 期待 403，但既有匿名语义为 200，原基线可独立复现，不计入 394 项通过。正式 8000 OpenAPI 与候选定义逐项相符，14 路径、15 操作、26 schema。 |
+| R2-AC01 | 本轮定向 SQLite 通过各组三类 100 槽、规范化、同号唯一、JSON 形状和重名语义。r1 独立 QA1 的 MySQL 历史试验证明两主表 JSON 每列可容纳 100 个逻辑值。本轮现有 dev 未填满 100 槽，未占用现有字段做满容量测试。 |
+| R2-AC02–AC04 | 定向 suite 涵盖部分更新、省略/清空/边界值及拒绝整包。真实 HTTP 验证首次创建、标准计划过滤、0、false、可空字段、无计划先实绩、可选历史回填、真实一次性快照和非法混合包回拒。 |
+| R2-AC05–AC08 | 定向 suite 验证独立时间戳、观察时间与序号、同步语义和处理顺序。实际 dev 正常 API 验证同号状态/值回写、同号并发创建和不同字段更新。无负载假设的两单并发 API 用时 23.24、25.87 ms，批次 26.06 ms，串行基准 14.87、14.74 ms，各写事务共用配置行锁。通过进程内故障钩子在已 flush 实绩后、写计划前令真实 MySQL 请求返回 503，正常 API 两表详情与只读台账均相同。 |
+| R2-AC09–AC11 | 真实无 token 的集成路径、合法/冲突目标、普通 GET、null/停用/恢复及受保护设备权限。管理员保存匿名 401、操作员 403。定向测试涵盖分页、形状、时区、排序、版本无阻断。GET 不改变业务内容及使用台账。 |
+| R2-AC12 | 冻结候选真实 Chrome mock 20 项覆盖双语、草稿取消、冲突保留、末列可滚动及拖动后 190→235→190 的本机列宽恢复。正式 5190/8000 以真实 Chrome 157 在 1360 与 390 px 访问计划与实绩，各 2 次，覆盖三段布局、共享和本地设置、合成记录筛选及双语。两次 admin 登录 200，实际发出 26 个真实 API 请求，浏览器未执行业务写入。 |
+| R2-AC13 | 真实 admin API 拒绝已用共享字段删除 409，未用的两个独有探针分别成功删除并重新使用同一 `plan_local` 100 槽。真实 MySQL 两种先后在 `performance_schema.data_locks` 看到配置行等待，更新先行并发删已引用的 GTR3 字段为 200→409，合成字段及写入保留，用时 55.93 ms。删除先行并发尝试填写已删除的未用探针为 200→422，原任务保持已写值且没有被删除字段，槽位空闲，用时 25.29 ms。旧依赖、欠缺历史证据、停用及其它引用语义由定向 suite 覆盖。 |
+| R2-AC14 | 实际迁移前后原 2 计划、2 实绩、2 批次、动作历史、历史配置、采集事实和其它受保护行按原值对账。实际旧动作返回 410，前端旧入口无调用。依赖异常/空状态路径以定向迁移测试补充，现有 dev 没有空状态。 |
+
+实际 HTTP 脚本 `dev_http_acceptance.py` 最终退出 0（前两次仅只读/认证探测，分别修正通配符参数绑定和登录响应字段后继续）。`api_fault_and_used_field.py`、`browser/run-live-r3.py`、`delete_probe_and_reconcile.py`、`dev_delete_commit_races.py`、`final_runtime_protected_reads.py` 最终分别退出 0。留存合成三单 `GTR3-C9EF6A-A/B/C` 及三项已用配置 `gtr3C9EF6AActual`、`gtr3C9EF6ANote`、`gtr3C9EF6AInspection`。证据对应 `dev-api-acceptance.json`、`live-api-fault-and-delete-protection.json`、`dev-browser-r3.json`、`dev-api-delete-reuse.json`、`dev-api-delete-concurrency.json`、`final-registered-contract-and-reads.json`。本轮探针释放其临时槽位。
+
+### 最终对账
+
+最终 `final_reconcile_r3.py` 退出 0。直接对账发现两张设备配置空表在正式恢复后增加了 3 行。它们与 16:17:02 的 `POST /api/v1/equipment/metric-groups` 及 16:19:40、16:20:12 的两个 `POST /api/v1/equipment/metric-configs` 在相同目标时钟对应，HTTP 均 200。只读 binlog 确认是 3 次 INSERT，事件和 HTTP 记录的时间差分别为 85、671、334 ms。时间晚于本轮并发探针，探针未请求设备写路径。保留这 3 条并行配置记录，未判断具体操作者。未落原始 binlog 或行值。其余 67 个整表与合成前相同。两主表非 GTR3 各 2 行、原 2 批次、6 历史引用、3 历史版本、10 历史定义和 6 项原生效语义一致，登记的 GTR3 合成各 3 行，10 条合成引用。当前业务版本与配置修订号均为 14，53 文件一致，两个手动示例在两表均无记录。8000 和 5190 均复查 HTTP 200。脱敏报告 `dev-protected-data-reconciliation-final.json` SHA-256 为 `4b5988a7c83006d784df558a4937f46e9421ded7eef7afdd52014bde3d46a640`。
+
+### 留给 Human Owner 的两个手动示例
+
+以下两个订单在交付对账时从未提交。访问本机 8000 的 docs，向 `POST /api/v1/integration/plans/upsert` 传入 `Content-Type: application/json`，无需 Bearer。通过 API 建单。
+
+```json
+{"taskNo":"R3-MANUAL-9BDF-A","items":{"productCode":"DEMO-01","targetLength":120,"customerOrderNo":"0001"}}
+{"taskNo":"R3-MANUAL-9BDF-B","items":{"productCode":"DEMO-02","targetLength":180,"customerOrderNo":"0002"}}
+```
+
+可先调 `GET /api/v1/integration/plans?productionStatus=new` 或 `GET /api/v1/integration/plans/by-task/{taskNo}`。用同一 API 服务模拟 SMA，向 `POST /api/v1/integration/performances/upsert` 各提交以下 JSON，不调用现场实例。
+
+```json
+{"taskNo":"R3-MANUAL-9BDF-A","items":{"completedLength":45,"currentSpeed":0}}
+{"taskNo":"R3-MANUAL-9BDF-B","productionStatus":"completed","items":{"completedLength":180,"currentSpeed":0}}
+```
+
+重查 `GET /api/v1/integration/plans/by-task/{taskNo}`，A 应为 `running` 且已完成 45，B 应为 `completed` 且已完成 180。
+
+## developer_handoff — ARCH-TASK-001 r3
+
+精确交接为正式工作树基线 `f7c5608c0e433612b15821a578a7ef3e4f155cdb` 上清单所列 53 文件及当前 Development 记录，未创建 commit。获批规格 SHA-256 `9307a205982c6952eb155c3bf91bfb84632670262c502b98cd5e52a2214cf3ff`，源码清单 SHA-256 `71a4835b7c6998f031ba38a55d1d7fdfc1636e603f6fce0c773821c6ad047d3c`。目标 dev 实跑 head `ae20b4d6f831`，8000 和 5190 可用。请 fresh-context Verification 按 r3 和继承的 R2-AC01–AC15 复核这一精确交付。须保留已有失败基线、满槽证据来源区别、并行设备配置写入记录、无恢复演练/现场设备操作及共享配置锁风险。最终验收由 Human Owner 在独立 Verification 后决定。
+
+## 第二次 developer_handoff — ARCH-TASK-001 r3
+
+2026-11-18，独立 Verification 首次退回缺陷 R3-QA-F01，记录 SHA-256 为 `14085a57b6f556343e954d610f9f7c7e88a64a743944ddb829aa977127607bf2`。该返工沿用已批准 r3 的 R2-03、R2-AC07、R2-AC12 及既有 dev 合成验收范围。以下为当前精确交付。上方第一次交接和迁移操作是历史证据。
+
+- `backend/app/task/domain.py` 改用公共 `BUSINESS_TIMEZONE` 的固定东八区。三项实绩输入经共用转换规范化为 MySQL `DATETIME(6)` 墙钟值，输出附 `+08:00`。计划和实绩时间筛选沿用这一共用转换。保留显式偏移、精度、上下文空值与存储范围的原校验。
+- `frontend-js/src/app/plan/components/TaskPage.vue` 的计划/实绩共用列表和详情显示 API 返回的墙钟秒值，避免再次套用地区历史夏令时。日期控件既有固定 `+08:00` 提交格式不变。公共日期工具及其他模块无本次改动。两份现有定向测试 `backend/tests/test_generic_task_flow.py` 与 `frontend-js/tests/module-registry/generic-task.test.mjs` 补回归。
+- 测试先在原冻结副本添加后端与前端断言。后端新断言修复前 4 failed、2 passed，退出 1。夏季 UTC 和非 UTC 偏移输入存入错误墙钟，时间边界被历史本地平太阳时偏移，筛选同链路输出偏移错误。前端 Vue setup 独立复现把 API 的 `1990-07-01T08:00:00.123456+08:00` 显示为 `09:00:00`，退出 1。最初后端复现运行还补齐了仅测试用的环境占位值。已修正测试的 SQLite 同秒更新条件及实绩列表路由，按实际端点验证。
+- 后端以项目 `.venv/bin/python -B -m pytest -q -m no_db -p no:cacheprovider --tb=short` 运行本文件首轮列出的同一测试范围，`env -i`、`TESTING=true` 与回环端口 1 的合成占位配置隔离现有库。HTTP/SQLite 文件 15 passed，整个定向集 400 passed、14 skipped，均退出 0；跳过原因及已存在的权限基线审计限制沿用上文。新测试涵盖 1990 夏/冬和当前，`-04:00` 输入，微秒，存储下界及低于下界的拒绝，两模块的日期区间包含下界、排除上界。前端 `TZ=America/New_York pnpm test:modules` 90/90，候选和正式 `pnpm build --outDir <专用临时目录>` 均退出 0，保留既有大块提示。
+- 仅四份文件在正式树整合前后发生内容变化。基线仍为 `f7c5608c0e433612b15821a578a7ef3e4f155cdb`，无新 commit。以原交接逐文件摘要守卫 preimage，再将四份文件写入。新正式清单 `backend/data/maintenance-evidence/arch-task-001-r3-dev3307/development-delivery-r3-f01-files.sha256` SHA-256 `e35290177b913b9327096305461a5e18ac5f119dfac059d2ecae517726e849ee`。候选副本与正式树 53/53 核对通过，首轮清单保留为历史。规格 SHA-256 仍为 `9307a205982c6952eb155c3bf91bfb84632670262c502b98cd5e52a2214cf3ff`。
+- 正式 8000 由原父进程自动 reload，子进程 60664 接续监听。5190 原进程保持运行。两服务 HTTP 200、已注册 OpenAPI 仍与候选合同一致，dev 唯一 head 仍为 `ae20b4d6f831`。无 DDL、profile 改动、服务手工启停、真实设备调用或清理。
+- 经正常免 Bearer API，仅对原合成 `GTR3-C9EF6A-C` 实绩提交时间。夏季 UTC、冬季 UTC 与夏季 `-04:00` 分别得到 `1990-07-01T08:00:00+08:00`、`1990-01-01T08:00:00+08:00` 和 `1990-07-01T08:30:00.123456+08:00`。只读 MySQL 核对三个 DATETIME 墙钟值一致，同号计划完整响应保持，重发是 `unchanged`，七位小数秒 422 且未改数据。两真实登录列表的 UTC、`+08:00`、`-04:00` 同瞬间筛选结果相同。HTTP 保护回归包括管理员配置、采集、设备及机器读接口。初次验证脚本因使用历史清单退出 1，当时无业务写入；首次实际提交后脚本发现合法新增的一条 v14 合成使用引用，调整脱敏断言后幂等复验退出 0。开完工及观测值保留在该合成实绩，以便独立 Verification 复查。全程无直接 SQL 业务写入。
+- 只读再次核对旧计划 2、实绩 2、下发 2、动作、配置与历史使用记录，以及本次被保护的采集事实。两个预留手动订单在两模块仍共返回 4 次 404。3 个既有合成计划和 3 个实绩保持数量。合成使用证据 10→11，逐项核定新增仅为 C 实绩的当前 v14 引用。实时探针 `r3-f01-live.py` 退出 0，脱敏 `r3-f01-live-time-and-protection.json` SHA-256 `973da0bfddbad50e54706a303846ebe526bd53dfd0b035c1ca46badcf45f5653`。
+- 真实 Chrome 157 使用两个独立上下文分别设 `Asia/Shanghai` 和 `America/New_York`，从正式 5190/8000 过滤 C 合成行。两上下文列表均显示 `1990-07-01 08:00:00`，详情三个历史值正确，无业务写入，浏览器已退出。命令为 `.venv/bin/python -B /private/tmp/arch-task-001-r2.FeZuND/browser/run-live-r3-f01.py`，退出 0，`r3-f01-browser-time.json` SHA-256 `b116bc2fbf1c75eea0e3a4032732eb2347b147ef06d31228537e879f9e50d005`。后续可清理返工临时构建与探针，时点为独立 Verification 确认不再依赖，持久日志与备份在任务原证据目录。
+- 本次同规格重新交付给 fresh-context Verification。真实 MySQL 本轮仍无满槽测试，旧权限审计基线、共享配置行串行风险、无恢复演练及无现场设备操作的证据边界沿用第一次交接。此次只修复上述时区路径。Human Owner 最终验收待独立 Verification 完成。
+
+## 第三次 developer_handoff — ARCH-TASK-001 r3
+
+2026-11-18，独立 Verification 第二次退回 R3-QA-F02，记录 SHA-256 为 `2cf7f94ae1340e3662ed038771eb68bd1b2f12cafb69e03f43510a4e78d23025`。同一已批准 r3 的返工按 R2-01 和 R2-AC02 修正原始 JSON 数值精度。先前两次交接和切换证据保留。此节给出当前精确交付。
+
+- `backend/app/task/http.py` 仅对使用 `Upsert` 派生请求模型的计划和实绩路由，用 Decimal 解码原文 JSON 的小数与科学计数形式。正常整数仍为 int。超长整数和超出 Decimal 指数表示范围的业务数字保留为可拒绝值，避免丢失原始范围信息。JSON 类型协商、语法错误、参数模型、权限依赖和异常信封继续由原路由处理。
+- `backend/app/task/domain.py` 在数值转定点前按十进制数量级确认整数部分最多十位，对四位小数做等值检查，返回原约定的规范化字符串。超精度既不舍入保存也不下溢变零。极端非零指数直接按范围拒绝，校验过程中不展开长定点字符串。响应仍由原类型还原规则返回标准 JSON number。
+- `backend/tests/test_generic_task_flow.py` 增加计划与实绩各自的集成、登录入口原始 HTTP 字节矩阵。验证原文 `9999999999.0001001`、`1e-400`、超界长整数（含 5,001 位）、正负极端指数、畸形 JSON、权限拒绝、布尔和数字字符串误用。每个拒绝同时核对备注与任务前后完全相等。合法绝对值边界、负值、科学计数、0、false、前导零字符串及显式 null 以原始字节提交，核对实际 JSON 类型和 SQLite 中的规范值。严格的顶层整数参数语义保留。
+- 在无实库的旧候选先运行 `tests/test_generic_task_flow.py -k 'raw_http_numbers or raw_task_upserts'`，四个入口都把超精度包误收为 HTTP 200，结果 4 failed、1 passed，退出 1。候选修复的初次试验发现当前 FastAPI ModelField 应从 `field_info.annotation` 读取类型。限定实际请求类型后全套原始字节测试 5/5，整份业务 HTTP/SQLite 文件 20/20，退出 0。
+- 后端继续使用首轮同一套模块，以 `/bin/zsh /private/tmp/arch-task-001-r2.FeZuND/run-r3-time-tests.sh .` 调用项目 `.venv/bin/python -B -m pytest -q -m no_db -p no:cacheprovider --tb=short`，以合成环境和回环端口 1 隔离现有库，405 passed、14 skipped、1 条原 SQLite datetime 适配警告，退出 0。F01 固定时区和日期区间仍通过；正式树以同命令重跑 F01、F02 及配套选择共 11 passed，退出 0。14 项跳过原因及原权限审计失败沿用首轮记录。前端 `TZ=America/New_York pnpm test:modules` 90/90；正式模块预检与 `pnpm build --outDir /private/tmp/arch-task-001-r2.FeZuND/r3-f02-formal-dist` 成功，均退出 0，保留 Vite 大块提示。
+- 正式工作树基线为 `f7c5608c0e433612b15821a578a7ef3e4f155cdb` 的未提交工作树。以第二次清单守卫正式树的 53 个 preimage，仅替换上述三个文件，另外 50 个摘要相同。正式树与返工候选逐项一致 53/53。`git diff --check` 退出 0。新清单 `backend/data/maintenance-evidence/arch-task-001-r3-dev3307/development-delivery-r3-f02-files.sha256` 的 SHA-256 为 `eb36d9abbfd7e9622b8cd5ec6944a1c20e2bea4f61eb5f154e041b27c6669158`。规格仍为 `9307a205982c6952eb155c3bf91bfb84632670262c502b98cd5e52a2214cf3ff`。
+- 8000 原父进程自动 reload，子进程 73105 接续。5190 原进程保持运行。两服务均 HTTP 200，注册 OpenAPI 的 14 路径、15 方法及 26 schema 与原候选合同相同，dev 唯一 head `ae20b4d6f831`，没有迁移、profile 或设备改动。
+- 真实 dev 仅针对已有 `GTR3-C9EF6A-A` 发原始字节边界探针。集成计划、集成实绩与登录计划共 18 次越界数值与 3 次畸形 JSON 均返回 422，两条人工入口匿名均 401。登录实绩的合法数字和拒绝场景由原始 HTTP/SQLite 逐项验证，无需在 dev 新增人工数字字段。实库验证无被接受的业务写入。两侧详情与备注逐次检查均不变，任务、字段配置和台账的全行快照前后相同，并保留 QA2 留存合成号。已核对原 2 计划、2 实绩、2 下发、采集事实、历史配置和 6 条原使用证据。正常采集读取 200、受保护采集管理和机器接口 401。用户预留两单共 4 次 404，未提交。命令为 `PYTHONDONTWRITEBYTECODE=1 backend/.venv/bin/python -B /private/tmp/arch-task-001-r2.FeZuND/r3-f02-live.py`，退出 0。持久报告 `r3-f02-live-number-precision.json` SHA-256 `3a3f0d5474f7a6b6ee583d0e2bae0d1809aea7f2600bd1f90f4c63299857f19c`。
+- 交 fresh-context Verification 复查精确 r3 和受影响入口。本轮无真实 MySQL 满槽、恢复演练或硬件验证，字段配置首锁和历史权限审计边界保持。返工临时日志和构建在独立复验确认无依赖后可回收。最终验收待 Human Owner。
+
+## 第四次 developer_handoff — ARCH-TASK-001 r3
+
+2026-11-18，独立 Verification 第三次退回 R3-QA-F03，记录 SHA-256 `f09042ae6caf12e6d5a4b6f3651bd2da19e91576fbc1ffb63637fe393dbfd30c`。同一获批 r3 按 R2-03、R2-04、R2-05 以及 R2-AC02/AC05 修复数值零的等值更新。此前交接和实际切换是历史证据，本节为当前精确交付。
+
+- `backend/app/task/domain.py` 的 number 规则把数值零统一编码成 `0`，包括带负号、补小数、科学计数表示。字符串槽仍保留原文字，数值槽仍拒绝数字字符串，正负非零按原值区分。保留 F02 的边界和精确解析规则。
+- 固定并核对目标、真实 head 和两份 profile 后，以 `START TRANSACTION READ ONLY` 查询两主表四个业务 JSON 列。按槽遍历，仅聚合完全等于 `-0` 的数量，并交叉核对当前和历史字段类型；上线修复前四列均 0 匹配，包括可归属历史 number 的槽。无负零存量需要转写，未执行数据归一化 SQL。实库合成复验后再次核对，四列结果仍完全相同。运行 `PYTHONDONTWRITEBYTECODE=1 backend/.venv/bin/python -B` 加临时目录中的 `r3-f03-zero-inventory.py` 及 `r3-f03-zero-inventory-post.py`，两次退出 0。持久报告 `r3-f03-zero-inventory.json` 和 `r3-f03-zero-inventory-post.json` 的相同 SHA-256 为 `915b7f27d730408722e78da6b8549d3e9412fd648026e4b41a9cab5e1e8cb6a7`，未记录单条业务值。
+- `backend/tests/test_generic_task_flow.py` 新增原始 HTTP 字节回归。五个零表示 `0`、`-0`、`-0.0`、`0.0000`、`-0e-400` 在计划、实绩与共享回写均保持原行及双方 `updatedAt`，每次实绩请求携带同一个微秒级 `observedAt`。正/负非零确实改变两侧时间，实绩同值而计划有真实差异仍只更新计划。验证数值槽拒绝 `"0"` 和 `"-0"`，字符串槽两者可区分。
+- 先在修复前候选运行 `tests/test_generic_task_flow.py -k equivalent_raw_zero`，新回归复现 `updated`（期望 `unchanged`），1 failed，退出 1。修复后该业务 HTTP/SQLite 文件 21 passed，退出 0。仍以 `/bin/zsh /private/tmp/arch-task-001-r2.FeZuND/run-r3-time-tests.sh .` 调用首轮同范围定向集，项目虚拟环境、`TESTING=true`、回环端口 1 占位、pytest `no_db`、禁缓存，406 passed、14 skipped、1 条原 datetime 适配警告，退出 0。正式候选 F01、F02、F03 和接口测试选集 12 passed，退出 0。前端 `TZ=America/New_York pnpm test:modules` 90/90，正式模块预检及 `pnpm build --outDir /private/tmp/arch-task-001-r2.FeZuND/r3-f03-formal-dist` 均退出 0，沿用 Vite 大块提示。
+- 正式工作树 HEAD 仍为 `f7c5608c0e433612b15821a578a7ef3e4f155cdb`，未提交。以第三次清单逐文件验证整合前置内容，只更新领域规则和定向测试两份文件，其他 51 个源码/文档摘要同第三次。新清单 `backend/data/maintenance-evidence/arch-task-001-r3-dev3307/development-delivery-r3-f03-files.sha256` SHA-256 为 `b32cf52e8e76245adfff149804d480552a199f31909ff67570122bb18df19822`，候选与正式树 53/53 一致，`git diff --check` 退出 0。规格 SHA-256 `9307a205982c6952eb155c3bf91bfb84632670262c502b98cd5e52a2214cf3ff` 保持。
+- 正式 8000 原父进程自动 reload，子进程 84077 接续监听；5190 为原 Vite 进程。两服务实际 HTTP 200，OpenAPI 的 14 路径、15 方法、26 个 schema 与候选合同一致。dev 唯一 head `ae20b4d6f831`，无 DDL、profile 改动、真实设备调用和清理。
+- 业务写入仅用正常 API，在已有 `GTR3-C9EF6A-A` 实绩提交数值 0 建立同号计划与实绩零基线，保留该行的原观察时间和其他字段。随后两模块各 5 次原文数值零写入及共享回写均 `unchanged`，逐次完整读回的双方 `updatedAt`、观察时间和详情保持，四次将字符串零提交数值槽均 422。通过只读事务检查两个共享槽实际保存 `0`。正负非零和实绩同值时修复计划差异已由隔离 HTTP 回归验证。没有直接 SQL 业务写入。命令 `PYTHONDONTWRITEBYTECODE=1 backend/.venv/bin/python -B /private/tmp/arch-task-001-r2.FeZuND/r3-f03-live.py` 退出 0，持久报告 `r3-f03-live-equal-zero.json` SHA-256 `1242d2d77d43e47735cd60a00815ab80d2e227d4b472be2d499f8d81d6c8a6e9`。
+- 只读复核其他任务行、原 2 计划/2 实绩/2 下发、历史配置、引用、PLC 数据及 F01 既有合成时间不变。任务列表登录要求、匿名采集只读、受保护管理和设备机器读入口的状态均一致，两个预留手工例仍为 4 次 404。保留其它 QA 合成证据。
+- 交 fresh-context Verification。已存在的旧全局权限审计失败、实际 MySQL 满槽证据来源、无恢复演练和现场验证及配置首锁的范围继续沿用。返工临时脚本、日志和构建待独立复验确认无依赖后回收。Human Owner 最终验收待独立 Verification 完成。
+
+## 第五次 developer_handoff — ARCH-TASK-001 r3
+
+2026-11-18，Human Owner 在真实页面澄清“两个模块本地字段设置按钮 都叫 本地字段管理；共享字段设置叫 共享字段管理，在计划管理和实绩管理下”。协调者与 PM 确认为获批 R2-11 的呈现纠正，沿用 r3。此前独立 Verification 已在源码交接边界暂停，记录 SHA-256 `b138a65826030964ea45fdbe5a97c2d0a1c2997f2f1fececebb1864e58d70690`。本节为当前交付，先前四次交接和 r2/r1 记录保留。
+
+- `frontend-js/src/app/plan/manifest.js` 与 `frontend-js/src/app/performance/manifest.js` 分别注册 `/plan/shared-fields`（`PlanSharedFields`、`plan.shared-fields`）和 `/performance/shared-fields`（`PerformanceSharedFields`、`performance.shared-fields`）。各自侧栏、面包屑和标题使用本模块的双语命名空间。两个条目都声明 `requiresAdmin: true`，与直链共同复用现有 Registry 门禁。全局路由、注册器和角色授予机制未改动。
+- 两入口动态加载同一个 `frontend-js/src/app/plan/views/shared-fields/index.vue`，用页面卡片显示配置。模块参数变化时重建 `TaskFieldEditor.vue`，从现有配置 API 拿最新定义并仅编辑 `shared_sync`。保存/删除沿用原接口；成功保存使用返回的新版本和字段定义，过期冲突保留草稿。取消丢弃草稿并重新读取，离开页面后再次进入重新读取。两个共享入口使用同一套本机列宽偏好。
+- `TaskPage.vue` 移除列表共享按钮及共享弹窗实例，本地按钮统一为“本地字段管理” / “Local Field Management”。`TaskConfigDialog.vue` 继续用独立本地弹窗，复用同一张编辑表，只显示对应组。关闭销毁编辑器，保存成功关闭并重读列表，删除与修订冲突沿用原语义。四个现有 locale 文件对称更新文案及共享页标题。字段操作指南与 `CODE_INDEX.md` 同步实际入口和结构。
+- Vue 与 Registry 定向测试覆盖两入口、共享定义、同源保存、草稿/冲突、列宽，以及两种单模块启用的装配。即使给 supervisor/operator 的 route-access consumer 提供显式 pageId grant，菜单和路由仍拒绝；真实配置解析器拒绝向非管理员配置该 pageId。改动测试文件为 `generic-task.test.mjs`、`page-access.test.mjs` 和 `registry.test.mjs`。候选初次测试因 VM fixture 的 import 处理及旧路由清单断言失败，按新增两条路由与既有 admin 顺序修正后重新执行。正式 `TZ=America/New_York pnpm test:modules` 92/92，`pnpm build --outDir /private/tmp/arch-task-001-r2.FeZuND/shared-page-final-dist` 含模块预检，均退出 0。构建保留已存在的 Vite 大块提示。后端文件无本轮更新，沿用第四次交接中 F01/F02/F03 与 406/14 的隔离自检证据。
+- 正式 Chrome 157 对现有 5190/8000 运行四个管理员场景（1360/390 px 各中英文），从两个侧栏菜单打开独立页，共享定义与配置修订一致。两个路由均横滚到底验证末列可见，桌面实拖 190→235 px，切换保留 235 px 并恢复到 190 px。重载和切换重读，浏览器内拦截 409 后保留草稿，取消和切换后未带走草稿。四组均重开各自本地弹窗验证分组与取消。两个真实非管理员账户均看不到入口且两个直链均拒绝。验证初期发现 390 px 固定顶栏遮挡标题（旧卡片 y=144、标题 y=164、顶栏底 y=186）。将原任务列表的顶部位置计算提取到任务作用域 `useTaskPagePadding.js`，两类页面共用。复测 390 px 卡片顶 y=194、标题 y=214，标题可命中且页面不横向溢出。探针在 Element Plus 表头同步、可拖动目标及侧栏动画结束后测量。记录 64 次真实 API GET、6 次真实登录、4 次仅浏览器拦截的合成 409，真实业务写入为 0。命令为 `PYTHONDONTWRITEBYTECODE=1 backend/.venv/bin/python -B /private/tmp/arch-task-001-r2.FeZuND/browser/run-live-shared-page.py`，退出 0，独立 Chrome 已关闭。脱敏证据 `dev-browser-shared-field-page-final.json` SHA-256 为 `cde2da8c8085cda1b2fbee6d2749885fbc1e824cc982384aaf8d5ce218555f52`。
+- 8000/5190 都返回 200，原监听进程均保持。通过只读 HTTP 复核两个手工示例在两接口仍为 4 次 404。未连接数据库、执行 SQL、修改后端或 private profile，页面配置仅通过当前 API 正常读取。字段真实写入与发布未在本次呈现纠正中重新执行。
+- 工作树 HEAD `f7c5608c0e433612b15821a578a7ef3e4f155cdb`，未提交。整合前以第四次清单逐个核验原 53 路径，四个此前清单外现有 manifest/测试路径与 HEAD 同字节，三个新增文件确认原不存在。两次整合共涉及获批的 16 个路径，首轮 59 路径清单保留作布局修正前证据。新清单 `backend/data/maintenance-evidence/arch-task-001-r3-dev3307/development-delivery-r3-shared-page-final-files.sha256` SHA-256 `ec18f34757a115dc3d5a4e3c61d9c71dd2eabbb710af62e459c02bbe82d5a6ae`，比第四次增加四个既有路径及两个新 SFC 和页面布局函数，共 60/60 一致。候选与正式逐项复核，`git diff --check` 退出 0。批准规格 SHA-256 `9307a205982c6952eb155c3bf91bfb84632670262c502b98cd5e52a2214cf3ff` 与独立 checklist 保持。
+- 当前精确交付交 fresh-context Verification。旧权限审计基线、实库容量证据来源、配置首锁、无恢复演练和现场操作的证据边界保持。可在独立复验确认无需临时脚本后清理本轮候选构建与浏览器脚本。Human Owner 最终验收待独立 Verification。
+
+## 第六次 developer_handoff — ARCH-TASK-001 r3
+
+2026-11-18，独立 QA5 在第五次交付中发现 R3-QA-F04，checklist SHA-256 `ad6a213c69522b3bd1df6e33e1bf81c8f0ecb9bbfe6a8c1c6e8435a495d46516`。协调者与 PM 确认按已批准 R2-12/R2-AC13 返工。第五次的两个共享页面入口、浏览器和前三项缺陷证据仍在原节，本节为当前交付。
+
+- `backend/app/task/services/async_fields.py` 继续在同一事务中先锁配置单例，核对修订、连续版本、定义快照和字段身份，然后查询适用历史版本的使用台账。已有使用证据直接 409。台账查询不能证明未用时进一步核对两张主表和历史下发批次。共享组检查两模块，本地只检查所属模块，历史批次始终检查。
+- 对仍绑定含当前定义的历史版本、无法解释的绑定版本、缺失对应创建或批次使用行、持久槽值等证据，拒绝删除。较旧任务的创建版本未包含当前字段，但主行实际变更时间不早于该定义最近一次连续发布区间的起点时，缺少使用证据同样拒绝。历史定义曾删除并在间隔后重新发布时，以当前连续区间判定后续行变更。真实无使用记录且独立引用完整的旧任务不会阻止新字段删除。核验使用当前锁定读，查询失败返回 503，继续保留旧配置。
+- 有效但主行未变的 POST 仍按规范记录使用台账，台账存在时仍按原语义拒绝删除。若旧任务缺少某次同值 POST 的使用行、其较早创建使用行还在，且任务、槽值、状态和时间均没有独立痕迹，现行持久模型无法将该选择性丢失与未发送 POST 区分。仍依赖同事务台账和迁移时已核实的历史基线，不宣称能检测无独立证据的数据损坏。此限制已回报协调者与 PM。没有新迁移、历史使用行改写或批量修复。
+- QA5 的原始注入仅令 `FROM task_field_config_uses` 的查找为空，计划和原槽仍在。以 `/bin/zsh /private/tmp/arch-task-001-r2.FeZuND/f04-repro.sh /private/tmp/arch-task-001-r2.FeZuND/source/backend` 同环境复现原版为正常 409、注入后 200、计划值不再可见，断言退出 1；修复后为正常 409、注入后 409、计划值保留，退出 0。此为隔离 ASGI/内存 SQLite，注入不改真实台账。扩展红组在原版 11 failed、2 passed。
+- `backend/tests/test_generic_task_flow.py` 覆盖两主表和历史下发、共享/各自本地、有效值与无值、未知/缺失创建证据、旧单后续值或状态写、旧单同值 POST 有台账和纯 GET 对照，以及配置查询失败 503、空槽删除后重用和先删后写拒绝。新增断言核对读回数据、修订号及无后续业务行。原有 MySQL 方言锁顺序检查继续通过，并增加三个历史源的 `FOR UPDATE` 语句检查。候选 HTTP/SQLite 文件 38 passed，退出 0。实际 MySQL 两种竞争结果沿用首轮已落盘的相同配置首锁证据，本轮没有重新执行实库写入或竞争。
+- 候选运行 `/bin/zsh /private/tmp/arch-task-001-r2.FeZuND/run-r3-time-tests.sh .` 加首轮的同一后端定向集合，使用项目虚拟环境、`no_db`、端口 1 占位和 SQLite/合成依赖。423 passed、14 skipped、1 条既有 SQLite datetime 适配警告，退出 0。正式 F04 重放及定向 重放为正常 409、注入 409 且原值保留，退出 0。正式 `tests/test_generic_task_flow.py tests/test_generic_task_source.py` 为 50 passed，退出 0。前端正式 `TZ=America/New_York pnpm test:modules` 92/92，模块预检和 `pnpm build --outDir /private/tmp/arch-task-001-r2.FeZuND/r3-f04-formal-dist` 均退出 0，保留已有大块提示。已知旧权限全局审计和满容量证据来源沿用原记录。
+- 模块边界核验以任务域的 SQLAlchemy Core 持久表合同选择历史主体，无对计划或实绩 ORM 的反向导入，也不改 Registry 或依赖声明。正式 `/bin/zsh /private/tmp/arch-task-001-r2.FeZuND/f04-preflight.sh backend` 源码 AST 和 manifest 预检退出 0。禁用后端 performance 或两模块均通过装配检查。仅关闭 plan 时，backend performance 依旧按原 `requires` 被拒绝。保留的历史表仍供删除时核对，表缺失或不可访问时拒绝删除。新增审计可能在少见的删除请求中扫描相关表，仍在首个配置锁内执行。
+- 正式树 HEAD `f7c5608c0e433612b15821a578a7ef3e4f155cdb`，无提交。整合前校验第五次 60 路径的逐字节散列，只有两个获批后端文件有变化。候选与正式树核对 60/60，`git diff --check` 退出 0。新清单 `backend/data/maintenance-evidence/arch-task-001-r3-dev3307/development-delivery-r3-f04-files.sha256` 的 SHA-256 为 `223220e938ac3a6360658e60a53b96b5474cb71bbafd0ff9470774151df9d8f1`。过往清单、spec 和独立 checklist 保留。
+- 8000 原父进程 27134 自动热载入新子进程 15757，5190 的 Vite 仍为 85234，未手动重启。/health、OpenAPI 和 Web 均 HTTP 200，两个预留示例在两接口仍共 4 次 404。 本轮未执行真实字段删除、直接数据库连接、DDL、profile 更新或现场设备操作。两条预留手工任务无业务写入。开发交接给 fresh-context Verification，Human Owner 终验待独立复验。临时探针和构建以独立复验结束且不再依赖为回收时点。
+
+## r2 与 r1 Development 历史原文
+
+Task ID: ARCH-TASK-001
+Revision: r2
+Status: dev_blocked
+Owner Role: Development
+Allowed Writers: Development
+Handoff: 返回协调者和 PM 审阅采集保护范围；未进入 fresh-context Verification。
+Workflow Mode: STD
+Execution Mode: agent_team_same_session
+Task Namespace: aiis-ics-arch
+Classification: root
+Capability: 通用计划与实绩、当前字段配置和同号实绩回写
+Owner: AIIS ICS Architecture 计划与实绩模块
+Acceptance Chain Reference: spec.md 第 8、9 节及 Development Lifecycle Workflow
+
+# r2 Development 记录
+
+2026-11-18。获批草稿 SHA-256 为 `8a2c9775d135752e9ff8c5e0d9ec90cf19eb31922252a1c7e5da1c858e4b62ea`。含 Human Owner 批准记录的规格 SHA-256 为 `0a18d87f55b80a8c6c0610b8c9104ea30a5fec7ea8b41eeb63b984fb306aa0c8`。实际 Development 角色已启动，协调者发现规格纳入的采集保护无法在当前允许写入路径内完成后，指示暂停源码写入。
+
+## 阻塞与解除条件
+
+r2 新 Alembic 修订候选为 `ae20b4d6f831`，前驱为 `9d1f3a5c7e20`。PLC Facts v2 的 [版本白名单](../../backend/app/plc_facts/v2_config.py#L14) 只接受到当前前驱；[API 守卫](../../backend/app/plc_facts/crud/async_v2.py#L26) 和[同步维护守卫](../../backend/app/plc_facts/crud/sync_v2_maintenance.py#L21) 要求目标库 Alembic 修订等于采用 profile 的修订，且在源码白名单内。旧采用 profile 与迁移后目标不一致；仅更新 profile，新修订仍会被源码拒绝。这阻塞 R2-AC09、R2-AC14 和 R2-AC15 的采集保护验证。PLC Facts v2 源码和实际采用 profile 均超出 r2 允许写入范围。协调者安排 PM 准备最小必要修订，须获 Human Owner 批准后恢复 Development。现有 dev 的迁移、profile 操作、服务切换和测试写入仍须各自具体授权。
+
+## 候选源码与进度
+
+正式工作树基线为 `f7c5608c0e433612b15821a578a7ef3e4f155cdb`，已有其他任务未提交改动。只读检查发现 127.0.0.1:8000 的正式后端监听仍在，进程 cwd 为正式 `backend/`，按 r1 记录存在源码热更新。为保持现有服务未授权不变，候选写入位于 `/private/tmp/arch-task-001-r2.FeZuND/source`。候选使用从正式树复制的 Git 跟踪文件，链接复用现有后端虚拟环境和前端依赖目录，未复制私有 `.env`，未创建 Git 分支或 Git worktree。候选尚未整合到正式工作树。
+
+| 候选路径 | 已写入的内容 |
+| --- | --- |
+| `backend/app/plan/api/routes.py`、`manifest.py`、`models/plan.py`、`schemas/workflow.py`、`services/async_workflow.py` | 普通计划读取、部分写入、同号状态继承与可选回填，保留旧历史列，隐藏旧动作入口并固定返回 410。 |
+| `backend/app/performance/api/routes.py`、`models/performance.py`、`schemas/workflow.py`、`services/async_workflow.py` | 实绩部分上报与人工字段入口，订单快照、观测时间、同事务计划状态/字段回写，保留旧诊断列。 |
+| `backend/app/task/api/routes.py`、`crud/async_records.py`、`domain.py`、`errors.py`、`http.py`、`manifest.py`、`models/__init__.py`、`models/fields.py`、`schemas/fields.py`、`schemas/workflow.py`、`services/async_fields.py` | 当前配置、分页和输入校验、字段组修订与删除、历史快照存在及使用证据。候选按配置单例行先加锁，串行化任务写入和配置发布，MySQL 实际并发与锁竞争待验证。 |
+| `backend/alembic/versions/20261118_1200_ae20b4d6f831_generic_task_r2.py` | 显式后继候选。在线预检目标、时区、历史版本/槽及依赖后补录历史引用，转换计划空状态并调整两主表约束。MySQL DDL 非事务性，未在数据库执行。 |
+
+前端、定向回归套件、合同候选、使用说明、代码索引以及实际 dev 操作与恢复提案仍待完成。现有 r1 源码测试引用旧请求和动作实现，未运行，恢复后需按 r2 正常入口更新相应断言，同步保留历史合同与记录。当前候选也尚未验证安全删除证据、旧数据兼容、历史时区、权限、实际合并和回写、故障回滚或两类并发先后。服务器仍生效的映射核查留待后续，外部 MES/SMA 映射需由操作者确认。
+
+## 已执行的 DEV self-check
+
+- 候选 `backend/` 内项目现有 uv 虚拟环境的 `.venv/bin/python -m compileall -q app/plan app/performance app/task alembic/versions/20261118*` 退出 0。
+- 候选 `.venv/bin/python -m app.module_preflight --project-root . --check-only` 初次检出旧错误枚举与 manifest 不一致，更新后重新执行退出 0。
+- 候选 `.venv/bin/alembic heads` 退出 0，仅输出 `ae20b4d6f831 (head)`，未执行 upgrade。
+- 候选以 `env -i` 启动 Python 和 `create_app(testing=True)`，使用 `API_V1_PREFIX=/api/v1`、MySQL 占位地址 `127.0.0.1:1` 和合成凭据，通过 HTTPX ASGITransport 执行，不启动监听且显式替换 `get_db`。首次缺少 `API_V1_PREFIX` 导致设置校验失败，补齐后退出 0。OpenAPI 包含普通集成计划列表及字段删除，四条旧入口隐藏且对无效请求体仍返回 410，数据库依赖调用次数为 0。非法状态 null、开工时间 null、布尔序号和旧 `syncValues` 请求均返回 422 且包含字段定位。该检查只覆盖路由装配与请求拒绝。
+- 逐字节比对正式树与候选确认 18 个已存在文件及 3 个新文件有源码差异，均位于上表路径。三份任务文件原始摘要分别核对，r1 `tasks.md` 的原字节保留在本节之后，原 SHA-256 为 `6f4f6a7f9d21b225c81891d2a4ab74f59f5cdd8dba16be2fe58c5d391d445bcd`。
+
+没有连接 dev 数据库，未运行可建表、清库的 pytest fixture，也未改动服务、配置、现有数据、历史迁移、旧合同或 Verification 记录。候选保留以便按获批修订恢复，确认整合并核对有效证据后再回收。当前未形成 `developer_handoff`。
+
+## r1 Development 历史原文
+
+Task ID: ARCH-TASK-001
 Revision: r1
 Status: developer_handoff
 Owner Role: Development

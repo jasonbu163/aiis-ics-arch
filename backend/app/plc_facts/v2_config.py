@@ -11,7 +11,7 @@ from .v2_domain import V2Error, identifier
 
 LEGACY_REVISION = '5f7a9c1e3b25'
 REVISION = '7b9d1f3a5c7e'
-ALLOWED_REVISIONS = (REVISION, '8c0e2a4d6f18', '9d1f3a5c7e20')
+ALLOWED_REVISIONS = (REVISION, '8c0e2a4d6f18', '9d1f3a5c7e20', 'ae20b4d6f831', 'c9e1a3b5d720')
 
 
 class V2Settings(BaseSettings):

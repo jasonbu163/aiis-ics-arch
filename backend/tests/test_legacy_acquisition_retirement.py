@@ -83,7 +83,8 @@ def test_single_head_and_metadata_retire_only_nine_tables():
     module = migration()
     import_model_packages()
     graph = ScriptDirectory.from_config(Config('alembic.ini'))
-    assert graph.get_heads() == ['9d1f3a5c7e20']
+    assert graph.get_heads() == ['c9e1a3b5d720']
+    assert graph.get_revision('ae20b4d6f831').down_revision == '9d1f3a5c7e20'
     assert graph.get_revision('9d1f3a5c7e20').down_revision == '8c0e2a4d6f18'
     assert graph.get_revision('8c0e2a4d6f18').down_revision == '7b9d1f3a5c7e'
     assert graph.get_revision('7b9d1f3a5c7e').down_revision == '6a8c0e2b4d16'
@@ -99,8 +100,9 @@ def test_single_head_and_metadata_retire_only_nine_tables():
     expected |= {'equipment_status_main', 'process_monitor_main', 'equipment_metric_configs',
                  'equipment_metric_slot_bindings', 'equipment_card_configs', 'monitor_curve_group_configs',
                  'metric_ingest_receipts', 'equipment_metric_groups', 'energy_metric_configs',
-                 'energy_consumption_main'}
-    assert set(Base.metadata.tables) == expected
+                 'energy_consumption_main', 'task_field_config_versions', 'task_field_config_uses'}
+    from tests.test_observation_retirement import RETIRED_TABLES
+    assert set(Base.metadata.tables) == expected - RETIRED_TABLES
 
 
 def test_offline_and_downgrade_refuse():
@@ -171,6 +173,6 @@ def test_legacy_routes_absent_and_v2_business_routes_present():
     assert not any(path.startswith('/api/v1/projection-mappings') for path in paths)
     for path in ('/api/v1/integration/plc-facts/samples', '/api/v1/acquisition-data/options',
                  '/api/v1/acquisition-data/latest', '/api/v1/acquisition-data/history',
-                 '/api/v1/acquisition-data/history/{id}', '/api/v1/monitor/collector/status',
+                 '/api/v1/acquisition-data/history/{id}',
                  '/api/v1/sys-dict', '/api/v1/auth/login'):
         assert path in paths

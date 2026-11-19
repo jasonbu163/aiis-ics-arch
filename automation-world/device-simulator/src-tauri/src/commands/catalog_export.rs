@@ -43,7 +43,9 @@ pub async fn ds_catalog_choose_directory(
         false,
         "ds_catalog_choose_directory",
         move |app, intent| {
+            catalog_export::clear_directory(app, &intent.token)?;
             let Some(selected) = host.dialog().file().blocking_pick_folder() else {
+                catalog_export::cancel(app, intent)?;
                 return runtime_queries::value("cancelled");
             };
             let path = selected.into_path().map_err(|_| "catalog_directory")?;

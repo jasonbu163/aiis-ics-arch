@@ -11,16 +11,13 @@ from common.integration.canonical import canonical_bytes
 from ..domain import ObservationError, reject
 from ..models import EnergyMetric, EnergySample, HistorySample, LatestSnapshot, MetricConfig, MetricGroup, Receipt, SlotBinding
 from ..profile import permitted, permitted_energy
-from . import ingest as v1
 from . import v2_domain
 
 
 def receipt_data(row):
     data = {"target": row.target, "producerId": row.producer_id, "eventId": row.event_id,
             "outcome": row.outcome, "recordId": str(row.result_record_id) if row.result_record_id else None}
-    if row.result_version == "r8":
-        data.update(resultVersion="r8", resultLocation="equipment_status_r8_archive" if row.target == "latest" else "process_monitor_r8_archive")
-    elif row.result_detail:
+    if row.result_detail:
         data.update(row.result_detail)
     return data
 
@@ -29,39 +26,6 @@ async def _previous(db, target, producer_id, event_id):
     query = select(Receipt).where(Receipt.target == target, Receipt.producer_id == producer_id,
                                   Receipt.event_id == event_id).with_for_update()
     return (await db.execute(query)).scalar_one_or_none()
-
-
-async def legacy_replay(db, profile, producer, target, document):
-    """只允许已持久确认的 v1 原请求重放，不重新创建 r8 业务行。"""
-    if producer.get("kind") not in ("sma", "external"):
-        reject("contract_version", 409)
-    data = v1.normalize(document, producer, target)
-    if set(data["values"]) - data["allowed"]:
-        reject("forbidden", 403)
-    try:
-        await probe_target(db, profile["target"])
-        previous = await _previous(db, target, data["producerId"], data["eventId"])
-        if previous is None:
-            reject("contract_version", 409)
-        old = dict(data)
-        old["mappingId"] = data["mappingId"] or previous.mapping_id
-        old["mappingRevision"] = data["mappingRevision"] or previous.mapping_revision
-        if previous.contract_version != "aiis.metric-ingest/v1" or v1.fingerprint(old) != bytes(previous.request_digest):
-            reject("event_conflict", 409)
-        result = receipt_data(previous)
-        await db.rollback()
-        return result
-    except ObservationError:
-        await db.rollback()
-        raise
-    except EvidenceUnavailable:
-        await db.rollback()
-        reject("not_ready", 503)
-
-
-def _legacy(document):
-    data = document.get("data") if isinstance(document, dict) else None
-    return document.get("contractVersion") == "aiis.metric-ingest/v1" or isinstance(data, dict) and "sampledAt" in data
 
 
 def _receipt(target, producer, event, doc, now):
@@ -84,7 +48,7 @@ async def _retry_receipt(db, target, producer, event):
     previous = await _previous(db, target, producer["producerId"], event["eventId"])
     if previous is None:
         return None
-    if previous.contract_version != "aiis.metric-ingest/v2" or bytes(previous.request_digest) != event["requestDigest"]:
+    if (previous.contract_version, previous.result_version) != ("aiis.metric-ingest/v2", "r10") or bytes(previous.request_digest) != event["requestDigest"]:
         reject("event_conflict", 409)
     result = receipt_data(previous)
     await db.rollback()
@@ -92,8 +56,22 @@ async def _retry_receipt(db, target, producer, event):
 
 
 async def device(db, profile, producer, target, document, decimal_document=None):
-    if _legacy(document):
-        return await legacy_replay(db, profile, producer, target, document)
+    data = document.get("data") if isinstance(document, dict) else None
+    if isinstance(document, dict) and (
+        document.get("contractVersion") == "aiis.metric-ingest/v1"
+        or isinstance(data, dict) and "sampledAt" in data
+    ):
+        equipment = data.get("equipmentId") if isinstance(data, dict) else None
+        group = data.get("groupKey") if isinstance(data, dict) else None
+        values = data.get("values") if isinstance(data, dict) else None
+        if document.get("producerId", producer["producerId"]) != producer["producerId"]:
+            reject("forbidden", 403)
+        if (not isinstance(equipment, str) or equipment not in profile["devices"]
+                or not isinstance(group, str) or not isinstance(values, dict)):
+            reject("forbidden", 403)
+        if not set(values) <= permitted(producer, equipment, group, target):
+            reject("forbidden", 403)
+        reject("contract_version", 409)
     event = v2_domain.device_event(decimal_document or document, producer, target)
     equipment = event["equipmentId"]
     if equipment not in profile["devices"]:

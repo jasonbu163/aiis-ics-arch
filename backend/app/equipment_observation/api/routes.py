@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Header, Query, Request, Security
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy import select, text
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..services.guard import EvidenceUnavailable, probe_target
@@ -302,75 +302,6 @@ async def patch_energy_sample(identity: int, item: HistoryReview, user=Depends(g
     await db.commit()
     await db.refresh(row)
     return response(await energy_reads.sample_data(db, row))
-
-
-@router.get("/equipment/admin/r8-archive")
-async def old_latest_archive(equipment_id: str = Query(alias="equipmentId"), page: int = Query(1, ge=1),
-                             size: int = Query(20, ge=1, le=100, alias="pageSize"), user=Depends(get_current_active_admin),
-                             db: AsyncSession = Depends(get_db)):
-    from ..profile import allowed_device
-    profile = get_profile()
-    allowed_device(profile, user, equipment_id)
-    await probe_target(db, profile["target"])
-    count = (await db.execute(text("SELECT COUNT(*) FROM equipment_status_r8_archive WHERE equipment_id=:equipment"),
-                              {"equipment": equipment_id})).scalar_one()
-    result = await db.execute(text("SELECT id,equipment_id,group_key,task_no,sampled_at,quality,local_values,remark,"
-                                   "ingest_receipt_id,created_at,updated_at FROM equipment_status_r8_archive "
-                                   "WHERE equipment_id=:equipment ORDER BY id LIMIT :size OFFSET :offset"),
-                              {"equipment": equipment_id, "size": size, "offset": (page - 1) * size})
-    items = []
-    for row in result.mappings():
-        values = row["local_values"]
-        if isinstance(values, str):
-            values = json.loads(values)
-        items.append({"id": str(row["id"]), "resultVersion": "r8", "equipmentId": row["equipment_id"],
-                      "groupKey": row["group_key"], "taskNo": row["task_no"], "observedAt": row["sampled_at"].isoformat()+"+08:00",
-                      "quality": row["quality"], "localValues": values, "remark": row["remark"],
-                      "receiptId": str(row["ingest_receipt_id"]), "createdAt": row["created_at"].isoformat()+"+08:00",
-                      "updatedAt": row["updated_at"].isoformat()+"+08:00"})
-    return response({"items": items, "total": count, "page": page, "pageSize": size, "totalPages": (count+size-1)//size})
-
-
-@router.get("/equipment/admin/r8-archive/config")
-async def old_metric_config(group_key: str = Query(alias="groupKey"), user=Depends(get_current_active_admin),
-                            db: AsyncSession = Depends(get_db)):
-    identifier(group_key)
-    await probe_target(db, admin_scope(user)["target"])
-    rows = (await db.execute(text("SELECT b.target,b.group_key,b.slot_no,b.metric_key,b.enabled,b.list_visible,"
-                                  "b.list_order,b.first_used_at,m.category,m.name_zh,m.name_en,m.value_type,m.unit,m.decimals "
-                                  "FROM equipment_metric_slot_bindings_r8_archive b JOIN equipment_metric_configs_r8_archive m "
-                                  "ON m.metric_key=b.metric_key WHERE b.group_key=:group_key ORDER BY b.target,b.slot_no"),
-                             {"group_key": group_key})).mappings().all()
-    return response([{"target": row["target"], "groupKey": row["group_key"], "slotNo": row["slot_no"],
-        "metricKey": row["metric_key"], "enabled": bool(row["enabled"]), "listVisible": bool(row["list_visible"]),
-        "listOrder": row["list_order"], "firstUsedAt": row["first_used_at"].isoformat()+"+08:00" if row["first_used_at"] else None,
-        "category": row["category"], "nameZh": row["name_zh"], "nameEn": row["name_en"],
-        "valueType": row["value_type"], "unit": row["unit"], "decimals": row["decimals"]} for row in rows])
-
-
-@router.get("/monitor/admin/r8-archive")
-async def old_history_archive(equipment_id: str = Query(alias="equipmentId"), page: int = Query(1, ge=1),
-                              size: int = Query(20, ge=1, le=100, alias="pageSize"), user=Depends(get_current_active_admin),
-                              db: AsyncSession = Depends(get_db)):
-    from ..profile import allowed_device
-    profile = get_profile()
-    allowed_device(profile, user, equipment_id)
-    await probe_target(db, profile["target"])
-    count = (await db.execute(text("SELECT COUNT(*) FROM process_monitor_r8_archive WHERE equipment_id=:equipment"),
-                              {"equipment": equipment_id})).scalar_one()
-    rows = (await db.execute(text("SELECT id,equipment_id,group_key,task_no,sampled_at,quality,local_values,remark,review_mark,"
-                                  "ingest_receipt_id,created_at,updated_at FROM process_monitor_r8_archive "
-                                  "WHERE equipment_id=:equipment ORDER BY id LIMIT :size OFFSET :offset"),
-                             {"equipment": equipment_id, "size": size, "offset": (page - 1) * size})).mappings().all()
-    items = []
-    for row in rows:
-        values = json.loads(row["local_values"]) if isinstance(row["local_values"], str) else row["local_values"]
-        items.append({"id": str(row["id"]), "resultVersion": "r8", "equipmentId": row["equipment_id"],
-                      "groupKey": row["group_key"], "taskNo": row["task_no"], "observedAt": row["sampled_at"].isoformat()+"+08:00",
-                      "quality": row["quality"], "localValues": values, "remark": row["remark"], "reviewMark": row["review_mark"],
-                      "receiptId": str(row["ingest_receipt_id"]), "createdAt": row["created_at"].isoformat()+"+08:00",
-                      "updatedAt": row["updated_at"].isoformat()+"+08:00"})
-    return response({"items": items, "total": count, "page": page, "pageSize": size, "totalPages": (count+size-1)//size})
 
 
 @router.get("/equipment/metric-configs")

@@ -19,6 +19,7 @@
 | [PLC facts v2](published/http-api/plc-facts-v2/README.zh-CN.md) | ARCH-BE-012 r4 源码实施与隔离验证进行中。 |
 | [PLC事实provider](published/http-api/plc-facts-v1/README.zh-CN.md) | BE-009源码及隔离MySQL A+B QA通过，Owner终验/provider-ready及真实采用待定。 |
 | [typed业务provider](published/http-api/business-integration-v1/README.zh-CN.md) | BE-010 r2八路及隔离A+B QA通过，真实schema/时间采用及终验待定。 |
+| [清退规格](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md) | 当前设备／过程和表计使用 v2；设备／过程旧写入和 v1 重放退出。历史合同保留。 |
 | [AW需求](demands/automation-world-facts-integration.zh-CN.md) | 文档仍proposed；AW008文档QA2通过、Owner文档终验待定，provider证据独立。 |
 | 旧CA授权 | 原需求/provider/前置gate保留为历史输入，不证明新CA现场就绪。 |
 

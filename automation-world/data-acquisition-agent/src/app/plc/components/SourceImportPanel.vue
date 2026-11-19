@@ -3,8 +3,7 @@
   <section class="daa-source-import">
     <p class="daa-capability-note">{{ t('plc.sourceImport.help') }}</p>
     <el-alert v-if="local.dirty || local.editing" :title="t('common.local.saveBeforeTools')" type="warning" :closable="false" />
-    <div class="console-action-group daa-source-import__picker"><input ref="fileInput" type="file" accept=".db,.udt" multiple hidden @change="local.readFiles" /><ConsoleActionButton label-key="common.local.importFile" tone="primary" :disabled="local.busy || local.dirty || local.editing || local.mutationUnknown || !local.selectedPlc || selectedCatalogPlc" @click="fileInput?.click()" /><ConsoleActionButton label-key="plc.catalog.open" :disabled="local.busy || local.dirty || local.editing || local.mutationUnknown || !local.view" @click="local.openCatalog" /><span class="daa-capability-note">{{ local.sources.map(s => s.name).join(' · ') || t('plc.sourceImport.chooseHint') }}</span></div>
-    <CatalogImportDialog :local="local" />
+    <div class="console-action-group daa-source-import__picker"><input ref="fileInput" type="file" accept=".db,.udt" multiple hidden @change="local.readFiles" /><ConsoleActionButton label-key="common.local.importFile" tone="primary" :disabled="local.busy || local.dirty || local.editing || local.mutationUnknown || !local.selectedPlc || selectedCatalogPlc" @click="fileInput?.click()" /><span class="daa-capability-note">{{ local.sources.map(s => s.name).join(' · ') || t('plc.sourceImport.chooseHint') }}</span></div>
     <template v-if="local.identification && local.sources.length">
       <p>{{ t('plc.sourceImport.counts', { files: local.identification.fileCount, dbs: local.identification.dbCount, udts: local.identification.udtCount }) }}</p>
       <el-table :data="local.pagedImportRows" :row-key="rowKey" :tooltip-options="{ appendTo: '#daa-feedback' }">
@@ -51,7 +50,6 @@ import { useI18n } from 'vue-i18n';
 import type { LocalConsole } from '../../../console/composables/useLocalAcquisitionConsole';
 import type { IdentifiedBlock } from '../../../services/localAcquisition';
 import ConsoleActionButton from '../../../components/console/ConsoleActionButton.vue';
-import CatalogImportDialog from './CatalogImportDialog.vue';
 const props = defineProps<{ local: LocalConsole }>();
 const { t } = useI18n();
 const fileInput = ref<HTMLInputElement | null>(null);

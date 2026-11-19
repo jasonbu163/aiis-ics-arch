@@ -129,10 +129,10 @@ export interface Catalog {
     origin: { kind: string; profile_id: string; plc_id: string };
     export: { producer: string; profile_id: string; config_state: string; revision_id: string; payload_sha256: string; exported_at: string };
     plc: { name: string; protocol: string; connection: CatalogConnection };
-    dbs: Array<{ id: string; name: string; number: number; size_bytes: number; source_enabled: boolean; points: CatalogPoint[] }>;
+    dbs: Array<{ id: string; name: string; number: number; size_bytes: number; source_enabled?: boolean; points: CatalogPoint[] }>;
 }
-export interface CatalogInput { bytes: number[]; filename: string; expectedEtag: string; target: CatalogConnection | null; }
-export interface CatalogPreview { catalog: Catalog; sha256: string; target: CatalogConnection; previewToken: string; etag: string; }
+export interface CatalogInput { bytes: number[]; filename: string; expectedEtag: string; target: CatalogConnection | null; asNewLocalInstance: boolean; }
+export interface CatalogPreview { catalog: Catalog; sha256: string; target: CatalogConnection; previewToken: string; etag: string; historyConflict: boolean; localPlcId: string; localDbIds: Record<string, string>; localPointIds: Record<string, string>; }
 export interface ConfigurationView {
     schemaVersion: 1;
     draft: Configuration;
@@ -143,6 +143,7 @@ export interface ConfigurationView {
     used: string | null;
     phase: string;
     issues: Issue[];
+    importedLocalPlcId?: string;
 }
 export interface Operation {
     operationId: string;

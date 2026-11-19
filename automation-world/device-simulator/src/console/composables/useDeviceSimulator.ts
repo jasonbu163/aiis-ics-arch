@@ -137,6 +137,28 @@ export function useDeviceSimulator() {
         else if (receipt.value && result === undefined) { markUncertain('known_readback', false); restoreOutstanding(); }
         return result !== undefined && !unknown.value && !uncertainSave.value && !uncertainControls.value.length && !previewUnknowns.value.length && !previewReleases.value.length;
     }
+    async function commitCatalogImport(fileToken: string, preview: ipc.Preview) {
+        if (editing.value || busy.value || unknown.value || dirty.value || !draft.value || !configuration.value || configuration.value.etag !== preview.expectedEtag) return false;
+        const submitted: ipc.Workspace = JSON.parse(JSON.stringify(preview.workspace)), original = JSON.stringify(draft.value);
+        const newId = submitted.instances.find(i => !draft.value!.instances.some(old => old.id === i.id))?.id;
+        let receipt: ipc.SaveResult | null = null;
+        const markPending = (reason: SavePending['reason']) => {
+            if (!editing.value && JSON.stringify(draft.value) === original) {
+                draft.value = structuredClone(submitted);
+                if (newId) instanceId.value = newId;
+            }
+            uncertainSave.value = {expectedEtag: preview.expectedEtag, submitted, confirmPoints: [], reason, cleanupUnproven: false};
+            saveReview.value = null; saveReviewError.value = null; lastSafetyFailure = null;
+        };
+        saving.value = true; saveOutcome.value = null; saveFailure.value = null; saveReloadGuard = original;
+        let result;
+        try { result = await action(async () => {
+            try { const saved = await ipc.confirmCatalogImport(fileToken, preview); receipt = saved; saveReceiptEtag = saved.etag; saveOutcome.value = saved.result; return saved; }
+            catch (e) { if (e instanceof ipc.IpcFailure && e.unknown) { const reason = ['save_receipt_unknown', 'save_commit_unknown', 'runtime_task_receipt_unknown'].includes(e.code) ? e.code as SavePending['reason'] : 'ipc_transport_unknown'; markPending(reason); } throw e; }
+        }, true); } finally { saveReloadGuard = null; saveReceiptEtag = null; saving.value = false; }
+        if (receipt && result === undefined) { markPending('known_readback'); restoreOutstanding(); }
+        return result !== undefined && !unknown.value && !uncertainSave.value && !uncertainControls.value.length && !previewUnknowns.value.length && !previewReleases.value.length;
+    }
     async function reviewUncertainSave() {
         const pending = uncertainSave.value;
         if (!pending || checkingSave.value || busy.value) return false;
@@ -242,7 +264,7 @@ export function useDeviceSimulator() {
     async function loadLogs(offset = 0, event: string | null = null) {
         const result = await action(() => ipc.queryLogs(offset, 50, event)); if (result)
         logs.value = result; }
-    return { lastSavedRevision, revisionOffset, pageRevisions, refreshRevisions, releasePreview, previewReleases, previewUnknowns, saving, saveOutcome, saveFailure, closeGate, beginClose, cancelClose, closeFingerprint, editing, finishEditor, discardEditor, busy, refreshing, error, unknown, conflictEtag, bootstrap, configuration, draft, snapshot, instanceId, dbId, valueOffset, valueLimit, logs, dirty, selected, selectedDb, runtime, available: ipc.desktopAvailable, uncertainSave, saveCanResolve, saveReview, checkingSave, saveReviewError, reviewUncertainSave, acceptReviewedSave, noteSaveDifferences, uncertainControls, controlReview, checkingControls, controlReviewError, reviewUncertainControls, acceptReviewedControls, reload, refresh, action, save, newInstance, control, loadLogs };
+    return { lastSavedRevision, revisionOffset, pageRevisions, refreshRevisions, releasePreview, previewReleases, previewUnknowns, saving, saveOutcome, saveFailure, closeGate, beginClose, cancelClose, closeFingerprint, editing, finishEditor, discardEditor, busy, refreshing, error, unknown, conflictEtag, bootstrap, configuration, draft, snapshot, instanceId, dbId, valueOffset, valueLimit, logs, dirty, selected, selectedDb, runtime, available: ipc.desktopAvailable, uncertainSave, saveCanResolve, saveReview, checkingSave, saveReviewError, reviewUncertainSave, acceptReviewedSave, noteSaveDifferences, uncertainControls, controlReview, checkingControls, controlReviewError, reviewUncertainControls, acceptReviewedControls, reload, refresh, action, save, commitCatalogImport, newInstance, control, loadLogs };
 }
 export type SimulatorConsole = UnwrapNestedRefs<ReturnType<typeof useDeviceSimulator>>;
 export const simulatorKey: InjectionKey<SimulatorConsole> = Symbol('DS console');

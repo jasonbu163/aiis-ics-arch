@@ -2,6 +2,8 @@
 
 English: [README.md](README.md)。
 
+本入口已撤 `equipment` 和 `monitor`；当前解析器仅接受 `performance`。旧 owner 及 13 表／41 列文字以下为历史。当前性能模块未导出巡检所需的 legacy 维护接口，inspect／verify 可用性未建立。 [清退规格](../../../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+
 本工具仅调查 BE010 固定13表41列、准备候选计划及比较只读快照。不执行schema/data变更、不从时间数值推断时区、不启动writer、不安装采用文件或授予采用批准。未知、混合且无法分类的来源继续阻止G-T解除。
 
 裸入口只显示help，不加载配置、dotenv、模块或目标：
@@ -14,9 +16,9 @@ uv run --offline --frozen --no-sync python scripts/business_time_adoption/main.p
 具体目标操作须另获批准。将 `.env.example` 复制到目标受控私有位置并显式指定**绝对**路径。专用process `BUSINESS_TIME_DB_*` 优先于显式文件，不回退读取工具或backend真实 `.env`。只有显式工具engine使用目标配置。账号仅需固定列、UUID/schema/时钟、information_schema和current revision探针的只读资格。报告保存计数、metadata和按主键排序的逐列摘要，不保存行原文、密码或DSN。
 
 ```text
-... main.py inspect --module equipment --env-file /private/approved/tool.env --source-revision <已审阅源码> --output /private/approved/inspection.json
-... main.py plan --module equipment --inspection-report /private/approved/inspection.json --classification-report /private/approved/classification.json --source-revision <已审阅源码> --output /private/approved/plan.json
-... main.py verify --module equipment --env-file /private/approved/tool.env --inspection-report /private/approved/inspection.json --source-revision <已审阅源码> --output /private/approved/verification.json
+... main.py inspect --module performance --env-file /private/approved/tool.env --source-revision <已审阅源码> --output /private/approved/inspection.json
+... main.py plan --module performance --inspection-report /private/approved/inspection.json --classification-report /private/approved/classification.json --source-revision <已审阅源码> --output /private/approved/plan.json
+... main.py verify --module performance --env-file /private/approved/tool.env --inspection-report /private/approved/inspection.json --source-revision <已审阅源码> --output /private/approved/verification.json
 ```
 
 `plan`离线运行。`business-time-classification/v1`须精确覆盖调查的每个`table.column`，记录basis（utc_wall/shanghai_wall/known_offset/unknown）、与调查相等的coveredRows和指向私有来源证据的evidenceRef。这些声明不能自动变成历史证明；计划始终为state=candidate、adoptionEligible=false。`verify`比较同一目标/profile、行数和时间列摘要；摘要变化不证明转换正确，也不替代ID/值/FK/pair守恒。旧HTTP/Projection兼容、writer隔离、备份、明确获批的data-only转换及Owner目标采用决定仍须独立证明。

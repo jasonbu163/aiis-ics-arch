@@ -21,6 +21,7 @@
         <template v-if="local.catalogPreview">
           <dl class="daa-local-facts">
             <dt>{{ t('plc.catalog.plc') }}</dt><dd>{{ local.catalogPreview.catalog.plc.name }} · {{ local.catalogPreview.catalog.origin.plc_id }}</dd>
+            <template v-if="local.catalogPreview.historyConflict"><dt>{{ t('plc.catalog.localIdentity') }}</dt><dd><code>{{ local.catalogPreview.localPlcId }}</code></dd></template>
             <dt>{{ t('plc.catalog.origin') }}</dt><dd>{{ local.catalogPreview.catalog.origin.kind }} · {{ local.catalogPreview.catalog.origin.profile_id }}</dd>
             <dt>{{ t('plc.catalog.producer') }}</dt><dd>{{ local.catalogPreview.catalog.export.producer }} · {{ local.catalogPreview.catalog.export.profile_id }}</dd>
             <dt>{{ t('plc.catalog.revision') }}</dt><dd>{{ local.catalogPreview.catalog.export.revision_id }} · {{ local.catalogPreview.catalog.export.exported_at }}</dd>
@@ -29,11 +30,12 @@
             <dt>{{ t('plc.catalog.payloadSha') }}</dt><dd><code>{{ local.catalogPreview.catalog.export.payload_sha256 }}</code></dd>
           </dl>
           <p class="daa-capability-note">{{ t('plc.catalog.hashHint') }}</p>
+          <template v-if="local.catalogPreview.historyConflict"><ElAlert :title="t('plc.catalog.historyHint')" type="warning" :closable="false" show-icon /><ElCheckbox v-model="local.catalogAsNew" :disabled="local.busy" @change="local.previewCatalog">{{ t('plc.catalog.asNew') }}</ElCheckbox></template>
           <div class="console-action-group"><ConsoleActionButton label-key="plc.catalog.resetWidths" @click="resetColumnWidths" /></div>
           <ConsoleTableShell v-model:current-page="page" v-model:page-size="pageSize" :page-sizes="[10,20,50]" :total="rows.length" layout="total, sizes, prev, pager, next">
             <el-table :key="tableVersion" border :data="paged" row-key="id" @header-dragend="resizeColumn">
-              <el-table-column column-key="db" :label="t('plc.catalog.db')" :width="widths.db" :min-width="180"><template #default="{ row }">{{ row.dbName }} · DB{{ row.dbNumber }} · {{ row.dbSize }} B<small class="muted-cell">{{ row.dbId }} · {{ t('plc.catalog.sourceEnabled') }}: {{ local.label(String(row.dbEnabled)) }}</small></template></el-table-column>
-              <el-table-column column-key="name" :label="t('plc.naming.technicalName')" :width="widths.name" :min-width="180"><template #default="{ row }">{{ row.name }}<small class="muted-cell">{{ row.id }}</small></template></el-table-column>
+              <el-table-column column-key="db" :label="t('plc.catalog.db')" :width="widths.db" :min-width="180"><template #default="{ row }">{{ row.dbName }} · DB{{ row.dbNumber }} · {{ row.dbSize }} B<small class="muted-cell">{{ row.dbId }} · {{ t('plc.catalog.sourceEnabled') }}: {{ row.dbEnabled === undefined ? t('plc.catalog.notProvided') : local.label(String(row.dbEnabled)) }}</small><small v-if="local.catalogPreview?.historyConflict" class="muted-cell">{{ t('plc.catalog.localIdentity') }}: {{ local.catalogPreview.localDbIds[row.dbId] }}</small></template></el-table-column>
+              <el-table-column column-key="name" :label="t('plc.naming.technicalName')" :width="widths.name" :min-width="180"><template #default="{ row }">{{ row.name }}<small class="muted-cell">{{ row.id }}</small><small v-if="local.catalogPreview?.historyConflict" class="muted-cell">{{ t('plc.catalog.localIdentity') }}: {{ local.catalogPreview.localPointIds[row.id] }}</small></template></el-table-column>
               <el-table-column column-key="address" :label="t('common.local.addressSummary')" :width="widths.address" :min-width="120"><template #default="{ row }">{{ row.data_type }} · {{ row.byte_offset }}<template v-if="row.bit !== undefined">.{{ row.bit }}</template></template></el-table-column>
               <el-table-column column-key="sourcePath" :label="t('plc.catalog.sourcePath')" :width="widths.sourcePath" :min-width="130"><template #default="{ row }">{{ row.source_path ?? t('plc.catalog.notProvided') }}</template></el-table-column>
               <el-table-column column-key="zh" :label="t('plc.naming.displayNameZh')" :width="widths.zh" :min-width="120"><template #default="{ row }">{{ row.display_names?.['zh-CN'] ?? '' }}</template></el-table-column>
@@ -46,7 +48,7 @@
           <ElCheckbox v-model="local.catalogConfirmed" :disabled="local.busy || local.mutationUnknown">{{ t('plc.catalog.confirmTarget') }}</ElCheckbox>
         </template>
       </div>
-      <template #footer><div class="console-action-group"><ConsoleActionButton label-key="common.local.cancelEdit" :disabled="local.busy" @click="local.closeCatalog" /><ConsoleActionButton label-key="plc.catalog.commit" tone="primary" :disabled="local.busy || local.dirty || local.editing || local.mutationUnknown || !local.catalogPreview || !local.catalogConfirmed" @click="local.confirmCatalog" /></div></template>
+      <template #footer><div class="console-action-group"><ConsoleActionButton label-key="common.local.cancelEdit" :disabled="local.busy" @click="local.closeCatalog" /><ConsoleActionButton label-key="plc.catalog.commit" tone="primary" :disabled="local.busy || local.dirty || local.editing || local.mutationUnknown || !local.catalogPreview || !local.catalogConfirmed || (local.catalogPreview.historyConflict && !local.catalogAsNew)" @click="local.confirmCatalog" /></div></template>
     </ElDialog>
   </Teleport>
 </template>

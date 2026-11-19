@@ -19,6 +19,7 @@ This plan tracks the rollout of the project-level contract hub.
 | [PLC facts v2](published/http-api/plc-facts-v2/README.md) | ARCH-BE-012 r4 source implementation and isolated verification in progress. |
 | [PLC facts provider](published/http-api/plc-facts-v1/README.md) | BE-009 source and isolated MySQL A+B QA passed; Owner final/provider-ready and real adoption pending. |
 | [Typed business provider](published/http-api/business-integration-v1/README.md) | BE-010 r2 eight operations and isolated A+B QA passed; real schema/time adoption and final acceptance pending. |
+| [Retirement specification](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md) | Current equipment, process and meter observations use v2. The old device/process writes and v1 replay are retired. Published history is preserved. |
 | [AW demand](demands/automation-world-facts-integration.md) | Proposed document; AW008 document QA2 passed, Owner document acceptance pending. Provider evidence is separate. |
 | Old CA authorization | Original demand/provider/preflight records remain historical inputs, not proof of new CA field readiness. |
 

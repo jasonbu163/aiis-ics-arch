@@ -1,6 +1,6 @@
 # DAA User Guide
 
-[中文](USER_GUIDE.zh-CN.md) · [Quick start](README.md) · [Windows operation and verification](#windows-source-startup-and-manual-checks) · [Common acquisition-data guide](../../docs/acquisition-data-guide.md)
+[中文](USER_GUIDE.zh-CN.md) · [Quick start](README.md) · [Configure PLCs and points](#2-configure-plcs-and-points) · [Windows operation and verification](#windows-source-startup-and-manual-checks) · [Common acquisition-data guide](../../docs/acquisition-data-guide.md)
 
 This guide applies to source versions containing DAA-010 sample reporting and DAA-013 per-PLC bindings, with a backend that has adopted the corresponding source-registration contract. Use the deployment and authorization for the actual environment. This guide does not imply that every environment has been upgraded or accepted for field or production use. Follow the actual version's instructions for older clients or targets.
 
@@ -56,33 +56,70 @@ These steps are for later use on Windows 10/11 x64; native Windows validation ha
 3. Follow sections 2–3 to configure the simulated PLC, collection and reporting source, then sections 4–5 to check paused-collection reporting and concurrent collection/reporting. Check the reliable receipt and Web history for the same selected `sampleId`. Check existing configuration first; there is no need to recreate it.
 4. Use the [Windows native validation record](WINDOWS_NATIVE_VALIDATION.zh-CN.md) (Chinese) to record first initialization, close/reopen, exclusive locking and failure recovery. Its first automatic-initialization check requires a test profile that **does not already exist**; ordinary use of an existing profile serves a different purpose. Mark checks that were not performed as untested.
 
-## 2. Configure one PLC and inspect a local sample
+## 2. Configure PLCs and points
 
-This synthetic example need not replace existing configuration. In DS use [minimal.db](src-tauri/tests/fixtures/source-import-minimal/minimal.db) and [minimal.udt](src-tauri/tests/fixtures/source-import-minimal/minimal.udt): create `DEV-PLC-A` at `127.0.0.1:31281`, rack `0`, slot `1`; import `MinimalImport` as DB21, confirm standard layout, give the three points readable initial values, then load and start it. Saving the draft, saving a version, loading and starting are separate actions; see the [DS guide](../device-simulator/USER_GUIDE.md).
+| What you have or need | Steps |
+| --- | --- |
+| A PLC JSON exported by DS or DAA | [Import PLC JSON](#24-import-plc-json) directly to create the PLC and its points in the draft. |
+| TIA `.db` / `.udt` files | [Add or select the PLC](#21-add-a-plc-manually) → [import points and confirm addresses and DB length](#22-import-points-from-db--udt) → [edit names as needed](#23-edit-names-assign-groups-and-enable). |
+| A configuration to share with another app | [Export PLC JSON](#25-export-plc-json). Use **Saved draft** to export a newly saved configuration. |
+| A PLC ready for collection | [Group and enable](#23-edit-names-assign-groups-and-enable) → [save draft → activate configuration → connect → start collection](#26-activate-and-start-only-when-collection-is-needed). |
 
-| DB21 source path | Type | Address | Example initial value |
-| --- | --- | --- | --- |
-| `payload.ready` | BOOL | `0.0` | `false` |
-| `payload.count` | INT | `2` | `0` |
-| `payload.temperature` | REAL | `4` | `12.5` |
+DAA creates points from DB / UDT or PLC JSON. To create a DB and points by hand, build them in [DS](../device-simulator/USER_GUIDE.md), export PLC JSON, and import it into DAA.
 
-1. In DAA **PLC configuration**, add and enable `DEV-PLC-A`, enter the same IPv4, port, rack and slot, finish editing and **Save draft**. Review an existing PLC instead of adding a duplicate.
-2. Open **Points and collection groups**, select that PLC, and select both files under the source-file and structure area. Select `MinimalImport`, enter DB number `21`, preview and confirm the import. Under offset assistance, choose **Preview standard-layout offsets**, check the table and 8-byte length, then **Confirm non-manual offsets**. Verify real PLC addresses against the actual source.
-3. Under collection groups and periods, add and enable `G1_1000` at `1000 ms`. Select the three points and choose **Enable selected points in this group**. Enabled points for one PLC/DB belong to the same group. Save the draft, choose **Activate configuration**, confirm, and check it is applied.
-4. In **Workbench**, select **Connect** for the PLC, then **Start collection**. After a few seconds choose **Pause collection**. Pausing collection and disconnecting are separate actions.
-5. Open **Reporting and storage → Local history**, filter by PLC, group and time, and choose **View sample** on a DB21 row. Check the three values, quality and collection times. Samples collected before the reporting binding is saved are **Local record only** and do not automatically enter the queue later.
+### 2.1 Add a PLC manually
 
-In the point editor, Chinese and English display names are independent of the technical name and comment. Enter either or both explicitly; an empty value stays empty, and each value is limited to 256 UTF-8 bytes. The list follows the top-bar language without saving the draft. Saving an edit uses the existing preview and draft confirmation; activate separately when needed. Display names do not enter the current v2 reporting body.
+1. Open **Configuration → PLC configuration**. Reuse the target PLC if listed. To create one, choose **Add PLC**. The app supports up to four PLCs, each with a unique endpoint.
+2. Enter **Name**, **IPv4 address**, **Port**, **Rack** and **Slot** to match the PLC or DS listening configuration. Use `127.0.0.1` for DS on the same computer. **Enabled** defaults off for a new PLC.
+3. Choose **Save draft** in the dialog. Check the PLC appears in the list, choose **Configure points**, and check the **PLC** selection. Then import its points.
 
-### Use a PLC JSON exported by DS
+### 2.2 Import points from DB / UDT
 
-These are the steps for the current source candidate. Cross-application and native results belong to the [DAA-017 task record](plans/DAA-017-plc-json-import/tasks.md).
+1. In **Points and collection groups**, select the target PLC and save any unsaved draft. Open **Source files and full structure → Select source files** and select the `.db` and the `.udt` files it references together. This action is disabled for a PLC containing a JSON catalog DB.
+2. On every page, select only the blocks you want to import and set the actual **DB number** for each. Leave **Existing target (explicit update)** empty for a new DB. Select the target explicitly for an update. UDTs are dependencies and need no DB number.
+3. Choose **Preview import differences**. Review the DBs, structure, point paths, candidate technical names and diagnostics. Choose **Confirm import and save** once you have checked them. After the points appear, check the addresses and length of each DB.
+4. **Confirm addresses.** Select a specific **DB**, then open **Assisted address layout → Preview standard-layout offsets**. Compare byte and bit offsets, candidate names and calculated length with the actual PLC documentation. Choose **Confirm non-manual offsets** after checking. The aid only handles complete, explicitly non-optimized standard layouts. It is unavailable for optimized or incomplete DBs or those with STRING or unknown types. For manual confirmation, choose **Edit** on the point, fill **Byte offset**, **Bit offset** for BOOL, and **Confirmation reason**. Check the address, turn on **Address confirmed**, review the name preview and choose **Save draft**. Confirm an address again after changing it. Inference preserves existing manual addresses.
+5. **Check the DB length.** An ordinary imported DB starts at `65536` bytes. Its length updates to the theoretical value only when every point is eligible for and included in the non-manual confirmation. To correct the value, open **Source files and full structure → View complete structure**, expand the DB, enter the actual **DB length (bytes)**, close the dialog and choose **Save draft** at the top.
 
-1. Check each running DAA and DS process and its selected profile. When using the confirmed `.local/dev` for each app, record existing PLC, connection, collection and reporting states first. Stop if existing devices or real reporting could be triggered. Follow the [DS guide](../device-simulator/USER_GUIDE.md) to create an identifiable synthetic instance, save a revision and export that instance's JSON; record the revision, instance identity and file SHA-256. Use only your own `127.0.0.1` port; loopback works only on the same computer.
-2. In DAA open **Points and collection groups → Source files and complete structure**, choose **Import DS PLC JSON**, and select the actual DS export. No `.db` or `.udt` is needed again. Check the origin, export revision, input-file hash, client target, every DB and point, including disabled points, the unlabelled legacy name, both display names and the independent description. The exporter's declared configuration hash is not verified by DAA and does not establish device layout, file authenticity or network reachability. After changing the target, choose **Preview again**, explicitly confirm, then choose **Confirm creation and save draft**. The selected file object is read again before confirmation; if the bytes change or the read fails, select and preview it again. A browser may retain a file snapshot without exposing changes at the underlying path, so explicitly reselect a file you know has changed. Cancel does not save; existing origins, identities or the same file are rejected without merging or overwriting. If the result is unknown, reload the draft and source before deciding; do not retry blindly.
-3. The new PLC and points start disabled and ungrouped; source enabled values do not grant collection permission. Select the new PLC, add and enable a collection group, confirm its interval, select the required points and assign them to it; enable the new PLC under **PLC configuration**. Save the draft, explicitly activate, and confirm the checked scope. Catalog point sets, technical names, addresses and types cannot be overridden; display names, comments, grouping and enabled state use the existing preview. The JSON catalog does not fabricate a TIA tree.
-4. On the workbench choose **Connect** and **Start collection** only for this new PLC. In **Local history**, check the BOOL, INT and REAL identities, DB, addresses, values and quality, and confirm disabled points remain in configuration. This does not require reporting; actual network reporting follows sections 3–5 and its own authorization.
-5. Pause this collection and disconnect the test PLC. Use normal application operations to clean up only objects and export files confirmed to belong to this test. If an active revision or history refers to them, or removal could affect other data, retain and record them for a later decision. Do not delete the entire `.local/dev`, existing PLCs, history, queues or receipts.
+For a local example, use [minimal.db](src-tauri/tests/fixtures/source-import-minimal/minimal.db) and [minimal.udt](src-tauri/tests/fixtures/source-import-minimal/minimal.udt). Import `MinimalImport` as DB21 and check `payload.ready` BOOL `0.0`, `payload.count` INT `2`, `payload.temperature` REAL `4`, and an 8-byte DB length.
+
+### 2.3 Edit names, assign groups and enable
+
+1. **Check the points.** Select the right PLC and DB and check each **Technical name**, type and address. Choose **Edit** to set **Display name (Chinese)**, **Display name (English)** and **Comment** as needed, review the name preview, then choose **Save draft** in the dialog. **Save draft and edit** saves any pending draft changes first. Display names are limited to 256 UTF-8 bytes per language. Unset names stay empty. The top-bar language selector switches the displayed language. Current v2 reporting uses the technical name. Display names are used for the interface and configuration exchange.
+2. **Create a group and enable the points to collect.** Open **Collection groups and periods → Add group**, enter a name and period, and turn on the group's **Enabled** switch. Check the points in the table, then choose **Enable selected points in this group** for that group. Put enabled points from the same PLC / DB in one group. Checks persist across pages and filters, so verify the selected count.
+3. **Save and enable the PLC.** Choose **Save draft** at the top. In **PLC configuration → Edit**, turn on **Enabled** for the target PLC and choose **Save draft** in the dialog. Check the points are enabled under the right group and the page shows **Draft saved**. You can stop here if preparing configuration. To collect, continue to 2.6.
+
+To disable points, check them and choose **Disable and unassign selected points**, then use the top-level **Save draft**. Turning off **Enabled** in a single point's editor retains its group.
+
+### 2.4 Import PLC JSON
+
+1. Save or cancel current edits, then open **PLC configuration → Import PLC JSON → Choose JSON file**. Select a single-PLC file exported from DS or DAA. The import creates the PLC.
+2. Under **Check the acquisition client target**, verify the IPv4, port, rack and slot for the device reachable from the DAA computer. Choose **Preview again** after a change. Use a loopback address on the same computer. DAA rejects unsupported non-default TSAPs.
+3. Review every DB and point, including disabled items, technical names, types, addresses, bilingual display names and descriptions. If the origin only exists in history, select **Import as a new local instance** as needed. The new PLC has a separate local identity.
+4. Check **I checked the target and complete point list and confirm that descriptions will be copied to new point comments**, then choose **Confirm creation and save draft**. In **Points and collection groups**, check the new PLC and point count. The new PLC and points are disabled and the points are unassigned. For file exchange alone, stop here or export using 2.5. To collect, follow 2.3 and 2.6.
+
+For JSON imports, display names, comments, groups and enabled state can be edited. The catalog fixes the technical names, types, addresses and point set. The DB / UDT append action is disabled for this PLC.
+
+**Origin or endpoint conflicts.** An origin still in the current draft, active or running configuration blocks import. For a duplicate endpoint, check the target first. If you need to remove an existing PLC with that origin, check the impact. Pause collection and disconnect first if it is active or running. On that PLC row choose **Edit → Remove → Confirm**, then **Save draft** at the top. If it was only in the draft, retry. If it remains in the active or running configuration, explicitly activate the configuration without it, then retry. A new instance from a historical origin does not inherit old samples, reporting bindings, queues or receipts.
+
+Reselect and preview a file that has changed. If the result is unknown, reload the draft and check the source before retrying. The exporter declares the source configuration digest shown in the preview. Verify the actual device layout separately.
+
+### 2.5 Export PLC JSON
+
+1. Save the edits to share, then open **PLC configuration → Export PLC JSON**. Choose **Saved draft** or **Active revision** and check the selected version. The file excludes unsaved edits.
+2. Select the PLCs to export. The default filename uses the PLC name and adds `.json` only if the name has no `.json` suffix, regardless of case. You can rename each file. Use a valid and unique filename, keep `.json`, and avoid names that differ only by case. Choose **Preview selected PLCs**, then check each client target and all DBs and points. Preview again after changing the selection or filenames.
+3. Check **I checked each PLC client target and complete point list**, then choose **Choose export folder → Export**. Read the header and each row's **Exported** status. Existing files stay in place. Change the name or choose a different folder if needed. For an unknown result, check the folder first.
+4. In DS, choose **Instances → Import PLC JSON** and select the file, then check the listening target, layout and names. See the [DS guide](../device-simulator/USER_GUIDE.md).
+
+### 2.6 Activate and start only when collection is needed
+
+1. Check the target endpoint, point addresses, groups, and enabled states of the PLC, groups and points. At the top of the configuration page, choose **Save draft → Activate configuration**, confirm, and check **Applied**. If activation is unavailable, resolve the issues shown in the configuration bar.
+2. In **Workbench**, find the target PLC and choose **Connect**. Once connected, choose **Start collection**. For a local DS instance, load the intended revision and start the instance in DS first.
+3. In **Reporting and storage → Local history**, filter by PLC, group and time. Choose **View sample** to verify values, quality and time. When finished, choose **Pause collection**, then **Disconnect** if needed.
+
+For collection alone, stop here. Samples collected without a reporting binding are **Local record only** and are never queued automatically by a later binding. For reporting, follow sections 3–5.
+
+After a test, handle only the test objects and exports confirmed to belong to it. Retain anything referenced by active configuration or history. See the native validation records for [DAA-019](plans/DAA-019-plc-json-bidirectional/checklist.md) and [DAA-017](plans/DAA-017-plc-json-import/tasks.md).
 
 ## 3. Register the source and configure reporting
 

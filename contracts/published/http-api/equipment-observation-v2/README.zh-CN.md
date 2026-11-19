@@ -2,7 +2,9 @@
 
 [English](README.md) · [OpenAPI](openapi.json) · [合成请求](vectors.json) · [私有配置样例](example-profile.json) · [批准的 r10 规格](../../../../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md#r10-source-independent-energy)
 
-本合同适用于 r10 后端；v1 文档保留原历史合同，新 v1 事件不再保证接收，已存 v1 的相同请求可按原规则重放。机器 Bearer 的 producer、设备、目标、区域、指标与表计权限在服务端私有 profile 中配置，提交方类型可为 SMA、第三方或其他授权程序，正文不可授予权限；不要求 PLC 证据，也不表示 SMA 产品已经实现该投递。profile 在进程加载时缓存，修改需按运行环境协调重载；样例中的目标、摘要均为不可使用的占位符，不能提交真实 token 或 profile。
+清退后的源码仅接受 v2，鉴权后明确拒绝旧 v1 且不重放归档回执。设备观察私有 profile 仅接受 `c9e1a3b5d720`；同目录已发布的向量、OpenAPI 和 profile 样例保留原版本。 [清退规格](../../../../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+
+本合同说明当前接口沿用的 r10 v2 报文。机器 Bearer 的 producer、设备、目标、区域、指标与表计权限在服务端私有 profile 中配置，提交方类型可为 SMA、第三方或其他授权程序，正文不可授予权限；不要求 PLC 证据，也不表示 SMA 产品已经实现该投递。profile 在进程加载时缓存，修改需按运行环境协调重载；样例中的目标、摘要均为不可使用的占位符，不能提交真实 token 或 profile。
 
 | 方法及路径（均以 `/api/v1` 为前缀） | 使用 |
 | --- | --- |
@@ -18,4 +20,4 @@
 
 区域键／指标键为稳定标识，不使用可变中英文标题。完整包可省略区域、发送空区域或 `groups: {}` 表示缺测；实时替换要求有被清空范围的全部权限。空组也须登记和授权；未知组／指标、越权或错误类型整包拒绝，不产生部分写入；`null` 非有效指标值，数字 0、布尔 false 和空字符串有效。数字必须可无损经过 JSON 数值存储。历史启用但整包缺测时仍保存缺测事件以形成曲线断点；无任何历史启用指标才返回 `no_history_metrics`。不同事件同一真实采样时刻分别保留，不能把事件号当时间或自动证明跨发送方是同一个物理样本。
 
-标准成功回执 `data` 含 `target`、`producerId`、`eventId`、`outcome`、`recordId`，设备两路还可有 `stored`、`skipped`。常见结果为 `stored`、`stale`、`already_stored`、`no_history_metrics`；旧回执还注明结果版本和归档位置。`401` 是身份错误，`403` 是越权，`409` 是事件或样本冲突，`422` 是字段／类型／时间／质量等校验失败，`503` 是目标未就绪或提交结果未知。机器 GET 不读取业务样本；业务用户和 admin 的读取、配置、管理另用各自人类权限和设备／表计范围，见[使用说明](../../../../docs/equipment-status-process-monitoring.zh-CN.md#r10-guide)。
+标准成功回执 `data` 含 `target`、`producerId`、`eventId`、`outcome`、`recordId`，设备两路还可有 `stored`、`skipped`。常见结果为 `stored`、`stale`、`already_stored`、`no_history_metrics`。`401` 是身份错误，`403` 是越权，`409` 是事件或样本冲突，`422` 是字段／类型／时间／质量等校验失败，`503` 是目标未就绪或提交结果未知。机器 GET 不读取业务样本；业务用户和 admin 的读取、配置、管理另用各自人类权限和设备／表计范围，见[使用说明](../../../../docs/equipment-status-process-monitoring.zh-CN.md#r10-guide)。

@@ -77,8 +77,8 @@ backend permission keys, not frontend pageIds, URLs or arbitrary module names. D
 `*` is an unknown key, not a wildcard. Only these two roles use the arrays; unknown roles fail closed.
 
 ~~~dotenv
-SUPERVISOR_API_PERMISSIONS_JSON='["monitor","control-agent-read"]'
-OPERATOR_API_PERMISSIONS_JSON='["monitor"]'
+SUPERVISOR_API_PERMISSIONS_JSON='["monitor-observation-read","control-agent-read"]'
+OPERATOR_API_PERMISSIONS_JSON='["monitor-observation-read"]'
 ~~~
 
 Operator's **original configured keys must be a subset of supervisor's original keys**. Both arrays must
@@ -142,7 +142,7 @@ Before restarting, manually migrate the configuration used by your selected entr
 1. Review the old object and keep each role's members unchanged. For example:
 
    ~~~dotenv
-   ROLE_API_PERMISSIONS_JSON='{"supervisor":["monitor","control-agent-read"],"operator":["monitor"]}'
+   ROLE_API_PERMISSIONS_JSON='{"supervisor":["monitor-observation-read","control-agent-read"],"operator":["monitor-observation-read"]}'
    ~~~
 
 2. Remove/comment the old assignment in dotenv and remove it from the process environment; write the two
@@ -295,12 +295,7 @@ It does not replace an existing non-empty role/name. Keep reset off after the in
 Grant arrays neither create accounts nor update their passwords. Maintenance is a database write requiring its
 own operational authorization; its entry first performs the permission configuration checks documented above.
 
-A generic current-module grant set is supervisor `["monitor","system","control-agent-read"]` and operator
-`["monitor"]`. The `monitor` permission provides GET `/monitor/collector/status`; the retired realtime snapshot path is absent. `system` includes user-management
-writes with independent actor restrictions; `control-agent-read` covers action-scope queries. This is an
-explicit grant choice, not the public templates' safe `[]` defaults. The approved local three-environment
-migration adds monitor for host/prod operator and adds all three supervisor keys plus monitor for dev operator;
-it is not merely an equivalent variable rename. Future interfaces added under a key require renewed review.
+Process reads require `monitor-observation-read`, device reads require `equipment-observation-read`, and meter reads require `energy-consumption-read`, each with its configured device or meter scope. Review and remove a retired `monitor` grant during approved maintenance. This change adds no replacement grants automatically.
 
 Hourly energy-price adoption uses the existing three API paths, Shanghai observedAt buckets and a new explicit b8d0f2a4c6e8 successor (sixteen total tables). Legacy append rows remain intact; read [the module contract and gated conversion SQL](app/energy/README.md) before adoption. Source validation does not authorize real migration or deployment.
 
@@ -309,6 +304,8 @@ Hourly energy-price adoption uses the existing three API paths, Shanghai observe
 See the [v1 Python module contract](app/MODULE_CONTRACT.md) for dependencies, exports, errors and conflict checks. The explicit d2f4a6b8c0e2 successor adds 42 tables to the protected sixteen (58 in the reintegration fixture); HR remains disabled, and imports/GETs do not seed or apply schema. Real MySQL/Docker/runtime actions remain separately gated.
 
 ## Complete temperature sample pilot
+
+Historical record of the earlier implementation. The routes, configuration and table layouts below describe that release.
 
 The [equipment module](app/equipment/README.md) adds independent async POST/GET `/equipment/temperature-samples`. It owns exact complete per-sample values and delivery receipts, with separate read/ingest permissions and one fail-closed module-local scope. Explicit e4f6a8b0c2d4 adds two tables after d2 (60 in the BE003 fixture); the original 58-table reintegration subset and old temperature-control/Projection/frontend data sources remain unchanged. `settings.resolve_env_file() -> Path` is public only for path selection; other private Settings remain private. Database/Docker and real adoption require their own concrete approval.
 
@@ -322,6 +319,8 @@ At the BE003 checkpoint this additional key brought each public env example to 6
 
 
 ## HTTP mapping business observations
+
+Historical record of the earlier implementation. The routes, configuration and table layouts below describe that release.
 
 Equipment, performance and monitor own separate HTTP observation domains. Each module requires one exact,
 case-sensitive business equipment key: `EQUIPMENT_MAPPING_INGEST_ID`, `PERFORMANCE_MAPPING_INGEST_ID` and
@@ -349,6 +348,8 @@ recovery. Unknown commits return retryable failure; retry the same sampleId. No 
 
 ## Anonymous business integration source
 
+Historical record of the earlier implementation. The routes, configuration and table layouts below describe that release.
+
 [ARCH-BE-010 r2](../plans/ARCH-BE-010-anonymous-business-integration/spec.md) wires eight typed anonymous POST routes to owner-local async Service/CRUD and existing business tables. [The closed provider](../contracts/published/http-api/business-integration-v1/README.md) defines strict JSON numbers, typed success/failure envelopes, both digests, presence/units and permanent minimal receipts. Existing JWT/admin/permission/scope and owner-local business time boundaries stay intact. Producer/source declarations are admission claims, not authentication.
 
 All module switches default off, device/producer scopes empty and storage profiles `unadopted`. Default old entrypoints use the original time path without reading adoption evidence or probing a target; admitted new requests return 503 before the database dependency. `shanghai-v1` requires an explicit valid external adopted manifest plus a matching per-transaction UUID/schema/revision/clock probe. Unknown profiles, retained file paths with unadopted, missing/invalid evidence or wrong targets reject writes. A profile string alone never enables writing.
@@ -371,10 +372,14 @@ The fixed compatibility profile covers 13 old tables / 41 calendar columns. Awar
 
 The successor `4e6a8b0d2f14` renames the two facts tables and adds nullable history metadata. Its target, maintenance window, staged recovery and exact-source adoption procedure are defined by [ARCH-ACQ-003 r2](../plans/ARCH-ACQ-003-acquisition-data-optional-filters/spec.md).
 
-## Generic task workflow candidate
+## Current equipment, process and energy entry points
 
-ARCH-TASK-001 r1 replaces the coil Plan/Performance surfaces with the [generic task workflow](../contracts/published/http-api/generic-task-workflow-v1/README.md). `app/task` owns field versions, integration eligibility and `task.*` errors; Plan owns dispatch and action evidence; Performance owns complete snapshots and calls Plan within the same transaction. The old reports and dashboard routes and old Performance model imports are retired. Independent quality, acquisition, equipment and monitor remain separate.
+The `equipment_observation` module serves current device, process and meter observations via `equipment_status_main`, `process_monitor_main` and `energy_consumption_main`. The retired archive queries, collector status and old device/process/energy routes are absent from current source. The post-retirement observation profile requires schema revision `c9e1a3b5d720`; the two device observation writes accept only v2. Target adoption is recorded in the task. [Retirement specification](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
 
-The candidate successor `5f7a9c1e3b25` requires exact predecessor `4e6a8b0d2f14`, an explicitly identified target and online empty-table/dependency preflight. Its MySQL DDL is not transactional and has no automatic downgrade. Read the approved task's cutover and recovery procedure before any operation. Source changes and OpenAPI generation do not authorize DDL, a process restart or real configuration changes.
+## Generic task workflow v2 candidate
 
-A private project profile at `TASK_INTEGRATION_PROFILE_FILE` registers target/version dispatch fields, PLC sequence bounds and producers. `TASK_INTEGRATION_ENABLED` defaults false and controls anonymous integration; project mapping remains necessary for logged-in plan creation when it is false. Preserve mappings and automatic producer identity for all in-use versions; new streams use a new version. See the contract for sample versions, role grants, error semantics and the MES/CA/FF/DAA/SMA flow.
+The [Plan and Performance v2 candidate](../contracts/published/http-api/generic-task-workflow-v2/README.md) uses current field definitions, partial writes and ordinary paginated plan reads. A valid automatic performance report synchronizes the same-number plan in one transaction when present. Plan, Performance and Task own the HTTP routes and configuration. R1 dispatch and action data remain available for historical reconciliation and the [v1 contract](../contracts/published/http-api/generic-task-workflow-v1/README.md) remains available for existing clients.
+
+The forward-only candidate `ae20b4d6f831` follows `9d1f3a5c7e20`. It requires the exact target and reviewed timezone/dependency/history evidence. It creates field-configuration usage evidence and updates task constraints. MySQL DDL may commit in stages. Follow the [task cutover proposal](../plans/ARCH-TASK-001-generic-plan-performance/tasks.md) before any data or service operation. PLC Facts, equipment observation and business-time adoption still require matching target profiles and valid evidence.
+
+Generic task integration uses the project's trusted network boundary. The r1 task integration profile and dispatch/producer admission are historical. Login roles still apply to frontend APIs, and configuration changes require admin.

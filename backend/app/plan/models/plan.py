@@ -24,12 +24,12 @@ class Plan(Base):
     __tablename__ = 'plan_main'
     id = Column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
     task_no = Column(key(50), nullable=False)
-    target_key = Column(key(64), nullable=False)
+    target_key = Column(key(64))
     field_config_version = Column(INTEGER(unsigned=True), nullable=False)
     remark = Column(String(500))
     created_at = stamp()
     updated_at = updated()
-    production_status = Column(key(16))
+    production_status = Column(key(16), nullable=False)
     priority = Column(SMALLINT(unsigned=True), nullable=False, server_default=text('5'))
     dispatch_status = Column(key(24), nullable=False, server_default=text("'pending'"))
     local_values = Column(JSON, nullable=False, server_default=text('(JSON_OBJECT())'))
@@ -39,7 +39,7 @@ class Plan(Base):
         CheckConstraint("JSON_TYPE(local_values) = 'OBJECT' AND JSON_LENGTH(local_values) <= 100", name='ck_plan_local_values'),
         CheckConstraint("JSON_TYPE(sync_values) = 'OBJECT' AND JSON_LENGTH(sync_values) <= 100", name='ck_plan_sync_values'),
         CheckConstraint('priority BETWEEN 1 AND 10', name='ck_plan_priority'),
-        CheckConstraint("production_status IS NULL OR production_status IN ('running','completed')", name='ck_plan_production_status'),
+        CheckConstraint("production_status IN ('new','running','completed','error')", name='ck_plan_production_status_r2'),
         CheckConstraint("dispatch_status IN ('pending','paused','claimed','exception','plc_accepted','cancelled','not_required')", name='ck_plan_dispatch_status'),
         Index('ix_created_page', 'created_at', 'id'),
         Index('ix_plan_target_state_page', 'target_key', 'dispatch_status', 'created_at', 'id'),

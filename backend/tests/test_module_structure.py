@@ -9,17 +9,22 @@ from app.module_registry import get_module_manifests
 
 pytestmark = pytest.mark.no_db
 
-CORE_MODULES = ("auxiliary", "aiis_demo", "monitor", "schema_maintenance", "system")
+CORE_MODULES = ("auxiliary", "aiis_demo", "equipment_observation", "schema_maintenance", "system")
 REQUIRED_DIRS = ("api", "models", "schemas", "crud", "services", "mocks", "seeds")
 
 
 def test_core_modules_keep_the_standard_package_shape():
     app_dir = Path("app")
-    for module_name in (manifest.name for manifest in get_module_manifests()):
+    manifests = {manifest.name for manifest in get_module_manifests()}
+    assert {"equipment", "monitor"}.isdisjoint(manifests)
+    for module_name in CORE_MODULES:
         module_dir = app_dir / module_name
         assert (module_dir / "__init__.py").is_file()
         for directory in REQUIRED_DIRS:
-            assert (module_dir / directory / "__init__.py").is_file()
+            if module_name == "equipment_observation" and directory == "schemas":
+                assert (module_dir / "schemas.py").is_file()
+            elif module_name != "equipment_observation" or directory in {"api", "models", "services"}:
+                assert (module_dir / directory / "__init__.py").is_file()
 
 
 def test_core_modules_opt_in_with_manifest_and_no_central_allowlist():

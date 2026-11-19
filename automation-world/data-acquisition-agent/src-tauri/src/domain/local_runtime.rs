@@ -32,6 +32,18 @@ pub(crate) struct ConfigurationView {
     pub used: Option<String>,
     pub phase: String,
     pub issues: Vec<Issue>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub imported_local_plc_id: Option<String>,
+}
+#[derive(Clone)]
+pub(crate) struct ConfigurationSnapshot {
+    pub state: String,
+    pub revision: String,
+    pub payload_sha256: String,
+    pub configuration: Configuration,
+    pub instance: String,
+    pub active: Option<String>,
+    pub used: Option<String>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

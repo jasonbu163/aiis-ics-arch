@@ -117,6 +117,10 @@ pub(crate) fn dispatch(
         }
         "daa_preview_catalog" => value(engine.preview_catalog(parse(request)?)?),
         "daa_confirm_catalog" => value(engine.confirm_catalog(parse(request)?)?),
+        "daa_catalog_export_inspect" => engine.catalog_export_inspect(parse(request)?),
+        "daa_catalog_export_preview" => engine.catalog_export_preview(parse(request)?),
+        "daa_catalog_export_commit" => engine.catalog_export_commit(parse(request)?),
+        "daa_catalog_export_cancel" => engine.catalog_export_cancel(parse(request)?),
         "daa_cancel_catalog" => {
             *engine.catalog_preview.lock().unwrap() = None;
             Ok(json!({}))

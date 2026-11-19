@@ -13,7 +13,7 @@ const catalog = JSON.parse(readFileSync(new URL('./fixtures/plc-catalog-v1.json'
 
 async function fixture(t) {
     const draft = { schemaVersion: 1, plcs: [], dbs: [], points: [], groups: [], sources: [], storage: { quotaBytes: 1073741824, retentionDays: 7 } };
-    const server = { view: { schemaVersion: 1, draft, etag: 'e1', active: null, previous: null, loaded: null, used: null, phase: 'loaded', issues: [] }, calls: [], failConfirm: null, failReload: null };
+    const server = { view: { schemaVersion: 1, draft, etag: 'e1', active: null, previous: null, loaded: null, used: null, phase: 'loaded', issues: [] }, calls: [], failConfirm: null, failPreview: null, failReload: null, remap: false, missingId: false };
     const service = { bootstrap: { localStorage: true, origin: 'fixture' }, LocalCommandError,
         async localCall(command, request) {
             server.calls.push({ command, request: clone(request ?? null) });
@@ -24,15 +24,18 @@ async function fixture(t) {
             if (command === 'daa_get_local_snapshot') return { operations: [] };
             if (command === 'daa_cancel_catalog') return {};
             if (command === 'daa_preview_catalog') {
+                if (server.failPreview) { const error = server.failPreview; server.failPreview = null; throw error; }
                 assert.equal(request.expectedEtag, server.view.etag);
-                return { catalog: clone(catalog), sha256: 'file-sha', target: clone(request.target ?? catalog.plc.connection), previewToken: 'token-' + server.calls.length, etag: request.expectedEtag };
+                return { catalog: clone(catalog), sha256: 'file-sha', target: clone(request.target ?? catalog.plc.connection), previewToken: 'token-' + server.calls.length, etag: request.expectedEtag, historyConflict: server.remap, localPlcId: server.remap ? 'new-local-id' : catalog.origin.plc_id, localDbIds: {}, localPointIds: {} };
             }
             if (command === 'daa_confirm_catalog') {
                 if (server.failConfirm) { const error = server.failConfirm; server.failConfirm = null; throw error; }
                 assert.equal(request.input.expectedEtag, server.view.etag);
-                server.view.draft.plcs.push({ id: catalog.origin.plc_id, name: catalog.plc.name });
+                if (server.remap && !request.input.asNewLocalInstance) throw new LocalCommandError('catalog_history_choice_required');
+                const localId = server.remap ? 'new-local-id' : catalog.origin.plc_id;
+                server.view.draft.plcs.push({ id: localId, name: catalog.plc.name });
                 server.view.etag = 'e2';
-                return clone(server.view);
+                return clone({ ...server.view, ...(server.missingId ? {} : { importedLocalPlcId: localId }) });
             }
             throw new Error('unexpected IPC ' + command);
         },
@@ -78,6 +81,39 @@ test('preview is read only; target changes require a fresh confirmation', async 
     assert.deepEqual(commit.request.input.bytes, [0x7b, 0x7d, 0x0a]);
     assert.equal(server.view.etag, 'e2');
     assert.equal(local.catalogDialogOpen, false);
+    assert.equal(local.selectedPlc, catalog.origin.plc_id);
+});
+
+test('a conflicting initial endpoint remains editable before a new preview', async t => {
+    const { local, server } = await fixture(t);
+    const bytes = [...Buffer.from(JSON.stringify(catalog))];
+    server.failPreview = new LocalCommandError('duplicate_endpoint');
+    local.openCatalog(); await local.readCatalogFile(fileEvent(bytes));
+    assert.equal(local.error, 'duplicate_endpoint');
+    assert.equal(local.catalogTarget.host, catalog.plc.connection.host);
+    local.catalogTarget.port = 31999;
+    await local.previewCatalog();
+    assert.equal(server.calls.at(-1).request.target.port, 31999);
+    assert.ok(local.catalogPreview);
+    assert.equal(server.view.etag, 'e1');
+});
+
+test('historical import selects the committed local identity and never guesses an unknown result', async t => {
+    const { local, server } = await fixture(t); server.remap = true;
+    local.openCatalog(); await local.readCatalogFile(fileEvent());
+    assert.equal(local.catalogPreview.historyConflict, true);
+    local.catalogTarget.port = 31990;
+    local.catalogAsNew = true; await local.previewCatalog(); local.catalogConfirmed = true;
+    await local.confirmCatalog();
+    assert.equal(server.calls.find(call => call.command === 'daa_confirm_catalog').request.input.asNewLocalInstance, true);
+    assert.equal(server.calls.find(call => call.command === 'daa_confirm_catalog').request.input.target.port, 31990);
+    assert.equal(local.selectedPlc, 'new-local-id');
+    assert.equal(local.selectedDb, '');
+    const next = await fixture(t); next.server.remap = true; next.server.missingId = true;
+    next.local.openCatalog(); await next.local.readCatalogFile(fileEvent()); next.local.catalogAsNew = true;
+    await next.local.previewCatalog(); next.local.catalogConfirmed = true; await next.local.confirmCatalog();
+    assert.equal(next.local.catalogUnknown, true);
+    assert.notEqual(next.local.selectedPlc, 'new-local-id');
 });
 
 test('cancel does not save; unknown result blocks retry until successful reload', async t => {
@@ -125,7 +161,9 @@ test('changed or unreadable selected file invalidates preview before commit', as
 test('catalog controls and both locale trees remain present', () => {
     const sourcePanel = readFileSync(new URL('../src/app/plc/components/SourceImportPanel.vue', import.meta.url), 'utf8');
     const dialog = readFileSync(new URL('../src/app/plc/components/CatalogImportDialog.vue', import.meta.url), 'utf8');
-    assert.match(sourcePanel, /CatalogImportDialog/);
+    const page = readFileSync(new URL('../src/app/plc/views/diagnostics/index.vue', import.meta.url), 'utf8');
+    assert.doesNotMatch(sourcePanel, /CatalogImportDialog/);
+    assert.match(page, /CatalogImportDialog/);
     assert.match(dialog, /catalogConfirmed/);
     assert.match(dialog, /catalog\.dbs/);
     const zh = JSON.parse(readFileSync(new URL('../src/app/plc/locales/zh-CN.json', import.meta.url)));

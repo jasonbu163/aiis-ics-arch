@@ -248,6 +248,8 @@ pub struct InstanceConfig {
     pub dbs: Vec<DbConfig>,
     #[serde(default)]
     pub names_confirmation: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub catalog: Option<super::plc_catalog::CatalogBinding>,
 }
 impl InstanceConfig {
     pub fn called_tsap(&self) -> u16 {
@@ -334,14 +336,14 @@ pub fn validate(workspace: &Workspace) -> Result<(), String> {
             {
                 return Err("db_parameters".into());
             }
-            if db.binding.is_none() && !db.manual {
+            if db.binding.is_none() && !db.manual && instance.catalog.is_none() {
                 return Err("manual_structure_required".into());
             }
             for point in &db.points {
                 take_id(&point.id)?;
                 typed_value::width(&point.data_type)?;
                 if point.name.len() > 100
-                    || point.display_name.len() > 200
+                    || point.display_name.len() > 256
                     || point
                         .display_names
                         .as_ref()
@@ -369,5 +371,6 @@ pub fn validate(workspace: &Workspace) -> Result<(), String> {
             }
         }
     }
+    super::plc_catalog::verify_bindings(workspace)?;
     Ok(())
 }

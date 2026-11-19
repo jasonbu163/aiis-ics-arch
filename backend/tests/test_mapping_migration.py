@@ -47,7 +47,8 @@ def test_six_revision_60_to_64_model_parity_and_53_protection():
     assert set(recorder.metadata.tables)-set(before)==NEW
     assert len(set(before)-CHANGED)==53
     task_migration = load(VERSIONS_DIR/'20261111_1400_5f7a9c1e3b25_generic_task.py')
-    retired={"plc_db_block_raw_snapshots", "plc_db_block_latest_snapshots"} | set(task_migration.OLD_TABLES)
+    from tests.test_observation_retirement import RETIRED_TABLES
+    retired={"plc_db_block_raw_snapshots", "plc_db_block_latest_snapshots"} | set(task_migration.OLD_TABLES) | RETIRED_TABLES
     for name,table in recorder.metadata.tables.items():
         if name not in retired:
             assert signature(table)==signature(Base.metadata.tables[name]),name
@@ -62,7 +63,7 @@ def test_six_revision_60_to_64_model_parity_and_53_protection():
         assert isinstance(recorder.metadata.tables[table].c[key].type.dialect_impl(mysql.dialect()),mysql.VARBINARY)
         assert 'VARBINARY(200)' in str(CreateTable(recorder.metadata.tables[table]).compile(dialect=mysql.dialect()))
     graph = ScriptDirectory.from_config(Config('alembic.ini'))
-    assert graph.get_heads()==['9d1f3a5c7e20']
+    assert graph.get_heads()==['c9e1a3b5d720']
     assert graph.get_revision('9d1f3a5c7e20').down_revision=='8c0e2a4d6f18'
     assert graph.get_revision('8c0e2a4d6f18').down_revision=='7b9d1f3a5c7e'
     assert graph.get_revision('7b9d1f3a5c7e').down_revision=='6a8c0e2b4d16'
@@ -122,14 +123,3 @@ def test_prepared_b_old_columns_and_primary_keys_survive_new_columns_and_rows(mo
     assert queries[-1]==('id','tv')
     active['rows'][0]['tv']=1
     with pytest.raises(AssertionError):module.assert_legacy_rows(target,before)
-
-
-def test_equipment_millisecond_default_has_matching_mysql_precision():
-    from sqlalchemy.schema import CreateTable
-    from sqlalchemy.dialects import mysql
-    from app.equipment.models.equipment import EquipmentDrive,EquipmentProductionParameters
-    for model in (EquipmentDrive,EquipmentProductionParameters):
-        column=model.__table__.c.timestamp
-        assert column.type.dialect_impl(mysql.dialect()).fsp==3
-        assert str(column.server_default.arg.compile(dialect=mysql.dialect(),compile_kwargs={'literal_binds':True})).upper()=='CURRENT_TIMESTAMP(3)'
-        assert 'CURRENT_TIMESTAMP(3)' in str(CreateTable(model.__table__).compile(dialect=mysql.dialect())).upper()

@@ -13,7 +13,7 @@ from sqlalchemy.pool import StaticPool
 from app.equipment_observation.api import routes
 from app.equipment_observation.profile import authenticate
 from app.equipment_observation.models import CardConfig, CurveGroup, EnergySample, HistorySample, LatestSnapshot, MetricConfig, MetricGroup, Receipt, SlotBinding
-from app.equipment_observation.services import energy_reads, ingest as legacy_ingest, ingest_v2, reads
+from app.equipment_observation.services import energy_reads, ingest_v2, reads
 from core.deps import get_current_user
 from database import get_db
 
@@ -278,30 +278,32 @@ async def test_no_enabled_history_returns_idempotent_receipt_without_row(app_and
 
 
 @pytest.mark.asyncio
-async def test_v1_receipt_replays_before_v2_required_fields_and_remains_scoped(app_and_db):
+async def test_v1_receipt_is_never_replayed_and_scope_still_applies(app_and_db, monkeypatch):
     app, session, profile, producer = app_and_db
-    producer.update(kind='external', sourceId='source', mappingId='mapping', mappingRevision='r1')
-    old = {'sourceRefs':[{'kind':'external_event','sourceEventId':'old-sample'}],
-           'data':{'equipmentId':'line','groupKey':'heatZone1','taskNo':'000042',
-                   'sampledAt':'2026-11-17T12:00:00+08:00','values':{'actual':0}}}
-    normalized = legacy_ingest.normalize(old, producer, 'latest')
-    normalized['mappingId'], normalized['mappingRevision'] = 'mapping', 'r1'
-    session.add(Receipt(target='latest',producer_id='writer',event_id=normalized['eventId'],
-        request_digest=legacy_ingest.fingerprint(normalized),outcome='stored',processed_at=datetime(2026,11,17,12),
-        result_record_id=9,mapping_id='mapping',mapping_revision='r1',source_refs=normalized['sourceRefs'],
-        task_evidence={'pointId':'expired'},contract_version='aiis.metric-ingest/v1',result_version='r8'))
+    producer["enabled"] = True
+    producer["tokenSha256"] = hashlib.sha256(b"fixture").hexdigest()
+    monkeypatch.setattr(routes, "authenticate", authenticate)
+    old = {'contractVersion': 'aiis.metric-ingest/v1', 'eventId': 'historical-event',
+           'data': {'equipmentId': 'line', 'groupKey': 'heatZone1',
+                    'sampledAt': '2026-11-17T12:00:00+08:00', 'values': {'actual': 0}}}
+    session.add(Receipt(target='latest', producer_id='writer', event_id='historical-event',
+        request_digest=bytes(32), outcome='stored', processed_at=datetime(2026,11,17,12),
+        result_record_id=9, contract_version='aiis.metric-ingest/v1', result_version='r8'))
     session.commit()
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url='http://test/api/v1',
-                                 headers={'Authorization':'Bearer fixture'}) as client:
-        replay = await client.post('/integration/equipment/latest-snapshots', json=old)
-        assert replay.status_code == 200 and replay.json()['data']['recordId'] == '9'
-        assert replay.json()['data']['resultLocation'] == 'equipment_status_r8_archive'
-        changed = {'sourceRefs':old['sourceRefs'], 'data':{**old['data'],'values':{'actual':1}}}
-        assert (await client.post('/integration/equipment/latest-snapshots', json=changed)).status_code == 409
+    path = '/integration/equipment/latest-snapshots'
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url='http://test/api/v1') as client:
+        assert (await client.post(path, json=old)).status_code == 401
+        headers = {'Authorization': 'Bearer fixture'}
+        response = await client.post(path, headers=headers, json=old)
+        assert response.status_code == 409
+        assert response.json()['errorCode'] == 'equipment_observation.contract_version'
+        assert response.json()['data'] is None
         assert session.execute(select(LatestSnapshot)).scalars().all() == []
+        assert len(session.execute(select(Receipt)).scalars().all()) == 1
         for grant in producer['grants']:
-            if grant['groupKey'] == 'heatZone1': grant['metricKeys'] = []
-        assert (await client.post('/integration/equipment/latest-snapshots', json=old)).status_code == 403
+            if grant['groupKey'] == 'heatZone1':
+                grant['metricKeys'] = []
+        assert (await client.post(path, headers=headers, json=old)).status_code == 403
 
 
 @pytest.mark.asyncio

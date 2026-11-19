@@ -31,7 +31,7 @@ def read_json(path):
 def parser():
     result=argparse.ArgumentParser(description="Read-only fixed business-time inspect/plan/verify; no apply or SQL proxy")
     result.add_argument("operation", nargs="?", choices=("inspect", "plan", "verify"))
-    result.add_argument("--module", choices=("equipment", "performance", "monitor"))
+    result.add_argument("--module", choices=("performance",))
     result.add_argument("--env-file", help="Explicit tool target env, absolute path; no backend dotenv fallback")
     result.add_argument("--output", help="Explicit absolute private JSON report path")
     result.add_argument("--inspection-report")

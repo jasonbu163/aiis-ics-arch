@@ -21,7 +21,6 @@ from sqlalchemy.schema import MetaData, Table
 
 from app.control_agent.models.gate_token import ControlAgentGateToken
 from app.module_registry import import_model_packages
-from app.monitor.models import MonitorCollectorState
 from app.system.models import (
     ProjectionMappingAuditEvent,
     ProjectionMappingBinding,
@@ -201,7 +200,7 @@ def _table_signature(table: Table) -> dict[str, Any]:
 def test_core_baseline_executes_real_operations_and_matches_metadata() -> None:
     """The parity assertion must consume migration operations, not a second schema list."""
     import_model_packages()
-    retired = {"plc_db_block_raw_snapshots", "plc_db_block_latest_snapshots"}
+    retired = {"plc_db_block_raw_snapshots", "plc_db_block_latest_snapshots", "monitor_collector_states"}
     assert ((EXPECTED_CORE_TABLES - retired) | {"energy_prices", "energy_price_hours"}).issubset(Base.metadata.tables)
     assert retired.isdisjoint(Base.metadata.tables)
 

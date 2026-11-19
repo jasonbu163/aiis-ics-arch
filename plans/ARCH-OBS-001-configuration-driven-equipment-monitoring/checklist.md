@@ -1391,3 +1391,17 @@ Verification Scope: r6 §7.4 D-06
 协调者报告：在核对目录所有者、0700 权限、ownership 的 task／nonce／cleanupOwner 和 lsof 无占用后，精确回收本任务目录 /private/tmp/arch-obs-r10-concurrency.Pr8fMiuZ，含本轮合成 token／profile，未跟随符号链接。Verification 随后仅只读使用 Python os.path.lexists 核对该精确路径不存在且不是残留符号链接，退出 0；未访问数据库或重跑测试。上方 r10 有界合成 qa_passed、r11 §13 scoped qa_passed 和全部历史 verdict 不变，Human Owner 最终验收仍待决定。
 
 本节写入前 checklist 为 231,898 字节、SHA-256 a7274934f0c7fcfb79b484fd4573411bda74fcb137f5e37ca3927d3647d0de04，其原始字节完整保留。
+
+## 2026-11-18　ARCH-OBS-001 r12 §14 独立 Verification
+
+fresh-context 命名 Verification `obs_r12_verification` 在正式工作树、Darwin arm64、Python 3.9.6 下复核未提交的 developer_handoff。基准 HEAD 为 `f7c5608c0e433612b15821a578a7ef3e4f155cdb`。结论为 **qa_passed**，覆盖 R12-AC01–05 的双语操作手册静态验收，无 blocker。
+
+| 验收项 | 独立证据与结果 |
+| --- | --- |
+| AC01 | 核对 equipment/monitor manifest、设备 admin.vue、过程 admin.vue 和 curves.vue 以及 profile.py。区域和卡片键复用“指标键”；指标选区域，槽位手填区域键；latest/history 各自绑定 1–100 槽；同类同单位图框及区域多选、空态、admin 及人类/机器授权与手册一致。configuration.py 限制一张卡启用 10 项。 |
+| AC02 | 对照 v2 OpenAPI、合同与 machine_openapi.py。两路 POST 共用整包，示例键对应所建槽位，任务号保留前导零；采样时间含偏移；实时覆盖与缺项清空、历史 good、按目标及发送方用原事件原文重试、机器发现仅返回获准定义均已说明。 |
+| AC03 | 核对 RecordList.vue、EnergyAdmin.vue、energy.vue 与 energy_statistics.py。实时备注、历史及能耗备注和复核标记、显示列配置入口、表计配置及独立发现/上报符合实现。时段样例覆盖 10:00–10:15，示例用量 2.5 kWh；累计连续性、增量缺口/重叠及瞬时量限制明确。 |
+| AC04 | `python3 -` 静态提取每稿七节和代码围栏，四段 JSON 均解析、六段 Bash 均经 `bash -n`，双语围栏逐字一致；每稿五条路径及方法匹配 openapi.json，所有手册相对链接和 r10 锚点可达；双语索引第 14 行均链接对应手册。使用保留域名和机器凭据变量，无实值凭据。 |
+| AC05 | `git rev-parse HEAD`、`shasum -a 256`、`git diff --numstat -- docs/README*` 及相关文件 `git diff --check` 通过；两索引各新增一行。双语指南及 spec 哈希与交接一致。按 SHA-256 验证追加前 tasks 原前缀，追加前 checklist 为 `5de37a7bbfb528d897f17458ab85ce6825b266c85b676aa14c5c75c58904bcea`，既有 QA 记录保留。 |
+
+本轮仅静态核验，未发送 HTTP、写数据库或配置、运行服务、Docker、浏览器或设备。既有并行改动与历史验证保留。交 Human Owner 决定该手册最终验收。

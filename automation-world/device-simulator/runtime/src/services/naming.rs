@@ -28,6 +28,27 @@ pub fn preview(service: &Configuration, intent: NamesIntent) -> Result<Preview, 
     if selected.len() != intent.point_ids.len() {
         return Err("point_selection".into());
     }
+    if i.catalog.is_some() {
+        let points = i.dbs.iter().flat_map(|db| &db.points).collect::<Vec<_>>();
+        if selected.is_empty()
+            || selected
+                .iter()
+                .any(|id| !points.iter().any(|p| &p.id == *id))
+        {
+            return Err("point_selection".into());
+        }
+        let rows = points
+            .iter()
+            .map(|p| json!({"pointId":p.id,"name":p.name,"mode":"catalog"}))
+            .collect::<Vec<_>>();
+        i.names_confirmation = Some(layout::names_signature(i));
+        return service.preview(
+            "names",
+            &intent.expected_etag,
+            state.workspace,
+            json!({"rows":rows,"enabledPending":false}),
+        );
+    }
     let entries = i
         .dbs
         .iter()

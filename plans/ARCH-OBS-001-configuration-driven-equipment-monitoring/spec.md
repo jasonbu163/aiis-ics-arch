@@ -1,19 +1,19 @@
 Task ID: ARCH-OBS-001
-Revision: r11
+Revision: r12
 Status: owner_approved
 Owner Role: PM
 Allowed Writers: PM, Human Owner
-Handoff: Human Owner 已批准 r11 §13；交命名 Development 实施，随后 fresh-context Verification 独立验证
+Handoff: Human Owner 已要求整理设备状态与过程监控操作手册；交命名 Development 按 §14 文档范围实施，随后 fresh-context Verification
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch
 Classification: root
 Capability: 配置驱动的设备状态、过程历史及独立能耗数据与统计
 Owner: AIIS ICS Architecture
-Acceptance Chain Reference: 本稿第 13 节与 Development Lifecycle Workflow；第 12 节为已批准 r10，第 10 节为已批准 r8，第 11 节为未批准候选
+Acceptance Chain Reference: 本稿第 14 节与 Development Lifecycle Workflow；第 13 节为已批准 r11，第 12 节为已批准 r10，第 10 节为已批准 r8，第 11 节为未批准候选
 Related Task: ARCH-ACQ-001, ARCH-ACQ-003, ARCH-ACQ-004 r4, ARCH-ACQ-005 r1, ARCH-TASK-001, ARCH-BE-010, aiis-ics-arch.aw.sma::SMA-004
 Created: 2026-11-07
-Updated: 2026-11-17
+Updated: 2026-11-18
 
 # 配置优先的设备状态与过程监控方案
 
@@ -1439,3 +1439,54 @@ QA4 另记录 [frontend-js/README.md](../../frontend-js/README.md#business-obser
 批准前 spec SHA-256 为 `94d18d3945c342b8fb30dfd573033fd713a224b66ee1a00c91e7884ede4fd90c`。该答复批准 `ARCH-OBS-001 r11` §13 的精确范围和其中所列的指定一次性隔离目标、动作及回收，不扩大到其他数据库、现有容器、SMA／DAA／PLC、生产部署或源码实现变更。r10 既有批准、已执行的 dev 迁移及 QA4 `qa_blocked` 与之前全部证据保持原状；本次范围批准不表示隔离验证已执行或通过，也不是 Human Owner 最终验收。
 
 §13 标题及前文的 `draft`、待批准和不得实施措辞保留批准前状态；本记录和文件头的 `Status: owner_approved` 表示本节所列 r11 范围现已获批。实际命名 `development` 按 §13.3–13.4 交付两份说明并在 `tasks.md` 记录自检和精确 `developer_handoff`；其后 fresh-context 命名 `verification` 在 §13.2 指定隔离目标独立验证并更新 `checklist.md`。若目标、范围、验收或风险发生实质变化，停止越界动作并按 canonical workflow 回 PM 修订，不因本批准推断额外授权。
+
+<a id="r12-user-guide"></a>
+
+## 14. r12：设备状态、过程监控和能耗操作手册
+
+2026-11-18（Asia/Shanghai）。Human Owner 接受上一轮关于单独整理一份按实际页面操作的手册的建议：从新增加热区、配置卡片和曲线，到手动 POST、查看列表及能耗配置，步骤简洁但完整。Human Owner 本轮原话为：
+
+> 好的，整理吧。步骤描述简介，但是要完整。
+
+用户明确授权整理这份手册。`r12` 是 PM 为这次文档切片分配的内部编号；用户没有说过该编号，也未逐字审阅本节或作最终验收。本节将其已授权的具体工作落实为下面的文件和验收口径；不推断任何代码、数据库、运行、发布或现场操作授权。顶端 `owner_approved` 表示这项具体文档工作的范围授权，非其他修订的最终验收。
+
+### 14.1 背景和权威边界
+
+现有 [设备状态与过程监控讨论稿](../../docs/equipment-status-process-monitoring.zh-CN.md#r10-guide) 已保留 r10 使用摘要及 r6–r8 历史讨论；新手册单独面向使用者按步骤操作，不替换讨论稿、[r10 规格](#r10-source-independent-energy)或 [v2 机器合同](../../contracts/published/http-api/equipment-observation-v2/README.zh-CN.md)。具体步骤和名称以正式工作树实际前后端为准；合同、程序或页面不一致时标明实际限制，不编造入口、字段、权限或已完成联调。
+
+本节起草前，spec SHA-256 为 `b84a907c6fbf31508816373c165ba70194f89919bac2b99c4f22a8127f33a8ff`，Development [tasks.md](tasks.md) 为 `ca0e06030c2507fdea23e8e141752736d9ba866639d06d6c4b31bf3c8b1b5ffe`，Verification [checklist.md](checklist.md) 为 `5de37a7bbfb528d897f17458ab85ce6825b266c85b676aa14c5c75c58904bcea`。r10 的有界合成 `qa_passed`、r11 §13 的 scoped `qa_passed`、一次可恢复并发死锁／503 和未穷尽项均按 checklist 保留；它们不等于 Human Owner 已最终验收或真实 SMA／DAA／PLC、现场和生产部署已完成。该文档切片不改变上述结论。
+
+### 14.2 交付内容与操作主线
+
+新增一对互链的短步骤指南：
+
+- `docs/equipment-status-process-monitoring-guide.zh-CN.md`：中文操作手册。
+- `docs/equipment-status-process-monitoring-guide.md`：英文配对，步骤、示例、限制和链接与中文对应。
+
+两份 `docs/README` 各增加同一手册入口；保留已有讨论稿及其历史。文档按下面顺序组织，语句简洁，必要时用小表提供示例字段及预期结果。示例值均为虚构值，不声称任何现场设备、账号或实时配置已经存在。
+
+1. **准备和权限**：说明从已获授权的目标环境和现有服务开始，admin 管理入口、人类读取权限与设备／表计范围、机器 Bearer 及其目标／区域／指标授权各自独立。明确设备和表计身份及机器授权来自后端仓库外的私有 profile；页面配置区域、指标等不能代替登记设备／表计或赋予机器权限。profile 由环境负责人按实际合同配置和协调加载，不能把示例占位符当成可用凭据或 UUID；设备／表计选项为空、尚无指标或图表时说明实际空态。
+2. **加热区和指标**：从“设备状态 → 配置管理 → 区域配置”新增温控类别的合成 `heatZone1`，填写实际界面要求的中英文名称、排序和启用；在“指标设置”登记 `zone1Actual`、`zone1Set` 两个数字指标，按实际控件选择所属区域，填写中英文名、可选 `°C` 和小数位。依实际界面解释“指标键”在区域／卡片表单中对应各自稳定键，“采样组”在槽位表单中需要输入区域键；展示标题可编辑，上报仍使用稳定键。
+3. **槽位、卡片和历史**：在“槽位设置”为两个指标分别新增 `latest` 与 `history` 绑定并启用；具体示例逐项列出目标、采样组、槽位和指标。说明每目标每区域独立 1–100 槽，首次使用后绑定和物理含义受保护，实时专用指标可只绑定实时。再在“卡片设置”新增温控页面的双语卡片并添加两指标；一张卡最多 10 项。显示配置、实时写入和历史留存是独立设置，曲线可见不等于已经启用历史写入。
+4. **曲线和多区域**：在“过程监控 → 配置管理 → 曲线设置”新增温度类别、同单位的图框及实际／设定两条数值指标；根据实际可用控件解释添加第二个区域及其不同指标键，再在温度曲线页选择设备、任务和采集时间范围，点击“查询”，使用“选择区域”／“全选区域”查看单区或多区。无数据时保留空轴并提示原因；历史横轴按 `observedAt`，不是 `updatedAt`。
+5. **手动发现与上报**：给出与步骤 2–4 键名相互对应的可阅读合成 JSON 和必要的手工 HTTP 请求：机器发现 GET、实时 POST、历史 POST。设备两路请求采用同一整包结构、各自发送及核对结果；历史用 `quality: good`，实时更晚采样整包覆盖、缺项变缺测，历史按启用槽追加。说明 `eventId` 是单目标重试身份、相同事件原文重试、不同样本用新事件；`taskNo` 为字符串、`observedAt` 为真实采样时间且带偏移，标量不带单位，未传不等于 `null`，`0`／`false` 有效。必须提示示例中的设备、授权、键和时间先替换为本人获准的配置；通过 curl 等工具使用机器凭据时不得把真实令牌写入文档或仓库。机器 GET 只返回获准定义，不等同于读取历史样本；完整字段、错误码及可省略项链接 v2 合同。
+6. **查看与能耗**：按实际侧栏说明四设备卡片、三个过程曲线页，以及各自 admin“数据管理”如何筛选、在“指标列设置”选择显示列、查看详情。实时只可改备注；过程与能耗只可改备注及异常／已复核标记，不在手册中虚构原始值编辑或删除入口。另说明“过程监控 → 配置管理 → 表计指标配置”的实际表计选择、组、指标键、槽位、名称、物理量、计量方式、单位和适用规则；从机器 GET／能耗 POST 到能耗统计／样本列表给出一个简洁示例。能耗按表计独立于 `taskNo`；累计读数、时段增量、瞬时量不可混为一谈，增量样本应按合同携带真实区间，缺边界或连续性未知不补零。
+7. **排查与收尾**：简要区分无可访问设备／表计、无配置、无样本、无权限、参数错误、事件冲突、服务未就绪及同一事件重试；提示 503 可出现提交结果未知或竞争失败，按 v2 合同核对后以原事件和原文重试，不误说全部 503 原因相同。测试数据如需清理，应先核实对象归属、引用和授权，由环境负责人按精确记录处理；不提供整表删除、清库或虚构前端删除功能。手动 HTTP／模拟发送方不等于 SMA 产品或真实 PLC 已接入。
+
+### 14.3 范围、验收与角色交接
+
+| 归属 | 允许范围 |
+| --- | --- |
+| PM | 仅本 `spec.md` 的 §14 和相应元数据；保留 r10／r11 及更早历史原文。 |
+| Development | 上述两份新手册、`docs/README.md` 与 `docs/README.zh-CN.md` 的对应索引行，以及本任务 `tasks.md` 自检与交接；不修改现有讨论稿或其他源码／配置。 |
+| Verification | 精确交接后使用 fresh context 独立检查工作树及合同，在本任务 `checklist.md` 记录证据和 verdict，保留所有历史。 |
+
+| 验收项 | 可观察结果 |
+| --- | --- |
+| R12-AC01 实际界面与前置 | 中英文手册从服务和权限前提开始，以真实侧栏、表单标签和操作顺序覆盖 §14.2 的区域、指标、两目标槽位、卡片、曲线和多区域；解释空设备／表计、私有 profile 与界面配置的区别。 |
+| R12-AC02 端到端示例 | 一套一致的虚构区域、指标、卡片和曲线样例可贯穿页面与机器请求；至少有一份实时／历史共用正文、各自路径、按原类型传值及采样时间／任务号／事件号说明，足以让读者理解如何自行用获准设备重复；机器 GET 不被描述为业务值读取。 |
+| R12-AC03 列表、能耗和异常 | 根据当前界面写明两个设备／过程列表和能耗样本的列显示、筛选及允许编辑内容；给出表计指标配置与独立能耗上报／统计示例，区分三种计量方式、时间区间、缺测及异常处理。 |
+| R12-AC04 正确性与边界 | 两稿对应、互链，双语文档索引可达；引用现行 v2 合同及 r10 操作基础，核对新增路径、锚点和 JSON 示例可解析。示例无真实地址、口令、token 或客户数据；明确测试条件和清理责任，不声称真实 SMA／DAA／PLC 或生产部署已完成。 |
+| R12-AC05 范围与记录 | 差异限本节和列出的两份手册、两行索引、对应角色记录；其他并行工作和既有 QA 原事实不被覆盖。文档编写和静态核验不执行 POST、数据库写入／迁移、项目配置修改、服务切换、Docker 操作或设备动作。 |
+
+Development 使用 `project-governance` 和 `aiis`，对操作步骤、接口与当前实现分别核对 `frontend-ui`／`backend-arch` 的适用边界；此处是阅读与文档整理，不授权 UI 或后端代码改动。完成后由实际命名 Development 在 `tasks.md` 记录具体文件、静态检查、限制和 `developer_handoff`，再交 fresh-context 命名 Verification 核对并更新 `checklist.md`。范围若实质扩展，按 canonical workflow 返回 PM。独立 QA 通过后仍须 Human Owner 决定手册的最终验收。

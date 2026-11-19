@@ -79,6 +79,9 @@ impl Configuration {
         }
         for i in &mut next.instances {
             let old_i = previous.workspace.instances.iter().find(|v| v.id == i.id);
+            if i.catalog.as_ref() != old_i.and_then(|v| v.catalog.as_ref()) {
+                return Err("derived_source_read_only".into());
+            }
             for db in &mut i.dbs {
                 let old_db = old_i.and_then(|v| v.dbs.iter().find(|v| v.id == db.id));
                 if db.binding.as_ref() != old_db.and_then(|v| v.binding.as_ref())

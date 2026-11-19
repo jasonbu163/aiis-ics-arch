@@ -5,7 +5,6 @@ import pytest
 
 from app.equipment_observation.domain import ObservationError, scalar, task_no
 from app.equipment_observation.profile import parse_profile
-from app.equipment_observation.services.ingest import normalize
 from app.equipment_observation.services.reads import freshness
 
 pytestmark = pytest.mark.no_db
@@ -36,31 +35,8 @@ def test_task_no_ascii_and_numeric_domain():
             scalar(invalid, "number")
 
 
-def test_external_normalization_distinguishes_targets_and_null():
-    first = normalize(body(), producer(), "latest")
-    second = normalize(body(), producer(), "latest")
-    assert first["eventId"] == second["eventId"]
-    assert first["taskNo"] == "00A-1"
-    assert first["quality"] == "unknown"
-    assert first["sourceRefs"][0]["sourceId"] == "source-1"
-    history = body()
-    history["data"]["quality"] = "good"
-    assert normalize(history, producer(), "history")["eventId"] != first["eventId"]
-    for field in ("eventId", "mappingId"):
-        invalid = body()
-        invalid[field] = None
-        with pytest.raises(ObservationError):
-            normalize(invalid, producer(), "latest")
-    invalid = body()
-    invalid["data"]["values"]["actual"] = None
-    with pytest.raises(ObservationError):
-        normalize(invalid, producer(), "latest")
-    with pytest.raises(ObservationError):
-        normalize(body(), producer(), "history")
-
-
 def test_profile_rejects_nonstring_uuid():
-    profile = {"target": {"serverUuid": 123, "schema": "fixture", "schemaRevision": "8c0e2a4d6f18"},
+    profile = {"target": {"serverUuid": 123, "schema": "fixture", "schemaRevision": "c9e1a3b5d720"},
                "devices": [], "readScopes": {}, "producers": [], "historyRules": [], "groupSettings": []}
     with pytest.raises(ValueError):
         parse_profile(profile)

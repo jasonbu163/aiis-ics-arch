@@ -118,7 +118,7 @@ const quickLinks = ref([
   { nameKey: 'planManagement', icon: 'Calendar', bgColor: 'var(--primary)', path: '/plan/list' },
   { nameKey: 'performanceQuery', icon: 'DataLine', bgColor: 'var(--danger)', path: '/performance/list' },
   { nameKey: 'monitorCurve', icon: 'TrendCharts', bgColor: 'var(--info)', path: '/monitor/temperature' },
-  { nameKey: 'energyStats', icon: 'Cpu', bgColor: 'var(--warning)', path: '/monitor/energy' },
+  { nameKey: 'energyStats', icon: 'Cpu', bgColor: 'var(--warning)', path: '/monitor/consumption' },
   { nameKey: 'efficiencyStats', icon: 'DataAnalysis', bgColor: 'var(--success)', path: '/performance/efficiency' },
   { nameKey: 'equipmentStatus', icon: 'SetUp', bgColor: 'var(--primary-light)', path: '/equipment/production-parameters' }
 ])

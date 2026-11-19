@@ -6,7 +6,8 @@ DAA 实施任务各有唯一的本地 bundle。这里只链接已存在的角色
 
 | 任务 | 状态 | PM 范围 | Development | Verification |
 | --- | --- | --- | --- | --- |
-| DAA-018 点位中英文显示名 | `qa_blocked`（r3） | [r3 规格](DAA-018-bilingual-point-display-names/spec.md) | [tasks](DAA-018-bilingual-point-display-names/tasks.md)；返工已交接，原生隔离事件已记录 | [checklist](DAA-018-bilingual-point-display-names/checklist.md)；QA1 `qa_failed`，QA2 `qa_blocked` |
+| DAA-019 双向 PLC JSON | `qa_passed`（r3 文档）；r2 `qa_blocked` | [r3 规格（收尾）](DAA-019-plc-json-bidirectional/spec.md) | [tasks](DAA-019-plc-json-bidirectional/tasks.md)；`developer_handoff` | [QA2](DAA-019-plc-json-bidirectional/checklist.md)；`qa_blocked`；r3 文档复核 `qa_passed`，待 Human Owner 验收 |
+| DAA-018 点位中英文显示名 | `qa_passed`（r4 文档）；r3 `qa_blocked` | [r4 规格（收尾）](DAA-018-bilingual-point-display-names/spec.md) | [tasks](DAA-018-bilingual-point-display-names/tasks.md)；返工已交接，原生隔离事件已记录 | [checklist](DAA-018-bilingual-point-display-names/checklist.md)；QA1 `qa_failed`，QA2 `qa_blocked`；r4 文档复核 `qa_passed`，待 Human Owner 验收 |
 | DAA-017 按 PLC 导入点位 JSON | `qa_passed`（r5） | [r5 规格](DAA-017-plc-json-import/spec.md) | [tasks](DAA-017-plc-json-import/tasks.md)；返修已交接 | [checklist](DAA-017-plc-json-import/checklist.md)；QA1 `qa_failed`，QA2 `qa_passed`，待 Owner 验收 |
 | DAA-016 文档收尾 | `owner_accepted`（r1） | [spec.md](DAA-016-docs-closeout/spec.md)，范围及历史链接影响已批准 | [tasks.md](DAA-016-docs-closeout/tasks.md)，文档及返工已交接 | [checklist.md](DAA-016-docs-closeout/checklist.md)，QA2 通过并获 Human Owner 验收 |
 | DAA-015 工作台与启动设置 | `owner_accepted`（r1） | [spec.md](DAA-015-startup-automation-and-workbench/spec.md)，Human Owner 已批准 | [tasks.md](DAA-015-startup-automation-and-workbench/tasks.md)，实施与返工已交接 | [checklist.md](DAA-015-startup-automation-and-workbench/checklist.md)，QA4 通过并获 Human Owner 验收 |

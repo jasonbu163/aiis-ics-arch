@@ -104,6 +104,12 @@ h1,h2,h3,p { margin-top:0; }
 }
 
 /* 保存版本导出：实例目标和完整点集在同一预览中核对。 */
+.ds-catalog-export-dialog .el-dialog__body { max-height: min(60vh, 700px); overflow: auto; }
+.ds-catalog-summary { margin-top: var(--agent-action-gap); }
+.ds-catalog-summary p { margin: 4px 0 0; }
+.ds-catalog-filename { display: grid; gap: 6px; max-width: 420px; margin-bottom: 12px; }
+.ds-catalog-receipt { display: grid; gap: 6px; overflow-wrap: anywhere; }
+.ds-catalog-receipt p { margin: 0; }
 .ds-catalog-instances { display: grid; gap: 12px; }
 .ds-catalog-instance { border: 1px solid var(--el-border-color); padding: 12px; margin: 12px 0; }
 .ds-catalog-fields { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }

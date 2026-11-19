@@ -22,7 +22,7 @@ from database import Base
 pytestmark = pytest.mark.no_db
 
 
-CORE_MODULES = {"auxiliary", "monitor", "schema_maintenance", "system", "aiis_demo", "dashboard", "energy", "equipment", "hr", "maintenance", "performance", "plan", "project", "quality", "reports", "task"}
+CORE_MODULES = {"auxiliary", "equipment_observation", "schema_maintenance", "system", "aiis_demo", "dashboard", "energy", "hr", "maintenance", "performance", "plan", "project", "quality", "reports", "task"}
 ENABLED_MODULES = CORE_MODULES - {"hr", "aiis_demo", "dashboard", "reports"}
 
 
@@ -47,7 +47,7 @@ def test_disabled_demo_manifest_is_not_exposed_or_imported_as_router():
     route_paths = {route.path for route in app_router.routes}
     assert "/ping" not in route_paths
     assert "/monitor/realtime/latest" not in route_paths
-    assert "/monitor/collector/status" in route_paths
+    assert "/monitor/collector/status" not in route_paths
     assert "/schema-maintenance/status" in route_paths
 
 
@@ -55,7 +55,7 @@ def test_model_imports_include_enabled_and_disabled_manifest_models():
     import_model_packages()
     assert "users" in Base.metadata.tables
     assert "sys_dicts" in Base.metadata.tables
-    assert "monitor_collector_states" in Base.metadata.tables
+    assert "monitor_collector_states" not in Base.metadata.tables
     assert "aiis_demo" not in Base.metadata.tables
 
 

@@ -1,4 +1,4 @@
-//! 逐 PLC 保存版本导出：有界预览、原生选择目录绑定与不覆盖的原子创建。
+//! 逐 PLC 保存版本导出：有界预览绑定文件名、原生目录与不覆盖的原子创建。
 use crate::{
     app::App,
     domain::{
@@ -32,6 +32,7 @@ pub struct RevisionIntent {
 pub struct PreviewIntent {
     pub revision_id: String,
     pub targets: Vec<Target>,
+    pub filenames: BTreeMap<String, String>,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -41,6 +42,8 @@ pub struct TokenIntent {
 
 struct Item {
     id: String,
+    name: String,
+    filename: String,
     bytes: Option<Vec<u8>>,
     sha: Option<String>,
     issues: Vec<plc_catalog::Issue>,
@@ -63,6 +66,48 @@ struct Pending {
 #[derive(Default)]
 pub struct CatalogExports {
     pending: BTreeMap<String, Pending>,
+}
+
+fn filename_error(filename: &str) -> Option<&'static str> {
+    if filename.len() > 255 {
+        return Some("catalog_filename_length");
+    }
+    if filename
+        .bytes()
+        .any(|c| c <= 31 || c == 127 || b"/\\<>:\"|?*".contains(&c))
+    {
+        return Some("catalog_filename_characters");
+    }
+    let Some((stem, extension)) = filename.rsplit_once('.') else {
+        return Some(if filename.trim().is_empty() {
+            "catalog_filename_required"
+        } else {
+            "catalog_filename_extension"
+        });
+    };
+    if !extension.eq_ignore_ascii_case("json") {
+        return Some("catalog_filename_extension");
+    }
+    if stem.trim().is_empty() {
+        return Some("catalog_filename_required");
+    }
+    if stem.ends_with([' ', '.']) {
+        return Some("catalog_filename_ending");
+    }
+    let device = stem.split('.').next().unwrap_or(stem).to_ascii_uppercase();
+    let numbered_device = device
+        .strip_prefix("COM")
+        .or_else(|| device.strip_prefix("LPT"))
+        .is_some_and(|n| matches!(n.as_bytes(), [b'1'..=b'9']));
+    // 共享 JSON 可交给 DAA 导入，文件名不能占用其私有来源前缀。
+    if matches!(device.as_str(), "CON" | "PRN" | "AUX" | "NUL")
+        || numbered_device
+        || filename.starts_with("__daa_yaml_migration_v1__")
+        || filename.starts_with("__daa_startup_settings_v1__")
+    {
+        return Some("catalog_filename_reserved");
+    }
+    None
 }
 
 fn instance_facts(app: &App, id: &str) -> Result<(Option<String>, Option<String>), String> {
@@ -106,8 +151,30 @@ pub fn preview(app: &App, intent: PreviewIntent) -> Result<Value, String> {
         .iter()
         .map(|t| &t.instance_id)
         .collect::<BTreeSet<_>>();
-    if ids.len() != intent.targets.len() || ids.is_empty() || ids.len() > 8 {
+    if ids.len() != intent.targets.len()
+        || ids.is_empty()
+        || ids.len() > 8
+        || ids.len() != intent.filenames.len()
+        || ids.iter().any(|id| !intent.filenames.contains_key(*id))
+    {
         return Err("catalog_selection".into());
+    }
+    let mut counts = BTreeMap::new();
+    for name in intent.filenames.values().filter(|name| name.len() <= 255) {
+        *counts.entry(name.to_lowercase()).or_insert(0) += 1;
+    }
+    let filename_errors: Vec<_> = intent
+        .filenames
+        .iter()
+        .filter_map(|(id, name)| {
+            let code = filename_error(name).or_else(|| {
+                (counts[&name.to_lowercase()] > 1).then_some("catalog_filename_duplicate")
+            })?;
+            Some(json!({"instanceId":id,"code":code}))
+        })
+        .collect();
+    if !filename_errors.is_empty() {
+        return Ok(json!({"filenameErrors":filename_errors}));
     }
     let source = app
         .configuration
@@ -123,6 +190,7 @@ pub fn preview(app: &App, intent: PreviewIntent) -> Result<Value, String> {
             .iter()
             .find(|i| i.id == target.instance_id)
             .ok_or("catalog_instance_missing")?;
+        let filename = &intent.filenames[&i.id];
         let (selected, loaded) = instance_facts(app, &i.id)?;
         let difference = loaded.as_deref() != Some(intent.revision_id.as_str());
         let mut issues = Vec::new();
@@ -151,7 +219,7 @@ pub fn preview(app: &App, intent: PreviewIntent) -> Result<Value, String> {
         let bytes = if issues.is_empty() {
             document
                 .as_ref()
-                .map(|d| serde_json::to_vec_pretty(d).expect("JSON value serializes"))
+                .map(|d| plc_catalog::encode_document(d).expect("validated catalog serializes"))
         } else {
             None
         };
@@ -160,7 +228,7 @@ pub fn preview(app: &App, intent: PreviewIntent) -> Result<Value, String> {
             "points":db.points.iter().map(|p| json!({"id":p.id,"name":p.name,"displayName":p.display_name,
                 "displayNames":p.display_names,"description":p.description,"dataType":p.data_type,"sourcePath":p.source_path,
                 "byte":p.byte,"bit":p.bit,"enabled":p.enabled})).collect::<Vec<_>>() })).collect::<Vec<_>>();
-        rows.push(json!({"instanceId":i.id,"name":i.name,"selectedRevision":selected,"loadedRevision":loaded,
+        rows.push(json!({"instanceId":i.id,"name":i.name,"filename":filename,"selectedRevision":selected,"loadedRevision":loaded,
             "loadedDiffers":difference,"loopback":target.host.parse::<std::net::Ipv4Addr>().is_ok_and(|v|v.is_loopback()),
             "localTsap":i.calling_tsap,"remoteTsap":i.called_tsap(),
             "nonDefaultTsap":i.calling_tsap != 0x100 || u64::from(i.called_tsap()) != 0x100 + u64::from(target.rack) * 32 + u64::from(target.slot),
@@ -168,6 +236,8 @@ pub fn preview(app: &App, intent: PreviewIntent) -> Result<Value, String> {
             "dbs":details,"document":document,"issues":issues,"byteCount":bytes.as_ref().map(Vec::len),"fileSha256":sha}));
         items.push(Item {
             id: i.id.clone(),
+            name: i.name.clone(),
+            filename: filename.clone(),
             bytes,
             sha,
             issues,
@@ -261,6 +331,17 @@ fn link_failure(errno: Option<i32>) -> &'static str {
         "catalog_write"
     }
 }
+/// 打开新的原生目录选择器前撤销旧目录授权。
+pub fn clear_directory(app: &App, token: &str) -> Result<(), String> {
+    let mut sessions = app.catalog_exports.lock().map_err(|_| "catalog_state")?;
+    let pending = sessions
+        .pending
+        .get_mut(token)
+        .filter(|pending| pending.expires > Instant::now())
+        .ok_or("catalog_preview_stale")?;
+    pending.directory = None;
+    Ok(())
+}
 /// 只由原生选择器传入路径；IPC 不接收任何前端路径。
 pub fn choose_directory(app: &App, token: &str, path: &Path) -> Result<Value, String> {
     let mut dir = directory(path)?;
@@ -278,10 +359,9 @@ pub fn choose_directory(app: &App, token: &str, path: &Path) -> Result<Value, St
     }
     let mut rows = Vec::new();
     for item in &pending.items {
-        let name = format!("{}.json", item.id);
-        let conflict = exists(&dir, &name)?;
+        let conflict = exists(&dir, &item.filename)?;
         dir.conflicts.insert(item.id.clone(), conflict);
-        rows.push(json!({"instanceId":item.id,"filename":name,"conflict":conflict,"valid":item.bytes.is_some()}));
+        rows.push(json!({"instanceId":item.id,"name":item.name,"filename":item.filename,"conflict":conflict,"valid":item.bytes.is_some()}));
     }
     pending.directory = Some(dir);
     Ok(json!({"rows":rows}))
@@ -295,11 +375,11 @@ pub fn cancel(app: &App, intent: TokenIntent) -> Result<Value, String> {
     Ok(json!({"result":"cancelled","committed":false}))
 }
 #[cfg(unix)]
-fn write_new(dir: &Directory, id: &str, bytes: &[u8]) -> Result<Option<String>, String> {
+fn write_new(dir: &Directory, filename: &str, bytes: &[u8]) -> Result<Option<String>, String> {
     use std::os::fd::FromRawFd;
     let tmp_name = format!(".ds003-{}.tmp", uuid());
     let tmp = std::ffi::CString::new(tmp_name.clone()).map_err(|_| "catalog_filename")?;
-    let dest = std::ffi::CString::new(format!("{id}.json")).map_err(|_| "catalog_filename")?;
+    let dest = std::ffi::CString::new(filename).map_err(|_| "catalog_filename")?;
     let fd = unsafe {
         libc::openat(
             dir.file.as_raw_fd(),
@@ -388,7 +468,7 @@ mod tests {
     }
 }
 #[cfg(not(unix))]
-fn write_new(_dir: &Directory, _id: &str, _bytes: &[u8]) -> Result<Option<String>, String> {
+fn write_new(_dir: &Directory, _filename: &str, _bytes: &[u8]) -> Result<Option<String>, String> {
     Err("catalog_platform_unsupported".into())
 }
 pub fn commit(app: &App, intent: TokenIntent) -> Result<Value, String> {
@@ -426,11 +506,11 @@ pub fn commit(app: &App, intent: TokenIntent) -> Result<Value, String> {
         } else if dir.conflicts.get(&item.id) != Some(&false) {
             Err("catalog_target_exists".into())
         } else {
-            write_new(&dir, &item.id, item.bytes.as_ref().unwrap())
+            write_new(&dir, &item.filename, item.bytes.as_ref().unwrap())
         };
         let success = outcome.is_ok();
         let code = outcome.as_ref().err();
-        rows.push(json!({"instanceId":item.id,"filename":format!("{}.json",item.id),"result":if success {"written"} else if code.is_some_and(|c|c == "catalog_write_result_unknown") {"unknown"} else {"failed"},"errorCode":code,"cleanupPending":outcome.ok().flatten(),"fileSha256":if success {item.sha} else {None},"issues":item.issues}));
+        rows.push(json!({"instanceId":item.id,"name":item.name,"filename":item.filename,"result":if success {"written"} else if code.is_some_and(|c|c == "catalog_write_result_unknown") {"unknown"} else {"failed"},"errorCode":code,"cleanupPending":outcome.ok().flatten(),"fileSha256":if success {item.sha} else {None},"issues":item.issues}));
     }
     let written = rows.iter().filter(|r| r["result"] == "written").count();
     let unknown = rows.iter().any(|r| r["result"] == "unknown");

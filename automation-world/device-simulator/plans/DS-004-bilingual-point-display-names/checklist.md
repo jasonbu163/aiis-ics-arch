@@ -522,3 +522,33 @@ CARGO_MANIFEST_DIR="$RUN_DIR/snapshot/src-tauri" rustc --edition=2021 "$RUN_DIR/
 本次 harness SHA-256 为 `50287defeed59ef317f4ebf8a106c16f8ff91ceb6866e2966dc8f8e12b39b393`，sandbox policy SHA-256 为 `508a43b67834f262955b3b0319048ff9603fb4c7a24c4b47b144511ab8667040`，均为协调者提供；本 Verification 本次未收到并核算原文件。本次交接未提供可独立审计的完整命令、原始输出、实际 bundle / UUID、端口及资源绝对路径；不能仅凭哈希重建测试。
 
 本次相较失败探针同时改变了 metadata 权限、额外自有系统目录和 WebView 生命周期，不能将成功归因于其中任何单一因素，也不撤销先前失败事实。该结果为后续当前用户环境的隔离方案提供增量，仍不能代替 DS 普通入口、实际应用和 WebKit / XPC 身份及落点、DS4-07 原生界面、同一 profile 的正常关闭 / 重开及其他现行 gate。Human Owner 最终验收未发生。
+
+## DS-004 r3 独立文档复核，第一轮（2026-11-18，Asia/Shanghai）
+
+**文档 verdict 为 `qa_failed`。** F-R3-01：Development 在 tasks.md“精确工作树、候选与 DEV self-check”记载固定 HEAD 与 QA4 相同 9/15，独立复算为 **8/15**。退回 Development 核对、更正文档并重新交接。r2 产品 QA4 仍为 `qa_blocked`。Human Owner 最终验收待定。
+
+| 标准 | 独立复核及证据 |
+| --- | --- |
+| R3-01 | 符合。子 r3 与父 ARCH-PLC-001 r8 的批准后 spec SHA-256 分别为 `92507578ef3e1da050d6d192f8612732cffd6c42a7fdee6d502a09954b81210e`、`38085d5f0dd5d9db444008b9e04963371ddff3995cbb050641281ce6517931e5`。组内范围批准、历史 r1/r2 批准、QA1–3 失败、QA4 阻塞及各自待最终验收均可追溯。 |
+| R3-02 | 符合。Owner 自报语言切换、显示名操作及文件往返，具体字段状态、同次 L2 IPC 缺证。历史 Development 自检、独立 QA 和协调者观察分别具名。核对父 r8 定位的私有会话既有脚本与输出记录，13 条真实上报为 seq 91–103，匹配回执 status=committed，outcome 属于 created 或 duplicate。显示名排除及服务端数据核对限该样本与已检查字段。未亲见操作或复查原库。 |
+| R3-03 | **部分不符，F-R3-01。** 以 tasks 中 QA4 的 15 行清单顺序，Python hashlib.sha256 逐项处理 git show 固定 HEAD 的文件字节，按“小写摘要、双空格、模块相对路径、LF”复算。历史清单摘要 eeee96a3206739ae1de678166123d742d9d3a9e9d010d3f90fc36c92af70f257，固定 HEAD f7c5608c0e433612b15821a578a7ef3e4f155cdb 的清单摘要 bf50aacd2b2235d882c907cd3a85f4ee59b6635cf71467b8294392d6d22c10e1；不匹配的七项为 src/services/deviceSimulator.ts、两份 simulator locale、src/styles/app.css、两份 USER_GUIDE、CODE_INDEX.md。当前正式树 4/15 相同，清单摘要 95003a2a8531dedbfa23cc998a8ad154c20c38f5ed3af9e18df143c6102687d6。核对 QA4、DS-005、DAA-019 及 ARCH-PLC-002 记录，旧 F3、未知回执、旧版原生兼容、旧轮历史前值、正常关闭重开、原生列宽及隔离事件影响仍缺证。旧原始工件已依历史记录清理。 |
+| R3-04 | 符合。本轮只读取既有文档、清单所指文件字节、Git diff 与私有会话所指记录。测试、构建、应用、GUI、数据库、PLC、网络及上报均未执行。无临时资源。 |
+| R3-05 | 符合。正式树本次交接 tasks SHA-256 为 bcab509c6843cd7a8139cc3abf7e0d331b22af847fdfbc01c49c3703c37446fd。git diff --numstat 显示 spec、tasks 分别新增 80、27 行，删除均为零。历史 checklist 的写前摘要 1779106e07420c4bcdb9100a06bf7f2a6d69ee0c95729cc1ee1137fae6b01d7d。本轮 fresh-context Verification 只在原文末尾追加，保留 QA1–QA4 及后续探针。 |
+| R3-06 | 按标准记录本轮文档失败。F-R3-01 可通过固定 Git 对象只读复核，无需产品测试。现场、原生及完整产品结论仍按原证据，最终决定归 Human Owner。 |
+
+使用正式仓库的 zsh、git show、git diff --numstat / --check、shasum -a 256 及 Python 3 标准库完成上述读取与摘要比较，命令退出 0。计数差异来自记录内容。
+
+## DS-004 r3 文档返工独立复核（2026-11-18，Asia/Shanghai）
+
+**本轮 verdict 为 `qa_passed`，仅适用于 DS-004 r3 有界文档收尾。** F-R3-01 已通过独立复算。第一轮 r3 文档失败、r2 产品 QA4 阻塞及历次失败仍按各轮原文保留。交 Human Owner 决定是否接受明确列出的缺口和风险。
+
+| 标准 | 本轮独立核对 |
+| --- | --- |
+| R3-01 | 核对批准后子 r3 及父 ARCH-PLC-001 r8 的 spec、摘要及组内批准记录，均与第一轮 R3-01 的两个摘要相同。Owner 对五份草案及版本衔接的批准可追溯，两任务分别最终验收。r1/r2 范围批准、QA1–3 失败、QA4 阻塞均保留。 |
+| R3-02 | 对照父 r8 §2、DS-005 / DAA-019 checklist 和 DS 历史记录，Owner 报告本机语言切换、显示名操作及 DAA→DS→DAA 文件往返。新实例自动选中并显示四点属于报告范围，具体字段状态及同次 L2 IPC 仍缺证。历史 Development 自检和独立 QA 具名分列。父记录及第一轮文档 QA 支持协调者所述 seq 91–103 共 13 条实际样本的匹配 committed 回执、created 或 duplicate、所核历史字段匹配和指定时点三点 good。请求中排除显示名字段与对应文本，服务端仅检查所列字段。本轮依现存文档核对归属和限定，未重新查看私有输出或亲见操作。 |
+| R3-03 | 按 tasks 第 245–259 行次序，以 Python 3 hashlib 对固定 Git 对象及当前文件逐项计算 SHA-256。QA4、固定 HEAD、工作树三个清单摘要分别始于 eeee96a3、bf50aacd、95003a2a，与新 handoff 全长摘要一致。固定 HEAD 匹配 8/15，当前匹配 4/15。旧 9/15 原句和首轮失败仍可定位。QA4 的合成结果限原候选；旧通用 F3、未知回执、原生列宽跨重启、真实关闭重开、旧程序兼容、隔离事件影响与历史前值继续缺证。 |
+| R3-04 | 本轮限现存文档、Git 对象及候选文件摘要。未运行测试、构建、应用或 GUI，未访问真实配置、数据库、PLC、网络或上报，未创建测试资源。 |
+| R3-05 | 正式交付树 main / f7c5608。本次 tasks 摘要为 431289eee83ee4731778d835e5440d7b8299ad6ff0bd74b235d04df66e77dc43；其前 289 行摘要与第一轮 handoff 的 bcab509c… 完全匹配。写前 checklist 摘要为 154c5fce1a8be4a3307cdbea1aafa32b96cb71b1e33935720dce99acb4e8e10e。本轮独立 Verification 只向此文件追加。 |
+| R3-06 | 文档标准通过，F-R3-01 关闭。本结论不授予完整 r2 产品 QA、原生 gate、现场或发布验收。Human Owner 最终决定待定。 |
+
+在正式仓库的 zsh 中使用 shasum -a 256、git show、git diff --numstat、git diff --check 及 Python 3 逐项摘要比较，均退出 0。写前 bundle 相对 HEAD 的 spec、tasks、checklist 分别增加 80、35、15 行，删除均为零。

@@ -10,15 +10,13 @@ pytestmark = pytest.mark.no_db
 EXPECTED_TAGS = {
     "Auxiliary - Energy Price",
     "Auxiliary - Shift Teams", "Auxiliary - Shifts", "Auxiliary - Shift Rules", "Auxiliary - Stop Records",
-    "Equipment", "Maintenance", "Maintenance - Logs",
+    "Equipment observation", "Maintenance", "Maintenance - Logs",
     "Performance", "Plan", "Task fields", "Project", "Quality", "Quality - Defects",
-    "Monitor - Temperature", "Monitor - Energy",
     "User - Auth",
     "User - Users",
     "Control Agent",
     "System - Dictionary",
     "System - Dictionary Items",
-    "Monitor - Collector",
     "Schema Maintenance",
 }
 
@@ -47,13 +45,10 @@ def test_openapi_excludes_disabled_hr_routes_and_c2_stays_clean(tmp_path):
 def test_retired_realtime_and_collector_paths():
     schema = create_app(testing=True).openapi()
     assert "/api/v1/monitor/realtime/latest" not in schema["paths"]
-    assert "/api/v1/monitor/collector/status" in schema["paths"]
-    assert schema["paths"]["/api/v1/monitor/collector/status"]["get"]["tags"] == [
-        "Monitor - Collector"
-    ]
+    assert "/api/v1/monitor/collector/status" not in schema["paths"]
 
 
 def test_public_energy_slice_exposes_only_approved_methods():
     paths = create_app(testing=True).openapi()["paths"]
-    energy = {path: set(methods) for path, methods in paths.items() if path.startswith("/api/v1/energy")}
+    energy = {path: set(paths[path]) for path in ("/api/v1/energy", "/api/v1/energy/current")}
     assert energy == {"/api/v1/energy": {"get", "post"}, "/api/v1/energy/current": {"get"}}

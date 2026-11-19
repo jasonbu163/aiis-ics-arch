@@ -1,0 +1,77 @@
+{
+  "format": "aiis.plc_points",
+  "schema_version": 1,
+  "origin": {
+    "kind": "data_acquisition_agent",
+    "profile_id": "59e9429c-9f24-45aa-b948-0d8d7367c2ca",
+    "plc_id": "f6da5dac-7326-4a6c-bceb-55ad7e74b8cf"
+  },
+  "export": {
+    "producer": "data_acquisition_agent",
+    "profile_id": "59e9429c-9f24-45aa-b948-0d8d7367c2ca",
+    "config_state": "active_revision",
+    "revision_id": "ea6fddc6-286d-409b-b403-00c7380c0bdc",
+    "payload_sha256": "a306c69089b81205c7795b3433323a3578cf84458e29efaa60a38a20c5674abc",
+    "exported_at": "2026-11-18T14:23:50.044+08:00"
+  },
+  "plc": {
+    "name": "DEV-PLC",
+    "protocol": "s7",
+    "connection": {
+      "host": "127.0.0.1",
+      "port": 31281,
+      "rack": 0,
+      "slot": 1
+    }
+  },
+  "dbs": [
+    {
+      "id": "6727b8c1-c118-48f4-9c2c-0bda2bd2481a",
+      "name": "MinimalImport",
+      "number": 21,
+      "size_bytes": 8,
+      "points": [
+        {
+          "id": "4018876d-a9f6-4f1c-acb7-949ba1edd486",
+          "name": "DB21_payload_ready_Bool",
+          "display_names": {
+            "zh-CN": "开关",
+            "en-US": "switch"
+          },
+          "description": "",
+          "source_path": "payload.ready",
+          "data_type": "BOOL",
+          "byte_offset": 0,
+          "bit": 0,
+          "source_enabled": true
+        },
+        {
+          "id": "19c5bd4e-f07a-400b-9ae5-e38d746b5d68",
+          "name": "DB21_payload_count_Int",
+          "display_names": {
+            "zh-CN": "",
+            "en-US": ""
+          },
+          "description": "",
+          "source_path": "payload.count",
+          "data_type": "INT",
+          "byte_offset": 2,
+          "source_enabled": true
+        },
+        {
+          "id": "856d5556-2bd4-45d2-9b0d-3ac2c71224e4",
+          "name": "DB21_payload_temperature_Real",
+          "display_names": {
+            "zh-CN": "",
+            "en-US": ""
+          },
+          "description": "",
+          "source_path": "payload.temperature",
+          "data_type": "REAL",
+          "byte_offset": 4,
+          "source_enabled": true
+        }
+      ]
+    }
+  ]
+}

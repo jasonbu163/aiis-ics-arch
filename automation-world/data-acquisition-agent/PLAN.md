@@ -6,7 +6,8 @@ This PLAN owns DAA implementation tasks. The [AW PLAN](../PLAN.md) owns cross-pr
 
 | Task ID | Status | Spec | Latest fact / next gate |
 | --- | --- | --- | --- |
-| DAA-018 | `qa_blocked` (r3) | [r3 bilingual names](plans/DAA-018-bilingual-point-display-names/spec.md) | QA2 verified the preview-bypass rework; mandatory native checks remain paused after an isolation incident. |
+| DAA-019 | `qa_passed` (r3 docs); r2 `qa_blocked` | [r3 bidirectional JSON (closeout)](plans/DAA-019-plc-json-bidirectional/spec.md) | QA2 blocked on historical and same-import evidence; [checklist](plans/DAA-019-plc-json-bidirectional/checklist.md). Closeout document review passed; Human Owner final acceptance pending. |
+| DAA-018 | `qa_passed` (r4 docs); r3 `qa_blocked` | [r4 bilingual names (closeout)](plans/DAA-018-bilingual-point-display-names/spec.md) | QA2 verified the preview-bypass rework; mandatory native checks remain paused after an isolation incident. Closeout document review passed; Human Owner final acceptance pending. |
 | DAA-017 | `qa_passed` (r5) | [r5 import spec](plans/DAA-017-plc-json-import/spec.md) | QA2 passed after the corrected DS→DAA native joint retest; Human Owner acceptance is pending. |
 | DAA-016 | `owner_accepted` (r1) | [r1 spec](plans/DAA-016-docs-closeout/spec.md) | Documentation cleanup and the Windows sheet passed independent QA2 and were accepted by the Human Owner. [Tasks](plans/DAA-016-docs-closeout/tasks.md) · [Checklist](plans/DAA-016-docs-closeout/checklist.md) |
 | DAA-015 | `owner_accepted` (r1) | [r1 spec](plans/DAA-015-startup-automation-and-workbench/spec.md) | Workbench and startup settings passed independent QA4 and were accepted by Human Owner; QA1–QA3 failure history is retained. [Tasks](plans/DAA-015-startup-automation-and-workbench/tasks.md) · [Checklist](plans/DAA-015-startup-automation-and-workbench/checklist.md) |

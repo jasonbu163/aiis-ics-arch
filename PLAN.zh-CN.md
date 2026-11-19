@@ -16,8 +16,8 @@ Human Owner于2026-10-30验收DAA-002 r2、DAA-003 r1、DAA-004 r1和[DAA-007 r2
 
 | 工作流 | 状态 | 记录 | 边界 |
 | --- | --- | --- | --- |
-| AW 点位双语显示名与共用 JSON | `owner_approved`（ARCH-PLC-001 r4 设计范围） | [AW 设计](automation-world/plans/ARCH-PLC-001-shared-plc-point-json/spec.md) | DS-004 r2 的 QA4 和 DAA-018 r3 的 QA2 均因隔离事件后的原生检查暂停而阻塞；两端均最终验收后，才能实施另行批准的 DS 导出和 DAA 导入。 |
-| 计划与实绩通用任务 | `qa_passed`（ARCH-TASK-001 r1，QA4） | [r1 spec](plans/ARCH-TASK-001-generic-plan-performance/spec.md) | dev 切换、合成闭环、两个列表页及字段设置弹窗通过独立 QA，待 Human Owner 最终验收。[QA 记录](plans/ARCH-TASK-001-generic-plan-performance/checklist.md) |
+| AW 点位双语显示名与共用 JSON | `qa_blocked`（DS-005 r2 / DAA-019 r2） | [AW r7 设计](automation-world/plans/ARCH-PLC-001-shared-plc-point-json/spec.md) | 双向 JSON 的 QA2 因父设计证据阻塞；DS-004 r2 和 DAA-018 r3 保留各自阻塞状态。独立的 [ARCH-PLC-002 r1](automation-world/plans/ARCH-PLC-002-plc-json-export-feedback/checklist.md) 导出命名及反馈已 `owner_accepted`。 |
+| 计划与实绩通用任务 | `qa_passed`（ARCH-TASK-001 r3，QA6）；`qa_passed`（r1，QA4） | [r3 spec](plans/ARCH-TASK-001-generic-plan-performance/spec.md) | QA6 已独立验证共享字段导航及删除保护返工，Human Owner 最终验收待定。[开发记录](plans/ARCH-TASK-001-generic-plan-performance/tasks.md) · [QA 记录及边界](plans/ARCH-TASK-001-generic-plan-performance/checklist.md) |
 | 采集数据优化与业务接线项目路线 | `draft`（ARCH-ACQ-001 r1） | [r1 spec](plans/ARCH-ACQ-001-acquisition-data-coordination/spec.md) | 由 Owner 主动触发跟踪四项交付、两条业务线及最终 SMA 接线。后端事实先行。 |
 | 简化后端采集事实 | `qa_blocked`（ARCH-BE-012 r4） | [r4 spec](plans/ARCH-BE-012-simplified-plc-facts/spec.md) | 独立源码验证和 Owner 指定的 dev 功能验证通过。原隔离矩阵及最终验收待定。 |
 | Web 采集数据模块 | `qa_passed`（ARCH-FE-005 r2） | [r2 spec](plans/ARCH-FE-005-acquisition-data-module/spec.md) · [QA 记录](plans/ARCH-FE-005-acquisition-data-module/checklist.md) | QA5 通过 PLC 选中后的筛选对齐、标题帮助及 dev 实读复验，待 Human Owner 最终验收。 |
@@ -26,6 +26,7 @@ Human Owner于2026-10-30验收DAA-002 r2、DAA-003 r1、DAA-004 r1和[DAA-007 r2
 | 简化 PLC 来源登记 | `owner_accepted`（ARCH-ACQ-004 r4） | [r4 规格](plans/ARCH-ACQ-004-acquisition-source-registry/spec.md) | Human Owner 于 2026-11-13 验收源码及隔离 QA3；[验收记录](plans/ARCH-ACQ-004-acquisition-source-registry/checklist.md#arch-acq-004-r4-human-owner-最终验收)。现有 dev 数据库迁移及人工验证另行处理。 |
 | PLC 来源删除与独立历史查询 | `qa_passed`（ARCH-ACQ-005 r1） | [r1 规格](plans/ARCH-ACQ-005-acquisition-source-deletion/spec.md) | dev API 和 Web 独立验证通过，等待 Human Owner 最终验收。 |
 | 配置优先的设备状态与过程监控 | r10 `qa_passed`（有界合成范围）；r11 §13 `qa_passed` | [r11 隔离恢复复验](plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md#r11-isolated-recovery) | [独立 QA](plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/checklist.md)已验证隔离旧数据恢复、浏览器/API 场景和指定 MySQL 并发条件；一次可恢复死锁／503及测试边界已记录，待 Owner 验收。 |
+| 旧设备与过程监控链路清退 | `qa_passed`（ARCH-OBS-002 r1，dev AC06） | [r1 规格](plans/ARCH-OBS-002-legacy-observation-retirement/spec.md) · [QA 记录](plans/ARCH-OBS-002-legacy-observation-retirement/checklist.md) | 获批 dev 切换及独立只读复核通过；Human Owner 最终验收待完成。 |
 | C# 原生开发配置 | `draft`（ARCH-BE-011 r2） | [r2 spec](plans/ARCH-BE-011-dotnet-local-environment-loading/spec.md) | appsettings/User Secrets与Development启动profile替代未批准的r1 .env方案。获授权只读核对确认Plan结构/权限匹配，但SYSTEM时区名称不通过现C#创建校验；待精确r2实施批准，现库采用另行处理。 |
 | 项目现状与设计决策文档同步 | `qa_passed`（ARCH-DOC-001 r1，QA2） | [r1 spec](plans/ARCH-DOC-001-project-state-and-decision-sync/spec.md) | 四份设计正文6处返工后，fresh-context QA2通过全部14项文档验收并关闭两组QA1问题；QA1失败及证据保留。Owner文档终验pending。 |
 | 匿名PLC事实服务 | `owner_accepted`（r1，2026-11-05）；保留A历史 | [spec](plans/ARCH-BE-009-backend-facts-integration/spec.md) | 两轮独立MySQL8.4.6验证通过：Development 9项正式MySQL及42项扩展；fresh QA独立通过9项正式、47项具名扩展、181项聚焦和44项旧测试（9项未选）。专用资源和27份临时口令/操作配置已清理并独立核验。Human Owner于2026-11-05验收获批源码及隔离A+B交付；真实采用、DAA/SMA联调及生产长期SLA仍单独处理；现有库/真实历史未操作。 |

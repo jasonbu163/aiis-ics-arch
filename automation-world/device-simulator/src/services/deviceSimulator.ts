@@ -294,17 +294,41 @@ export interface CatalogPoint {
 }
 export interface CatalogDb { id: string; name: string; number: number; length: number; enabled: boolean; points: CatalogPoint[]; }
 export interface CatalogRow {
-    instanceId: string; name: string; selectedRevision: string | null; loadedRevision: string | null;
+    instanceId: string; name: string; filename: string; selectedRevision: string | null; loadedRevision: string | null;
     loadedDiffers: boolean; loopback: boolean; nonDefaultTsap: boolean; localTsap: number; remoteTsap: number;
     dbCount: number; pointCount: number; dbs: CatalogDb[]; document: Record<string, unknown> | null;
     issues: {code: string; dbId: string | null; pointId: string | null}[]; byteCount: number | null; fileSha256: string | null;
 }
 export interface CatalogRevision { revisionId: string; savedSeq: string; createdUtc: string; sha256: string; }
 export interface CatalogPreview { token: string; revision: CatalogRevision; rows: CatalogRow[]; }
-export interface CatalogDirectory { rows: {instanceId: string; filename: string; conflict: boolean; valid: boolean}[]; }
-export interface CatalogResult { rows: {instanceId: string; filename: string; result: 'written' | 'failed' | 'unknown'; errorCode: string | null; cleanupPending: string | null; fileSha256: string | null}[]; }
+export interface CatalogFilenameErrors { filenameErrors: {instanceId: string; code: string}[]; }
+export interface CatalogFile { instanceId: string; name: string; filename: string; }
+export interface CatalogDirectory { rows: (CatalogFile & {conflict: boolean; valid: boolean})[]; }
+export interface CatalogResultRow extends CatalogFile {
+    result: 'written' | 'failed' | 'unknown';
+    errorCode: string | null;
+    cleanupPending: string | null;
+    fileSha256: string | null;
+    issues?: CatalogRow['issues'];
+}
+export interface CatalogResult { rows: CatalogResultRow[]; }
 export const catalogRevision = (revisionId: string) => call<{revision: CatalogRevision; instances: CatalogInstance[]}>('ds_catalog_revision', operation({revisionId}));
-export const catalogPreview = (revisionId: string, targets: CatalogTarget[]) => call<CatalogPreview>('ds_catalog_preview', operation({revisionId, targets}));
+export const catalogPreview = (revisionId: string, targets: CatalogTarget[], filenames: Record<string, string>) => call<CatalogPreview | CatalogFilenameErrors>('ds_catalog_preview', operation({revisionId, targets, filenames}));
 export const catalogChooseDirectory = (token: string) => call<CatalogDirectory | 'cancelled'>('ds_catalog_choose_directory', operation({token}));
 export const catalogCommit = (token: string) => call<CatalogResult>('ds_catalog_commit', operation({token}));
 export const catalogCancel = (token: string) => call('ds_catalog_cancel', operation({token}));
+
+/** 仅原生选择器提供目录文件；票据绑定原字节、监听参数及草稿。 */
+export interface ImportCatalogPoint { id:string; name:string; display_name?:string; display_names?:{'zh-CN':string;'en-US':string}; description?:string; source_path?:string; data_type:string; byte_offset:number; bit?:number; source_enabled:boolean; }
+export interface ImportCatalogDb { id:string; name:string; number:number; size_bytes:number; source_enabled?:boolean; points:ImportCatalogPoint[]; }
+export interface ImportCatalogDocument {
+    origin:{kind:string; profile_id:string; plc_id:string};
+    export:{producer:string; profile_id:string; config_state:string; revision_id:string; payload_sha256:string; exported_at:string};
+    plc:{name:string; protocol:string; connection:{host:string;port:number;rack:number;slot:number;local_tsap?:number;remote_tsap?:number}};
+    dbs:ImportCatalogDb[];
+}
+export interface ImportCatalogFile {fileToken:string;fileName:string;byteCount:number;fileSha256:string;document:ImportCatalogDocument;}
+export const chooseCatalogImport = () => call<ImportCatalogFile | 'cancelled'>('ds_catalog_import_choose', operation({}));
+export const previewCatalogImport = (payload:{fileToken:string;expectedEtag:string;host:string;port:number;rack:number;slot:number;connectionConfirmed:boolean}) => call<Preview>('ds_catalog_import_preview', operation(payload));
+export const confirmCatalogImport = (fileToken:string, preview:Preview) => call<SaveResult>('ds_catalog_import_confirm', operation({fileToken, token:preview.token, expectedEtag:preview.expectedEtag, candidateSha256:preview.candidateSha256}));
+export const cancelCatalogImport = (fileToken:string) => call('ds_catalog_import_cancel', operation({fileToken}));

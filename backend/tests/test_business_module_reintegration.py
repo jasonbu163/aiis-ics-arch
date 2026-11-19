@@ -18,7 +18,8 @@ def test_f_has_exact_58_tables_and_price_has_one_owner():
             continue
         module=load(path);module.op=recorder;module.upgrade()
     assert len(recorder.metadata.tables)==58
-    retired={"plc_db_block_raw_snapshots", "plc_db_block_latest_snapshots"}
+    from tests.test_observation_retirement import RETIRED_TABLES
+    retired=RETIRED_TABLES | {"plc_db_block_raw_snapshots", "plc_db_block_latest_snapshots"}
     assert (set(recorder.metadata.tables)-retired).issubset(Base.metadata.tables)
     assert retired.isdisjoint(Base.metadata.tables)
     from app.energy.models import EnergyPrice,EnergyPriceHour
@@ -43,16 +44,14 @@ def test_all_active_global_errorcode_references_are_closed():
                 assert node.attr in ErrorCode.__members__,(source,node.lineno,node.attr)
 
 
-def test_eight_sync_descriptors_stay_local_and_uniquely_owned():
+def test_performance_sync_descriptors_stay_local_and_uniquely_owned():
     from importlib import import_module
     handlers=[import_module("app." + name).projection_handler for name in (
-        "equipment.services.sync_drive", "equipment.services.sync_temperature",
-        "equipment.services.sync_production_parameters", "performance.services.sync_production_record",
+        "performance.services.sync_production_record",
         "performance.services.sync_process_temperature", "performance.services.sync_process_tension",
-        "performance.services.sync_process_speed", "monitor.services.sync_process_curve")]
+        "performance.services.sync_process_speed")]
     expected={
-        'equipment.sync_drive','equipment.sync_temperature','equipment.sync_production_parameters',
-        'performance.sync_production_record','performance.sync_process_temperature','performance.sync_process_tension','performance.sync_process_speed','monitor.sync_process_curve'}
+        'performance.sync_production_record','performance.sync_process_temperature','performance.sync_process_tension','performance.sync_process_speed'}
     assert expected.issubset(h.handler_key for h in handlers)
     for handler in handlers:
         if handler.handler_key not in expected: continue

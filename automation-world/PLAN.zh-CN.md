@@ -4,9 +4,12 @@
 
 | Task ID | 状态 | 规格 | 最新事实 / 下一 gate |
 | --- | --- | --- | --- |
-| ARCH-PLC-001 | owner_approved | [r5 设计](plans/ARCH-PLC-001-shared-plc-point-json/spec.md) | Human Owner 已批准 r5 及实施顺序调整；最终验收另行处理。 |
-| DS-004 | qa_blocked | [r2 双语显示名](device-simulator/plans/DS-004-bilingual-point-display-names/spec.md) | QA4 的合成检查未发现新的确定性失败；必需的原生检查因隔离事件仍暂停。 |
-| DAA-018 | qa_blocked | [r3 双语显示名](data-acquisition-agent/plans/DAA-018-bilingual-point-display-names/spec.md) | QA2 已复核预览绕过修复；必需的原生检查因隔离事件仍暂停。 |
+| ARCH-PLC-002 | owner_accepted | [r1 导出命名与反馈](plans/ARCH-PLC-002-plc-json-export-feedback/spec.md) | QA2 通过回执返修复验，Human Owner 已验收 r1，见 [checklist](plans/ARCH-PLC-002-plc-json-export-feedback/checklist.md)。 |
+| ARCH-PLC-001 | `qa_passed`（r8 文档）；r7 `owner_approved` | [r8 双向设计（收尾）](plans/ARCH-PLC-001-shared-plc-point-json/spec.md) | Human Owner 已批准保留旧版本的测试路径；已批准的 r6 保留。本次文档复核通过，待 Human Owner 最终验收。 |
+| DS-005 | `qa_passed`（r3 文档）；r2 `qa_blocked` | [r3 双向 JSON（收尾）](device-simulator/plans/DS-005-plc-json-bidirectional/spec.md) | QA2：父设计的往返证据未闭合，见 [checklist](device-simulator/plans/DS-005-plc-json-bidirectional/checklist.md)。本次文档复核通过，待 Human Owner 最终验收。 |
+| DAA-019 | `qa_passed`（r3 文档）；r2 `qa_blocked` | [r3 双向 JSON（收尾）](data-acquisition-agent/plans/DAA-019-plc-json-bidirectional/spec.md) | QA2：历史与同次导入证据未闭合，见 [checklist](data-acquisition-agent/plans/DAA-019-plc-json-bidirectional/checklist.md)。本次文档复核通过，待 Human Owner 最终验收。 |
+| DS-004 | `qa_passed`（r3 文档）；r2 `qa_blocked` | [r3 双语显示名（收尾）](device-simulator/plans/DS-004-bilingual-point-display-names/spec.md) | QA4 的合成检查未发现新的确定性失败；必需的原生检查因隔离事件仍暂停。本次文档复核通过，待 Human Owner 最终验收。 |
+| DAA-018 | `qa_passed`（r4 文档）；r3 `qa_blocked` | [r4 双语显示名（收尾）](data-acquisition-agent/plans/DAA-018-bilingual-point-display-names/spec.md) | QA2 已复核预览绕过修复；必需的原生检查因隔离事件仍暂停。本次文档复核通过，待 Human Owner 最终验收。 |
 | DS-003 | qa_passed | [r5 导出规格](device-simulator/plans/DS-003-plc-json-export/spec.md) | 返修后的 DS→DAA 原生联测完成，QA2 已通过；待 Human Owner 验收。 |
 | DAA-017 | qa_passed | [r5 导入规格](data-acquisition-agent/plans/DAA-017-plc-json-import/spec.md) | 返修后的 DS→DAA 原生联测完成，QA2 已通过；待 Human Owner 验收。 |
 | SMA-001 | draft | [r2 总规格](semantic-mapping-agent/plans/SMA-001-cu-integration-and-scope-cleanup/spec.md) | SMA-002、SMA-003 已验收。[SMA-004 r1 于 2026-11-14 验收](semantic-mapping-agent/plans/SMA-004-local-configuration/checklist.md#owner-acceptance-r1)，独立 QA2 已通过。正常投递处于关闭状态。 |

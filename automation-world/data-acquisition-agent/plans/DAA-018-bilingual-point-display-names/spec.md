@@ -1,4 +1,83 @@
 Task ID: DAA-018
+Revision: r4
+Status: owner_approved
+Owner Role: PM
+Allowed Writers: PM, Human Owner
+Handoff: Human Owner 已精确批准 DAA-018 r4、ARCH-PLC-001 r8 及收尾衔接 -> Development 文档交接 -> fresh-context Verification 独立文档核对 -> Human Owner 最终验收
+Workflow Mode: STD
+Execution Mode: agent_team_same_session
+Task Namespace: aiis-ics-arch
+Classification: root
+Capability: DAA 点位中英文显示名与事实隔离的有界证据收尾
+Owner: Data Acquisition Agent
+Acceptance Chain Reference: 本任务独立履行 STD；本 r4 和相关设计分别精确范围批准后，Development、fresh-context Verification 和 Human Owner 最终验收各自记录。
+Related Task: aiis-ics-arch::ARCH-PLC-001 r8; device-simulator::DS-004; aiis-ics-arch::DAA-017 r5; aiis-ics-arch::DAA-019; aiis-ics-arch::DAA-010; aiis-ics-arch::DAA-013
+Depends On: Human Owner 已在同一决定中分别精确批准 DAA-018 r4、ARCH-PLC-001 r8 及二者收尾衔接；各任务不继承彼此的 QA 或最终验收。
+
+# DAA-018 r4：双语显示名及上报证据的有界收尾（范围已批准）
+
+## 1. 目标与范围
+
+Human Owner 要求按 STD 利用已完成的人工操作、真实上报与历史记录收尾，不再重复测试，保留历史和现有数据。本 r4 仅整理现有 DAA 本机双语显示、特定真实 v2 样本上报和原 r3 证据、缺口及风险，供独立文档复核和 Human Owner 决定是否接受**明确列出的有限范围及遗留风险**。本 r4 不是新一轮产品开发，也不是对原 r3 各项产品验收整体通过的声明。
+
+r3 的双语配置、原子预览、样本和上报保护合同仍为设计背景；本次以 §4 的文档收尾标准替代将 r3 全部未完成实测作为本轮必做条件，未证明之处必须保留为未证明，不以修订把它们追认为通过。精确批准 r4 的收尾范围不同于接受风险或最终验收；本任务历史 QA 和其他任务的结论均不随本 r4 改变。
+
+[ARCH-PLC-001 r8](../../../plans/ARCH-PLC-001-shared-plc-point-json/spec.md) 是对应的父设计收尾草案，本 r4 形成时该草案 SHA-256 为 `a0fdfabbaeebdd95f8bc39fd9f2a0c3b974c13ec5a6b15fe39b6b834aba0eac3`。Human Owner 已在同一决定中分别精确批准该父设计 r8、本任务 r4 及版本衔接，见 §6；父任务的批准不是从本任务自动继承。父设计、DS、DAA-019 和本任务分别记录批准、交接、独立 QA 与最终验收。
+
+## 2. 现有证据及其来源
+
+1. **Human Owner 人工报告。** Human Owner 报告在 DAA `.local/dev` 完成中英文切换和 `display_name` 显示，反馈成功。该项按用户本人对本次本机操作的报告使用；本 PM 没有亲历，既不是新的 Development 实测，也不是新的独立 QA。此报告不补造未报告的编辑、取消、保存/重开、列宽或其他交互结果。
+2. **协调者的本机只读核对。** 协调者报告，经用户授权只读对照同一配置的 DAA 与后端 v2 样本 `seq 91–103` 共 13 条：每条在本机均有可靠匹配的 `status=committed` 回执，`outcome` 为 `created` 或 `duplicate`，正文与回执 SHA 校验有效；MySQL `plc_facts_history` 的 13 条来源身份、请求 SHA 及所核点名/类型/值/质量与对应样本一致。`plc_facts_latest` 的 3 点质量为 `good`，最新 seq 为 103；对应来源绑定匹配。该配置至少一个点的中英显示名均非空；13 份实际上传正文均未见显示名字段或对应中英文显示名文本；后端保存的点集未见 display 类字段，所核点字段和值一致，但未对其任意字段的字符串做通用搜索。同一时段 DS 日志无 `WARN` / `ERROR`。这些是**协调者报告的该次本机、同一配置、特定样本与时段**的观察；本 PM 未亲自检查应用、日志或数据库，不能扩大为所有旧版本、v2 分支、异常或时间范围均已验证。
+3. **历史独立证据。** [r3 checklist](checklist.md) 记载 QA1 为 `qa_failed`，F-QA1-001 曾复现普通保存绕过双语预览；QA2 对返工在其所覆盖的独立负例中不再复现，整体仍为 `qa_blocked`。原 QA1 / QA2 保留，不能称本任务原 r3 已通过。QA2 原记载的 fake `Capture` transport 对旧 `NeverSent` 样本转 v2、新样本及冻结重试的覆盖，是当时独立合成证据，不是本次 13 条真实上报的观察，也不证明后续组合候选或全部异常。相关 [Development 记录](tasks.md) 和 QA 记载分别保留其执行者、候选、环境、命令、结果和限制。
+4. **旧 v1 本地构造与外发边界。** 原 r3 允许的 test-only 旧 v1 冻结正文保留完整 `contextUtf8`，因此可含双语显示名；这是本地合成构造，不是已发生外发或旧 v1 零泄露证明。生产账本的本地重构/完整性校验不能整体称为 test-only。不得启用旧 v1 外发或裁剪、重算旧 context / 正文 / SHA 来抹去事实；若将来拟启用旧 v1 发送须另经设计及批准。
+
+该协调者观察可追溯本机会话 `~/.codex/sessions/2026/11/16/rollout-2026-11-16T09-24-47-01a1e1f4-eb7e-74d2-b055-3696e1a855ec.jsonl`：约第 28239–28242 行为样本、回执和 MySQL 对照，约第 28257–28260 行为双语排除核对，行号可能变化，应按内容定位。该会话可能包含私人信息；仅保留脱敏来源定位和必要结论，禁止将原始业务正文、点值、地址、身份或凭据复制入仓。后续可依据现存会话脱敏核对并持久记录其来源；若记录不可访问，不得声称已独立复核该原文或补造证据。
+
+## 3. 未验证项、风险和资源
+
+- 原 r3 DA18-04：旧的**普通 native** 程序面对含 `pointDisplayNames` 的新配置是否安全拒绝、无误采且不误建空库仍未验证。先前旧 `local-validation` 测试入口的拒绝不能替代普通 native；QA2 只证明所测读取调用零写，已有启动/关闭事件和日志写入不能说成整个进程或 profile 零写。
+- 原 r3 DA18-01/02/07–09：最终候选原生编辑、取消及相关影响、顶栏语言完整行为、表格列宽拖动、跨重启保持、恢复默认和原有功能回归未完成独立原生验证。用户已报告的语言切换只覆盖其实际报告范围；Node/合成测试和旧 incognito 窗口观察不能补成正式原生完整通过。
+- 原 r3 的真实隔离事件及其影响仍未知：候选退出后的 CUA 可能重新启动或绑定默认真实 profile，路径、可能的启动/退出及其他写入和受影响数据均未确认。继续保留 [tasks](tasks.md) 和 [checklist](checklist.md) 原始事件、QA1 `qa_failed`、QA2 `qa_blocked` 和各次探针，不得称该事件零写或自行恢复、扫描、复制、清理及回滚疑似真实资料。
+- 此次 13 条真实 v2 上报不能倒证旧普通程序兼容、所有 v2 外发分支、旧样本与冻结/重试的实际网络行为、未知回执、其他异常、Windows/VM、真实 PLC、长稳或生产/现场采用。各历史合成检查仅覆盖原记录所述条件。
+- 用户已明确要求删除的旧任务临时工件已清理；原始临时文件无法再复核。历史文档摘要仍是当时的记录，不把已删除工件写成可取得或重新生成；不得为本轮找回、复制或重新生成它们。
+
+## 4. r4 文档收尾验收标准
+
+| 编号 | 可独立核对的文档标准 |
+| --- | --- |
+| D18C-01 | 列明精确 Task ID / Revision、r1–r3 已批准事实、r3 QA1 `qa_failed` 和 QA2 `qa_blocked`；保留 F-QA1-001 的原失败与 QA2 受限复验、事故和全部历史，不将其改写成全项通过或 Owner 已接受。 |
+| D18C-02 | 区分 Human Owner 在 `.local/dev` 的语言切换 / `display_name` 自报、Development 自检、既有独立 QA 和协调者本机只读核对；不将任何转述冒充当前角色亲见或完整产品 QA。 |
+| D18C-03 | 如实记录 §2 的 13 条 seq、逐条可靠回执和 SHA、MySQL history 对照、latest 3 点、双语非空与上报正文/后端点集的观察及同一时段 DS 日志边界；记录样本、配置、时间及观察者的限制，脱敏定位可追溯的现存记录。 |
+| D18C-04 | 分开历史 fake transport 对旧未发送样本、新样本和冻结重试的独立证据与本次真实 v2 样本；保留 test-only 旧 v1 本地正文可能含双语及不得启用其外发的边界，不声称所有外发分支或历史数据均已证明。 |
+| D18C-05 | 明确列出旧普通 native 安全拒绝 / 无误采 / 无空库、最终原生编辑、列宽跨重启 / 复位等尚未独立完成的项及隔离事件未知影响；注明旧临时工件已清理、不可从原件复核，不以真实样本或人工切换补齐缺口。 |
+| D18C-06 | 根据现存任务记录及可取得的经授权会话记录完成脱敏文档交接，记录实际已核对和未核对的证据、缺失或不可访问资料及精确限制；不重跑产品测试或构建，不访问应用、GUI、IPC、profile、数据库、PLC，不发送上报、不要求用户重新操作。 |
+| D18C-07 | fresh-context Verification 独立核对本 r4、Development 交接、现存角色记录及允许的文档 diff；证据不一致或无法满足本 r4 标准时如实给出 `qa_failed` / `qa_blocked`。若文档 `qa_passed`，只表示本次收尾记录通过，不代表 r3 所有 DA18-01–10、旧 native、全部产品功能或生产通过。 |
+| D18C-08 | 准确记录 ARCH-PLC-001 r8、DAA-018 r4 与版本衔接各自真实的 Human Owner 范围批准状态；不将范围批准、历史独立 QA 或文档复核直接记为风险接受及 Human Owner 最终验收。 |
+
+## 5. 写入范围、执行与 handoff
+
+本 PM 只修订本 `spec.md`。Human Owner 已对 `aiis-ics-arch::DAA-018 r4`、`aiis-ics-arch::ARCH-PLC-001 r8` 及版本衔接作出精确范围批准（见 §6）；Development 可更新本任务既有 [tasks.md](tasks.md)，根据既有记录整理证据来源、脱敏定位、实际未运行项、风险及文档自检并形成 `developer_handoff`；之后由 fresh-context Verification 独立核对，并仅更新本任务既有 [checklist.md](checklist.md) 的 r4 文档核对和 verdict。保留原 r3 角色文件的全部历史事实、原时点 Revision / 状态和旧批准、失败、阻塞、事故及证据；如更新顶层元数据，应先记录原文件 SHA 与原元数据，不覆盖或伪造历史结论。
+
+Development 和 Verification 的本轮写入仅限各自上述角色文件；PM / Human Owner 的范围与批准记录归本 spec。协调者可在其权限和适用批准下进行必要的索引机械同步。任何代码、测试、构建、手册、运行配置、用户数据、历史或其他任务均不属于本 r4 角色写入范围；本轮不启动应用、访问数据库或发送新请求。已有脏工作树和并行变更按所属任务保留，不因收尾撤销或归因。
+
+本 r4 仅需 `aiis` 与 `project-governance` 处理项目方法、证据收尾与角色边界；后续文档角色按实际触达面加载适用 shared skill。若重新打开产品实现、原生验证、设备或上报工作，须由 PM 形成新的精确范围并路由 `rust-runtime`、`desktop-tauri`、`frontend-ui`、`i18n-workflow`、`plc-point-mapping` 等适用专项角色与 skill，经 Human Owner 另行批准；此处不授权技术执行。角色为 contract_only，不代表平台 ACL 或强制路由。
+
+## 6. Human Owner 精确范围批准
+
+Human Owner 在协调者列明整组精确草案及版本衔接后明确回复：
+
+> 批准这组收尾草案
+
+该决定在同一次明确批准 `aiis-ics-arch::DAA-018 r4`、`aiis-ics-arch::ARCH-PLC-001 r8`、`device-simulator::DS-004 r3`、`device-simulator::DS-005 r3`、`aiis-ics-arch::DAA-019 r3` 及其版本衔接；每项的批准分别生效，不由父任务或子任务互相继承。Human Owner 审阅的本 r4 草案 SHA-256 为 `92eb1b76a83e5b84bca267d5511b291f60f98481292504b4096bc3fbd21a15dd`。§1 所载父 r8 的草案 SHA 是本 r4 形成时的历史事实；父任务的批准详情归其自身 spec。
+
+本决定批准的是本 r4 既定的文档收尾范围，并非风险接受、独立 QA 通过或最终验收。原 r3 QA1 `qa_failed`、QA2 `qa_blocked`、未验证项和隔离事件未知影响保持；当前没有 r4 Development handoff、r4 QA verdict 或 Human Owner 最终验收。Development 可按 §5 进行文档交接，之后由 fresh-context Verification 独立审阅，Human Owner 再单独决定最终验收。
+
+## 附录：已批准 DAA-018 r3 完整原文及全部历史
+
+以下围栏首行之后至闭合围栏之前为写前 r3 的完整原始 UTF-8 字节，含原末尾换行及嵌套的 r2、r1 原文；写前 SHA-256 为 `bd27de086ade327ccabe33b1ee3669bffb8b3be8f54698b27ff3160ff7749895`。其中历史时态、批准、allowlist 与命令仅记录各自时点，不构成本 r4 的批准或执行范围。
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~markdown
+Task ID: DAA-018
 Revision: r3
 Status: owner_approved
 Owner Role: PM
@@ -343,3 +422,4 @@ PM 使用 `aiis`、`project-governance`、`plc-point-mapping`；后续 Developme
 此决定批准本任务 `DAA-018 r1` 的精确实施范围，批准前完整草案 SHA256 为 `2adc3ae0f61ee6b37bf1ba111d6f26e2f7e844f64a1512b5b5c4e68319cbbd79`；允许按本规格开展 Development 自检及 fresh-context Verification。该批准不代表 Human Owner 最终验收，不授权 JSON 导出/导入、FF/CA、真实 profile、DDL、现场设备或发布；两项基础任务各自完成 STD 最终验收后，导出/导入仍须独立精确批准。
 ~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

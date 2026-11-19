@@ -8,7 +8,7 @@ from core.deps import get_current_user
 from database import get_db
 
 pytestmark=pytest.mark.no_db
-PATHS=('/equipment/drive','/energy/current','/items','/performances','/plans','/task-field-configs?module=plan','/project/list','/quality','/shift-rules','/monitor/temperature?date=2026-10-14')
+PATHS=('/energy/current','/items','/performances','/plans','/task-field-configs?module=plan','/project/list','/quality','/shift-rules')
 
 
 @pytest.mark.asyncio
@@ -36,7 +36,7 @@ def test_each_other_registered_business_method_has_declared_owner_guard():
             continue  # Anonymous source admission is exercised by the integration API tests.
         module=getattr(endpoint,'__module__','')
         parts=module.split('.')
-        if len(parts)<3 or parts[0]!='app' or parts[1] not in manifests or parts[1] in {'system','schema_maintenance','task','plan','performance'}:continue
+        if len(parts)<3 or parts[0]!='app' or parts[1] not in manifests or parts[1] in {'system','schema_maintenance','task','plan','performance','equipment_observation','plc_facts'}:continue
         owner=parts[1];keys=set()
         def visit(dep):
             call=dep.call

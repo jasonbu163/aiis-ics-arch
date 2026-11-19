@@ -98,6 +98,11 @@ h1,h2,h3,p { margin-top:0; }
 .daa-import-dialog .el-dialog__body { max-height: min(65vh, 700px); overflow: auto; }
 .daa-import-dialog .daa-details { margin-block: var(--agent-card-padding); overflow-wrap: anywhere; }
 .daa-import-dialog .console-action-group { justify-content: flex-end; flex-wrap: wrap; gap: var(--agent-action-gap); }
+.daa-export-header { padding-right: 28px; overflow-wrap: anywhere; }
+.daa-export-header .el-alert { margin-top: var(--agent-card-padding); }
+.daa-export-header .el-alert p { margin: 4px 0; overflow-wrap: anywhere; }
+.daa-export-filename { margin-block: var(--agent-action-gap); }
+.daa-export-error { color: var(--el-color-danger); margin: 4px 0; }
 
 /* DAA-006局部技术名差异/选择；表格和按钮仍复用CU，footer保持窄窗可见。 */
 .daa-name-tools { padding-block: var(--agent-card-padding); justify-content: space-between; }

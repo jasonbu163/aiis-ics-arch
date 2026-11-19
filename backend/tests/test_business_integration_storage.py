@@ -20,8 +20,9 @@ def manifest(owner):
         backupRef="private:backup",ownerApprovalRef="fixture-approved-target",verifiedAt="2026-11-04T10:00:00.000+08:00",state="adopted")
 
 
-@pytest.mark.parametrize('owner', ('equipment', 'performance', 'monitor'))
-@pytest.mark.parametrize('revision', ('3d5f7a9c1e23', '4e6a8b0d2f14', '5f7a9c1e3b25'))
+@pytest.mark.parametrize('owner', ('performance',))
+@pytest.mark.parametrize('revision', ('2c4e6a8b0d12', '3d5f7a9c1e23', '4e6a8b0d2f14',
+    '5f7a9c1e3b25', '6a8c0e2b4d16', '7b9d1f3a5c7e', '8c0e2a4d6f18', '9d1f3a5c7e20', 'ae20b4d6f831', 'c9e1a3b5d720'))
 def test_successor_requires_matching_fresh_adoption(owner, revision):
     old = manifest(owner)
     new = deepcopy(old)
@@ -31,20 +32,28 @@ def test_successor_requires_matching_fresh_adoption(owner, revision):
     with pytest.raises(ValueError):
         validate_adoption_probe(old, probe)
     assert validate_adoption_probe(new, probe).manifest == new
+    with pytest.raises(ValueError):
+        validate_adoption_probe(new, StorageProbe('wrong-server', probe.schema, probe.schema_revision, probe.utc_now))
+    with pytest.raises(ValueError):
+        validate_adoption_probe(new, StorageProbe(probe.server_uuid, 'wrong_schema', probe.schema_revision, probe.utc_now))
     new['schemaRevision'] = 'unrecognized'
     with pytest.raises(ValueError):
         parse_adoption_manifest(new, owner)
 
 
-@pytest.mark.parametrize("owner",("equipment","performance","monitor"))
-def test_exact_profile_and_adoption_rejection(owner,tmp_path):
+@pytest.mark.parametrize("owner",("performance",))
+@pytest.mark.parametrize("revision",("1b3d5f7a9c20","ae20b4d6f831","c9e1a3b5d720"))
+def test_exact_profile_and_adoption_rejection(owner,revision,tmp_path):
     module=importlib.import_module(f"app.{owner}.integration_config")
     prefix=owner.upper()+"_INTEGRATION_"
-    evidence=manifest(owner)
+    evidence={**manifest(owner), "schemaRevision":revision}
     assert parse_adoption_manifest(evidence,owner)==evidence
     file=tmp_path/"adoption.json";file.write_text(json.dumps(evidence))
     config=module.IntegrationConfig(_env_file=None,**{prefix+"ENABLED":True,prefix+"EQUIPMENT_IDS_JSON":'["line-demo"]',prefix+"PRODUCER_IDS_JSON":'["sma-demo"]',prefix+"STORAGE_PROFILE":"shanghai-v1",prefix+"ADOPTION_FILE":str(file)})
     assert config.require_ready("line-demo","sma-demo")==evidence
+    for equipment, producer in (("other","sma-demo"), ("line-demo","other")):
+        with pytest.raises(Exception):
+            config.require_ready(equipment,producer)
     for path,value in [("schemaRevision","wrong"),("fixedColumnDigest","sha256:"+"f"*64),("state","candidate")]:
         broken=deepcopy(evidence);broken[path]=value;file.write_text(json.dumps(broken))
         with pytest.raises(Exception):config.require_ready("line-demo","sma-demo")
@@ -55,10 +64,7 @@ def test_exact_profile_and_adoption_rejection(owner,tmp_path):
     with pytest.raises(ValueError):parse_adoption_manifest(evidence,owner)
 
 
-def test_fixed_13_tables_41_columns_and_aware_naive_inverse():
-    profiles=[importlib.import_module(f"app.{owner}.integration_storage").BUSINESS_TIME_COLUMN_PROFILE for owner in ("equipment","performance","monitor")]
-    assert sum(len(p["columns"]) for p in profiles)==13
-    assert sum(len(fields) for p in profiles for fields in p["columns"].values())==41
+def test_aware_naive_inverse():
     utc=datetime(2026,11,3,17,1,2,123000)
     shanghai=to_storage_time(utc,"utc_wall")
     assert shanghai==datetime(2026,11,4,1,1,2,123000)
@@ -69,60 +75,6 @@ def test_fixed_13_tables_41_columns_and_aware_naive_inverse():
     assert to_storage_time(None,"utc_wall") is None
     with pytest.raises(ValueError):to_storage_time(utc,"unknown")
 
-
-@pytest.mark.parametrize("owner",("equipment",pytest.param("performance", marks=pytest.mark.skip(reason="retired performance integration probe; historical BE-010 evidence")),"monitor"))
-async def test_async_and_sync_probe_use_only_passed_session(owner):
-    queries=[]
-    class Result:
-        def mappings(self):return self
-        def one(self):return dict(serverUuid="fixture-server",schema="fixture_schema",utcNow=datetime(2026,11,4,2))
-        def scalar_one(self):return "1b3d5f7a9c20"
-    class Sync:
-        def execute(self,sql):queries.append(str(sql));return Result()
-    class Async:
-        async def execute(self,sql):queries.append(str(sql));return Result()
-    sync=importlib.import_module(f"app.{owner}.crud.sync_integration")
-    async_=importlib.import_module(f"app.{owner}.crud.async_integration")
-    a=sync.probe_storage(Sync());b=await async_.probe_storage(Async())
-    assert isinstance(a,StorageProbe) and a==b
-    from dataclasses import asdict
-    assert set(asdict(a))=={"serverUuid","schema","schemaRevision","utcNow"}
-    context=validate_adoption_probe(manifest(owner),a)
-    assert context.database_now.isoformat()=="2026-11-04T10:00:00+08:00"
-    assert len(queries)==4 and all("FOR SHARE" in q for q in queries[1::2])
-    with pytest.raises(ValueError):validate_adoption_probe(manifest(owner),StorageProbe("other",a.schema,a.schema_revision,a.utc_now))
-
-
-def test_owner_legacy_views_do_not_dirty_original_and_select_fixed_basis():
-    from app.equipment.models import EquipmentDrive,EquipmentProductionParameters
-    from app.monitor.models import HistoryProcessCurve
-    from database import Base
-    physical=datetime(2026,11,4,1,0,0,123000)
-    for owner in ('equipment','monitor'):
-        module=importlib.import_module(f'app.{owner}.integration_storage')
-        evidence=manifest(owner)
-        evidence['basisProfile']['legacyNaive']='shanghai_wall'
-        evidence['basisProfile']['systemWire']='utc_wall'
-        for table,fields in module.BUSINESS_TIME_COLUMN_PROFILE['columns'].items():
-            values={column.name:None for column in Base.metadata.tables[table].columns}
-            values.update({field:physical for field in fields})
-            row=SimpleNamespace(__table__=Base.metadata.tables[table],**values)
-            before=dict(row.__dict__)
-            view=module.legacy_view(row,evidence,'legacy')
-            assert row.__dict__==before
-            for field in fields:
-                expected=to_legacy_time(physical,module.legacy_basis(table,field,evidence,'legacy'))
-                assert getattr(view,field)==expected
-            assert module.legacy_view(row,None) is row
-
-
-
-def test_monitor_refuses_unselectable_mixed_created_at_wire_basis(tmp_path):
-    from app.monitor.integration_config import IntegrationConfig
-    evidence=manifest("monitor");evidence["basisProfile"]["legacyNaive"]="shanghai_wall"
-    filename=tmp_path/"mixed.json";filename.write_text(json.dumps(evidence))
-    config=IntegrationConfig(_env_file=None,MONITOR_INTEGRATION_STORAGE_PROFILE="shanghai-v1",MONITOR_INTEGRATION_ADOPTION_FILE=str(filename))
-    with pytest.raises(Exception):config.adoption()
 
 
 

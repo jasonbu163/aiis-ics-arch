@@ -1,5 +1,5 @@
 """通用任务字段版本与管理员修订状态；导入模型不触发数据库操作。"""
-from sqlalchemy import Boolean, CheckConstraint, Column, String, UniqueConstraint, text
+from sqlalchemy import Boolean, CheckConstraint, Column, ForeignKey, String, UniqueConstraint, text
 from sqlalchemy.dialects.mysql import BIGINT, DATETIME, INTEGER, SMALLINT, TINYINT, VARCHAR
 from database import Base
 
@@ -48,5 +48,31 @@ class FieldDefinition(Base):
         UniqueConstraint('config_version', 'scope', 'name', name='uq_task_field_name'),
         CheckConstraint("scope IN ('shared_sync','plan_local','performance_local') AND slot_no BETWEEN 1 AND 100", name='ck_task_field_scope_slot'),
         CheckConstraint("value_type IN ('string','number','boolean')", name='ck_task_field_type'),
+        {'mysql_engine': 'InnoDB', 'mysql_row_format': 'DYNAMIC', 'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_unicode_ci'},
+    )
+
+
+class FieldConfigVersion(Base):
+    """完整快照的存在及条数，包括定义为空的业务版本。"""
+
+    __tablename__ = 'task_field_config_versions'
+    config_version = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=False)
+    definition_count = Column(SMALLINT(unsigned=True), nullable=False)
+    __table_args__ = (
+        CheckConstraint('definition_count <= 300', name='ck_task_config_definition_count'),
+        {'mysql_engine': 'InnoDB', 'mysql_row_format': 'DYNAMIC', 'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_unicode_ci'},
+    )
+
+
+class FieldConfigUse(Base):
+    """记录每个任务或历史批次曾采用的字段配置版本。"""
+
+    __tablename__ = 'task_field_config_uses'
+    config_version = Column(INTEGER(unsigned=True), ForeignKey('task_field_config_versions.config_version',
+                            name='fk_task_config_use_version'), primary_key=True, autoincrement=False)
+    subject_kind = Column(ascii_key(16), primary_key=True)
+    subject_key = Column(ascii_key(50), primary_key=True)
+    __table_args__ = (
+        CheckConstraint("subject_kind IN ('plan','performance','dispatch')", name='ck_task_config_use_kind'),
         {'mysql_engine': 'InnoDB', 'mysql_row_format': 'DYNAMIC', 'mysql_charset': 'utf8mb4', 'mysql_collate': 'utf8mb4_unicode_ci'},
     )

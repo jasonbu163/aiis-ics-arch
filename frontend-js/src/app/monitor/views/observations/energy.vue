@@ -14,7 +14,6 @@
         </el-select>
         <el-date-picker v-model="range" type="datetimerange" value-format="YYYY-MM-DD HH:mm:ss" format="YYYY-MM-DD HH:mm:ss" :range-separator="'–'" />
         <ActionButton variant="primary" @click="load">{{ t('equipment.observation.search') }}</ActionButton>
-        <router-link :to="{ name: 'MonitorLegacyEnergy' }">{{ t('monitor.observation.legacyEnergy') }}</router-link>
       </div>
       <el-alert v-if="failed" :title="t('equipment.observation.loadFailed')" type="error" show-icon :closable="false">
         <ActionButton @click="retry">{{ t('monitor.observation.retry') }}</ActionButton>

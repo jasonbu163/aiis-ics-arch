@@ -1307,3 +1307,30 @@ async function render(template, locale, row, extra = {}) {
 
 <!-- ARCH-OBS-001-r7-history-end -->
 </details>
+
+## 2026-11-18（Asia/Shanghai）ARCH-OBS-001 r12 操作手册
+
+命名 Development `obs_r12_development` 按 [r12 §14](spec.md#r12-user-guide) 实施。正式交付对象为 `/Users/jason/Desktop/DreamCode/aiis-ics-arch` 工作树，基准 HEAD `f7c5608c0e433612b15821a578a7ef3e4f155cdb`，以当前工作树差异交付。仅新增双语手册、在双语文档索引各增加一行并追加本节。
+
+### 实际文件
+
+| 对象 | 内容 | 文档 SHA-256 |
+| --- | --- | --- |
+| [中文手册](../../docs/equipment-status-process-monitoring-guide.zh-CN.md) | 私有 profile、加热区、指标、两路槽、卡片／曲线、两路上报、数据列表和能耗 | `ee52df91fdf7556cd25d58564444ebe8806c67514d485ed3e0d0fe064e20c6a5` |
+| [英文手册](../../docs/equipment-status-process-monitoring-guide.md) | 与中文版对应的操作和示例 | `4260bc998961a9abedce43bff812c3f911eea7d3eca635815833e00ca14e8d9e` |
+| [中文索引](../../docs/README.zh-CN.md) | 新手册索引 | `a663bfebdf28f4c139d7568a7976a7ba46a637d5766b38de1fb2c1d5a2ca6a0e` |
+| [英文索引](../../docs/README.md) | 新手册索引 | `523e5fb7b4a7beed573215f23ade9b3d8abb4fee36ec4a250a51caa0c0fc7876` |
+| 本 `tasks.md` | 追加本轮 DEV 自检和交接 | 当前节 |
+
+### DEV self-check
+
+| 检查 | 命令和实测结果 |
+| --- | --- |
+| 表单与合同走读 | 使用 `rg -n`、`sed -n` 和 `node` 读取侧栏 manifest、配对 locale、设备配置和记录、过程曲线、能耗统计及表计组件；对照 `profile.py`、`machine_openapi.py`、`configuration.py`、`energy_statistics.py` 和 v2 合同。确认区域、卡片、曲线复用了不同含义的「指标键」，槽位采样组需手填，曲线任务号为输入框，表计配置查询后方可新增，能耗样本列在表计配置设置。 |
+| 双语、链接、示例和路径 | `python3 -` 内联静态核验退出 0，16 个相对链接（含双语索引行与 r10 锚点）可达；两稿均有 7 节、共 4 段可解析的 JSON，正文和命令示例成对一致。5 条方法／路径匹配发布 OpenAPI，核对三路 POST 的必填／可用字段、采样偏移、质量、区间顺序及示例键值。占位域名为 `observation.example.invalid`，所有机器请求仅引用令牌变量。 |
+| Shell 语法 | `python3 -` 提取代码围栏逐段运行 `bash -n`，6/6 语法检查退出 0。 |
+| 差异、字节与范围 | `git diff --check -- docs/README.md docs/README.zh-CN.md plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/tasks.md`，新手册另检查行尾空白。两份索引各 1 行新增。比较原任务记录 SHA-256，确认原字节为本文件的完整前缀。获批 spec SHA-256 为 `02c43085ec3ce66dc77101ff847d2a4ebd559aeafd2062808401a394d0f27adb`，既有 checklist SHA-256 为 `5de37a7bbfb528d897f17458ab85ce6825b266c85b676aa14c5c75c58904bcea`。 |
+
+### r12 developer_handoff
+
+交 fresh-context 命名 Verification，按 [r12 §14](spec.md#r12-user-guide) 的 R12-AC01–05 核对上述工作树、五项文件及本节实际记录。并行工作以自身差异为准。验证仅限源码与文档静态核对，未执行 HTTP、浏览器流程、数据库、迁移、配置修改、服务、Docker 或设备操作，无临时运行资源。使用者仍需由环境负责人配置真实授权范围，替换合成键、占位地址与时间。本轮证据仅覆盖手册，历史执行限制沿用原记录。独立 QA 与 Human Owner 最终验收各自待后续角色记录。

@@ -1,4 +1,83 @@
 Task ID: DS-004
+Revision: r3
+Status: owner_approved
+Owner Role: PM
+Allowed Writers: PM, Human Owner
+Handoff: Human Owner 已精确批准 device-simulator::DS-004 r3、aiis-ics-arch::ARCH-PLC-001 r8 及版本衔接 -> Development 仅整理既有资料并更新 tasks.md -> fresh-context Verification 仅独立文档复核并更新 checklist.md -> Human Owner 最终验收
+Workflow Mode: STD
+Execution Mode: agent_team_same_session
+Task Namespace: device-simulator
+Classification: root
+Capability: DS 本机点位中英文显示名称基础的既有证据收尾
+Owner: Device Simulator
+Acceptance Chain Reference: Development Lifecycle Workflow；本任务独立按精确 Revision 范围批准、Development、fresh-context Verification 和 Human Owner 最终验收。
+Related Task: aiis-ics-arch::ARCH-PLC-001 r8; aiis-ics-arch::DAA-018; device-simulator::DS-005; aiis-ics-arch::DAA-019
+Depends On: Human Owner 已在同一决定中分别精确批准本 r3、ARCH-PLC-001 r8 及版本衔接；本任务批准并非由父任务自动继承，二者最终验收仍各自独立。
+
+# DS-004 r3：既有本机双语证据的有界收尾（范围已批准）
+
+## 1. 目标、范围与状态
+
+Human Owner 要求按 STD 使用已完成的手动验证和实际上报证据收尾，不再重复测试，并保留历史记录和现有数据。本 r3 是对 DS 本机双语点位基础功能**既有证据及限制**的已批准文档收尾范围：只整理 Owner 报告的本机操作、Development 和独立 QA 原有记录，以及与之相关但不能相互替代的跨应用证据。验收只讨论已完成的本机双语基础和历史记录审阅，不增加代码、运行验证或新的产品能力。本 r3 的范围批准不代表问题已修复、`qa_passed` 或 Human Owner 最终验收。
+
+原 r2 对 DS4-01～15 的完整验证，尤其 DS4-07 原生检查及真实关闭/重开，仍有未完成部分。已批准的本 r3 **改变本次收尾的验收口径**：不要求为填补这些缺口重新执行测试，但必须逐项标记证据等级和未证明边界，再由 Human Owner 明确决定是否接受这些缺口及其风险。不能把原条件描述为已满足、已延期完成或原 r2 产品 QA 已通过。本次最终决定只可针对被批准的有界范围，不能外推到完整 r2 合同或全场景。
+
+[ARCH-PLC-001 r8](../../../plans/ARCH-PLC-001-shared-plc-point-json/spec.md) 是同一收尾事项的关联父设计；本 PM 形成草案时读取的父文件 SHA-256 为 `a0fdfabbaeebdd95f8bc39fd9f2a0c3b974c13ec5a6b15fe39b6b834aba0eac3`，当时状态为 `draft`。此后 Human Owner 在同一决定中明确批准父 r8、本 r3 及版本衔接，父 r8 的批准不是本任务批准的自动继承。本任务仍有独立 Task ID、批准与最终验收链，其他任务的 QA 不能转移给 DS-004。r1/r2 原批准、QA1–QA3 的 `qa_failed`、r2 QA4 的 `qa_blocked` 和隔离事件均作为历史保留；本任务尚未最终验收。写前 r2 全文及其内的 r1 原文按原字节保存在本文附录。
+
+## 2. 可引用的现有事实与证据身份
+
+1. **Owner 本人报告。** Human Owner 报告曾在 DS/DAA 各自 `.local/dev` 中操作中英文切换和 `display_name`，并在后续实际操作 DAA→DS→DAA 文件往返。本 PM 未亲历或独立截获这次界面操作或 IPC；只按 Owner 实际报告的范围引用，不能推成每个编辑、保存/重开、字段格式或所有异常分支均已验证。用户使用的 `display_name` 是此处对报告用词的引用，不据此断定它具体指旧无语言 `displayName` 还是新双语 `displayNames` 的所有状态。
+2. **原 DS-004 Development 与 QA。** [tasks.md](tasks.md) 记录 r2 精确候选、自检及其内存/合成边界；[checklist.md](checklist.md) 保留 QA1 F1、QA2 F2、QA3 F3/F4 失败及各轮复核。QA4 对当时精确候选的 Rust、内存 UI、故障注入和合成 profile 等局部检查有其限定结果；整体仍为 `qa_blocked`。这些原时点证据不能自动覆盖后来叠加的工作树或代替原生 IPC 和 GUI。QA4 中受控合成兼容探针不等于旧普通原生程序和所有 profile 的兼容证明。
+3. **跨应用文件记录。** [DS-005 checklist](../DS-005-plc-json-bidirectional/checklist.md) 和 [DAA-019 checklist](../../../data-acquisition-agent/plans/DAA-019-plc-json-bidirectional/checklist.md) 记载各自的历史观察、实际文件比较和局部核验；DAA-019 QA3 记录三份文件按规定去除导出头、连接目标及两端启用字段并按外部身份排序后，技术字段、双语与描述相同。该记录属于当时的特定文件和归一化范围；Owner 报告的自动选中及原生界面操作不能与其他轮次结果拼成同一次 IPC 返回的独立直接证据。旧临时工件已按 Owner 要求清理，后续只能引用现存记录；不能宣称重新核验已删除原件。
+4. **协调者转述的上报观察。** 父 r8 §2 记录协调者对 2026-11-18 一次本机 DAA dev 只读核对的转述：seq 91–103 共 13 条 v2 样本各有匹配 `sampleId` 的 `status=committed` 回执，`outcome` 为 `created` 或 `duplicate`；所核服务端历史的来源身份、正文 SHA 和点位名称/类型/值/质量匹配；指定时点 latest 有 3 点质量 `good`。该样本配置中一实际点的中英显示名均非空；13 份请求正文均未见中英文显示名字段和对应文本。服务端所核点数据未见显示类字段，指定点字段及值一致；未对服务端任意字段字符串进行通用搜索。私有证据定位、身份和详细限定见父 r8 §2；本 PM 未亲自读取应用、数据库、网络、日志或原始回执。这只是特定 DAA 样本和时点的受控观察，不证明 DS 未测行为、全部上报路径、旧程序兼容或旧数据历史前值。不得把私有正文、点值、地址、身份或凭据复制进仓库。
+
+## 3. 未验证边界与风险，由 Human Owner 评估
+
+- QA4 时真实 macOS 原生编辑、顶栏切换、列宽拖动、跨重启记忆/复位、普通入口和正常关闭后同一 profile 重开未完成独立验证。后续 Owner 的本人报告只证明其报告的操作；不能把它扩大为独立 QA 对全部原生 UI、跨重启或异常关闭的验证。崩溃、强制退出、实际 Tauri IPC/JoinError、跨进程原子性及无法确定终结的保存/释放回执也没有完整原生证明。
+- QA3 的 F3 无本次保存直接交错的旧通用 apply/write/preview 未知结果清除风险，r2 明确没有声称修复。QA1–QA3 的失败历史及 QA4 所测范围的复核均须保留；不得因为缩小验收范围而将 F3、未覆盖时序或原先 `qa_failed`/`qa_blocked` 改写为整体通过。
+- 另一任务的原生隔离事件影响未知；原记录并未证明无写入或无影响。历史数据、profile、版本、原有配置和任何真实记录须保全；后续可比基线不能倒证较早一轮缺失的逐行前值，也不把某轮允许新增的记录称为零写。
+- 单个旧二进制合成 probe 的结果不代表旧版普通原生应用的全部兼容、错误恢复或不误开空 profile 已获证明；本 r3 不触及旧 profile、DDL、迁移或修复。无法证明的具体资料和已清理工件必须明确列出，不制造替代证据。
+- 真实 PLC、FF/CA、现场、Windows/其他平台、长期稳定性、生产采用、发布或部署均在本范围外。样本上报不代表上述场景或所有点位/时序已验证。
+
+Human Owner 已批准本 r3 所列以既有资料整理替代原 r2 尚缺新增实测的有界收尾范围及对上述缺口和风险的记录、独立文档复核路径；这不表示问题已修复或隔离事件影响已经确定。是否最终接受该有界收尾、对旧 F3 和隔离事件是否另行处理，仍由 Human Owner 决定，不能由 PM、Development 或 QA 推定；最终验收需在新的独立文档 verdict 后单独决定。
+
+## 4. 文档收尾要求与验收标准
+
+本 r3 的判定对象是证据归属和文档交接；下列标准不要求证明原 r2 各项产品验收已通过。
+
+| 编号 | 待独立文档核对的验收标准 |
+| --- | --- |
+| R3-01 | 指明 `device-simulator::DS-004 r3`、关联父 `aiis-ics-arch::ARCH-PLC-001 r8` 的精确批准状态和独立验收链；列出历史 r1/r2 的批准、QA1–QA3 `qa_failed`、QA4 `qa_blocked` 与尚待 Owner 决定的最终验收，保留历史原文及其时态。 |
+| R3-02 | 以 Owner 报告、Development 自检、历史独立 QA、协调者转述分别标注来源；记录本机语言切换/显示名、文件往返及 13 条 DAA 上报观察各自的具体范围，不写成 PM 或本轮 QA 亲见，不以报告代替缺失 IPC。 |
+| R3-03 | 审阅现存 DS-004 tasks/checklist、相关跨任务历史记录及本 r3 文档 diff，明确 QA4 合成检查的精确候选与未完成原生检查；记录旧 F3、未知结果、隔离事件影响未知、旧版原生兼容和旧历史前值等缺口，不用后续事实倒证旧轮。 |
+| R3-04 | 确认本次只使用既有资料，不运行、重跑或要求用户重复任何测试；不启动或附着应用、GUI/CUA、访问 `.local/dev`、profile、数据库、PLC 或网络，也不重发数据或重新生成已清理工件。现有资料不足时保留未知，不伪造证据。 |
+| R3-05 | 审核下述角色各自写入范围与 handoff：Development 在既有 tasks 追加真实资料来源、工作树/diff 身份、未运行项和风险，fresh-context Verification 在既有 checklist 追加独立文档核验、verdict 与未证明边界；历史批准、失败、阻塞及事件不删除、不覆盖。 |
+| R3-06 | 如文档与现有证据不一致、将不可访问的资料误称已复验、证据来源无法识别、风险描述不足或 R3-01～05 不能满足，Verification 如实给出 `qa_failed` 或 `qa_blocked`；若通过，`qa_passed` 仅代表本 r3 文档收尾要求通过，不代表 r2 全面产品 QA、原生 gate、现场或最终验收通过。 |
+
+## 5. 写入范围、角色 handoff 与排除项
+
+- **PM 本阶段：**仅修订本任务 `spec.md` 形成 r3 并记录范围批准，不修改既有 `tasks.md`、`checklist.md`、任何实现、测试、手册、配置或计划索引。原 r2、r1 在附录中完整保全。
+- **Human Owner 范围 gate：**Human Owner 已在同一明确决定中分别精确批准 `device-simulator::DS-004 r3`、`aiis-ics-arch::ARCH-PLC-001 r8` 及二者版本衔接，原话和本任务审阅前草案摘要见 §6；不是以其他任务批准推断本任务批准。批准只授权此处文档交接，不授权产品更改、补测或最终验收。
+- **Development（仅在本 r3 精确批准及衔接后）：**只在本任务既有 `tasks.md` 追加文档整理、既有证据引用、身份/差异检查、限制和 `developer_handoff`，保留原文。禁止修改代码、测试、手册、配置、数据库、profile、历史或其他任务；不运行任何产品测试、构建或应用，不要求用户重复操作。若现有材料不足，记录缺口并交回，不扩大写入范围。
+- **fresh-context Verification（handoff 后）：**独立对照本 spec、原始任务记录、可取得的既有文档与文档 diff，只在本任务既有 `checklist.md` 追加 R3-01～06 复核与真实 verdict；不得访问应用、profile、数据库、GUI/CUA、设备或网络，不重新测试或声称亲见 Owner 操作。历史 `qa_failed`/`qa_blocked` 不得删除；证据无法取得时如实标注并据标准判定，不强行通过。
+- **Human Owner 最终 gate：**在审阅该精确 r3 文档 verdict、已有人工报告及全部未证明风险后单独决定是否接受此有界收尾；不代表完整 r2、两端 PLC、FF/CA、现场或发布已接受。任何范围、验收、风险或允许路径实质变化均先回 PM 新 Revision 和精确批准。
+
+本 PM 使用 `aiis` 与 `project-governance`。后续仅文档工作按触达面选择相应 skill；如另行提出 Rust/Tauri、前端/i18n 或 PLC 点位技术改动，须另立批准范围并交相应技术角色使用 `rust-runtime`、`desktop-tauri`、`frontend-ui`、`i18n-workflow`、`plc-point-mapping` 等适用 skill，本 r3 不替其实施或验证。角色为 `contract_only`，主会话、任务 bundle 与 diff 审计仍是必要控制，不宣称平台 ACL 或强制路由。
+
+## 6. Human Owner 精确范围批准与衔接
+
+本次会话中，Human Owner 在审阅该组收尾草案后明确回复：
+
+> 批准这组收尾草案
+
+该决定精确批准 `device-simulator::DS-004 r3`、`aiis-ics-arch::ARCH-PLC-001 r8`、`device-simulator::DS-005 r3`、`aiis-ics-arch::DAA-018 r4`、`aiis-ics-arch::DAA-019 r3` 及其版本衔接；父 r8 与本 r3 均为同一决定明确包含的版本，不是相互自动继承批准。Human Owner 审阅前本 r3 完整草案 SHA-256 为 `fec0ebdc1af202aad5d8cd6ff4886665f945187f9bb4ebb275b7a0d7649f99c6`。本批准只进入本任务 Development 的既有资料文档交接及后续独立文档复核，不改变 §2–5 的验收、证据和数据保护边界；历史 `qa_failed`、`qa_blocked` 与隔离事件保持原事实，新的 QA verdict 与 Human Owner 最终验收尚未发生。
+
+## 附录：已批准 r2 完整原文及嵌套 r1 历史
+
+以下围栏内为写前完整 r2 UTF-8 原始字节（含末尾换行），SHA-256：`4f5ff981cf28f6734b2bc2409189157cad7b102510715d2712f745710d026f3c`。r2 内嵌的完整 r1 原文字节 SHA-256：`322b2be3639d124f02a0585a1cfaf1b3eb34e1a519f18b145f551ac1fa856ae4`。历史时态、旧批准、旧 allowlist 和当时 gate 只属于相应历史 Revision，不构成本 r3 的批准或 QA 结论；本 r3 的范围批准见 §6。
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~markdown
+Task ID: DS-004
 Revision: r2
 Status: owner_approved
 Owner Role: PM
@@ -225,3 +304,4 @@ Human Owner 于 2026-11-17（Asia/Shanghai）要求先统一 DS/DAA 点位中英
 
 此决定批准本任务 `DS-004 r1` 的精确实施范围，批准前完整草案 SHA256 为 `7d1a821922e5c8330740eba3889ce775c93eda6506a71aa92a30cd436328ecf3`；允许按本规格开展 Development 自检及 fresh-context Verification。该批准不代表 Human Owner 最终验收，不授权 JSON 导出/导入、FF/CA、真实 profile、DDL、现场设备或发布；两项基础任务各自完成 STD 最终验收后，导出/导入仍须独立精确批准。
 ~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

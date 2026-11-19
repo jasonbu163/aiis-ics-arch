@@ -40,7 +40,7 @@ frontend-js -> FastAPI 业务 API -> 所属业务数据库
 目标链：DAA -> plc_facts API -> SMA -> typed 业务 API -> 业务记录
 ```
 
-当前源码保留[PLC事实 v2](contracts/published/http-api/plc-facts-v2/README.zh-CN.md)与[八类 typed 业务集成入口](contracts/published/http-api/business-integration-v1/README.zh-CN.md)。[v1 合同](contracts/published/http-api/plc-facts-v1/README.zh-CN.md)及其隔离证据保留为历史；当前 Core 撤下 v1 路由、旧快照和 Projection runner，旧 DAA 上传及冻结的直库 control-agent 需分别处理切换。目标采用及 DAA/SMA 接线另行推进，准入保持默认关闭/未采用。SMA已拥有本地SQLite配置与纯预览，当前配置阶段关闭正常投递，见[SMA说明](automation-world/semantic-mapping-agent/README.zh-CN.md)和所属任务。
+当前源码保留[PLC事实 v2](contracts/published/http-api/plc-facts-v2/README.zh-CN.md)与[设备、过程和表计 v2](contracts/published/http-api/equipment-observation-v2/README.zh-CN.md)。[v1 合同](contracts/published/http-api/plc-facts-v1/README.zh-CN.md)及其隔离证据保留为历史；当前 Core 撤下 v1 路由、旧快照和 Projection runner，旧 DAA 上传及冻结的直库 control-agent 需分别处理切换。目标采用及 DAA/SMA 接线另行推进，准入保持默认关闭/未采用。SMA已拥有本地SQLite配置与纯预览，当前配置阶段关闭正常投递，见[SMA说明](automation-world/semantic-mapping-agent/README.zh-CN.md)和所属任务。
 
 后端 Registry 只发现声明了启用 manifest 的模块。Registry 负责暴露路由和 metadata，不负责创建数据表；表结构变化必须走显式迁移任务。`control-agent` 始终是独立的运行时和交付边界。
 

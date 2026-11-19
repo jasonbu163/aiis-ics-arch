@@ -29,9 +29,11 @@ pub fn load(c: &Connection) -> Result<Snapshot, String> {
         )
         .optional()
         .map_err(|_| "storage_revision")?;
+    let workspace = decode(payload, sha)?;
+    validate_references(c, &workspace)?;
     Ok(Snapshot {
         etag,
-        workspace: decode(payload, sha)?,
+        workspace,
         latest_revision: latest,
     })
 }
@@ -91,8 +93,8 @@ pub fn selections(c: &Connection) -> Result<Vec<Selection>, String> {
 }
 pub fn validate_references(c: &Connection, w: &Workspace) -> Result<(), String> {
     for source in &w.source_versions {
-        let row:Option<(String,Vec<u8>,i64,String)>=c.query_row("SELECT v.lineage_id,b.utf8,b.byte_len,v.blob_sha256 FROM source_versions v JOIN source_blobs b ON v.blob_sha256=b.sha256 WHERE v.version_id=?1",[&source.version_id],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get(3)?))).optional().map_err(|_|"storage_reference")?;
-        let Some((lineage, bytes, len, hash)) = row else {
+        let row:Option<(String,Vec<u8>,i64,String,Vec<u8>)>=c.query_row("SELECT v.lineage_id,b.utf8,b.byte_len,v.blob_sha256,v.metadata FROM source_versions v JOIN source_blobs b ON v.blob_sha256=b.sha256 WHERE v.version_id=?1",[&source.version_id],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get(3)?,r.get(4)?))).optional().map_err(|_|"storage_reference")?;
+        let Some((lineage, bytes, len, hash, metadata)) = row else {
             return Err("storage_reference".into());
         };
         if lineage != source.lineage_id
@@ -100,6 +102,7 @@ pub fn validate_references(c: &Connection, w: &Workspace) -> Result<(), String> 
             || len != bytes.len() as i64
             || hash != source.blob_sha256
             || configuration::hash_bytes(&bytes) != hash
+            || serde_json::to_vec(source).map_err(|_| "storage_reference")? != metadata
         {
             return Err("storage_reference".into());
         }

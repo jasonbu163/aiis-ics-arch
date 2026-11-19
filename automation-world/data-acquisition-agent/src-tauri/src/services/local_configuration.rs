@@ -61,6 +61,10 @@ impl LocalEngine {
         mut draft: Configuration,
         etag: String,
     ) -> LocalResult<ConfigurationView> {
+        let _mutation = self
+            .configuration_mutation
+            .lock()
+            .map_err(|_| "configuration_busy")?;
         validate_display_names(&draft)?;
         let previous = self.configuration()?;
         if previous.etag != etag {
@@ -117,6 +121,12 @@ impl LocalEngine {
             })
             .map(|b| b.source_id.clone())
             .collect();
+        let loaded = self
+            .loaded
+            .lock()
+            .unwrap()
+            .as_ref()
+            .map(|l| l.configuration.clone());
         self.storage.call(false, move |s| {
             for source_id in &new_sources {
                 let source = draft
@@ -124,7 +134,7 @@ impl LocalEngine {
                     .iter()
                     .find(|s| &s.id == source_id)
                     .ok_or("catalog_source_invalid")?;
-                s.ensure_catalog_new(source)?;
+                s.ensure_catalog_new(source, &draft, loaded.as_ref())?;
             }
             s.save_draft(&draft, &etag)
         })?;

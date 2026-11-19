@@ -1,3 +1,277 @@
+# ARCH-TASK-001 r3 第六次交接独立验证 · 2026-11-18
+
+Status: qa_passed
+Handoff: Human Owner 最终验收。R3-QA-F04 已在本次精确交付复验通过。
+
+**交接身份。** 正式工作树 HEAD `f7c5608c0e433612b15821a578a7ef3e4f155cdb`。从仓库根目录执行 `git rev-parse HEAD` 和 `shasum -a 256`，spec 为 `9307a205982c6952eb155c3bf91bfb84632670262c502b98cd5e52a2214cf3ff`，tasks 为 `0fe87d9bb496196dc9e182d781c410d9ad2fa9b123fa902dbec071d2fc9841dc`，旧 checklist 为 `ad6a213c69522b3bd1df6e33e1bf81c8f0ecb9bbfe6a8c1c6e8435a495d46516`。证据目录 `backend/data/maintenance-evidence/arch-task-001-r3-dev3307` 下 `development-delivery-r3-f04-files.sha256` 的 SHA-256 为 `223220e938ac3a6360658e60a53b96b5474cb71bbafd0ff9470774151df9d8f1`；用 `shasum -a 256 -c` 复算 60/60。与 QA5 的 `development-delivery-r3-shared-page-final-files.sha256` 逐行比较，仅 async_fields.py 和 test_generic_task_flow.py 改变。正式树 git diff --check 退出 0。原清单全文保存在下方。
+
+**本轮新证据。** 正式树使用项目 Python 3.13 与内存 SQLite 验证 HTTP/ASGI。以下 W 为 `/private/tmp/arch-task-001-r2.FeZuND`。
+
+- 根目录运行 `/bin/zsh "$W/f04-repro.sh" backend`，正常和隐藏 use 查询均 409，GET 仍读回原值。历史红例记录的原候选为 409/200，原值不可见；本轮直接重放新候选。脚本 f04-qa-repro.py 的 SHA-256 为 `249465eaa7402218712c29dfd83711ce075eb34cecaba65ac1a5d0c2a9a40cf2`。
+- `/bin/zsh "$W/run-r3-time-tests.sh" backend tests/test_generic_task_flow.py tests/test_generic_task_source.py`，50 passed。覆盖正常 use、已停用/无值、隐藏创建引用、两主表和历史批次、更新/状态、未知绑定、真正未用字段释放/重用、旧任务仅 GET、删后旧载荷返回 422、审计异常 503。MySQL 方言三个查询均带 FOR UPDATE。模块 AST/真实 Registry 命令 `/bin/zsh "$W/f04-preflight.sh" backend` 退出 0，两侧历史主表和批次按 task 域表合同查询，未反向导入 plan/performance ORM。禁用 performance 或同时禁用两模块可装配，单独禁用 plan 按原依赖拒绝。
+- 下列独立 20 例测试以正式模块和当前 HTTP 路由执行，每例独立内存库。两个模块分别测共享及本地已停用字段，分别在创建、旧单改状态、旧单同值提交、纯读及查询抛错时删除。隐藏 use 后创建绑定及状态更新各返回 409；正常同值 POST 后为 409，纯读后为 200，历史表读异常为 503。前后 GET 完全一致，失败时修订号不变。结果 20/20，退出 0。
+- MySQL 8.4.6 实库语义复核使用本机受保护的 3307 配置和只读事务，验证目标身份、单一迁移 head 和 +08:00，通过后用生产代码生成三条 SELECT，仅移除 FOR UPDATE 以保持非锁定读，逐条执行并回滚。计划和实绩均有命中，历史批次无命中，三条均可执行，非数据破坏演练。首次沙盒回环被拒，放行同一本机只读命令后退出 0。真实两种交错写和配置单例锁等待仍以原 3307 证据为准，更新先行 200/409，删除先行 200/422，新增槽占用为零。所有写路径先锁配置单例，随后再取任务/行锁；删除核验、发布和业务 use 各自处于同一事务。此次没有在正在使用的 dev 上重跑并发写入。
+- 对旧单，若添加字段后仅发生一次同值 POST，而唯一对应 use 事后被选择性抹去，创建版 use 仍在，且任务值、状态、更新时间均无变化，现有模型无法从持久数据识别这次破坏。正常 POST 的事务台账、迁入历史基线以及存在独立证据时的保守拒绝是本次 verdict 的适用条件。
+
+**完整后端回归。** 在 backend 执行 `/bin/zsh "$W/run-r3-time-tests.sh" . tests/test_generic_task*.py tests/test_{business_integration_storage,plc_facts_v2,acquisition_data_browse,acquisition_source_registry,equipment_observation_r10_flow,equipment_observation_r10,equipment_observation_r8,equipment_temperature_migration,legacy_acquisition_retirement,mapping_migration,business_integration_api,mapping_api}.py`，423 passed、14 skipped、1 条既有 SQLite datetime 适配警告，124.02 秒，退出 0。开发窗口中 r3-f04-backend-tests.log、r3-f04-frontend-tests.log、r3-f04-formal-build.log 的摘要分别为 `939e3050a7771f04d32b0c9b6eb43984009b7ff4b935165d4dfb27594c755244`、`d9acb52f67535544135b333fa5e9425f378077e1f68afd4c8437f347ba74deb4`、`bfd33a6cd16e7285f9210b07c282d01821f9f98e2ed779e23ae65042d70447ce`。
+
+**验收范围。** R2-AC01–11 依照第五次检查矩阵及本轮后端定向回归，涵盖规范化、容量、局部更新、新建、补建、回写、时区、事务、查询、权限及当前字段定义；MySQL 满容量来自早前已记录的验证。R2-AC12 的两个菜单分别访问 plan/shared-fields 和 performance/shared-fields，共用同一页面，列表保留各自本地入口。本轮逐文件一致并核对 manifest，两侧语言、尺寸、非管理员拒绝、列宽和草稿采用 QA5 独立 Chrome 结果，持久副本 qa5-shared-page-browser.json 与原 browser.json 均复算 `5fb905b445e38597da1a96bb7ed44988b5a906dea03611b87af1294fe3299817`。R2-AC13 本轮通过。R2-AC14 使用既有迁移/保护数据记录及本轮隔离链、退役行为回归。R2-AC15 综合采用后端定向回归、QA5 正式前端 92/92、构建及独立浏览器证据。R3-AC01–04 使用精确清单与迁移链、PLC Facts、设备及业务时间守卫的合成回归。R3-AC05–06 对照此前获准的备份、迁移及保护对账；R3-AC07 使用上述正式后端和逐字节不变的前端证据。原有全局权限审计基线失败及历史 skips 详见前轮。
+
+实库与自检输出的 SHA-256 已重新计算。migration-operation.json 为 `6ffcaeb668275a16cea4ee48e1122c61eb56ecdb5827222306c65c4d118e16e7`，dev-protected-data-reconciliation-final.json 为 `4b5988a7c83006d784df558a4937f46e9421ded7eef7afdd52014bde3d46a640`，dev-api-delete-concurrency.json 为 `0c85f3a99bdff064f51642b1472185b176ab04f519a622917aef0cef26067dc3`，backup-validated.json 为 `8615642c7bcdd9289988c7595bababdb635865ec8522d74f8224e00d77f24856`。未做恢复演练、PLC/SMA/CA 实机联调或生产部署。未改 dev 配置、profile、服务或手工验收任务。本轮探针从 stdin 执行，没有新建探针文件或后台进程。W、QA5 浏览器目录和此前构建由协调者确认无其他依赖后回收，实库证据及备份按原保留条件。无本轮 blocker。
+
+**持久证据。** 协调者将 W 中的 8 个脚本与开发日志逐字节复制到 `backend/data/maintenance-evidence/arch-task-001-r3-dev3307/qa6-retained/`，复算 8/8 均符合该目录的 `sha256.json`。QA5 的脱敏浏览器输出位于同级 `qa5-shared-page-browser.json`。核对上述证据可直接使用持久副本；命令中的 W 记录当时的执行位置。
+
+<details><summary>独立矩阵和实库只读探针的完整命令（从根目录运行）</summary>
+
+```sh
+cd backend && env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=.:tests TESTING=true MYSQL_HOST=127.0.0.1 MYSQL_PORT=1 .venv/bin/python -B - <<'PY'
+import asyncio,sys
+from unittest.mock import patch
+sys.path.append('tests')
+import test_generic_task_flow as f
+async def run(route,group,kind,mode):
+    async for h,_,_,_ in f.client.__wrapped__():
+        scope={'shared':'shared_sync','plan':'plan_local','performance':'performance_local'}[group]
+        if mode!='created': await f.put(h,route,'GTR3-QA6')
+        cfg=await f.configure(h,group,f.field(scope,7,'checkold',enabled=False,**({} if group=='plan' else {'performanceOwner':'automated'})))
+        if mode=='created': await f.put(h,route,'GTR3-QA6')
+        if mode=='changed': await f.put(h,route,'GTR3-QA6',productionStatus='error')
+        if mode=='unchanged': assert (await f.put(h,route,'GTR3-QA6'))['outcome']=='unchanged'
+        before=await f.get(h,route,'GTR3-QA6')
+        old=f.Transactions.execute
+        async def changed(self,q):
+            if mode=='fault' and 'FROM '+kind+'_main LEFT OUTER JOIN' in str(q): raise RuntimeError('read failed')
+            if mode in ('created','changed') and 'FROM task_field_config_uses' in str(q): q=q.where(False)
+            return await old(self,q)
+        with patch.object(f.Transactions,'execute',changed):
+            resp=await h.post(f.CONFIG+'/delete',json=dict(scope=scope,slotNo=7,name='checkold',configRevision=cfg['configRevision']))
+        expected=503 if mode=='fault' else 200 if mode=='read' else 409
+        assert resp.status_code==expected,(kind,group,mode,resp.status_code)
+        assert before==await f.get(h,route,'GTR3-QA6')
+        if expected!=200: assert cfg['configRevision']==f.data(await h.get(f.CONFIG,params={'module':kind}))['configRevision']
+async def main():
+    for route,kind in [(f.PLAN,'plan'),(f.PERF,'performance')]:
+        for group in ('shared',kind):
+            for mode in ('created','changed','unchanged','read','fault'): await run(route,group,kind,mode)
+    print('20/20')
+asyncio.run(main())
+PY
+```
+
+```sh
+cd backend && PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=.:/private/tmp/arch-task-001-r2.FeZuND .venv/bin/python -B - <<'PY'
+import asyncio
+from types import SimpleNamespace
+from datetime import datetime
+from window_shared import config,read_session,NEW
+from app.task.services.async_fields import _verify_subject_history
+from sqlalchemy import select,func
+from app.task.models.fields import FieldConfigState
+with read_session(config(),NEW) as (db,_):
+    version=db.execute(select(FieldConfigState.active_version)).scalar_one()
+    class Capture:
+        async def execute(self,q):
+            c=q.compile(dialect=db.dialect,compile_kwargs={'literal_binds':True})
+            sql=str(c)
+            assert sql.endswith(' FOR UPDATE')
+            hit=db.exec_driver_sql(sql.removesuffix(' FOR UPDATE')).first()
+            print(sql.split('FROM ')[1].split()[0], 'read_ok', bool(hit))
+            return SimpleNamespace(first=lambda:None)
+    active=SimpleNamespace(config_version=version,slot_no=1,scope='shared_sync',created_at=datetime(2099,1,1))
+    asyncio.run(_verify_subject_history(Capture(),('plan','performance','dispatch'),[active],active))
+PY
+```
+
+</details>
+
+---
+
+
+# ARCH-TASK-001 r3 第五次交接独立复验
+
+Status: qa_failed
+Handoff: Development 修复 R3-QA-F04 后重新交接。Human Owner 最终验收待后续独立 Verification。
+
+## R3-QA-F04 · 已用字段在使用记录缺失时被删除
+
+规格 R2-12 和 R2-AC13 要求历史使用证据不完整时保守拒绝删除。在正式树的 ASGI 路由、独立内存 SQLite 中，经 API 建立共享字段、写入计划槽值。完整使用证据时，删除返回 409。随后单独让使用记录的 SELECT 返回空，保留实际计划、绑定版本、字段定义及所有槽值。同一删除请求返回 HTTP 200、outcome=deleted、configVersion=3、configRevision="3"。原计划 GET 的 items 从 {"qaUsed":"retained"} 变为 {}。期望 409 task.field_in_use，字段仍可见。测试没有改写数据库使用记录，也未访问 dev。该缺失场景是故障注入，无证据表明 3307 实际丢失记录。
+
+定位于 backend/app/task/services/async_fields.py 的 delete_field。函数核对版本连续性、各版本定义数量、字段身份和 FieldConfigUse。如果实际使用行缺失，它未从仍可查询的任务绑定版本或历史批次识别矛盾，就发布删除后的配置。Development 应覆盖共享与各自本地作用域，保持无引用定义的正常删除。
+
+在 backend 目录以项目 .venv/bin/python -B 从标准输入运行，环境 TESTING=true、MYSQL_HOST=127.0.0.1、MYSQL_PORT=1。以下为可复核运行体。原观察脚本打印实际返回，退出 0；若将预期 409 设为断言，则当前候选失败。
+
+```python
+import asyncio
+import sys
+from unittest.mock import patch
+
+sys.path.append("tests")
+import test_generic_task_flow as f
+
+async def verify():
+    async for http, _, _, _ in f.client.__wrapped__():
+        cfg = await f.configure(http, "shared", f.field(
+            "shared_sync", 1, "qaUsed", performanceOwner="order_snapshot"))
+        await f.put(http, f.PLAN, "GTR3-QA5-F04", items={"qaUsed": "retained"})
+        payload = dict(scope="shared_sync", slotNo=1, name="qaUsed",
+                       configRevision=cfg["configRevision"])
+        route = f.CONFIG + "/delete"
+        print((await http.post(route, json=payload)).status_code)
+        execute = f.Transactions.execute
+
+        async def missing_use(self, query):
+            if "FROM task_field_config_uses" in str(query):
+                query = query.where(False)
+            return await execute(self, query)
+
+        with patch.object(f.Transactions, "execute", missing_use):
+            result = await http.post(route, json=payload)
+            print(result.status_code, result.json()["data"])
+            print((await f.get(http, f.PLAN, "GTR3-QA5-F04"))["items"])
+
+asyncio.run(verify())
+```
+
+## 输入、环境及复验范围
+
+- 正式未提交工作树 HEAD f7c5608c0e433612b15821a578a7ef3e4f155cdb。shasum -a 256 核对 spec、tasks、开始前 checklist，分别为 9307a205982c6952eb155c3bf91bfb84632670262c502b98cd5e52a2214cf3ff、f5440239c494f6399808924be6cc499b7e63ce18b90481a6400159b13a82f794、b138a65826030964ea45fdbe5a97c2d0a1c2997f2f1fececebb1864e58d70690。第五次交接 60 项清单 development-delivery-r3-shared-page-final-files.sha256 的摘要为 ec18f34757a115dc3d5a4e3c61d9c71dd2eabbb710af62e459c02bbe82d5a6ae。由根目录使用 shasum -a 256 -c 校验正式文件。并行工作树另有范围外差异。
+- 后端在 backend 运行 /bin/zsh /private/tmp/arch-task-001-r2.FeZuND/run-r3-time-tests.sh .，参数为 tests/test_generic_task*.py 及 tasks.md 首轮列明的 12 个保护回归模块。项目 Python 3.13，合成占位环境、无 MySQL 连接、pytest no_db。406 passed、14 skipped、1 条已有 SQLite datetime 警告；会话退出 0。跳过项按原任务记录，包括已退役行为、历史基线和显式外部夹具。首次单独探针用 sys.path.insert(0,"tests") 与 tests/app 重名导致导入失败，改为 append 后得到上述 API 观察。
+- 前端在 frontend-js 执行 TZ=America/New_York pnpm --config.verify-deps-before-run=false test:modules，92/92 通过。使用两个空非管理员授权数组、mock=false、/api/v1 执行同一 pnpm 的 build --outDir /private/tmp/gtr3-qa5-j81/dist，模块预检及 Vite 构建退出 0，有既有大块提示。单模块装配及显式 grant 下共同拒绝共享页面属 Registry 测试证据。
+- 对正式 5190/8000 独立运行 backend/.venv/bin/python -B /private/tmp/gtr3-qa5-j81/run-live-shared-page.py，退出 0。探针复用经复核的只读浏览器脚本，仅更换输出位置；Chrome 157 独立上下文，中英各 1360/390 像素，共 64 次真实 GET、6 次登录、4 次本机拦截的 409，零真实业务写。两入口均读取相同定义，两个列表只显示各自本地管理弹窗，冲突保留草稿、取消丢弃，两个非管理员的菜单均隐藏且两个直链均拒绝。桌面横滚 1206 px，拖宽 190→235，切换保留并恢复 190；窄屏滚动 1940/1912 px，页卡顶部 194、标题 214，位于顶栏底 186 之下。现场保存未执行，共享 API 持久化路径在独立 ASGI/SQLite 中真实发布和读回；指南、路由和共用编辑器均指向对应入口。浏览器已退出，输出 SHA-256 5fb905b445e38597da1a96bb7ed44988b5a906dea03611b87af1294fe3299817。临时产物可在交接后回收。
+- R2-AC01 至 AC11 的独立隔离套件覆盖规范化、100+100 槽、局部更新、补建、快照、回写、状态、采集时间、回滚、目标、分页及配置切换。固定 +08:00、精确小数和正负零的历史回归在本轮通过。MySQL 满容量来自历史 r1；并发、真实事务与保护数据对账沿用 tasks.md 所列 3307 切换证据。本轮未重复实库写入。R2-AC12 见浏览器与 Registry。R2-AC13 失败。R2-AC14 依据原迁移记录及本轮链/410 隔离回归，未重复切换。R2-AC15 有后端、OpenAPI、前端构建与真实浏览器证据，整体验收因 AC13 失败。
+- R3-AC01 至 AC04 依据精确交付清单、迁移及受保护 revision 的定向测试；R3-AC05、06 对应已记录切换前后证据（migration-operation.json、dev-protected-data-reconciliation-final.json 等），本轮未重跑迁移、实库并发、保护探针或恢复演练。R3-AC07 定向回归及正式构建通过，新增独立 AC13 反例阻止交付。历史基线的权限闭包审计失败仍按原记录。本轮未更改私有配置、服务、PLC 或两个手工任务号。
+
+以下保留第四次交接暂停、前三次 r3 失败及 r1 验证历史。
+
+---
+
+# ARCH-TASK-001 r3 第四次交接 · 独立 Verification 暂停
+
+Status: qa_blocked
+Handoff: 协调者及 PM 根据 Human Owner 最新页面要求处理范围和 Revision，待新的精确 Development handoff 后重新开始独立 QA。
+
+Human Owner 在真实页面澄清了导航与命名要求。计划、实绩导航下各需一个“共享字段管理”独立页面入口，共用页面和后端。两张列表的本地入口统一命名“本地字段管理”。本轮正式源码的 TaskPage.vue 在列表操作区打开共享设置弹窗。原 r2 的 R2-11 曾允许同一页面或组件；此处记录 Owner 新澄清及交付即将变更，未判为原规格实现失败。
+
+**已独立核对。** 2026-11-18，在正式工作树使用 shasum -a 256 核对批准 spec 摘要 9307a205982c6952eb155c3bf91bfb84632670262c502b98cd5e52a2214cf3ff、第四次 handoff tasks 摘要 632e6d5706050620f8576f7fc907b35acd68ddd4b23adcdfb047a8ab8ab08402、原 checklist 摘要 f09042ae6caf12e6d5a4b6f3651bd2da19e91576fbc1ffb63637fe393dbfd30c，以及 development-delivery-r3-f03-files.sha256 摘要 b32cf52e8e76245adfff149804d480552a199f31909ff67570122bb18df19822。以 Python hashlib 对清单全部 53 项逐项复算，均相符。默认沙箱下 curl 的两个 HTTP 状态输出为 000；获准访问本机后，curl -fsS 实测 8000/openapi.json 和 5190/ 均为 200，退出 0。源码阅读涉及任务数值、时间、HTTP 适配及列表设置入口。
+
+**尚未验完。** 本轮未连接 3307 独立确认 head 或备份及保护数据，未复验 F01、F02、F03 的运行时行为。R2-AC01–15 和 R3-AC01–07 均未完成独立验收。权限审计旧失败、SQLite、MySQL、浏览器和构建结果仍归各自历史轮次。Owner 暂停指令到达时没有在途请求、自有服务或浏览器进程。本轮实际业务写入、字段操作和浏览器交互均为零；空的自有临时目录已回收。原三轮 r3 qa_failed 和 r1 历史全文保留如下。Human Owner 最终验收待后续交接。
+
+---
+
+Task ID: ARCH-TASK-001
+Revision: r3
+Status: qa_failed
+Owner Role: QA / Verification
+Handoff: Development 修复 R3-QA-F03，再交独立 Verification。
+
+# r3 第三次独立验证 · 2026-11-18
+
+**R3-QA-F03：等值数字重报推进更新时间。** 正式树 ASGI 入口、内存 SQLite、独立 pytest 探针。在计划本地配置 number 字段 amount，向 /integration/plans/upsert 发送两个 application/json 原始正文：
+
+```json
+{"taskNo":"ZERO","items":{"amount":0}}
+{"taskNo":"ZERO","items":{"amount":-0.0}}
+```
+
+第一份返回 created、amount=0、updatedAt=2026-11-18T17:14:06.317475+08:00。第二份返回 updated、amount=0、updatedAt=2026-11-18T17:14:06.320163+08:00。R2-04 要求相同业务值重发保持时间并返回 unchanged。domain.py 的 encode_value 把带负号的 Decimal 零编码为字符串 -0，其他零编码为 0；读取均得到整数 0，比较 JSON 槽位时却不同。F03 影响 AC02，其他路径使用同一编码函数，尚须复核实绩和共享回写。此次复验没有向真实库写业务或配置。返工应覆盖历史存量的两种零表示。
+
+**交接身份。** shasum -a 256 核对 spec 9307a205982c6952eb155c3bf91bfb84632670262c502b98cd5e52a2214cf3ff，tasks 4fb6a10d14cf496d2820f71f8dea2e71706645fa882d8a8fc2aa920d96c03f41，原 checklist 2cf7f94ae1340e3662ed038771eb68bd1b2f12cafb69e03f43510a4e78d23025，f02 清单 eb36d9abbfd7e9622b8cd5ec6944a1c20e2bea4f61eb5f154e041b27c6669158。正式树 shasum -a 256 -c 清单为 53/53，git diff --check 通过。以下原有历史按字节保留。
+
+**本轮实际验证。** 临时窗口 Q=/private/tmp/arch-task001-qa3r3.W0e4y6，保留供 Development/下一轮 QA，之后协调者可清理。开发运行器 W=/private/tmp/arch-task-001-r2.FeZuND。主要结论持久记录于本节。
+
+- backend 下 TESTING=true MYSQL_HOST=127.0.0.1 MYSQL_PORT=1 PYTHONPATH=.:tests PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m pytest -s -q -c pytest.ini -p no:cacheprovider $Q/test_equal_zero.py --tb=short，退出 1，1 failed。
+- backend 下 /bin/zsh $W/run-r3-time-tests.sh . tests/test_generic_task*.py 加 tasks 首轮所列 12 个回归模块，退出 0，405 passed、14 skipped、1 条 SQLite datetime 弃用提示。fixture 使用无效 MySQL 端口、SQLite/合成依赖。F02 原始 HTTP 字节覆盖计划、实绩、集成和登录人工四个入口，对指定超精度输入整包拒绝、合法值通过，认证与严格元数据测试通过。F01 在夏、冬、当前、偏移、微秒、边界和日期区间通过。F02 本轮没有重新向真实 MySQL 发写请求。
+- 同运行器单跑 tests/test_business_module_permissions.py，退出 1，1 passed、1 failed。全局审计断言为 /api/v1/acquisition-data/options、plc_facts、空权限集，和此前基线记录同一路径。审计文件与相应 acquisition_data 目录相对 HEAD 无差异，未见 r3 任务路由触发该失败。
+- frontend-js 下 TZ=America/New_York pnpm --config.verify-deps-before-run=false test:modules，退出 0，90/90。此次未重跑构建。
+- backend/.venv/bin/python -B $Q/run-live-r3-f01.py 与 $Q/run-live-r3.py 均退出 0。复用已检查的驱动，报告重定向到 Q，以独立真实 Chrome 157 context 登录 5190，仅允许登录与 GET。上海/纽约时区列表同为 1990-07-01 08:00:00，两组各核对三项详情和六条真实读请求。两页在 1360/390px 的标题、筛选、表格顺序正确，可按合成号查询，局部/共享设置及语言切换通过，26 个 API 请求，业务写入 0。列宽拖动持久化本轮未独立实测。
+- curl 检查 8000/openapi.json 为 200。backend/.venv/bin/python -B $Q/reconcile.py 退出 0，3307、MySQL 8.4.6、固定 +08、运行 head ae20b4d6f831 及 profile 身份断言通过。只读事务比对迁移后合成前摘要，原计划 2、实绩 2、批次 2、历史引用 6、历史版本 3、历史定义 10、PLC 历史 107、latest 6，逐组 SHA 相同。设备配置当前为 1 组和 2 项。没有操作设备、服务或手动示例。
+
+| 验收项 | 独立证据与剩余限制 |
+|---|---|
+| R2-AC01 | SQLite 槽位容量及跨组同名回归通过，未重复 MySQL 物理容量试验。 |
+| R2-AC02 | F03 失败。超精度、类型、清空和混合包的既有 ASGI 回归通过。 |
+| R2-AC03 / 04 | 无计划补建、回填优先级和快照在隔离套件覆盖。未重新实库写入。 |
+| R2-AC05 / 06 | 合并、状态回写、独立时间及恢复 running 的隔离回归通过；新增 F03 对共享数值的影响待返工覆盖。 |
+| R2-AC07 | 固定偏移、历史时间及查询隔离回归通过；现有历史合成实绩在真实浏览器显示通过。 |
+| R2-AC08 | SQLite 回滚和锁查询顺序有测试，本轮无真实 MySQL 故障和交错写重演。 |
+| R2-AC09 / 10 | 隔离回归覆盖目标冲突、无 token、权限、分页、示例，真实浏览器覆盖登录查询。 |
+| R2-AC11 | 当前定义、使用和展示的隔离测试通过；无本轮实库配置切换。 |
+| R2-AC12 | 两页两尺寸、共享和本地设置、双语真实浏览器通过。列宽跨页持久化、冲突不丢草稿仍待完整实测。 |
+| R2-AC13 | 槽位删除与使用保护的 SQLite/锁语句测试通过，实库删除竞态未重跑。 |
+| R2-AC14 | 独立校验旧记录及 PLC 摘要。迁移/旧接口测试属于隔离回归，未重做切换。 |
+| R2-AC15 | 定向后端与前端模块完成；真实写入、事务并发、列宽和正式构建尚待完整验证。 |
+| R3-AC01 | 53 项摘要及迁移/守卫定向回归通过；整体 r2 业务因 F03 失败。 |
+| R3-AC02 / 03 / 04 | 合成 revision、异步/同步 target 守卫、设备时序及采用证据的既有定向回归通过；仅为合成环境覆盖。 |
+| R3-AC05 / 06 | 切换已有 Development 记录。本轮检查活动 profile/head 和上述历史摘要，未独立复演备份恢复、现场和设备写入。 |
+| R3-AC07 | 隔离回归、浏览器和读库见上。全局权限审计单列，尚未满足全部验收。 |
+
+**结论：qa_failed。** 先将 F03 返回 Development。修复后须重新交接精确源文件清单，复验业务值等同和时间语义，并完成仍缺的真库/浏览器验收。Human Owner 最终验收待独立 QA 通过后决定。
+
+---
+
+Task ID: ARCH-TASK-001
+Revision: r3
+Status: qa_failed
+Owner Role: QA / Verification
+Handoff: Development 修复 R3-QA-F02 后重新交付，供 fresh Verification 复验。
+
+# r3 第二次独立验证 · 2026-11-18
+
+正式树 HEAD 为 `f7c5608c0e433612b15821a578a7ef3e4f155cdb`。规格 SHA-256 为 `9307a205982c6952eb155c3bf91bfb84632670262c502b98cd5e52a2214cf3ff`，第二次 tasks 为 `72e9e1cab9b65f0f9866d7361c9415645acd2ca935ef135cf823bbfa262e8931`，原 checklist 为 `14085a57b6f556343e954d610f9f7c7e88a64a743944ddb829aa977127607bf2`。本节以下保留其完整原文。正式树执行 `shasum -a 256 -c backend/data/maintenance-evidence/arch-task-001-r3-dev3307/development-delivery-r3-f01-files.sha256`，53/53 一致，清单 SHA 为 `e35290177b913b9327096305461a5e18ac5f119dfac059d2ecae517726e849ee`。
+
+## R3-QA-F02 · 超精度 JSON 数值获准写入
+
+R2-01、R2-AC02 要求 number 最多四位小数，超限须整包拒绝。正式 8000 的 `POST /api/v1/integration/plans/upsert`，无 Bearer，Content-Type 为 application/json。使用 `httpx.post(..., content=body)` 发送以下原始文本，数字以文本拼入，客户端未做浮点转换。
+
+```json
+{"taskNo":"GTR3-QA-9E05CCD4","remark":"QA-precision","items":{"gtr3C9EF6AActual":9999999999.0001001}}
+```
+
+复用既有启用的共享 number 字段，slot 90、isNullable 和 syncEnabled 为 true，实绩归属 automated。请求前按同号 GET 验证该字段为 null，备注为 QA-retained。预期 HTTP 422 且二者保持。实际 HTTP 200，再 GET 返回 9999999999.0001 和 QA-precision。原始 7 位小数被舍入并保存，混合包中的另一字段也已写入。正常 HTTP 复现，未直接写数据库。应用层对已解析的数值执行 `Decimal(str(value))`；计划与实绩调用同一 item_patch / encode_value。此次实库失败复现在计划入口，实绩入口需在返工回归中单独覆盖。
+
+独立内存 HTTP 复现补充：正式 backend 下执行 `zsh /private/tmp/arch-task-001-r2.FeZuND/run-r3-time-tests.sh . -o asyncio_mode=auto --import-mode=prepend -o 'pythonpath=. tests' -s /private/tmp/arch-task-r3-qa2/test_precision_extra.py`，两项缺陷复现断言通过，退出 0。计划与实绩的正常路由均对原文 9999999999.0001001 和 1e-400 返回 200，同属 F02；两端均接受 9999999999，拒绝 10000000000、true、字符串 "123" 及 1.00001（422）。临时测试位于项目外触发两条 pytest 标记注册警告。此检查仅使用 SQLite 内存库。
+
+## 本轮命令与覆盖
+
+- `backend/.venv/bin/python -B /private/tmp/arch-task-r3-qa2/probe.py` 退出 1，最后断言为上述 422/原备注。失败前已通过 F01 的三条正常 HTTP 输入、MySQL 8.4.6 的 3307 只读事务逐项核对与当前 head 身份守卫。1990 夏 UTC、冬 UTC 与夏 -04:00 分别保存并返回 08:00:00、08:00:00 和 08:30:00.123456，均 +08:00。无计划建实绩、补建计划继承 running、实绩 unchanged 时修复计划 error、completed 再 running、并发分别更新备注和共享值、显式 null 同步皆通过。仅上述一条 QA 号两表留存。
+- 正式 backend 中执行 `zsh /private/tmp/arch-task-001-r2.FeZuND/run-r3-time-tests.sh . tests/test_generic_task*.py tests/test_business_integration_storage.py tests/test_plc_facts_v2.py tests/test_acquisition_data_browse.py tests/test_acquisition_source_registry.py tests/test_equipment_observation_r10_flow.py tests/test_equipment_observation_r10.py tests/test_equipment_observation_r8.py tests/test_equipment_temperature_migration.py tests/test_legacy_acquisition_retirement.py tests/test_mapping_migration.py tests/test_business_integration_api.py tests/test_mapping_api.py tests/test_business_module_permissions.py`，401 passed、14 skipped、1 failed，退出 1。工具仅设置隔离 fixture、127.0.0.1:1、TESTING=true、no_db、关闭缓存；SQLite 时间适配器有一条弃用提示。F01 当前时间、精度、存储上下界和两个列表筛选回归通过。唯一失败是权限闭包断言 `('/api/v1/acquisition-data/options', 'plc_facts', set())`，与交接中登记的基线一致，未证实它是本次 r3 变更引入或实际匿名访问成功。未将整组计为通过。
+- 正式 frontend-js 执行 `TZ=America/New_York pnpm --config.verify-deps-before-run=false test:modules`，90 passed、0 skipped；同一 pnpm 的 `build --outDir /private/tmp/arch-task-r3-qa2/dist` 成功，保留 Vite 大块警告，均退出 0。
+- `backend/.venv/bin/python -B /private/tmp/arch-task-r3-qa2/run-live-r3-f01.py` 与同目录 `run-live-r3.py` 各退出 0。真实 Chrome 157 的上海与纽约两上下文均在实绩列表读到 1990-07-01 08:00:00，详情三个值正确。计划/实绩分别用 1360 和 390 宽度检查三段布局、真实筛选、共享/本地字段与双语入口；26 次实际 API 请求，两个独立登录均 200，浏览器业务写入 0。
+
+## 验收范围与下一次交接
+
+R2-AC02 因 F02 失败。R2-AC03/05/06/07/08 的上述子场景获实库证据，R2-AC12 部分获浏览器证据。定向集覆盖 R2-AC01–15 的部分路径及 R3 的迁移和三个兼容守卫；本轮 100 槽是 SQLite 功能结果，r1 的 MySQL 物理满槽属于历史。R2-AC01、03–15 及 R3-AC01–07 均未在本轮逐项完整签收。真实 MySQL 两表间故障回滚、删除竞态、全量列宽交互、全部保护对象与备份逐项独立对账仍须复核。已知失败后依协调者指示停止业务写入并交 Development。保留预留手工订单、既有两计划/实绩/批次、并行设备配置和 QA 合成记录；本轮没执行迁移、恢复、清理或 PLC 操作。临时目录及日志供返工复验对照，复验结束后由协调者回收。Human Owner 最终验收待后续交接。
+
+---
+
+Task ID: ARCH-TASK-001
+Revision: r3
+Status: qa_failed
+Owner Role: QA / Verification
+Handoff: Development 修复 R3-QA-F01 后重新交接，重新执行 fresh Verification。
+
+# r3 首次独立验证
+
+2026-11-18，正式工作树 HEAD 为 `f7c5608c0e433612b15821a578a7ef3e4f155cdb`。对规格、Development 交接、原 checklist 和候选清单执行 `shasum -a 256`，退出 0。摘要依次为 `9307a205982c6952eb155c3bf91bfb84632670262c502b98cd5e52a2214cf3ff`、`15e871add6ee71b17c34cdbc3d1abb5162a182bae9d54f3c9aa27fbde395d605`、`673a6abe5aaae4533be6cf4a43583ed7ac1762a54ce0c05b0aa4f56f65095ae1`、`71a4835b7c6998f031ba38a55d1d7fdfc1636e603f6fce0c773821c6ad047d3c`。正式树根运行 `set -o pipefail; shasum -a 256 -c /private/tmp/arch-task-001-r2.FeZuND/candidate-inventory.sha256 | rg -c ': OK$'`，退出 0，53/53 相符。
+
+## R3-QA-F01 · 合法时间未按固定 +08:00 保存和输出
+
+R2-03 与 R2-AC07 要求有偏移的输入按项目东八区保存并输出 `+08:00`。正式后端接受 `1990-07-01T00:00:00Z`。期望入库前墙钟值为 `08:00:00`，输出 `1990-07-01T08:00:00+08:00`。实际入库前为 `09:00:00`，输出 `1990-07-01T09:00:00+09:00`。原因是 `backend/app/task/domain.py` 第 8、39、51–52 行使用地区的历史夏令时偏移。实绩服务的 observedAt、startedAt、completedAt，以及任务列表时间边界，共用这一转换。未对实际数据库作写入推断。
+
+正式 `backend/` 内运行以下无数据库复现，断言退出 **1**。
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -c "from app.performance.schemas.workflow import PerformanceUpsert; from app.task.domain import local_time,wire_time; v=PerformanceUpsert(taskNo='GTR3-QA-TIME',observedAt='1990-07-01T00:00:00Z').observedAt; dt=local_time(v); print('stored=',dt,'wire=',wire_time(dt)); assert wire_time(dt)=='1990-07-01T08:00:00+08:00'"
+```
+
+另用相同函数分别代入 1990-01-01、1990-07-01、2026-07-01 三个 UTC 零点，退出 0，输出小时和偏移依次为 08/+08、09/+09、08/+08。近期日期测试无法发现该缺陷。
+
+**判定与范围。** R2-AC07 失败，整份 r3 返回 Development。R3-AC01 只完成候选文件摘要检查。R2-AC01–06、08–15 和 R3-AC01–07 的完整验收留待重新交接。此轮未执行实库 HTTP 写入、浏览器操作、数据库测试、迁移、服务或配置变更，未生成或删除任何测试任务、字段、设备配置。两条预留手工任务不受影响。本轮没有独立验证全槽 MySQL、备份恢复或采集角色审计。下一轮需在重新交接的正式树核对全部条目，并检查历史偏移输入、普通日期及时间筛选等价性。Human Owner 最终验收仍待后续交接。
+
+---
+
+## 历史记录 · r1 原文
+
 Task ID: ARCH-TASK-001
 Revision: r1
 Status: qa_passed
