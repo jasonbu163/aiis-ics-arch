@@ -113,7 +113,7 @@ def _record_diagnostic(
         )
     elif status == "skipped-no-manifest":
         log_event(
-            "INFO",
+            "DEBUG",
             "backend.module_discovery_skipped",
             module=module,
             stage=stage,
@@ -121,7 +121,7 @@ def _record_diagnostic(
         )
     else:
         log_event(
-            "INFO",
+            "DEBUG",
             "backend.module_discovery_loaded",
             module=module,
             stage=stage,

@@ -11,6 +11,19 @@
   max-width: none;
 }
 
+.connection-form {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.connection-form > .test-address {
+  grid-column: 1 / -1;
+}
+
+.connection-form .test-address input {
+  background: var(--agent-surface-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
 .diagnostics-layout {
   display: grid;
   grid-template-columns: minmax(0, 8fr) minmax(360px, 4fr);
@@ -134,13 +147,6 @@
   margin-top: 16px;
 }
 
-.openapi-catalog-count {
-  color: var(--agent-text-muted);
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
 .openapi-operation-list {
   display: grid;
   gap: 8px;
@@ -252,6 +258,10 @@
 }
 
 @media (max-width: 760px) {
+  .connection-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .openapi-operation summary {
     align-items: flex-start;
     flex-direction: column;
@@ -259,5 +269,11 @@
 
   .openapi-operation-title {
     text-align: left;
+  }
+}
+
+@media (max-width: 520px) {
+  .connection-form {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

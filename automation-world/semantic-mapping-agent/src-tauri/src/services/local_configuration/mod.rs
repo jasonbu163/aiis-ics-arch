@@ -232,5 +232,29 @@ fn entities(d: &ConfigurationDocument) -> BTreeMap<String, Value> {
             );
         }
     }
+    if let Some(acquisition) = &d.acquisition_loopback {
+        out.insert(
+            "acquisitionLoopback".into(),
+            serde_json::to_value(acquisition).unwrap(),
+        );
+    }
     out
+}
+
+impl LocalConfigurationService {
+    pub fn save_acquisition_loopback(
+        &self,
+        expected: u64,
+        config: crate::contracts::acquisition::LoopbackConfig,
+    ) -> Result<ConfigurationSnapshot, String> {
+        let mut inner = self.lock()?;
+        let result = store(&mut inner)?.update(expected, |current| {
+            crate::domain::acquisition::require_material(current, &config.material_key)?;
+            let mut next = current.clone();
+            next.acquisition_loopback = Some(config);
+            Ok(next)
+        });
+        record("acquisition_configuration", expected, &result);
+        result
+    }
 }

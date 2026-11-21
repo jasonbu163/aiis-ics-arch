@@ -35,6 +35,33 @@
         "title": "ConfigSave",
         "type": "object"
       },
+      "Envelope_FieldBatchDeleteResult_": {
+        "properties": {
+          "code": {
+            "default": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/FieldBatchDeleteResult"
+          },
+          "message": {
+            "default": "success",
+            "title": "Message",
+            "type": "string"
+          },
+          "timestamp": {
+            "title": "Timestamp",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "data",
+          "timestamp"
+        ],
+        "title": "Envelope[FieldBatchDeleteResult]",
+        "type": "object"
+      },
       "Envelope_FieldConfigResult_": {
         "properties": {
           "code": {
@@ -87,6 +114,33 @@
           "timestamp"
         ],
         "title": "Envelope[FieldDeleteResult]",
+        "type": "object"
+      },
+      "Envelope_LocalFieldBatchDeleteResult_": {
+        "properties": {
+          "code": {
+            "default": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/LocalFieldBatchDeleteResult"
+          },
+          "message": {
+            "default": "success",
+            "title": "Message",
+            "type": "string"
+          },
+          "timestamp": {
+            "title": "Timestamp",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "data",
+          "timestamp"
+        ],
+        "title": "Envelope[LocalFieldBatchDeleteResult]",
         "type": "object"
       },
       "Envelope_Page_PerformanceRecord__": {
@@ -289,6 +343,63 @@
           "timestamp"
         ],
         "title": "ErrorEnvelope",
+        "type": "object"
+      },
+      "FieldBatchDelete": {
+        "additionalProperties": false,
+        "properties": {
+          "configRevision": {
+            "pattern": "^[1-9][0-9]{0,19}$",
+            "title": "Configrevision",
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/SharedFieldIdentity"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Fields",
+            "type": "array"
+          }
+        },
+        "required": [
+          "configRevision",
+          "fields"
+        ],
+        "title": "FieldBatchDelete",
+        "type": "object"
+      },
+      "FieldBatchDeleteResult": {
+        "properties": {
+          "configRevision": {
+            "title": "Configrevision",
+            "type": "string"
+          },
+          "configVersion": {
+            "title": "Configversion",
+            "type": "integer"
+          },
+          "deleted": {
+            "items": {
+              "$ref": "#/components/schemas/SharedFieldIdentity"
+            },
+            "title": "Deleted",
+            "type": "array"
+          },
+          "outcome": {
+            "const": "deleted",
+            "title": "Outcome",
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome",
+          "deleted",
+          "configVersion",
+          "configRevision"
+        ],
+        "title": "FieldBatchDeleteResult",
         "type": "object"
       },
       "FieldChange": {
@@ -765,6 +876,103 @@
           "name"
         ],
         "title": "FieldDeleteResult",
+        "type": "object"
+      },
+      "LocalFieldBatchDelete": {
+        "additionalProperties": false,
+        "properties": {
+          "configRevision": {
+            "pattern": "^[1-9][0-9]{0,19}$",
+            "title": "Configrevision",
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/LocalFieldIdentity"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Fields",
+            "type": "array"
+          },
+          "module": {
+            "enum": [
+              "plan",
+              "performance"
+            ],
+            "title": "Module",
+            "type": "string"
+          }
+        },
+        "required": [
+          "module",
+          "configRevision",
+          "fields"
+        ],
+        "title": "LocalFieldBatchDelete",
+        "type": "object"
+      },
+      "LocalFieldBatchDeleteResult": {
+        "properties": {
+          "configRevision": {
+            "title": "Configrevision",
+            "type": "string"
+          },
+          "configVersion": {
+            "title": "Configversion",
+            "type": "integer"
+          },
+          "deleted": {
+            "items": {
+              "$ref": "#/components/schemas/LocalFieldIdentity"
+            },
+            "title": "Deleted",
+            "type": "array"
+          },
+          "outcome": {
+            "const": "deleted",
+            "title": "Outcome",
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome",
+          "deleted",
+          "configVersion",
+          "configRevision"
+        ],
+        "title": "LocalFieldBatchDeleteResult",
+        "type": "object"
+      },
+      "LocalFieldIdentity": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "pattern": "^[a-z][A-Za-z0-9_]{0,63}$",
+            "title": "Name",
+            "type": "string"
+          },
+          "scope": {
+            "enum": [
+              "plan_local",
+              "performance_local"
+            ],
+            "title": "Scope",
+            "type": "string"
+          },
+          "slotNo": {
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Slotno",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "scope",
+          "slotNo",
+          "name"
+        ],
+        "title": "LocalFieldIdentity",
         "type": "object"
       },
       "ManualEdit": {
@@ -1452,6 +1660,34 @@
           "taskNo"
         ],
         "title": "PlanUpsert",
+        "type": "object"
+      },
+      "SharedFieldIdentity": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "pattern": "^[a-z][A-Za-z0-9_]{0,63}$",
+            "title": "Name",
+            "type": "string"
+          },
+          "scope": {
+            "const": "shared_sync",
+            "title": "Scope",
+            "type": "string"
+          },
+          "slotNo": {
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Slotno",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "scope",
+          "slotNo",
+          "name"
+        ],
+        "title": "SharedFieldIdentity",
         "type": "object"
       },
       "TaskErrorCode": {
@@ -3162,6 +3398,102 @@
         ]
       }
     },
+    "/api/v1/task-field-configs/batch-delete": {
+      "post": {
+        "operationId": "drop_shared_fields_api_v1_task_field_configs_batch_delete_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FieldBatchDelete"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_FieldBatchDeleteResult_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Drop Shared Fields",
+        "tags": [
+          "Task fields"
+        ]
+      }
+    },
     "/api/v1/task-field-configs/delete": {
       "post": {
         "operationId": "drop_field_api_v1_task_field_configs_delete_post",
@@ -3253,6 +3585,102 @@
           }
         ],
         "summary": "Drop Field",
+        "tags": [
+          "Task fields"
+        ]
+      }
+    },
+    "/api/v1/task-field-configs/local/batch-delete": {
+      "post": {
+        "operationId": "drop_local_fields_task_field_configs_local_batch_delete_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocalFieldBatchDelete"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_LocalFieldBatchDeleteResult_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Drop Local Fields",
         "tags": [
           "Task fields"
         ]

@@ -3,5 +3,6 @@ import type { Component } from 'vue'
 export type UiTheme = 'light' | 'dark'
 export type UiTone = 'neutral' | 'success' | 'warning' | 'danger'
 export type ActionTone = 'primary' | 'secondary' | 'success' | 'warning' | 'danger'
+export interface CardHeaderStatus { id: string; label: string; tone?: UiTone }
 export interface NavigationChildItem { id: string; label: string; icon?: Component }
 export interface NavigationItem extends NavigationChildItem { children?: NavigationChildItem[] }

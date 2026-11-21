@@ -9,7 +9,8 @@
 -->
 <script setup lang="ts">
 import { useTableWidths, vTableWidths } from "../../../console/tableWidths";
-import { ConsoleCard, ConsoleActionButton, StatusCapsule } from "@aw-ui";
+import { ConsoleCard, ConsoleActionButton, StatusCapsule, type CardHeaderStatus } from "@aw-ui";
+import { Refresh } from "@element-plus/icons-vue";
 import { computed, ref } from "vue";
 import type { LocalImportPreview } from "../api/localConfiguration";
 import type { LocaleMessages } from "../../../locales";
@@ -101,24 +102,35 @@ function normalizationReason(errorCode: string | null) {
 }
 
 const materialsTable = useTableWidths("api-materials", [{ id: "select", width: 64, min: 64, fixed: true }, { id: "method", width: 100 }, { id: "name", width: 220 }, { id: "path", width: 250 }, { id: "operationId", width: 180 }, { id: "parameters", width: 180 }, { id: "source", width: 180 }, { id: "loadability", width: 220 }, { id: "selected", width: 180 }]);
+
+const headerStatuses = computed<CardHeaderStatus[]>(() => {
+  const { labels, selectedIdentities, savedMaterials } = props;
+  const saved = new Set(savedMaterials.map(item => apiMaterialIdentity(item.httpMethod, item.path)));
+  const dirty = selectedIdentities.length !== saved.size || selectedIdentities.some(id => !saved.has(id));
+  const entries: CardHeaderStatus[] = [];
+  if (props.busy) entries.push({ id: "working", label: labels.loading });
+  if (props.catalogPreview) entries.push({ id: "preview", label: labels.catalogPreviewPending, tone: "warning" });
+  entries.push(dirty
+    ? { id: "selection", label: labels.selectionPending, tone: "warning" }
+    : { id: "selection", label: labels.savedItemCount.replace("{count}", String(saved.size)), tone: "success" });
+  entries.push({ id: "catalog", label: labels.localCatalogCount.replace("{count}", String(props.operations.length)) });
+  return entries;
+});
 </script>
 
 <template>
   <div class="mapping-page-stack api-materials-stack">
-    <p>{{ labels.targetApiPartUnionHint }}</p>
-    <ConsoleCard :title="labels.apiMaterialsTitle">
-    <p v-if="busy" class="hint" role="status">{{ labels.loading }}</p>
-<template #actions><StatusCapsule label="OpenAPI · HTTP" /></template>
-      <p>{{ labels.apiMaterialsHint }}</p>
-      <div class="action-row api-materials-actions">
-        <ConsoleActionButton tone="secondary" native-type="button" :disabled="!enabled || busy" @click="emit('reload')">{{ labels.apiMaterialsReload }}</ConsoleActionButton>
-        <ConsoleActionButton tone="primary" native-type="button" :disabled="!enabled || busy || !canSave" @click="emit('save')">{{ labels.apiMaterialsSaveSelection }}</ConsoleActionButton>
-      </div>
-      <div class="action-row">
+    <ConsoleCard :title="labels.apiMaterialsTitle" :header-statuses="headerStatuses" :status-overflow-label="labels.moreCardStatuses" :help="labels.apiMaterialsHint + '\n' + labels.targetApiPartUnionHint" :help-label="labels.apiMaterialsTitle + labels.cardHelpSuffix" help-append-to="#sma-overlays">
+      <template #actions>
         <ConsoleActionButton tone="secondary" :disabled="!enabled || busy" @click="chooseOpenApiFile">{{ labels.localOpenApiImport }}</ConsoleActionButton>
-        <span class="configuration-file-name" role="status">{{ openApiFileName || labels.localConfigurationNoFileSelected }}</span>
-        <input ref="openApiFileInput" class="facts-file-input" type="file" accept=".json,application/json" :disabled="!enabled || busy" @change="importOpenApiFile" />
-      </div>
+        <ConsoleActionButton tone="primary" native-type="button" :disabled="!enabled || busy || !canSave" @click="emit('save')">{{ labels.apiMaterialsSaveSelection }}</ConsoleActionButton>
+      </template>
+      <template #refresh>
+        <ConsoleActionButton tone="secondary" native-type="button" :icon="Refresh" :title="labels.apiMaterialsReload" :aria-label="labels.apiMaterialsReload" :disabled="!enabled || busy" @click="emit('reload')">{{ labels.refresh }}</ConsoleActionButton>
+      </template>
+      <p class="configuration-file-name" role="status">{{ openApiFileName || labels.localConfigurationNoFileSelected }}</p>
+      <input ref="openApiFileInput" class="facts-file-input" type="file" accept=".json,application/json" :disabled="!enabled || busy" @change="importOpenApiFile" />
+      <p v-if="result" class="notice" role="status">{{ labels.apiMaterialsSaveResult.replace('{created}', String(result.created)).replace('{updated}', String(result.updated)).replace('{unchanged}', String(result.unchanged)).replace('{removed}', String(result.removed)) }}</p>
       <section v-if="catalogPreview">
         <p>{{ labels.localOpenApiPreview }} · {{ labels.mappingBatchErrors }}: {{ catalogPreview.errors.length }}</p>
         <ul><li v-for="operation in catalogCandidates" :key="`${operation.method} ${operation.path}`"><code>{{ operation.method }} {{ operation.path }}</code> · {{ operation.summary }} · {{ operation.normalizationStatus === "ready" ? labels.apiMaterialsReady : labels.apiMaterialsUnsupported.replace("{reason}", normalizationReason(operation.normalizationErrorCode)) }}</li></ul>
@@ -126,12 +138,15 @@ const materialsTable = useTableWidths("api-materials", [{ id: "select", width: 6
         <ConsoleActionButton :disabled="busy || catalogPreview.errors.length > 0" @click="emit('apply-catalog')">{{ labels.mappingBatchApply }}</ConsoleActionButton>
       </section>
       <p v-if="missingSavedCount" class="warning" role="alert">{{ labels.apiMaterialsMissingWarning.replace('{count}', String(missingSavedCount)) }}</p>
-      <p v-if="result" class="notice">{{ labels.apiMaterialsSaveResult.replace('{created}', String(result.created)).replace('{updated}', String(result.updated)).replace('{unchanged}', String(result.unchanged)).replace('{removed}', String(result.removed)) }}</p>
       <p v-if="error" class="warning" role="alert">{{ labels.apiMaterialsOperationFailed }} {{ /CONFLICT|PREVIEW_CHANGED/.test(error) ? labels.localConfigurationConflict : error }}</p>
     </ConsoleCard>
 
-    <ConsoleCard :title="labels.apiMaterialsCandidatesTitle">
-      <div v-if="operations.length" class="api-materials-filters">
+    <ConsoleCard :title="labels.apiMaterialsCandidatesTitle" :help="labels.apiMaterialsListHelp" :help-label="labels.apiMaterialsCandidatesTitle + labels.cardHelpSuffix" help-append-to="#sma-overlays">
+      <template #actions>
+        <ConsoleActionButton size="small" @click="materialsTable.reset" :title="labels.resetTableWidthsHelp">{{ labels.resetTableWidths }}</ConsoleActionButton>
+      </template>
+      <template v-if="operations.length" #tools>
+        <div class="api-materials-filters">
         <label>
           <span>{{ labels.apiMaterialsFilterMethod }}</span>
           <select v-model="methodFilter">
@@ -153,10 +168,10 @@ const materialsTable = useTableWidths("api-materials", [{ id: "select", width: 6
           </select>
         </label>
         <p class="api-materials-filter-count">{{ labels.apiMaterialsFilterResult.replace('{count}', String(filteredOperations.length)) }}</p>
-      </div>
+        </div>
+      </template>
       <div v-if="filteredOperations.length" class="table-scroll mapping-list-scroll" tabindex="0">
-        <ConsoleActionButton size="small" @click="materialsTable.reset">{{ labels.resetTableWidths }}</ConsoleActionButton>
-<table v-table-widths="[materialsTable, labels.resizeTableColumn]" class="api-materials-table">
+        <table v-table-widths="[materialsTable, labels.resizeTableColumn]" class="api-materials-table">
           <thead><tr><th>{{ labels.apiMaterialsUse }}</th><th>{{ labels.apiMaterialsMethod }}</th><th>{{ labels.targetApiName }}</th><th>{{ labels.targetApiPath }}</th><th>{{ labels.targetApiOperationId }}</th><th>{{ labels.apiMaterialsParameters }}</th><th>{{ labels.apiMaterialsSource }}</th><th>{{ labels.apiMaterialsLoadability }}</th><th>{{ labels.apiMaterialsSelectionState }}</th></tr></thead>
           <tbody>
             <tr v-for="operation in filteredOperations" :key="apiMaterialIdentity(operation.method, operation.path)">
@@ -181,8 +196,7 @@ const materialsTable = useTableWidths("api-materials", [{ id: "select", width: 6
 
 <style scoped>
 .configuration-file-name { min-width: 0; overflow-wrap: anywhere; }
-.api-materials-actions { margin-top: 16px; }
-.api-materials-filters { display: grid; grid-template-columns: auto minmax(220px, 1fr) auto auto; align-items: end; gap: 12px; margin: 16px 0; }
+.api-materials-filters { display: grid; grid-template-columns: auto minmax(220px, 1fr) auto auto; align-items: end; gap: 12px; }
 .api-materials-filters label { display: grid; gap: 6px; color: var(--agent-text-muted); font-size: 12px; font-weight: 650; }
 .api-materials-filters select, .api-materials-filters input { min-width: 0; }
 .api-materials-filter-count { margin: 0 0 7px; color: var(--agent-text-muted); font-size: 12px; white-space: nowrap; }

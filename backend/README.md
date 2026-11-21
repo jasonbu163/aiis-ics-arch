@@ -60,6 +60,10 @@ disposable MySQL `8.4.6` volume; the smoke env is ignored and must be removed af
 
 For host-source development, follow [database-only and account initialization](../INITIALIZATION.md#host-source-development-with-database-only). After migration and configuring the desired bootstrap accounts in `backend/.env`, run `uv run python main.py --maintenance bootstrap-users` from this directory, then `uv run python run.py`. Neither Alembic nor API startup creates login accounts; ENABLED flags only take effect when the maintenance command runs.
 
+`uv run run.py` keeps hot reload enabled and shows readable text in the terminal. API logs still go to
+`logs/api.log` and `logs/api-error.log` as JSON Lines under the configured `LOG_DIR`. Set `LOG_LEVEL=DEBUG`
+to see individual loaded and skipped modules.
+
 ## Packaging
 
 main.py is the reload-disabled application entry; run.py is the local development entry. build.py is an optional PyInstaller source package path and never copies a real .env, data dump or customer input. See BUILD.md.
@@ -203,6 +207,44 @@ These tables describe the historical 69-key BE003 configuration surface. Public 
 | `LOG_LEVEL` | Log threshold such as DEBUG, INFO, WARNING or ERROR. (str) | `'INFO'` | `INFO` |
 | `LOG_MAX_BYTES` | Maximum log-file size before rotation, in bytes. (int) | `10 * 1024 * 1024` | `10485760` |
 | `LOG_BACKUP_COUNT` | Number of rotated log backups retained. (int) | `5` | `5` |
+
+In backend modules, use `common.log` to record a structured event in one of two ways. Choose a stable event
+name such as `task.saved` and put values that vary by occurrence in structured fields such as `task_no`.
+
+- Use `log_event(...)` when the event name is enough for the development terminal.
+- Use `logger.bind(...).info(...)` when the development terminal should also show a key detail such as the task number.
+
+These examples show two ways to record the same event. Choose one per occurrence.
+
+```python
+from common.log import log_event, logger
+
+task_no = "TASK-001"
+
+# Development terminal: INFO: task.saved
+log_event("INFO", "task.saved", task_no=task_no, result="success")
+
+# Development terminal: INFO: Task TASK-001 saved
+logger.bind(event="task.saved", task_no=task_no, result="success").info(
+    "Task {} saved", task_no
+)
+```
+
+Both forms write `event`, `task_no` and `result` under `record.extra` in `api.log`. Filter by
+`record.extra.event` to find the event regardless of the displayed message.
+
+Show a field in the development terminal when it helps decide what to check next, such as which module failed,
+which record to inspect, or which error to investigate. For routine status events, the event name is usually
+enough. Keep the full context in the structured log.
+
+Examples from existing calls. The suggested terminal fields describe what to include if a debugging need arises.
+
+- [`schema_maintenance_status_checked`](app/schema_maintenance/services/async_schema.py) is a routine status check.
+  The event name is enough for the terminal. Keep table lists and warnings in the file.
+- [`business_integration_rejected`](common/integration/http.py) covers multiple modules and rejection causes.
+  Show `module`, HTTP `status`, and `error_code` when diagnosing integration failures.
+- [`plan_performance_linked`](app/plan/services/async_service.py) can show `plan_id`, `performance_id`, and
+  `action` when verifying which plan and performance records were linked and how.
 
 ### Database routing
 
@@ -374,7 +416,9 @@ The successor `4e6a8b0d2f14` renames the two facts tables and adds nullable hist
 
 ## Current equipment, process and energy entry points
 
-The `equipment_observation` module serves current device, process and meter observations via `equipment_status_main`, `process_monitor_main` and `energy_consumption_main`. The retired archive queries, collector status and old device/process/energy routes are absent from current source. The post-retirement observation profile requires schema revision `c9e1a3b5d720`; the two device observation writes accept only v2. Target adoption is recorded in the task. [Retirement specification](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+The `equipment_observation` module serves current device, process and meter observations via `equipment_main`, `monitor_main` and `energy_consumption_main`. The retired archive queries, collector status and old device/process/energy routes are absent from current source. The post-retirement observation profile requires schema revision `d8f2a4c6b915`; the two device observation writes accept only v2. Target adoption is recorded in the task. [Retirement specification](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+
+Equipment and process observations share the `observation_metric_*` configuration tables and write receipts to `observation_ingest_receipts`. Meter samples use `energy_ingest_receipts` independently. The migration preserves existing IDs and retry results.
 
 ## Generic task workflow v2 candidate
 

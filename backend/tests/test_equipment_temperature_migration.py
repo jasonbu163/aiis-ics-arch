@@ -47,7 +47,7 @@ def test_five_revisions_58_60_58_parity_old_bytes_and_mysql_types():
 
 def test_single_explicit_head_and_no_data_migration():
     graph=ScriptDirectory.from_config(Config("alembic.ini"))
-    assert graph.get_heads()==['c9e1a3b5d720'] and graph.get_bases()==["d4e6f8a0b2c4"]
+    assert graph.get_heads()==['e9f3b5d7c021'] and graph.get_bases()==["d4e6f8a0b2c4"]
     assert graph.get_revision("9d1f3a5c7e20").down_revision=="8c0e2a4d6f18"
     assert graph.get_revision("8c0e2a4d6f18").down_revision=="7b9d1f3a5c7e"
     assert graph.get_revision("7b9d1f3a5c7e").down_revision=="6a8c0e2b4d16"

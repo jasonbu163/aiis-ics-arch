@@ -86,7 +86,7 @@ export function useApiFirstMappingRuntimeStore() {
     runtime,
     busy,
     error,
-    refresh,
+    refresh: () => withBusy(refresh),
     action,
     startPolling,
     stopPolling,

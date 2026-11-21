@@ -22,7 +22,7 @@ def manifest(owner):
 
 @pytest.mark.parametrize('owner', ('performance',))
 @pytest.mark.parametrize('revision', ('2c4e6a8b0d12', '3d5f7a9c1e23', '4e6a8b0d2f14',
-    '5f7a9c1e3b25', '6a8c0e2b4d16', '7b9d1f3a5c7e', '8c0e2a4d6f18', '9d1f3a5c7e20', 'ae20b4d6f831', 'c9e1a3b5d720'))
+    '5f7a9c1e3b25', '6a8c0e2b4d16', '7b9d1f3a5c7e', '8c0e2a4d6f18', '9d1f3a5c7e20', 'ae20b4d6f831', 'c9e1a3b5d720', 'da6c32f8a701', 'd8f2a4c6b915', 'e9f3b5d7c021'))
 def test_successor_requires_matching_fresh_adoption(owner, revision):
     old = manifest(owner)
     new = deepcopy(old)
@@ -42,7 +42,7 @@ def test_successor_requires_matching_fresh_adoption(owner, revision):
 
 
 @pytest.mark.parametrize("owner",("performance",))
-@pytest.mark.parametrize("revision",("1b3d5f7a9c20","ae20b4d6f831","c9e1a3b5d720"))
+@pytest.mark.parametrize("revision",("1b3d5f7a9c20","ae20b4d6f831","c9e1a3b5d720","da6c32f8a701","d8f2a4c6b915","e9f3b5d7c021"))
 def test_exact_profile_and_adoption_rejection(owner,revision,tmp_path):
     module=importlib.import_module(f"app.{owner}.integration_config")
     prefix=owner.upper()+"_INTEGRATION_"

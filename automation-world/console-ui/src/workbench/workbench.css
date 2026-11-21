@@ -14,8 +14,20 @@ html, body, #app { margin: 0; min-width: 320px; min-height: 100vh; }
 .workbench-preview-note { margin-top: 18px; line-height: 1.6; }
 @media (max-width: 900px) { .workbench-columns { grid-template-columns: 1fr; } }
 
-.workbench-samples { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); gap: 18px; align-items: start; }
-@media (max-width: 1100px) { .workbench-samples { grid-template-columns: 1fr; } }
+.workbench-samples :is(.console-card__header, .console-card__tools, .console-card__footer) { padding-inline: var(--agent-card-padding); }
+.workbench-samples .console-card__body { padding-block: 0; }
+.workbench-list-filters { display: flex; align-items: center; flex-wrap: wrap; gap: var(--agent-action-gap); }
+.workbench-list-filters .el-input { flex: 1 1 170px; width: auto; max-width: 240px; }
+.workbench-list-filters .el-select { flex: 0 1 150px; width: 150px; }
+.workbench-sample-table { min-width: 0; padding-block: 12px; }
+.workbench-list-state { display: grid; justify-items: center; align-content: center; gap: 12px; padding-block: 14px; text-align: center; }
+.workbench-list-state p { margin: 0; }
+.workbench-list-feedback { margin: 0; padding-block: 8px; color: var(--agent-success); }
+.workbench-samples .el-pagination { flex-wrap: wrap; row-gap: 8px; white-space: normal; }
+.workbench-samples .el-pagination__total { margin-inline-end: 8px; }
+.workbench-list-details { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px 20px; margin: 0; }
+.workbench-list-details dt { color: var(--agent-text-muted); }
+.workbench-list-details dd { margin: 0; overflow-wrap: anywhere; }
 
 /* 参数页私有布局：桌面编辑/常驻样例，窄窗解除粘性与高度限制。 */
 .design-profile-layout { display: grid; grid-template-columns: minmax(340px, 0.9fr) minmax(460px, 1.3fr); gap: 18px; align-items: start; }
@@ -24,7 +36,6 @@ html, body, #app { margin: 0; min-width: 320px; min-height: 100vh; }
 .design-profile-preview-status { flex: 0 0 auto; padding: 12px 16px; border: 1px solid var(--agent-border); border-radius: var(--agent-control-radius); background: var(--agent-surface); }
 .design-profile-preview-status p { margin: 6px 0 0; font-size: 13px; line-height: 1.5; }
 .design-profile-preview-content { display: grid; grid-auto-rows: max-content; align-content: start; gap: 18px; min-height: 0; overflow: auto; margin-top: 12px; padding-bottom: 2px; }
-.design-profile-preview .workbench-samples { grid-template-columns: minmax(0, 1fr); }
 .design-profile-secondary { margin-top: 18px; }
 .design-profile-secondary summary { cursor: pointer; padding: 12px 0; color: var(--agent-text-muted); }
 .design-profile-palette { min-width: 0; margin: 0; padding: 16px; border: 1px solid var(--agent-border); border-radius: var(--agent-control-radius); }

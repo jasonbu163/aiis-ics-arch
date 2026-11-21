@@ -16,6 +16,27 @@
 
 同号计划先存在时，首次保存实绩继承启用的订单快照字段。实绩先建也可通过普通计划 POST 补建，缺省不回填。显式 `backfillExisting` 请求回填允许回写的历史共享值，本次给定的计划值优先。
 
+## 字段管理
+
+现有配置 GET、PUT 和单项删除继续兼容。GET 返回字段定义。管理员可在一次 PUT 中使用
+`module=shared` 和当前 `configRevision` 提交多个共享字段变更。
+
+`POST /api/v1/task-field-configs/batch-delete` 仅供管理员调用，接收当前 `configRevision` 与 1 至 100 个
+互不重复的共享字段身份（`scope=shared_sync`、`slotNo`、`name`）。后端在配置锁内逐项执行既有历史和使用保护，
+整批一次性提交。成功返回 `outcome=deleted`、按请求顺序排列的 `deleted` 和各推进一次的
+`configVersion`、`configRevision`。
+
+修订冲突或字段受保护时返回 409，身份不存在返回 404，无效请求返回 422。这些拒绝均不删除任何字段。
+`fields.1.name` 等细节路径标识可定位项，全局历史证据问题可返回 `fields`。收到
+`503 task.commit_unknown` 或丢失响应时，先读取当前配置核对字段和修订，再决定是否重试。
+MES、SMA 等外部引用仍需另行核对，GET 不提供删除资格。
+
+计划和实绩本地字段使用同一个 PUT 保存单项或多个变更，分别指定 `module=plan` 或
+`module=performance`。两个独立本地字段管理页通过 `POST /api/v1/task-field-configs/local/batch-delete`
+批量删除字段，接口仅供已登录管理员调用。请求包含模块、当前 `configRevision` 和 1 至 100 个互不重复的身份。
+计划只接受 `scope=plan_local`，实绩只接受 `scope=performance_local`，混组和共享身份均被拒绝。
+响应形态、原子性和失败后核对规则与上述机制一致。共享批删仍只接受共享身份。两条管理接口均位于集成 API 之外。
+
 ## 权限和切换
 
 任务集成入口按项目可信网络边界开放，无需前端 Bearer 或登记生产者。`producerId` 是标签，`fieldConfigVersion` 只作信息。网页入口要求登录和对应角色授权，只有管理员可修改、删除字段定义。

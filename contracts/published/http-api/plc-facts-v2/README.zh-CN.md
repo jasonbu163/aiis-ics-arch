@@ -128,3 +128,7 @@
 模块注册器内的错误声明采用 `plc_facts.v2.*`，HTTP `errorCode` 采用 `plc_facts_v2.*`。 [HTTP 路由](../../../../backend/app/plc_facts/api/v2.py) · [请求与响应模型](../../../../backend/app/plc_facts/schemas/v2.py) · [原值校验](../../../../backend/app/plc_facts/v2_domain.py)
 
 历史机器合同保存了各验收基线。 [原 OpenAPI](openapi.json) · [原请求 Schema](schema.json) · [原向量](vectors.json) · [r2 OpenAPI](openapi-acquisition-r2.json) · [ARCH-BE-012 r4 开发记录](../../../../plans/ARCH-BE-012-simplified-plc-facts/tasks.md) · [ARCH-ACQ-003 r2 验收](../../../../plans/ARCH-ACQ-003-acquisition-data-optional-filters/checklist.md#human-owner-最终验收)
+
+## 消费者绑定目标
+
+采用 `da6c32f8a701` 后，被 [采集消费者 v1](../acquisition-consumers-v1/README.zh-CN.md) 绑定的专属 `external` 目标流，在样本 POST 上另需服务 Bearer、租约、投递身份并验证原始正文指纹。其他 v2 样本来源和查询继续沿用上文的开发合同。

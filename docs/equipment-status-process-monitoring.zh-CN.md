@@ -2,11 +2,13 @@
 
 [English](equipment-status-process-monitoring.md) · [项目文档目录](README.zh-CN.md) · [ARCH-OBS-001 规格](../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md)
 
-当前设备、过程和能耗由 `equipment_observation` 注册，分别使用 `equipment_status_main`、`process_monitor_main` 和 `energy_consumption_main`。清退后的观测源码要求目标 revision `c9e1a3b5d720`，两条设备观测写入仅接受 v2，旧 collector 状态、常规旧设备／过程／能耗路由和 r8 归档查询已退出源码。真实目标采用状态由任务记录维护。 过程监控的能耗统计页面地址为 `/monitor/consumption`，唯一页面授权键为 `monitor.energy`。旧直链 `/monitor/energy` 已退出。已有 `monitor.consumption` 的部署须由负责人审查并显式处理，页面权限不会增加 `energy-consumption-read`、表计范围或管理权限。 [清退规格](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+当前设备、过程和能耗由 `equipment_observation` 注册，分别使用 `equipment_main`、`monitor_main` 和 `energy_consumption_main`。清退后的观测源码要求目标 revision `d8f2a4c6b915`，两条设备观测写入仅接受 v2，旧 collector 状态、常规旧设备／过程／能耗路由和 r8 归档查询已退出源码。真实目标采用状态由任务记录维护。 过程监控的能耗统计页面地址为 `/monitor/consumption`，唯一页面授权键为 `monitor.energy`。旧直链 `/monitor/energy` 已退出。已有 `monitor.consumption` 的部署须由负责人审查并显式处理，页面权限不会增加 `energy-consumption-read`、表计范围或管理权限。 [清退规格](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
 
 2026-11-17（Asia/Shanghai）。当前合同为 r10；既往章节作为历史保留。独立核验、Human Owner 最终验收、现场联调及生产部署分别记录。
 
 <a id="r10-guide"></a>
+
+设备和过程共用 `observation_metric_*` 配置表，写入回执保存到 `observation_ingest_receipts`。表计样本独立使用 `energy_ingest_receipts`。迁移保留原 ID 和重试结果。
 
 ## r10 当前方案与操作
 
@@ -14,11 +16,11 @@ r10 是来源无关的多区域整包：机器按稳定 `metricKey` 报单值，
 
 | 数据 | 持久表与含义 | 前端 |
 | --- | --- | --- |
-| 设备快照 | `equipment_status_main`：每 `(equipment_id, task_no)` 一行，较新整包替换 `local_values`；保留采集时间 `observed_at`。 | 生产、清洗、温控、传动四页共用卡片配置；默认显示最近采样任务，可手选或恢复跟随，不推断设备正在生产。 |
-| 过程历史 | `process_monitor_main`：一个合格整包一行，按原 `observed_at` 查询；空缺测事件可形成断点。 | 温度、传动、清洗页按单位显示配置的曲线、区域多选；选择不改变历史留存。 |
+| 设备快照 | `equipment_main`：每 `(equipment_id, task_no)` 一行，较新整包替换 `local_values`；保留采集时间 `observed_at`。 | 生产、清洗、温控、传动四页共用卡片配置；默认显示最近采样任务，可手选或恢复跟随，不推断设备正在生产。 |
+| 过程历史 | `monitor_main`：一个合格整包一行，按原 `observed_at` 查询；空缺测事件可形成断点。 | 温度、传动、清洗页按单位显示配置的曲线、区域多选；选择不改变历史留存。 |
 | 能耗 | `energy_consumption_main`：每表计、每组、每事件独立行，不关联任务；每个指标使用自己的累计、增量或瞬时口径。 | 过程监控的能耗统计页、表计配置和能耗数据列表；旧能耗及价格入口仍使用原权限。 |
 
-设备值的 JSON 第一层为区域键、第二层为目标／区域独立的 `01`–`100` 槽号；`equipment_metric_groups`、`equipment_metric_configs`、`equipment_metric_slot_bindings` 定义稳定语义，卡片与曲线表单独控制显示。已用槽位和物理含义不能改绑；停用区域只影响显示，历史留存由历史槽位开关决定。单位可空，有单位时显示在指标标题旁；同单位曲线纵轴标一次。`0`、`false`、空字符串保留，缺测不补零。
+设备值的 JSON 第一层为区域键、第二层为目标／区域独立的 `01`–`100` 槽号；`observation_metric_groups`、`observation_metric_configs`、`observation_metric_slot_bindings` 定义稳定语义，卡片与曲线表单独控制显示。已用槽位和物理含义不能改绑；停用区域只影响显示，历史留存由历史槽位开关决定。单位可空，有单位时显示在指标标题旁；同单位曲线纵轴标一次。`0`、`false`、空字符串保留，缺测不补零。
 
 ### 管理员配置
 

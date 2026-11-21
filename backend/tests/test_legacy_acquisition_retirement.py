@@ -83,7 +83,7 @@ def test_single_head_and_metadata_retire_only_nine_tables():
     module = migration()
     import_model_packages()
     graph = ScriptDirectory.from_config(Config('alembic.ini'))
-    assert graph.get_heads() == ['c9e1a3b5d720']
+    assert graph.get_heads() == ['e9f3b5d7c021']
     assert graph.get_revision('ae20b4d6f831').down_revision == '9d1f3a5c7e20'
     assert graph.get_revision('9d1f3a5c7e20').down_revision == '8c0e2a4d6f18'
     assert graph.get_revision('8c0e2a4d6f18').down_revision == '7b9d1f3a5c7e'
@@ -102,7 +102,19 @@ def test_single_head_and_metadata_retire_only_nine_tables():
                  'metric_ingest_receipts', 'equipment_metric_groups', 'energy_metric_configs',
                  'energy_consumption_main', 'task_field_config_versions', 'task_field_config_uses'}
     from tests.test_observation_retirement import RETIRED_TABLES
-    assert set(Base.metadata.tables) == expected - RETIRED_TABLES
+    consumption_tables = {'acq_consumption_activation', 'acq_consumption_streams', 'acq_consumption_events',
+                          'acq_consumers', 'acq_consumer_deliveries', 'acq_consumer_operations'}
+    current = (expected - RETIRED_TABLES) | consumption_tables
+    observation_renames = {
+        'equipment_status_main': 'equipment_main',
+        'process_monitor_main': 'monitor_main',
+        'equipment_metric_configs': 'observation_metric_configs',
+        'equipment_metric_slot_bindings': 'observation_metric_slot_bindings',
+        'equipment_metric_groups': 'observation_metric_groups',
+        'metric_ingest_receipts': 'observation_ingest_receipts',
+    }
+    expected_current = {observation_renames.get(table, table) for table in current} | {'energy_ingest_receipts', 'observation_write_sources'}
+    assert set(Base.metadata.tables) == expected_current
 
 
 def test_offline_and_downgrade_refuse():

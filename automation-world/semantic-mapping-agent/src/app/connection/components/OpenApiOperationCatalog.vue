@@ -21,12 +21,8 @@ function operationTitle(operation: BackendOpenApiOperation): string {
 </script>
 
 <template>
-  <ConsoleCard class="openapi-catalog" :title="props.labels.openApiCatalog">
-<template #actions><span class="openapi-catalog-count">
-        {{ props.result.operationCount }} {{ props.labels.openApiOperations }}
-      </span></template>
-
-    <p class="hint">{{ props.labels.openApiCatalogHint }}</p>
+  <ConsoleCard class="openapi-catalog" :title="props.labels.openApiCatalog" :help="props.labels.openApiCatalogHint" :help-label="props.labels.openApiCatalogHelp" help-append-to="#sma-overlays"
+    :header-statuses="[{ id: 'operations', label: props.result.operationCount + ' ' + props.labels.openApiOperations }]">
 
     <div v-if="props.result.operations.length" class="openapi-operation-list">
       <details v-for="operation in props.result.operations" :key="`${operation.method}:${operation.path}`" class="openapi-operation">

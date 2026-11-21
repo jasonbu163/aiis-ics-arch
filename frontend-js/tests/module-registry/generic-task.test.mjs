@@ -4,11 +4,12 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { parse, compileScript } from 'vue/compiler-sfc'
 import * as vue from 'vue'
-import { accessibleNavigation, canAccessRoute, createModuleRegistry } from '../../src/app/moduleManifest.js'
+import { accessibleNavigation, canAccessRoute, createModuleRegistry, defaultAuthenticatedPath } from '../../src/app/moduleManifest.js'
 import { parseRolePageAccess } from '../../src/config/pageAccess.js'
 import { planModule } from '../../src/app/plan/manifest.js'
 import { performanceModule } from '../../src/app/performance/manifest.js'
 import { useTableColumnWidths } from '../../src/utils/tableColumnWidths.js'
+import * as fieldSettings from '../../src/app/plan/components/fieldSettings.js'
 
 async function setupComponent(url) {
   const source = await readFile(new URL(url, import.meta.url), 'utf8')
@@ -22,7 +23,7 @@ async function setupComponent(url) {
 }
 
 const page = await setupComponent('../../src/app/plan/components/TaskPage.vue')
-const localDialog = await setupComponent('../../src/app/plan/components/TaskConfigDialog.vue')
+const localPage = await setupComponent('../../src/app/plan/views/local-fields/index.vue')
 const editor = await setupComponent('../../src/app/plan/components/TaskFieldEditor.vue')
 const sharedPage = await setupComponent('../../src/app/plan/views/shared-fields/index.vue')
 const field = (scope, slotNo, name, extra = {}) => ({ scope, slotNo, name, type: 'number',
@@ -36,7 +37,7 @@ const details = { id: '1', taskNo: 'FIXTURE-1', productionStatus: 'running', tar
 const config = { configVersion: 7, configRevision: '12', fields: savedFields }
 
 function mount(component, kind, options = {}) {
-  const hooks = [], calls = [], notices = [], local = new Map(), locale = vue.ref('en-US')
+  const hooks = [], calls = [], notices = [], local = options.local ?? new Map(), locale = vue.ref(options.locale ?? 'en-US')
   const open = vue.ref(true)
   const events = []
   const api = {
@@ -56,16 +57,21 @@ function mount(component, kind, options = {}) {
     removeItem: key => local.delete(key)
   }
   const deps = { vue: { ...vue, onMounted: hook => hooks.push(hook), onBeforeUnmount() {}, useModel: () => open },
-    'vue-i18n': { useI18n: () => ({ t: key => key, te: () => true, locale }) },
-    'element-plus': { ElMessage: { error: message => notices.push(message), success() {} } },
+    'vue-i18n': { useI18n: () => ({ t: options.t ?? (key => key), te: options.te ?? (() => true), locale }) },
+    'vue-router': { useRouter: () => ({ push: path => calls.push(['navigate', path]) }) },
+    'element-plus': { ElMessage: { error: message => notices.push(message), success() {}, warning() {}, info: message => notices.push(message) } },
     '@element-plus/icons-vue': { Setting: {}, QuestionFilled: {} },
     '@/store/user': { useUserStore: () => ({ role, isAdmin: role === 'admin', hasPageAccess: () => true, username: 'fixture' }) },
     '@/utils/tableColumnWidths': { useTableColumnWidths },
     './useTaskPagePadding': { useTaskPagePadding: () => ({ pageRoot: vue.ref(null), pagePadding: vue.ref(0) }) },
-    '@/components/common/BaseCard.vue': {}, '@/components/common/ActionButton.vue': {}, './TaskConfigDialog.vue': {}
+    '../../components/useTaskPagePadding': { useTaskPagePadding: () => ({ pageRoot: vue.ref(null), pagePadding: vue.ref(0) }) },
+    '../../api': api, '../../components/TaskFieldEditor.vue': {}, './SharedFieldForm.vue': {},
+    '../../components/fieldSettings': fieldSettings, './fieldSettings': fieldSettings,
+    '@/components/common/BaseCard.vue': {}, '@/components/common/ActionButton.vue': {}
   }
   const effect = vue.effectScope()
-  const state = effect.run(() => component.make(deps).setup({ kind, module: options.module ?? kind, api }, { expose() {}, emit: event => events.push(event) }))
+  const state = effect.run(() => component.make(deps).setup({ kind, module: options.module ?? kind, scope: options.scope, api },
+    { expose() {}, emit: event => events.push(event) }))
   return { state, api, open, calls, notices, local, locale, events, start: async () => { for (const hook of hooks) await hook() },
     close: () => { effect.stop(); delete globalThis.localStorage } }
 }
@@ -77,9 +83,9 @@ test('plans use current columns, distinct fields and a fixed production state', 
     assert.ok(p.state.fixedColumns.value.includes('productionStatus'))
     assert.ok(!p.state.fixedColumns.value.includes('dispatchStatus'))
     assert.doesNotMatch(page.template, /sharedFieldSettings|sharedConfigOpen/)
-    assert.match(page.template, /tr\('fieldSettings'\)/)
-    assert.match(localDialog.template, /destroy-on-close/)
-    assert.match(localDialog.template, /:kind="kind" :module="kind"/)
+    assert.doesNotMatch(page.template, /fieldSettings|local-fields/)
+    assert.doesNotMatch(page.template, /TaskConfigDialog/)
+    assert.match(localPage.template, /<FieldManagement/)
     assert.equal(p.state.fieldKey(savedFields[0]), 'shared_sync.feedback')
     assert.ok(!p.state.visibleFields.value.some(item => item.name === 'hidden'))
     assert.deepEqual(p.calls.filter(([key]) => key === 'config'), [['config', 'plan']])
@@ -190,7 +196,7 @@ test('current status and field setup texts resolve in both languages', async () 
     const [zh, en] = locales
     assert.deepEqual(leaves(zh), leaves(en))
     assert.deepEqual(Object.keys(en.statuses), ['new', 'running', 'completed', 'error'])
-    const declaredKeys = [...(page.template + editor.template).matchAll(/tr\('([a-zA-Z.]+)'\)/g)].map(match => match[1])
+    const declaredKeys = [...(page.template + editor.template + sharedPage.template).matchAll(/tr\('([a-zA-Z.]*[a-zA-Z])'(?=[,)])/g)].map(match => match[1])
     for (const key of declaredKeys) assert.ok(leaves(en).includes(key), `${module}.${key}`)
     assert.equal(zh.fieldSettings, '本地字段管理')
     assert.equal(zh.sharedFieldSettings, '共享字段管理')
@@ -210,31 +216,50 @@ test('both module routes use a common administrator page and cannot be granted t
   }
   const register = modules => createModuleRegistry(modules, locales, {}, { requiredModules: [] })
   const registry = register(manifests)
+  const admin = { isAdmin: true, isLoggedIn: true }
+  assert.equal(defaultAuthenticatedPath(registry, admin), '/plan/list')
   const perModule = module => registry.routeRecords.find(route => route.meta.pageId === `${module}.shared-fields`)
   assert.equal(perModule('plan').component.toString(), perModule('performance').component.toString())
-  assert.match(sharedPage.template, /:key="module" kind="shared" :module="module"/)
-  assert.doesNotMatch(sharedPage.template, /el-dialog/)
+  assert.match(sharedPage.template, /:kind="settingsKind" :module="module" :draft-rows="draftRows"/)
+  assert.match(sharedPage.template, /el-dialog/)
   for (const module of ['plan', 'performance']) {
     const route = perModule(module)
     assert.equal(route.path, `/${module}/shared-fields`)
     assert.equal(route.props.module, module)
     assert.equal(route.meta.titleKey, `${module}.workflow.sharedFieldSettings`)
     assert.equal(route.meta.requiresAdmin, true)
-    const navigation = accessibleNavigation(registry, { isAdmin: true, isLoggedIn: true })
-    assert.ok(navigation.find(group => group.name === module).children.some(entry => entry.name === route.name))
+    const localRoute = registry.routeRecords.find(route => route.meta.pageId === `${module}.local-fields`)
+    assert.equal(localRoute.path, `/${module}/local-fields`)
+    assert.equal(localRoute.props.module, module)
+    assert.equal(localRoute.meta.titleKey, `${module}.workflow.fieldSettings`)
+    assert.deepEqual(localRoute.meta.navigation, { visible: true, order: 15, icon: 'Setting' })
+    assert.equal(localRoute.meta.requiresAdmin, true)
+    assert.equal(canAccessRoute(localRoute, admin), true)
+    assert.equal(canAccessRoute(localRoute, { isAdmin: true, isLoggedIn: false }), false)
+    assert.equal(canAccessRoute(localRoute, { isAdmin: false }), false)
+    const navigation = accessibleNavigation(registry, admin)
+    assert.deepEqual(navigation.find(group => group.name === module).children.map(entry => entry.path), [
+      `/${module}/list`, localRoute.path, route.path
+    ])
     assert.equal(canAccessRoute(route, { isAdmin: true, isLoggedIn: false }), false)
-    for (const role of ['supervisor', 'operator']) {
+    for (const role of ['supervisor', 'operator', 'unknown']) {
       const access = { isAdmin: false, isLoggedIn: true, role, hasPageAccess: () => true }
       assert.equal(canAccessRoute(route, access), false)
-      assert.ok(!accessibleNavigation(registry, access).some(group => group.children.some(entry => entry.name === route.name)))
-      const env = { VITE_SUPERVISOR_PAGE_ACCESS_JSON: '[]', VITE_OPERATOR_PAGE_ACCESS_JSON: '[]' }
-      env[`VITE_${role.toUpperCase()}_PAGE_ACCESS_JSON`] = JSON.stringify([route.meta.pageId])
-      assert.throws(() => parseRolePageAccess(env, registry), /admin-only pageId/)
+      assert.equal(canAccessRoute(localRoute, access), false)
+      assert.deepEqual(accessibleNavigation(registry, access).find(group => group.name === module).children.map(entry => entry.path), [
+        `/${module}/list`
+      ])
+      if (role !== 'unknown') {
+        const env = { VITE_SUPERVISOR_PAGE_ACCESS_JSON: '[]', VITE_OPERATOR_PAGE_ACCESS_JSON: '[]' }
+        env[`VITE_${role.toUpperCase()}_PAGE_ACCESS_JSON`] = JSON.stringify([route.meta.pageId])
+        assert.throws(() => parseRolePageAccess(env, registry), /admin-only pageId/)
+      }
     }
     const only = register({ [`/app/${module}/manifest.js`]: { default: module === 'plan' ? planModule : performanceModule },
       [`/app/${module === 'plan' ? 'performance' : 'plan'}/manifest.js`]: {
         default: { ...(module === 'plan' ? performanceModule : planModule), enabled: false } } })
     assert.equal(only.messages['zh-CN'][module].workflow.sharedFieldSettings, '共享字段管理')
+    assert.equal(defaultAuthenticatedPath(only, admin), `/${module}/list`)
     assert.equal(only.messages['zh-CN'][module === 'plan' ? 'performance' : 'plan'], undefined)
   }
 })
@@ -267,4 +292,344 @@ test('switching shared route namespaces reads one saved definition and discards 
     assert.equal(performance.state.config.value.configRevision, '13')
     assert.ok(performance.state.rows.value.every(field => field.scope === 'shared_sync'))
   } finally { performance.close() }
+})
+
+const sharedFixture = Array.from({ length: 25 }, (_, index) => {
+  const slot = index + 1
+  return field('shared_sync', slot, 'field' + slot, { labels: { 'zh-CN': '字段' + slot, 'en-US': 'Field ' + slot },
+    unit: null, planOrder: slot === 1 ? 1 : null, performanceOrder: null, performanceEditable: false, enabled: slot !== 22 })
+})
+
+test('shared field filtering, pagination, selection and refresh use the current revision', async () => {
+  let response = { configVersion: 7, configRevision: '12', fields: [...sharedFixture.toReversed(), savedFields[2]] }
+  let fail = false
+  const p = mount(sharedPage, 'performance', { api: { getConfig: async module => {
+    assert.equal(module, 'performance')
+    if (fail) throw new Error('unavailable')
+    return response
+  } } })
+  try {
+    await p.start()
+    assert.equal(p.state.pageSize.value, 20)
+    assert.equal(p.state.pageRows.value.length, 20)
+    assert.equal(p.state.pageRows.value[0].slotNo, 1)
+    p.state.selectPage(true)
+    p.state.page.value = 2
+    p.state.selectRow(p.state.pageRows.value[0], true)
+    assert.equal(p.state.selections.value.size, 21)
+    p.state.pageSize.value = 50
+    await vue.nextTick()
+    assert.equal(p.state.page.value, 1)
+    assert.equal(p.state.selections.value.size, 21)
+    await p.state.load()
+    assert.equal(p.state.selections.value.size, 21)
+    fail = true
+    await p.state.load()
+    assert.equal(p.state.loadError.value, true)
+    assert.equal(p.state.selections.value.size, 21)
+    fail = false
+    response = { ...response, configRevision: '13' }
+    await p.state.load()
+    assert.equal(p.state.selections.value.size, 0)
+    assert.equal(p.state.loadError.value, false)
+    p.state.filters.keyword = 'FIELD 22'
+    p.state.filters.enabled = 'disabled'
+    p.state.filters.owner = 'automated'
+    p.state.search()
+    assert.deepEqual(p.state.pageRows.value.map(row => row.slotNo), [22])
+    p.state.selectPage(true)
+    p.state.resetFilters()
+    assert.equal(p.state.filtered.value.length, 25)
+    assert.equal(p.state.selections.value.size, 0)
+  } finally { p.close() }
+})
+
+test('shared edit submits actual changes only, preserves null and never overwrites an uncertain draft', async () => {
+  let authoritative = { configVersion: 7, configRevision: '12', fields: sharedFixture }
+  const payloads = []
+  const p = mount(sharedPage, 'plan', { api: {
+    getConfig: async () => authoritative,
+    saveConfig: async body => {
+      payloads.push(body)
+      if (payloads.length === 1) throw { response: { data: { errorCode: 'task.config_revision_conflict' } } }
+      if (payloads.length === 2) {
+        authoritative = { ...authoritative, configRevision: '13', fields: [
+          { ...sharedFixture[0], planOrder: null }, ...sharedFixture.slice(1)
+        ] }
+        throw { response: { data: { errorCode: 'task.commit_unknown' } } }
+      }
+      return authoritative
+    }
+  } })
+  try {
+    await p.start()
+    p.state.openEdit('batch', [p.state.fields.value[0], p.state.fields.value[24]])
+    p.state.draftRows.value[0].planOrder = null
+    await p.state.save()
+    assert.deepEqual(payloads[0], { module:'shared', configRevision:'12', changes:[{scope:'shared_sync',slotNo:1,planOrder:null}] })
+    assert.equal(p.state.editOpen.value, true)
+    assert.equal(p.state.draftRows.value[0].planOrder, null)
+    await p.state.save()
+    assert.equal(payloads.length, 1)
+    p.state.openEdit('single', [p.state.fields.value[0]])
+    p.state.draftRows.value[0].planOrder = null
+    await p.state.save()
+    assert.equal(p.state.reconciliation.value[0].status, 'shared.matches')
+    assert.equal(p.state.editOpen.value, true)
+    assert.equal(p.state.config.value.configRevision, '13')
+    await p.state.save()
+    assert.equal(payloads.length, 2)
+    p.state.addField()
+    assert.equal(p.state.draftRows.value[0].slotNo, 26)
+    p.state.draftRows.value[0].name = 'newField'
+    p.state.draftRows.value[0].labels = { 'zh-CN': '新字段', 'en-US': 'New field' }
+    await p.state.save()
+    assert.equal(payloads[2].changes[0].name, 'newField')
+    assert.equal(p.state.editOpen.value, false)
+  } finally { p.close() }
+})
+
+test('shared deletion requires confirmation, localizes the first obstruction, and reconciles unknown results', async () => {
+  let authoritative = { configVersion: 7, configRevision: '12', fields: sharedFixture }
+  const submissions = []
+  const p = mount(sharedPage, 'performance', { api: {
+    getConfig: async () => authoritative,
+    deleteSharedFields: async body => {
+      submissions.push(['batch', body])
+      if (submissions.length === 1) throw { response: { data: { errorCode: 'task.field_in_use',
+        details: { field:'fields.1.name', reason:'referenced_by_task_or_dispatch' } } } }
+      authoritative = { configVersion: 8, configRevision: '13', fields: sharedFixture.filter(row => row.slotNo !== 1 && row.slotNo !== 25) }
+      throw new Error('dropped response')
+    },
+    deleteField: async body => {
+      submissions.push(['single', body])
+      return { ...body, configVersion: 9, configRevision: '14' }
+    }
+  } })
+  try {
+    await p.start()
+    p.state.selectRow(p.state.fields.value[0], true)
+    p.state.selectRow(p.state.fields.value[24], true)
+    p.state.openDelete('batch', p.state.selectedRows.value)
+    assert.equal(submissions.length, 0)
+    await p.state.confirmDelete()
+    assert.equal(p.state.selections.value.size, 2)
+    assert.match(p.state.message.value, /referenced_by_task_or_dispatch/)
+    assert.equal(p.state.deleteOpen.value, true)
+    await p.state.confirmDelete()
+    assert.equal(submissions.length, 1)
+    p.state.openDelete('batch', p.state.selectedRows.value)
+    await p.state.confirmDelete()
+    assert.deepEqual(submissions[1][1].fields.map(row => row.slotNo), [1,25])
+    assert.deepEqual(p.state.reconciliation.value.map(row => row.status), ['shared.absent','shared.absent'])
+    await p.state.confirmDelete()
+    assert.equal(submissions.length, 2)
+    p.state.openDelete('single', [p.state.fields.value[0]])
+    await p.state.confirmDelete()
+    assert.equal(submissions[2][0], 'single')
+    assert.equal(submissions[2][1].configRevision, '13')
+    assert.equal(p.state.fields.value[0].slotNo, 3)
+  } finally { p.close() }
+})
+
+test('new shared field rejects any occupied shared slot before PUT, without blocking valid additions or edits', async () => {
+  for (const module of ['plan', 'performance']) {
+    const existing = sharedFixture[21]
+    const configBefore = { configVersion: 7, configRevision: '12', fields: [existing, savedFields[2], savedFields[3]] }
+    const payloads = []
+    const p = mount(sharedPage, module, { te: key => key.endsWith('.errors.config_revision_conflict'), api: {
+      getConfig: async () => configBefore,
+      saveConfig: async body => {
+        payloads.push(body)
+        if (body.changes[0].slotNo === 3) throw { response: { data: { errorCode: 'task.config_revision_conflict' } } }
+        return { ...configBefore, configVersion: 8, configRevision: '13',
+          fields: [...configBefore.fields, ...body.changes.filter(row => row.slotNo !== existing.slotNo)] }
+      }
+    } })
+    try {
+      await p.start()
+      const state = p.state
+      state.addField()
+      const draft = state.draftRows.value[0]
+      draft.slotNo = existing.slotNo
+      draft.type = existing.type
+      draft.unit = existing.unit
+      draft.labels = { 'zh-CN': '新的名称', 'en-US': 'New names' }
+      for (const name of [existing.name, 'differentKey']) {
+        draft.name = name
+        await state.save()
+        assert.equal(payloads.length, 0)
+        assert.equal(state.message.value, module + '.workflow.shared.slotOccupied')
+        assert.equal(state.editOpen.value, true)
+        assert.deepEqual(state.draftRows.value[0].labels, { 'zh-CN': '新的名称', 'en-US': 'New names' })
+        assert.deepEqual(state.config.value, configBefore)
+      }
+
+      draft.slotNo = 2 // This slot is occupied only in the independent local groups.
+      await state.save()
+      assert.equal(payloads.length, 1)
+      assert.equal(payloads[0].changes[0].slotNo, 2)
+      assert.equal(payloads[0].changes[0].name, 'differentKey')
+      assert.equal(state.editOpen.value, false)
+
+      state.openEdit('single', [state.fields.value.find(row => row.slotNo === existing.slotNo)])
+      state.draftRows.value[0].labels['en-US'] = 'Edited name'
+      await state.save()
+      assert.deepEqual(payloads[1], { module: 'shared', configRevision: '13',
+        changes: [{ scope: 'shared_sync', slotNo: existing.slotNo, labels: { ...existing.labels, 'en-US': 'Edited name' } }] })
+
+      state.addField()
+      Object.assign(state.draftRows.value[0], { slotNo: 3, name: 'concurrentField', labels: { 'zh-CN': '并发字段', 'en-US': 'Concurrent field' } })
+      await state.save()
+      assert.equal(payloads.length, 3)
+      assert.equal(payloads[2].configRevision, '13')
+      assert.equal(state.blocked.value, true)
+      assert.equal(state.editOpen.value, true)
+      assert.equal(state.draftRows.value[0].name, 'concurrentField')
+      assert.equal(state.message.value, module + '.workflow.errors.config_revision_conflict')
+    } finally { p.close() }
+  }
+})
+
+test('local management isolates lists, drafts, versioned actions and column widths by module', async () => {
+  const storage = new Map()
+  for (const module of ['plan', 'performance']) {
+    const scope = module + '_local'
+    const localFields = Array.from({ length: 25 }, (_, index) =>
+      field(scope, index + 1, 'local' + (index + 1), { enabled: index !== 23 }))
+    const otherScope = module === 'plan' ? 'performance_local' : 'plan_local'
+    const allFields = [...localFields, field(otherScope, 26, 'sameSlot'), ...savedFields.slice(0, 2)]
+    let revision = '12'
+    let failRead = false
+    const writes = []
+    const p = mount(sharedPage, module, { scope, local: storage, api: {
+      getConfig: async requested => {
+        assert.equal(requested, module)
+        if (failRead) throw Error('read failed')
+        return { ...config, configRevision: revision, fields: allFields }
+      },
+      saveConfig: async body => {
+        writes.push(['save', body])
+        if (revision === '13') throw { response: { data: { errorCode: 'task.commit_unknown' } } }
+        for (const row of body.changes) {
+          const existing = allFields.find(item => item.scope === row.scope && item.slotNo === row.slotNo)
+          if (existing) Object.assign(existing, row)
+          else allFields.push(row)
+        }
+        revision = '13'
+        return { ...config, configRevision: revision, fields: allFields }
+      },
+      deleteLocalFields: async body => {
+        writes.push(['delete', body])
+        if (revision === '13') { failRead = true; throw Error('response lost') }
+        return { configVersion: 8, configRevision: '15', deleted: body.fields }
+      }
+    } })
+    try {
+      await p.start()
+      const state = p.state
+      assert.deepEqual(state.settings.owners, module === 'plan' ? [] : ['automated', 'manual'])
+      assert.equal(state.settings.switches.includes('syncEnabled'), false)
+      assert.equal(state.fields.value.length, 25)
+      assert.equal(state.pageRows.value.length, 20)
+      state.selectRow(state.pageRows.value[0], true)
+      state.page.value = 2
+      state.selectRow(state.pageRows.value[0], true)
+      assert.deepEqual(state.selectedRows.value.map(row => row.slotNo), [1, 21])
+      state.filters.keyword = 'LoCaL1'
+      state.search()
+      assert.equal(state.page.value, 1)
+      assert.equal(state.selectedRows.value.length, 0)
+      assert.ok(!state.filtered.value.some(row => row.slotNo === 24))
+      assert.equal(state.columns.widths.name, 190)
+      state.columns.onHeaderDragEnd(201, 190, { property: 'name' })
+      state.addField()
+      const draft = state.draftRows.value[0]
+      draft.slotNo = 24
+      draft.labels = { 'zh-CN': '名称', 'en-US': 'Label' }
+      for (const name of ['local24', 'newField']) {
+        draft.name = name
+        await state.save()
+        assert.equal(writes.length, 0)
+        assert.equal(state.editOpen.value, true)
+        assert.match(state.message.value, /slotOccupied/)
+      }
+      draft.slotNo = 26
+      await state.save()
+      const [saveAction, saveBody] = writes[0]
+      assert.equal(saveAction, 'save')
+      assert.equal(saveBody.module, module)
+      assert.equal(saveBody.changes[0].scope, scope)
+      assert.ok(!('syncEnabled' in saveBody.changes[0]))
+      assert.ok(!((module === 'plan' ? 'performanceVisible' : 'planVisible') in saveBody.changes[0]))
+      assert.equal(state.editOpen.value, false)
+      state.openEdit('batch', [state.fields.value[1], state.fields.value[20]])
+      state.draftRows.value[1].labels['en-US'] = 'Changed'
+      await state.save()
+      assert.equal(writes[1][1].changes.length, 1)
+      assert.equal(writes[1][1].changes[0].scope, scope)
+      assert.equal(state.reconciliation.value[0].status, 'shared.differs')
+      assert.equal(state.draftRows.value[1].labels['en-US'], 'Changed')
+      state.openDelete('batch', [state.fields.value[0], state.fields.value[20]])
+      await state.confirmDelete()
+      assert.deepEqual(writes[2], ['delete', { module, configRevision: '13',
+        fields: [{scope, slotNo: 1, name: 'local1'}, {scope, slotNo: 21, name: 'local21'}] }])
+      assert.match(state.message.value, /unknownRefreshFailed/)
+      assert.equal(state.blocked.value, true)
+      failRead = false
+      await state.retryReconciliation()
+      assert.equal(writes.length, 3)
+      assert.deepEqual(state.reconciliation.value.map(item => item.status), ['shared.present', 'shared.present'])
+    } finally { p.close() }
+  }
+  assert.ok([...storage.keys()].some(key => key.endsWith('generic-task.local-fields.plan')))
+  assert.ok([...storage.keys()].some(key => key.endsWith('generic-task.local-fields.performance')))
+})
+
+test('local field saves explain duplicate and reserved keys in each locale and retain the draft', async () => {
+  for (const module of ['plan', 'performance']) {
+    for (const locale of ['zh-CN', 'en-US']) {
+      const catalogs = { [module]: JSON.parse(await readFile(
+        new URL(`../../src/app/${module}/locales/${locale}.json`, import.meta.url), 'utf8')) }
+      const lookup = key => key.split('.').reduce((part, name) => part?.[name], catalogs)
+      const payloads = []
+      const p = mount(sharedPage, module, { scope: module + '_local', locale, t: lookup,
+        te: key => typeof lookup(key) === 'string', api: {
+          saveConfig: async payload => {
+            payloads.push(payload)
+            const key = payload.changes[0].name
+            if (key === 'correctedKey') return { ...config, configRevision: '13' }
+            throw { response: { status: 422, data: { errorCode: 'task.invalid_request',
+              details: { field: 'changes.name', reason: key === 'productionStatus' ? 'invalid_field_name' : 'duplicate_field_name' } } } }
+          }
+        } })
+      try {
+        await p.start()
+        const state = p.state
+        state.addField()
+        const draft = state.draftRows.value[0]
+        const labels = { 'zh-CN': '保留草稿', 'en-US': 'Keep the draft' }
+        draft.labels = { ...labels }
+        for (const [name, pattern] of [
+          ['feedback', locale === 'zh-CN' ? /本地字段和共享字段都不重名/ : /does not match a local or shared field/],
+          ['productionStatus', locale === 'zh-CN' ? /系统保留键或格式无效/ : /reserved or invalid/]
+        ]) {
+          draft.name = name
+          await state.save()
+          assert.match(state.message.value, pattern)
+          assert.equal(state.editOpen.value, true)
+          assert.equal(state.blocked.value, false)
+          assert.equal(state.draftRows.value[0].name, name)
+          assert.deepEqual(state.draftRows.value[0].labels, labels)
+          assert.equal(state.config.value.configRevision, '12')
+        }
+        draft.name = 'correctedKey'
+        await state.save()
+        assert.equal(payloads.length, 3)
+        assert.equal(payloads[2].configRevision, '12')
+        assert.equal(state.editOpen.value, false)
+        assert.equal(state.config.value.configRevision, '13')
+      } finally { p.close() }
+    }
+  }
 })

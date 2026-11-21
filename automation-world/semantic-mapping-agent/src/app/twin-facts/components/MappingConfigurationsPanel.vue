@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import { ElDialog } from "element-plus";
 import { useTableWidths, vTableWidths } from "../../../console/tableWidths";
-import { ConsoleCard, ConsoleActionButton, StatusCapsule } from "@aw-ui";
+import { ConsoleCard, ConsoleActionButton, StatusCapsule, type CardHeaderStatus } from "@aw-ui";
 import { computed, ref, watch } from "vue";
 
 import type { LocaleMessages } from "../../../locales";
@@ -237,29 +237,40 @@ function manualRunUnresolved(mapping: MappingConfiguration) {
   );
 }
 
-const mappingsTable = useTableWidths("mappings", [{ id: "state", width: 140 }, { id: "key", width: 200 }, { id: "name", width: 220 }, { id: "targetApi", width: 220 }, { id: "bindings", width: 180 }, { id: "enabled", width: 140 }, { id: "manualRun", width: 220 }, { id: "actions", width: 380, min: 380, fixed: true }]);
+const mappingsTable = useTableWidths("mappings", [{ id: "state", width: 140 }, { id: "key", width: 200 }, { id: "name", width: 220 }, { id: "targetApi", width: 220 }, { id: "bindings", width: 180 }, { id: "enabled", width: 140 }, { id: "manualRun", width: 220 }, { id: "actions", width: 248, min: 248, fixed: true }]);
 const bindingsTable = useTableWidths("mapping-bindings", [{ id: "parameter", width: 220 }, { id: "mode", width: 180 }, { id: "value", width: 400 }, { id: "rule", width: 240 }, { id: "validation", width: 230 }]);
+
+const headerStatuses = computed<CardHeaderStatus[]>(() => {
+  const { labels, busy, status, configurations } = props;
+  const entries: CardHeaderStatus[] = [];
+  if (busy) entries.push({ id: "working", label: labels.loading });
+  else if (status === "saved") entries.push({ id: "saved", label: labels.mappingConfigurationSaved, tone: "success" });
+  entries.push({ id: "total", label: labels.savedItemCount.replace("{count}", String(configurations.length)), tone: "success" });
+  return entries;
+});
 </script>
 
 <template>
   <div class="mapping-page-stack mapping-configurations-stack">
-    <p class="hint">{{ labels.mappingDeliveryUnavailable }}</p>
+    <p class="hint io-notice">{{ labels.mappingDeliveryUnavailable }}</p>
     <section v-if="savedPreview"><h3>{{ labels.localSavedPreview }}</h3><pre>{{ JSON.stringify(savedPreview, null, 2) }}</pre></section>
-    <ConsoleCard :title="labels.mappingConfigurationsTitle">
-    <p v-if="busy" class="hint" role="status">{{ labels.loading }}</p>
-<template #actions><StatusCapsule label="HTTP" /></template>
-      <p>{{ labels.mappingConfigurationsHint }}</p>
-      <div class="action-row"><ConsoleActionButton tone="secondary" native-type="button" :disabled="!enabled || busy" @click="emit('load-target-apis')">{{ labels.mappingConfigurationsLoadTargetApis }}</ConsoleActionButton><ConsoleActionButton tone="secondary" native-type="button" :disabled="!enabled || busy" @click="batchOpen = true">{{ labels.mappingBatchOperations }}</ConsoleActionButton><ConsoleActionButton tone="primary" native-type="button" :disabled="!enabled || busy" @click="startCreate">{{ labels.mappingConfigurationNew }}</ConsoleActionButton></div>
+    <ConsoleCard :title="labels.mappingConfigurationsTitle" :header-statuses="headerStatuses" :status-overflow-label="labels.moreCardStatuses" :help="labels.mappingConfigurationsHint" :help-label="labels.mappingConfigurationsTitle + labels.cardHelpSuffix" help-append-to="#sma-overlays">
+      <template #actions>
+        <div class="action-row"><ConsoleActionButton tone="secondary" native-type="button" :disabled="!enabled || busy" @click="emit('load-target-apis')">{{ labels.mappingConfigurationsLoadTargetApis }}</ConsoleActionButton><ConsoleActionButton tone="secondary" native-type="button" :disabled="!enabled || busy" @click="batchOpen = true">{{ labels.mappingBatchOperations }}</ConsoleActionButton><ConsoleActionButton tone="primary" native-type="button" :disabled="!enabled || busy" @click="startCreate">{{ labels.mappingConfigurationNew }}</ConsoleActionButton></div>
+      </template>
+
       <p v-if="error" class="warning" role="alert">{{ labels.mappingConfigurationOperationFailed }} {{ /CONFLICT|PREVIEW_CHANGED/.test(error) ? labels.localConfigurationConflict : error }}</p>
-      <p v-if="status === 'saved'" class="notice">{{ labels.mappingConfigurationSaved }}</p>
     </ConsoleCard>
 
     <ConsoleCard :title="labels.mappingConfigurationsListTitle">
-      <div class="table-scroll mapping-list-scroll" tabindex="0"><ConsoleActionButton size="small" @click="mappingsTable.reset">{{ labels.resetTableWidths }}</ConsoleActionButton>
-<table v-table-widths="[mappingsTable, labels.resizeTableColumn]" class="mapping-list-table mapping-configurations-table"><thead><tr><th>{{ labels.mappingConfigurationState }}</th><th>{{ labels.mappingConfigurationKey }}</th><th>{{ labels.targetApiName }}</th><th>{{ labels.mappingConfigurationTargetApi }}</th><th>{{ labels.mappingConfigurationBindingSummary }}</th><th>{{ labels.targetApiState }}</th><th>{{ labels.mappingManualRunResult }}</th><th>{{ labels.targetApiActions }}</th></tr></thead>
+      <template #actions>
+        <ConsoleActionButton size="small" @click="mappingsTable.reset" :title="labels.resetTableWidthsHelp">{{ labels.resetTableWidths }}</ConsoleActionButton>
+      </template>
+      <div class="table-scroll mapping-list-scroll" tabindex="0">
+        <table v-table-widths="[mappingsTable, labels.resizeTableColumn]" class="mapping-list-table mapping-configurations-table"><thead><tr><th>{{ labels.mappingConfigurationState }}</th><th>{{ labels.mappingConfigurationKey }}</th><th>{{ labels.targetApiName }}</th><th>{{ labels.mappingConfigurationTargetApi }}</th><th>{{ labels.mappingConfigurationBindingSummary }}</th><th>{{ labels.targetApiState }}</th><th>{{ labels.mappingManualRunResult }}</th><th>{{ labels.targetApiActions }}</th></tr></thead>
         <tbody>
-          <tr v-for="pending in localDrafts" :key="pending.localId"><td>{{ labels.mappingConfigurationDraft }}</td><td><code>{{ pending.draft.mappingKey }}</code></td><td>{{ pending.draft.name }}</td><td><code>{{ pending.draft.targetApiKey }}</code></td><td>{{ bindingSummary(pending.draft.bindings) }}</td><td>{{ pending.draft.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td>{{ labels.mappingManualRunNone }}</td><td><div class="mapping-list-row-actions"><ConsoleActionButton size="small" tone="secondary" native-type="button" :disabled="!enabled || busy" @click="openDraft(pending.localId)">{{ labels.mappingValueRuleConfigure }}</ConsoleActionButton><ConsoleActionButton size="small" tone="danger" native-type="button" :disabled="!enabled || busy" @click="emit('remove-draft', pending.localId)">{{ labels.mappingConfigurationRemoveDraft }}</ConsoleActionButton></div></td></tr>
-          <tr v-for="mapping in configurations" :key="mapping.id"><td>{{ labels.mappingConfigurationSavedState }}</td><td><code>{{ mapping.mappingKey }}</code></td><td>{{ mapping.name }}</td><td><code>{{ mapping.targetApiKey }}</code></td><td>{{ bindingSummary(mapping.bindings) }}</td><td>{{ mapping.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td><div class="mapping-manual-run-result"><span>{{ manualRunStatus(mapping) }}</span><small v-if="manualRunUnresolved(mapping)">{{ manualRunUnresolved(mapping) }}</small></div></td><td><div class="mapping-list-row-actions"><ConsoleActionButton size="small" tone="secondary" :disabled="!enabled || busy" @click="emit('preview-saved', mapping.id)">{{ labels.localSavedPreview }}</ConsoleActionButton><ConsoleActionButton size="small" tone="secondary" native-type="button" :disabled="!enabled || busy" @click="openEditor(mapping.id)">{{ labels.targetApiEdit }}</ConsoleActionButton><ConsoleActionButton size="small" tone="danger" native-type="button" :disabled="!enabled || busy" @click="remove(mapping)">{{ labels.targetApiDelete }}</ConsoleActionButton></div></td></tr>
+          <tr v-for="pending in localDrafts" :key="pending.localId"><td>{{ labels.mappingConfigurationDraft }}</td><td><code>{{ pending.draft.mappingKey }}</code></td><td>{{ pending.draft.name }}</td><td><code>{{ pending.draft.targetApiKey }}</code></td><td>{{ bindingSummary(pending.draft.bindings) }}</td><td>{{ pending.draft.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td>{{ labels.mappingManualRunNone }}</td><td><div class="console-row-actions"><ConsoleActionButton variant="row" tone="primary" native-type="button" :disabled="!enabled || busy" @click="openDraft(pending.localId)">{{ labels.mappingValueRuleConfigure }}</ConsoleActionButton><ConsoleActionButton variant="row" tone="danger" native-type="button" :disabled="!enabled || busy" @click="emit('remove-draft', pending.localId)">{{ labels.mappingConfigurationRemoveDraft }}</ConsoleActionButton></div></td></tr>
+          <tr v-for="mapping in configurations" :key="mapping.id"><td>{{ labels.mappingConfigurationSavedState }}</td><td><code>{{ mapping.mappingKey }}</code></td><td>{{ mapping.name }}</td><td><code>{{ mapping.targetApiKey }}</code></td><td>{{ bindingSummary(mapping.bindings) }}</td><td>{{ mapping.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td><div class="mapping-manual-run-result"><span>{{ manualRunStatus(mapping) }}</span><small v-if="manualRunUnresolved(mapping)">{{ manualRunUnresolved(mapping) }}</small></div></td><td><div class="console-row-actions"><ConsoleActionButton variant="row" tone="secondary" :disabled="!enabled || busy" @click="emit('preview-saved', mapping.id)">{{ labels.mappingPreviewRequest }}</ConsoleActionButton><ConsoleActionButton variant="row" tone="primary" native-type="button" :disabled="!enabled || busy" @click="openEditor(mapping.id)">{{ labels.targetApiEdit }}</ConsoleActionButton><ConsoleActionButton variant="row" tone="danger" native-type="button" :disabled="!enabled || busy" @click="remove(mapping)">{{ labels.targetApiDelete }}</ConsoleActionButton></div></td></tr>
         </tbody>
       </table></div>
       <p v-if="!configurations.length && !localDrafts.length" class="empty-state">{{ labels.mappingConfigurationsEmpty }}</p>
@@ -288,7 +299,7 @@ const bindingsTable = useTableWidths("mapping-bindings", [{ id: "parameter", wid
           <section v-if="selectedTargetApi" class="mapping-bindings">
             <h3>{{ labels.mappingConfigurationBindings }}</h3>
             <div class="table-scroll" tabindex="0">
-              <ConsoleActionButton size="small" @click="bindingsTable.reset">{{ labels.resetTableWidths }}</ConsoleActionButton>
+              <ConsoleActionButton size="small" @click="bindingsTable.reset" :title="labels.resetTableWidthsHelp">{{ labels.resetTableWidths }}</ConsoleActionButton>
 <table v-table-widths="[bindingsTable, labels.resizeTableColumn]" class="mapping-bindings-table">
 
                 <thead><tr><th>{{ labels.mappingConfigurationParameterIdentity }}</th><th>{{ labels.mappingConfigurationUseFixedValue }}</th><th>{{ labels.mappingConfigurationValue }}</th><th>{{ labels.mappingConfigurationValueRule }}</th><th>{{ labels.mappingConfigurationValidation }}</th></tr></thead>
@@ -348,7 +359,6 @@ const bindingsTable = useTableWidths("mapping-bindings", [{ id: "parameter", wid
 .mapping-configurations-table td:first-child { width: 76px; min-width: 76px; white-space: nowrap; }
 .mapping-configurations-table th:last-child,
 .mapping-configurations-table td:last-child { width: 224px; min-width: 224px; }
-.mapping-configurations-table .mapping-list-row-actions > button { flex: 0 0 auto; white-space: nowrap; }
 .mapping-configurations-table td, .mapping-bindings-table td { vertical-align: top; white-space: normal; }
 .mapping-configurations-table td:first-child { white-space: nowrap; }
 

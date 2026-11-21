@@ -128,3 +128,7 @@ The first successful commit returns this receipt.
 The module registry declares internal names under `plc_facts.v2.*`. HTTP `errorCode` values use `plc_facts_v2.*`. [HTTP routes](../../../../backend/app/plc_facts/api/v2.py) · [Request and response models](../../../../backend/app/plc_facts/schemas/v2.py) · [Raw-value validation](../../../../backend/app/plc_facts/v2_domain.py)
 
 Historical machine contracts preserve the earlier baselines. [Original OpenAPI](openapi.json) · [Original request schema](schema.json) · [Original vectors](vectors.json) · [r2 OpenAPI](openapi-acquisition-r2.json) · [ARCH-BE-012 r4 development](../../../../plans/ARCH-BE-012-simplified-plc-facts/tasks.md) · [ARCH-ACQ-003 r2 acceptance](../../../../plans/ARCH-ACQ-003-acquisition-data-optional-filters/checklist.md#human-owner-最终验收)
+
+## Consumer-bound targets
+
+After adopting `da6c32f8a701`, a dedicated `external` target bound by [Acquisition Consumers v1](../acquisition-consumers-v1/README.md) additionally requires the service Bearer, lease, delivery identity and matching POST body digest. Other v2 sources and reads retain the development contract above.

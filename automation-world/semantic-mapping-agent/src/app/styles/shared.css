@@ -37,44 +37,6 @@
   gap: 14px;
 }
 
-.connection-status {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  min-height: 34px;
-  margin: 0 0 16px;
-  padding: 6px 10px;
-  color: var(--agent-text-muted);
-  background: var(--agent-surface-muted);
-  border: 1px solid var(--agent-border);
-  border-radius: 6px;
-  font-size: 13px;
-}
-
-.connection-status.connected {
-  color: var(--agent-accent-strong);
-  background: var(--agent-surface-muted);
-  border-color: var(--agent-border);
-}
-
-.connection-status.failed {
-  color: var(--agent-danger);
-  background: var(--agent-surface-muted);
-  border-color: var(--agent-danger);
-}
-
-.connection-status .status-dot {
-  background: var(--agent-accent);
-}
-
-.connection-status.connected .status-dot {
-  background: var(--agent-surface-muted);
-}
-
-.connection-status.failed .status-dot {
-  background: var(--agent-surface-muted);
-}
-
 .field,
 .check-field {
   display: flex;
@@ -199,8 +161,6 @@
 .mapping-list-table td:last-child {
   position: sticky;
   right: 0;
-  width: 210px;
-  min-width: 210px;
   box-shadow: -1px 0 0 var(--agent-border);
 }
 
@@ -212,13 +172,6 @@
 .mapping-list-table td:last-child {
   z-index: 1;
   background: var(--agent-surface);
-}
-
-.mapping-list-row-actions {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 8px;
 }
 
 :is(.sma-content, .sma-overlays) table {
@@ -336,7 +289,6 @@
 :is(.sma-content, .sma-overlays) .sma-column-resizer { position: absolute; top: 0; bottom: 0; right: 0; width: 9px; cursor: col-resize; touch-action: none; border-right: 2px solid var(--agent-border); }
 :is(.sma-content, .sma-overlays) :is(input, select, textarea, summary, button):focus-visible { outline: 2px solid var(--agent-accent-strong); outline-offset: 2px; }
 :is(.sma-content, .sma-overlays) input:disabled { opacity: 0.6; }
-:is(.sma-content, .sma-overlays) .mapping-list-row-actions .console-action-button { flex: 0 0 auto; }
 :is(.sma-content, .sma-overlays) .console-card__body > :first-child { margin-top: 0; }
 
 /* 运行态计数使用同一主题表面，保持数值与标签可扫描。 */

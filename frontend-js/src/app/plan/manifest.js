@@ -35,6 +35,19 @@ export const planModule = {
         requiresAdmin: true,
         navigation: { visible: true, order: 20, icon: 'Setting' }
       }
+    },
+    {
+      path: 'plan/local-fields',
+      name: 'PlanLocalFields',
+      component: () => import('./views/local-fields/index.vue'),
+      props: { module: 'plan' },
+      meta: {
+        titleKey: 'plan.workflow.fieldSettings',
+        pageId: 'plan.local-fields',
+        parentTitleKey: 'plan.title',
+        requiresAdmin: true,
+        navigation: { visible: true, order: 15, icon: 'Setting' }
+      }
     }
   ]
 }

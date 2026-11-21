@@ -55,7 +55,7 @@ def candidates(db, now, limit, lock, deadline=None):
     return sorted(rows, key=lambda item: (item[0], item[1], item[2][:3]))[:limit]
 
 
-def clear(db, candidate, now):
+def clear(db, candidate, now, *, guarded=False):
     expiry, kind, identity, _ = candidate
     if kind == 0:
         statement = delete(SampleV2).where(SampleV2.id == identity[0], SampleV2.expires_at == expiry,
@@ -69,7 +69,17 @@ def clear(db, candidate, now):
             LatestPointV2.source_seq == sequence,
         ).values(point_name=None, data_type=None, value_json=None, quality=None, reason=None,
                  observed_at=None, expires_at=None, sample_id=None)
-    return db.execute(statement).rowcount
+    if kind != 0 or not guarded:
+        return db.execute(statement).rowcount
+    db.execute(text('SET @acq006_prune_id = :identity'), {'identity': identity[0]})
+    try:
+        return db.execute(statement).rowcount
+    finally:
+        try:
+            db.execute(text('SET @acq006_prune_id = NULL'))
+        except Exception:
+            db.invalidate()
+            raise
 
 
 def oldest(db, now, deadline=None):

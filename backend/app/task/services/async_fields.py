@@ -213,11 +213,11 @@ async def record_use(db, version, module, task_no):
         db.add(FieldConfigUse(**identity))
 
 
-def _in_use(reason):
-    raise TaskError(TaskErrorCode.FIELD_IN_USE, 409, field='name', reason=reason)
+def _in_use(reason, field):
+    raise TaskError(TaskErrorCode.FIELD_IN_USE, 409, field=field, reason=reason)
 
 
-async def _verify_subject_history(db, subject_kinds, histories, current):
+async def _verify_subject_history(db, subject_kinds, histories, current, field):
     versions = {field.config_version: field for field in histories}
     continuous = current
     while continuous.config_version - 1 in versions:
@@ -244,16 +244,10 @@ async def _verify_subject_history(db, subject_kinds, histories, current):
                                              uses.c.config_version == version))
         query = select(version).select_from(proof).where(or_(*conditions)).limit(1).with_for_update()
         if (await db.execute(query)).first() is not None:
-            _in_use('historical_usage_unverifiable')
+            _in_use('historical_usage_unverifiable', field)
 
 
-async def delete_field(db, payload):
-    state, fields = await current_config(db, lock=True)
-    _revision(state, payload['configRevision'])
-    scope, slot, name = payload['scope'], payload['slotNo'], payload['name']
-    current = next((f for f in fields if (f.scope, f.slot_no, f.name) == (scope, slot, name)), None)
-    if current is None:
-        raise TaskError(TaskErrorCode.NOT_FOUND, 404, field='name', reason='field_identity_not_found')
+async def _verify_config_history(db, state, field):
     table = FieldConfigVersion
     versions = (await db.execute(select(table).order_by(table.config_version).with_for_update())).scalars().all()
     counts = Counter((await db.execute(select(FieldDefinition.config_version).with_for_update())).scalars())
@@ -261,12 +255,28 @@ async def delete_field(db, payload):
         v.config_version != index or counts.pop(index, 0) != v.definition_count
         for index, v in enumerate(versions, 1)
     ) or counts:
-        _in_use('historical_configuration_unverifiable')
+        _in_use('historical_configuration_unverifiable', field)
+
+
+def _field_identity(field):
+    return field.scope, field.slot_no, field.name
+
+
+def _find_field(fields, item, field):
+    identity = item['scope'], item['slotNo'], item['name']
+    current = fields.get(identity)
+    if current is None:
+        raise TaskError(TaskErrorCode.NOT_FOUND, 404, field=field, reason='field_identity_not_found')
+    return current
+
+
+async def _verify_field_unused(db, current, field):
+    scope, slot, name = _field_identity(current)
     histories = (await db.execute(select(FieldDefinition).where(
         FieldDefinition.scope == scope, FieldDefinition.slot_no == slot, FieldDefinition.name == name
     ).with_for_update())).scalars().all()
     if any(old.value_type != current.value_type or old.unit != current.unit for old in histories):
-        _in_use('historical_field_identity_unverifiable')
+        _in_use('historical_field_identity_unverifiable', field)
     subject_kinds = ('plan', 'performance', 'dispatch') if scope == 'shared_sync' else (
         scope.removesuffix('_local'), 'dispatch')
     use = (await db.execute(select(FieldConfigUse.config_version).where(
@@ -274,11 +284,56 @@ async def delete_field(db, payload):
         FieldConfigUse.subject_kind.in_(subject_kinds)
     ).limit(1).with_for_update())).first()
     if use is not None:
-        _in_use('referenced_by_task_or_dispatch')
-    await _verify_subject_history(db, subject_kinds, histories, current)
-    _publish(db, state, [_values(field) for field in fields if field is not current])
+        _in_use('referenced_by_task_or_dispatch', field)
+    await _verify_subject_history(db, subject_kinds, histories, current, field)
+
+
+async def _publish_deletion(db, state, fields, deleted):
+    _publish(db, state, [_values(field) for identity, field in fields.items() if identity not in deleted])
     state.config_revision += 1
     state.updated_at = business_now()
     await db.flush()
-    return {'outcome': 'deleted', 'scope': scope, 'slotNo': slot, 'name': name,
+    return {'outcome': 'deleted',
             'configVersion': state.active_version, 'configRevision': str(state.config_revision)}
+
+
+async def delete_field(db, payload):
+    state, rows = await current_config(db, lock=True)
+    _revision(state, payload['configRevision'])
+    fields = {_field_identity(row): row for row in rows}
+    current = _find_field(fields, payload, 'name')
+    await _verify_config_history(db, state, 'name')
+    await _verify_field_unused(db, current, 'name')
+    result = await _publish_deletion(db, state, fields, {_field_identity(current)})
+    return {**result, **{key: payload[key] for key in ('scope', 'slotNo', 'name')}}
+
+
+async def delete_shared_fields(db, payload):
+    return await _delete_fields(db, payload, 'shared_sync')
+
+
+async def delete_local_fields(db, payload):
+    return await _delete_fields(db, payload, SCOPES[payload['module']])
+
+
+async def _delete_fields(db, payload, scope):
+    requested = payload['fields']
+    slots = set()
+    for index, item in enumerate(requested):
+        if item['scope'] != scope:
+            invalid(f'fields.{index}.scope', 'scope_mismatch')
+        if item['slotNo'] in slots:
+            invalid(f'fields.{index}.slotNo', 'duplicate_slot')
+        slots.add(item['slotNo'])
+    state, rows = await current_config(db, lock=True)
+    _revision(state, payload['configRevision'])
+    fields = {_field_identity(row): row for row in rows}
+    await _verify_config_history(db, state, 'fields')
+    deleted = set()
+    for index, item in enumerate(requested):
+        field = f'fields.{index}.name'
+        current = _find_field(fields, item, field)
+        await _verify_field_unused(db, current, field)
+        deleted.add(_field_identity(current))
+    result = await _publish_deletion(db, state, fields, deleted)
+    return {**result, 'deleted': requested}

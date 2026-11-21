@@ -577,7 +577,7 @@ async def test_delete_history_reads_use_mysql_current_locking_selects():
             return SimpleNamespace(first=lambda: None)
 
     active = SimpleNamespace(config_version=2, slot_no=1, scope='shared_sync', created_at=datetime(2026, 11, 18, 10))
-    await _verify_subject_history(NoReferences(), ('plan', 'performance', 'dispatch'), [active], active)
+    await _verify_subject_history(NoReferences(), ('plan', 'performance', 'dispatch'), [active], active, 'name')
     assert [stmt.split('FROM ', 1)[1].split()[0] for stmt in queries] == ['plan_main', 'performance_main', 'plan_dispatch_attempts']
     assert all('LEFT OUTER JOIN task_field_config_uses' in stmt and stmt.endswith('FOR UPDATE') for stmt in queries)
     assert all('JSON_EXTRACT' in stmt and '.updated_at' in stmt for stmt in queries[:2])
@@ -666,7 +666,7 @@ async def test_candidate_examples_match_registered_openapi_and_actual_responses(
     candidate = Path(__file__).resolve().parents[2] / 'contracts/published/http-api/generic-task-workflow-v2'
     requests = json.loads((candidate / 'examples/requests.json').read_text())
     schema = json.loads((candidate / 'openapi.json').read_text())
-    assert len(schema['paths']) == 14
+    assert len(schema['paths']) == 16
     runtime = app.openapi()
     for path, methods in schema['paths'].items():
         assert set(methods) == set(runtime['paths'][path.removeprefix('/api/v1')])
@@ -688,6 +688,11 @@ async def test_candidate_examples_match_registered_openapi_and_actual_responses(
     assert results['finish']['performance']['productionStatus'] == 'completed'
     assert results['performance-first']['performance']['hasPlan'] is False
     assert results['plan-after-performance']['plan']['items']['completedLength'] == 35
+    assert [item['name'] for item in results['batch-delete-shared-fields']['deleted']] == ['operatorNote', 'qualityFlag']
+    assert results['batch-delete-shared-fields']['configRevision'] == '4'
+    assert [item['name'] for item in results['batch-delete-plan-local']['deleted']] == ['workNote', 'workInstruction']
+    assert [item['name'] for item in results['batch-delete-performance-local']['deleted']] == ['operatorNote', 'shiftNote']
+    assert results['batch-delete-performance-local']['configRevision'] == '8'
 
 
 async def test_mysql_locking_reads_precede_usage_audit_and_writes(monkeypatch):
@@ -719,3 +724,216 @@ async def test_mysql_locking_reads_precede_usage_audit_and_writes(monkeypatch):
     assert [next(table for table in ['task_field_config_state','task_field_definitions','plan_main'] if 'FROM '+table in stmt)
             for stmt in statements] == ['task_field_config_state','task_field_definitions','plan_main']
     assert all(stmt.endswith('FOR UPDATE') for stmt in statements)
+
+
+def shared_identity(slot, name):
+    return {'scope': 'shared_sync', 'slotNo': slot, 'name': name}
+
+
+@pytest.mark.parametrize('count', [1, 2, 100])
+async def test_delete_shared_batch_publishes_once_and_preserves_history(client, count):
+    http, session, _, _ = client
+    cfg = await configure(http, 'shared', *[
+        field('shared_sync', slot, f'field{slot}', performanceOwner='manual') for slot in range(1, count + 1)
+    ])
+    local = await configure(http, 'plan', field('plan_local', 1, 'localField'))
+    requested = [shared_identity(slot, f'field{slot}') for slot in range(count, 0, -1)]
+    versions = session.scalar(select(func.count()).select_from(FieldConfigVersion))
+    result = data(await http.post(CONFIG+'/batch-delete', json={'configRevision': local['configRevision'], 'fields': requested}))
+    assert result == {'outcome': 'deleted', 'deleted': requested, 'configVersion': local['configVersion'] + 1,
+                      'configRevision': str(int(local['configRevision']) + 1)}
+    assert session.scalar(select(func.count()).select_from(FieldConfigVersion)) == versions + 1
+    assert session.scalar(select(func.count()).select_from(FieldDefinition).where(
+        FieldDefinition.config_version == cfg['configVersion'])) == count
+    current = data(await http.get(CONFIG, params={'module': 'plan'}))
+    assert [item['name'] for item in current['fields']] == ['localField']
+    reused = await configure(http, 'shared', field('shared_sync', 1, 'reusedSlot', performanceOwner='manual'))
+    assert [item['name'] for item in reused['fields']] == ['reusedSlot']
+
+
+async def test_delete_shared_batch_validation_and_authority(client):
+    http, _, identity, app = client
+    cfg = await configure(http, 'shared', field('shared_sync', 1, 'first', performanceOwner='manual'))
+    payload = {'configRevision': cfg['configRevision'], 'fields': [shared_identity(1, 'first')]}
+    for invalid_fields in ([], [payload['fields'][0]] * 101, [payload['fields'][0]] * 2,
+                           [dict(scope='plan_local', slotNo=1, name='local')],
+                           [dict(scope='shared_sync', slotNo=True, name='first')],
+                           [dict(scope='shared_sync', slotNo=1, name='first', other='extra')]):
+        rejection(await http.post(CONFIG+'/batch-delete', json={**payload, 'fields': invalid_fields}), 422, 'invalid_request')
+    rejection(await http.post(CONFIG+'/batch-delete', json={**payload, 'configRevision': '1'}),
+              409, 'config_revision_conflict')
+    rejection(await http.post(CONFIG+'/batch-delete', json={**payload, 'fields': [
+        shared_identity(1, 'first'), shared_identity(2, 'missing')
+    ]}), 404, 'not_found', 'fields.1.name', 'field_identity_not_found')
+    for role in ('supervisor', 'operator'):
+        identity.role = role
+        rejection(await http.post(CONFIG+'/batch-delete', json=payload), 403, 'forbidden')
+    identity.role = 'admin'
+    original_user = app.dependency_overrides[get_current_user]
+    def no_user():
+        raise HTTPException(401)
+    app.dependency_overrides[get_current_user] = no_user
+    try:
+        rejection(await http.post(CONFIG+'/batch-delete', json=payload), 401, 'unauthenticated')
+    finally:
+        app.dependency_overrides[get_current_user] = original_user
+    assert data(await http.get(CONFIG, params={'module': 'plan'})) == cfg
+
+
+@pytest.mark.parametrize('evidence', ['plan', 'performance', 'dispatch', 'missing', 'version'])
+@pytest.mark.parametrize('used_index', [0, 1])
+async def test_delete_shared_batch_preserves_all_rows_on_protection(client, evidence, used_index):
+    http, session, _, _ = client
+    used = await configure(http, 'shared', field('shared_sync', 1, 'used', performanceOwner='automated', enabled=False))
+    if evidence in ('plan', 'performance', 'missing'):
+        await put(http, PERF if evidence == 'performance' else PLAN, 'USED')
+    if evidence == 'dispatch':
+        session.add(FieldConfigUse(config_version=used['configVersion'], subject_kind='dispatch', subject_key='prior'))
+        session.commit()
+    if evidence == 'missing':
+        session.query(FieldConfigUse).filter_by(subject_key='USED').delete()
+        session.commit()
+    # A later definition was never part of the earlier task's configuration.
+    current = await configure(http, 'shared', field('shared_sync', 2, 'unused', performanceOwner='manual'))
+    if evidence == 'version':
+        session.query(FieldConfigVersion).filter_by(config_version=1).delete()
+        session.commit()
+    requested = [shared_identity(2, 'unused')]
+    requested.insert(used_index, shared_identity(1, 'used'))
+    before = (
+        session.scalar(select(func.count()).select_from(FieldConfigVersion)),
+        session.scalar(select(func.count()).select_from(FieldDefinition)),
+        session.scalar(select(func.count()).select_from(FieldConfigUse)),
+    )
+    response = await http.post(CONFIG+'/batch-delete', json={'configRevision': current['configRevision'], 'fields': requested})
+    if evidence == 'version':
+        rejection(response, 409, 'field_in_use', 'fields', 'historical_configuration_unverifiable')
+    elif evidence == 'missing':
+        # Missing evidence can affect both candidates because the bound task is unverifiable.
+        rejection(response, 409, 'field_in_use', 'fields.0.name', 'historical_usage_unverifiable')
+    else:
+        rejection(response, 409, 'field_in_use', f'fields.{used_index}.name', 'referenced_by_task_or_dispatch')
+    assert data(await http.get(CONFIG, params={'module': 'plan'})) == current
+    assert before == (
+        session.scalar(select(func.count()).select_from(FieldConfigVersion)),
+        session.scalar(select(func.count()).select_from(FieldDefinition)),
+        session.scalar(select(func.count()).select_from(FieldConfigUse)),
+    )
+
+
+def local_identity(module, slot, name):
+    return {'scope': f'{module}_local', 'slotNo': slot, 'name': name}
+
+
+def local_definition(module, slot, name, **settings):
+    if module == 'performance':
+        settings.setdefault('performanceOwner', 'automated')
+    return field(f'{module}_local', slot, name, **settings)
+
+
+@pytest.mark.parametrize('module, count', [(module, size) for module in ('plan', 'performance') for size in (1, 2, 100)])
+async def test_local_batch_delete_scopes_and_publishes_once(client, module, count):
+    http, session, _, _ = client
+    other = 'performance' if module == 'plan' else 'plan'
+    await configure(http, 'shared', field('shared_sync', 1, 'sharedField', performanceOwner='manual'))
+    await configure(http, other, local_definition(other, 1, 'sameKey1'))
+    configured = await configure(http, module, *[
+        local_definition(module, slot, f'sameKey{slot}') for slot in range(1, count + 1)
+    ])
+    requested = [local_identity(module, slot, f'sameKey{slot}') for slot in range(count, 0, -1)]
+    other_before = data(await http.get(CONFIG, params={'module': other}))['fields']
+    response = data(await http.post(CONFIG + '/local/batch-delete', json={
+        'module': module, 'configRevision': configured['configRevision'], 'fields': requested,
+    }))
+    assert response == {
+        'outcome': 'deleted', 'deleted': requested, 'configVersion': configured['configVersion'] + 1,
+        'configRevision': str(int(configured['configRevision']) + 1),
+    }
+    assert session.scalar(select(func.count()).select_from(FieldConfigVersion)) == response['configVersion']
+    assert session.scalar(select(func.count()).select_from(FieldDefinition).where(
+        FieldDefinition.config_version == configured['configVersion'],
+        FieldDefinition.scope == f'{module}_local')) == count
+    assert data(await http.get(CONFIG, params={'module': other}))['fields'] == other_before
+    assert [row['name'] for row in data(await http.get(CONFIG, params={'module': module}))['fields']] == ['sharedField']
+
+
+@pytest.mark.parametrize('module', ['plan', 'performance'])
+async def test_local_batch_delete_validation_and_authority(client, module):
+    http, _, caller, app = client
+    other = 'performance' if module == 'plan' else 'plan'
+    cfg = await configure(http, module, local_definition(module, 1, 'first'))
+    one = local_identity(module, 1, 'first')
+    endpoint = CONFIG + '/local/batch-delete'
+    valid = {'module': module, 'configRevision': cfg['configRevision'], 'fields': [one]}
+    for payload in (
+        {**valid, 'module': 'shared'}, {**valid, 'fields': []}, {**valid, 'fields': [one] * 101},
+        {**valid, 'fields': [{**one, 'slotNo': True}]},
+        {**valid, 'fields': [{**one, 'extra': 'bad'}]}, {**valid, 'extra': 'bad'},
+        {**valid, 'fields': [{**one, 'scope': 'shared_sync'}]},
+    ):
+        rejection(await http.post(endpoint, json=payload), 422, 'invalid_request')
+    for fields, path, reason in (
+        ([one, one], 'fields.1.slotNo', 'duplicate_slot'),
+        ([one, {**one, 'name': 'otherKey'}], 'fields.1.slotNo', 'duplicate_slot'),
+        ([one, local_identity(other, 2, 'otherKey')], 'fields.1.scope', 'scope_mismatch'),
+        ([local_identity(other, 1, 'first')], 'fields.0.scope', 'scope_mismatch'),
+    ):
+        rejection(await http.post(endpoint, json={**valid, 'fields': fields}), 422, 'invalid_request', path, reason)
+    rejection(await http.post(endpoint, json={**valid, 'configRevision': '1'}),
+              409, 'config_revision_conflict')
+    rejection(await http.post(endpoint, json={**valid, 'fields': [one, local_identity(module, 2, 'missing')]}),
+              404, 'not_found', 'fields.1.name', 'field_identity_not_found')
+    for role in ('supervisor', 'operator', 'unknown'):
+        caller.role = role
+        rejection(await http.post(endpoint, json=valid), 403, 'forbidden')
+    caller.role = 'admin'
+    original_user = app.dependency_overrides[get_current_user]
+
+    def no_user():
+        raise HTTPException(401)
+
+    app.dependency_overrides[get_current_user] = no_user
+    try:
+        rejection(await http.post(endpoint, json=valid), 401, 'unauthenticated')
+    finally:
+        app.dependency_overrides[get_current_user] = original_user
+    assert data(await http.get(CONFIG, params={'module': module})) == cfg
+
+
+@pytest.mark.parametrize('module', ['plan', 'performance'])
+@pytest.mark.parametrize('evidence', ['task', 'disabled', 'dispatch', 'missing', 'version'])
+@pytest.mark.parametrize('used_index', [0, 1])
+async def test_local_batch_delete_keeps_every_definition_on_protection(client, module, evidence, used_index):
+    http, session, _, _ = client
+    original = await configure(http, module, local_definition(module, 1, 'protected', enabled=evidence != 'disabled'))
+    if evidence in ('task', 'disabled', 'missing'):
+        await put(http, PLAN if module == 'plan' else PERF, 'USED-LOCAL')
+    if evidence == 'dispatch':
+        session.add(FieldConfigUse(config_version=original['configVersion'], subject_kind='dispatch', subject_key='prior'))
+        session.commit()
+    if evidence == 'missing':
+        session.query(FieldConfigUse).filter_by(subject_key='USED-LOCAL').delete()
+        session.commit()
+    cfg = await configure(http, module, local_definition(module, 2, 'unused'))
+    if evidence == 'version':
+        session.query(FieldConfigVersion).filter_by(config_version=1).delete()
+        session.commit()
+    requested = [local_identity(module, 2, 'unused')]
+    requested.insert(used_index, local_identity(module, 1, 'protected'))
+
+    def counts():
+        return [session.scalar(select(func.count()).select_from(model)) for model in
+                (FieldConfigVersion, FieldDefinition, FieldConfigUse, Plan, Performance)]
+
+    before = counts()
+    response = await http.post(CONFIG + '/local/batch-delete', json={
+        'module': module, 'configRevision': cfg['configRevision'], 'fields': requested,
+    })
+    if evidence == 'version':
+        rejection(response, 409, 'field_in_use', 'fields', 'historical_configuration_unverifiable')
+    elif evidence == 'missing':
+        rejection(response, 409, 'field_in_use', 'fields.0.name', 'historical_usage_unverifiable')
+    else:
+        rejection(response, 409, 'field_in_use', f'fields.{used_index}.name', 'referenced_by_task_or_dispatch')
+    assert data(await http.get(CONFIG, params={'module': module})) == cfg
+    assert counts() == before

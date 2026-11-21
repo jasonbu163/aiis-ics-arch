@@ -9,6 +9,7 @@ from starlette.responses import JSONResponse, Response
 
 from common.log import log_event
 from database import get_db_session
+from ..consumption_domain import ConsumerError
 from ..services import async_v2 as service
 from ..schemas.v2 import DetailOut, FailureOut, HistoryOut, LatestBrowseOut, LatestOut, OptionsOut, ReceiptOut, SampleV2In
 from ..v2_config import get_profile
@@ -30,7 +31,7 @@ class V2Route(APIRoute):
                     request._json = document
                     request.state.plc_facts_v2.update(profile=profile, sample=sample, document=document, digest=digest)
                 return await handler(request)
-            except V2Error as error:
+            except (V2Error, ConsumerError) as error:
                 status, code = error.status, error.key
             except RequestValidationError:
                 status, code = 422, 'plc_facts_v2.invalid_request'
@@ -41,7 +42,8 @@ class V2Route(APIRoute):
                 code = ('plc_facts_v2.commit_outcome_unknown'
                         if request.state.plc_facts_v2.get('commit_attempted') else 'plc_facts_v2.not_ready')
             emit('plc_facts_v2_request_rejected', status=status, error_code=code)
-            return JSONResponse(status_code=status, content={'code': status, 'message': code, 'data': None, 'errorCode': code})
+            return JSONResponse(status_code=status, content={'code': status, 'message': code, 'data': None, 'errorCode': code},
+                                headers={'WWW-Authenticate': 'Bearer'} if status == 401 else None)
         return wrapped
 
 
@@ -89,7 +91,10 @@ async def body_bytes(request):
 
 @router.post('/integration/plc-facts/samples', operation_id='plc_facts_v2_sample', response_model=ReceiptOut, responses=ERROR_RESPONSES)
 async def create_sample(request: Request, body: SampleV2In):
+    from .consumption import target_headers
+
     boundary = request.state.plc_facts_v2
+    boundary['target_write'] = target_headers(request)
     db = await get_db_session()
     try:
         result = await service.write_sample(db, boundary['profile'], body, boundary['document'], boundary['digest'], boundary)

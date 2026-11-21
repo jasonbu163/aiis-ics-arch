@@ -1,4 +1,4 @@
-"""设备指标配置、两路采样和持久回执的 SQLAlchemy 模型。"""
+"""设备指标配置、两路采样和分域持久回执的 SQLAlchemy 模型。"""
 from sqlalchemy import Boolean, CheckConstraint, Column, ForeignKey, Index, Integer, JSON, String, Text, UniqueConstraint, func, text
 from sqlalchemy.dialects.mysql import BIGINT, BINARY, DATETIME, TINYINT
 
@@ -8,7 +8,7 @@ STAMP = text("CURRENT_TIMESTAMP(6)")
 
 
 class MetricConfig(Base):
-    __tablename__ = "equipment_metric_configs"
+    __tablename__ = "observation_metric_configs"
     metric_key = Column(String(64, collation="utf8mb4_bin"), primary_key=True)
     source_group_key = Column(String(64, collation="utf8mb4_bin"), nullable=False)
     category = Column(String(32), nullable=False)
@@ -21,7 +21,7 @@ class MetricConfig(Base):
 
 
 class MetricGroup(Base):
-    __tablename__ = "equipment_metric_groups"
+    __tablename__ = "observation_metric_groups"
     group_key = Column(String(64, collation="utf8mb4_bin"), primary_key=True)
     category = Column(String(32), nullable=False)
     name_zh = Column(String(128), nullable=False)
@@ -32,11 +32,11 @@ class MetricGroup(Base):
 
 
 class SlotBinding(Base):
-    __tablename__ = "equipment_metric_slot_bindings"
+    __tablename__ = "observation_metric_slot_bindings"
     target = Column(String(7), primary_key=True)
     group_key = Column(String(64, collation="utf8mb4_bin"), primary_key=True)
     slot_no = Column(TINYINT(unsigned=True), primary_key=True)
-    metric_key = Column(String(64, collation="utf8mb4_bin"), ForeignKey("equipment_metric_configs.metric_key", ondelete="RESTRICT"), nullable=False)
+    metric_key = Column(String(64, collation="utf8mb4_bin"), ForeignKey("observation_metric_configs.metric_key", name="fk_obs_r10_binding_metric", ondelete="RESTRICT"), nullable=False)
     enabled = Column(Boolean, nullable=False)
     list_visible = Column(Boolean, nullable=False, default=False, server_default=text("0"))
     list_order = Column(Integer)
@@ -72,8 +72,7 @@ class CurveGroup(Base):
     __table_args__ = (Index("ix_obs_r10_curve_category", "category", "sort_order", "curve_group_key"),)
 
 
-class Receipt(Base):
-    __tablename__ = "metric_ingest_receipts"
+class ReceiptColumns:
     id = Column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
     target = Column(String(7), nullable=False)
     producer_id = Column(String(64, collation="utf8mb4_bin"), nullable=False)
@@ -89,7 +88,22 @@ class Receipt(Base):
     contract_version = Column(String(32), nullable=False, server_default=text("'aiis.metric-ingest/v2'"))
     result_version = Column(String(8), nullable=False, server_default=text("'r10'"))
     result_detail = Column(JSON)
-    __table_args__ = (UniqueConstraint("target", "producer_id", "event_id", name="uq_obs_receipt_event"),)
+
+
+class Receipt(ReceiptColumns, Base):
+    __tablename__ = "observation_ingest_receipts"
+    __table_args__ = (
+        UniqueConstraint("target", "producer_id", "event_id", name="uq_obs_receipt_event"),
+        CheckConstraint("BINARY target IN ('latest','history')", name="ck_observation_receipt_target"),
+    )
+
+
+class EnergyReceipt(ReceiptColumns, Base):
+    __tablename__ = "energy_ingest_receipts"
+    __table_args__ = (
+        UniqueConstraint("target", "producer_id", "event_id", name="uq_obs_receipt_event"),
+        CheckConstraint("BINARY target = 'energy'", name="ck_energy_receipt_target"),
+    )
 
 
 class SampleColumns:
@@ -99,7 +113,7 @@ class SampleColumns:
     observed_at = Column(DATETIME(fsp=6), nullable=False)
     quality = Column(String(16), nullable=False)
     source_sample_key = Column(BINARY(32), nullable=False)
-    ingest_receipt_id = Column(BIGINT(unsigned=True), ForeignKey("metric_ingest_receipts.id", ondelete="RESTRICT"), nullable=False)
+    ingest_receipt_id = Column(BIGINT(unsigned=True), ForeignKey("observation_ingest_receipts.id", ondelete="RESTRICT"), nullable=False)
     local_values = Column(JSON, nullable=False)
     remark = Column(Text)
     created_at = Column(DATETIME(fsp=6), nullable=False, server_default=STAMP)
@@ -107,7 +121,7 @@ class SampleColumns:
 
 
 class LatestSnapshot(SampleColumns, Base):
-    __tablename__ = "equipment_status_main"
+    __tablename__ = "equipment_main"
     __table_args__ = (
         UniqueConstraint("equipment_id", "task_no", name="uq_obs_latest_task"),
         Index("ix_obs_latest_task_v2", "task_no", "id"),
@@ -115,7 +129,7 @@ class LatestSnapshot(SampleColumns, Base):
 
 
 class HistorySample(SampleColumns, Base):
-    __tablename__ = "process_monitor_main"
+    __tablename__ = "monitor_main"
     review_mark = Column(String(16))
     __table_args__ = (
         Index("ix_obs_history_task_time_v2", "task_no", "observed_at", "id"),
@@ -158,7 +172,7 @@ class EnergySample(Base):
     quality = Column(String(16), nullable=False)
     interval_start_at = Column(DATETIME(fsp=6))
     interval_end_at = Column(DATETIME(fsp=6))
-    ingest_receipt_id = Column(BIGINT(unsigned=True), ForeignKey("metric_ingest_receipts.id", ondelete="RESTRICT"), nullable=False)
+    ingest_receipt_id = Column(BIGINT(unsigned=True), ForeignKey("energy_ingest_receipts.id", name="fk_energy_sample_receipt", ondelete="RESTRICT"), nullable=False)
     local_values = Column(JSON, nullable=False)
     remark = Column(Text)
     review_mark = Column(String(16))

@@ -1,0 +1,2036 @@
+{
+  "components": {
+    "schemas": {
+      "AckIn": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "const": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "contractVersion": {
+            "const": "plc-facts/v2",
+            "title": "Contractversion",
+            "type": "string"
+          },
+          "httpStatus": {
+            "const": 200,
+            "title": "Httpstatus",
+            "type": "integer"
+          },
+          "instanceId": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Instanceid",
+            "type": "string",
+            "x-utf8-max-bytes": 128
+          },
+          "operationId": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Operationid",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "created",
+              "duplicate"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "sampleId": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Sampleid",
+            "type": "string"
+          },
+          "status": {
+            "const": "committed",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operationId",
+          "httpStatus",
+          "code",
+          "contractVersion",
+          "instanceId",
+          "sampleId",
+          "status",
+          "outcome"
+        ],
+        "title": "AckIn",
+        "type": "object"
+      },
+      "ConfirmedOut": {
+        "properties": {
+          "confirmedAt": {
+            "title": "Confirmedat",
+            "type": "string"
+          },
+          "deliveryId": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Deliveryid",
+            "type": "string"
+          },
+          "lastConfirmedSeq": {
+            "pattern": "^[1-9][0-9]{0,18}$",
+            "title": "Lastconfirmedseq",
+            "type": "string"
+          },
+          "status": {
+            "const": "confirmed",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "deliveryId",
+          "lastConfirmedSeq",
+          "confirmedAt"
+        ],
+        "title": "ConfirmedOut",
+        "type": "object"
+      },
+      "ConsumerCreatedOut": {
+        "properties": {
+          "consumerId": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Consumerid",
+            "type": "string"
+          },
+          "desiredState": {
+            "const": "paused",
+            "title": "Desiredstate",
+            "type": "string"
+          },
+          "excludedHistory": {
+            "$ref": "#/components/schemas/ExcludedOut"
+          },
+          "lastConfirmedSeq": {
+            "title": "Lastconfirmedseq",
+            "type": "string"
+          },
+          "startAt": {
+            "title": "Startat",
+            "type": "string"
+          },
+          "startSeq": {
+            "title": "Startseq",
+            "type": "string"
+          }
+        },
+        "required": [
+          "consumerId",
+          "startAt",
+          "startSeq",
+          "lastConfirmedSeq",
+          "excludedHistory",
+          "desiredState"
+        ],
+        "title": "ConsumerCreatedOut",
+        "type": "object"
+      },
+      "ConsumerStatusOut": {
+        "properties": {
+          "consumerId": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Consumerid",
+            "type": "string"
+          },
+          "dbNumber": {
+            "maximum": 65535.0,
+            "minimum": 1.0,
+            "title": "Dbnumber",
+            "type": "integer"
+          },
+          "desiredState": {
+            "enum": [
+              "running",
+              "paused"
+            ],
+            "title": "Desiredstate",
+            "type": "string"
+          },
+          "excludedHistory": {
+            "$ref": "#/components/schemas/ExcludedOut"
+          },
+          "lastConfirmedSeq": {
+            "title": "Lastconfirmedseq",
+            "type": "string"
+          },
+          "lease": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LeaseOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pending": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PendingOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "plcId": {
+            "title": "Plcid",
+            "type": "string"
+          },
+          "startAt": {
+            "title": "Startat",
+            "type": "string"
+          },
+          "startMode": {
+            "enum": [
+              "now",
+              "retained"
+            ],
+            "title": "Startmode",
+            "type": "string"
+          },
+          "startSeq": {
+            "title": "Startseq",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "idle",
+              "pending",
+              "confirmed",
+              "blocked"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/components/schemas/TargetOut"
+          }
+        },
+        "required": [
+          "desiredState",
+          "consumerId",
+          "plcId",
+          "dbNumber",
+          "startMode",
+          "startAt",
+          "startSeq",
+          "lastConfirmedSeq",
+          "excludedHistory",
+          "target",
+          "lease",
+          "pending",
+          "status"
+        ],
+        "title": "ConsumerStatusOut",
+        "type": "object"
+      },
+      "CreateConsumerIn": {
+        "additionalProperties": false,
+        "properties": {
+          "dbNumber": {
+            "maximum": 65535.0,
+            "minimum": 1.0,
+            "title": "Dbnumber",
+            "type": "integer"
+          },
+          "plcId": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Plcid",
+            "type": "string",
+            "x-utf8-max-bytes": 128
+          },
+          "startMode": {
+            "enum": [
+              "now",
+              "retained"
+            ],
+            "title": "Startmode",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/components/schemas/TargetIn"
+          }
+        },
+        "required": [
+          "plcId",
+          "dbNumber",
+          "startMode",
+          "target"
+        ],
+        "title": "CreateConsumerIn",
+        "type": "object"
+      },
+      "DeliveryTargetIn": {
+        "additionalProperties": false,
+        "properties": {
+          "dbNumber": {
+            "maximum": 65535.0,
+            "minimum": 1.0,
+            "title": "Dbnumber",
+            "type": "integer"
+          },
+          "instanceId": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Instanceid",
+            "type": "string",
+            "x-utf8-max-bytes": 128
+          },
+          "kind": {
+            "const": "plc-facts-v2",
+            "title": "Kind",
+            "type": "string"
+          },
+          "plcId": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Plcid",
+            "type": "string",
+            "x-utf8-max-bytes": 128
+          },
+          "sampleId": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Sampleid",
+            "type": "string"
+          },
+          "sourceGeneration": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Sourcegeneration",
+            "type": "string",
+            "x-utf8-max-bytes": 128
+          },
+          "sourceSeq": {
+            "pattern": "^[1-9][0-9]{0,18}$",
+            "title": "Sourceseq",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "instanceId",
+          "plcId",
+          "dbNumber",
+          "sourceGeneration",
+          "sampleId",
+          "sourceSeq"
+        ],
+        "title": "DeliveryTargetIn",
+        "type": "object"
+      },
+      "DeliveryTargetOut": {
+        "properties": {
+          "dbNumber": {
+            "maximum": 65535.0,
+            "minimum": 1.0,
+            "title": "Dbnumber",
+            "type": "integer"
+          },
+          "instanceId": {
+            "title": "Instanceid",
+            "type": "string"
+          },
+          "kind": {
+            "const": "plc-facts-v2",
+            "title": "Kind",
+            "type": "string"
+          },
+          "plcId": {
+            "title": "Plcid",
+            "type": "string"
+          },
+          "sampleId": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Sampleid",
+            "type": "string"
+          },
+          "sourceGeneration": {
+            "title": "Sourcegeneration",
+            "type": "string"
+          },
+          "sourceSeq": {
+            "pattern": "^[1-9][0-9]{0,18}$",
+            "title": "Sourceseq",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "instanceId",
+          "plcId",
+          "dbNumber",
+          "sourceGeneration",
+          "sampleId",
+          "sourceSeq"
+        ],
+        "title": "DeliveryTargetOut",
+        "type": "object"
+      },
+      "EmptyOut": {
+        "properties": {
+          "status": {
+            "const": "empty",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "EmptyOut",
+        "type": "object"
+      },
+      "ExcludedOut": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "string"
+          },
+          "firstEventSeq": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Firsteventseq"
+          },
+          "lastEventSeq": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lasteventseq"
+          }
+        },
+        "required": [
+          "count",
+          "firstEventSeq",
+          "lastEventSeq"
+        ],
+        "title": "ExcludedOut",
+        "type": "object"
+      },
+      "FailureOut": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "errorCode": {
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "errorCode"
+        ],
+        "title": "FailureOut",
+        "type": "object"
+      },
+      "LeaseIn": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "acquire",
+              "renew",
+              "release"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "operationId": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Operationid",
+            "type": "string"
+          },
+          "workerId": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Workerid",
+            "type": "string",
+            "x-utf8-max-bytes": 128
+          }
+        },
+        "required": [
+          "operationId",
+          "workerId",
+          "action"
+        ],
+        "title": "LeaseIn",
+        "type": "object"
+      },
+      "LeaseOut": {
+        "properties": {
+          "expiresAt": {
+            "title": "Expiresat",
+            "type": "string"
+          },
+          "leaseGeneration": {
+            "pattern": "^[1-9][0-9]{0,18}$",
+            "title": "Leasegeneration",
+            "type": "string"
+          },
+          "leaseId": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Leaseid",
+            "type": "string"
+          },
+          "renewAfterAt": {
+            "title": "Renewafterat",
+            "type": "string"
+          }
+        },
+        "required": [
+          "leaseId",
+          "leaseGeneration",
+          "expiresAt",
+          "renewAfterAt"
+        ],
+        "title": "LeaseOut",
+        "type": "object"
+      },
+      "PendingIn": {
+        "additionalProperties": false,
+        "properties": {
+          "bodySha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Bodysha256",
+            "type": "string"
+          },
+          "configHash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Confighash",
+            "type": "string"
+          },
+          "configVersion": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Configversion",
+            "type": "string",
+            "x-utf8-max-bytes": 128
+          },
+          "eventSeq": {
+            "pattern": "^[1-9][0-9]{0,18}$",
+            "title": "Eventseq",
+            "type": "string"
+          },
+          "serializerVersion": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Serializerversion",
+            "type": "string",
+            "x-utf8-max-bytes": 128
+          },
+          "target": {
+            "$ref": "#/components/schemas/DeliveryTargetIn"
+          }
+        },
+        "required": [
+          "eventSeq",
+          "configVersion",
+          "configHash",
+          "serializerVersion",
+          "bodySha256",
+          "target"
+        ],
+        "title": "PendingIn",
+        "type": "object"
+      },
+      "PendingOut": {
+        "properties": {
+          "bodySha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Bodysha256",
+            "type": "string"
+          },
+          "configHash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Confighash",
+            "type": "string"
+          },
+          "configVersion": {
+            "title": "Configversion",
+            "type": "string"
+          },
+          "deliveryId": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Deliveryid",
+            "type": "string"
+          },
+          "eventSeq": {
+            "pattern": "^[1-9][0-9]{0,18}$",
+            "title": "Eventseq",
+            "type": "string"
+          },
+          "serializerVersion": {
+            "title": "Serializerversion",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/components/schemas/DeliveryTargetOut"
+          }
+        },
+        "required": [
+          "deliveryId",
+          "eventSeq",
+          "configVersion",
+          "configHash",
+          "serializerVersion",
+          "bodySha256",
+          "target"
+        ],
+        "title": "PendingOut",
+        "type": "object"
+      },
+      "PointV2In": {
+        "additionalProperties": false,
+        "properties": {
+          "dataType": {
+            "pattern": "^(?:BOOL|BYTE|USINT|INT|UINT|WORD|DINT|UDINT|DWORD|REAL|CHAR|STRING\\[(?:[1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-4])\\])$",
+            "title": "Datatype",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "maxLength": 100,
+            "title": "Name",
+            "type": "string",
+            "x-utf8-max-bytes": 100
+          },
+          "observedAt": {
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?\\+08:00$",
+            "title": "Observedat",
+            "type": "string"
+          },
+          "pointId": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Pointid",
+            "type": "string",
+            "x-utf8-max-bytes": 128
+          },
+          "quality": {
+            "enum": [
+              "good",
+              "bad"
+            ],
+            "title": "Quality",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason",
+            "x-utf8-max-bytes": 128
+          },
+          "value": {
+            "title": "Value"
+          }
+        },
+        "required": [
+          "pointId",
+          "dataType",
+          "value",
+          "quality",
+          "observedAt"
+        ],
+        "title": "PointV2In",
+        "type": "object"
+      },
+      "ReadyOut": {
+        "properties": {
+          "deliveryId": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Deliveryid",
+            "type": "string"
+          },
+          "eventSeq": {
+            "pattern": "^[1-9][0-9]{0,18}$",
+            "title": "Eventseq",
+            "type": "string"
+          },
+          "sample": {
+            "$ref": "#/components/schemas/SampleDetail"
+          },
+          "status": {
+            "const": "ready",
+            "title": "Status",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/components/schemas/DeliveryTargetOut"
+          }
+        },
+        "required": [
+          "status",
+          "eventSeq",
+          "deliveryId",
+          "target",
+          "sample"
+        ],
+        "title": "ReadyOut",
+        "type": "object"
+      },
+      "RunStateIn": {
+        "additionalProperties": false,
+        "properties": {
+          "desiredState": {
+            "enum": [
+              "running",
+              "paused"
+            ],
+            "title": "Desiredstate",
+            "type": "string"
+          },
+          "operationId": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "title": "Operationid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operationId",
+          "desiredState"
+        ],
+        "title": "RunStateIn",
+        "type": "object"
+      },
+      "RunStateOut": {
+        "properties": {
+          "desiredState": {
+            "enum": [
+              "running",
+              "paused"
+            ],
+            "title": "Desiredstate",
+            "type": "string"
+          }
+        },
+        "required": [
+          "desiredState"
+        ],
+        "title": "RunStateOut",
+        "type": "object"
+      },
+      "SampleDetail": {
+        "properties": {
+          "configRevision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Configrevision"
+          },
+          "dbNumber": {
+            "title": "Dbnumber",
+            "type": "integer"
+          },
+          "groupId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Groupid"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "instanceId": {
+            "title": "Instanceid",
+            "type": "string"
+          },
+          "plcId": {
+            "title": "Plcid",
+            "type": "string"
+          },
+          "pointCount": {
+            "title": "Pointcount",
+            "type": "integer"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/PointV2In"
+            },
+            "title": "Points",
+            "type": "array"
+          },
+          "sampleId": {
+            "title": "Sampleid",
+            "type": "string"
+          },
+          "sampledAt": {
+            "title": "Sampledat",
+            "type": "string"
+          },
+          "sourceGeneration": {
+            "title": "Sourcegeneration",
+            "type": "string"
+          },
+          "sourceSeq": {
+            "title": "Sourceseq",
+            "type": "string"
+          },
+          "sourceType": {
+            "anyOf": [
+              {
+                "enum": [
+                  "daa",
+                  "external"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourcetype"
+          },
+          "storedAt": {
+            "title": "Storedat",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "instanceId",
+          "sampleId",
+          "plcId",
+          "dbNumber",
+          "groupId",
+          "configRevision",
+          "sourceType",
+          "sourceGeneration",
+          "sourceSeq",
+          "sampledAt",
+          "storedAt",
+          "pointCount",
+          "points"
+        ],
+        "title": "SampleDetail",
+        "type": "object"
+      },
+      "StandardResponse_ConfirmedOut_": {
+        "properties": {
+          "code": {
+            "default": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {},
+          "message": {
+            "default": "success",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "StandardResponse[ConfirmedOut]",
+        "type": "object"
+      },
+      "StandardResponse_ConsumerCreatedOut_": {
+        "properties": {
+          "code": {
+            "default": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {},
+          "message": {
+            "default": "success",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "StandardResponse[ConsumerCreatedOut]",
+        "type": "object"
+      },
+      "StandardResponse_ConsumerStatusOut_": {
+        "properties": {
+          "code": {
+            "default": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {},
+          "message": {
+            "default": "success",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "StandardResponse[ConsumerStatusOut]",
+        "type": "object"
+      },
+      "StandardResponse_LeaseOut_": {
+        "properties": {
+          "code": {
+            "default": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {},
+          "message": {
+            "default": "success",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "StandardResponse[LeaseOut]",
+        "type": "object"
+      },
+      "StandardResponse_PendingOut_": {
+        "properties": {
+          "code": {
+            "default": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {},
+          "message": {
+            "default": "success",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "StandardResponse[PendingOut]",
+        "type": "object"
+      },
+      "StandardResponse_RunStateOut_": {
+        "properties": {
+          "code": {
+            "default": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {},
+          "message": {
+            "default": "success",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "StandardResponse[RunStateOut]",
+        "type": "object"
+      },
+      "StandardResponse_Union_ReadyOut__EmptyOut__": {
+        "properties": {
+          "code": {
+            "default": 200,
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data"
+          },
+          "message": {
+            "default": "success",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "title": "StandardResponse[Union[ReadyOut, EmptyOut]]",
+        "type": "object"
+      },
+      "TargetIn": {
+        "additionalProperties": false,
+        "properties": {
+          "dbNumber": {
+            "maximum": 65535.0,
+            "minimum": 1.0,
+            "title": "Dbnumber",
+            "type": "integer"
+          },
+          "instanceId": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Instanceid",
+            "type": "string",
+            "x-utf8-max-bytes": 128
+          },
+          "kind": {
+            "const": "plc-facts-v2",
+            "title": "Kind",
+            "type": "string"
+          },
+          "plcId": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Plcid",
+            "type": "string",
+            "x-utf8-max-bytes": 128
+          },
+          "sourceGeneration": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Sourcegeneration",
+            "type": "string",
+            "x-utf8-max-bytes": 128
+          }
+        },
+        "required": [
+          "kind",
+          "instanceId",
+          "plcId",
+          "dbNumber",
+          "sourceGeneration"
+        ],
+        "title": "TargetIn",
+        "type": "object"
+      },
+      "TargetOut": {
+        "properties": {
+          "dbNumber": {
+            "maximum": 65535.0,
+            "minimum": 1.0,
+            "title": "Dbnumber",
+            "type": "integer"
+          },
+          "instanceId": {
+            "title": "Instanceid",
+            "type": "string"
+          },
+          "kind": {
+            "const": "plc-facts-v2",
+            "title": "Kind",
+            "type": "string"
+          },
+          "plcId": {
+            "title": "Plcid",
+            "type": "string"
+          },
+          "sourceGeneration": {
+            "title": "Sourcegeneration",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "instanceId",
+          "plcId",
+          "dbNumber",
+          "sourceGeneration"
+        ],
+        "title": "TargetOut",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "AcquisitionConsumerBearer": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Acquisition Consumers",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/acquisition-consumers/{consumerId}": {
+      "get": {
+        "operationId": "acq_consumer_status",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consumerId",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "title": "Consumerid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_ConsumerStatusOut_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          }
+        },
+        "security": [
+          {
+            "AcquisitionConsumerBearer": []
+          }
+        ],
+        "summary": "Consumer Status",
+        "tags": [
+          "acquisition-consumers"
+        ]
+      },
+      "put": {
+        "operationId": "acq_consumer_create",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consumerId",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "title": "Consumerid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConsumerIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_ConsumerCreatedOut_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          }
+        },
+        "security": [
+          {
+            "AcquisitionConsumerBearer": []
+          }
+        ],
+        "summary": "Create Consumer",
+        "tags": [
+          "acquisition-consumers"
+        ]
+      }
+    },
+    "/api/v1/acquisition-consumers/{consumerId}/lease": {
+      "post": {
+        "operationId": "acq_consumer_lease",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consumerId",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "title": "Consumerid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Consumer-Lease-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Consumer-Lease-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Consumer-Lease-Generation",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Consumer-Lease-Generation"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeaseIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_LeaseOut_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          }
+        },
+        "security": [
+          {
+            "AcquisitionConsumerBearer": []
+          }
+        ],
+        "summary": "Change Lease",
+        "tags": [
+          "acquisition-consumers"
+        ]
+      }
+    },
+    "/api/v1/acquisition-consumers/{consumerId}/next": {
+      "get": {
+        "operationId": "acq_consumer_next",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consumerId",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "title": "Consumerid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Consumer-Lease-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Consumer-Lease-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Consumer-Lease-Generation",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Consumer-Lease-Generation"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_Union_ReadyOut__EmptyOut__"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          }
+        },
+        "security": [
+          {
+            "AcquisitionConsumerBearer": []
+          }
+        ],
+        "summary": "Read Next",
+        "tags": [
+          "acquisition-consumers"
+        ]
+      }
+    },
+    "/api/v1/acquisition-consumers/{consumerId}/pending/{deliveryId}": {
+      "put": {
+        "operationId": "acq_consumer_pending",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consumerId",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "title": "Consumerid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "deliveryId",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "title": "Deliveryid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Consumer-Lease-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Consumer-Lease-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Consumer-Lease-Generation",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Consumer-Lease-Generation"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PendingIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_PendingOut_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          }
+        },
+        "security": [
+          {
+            "AcquisitionConsumerBearer": []
+          }
+        ],
+        "summary": "Mark Pending",
+        "tags": [
+          "acquisition-consumers"
+        ]
+      }
+    },
+    "/api/v1/acquisition-consumers/{consumerId}/pending/{deliveryId}/ack": {
+      "post": {
+        "operationId": "acq_consumer_ack",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consumerId",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "title": "Consumerid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "deliveryId",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "title": "Deliveryid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Consumer-Lease-Id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Consumer-Lease-Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Consumer-Lease-Generation",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Consumer-Lease-Generation"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AckIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_ConfirmedOut_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          }
+        },
+        "security": [
+          {
+            "AcquisitionConsumerBearer": []
+          }
+        ],
+        "summary": "Acknowledge",
+        "tags": [
+          "acquisition-consumers"
+        ]
+      }
+    },
+    "/api/v1/acquisition-consumers/{consumerId}/run-state": {
+      "put": {
+        "operationId": "acq_consumer_run_state",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "consumerId",
+            "required": true,
+            "schema": {
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+              "title": "Consumerid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunStateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardResponse_RunStateOut_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "410": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FailureOut"
+                }
+              }
+            },
+            "description": "Acquisition consumer failure"
+          }
+        },
+        "security": [
+          {
+            "AcquisitionConsumerBearer": []
+          }
+        ],
+        "summary": "Set Run State",
+        "tags": [
+          "acquisition-consumers"
+        ]
+      }
+    }
+  }
+}

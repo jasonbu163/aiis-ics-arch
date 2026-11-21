@@ -56,6 +56,33 @@ class FieldDelete(BaseModel):
     configRevision: str = Field(pattern=r'^[1-9][0-9]{0,19}$')
 
 
+class SharedFieldIdentity(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    scope: Literal['shared_sync']
+    slotNo: StrictInt = Field(ge=1, le=100)
+    name: str = Field(pattern=r'^[a-z][A-Za-z0-9_]{0,63}$')
+
+
+class FieldBatchDelete(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    configRevision: str = Field(pattern=r'^[1-9][0-9]{0,19}$')
+    fields: list[SharedFieldIdentity] = Field(min_length=1, max_length=100)
+
+
+class LocalFieldIdentity(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    scope: Literal['plan_local', 'performance_local']
+    slotNo: StrictInt = Field(ge=1, le=100)
+    name: str = Field(pattern=r'^[a-z][A-Za-z0-9_]{0,63}$')
+
+
+class LocalFieldBatchDelete(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    module: Literal['plan', 'performance']
+    configRevision: str = Field(pattern=r'^[1-9][0-9]{0,19}$')
+    fields: list[LocalFieldIdentity] = Field(min_length=1, max_length=100)
+
+
 class FieldDefinitionResult(BaseModel):
     scope: Literal['shared_sync', 'plan_local', 'performance_local']
     slotNo: int
@@ -88,6 +115,20 @@ class FieldDeleteResult(BaseModel):
     scope: Literal['shared_sync', 'plan_local', 'performance_local']
     slotNo: int
     name: str
+
+
+class FieldBatchDeleteResult(BaseModel):
+    outcome: Literal['deleted']
+    deleted: list[SharedFieldIdentity]
+    configVersion: int
+    configRevision: str
+
+
+class LocalFieldBatchDeleteResult(BaseModel):
+    outcome: Literal['deleted']
+    deleted: list[LocalFieldIdentity]
+    configVersion: int
+    configRevision: str
 
 
 Payload = TypeVar('Payload')

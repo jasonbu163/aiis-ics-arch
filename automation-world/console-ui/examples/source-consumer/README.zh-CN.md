@@ -59,7 +59,7 @@ import '@aw-ui-styles'
 </AgentLayout>
 ```
 
-上述组件从 `@aw-ui` 导入。`AgentLayout` 接收 `theme: 'light' | 'dark'`、`sidebarHidden`，提供 sidebar/topbar/default slots。`AgentSidebar` 接收下述翻译后的平铺/分组导航，叶项发出 `select(id)`。`AgentTopbar` 接收 title/subtitle/sidebarLabel，发出 `toggle-sidebar`。`ConsoleCard` 支持 actions/tools/default/footer slots 与 compact。`ConsoleActionButton` 接收已翻译 label/title 或 slot、tone、small/large 尺寸，发出 click。`StatusCapsule` 接收 label 及 neutral/success/warning/danger 展示色调；这些是展示值，不是设备状态。
+上述组件从 `@aw-ui` 导入。`AgentLayout` 接收 `theme: 'light' | 'dark'`、`sidebarHidden`，提供 sidebar/topbar/default slots。`AgentSidebar` 接收下述翻译后的平铺/分组导航，叶项发出 `select(id)`。`AgentTopbar` 接收 title/subtitle/sidebarLabel，发出 `toggle-sidebar`。`ConsoleCard` 支持 title-aside/actions/status/tools/default/footer 插槽 与 compact。`ConsoleActionButton` 接收已翻译 label/title 或 slot、tone、small/large 尺寸及表格行操作 `variant="row"`，发出 click。`StatusCapsule` 接收 label 及 neutral/success/warning/danger 展示色调；这些是展示值，不是设备状态。
 
 语言安装完全归消费端：创建或复用自己的 vue-i18n，加载对称 locale，再传入 `t(...)` 结果。主题通过 AgentLayout 显式安装；单独使用组件时用 `.aw-ui` 与 `data-aw-theme="light"` / `"dark"` 包裹，Element Plus 控件也应置于该作用域。body reset 和样例间距由消费端 CSS 管理。公共代码/样式不写 storage、不创建 app、不联系 CU；本示例刻意不持久化偏好。
 
@@ -102,7 +102,7 @@ Tab/Shift+Tab 可进入和离开可见项；上下键遍历可见项，右键展
 
 ## Element Plus 页面组合
 
-CU 私有的**页面样例**演示表格、校验表单、编辑弹窗及手动选择的正常/加载/空数据/失败状态。数据与重试/提交/编辑反馈只在内存中，刷新会重置样例。八个公共组件及 API 保持不变。独立消费者直接用自身 Element Plus 依赖组合更小的表格/表单/弹窗，拥有自己的 locale 与状态，不导入 PageSamples 或工作台文件。
+CU 私有的**页面样例**演示表格、校验表单、编辑弹窗及手动选择的正常/加载/空数据/失败状态。数据与重试/提交/编辑反馈只在内存中，刷新会重置样例。页面样例使用公共卡片和按钮。独立消费者直接用自身 Element Plus 依赖组合更小的表格/表单/弹窗，拥有自己的 locale 与状态，不导入 PageSamples 或工作台文件。
 
 先导入 Element Plus CSS，再导入 `@aw-ui-styles`。`ElTable` 使用 `aw-data-table`，`ElForm` 使用 `aw-sample-form`，动作区使用 `aw-form-actions`，状态内容使用 `aw-page-state`。公共 CSS 将 Element Plus 变量映射到当前作用域的 `--agent-*` tokens；页面布局由各宿主负责。这些类是样式约定，不是新增公共 Vue 组件。
 

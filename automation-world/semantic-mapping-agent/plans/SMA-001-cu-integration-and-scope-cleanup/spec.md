@@ -3,7 +3,7 @@ Revision: r2
 Status: draft
 Owner Role: PM
 Allowed Writers: PM, Human Owner
-Handoff: PM -> Human Owner 审阅 SMA-007 r1 rework-2 的独立验证结果并做最终验收。SMA-005 r1 待 Human Owner 手工完成隔离原生 GET 测试与重开等取证，再交独立 Verification 复核。POST 暂缓。SMA-006 r1 保留草案，SMA-002 至 SMA-004 已验收
+Handoff: PM -> Human Owner 审阅 SMA-007 r1 rework-2 的独立验证结果并做最终验收。SMA-005 r1 待 Human Owner 手工完成隔离原生 GET 测试与重开等取证，再交独立 Verification 复核。SMA-008 r3 rework-1 离线及夹具检查通过，待 Human Owner 在 dev 显式执行 POST、核对回执和历史，再交独立 Verification 复核 AC04。SMA-006 r1 保留草案，SMA-002 至 SMA-004 已验收
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch.aw.sma
@@ -61,18 +61,20 @@ Human Owner 于 2026-11-04（Asia/Shanghai）明确授权：
 
 两个 UI 子任务各自提交范围批准。二者共享少量组件与文案，建议页面变更交接后，再在同一工作树处理弹窗的重叠文件。UI 可用隔离配置验证，阶段④–⑥继续按下表组织。其余 UI 优先级记在对应子规格的后续事项。
 
+基于阶段③的 [SMA-008 r3 采集数据手动映射回环](../SMA-008-acquisition-data-get/spec.md)当前为 `qa_blocked`。rework-1 的离线及夹具检查通过，AC04 等待 Human Owner 在 dev 显式执行 POST、核对回执和目标历史，再交[独立 Verification](../SMA-008-acquisition-data-get/checklist.md)复核。SQLite 仅存配置，已批准的 [r2 规格快照](../SMA-008-acquisition-data-get/evidence/r2-approved-before-r3/spec.md)及其未完成开发事实保留。
+
 ### 基于阶段③的开发 profile 路径
 
 [SMA-007 r1 开发 profile 路径对齐](../SMA-007-dev-profile-path/spec.md)依赖 SMA-004。rework-2 候选在获批的离线范围内通过 AC01–AC05，结论为 `qa_passed`，待 Human Owner 最终验收。 [开发交接](../SMA-007-dev-profile-path/tasks.md#developer_handoff-rework-2) · [独立验证记录](../SMA-007-dev-profile-path/checklist.md)
 
 ## 4. 后续阶段：仅目标与依赖
 
-以下④–⑥尚未创建软件 spec 或分配 Task ID，进入对应阶段时再界定合同、范围、验收和风险。阶段③的实施、验证与验收记录见 SMA-004。
+SMA-008 r3 先完成④的手动闭环，rework-1 当前等待 Human Owner 的 dev POST、回执及历史证据和独立复核。⑤的持续运行和恢复保留为后续目标，接口及实现另行确认。⑥尚未创建软件 spec 或分配 Task ID，进入对应阶段时再界定合同、范围、验收和风险。阶段③的实施、验证与验收记录见 SMA-004。
 
 | 顺序 | 目标 | 前置依赖与届时决定 |
 | --- | --- | --- |
 | ④ 单目标 GET→POST 闭环 | 用一个受控目标完成源 GET → 绑定/常量/必要转换 → 目标 POST，核对真实业务保存。 | 配置独立化；源事实/目标业务 API 的可调用合同与固定候选就绪，身份/数据/错误/确认语义明确，真实联调单独批准。 |
-| ⑤ 历史消费与可靠恢复 | 补齐历史完整消费、持久进度、待投递、回执及断线/重启/unknown 对账。 | 单目标接受；Backend 历史/排序/安全游标/保留合同与目标去重/回执可用；另定恢复/迁移规格，不以 latest 代替历史完整性。 |
+| ⑤ 历史消费与可靠恢复 | 补齐历史完整消费、持久进度、待投递、回执及断线/重启/unknown 对账。 | 在④手动闭环之后另行确定接口及实现，不以 latest 代替历史完整性。ARCH-ACQ-006 r1 rework-1 的源码精确候选及隔离验证已获验收。 |
 | ⑥ 批量运行优化 | 在正确性与恢复基线上定义负载目标，测量容量并优化调度、资源占用和可观测性。 | 历史/恢复接受；代表负载、环境、容量口径获批；不预设并发模型，不以并发数冒充吞吐证明。 |
 
 ## 5. 外部依赖与并行准备
@@ -87,7 +89,7 @@ Backend 拥有事实/业务 API，DAA 拥有采集/上传，均非 SMA 子任务
 
 | 条件 | 总任务完成前必须存在的事实 |
 | --- | --- |
-| 分阶段证据 | 六阶段均有届时获批的精确范围、实现、独立验证和 Human Owner 接受；尚无 spec 的阶段不能靠目标表判为完成。 |
+| 分阶段证据 | 六阶段均有届时获批的精确范围、实现、独立验证和 Human Owner 接受；④、⑤可由同一子任务覆盖，尚未获批和实施的范围不能靠目标表判为完成。 |
 | 连贯交付 | 整合到约定交付工作树，来源/配置/接口/恢复/负载边界一致，各接受候选及之后变更可追溯。 |
 | 业务与可靠性 | 真实 GET→POST、业务保存、历史完整性/恢复、批量目标均有对应范围及证据，不能由前两阶段替代。 |
 | 总体决定 | Human Owner 审阅阶段汇总、未关闭风险及外部依赖后明确总体接受；前两个子任务完成仅代表阶段①②完成。 |

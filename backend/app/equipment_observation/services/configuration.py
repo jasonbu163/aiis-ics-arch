@@ -164,13 +164,28 @@ async def update_metric(db, key, patch):
     return metric_data(row)
 
 
+async def energy_metric_configs(db, meter_ids, group):
+    if not meter_ids:
+        return []
+    query = select(EnergyMetric).where(EnergyMetric.meter_id.in_(meter_ids))
+    if group:
+        query = query.where(EnergyMetric.group_key == group)
+    query = query.order_by(EnergyMetric.meter_id, EnergyMetric.group_key, EnergyMetric.slot_no, EnergyMetric.metric_key)
+    return [energy_metric_data(row) for row in (await db.execute(query)).scalars().all()]
+
+
 async def bindings(db, target, group):
-    if target not in ("latest", "history"):
-        reject()
-    identifier(group)
-    rows = (await db.execute(select(SlotBinding).where(SlotBinding.target == target, SlotBinding.group_key == group)
-                             .order_by(SlotBinding.slot_no))).scalars().all()
-    return {"items": [binding_data(row) for row in rows], "remaining": 100 - len(rows)}
+    query = select(SlotBinding)
+    if target is not None:
+        if target not in ("latest", "history"):
+            reject()
+        query = query.where(SlotBinding.target == target)
+    if group is not None:
+        identifier(group)
+        query = query.where(SlotBinding.group_key == group)
+    rows = (await db.execute(query.order_by(SlotBinding.target, SlotBinding.group_key, SlotBinding.slot_no))).scalars().all()
+    return {"items": [binding_data(row) for row in rows],
+            "remaining": 100 - len(rows) if target is not None and group is not None else None}
 
 
 async def create_binding(db, item):

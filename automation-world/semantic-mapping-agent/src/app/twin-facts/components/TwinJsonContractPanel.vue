@@ -15,13 +15,14 @@ import { useMappingConfigurationsStore } from "../store/mappingConfigurations";
 import { useMappingValueRulesStore } from "../store/mappingValueRules";
 import { useApiFirstMappingRuntimeStore } from "../store/apiFirstMappingRuntime";
 import { useTargetApiConfigurationStore } from "../store/targetApiConfiguration";
-import { ConsoleCard, ConsoleActionButton } from "@aw-ui";
+import { ConsoleCard, ConsoleActionButton, type CardHeaderStatus } from "@aw-ui";
 import { localConfiguration, previewConfiguration, applyConfiguration, exportConfiguration, type LocalImportPreview, type ChangeIntent } from "../api/localConfiguration";
 import { formatBusinessTime } from "../../../console/time";
 import { saveCollectionFactFile } from "../api";
 import ApiMaterialsPanel from "./ApiMaterialsPanel.vue";
 import ApiFirstMappingRuntimePanel from "./ApiFirstMappingRuntimePanel.vue";
 import FactsTablePanel from "./FactsTablePanel.vue";
+import AcquisitionLoopbackPanel from "./AcquisitionLoopbackPanel.vue";
 import MappingConfigurationsPanel from "./MappingConfigurationsPanel.vue";
 import MappingValueRulesPanel from "./MappingValueRulesPanel.vue";
 import TargetApiConfigurationPanel from "./TargetApiConfigurationPanel.vue";
@@ -107,10 +108,21 @@ onMounted(() => {
   apiFirstMappingRuntime.startPolling();
 });
 
+
+const headerStatuses = computed<CardHeaderStatus[]>(() => {
+  const { labels } = props;
+  const snapshot = localConfiguration.value;
+  const entries: CardHeaderStatus[] = [];
+  if (backupBusy.value) entries.push({ id: "working", label: labels.loading });
+  else if (restorePreview.value) entries.push({ id: "restore", label: labels.restorePreviewPending, tone: "warning" });
+  entries.push({ id: "revision", label: labels.localConfigurationRevision + " · " + (snapshot?.revision ?? "—"), tone: snapshot ? "success" : "neutral" });
+  return entries;
+});
 </script>
 
 <template>
   <div v-show="page === 'twinFacts'" class="single-fact-workspace-stack">
+    <AcquisitionLoopbackPanel v-if="page === 'twinFacts' && view === 'contract'" :labels="labels" :enabled="enabled" />
     <FactsTablePanel
       v-show="view === 'contract'"
       :labels="labels"
@@ -128,14 +140,21 @@ onMounted(() => {
     />
   </div>
 
-  <div v-show="page === 'mappingIdentity'">
-    <ConsoleCard :title="labels.localConfigurationTitle">
-      <p>{{ labels.localConfigurationOnly }}</p>
-      <p>{{ labels.localConfigurationRevision }} {{ localConfiguration?.revision ?? "—" }} · {{ labels.localConfigurationUpdatedAt }} {{ configurationTime }}</p>
-      <div class="action-row"><ConsoleActionButton :disabled="!enabled || backupBusy" @click="exportBackup">{{ labels.localConfigurationBackup }}</ConsoleActionButton><ConsoleActionButton tone="secondary" :disabled="!enabled || backupBusy" @click="chooseRestoreFile">{{ labels.localConfigurationRestore }}</ConsoleActionButton><span class="configuration-file-name" role="status">{{ restoreFileName || labels.localConfigurationNoFileSelected }}</span><input ref="restoreFileInput" class="facts-file-input" type="file" accept=".json,application/json" :disabled="!enabled || backupBusy" @change="previewRestore" /></div>
+  <div v-show="page === 'mappingIdentity'" class="mapping-page-stack">
+    <ConsoleCard :title="labels.localConfigurationTitle" :header-statuses="headerStatuses" :status-overflow-label="labels.moreCardStatuses" :help="labels.localConfigurationHelp" :help-label="labels.localConfigurationTitle + labels.cardHelpSuffix" help-append-to="#sma-overlays">
+      <template #actions>
+        <ConsoleActionButton :disabled="!enabled || backupBusy" @click="exportBackup">{{ labels.localConfigurationBackup }}</ConsoleActionButton>
+        <ConsoleActionButton tone="secondary" :disabled="!enabled || backupBusy" @click="chooseRestoreFile">{{ labels.localConfigurationRestore }}</ConsoleActionButton>
+      </template>
+      <label class="field configuration-saved-time">
+        <span>{{ labels.localConfigurationUpdatedAt }}</span>
+        <input type="text" :value="configurationTime" readonly />
+      </label>
+      <p class="configuration-file-name" role="status">{{ restoreFileName || labels.localConfigurationNoFileSelected }}</p>
+      <input ref="restoreFileInput" class="facts-file-input" type="file" accept=".json,application/json" :disabled="!enabled || backupBusy" @change="previewRestore" />
       <p v-if="backupError" class="warning" role="alert">{{ labels.localConfigurationFailed }} {{ /CONFLICT|PREVIEW_CHANGED/.test(backupError) ? labels.localConfigurationConflict : backupError }}</p>
       <section v-if="restorePreview">
-        <p>{{ labels.localConfigurationReplaceWarning }}</p>
+        <p class="warning" role="alert">{{ labels.localConfigurationReplaceWarning }}</p>
         <p>{{ labels.mappingBatchCreated }}: {{ restorePreview.createdKeys.join(', ') || '—' }}</p>
         <p>{{ labels.mappingBatchUpdated }}: {{ restorePreview.updatedKeys.join(', ') || '—' }}</p>
         <p>{{ labels.localConfigurationDeleted }}: {{ restorePreview.deletedKeys.join(', ') || '—' }}</p>
@@ -273,6 +292,8 @@ onMounted(() => {
     <ApiFirstMappingRuntimePanel
       :labels="labels"
       :runtime="apiFirstMappingRuntime.runtime.value"
+      :enabled="enabled"
+      @refresh="run(apiFirstMappingRuntime.refresh)"
       :busy="apiFirstMappingRuntime.busy.value"
       :error="apiFirstMappingRuntime.error.value"
       @action="run(() => apiFirstMappingRuntime.action($event))"
@@ -282,6 +303,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.configuration-saved-time input { background: var(--agent-surface-muted); }
 .configuration-file-name { min-width: 0; overflow-wrap: anywhere; }
 .single-fact-workspace-stack { display: grid; gap: 16px; }
 </style>

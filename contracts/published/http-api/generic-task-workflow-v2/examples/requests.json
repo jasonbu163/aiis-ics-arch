@@ -56,5 +56,142 @@
     "method": "POST",
     "path": "/api/v1/integration/plans/upsert",
     "body": {"taskNo": "GTR3-EXAMPLE-B", "backfillExisting": true, "items": {"completedLength": 35}}
-  }
+  },
+  {
+    "id": "batch-delete-fixture-fields",
+    "method": "PUT",
+    "path": "/api/v1/task-field-configs",
+    "body": {
+      "module": "shared",
+      "configRevision": "2",
+      "changes": [
+        {
+          "scope": "shared_sync", "slotNo": 3, "name": "operatorNote", "type": "string",
+          "labels": {"zh-CN": "操作备注", "en-US": "Operator note"}, "performanceOwner": "manual"
+        },
+        {
+          "scope": "shared_sync", "slotNo": 4, "name": "qualityFlag", "type": "boolean",
+          "labels": {"zh-CN": "质检标记", "en-US": "Quality flag"}, "performanceOwner": "manual"
+        }
+      ]
+    }
+  },
+  {
+    "id": "batch-delete-shared-fields",
+    "method": "POST",
+    "path": "/api/v1/task-field-configs/batch-delete",
+    "body": {
+      "configRevision": "3",
+      "fields": [
+        {"scope": "shared_sync", "slotNo": 3, "name": "operatorNote"},
+        {"scope": "shared_sync", "slotNo": 4, "name": "qualityFlag"}
+      ]
+    }
+  },
+    {
+      "id": "batch-delete-fixture-plan-local",
+      "method": "PUT",
+      "path": "/api/v1/task-field-configs",
+      "body": {
+        "module": "plan",
+        "configRevision": "4",
+        "changes": [
+          {
+            "scope": "plan_local",
+            "slotNo": 2,
+            "name": "workNote",
+            "type": "string",
+            "labels": {
+              "zh-CN": "演示本地字段",
+              "en-US": "workNote"
+            }
+          },
+          {
+            "scope": "plan_local",
+            "slotNo": 4,
+            "name": "workInstruction",
+            "type": "string",
+            "labels": {
+              "zh-CN": "演示本地字段",
+              "en-US": "workInstruction"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "batch-delete-plan-local",
+      "method": "POST",
+      "path": "/api/v1/task-field-configs/local/batch-delete",
+      "body": {
+        "module": "plan",
+        "configRevision": "5",
+        "fields": [
+          {
+            "scope": "plan_local",
+            "slotNo": 2,
+            "name": "workNote"
+          },
+          {
+            "scope": "plan_local",
+            "slotNo": 4,
+            "name": "workInstruction"
+          }
+        ]
+      }
+    },
+    {
+      "id": "batch-delete-fixture-performance-local",
+      "method": "PUT",
+      "path": "/api/v1/task-field-configs",
+      "body": {
+        "module": "performance",
+        "configRevision": "6",
+        "changes": [
+          {
+            "scope": "performance_local",
+            "slotNo": 2,
+            "name": "operatorNote",
+            "type": "string",
+            "labels": {
+              "zh-CN": "演示本地字段",
+              "en-US": "operatorNote"
+            },
+            "performanceOwner": "manual"
+          },
+          {
+            "scope": "performance_local",
+            "slotNo": 4,
+            "name": "shiftNote",
+            "type": "string",
+            "labels": {
+              "zh-CN": "演示本地字段",
+              "en-US": "shiftNote"
+            },
+            "performanceOwner": "manual"
+          }
+        ]
+      }
+    },
+    {
+      "id": "batch-delete-performance-local",
+      "method": "POST",
+      "path": "/api/v1/task-field-configs/local/batch-delete",
+      "body": {
+        "module": "performance",
+        "configRevision": "7",
+        "fields": [
+          {
+            "scope": "performance_local",
+            "slotNo": 2,
+            "name": "operatorNote"
+          },
+          {
+            "scope": "performance_local",
+            "slotNo": 4,
+            "name": "shiftNote"
+          }
+        ]
+      }
+    }
 ]

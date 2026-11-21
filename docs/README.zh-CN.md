@@ -10,6 +10,7 @@
 | --- | --- |
 | [多项目开发指南](multi-project-pm.md) | Core、复用模块仓和项目仓之间的长期边界与治理指引。 |
 | [采集数据模块原理与使用](acquisition-data-guide.zh-CN.md) · [English](acquisition-data-guide.md) | Web 来源登记、样本上报、后端存储及实时历史读取，适用于 DAA 与第三方。 |
+| [计划与实绩交互手册](generic-plan-performance-guide.zh-CN.md) · [English](generic-plan-performance-guide.md) | 字段管理、停用与删除、页面操作，以及用 Swagger 模拟下单和实绩回写。 |
 | [计划与实绩通用任务机制讨论稿](generic-task-workflow-discussion.zh-CN.md) · [English](generic-task-workflow-discussion.md) | 整理 MES → CA/FF → PLC → DAA → SMA → 实绩 → 计划回写的讨论口径、建议与待定项，包含流程/状态/ER示意图、项目约定的PLC写入条件、字段、页面和接口示例；不作为实施spec或已发布合同。 |
 | [设备状态、过程监控和能耗操作手册](equipment-status-process-monitoring-guide.zh-CN.md) · [English](equipment-status-process-monitoring-guide.md) | 配置加热区、卡片和曲线，手动上报合成样本并查看记录和表计统计。 |
 | [设备状态与过程监控讨论稿](equipment-status-process-monitoring.zh-CN.md) · [English](equipment-status-process-monitoring.md) | ARCH-OBS-001 r6 审阅指南，涵盖两张值表、SMA 或第三方上报到落库和展示，以及[第三方哪些字段能省略或传 null](equipment-status-process-monitoring.zh-CN.md#third-party-ingest)。 |

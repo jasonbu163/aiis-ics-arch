@@ -40,8 +40,49 @@
 .console-card__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 68px; padding: 14px 24px; border-bottom: 1px solid var(--agent-card-border); flex-wrap: wrap; }
 .console-card__title-wrap, .console-card__actions { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .console-card__title-wrap h2 { margin: 0; font-size: 16px; line-height: 1.3; }
+.aw-ui .console-card__help { display: inline-grid; place-items: center; flex: 0 0 20px; width: 20px; height: 20px; padding: 0; border: 1px solid currentColor; border-radius: 50%; background: transparent; color: var(--agent-text-muted); font-size: 12px; cursor: help; }
+.console-card__help:hover, .console-card__help:focus-visible { color: var(--agent-accent-strong); }
+.console-card-help-popper { max-width: min(340px, calc(100vw - 32px)); white-space: pre-line; }
+.console-card__actions { flex-wrap: wrap; }
+.console-card__header--managed { position: relative; column-gap: 8px; }
+.console-card__header--managed .console-card__title-wrap { flex: none; max-width: 100%; }
+.console-card__header--managed h2 { overflow-wrap: anywhere; }
+.console-card__header-controls, .console-card__button-group {
+  display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 8px; min-width: 0;
+}
+.console-card__header-controls { width: max-content; max-width: 100%; margin-inline-start: auto; }
+.console-card__button-group { max-width: 100%; margin-inline-start: auto; }
+.console-card__button-group .console-card__actions { max-width: 100%; justify-content: flex-end; }
+.console-card__refresh { flex: none; }
+.console-card__header-statuses { min-width: 0; max-width: 100%; }
+.console-card__header-statuses .status-capsule, .console-card__status-list .status-capsule {
+  min-width: 0; max-width: 100%; min-height: 26px; padding: 3px 10px; overflow-wrap: anywhere;
+}
+.console-card__header-statuses .status-capsule__label, .console-card__status-list .status-capsule__label { min-width: 0; }
+.console-card__header-statuses .status-dot, .console-card__status-list .status-dot { flex: 0 0 8px; }
+.aw-ui .console-card__status-trigger {
+  display: inline-flex; max-width: 100%; padding: 0; border: 0; border-radius: 999px; background: transparent;
+  color: inherit; text-align: start; vertical-align: middle; cursor: pointer;
+}
+.console-card__status-trigger:focus-visible { outline: 2px solid var(--agent-accent-strong); outline-offset: 2px; }
+.console-card__status-mark {
+  display: inline-grid; place-items: center; align-self: center; flex: 0 0 17px; width: 17px; height: 14px;
+  padding-inline-start: 5px; border-inline-start: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+}
+.console-card__status-mark::after {
+  content: ""; box-sizing: content-box; width: 5px; height: 5px; border: solid currentColor; border-width: 0 1.4px 1.4px 0;
+  transform: translateY(-1px) rotate(45deg);
+}
+.console-card__status-trigger[aria-expanded="true"] .console-card__status-mark::after { transform: translateY(1px) rotate(225deg); }
+.console-card-status-popper { max-width: min(300px, calc(100vw - 24px)); }
+.console-card__status-list { display: grid; justify-items: start; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.console-card__status-list li { max-width: 100%; }
+.console-card__status { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; padding: 10px var(--agent-card-padding); border-bottom: 1px solid var(--agent-card-border); }
+.console-card__status .status-capsule { min-width: 0; max-width: 100%; min-height: 26px; padding: 3px 10px; overflow-wrap: anywhere; }
+.console-card__status .status-dot { flex: 0 0 8px; }
 .console-card__icon { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 1px solid var(--agent-card-border); border-radius: 10px; background: var(--agent-surface-muted); color: var(--agent-accent); }
 .console-card__body { min-width: 0; padding: var(--agent-card-padding); }
+.console-card__body:empty { display: none; }
 .console-card__tools, .console-card__footer { padding: 14px 24px; background: var(--agent-surface-muted); }
 .console-card__tools { border-bottom: 1px solid var(--agent-card-border); }
 .console-card__footer { border-top: 1px solid var(--agent-card-border); }
@@ -51,6 +92,20 @@
 .console-action-button.el-button + .console-action-button.el-button { margin-left: 0; }
 .console-action-button--large.el-button { height: 40px; padding: 0 18px; }
 .console-action-button--small.el-button { height: 30px; padding: 0 12px; border-radius: var(--agent-control-radius-small); }
+.console-row-actions { display: inline-flex; align-items: center; justify-content: center; gap: min(8px, var(--agent-action-gap)); width: 100%; white-space: nowrap; }
+.console-action-button--row.el-button { flex: 0 0 auto; min-width: 48px; min-height: 24px; height: 24px; padding: 0 8px; border-radius: var(--agent-control-radius-small); font-size: 12px; line-height: 1; }
+.console-action-button--row.el-button--default:not(.is-disabled) {
+  --el-button-bg-color: var(--agent-surface-muted);
+  --el-button-text-color: var(--agent-accent-strong);
+  --el-button-border-color: var(--agent-border);
+}
+.aw-ui--dense { --el-font-size-base: 13px; font-size: 13px; }
+.aw-ui--dense .topbar-title h1 { font-size: 18px; }
+.aw-ui--dense .console-card__title-wrap h2 { font-size: 15px; }
+.aw-ui--dense .console-card__header { min-height: 56px; padding-block: 10px; }
+.aw-ui--dense .agent-menu :is(.el-menu-item, .el-sub-menu__title) { min-height: 34px; font-size: 13px; }
+.aw-ui--dense .agent-menu__label { padding-block: 7px; }
+.aw-ui--dense .agent-menu .el-icon:not(.el-sub-menu__icon-arrow) { flex: 0 0 16px; width: 16px; font-size: 16px; }
 .status-capsule { --status-color: var(--agent-accent-strong); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; gap: 8px; min-height: 36px; padding: 8px 14px; border: 1px solid color-mix(in srgb, var(--status-color) 24%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--status-color) 10%, transparent); color: var(--status-color); font-size: 13px; font-weight: 560; }
 .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
 .status-capsule--success { --status-color: var(--agent-success); }

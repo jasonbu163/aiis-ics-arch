@@ -13,5 +13,6 @@
 | SMA-005 | [r1 页面交互首批](SMA-005-page-interaction/spec.md)，SMA-001 已批准子任务 | [tasks](SMA-005-page-interaction/tasks.md)，#4 和 #6 已交接 | [验证记录](SMA-005-page-interaction/checklist.md)，独立离线检查通过，待 Human Owner 补齐原生 GET 手测证据，当前 qa_blocked。 |
 | SMA-006 | [r1 弹窗交互首批](SMA-006-dialog-interaction/spec.md)，SMA-001 子任务草案 | 等待范围批准 | 等待 Development 交接 |
 | SMA-007 | [r1 开发 profile 路径对齐](SMA-007-dev-profile-path/spec.md)，SMA-001 已批准子任务 | [tasks](SMA-007-dev-profile-path/tasks.md#developer_handoff-rework-2)，第二轮返工交接 | [验证记录](SMA-007-dev-profile-path/checklist.md)，第二轮返工候选独立验证通过，待 Human Owner 最终验收。 |
+| SMA-008 | [r3 现有采集 API 手动回环](SMA-008-acquisition-data-get/spec.md)，SMA-001 已批准子任务 | [Development 交接](SMA-008-acquisition-data-get/tasks.md)，rework-1 | [独立 QA2](SMA-008-acquisition-data-get/checklist.md)，AC04 待 Human Owner 操作 dev POST、核对回执及回读，当前 qa_blocked |
 
 各子任务独立批准范围、验证和验收。执行阶段④–⑥的目标与依赖见总规格。原 r1 草案保留为[历史快照](SMA-001-cu-integration-and-scope-cleanup/evidence/r1-before-task-split/spec.md)。

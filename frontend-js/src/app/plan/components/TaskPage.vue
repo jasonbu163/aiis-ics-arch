@@ -14,19 +14,24 @@
       <template #actions>
         <div class="table-actions">
           <ActionButton v-if="kind === 'plan' && canManage && configAvailable" variant="primary" @click="newPlan">{{ tr('newPlan') }}</ActionButton>
-          <ActionButton v-if="user.isAdmin && configAvailable" @click="configOpen = true"><el-icon><Setting /></el-icon> {{ tr('fieldSettings') }}</ActionButton>
-          <ActionButton @click="columns.reset">{{ tr('resetWidths') }}</ActionButton>
+          <el-tooltip :content="tr('resetWidthsHint')" placement="top" :trigger="['hover', 'focus']">
+            <ActionButton @click="columns.reset">{{ tr('resetWidths') }}</ActionButton>
+          </el-tooltip>
           <ActionButton :loading="loading" @click="load">{{ tr('refresh') }}</ActionButton>
         </div>
       </template>
       <div class="filter-section">
         <el-form class="filter-form" label-position="top" @submit.prevent="search">
-          <el-form-item :label="tr('taskNo')"><el-input v-model="filters.taskNo" clearable /></el-form-item>
-          <el-form-item :label="tr('targetKey')"><el-input v-model="filters.targetKey" clearable /></el-form-item>
-          <el-form-item :label="tr('productionStatus')"><el-select v-model="filters.productionStatus" clearable><el-option v-for="s in productionStates" :key="s" :value="s" :label="tr(`statuses.${s}`)" /></el-select></el-form-item>
-          <el-form-item :label="tr('createdFrom')"><el-date-picker v-model="filters.createdFrom" type="datetime" value-format="YYYY-MM-DDTHH:mm:ss[+08:00]" clearable /></el-form-item>
-          <el-form-item :label="tr('createdTo')"><el-date-picker v-model="filters.createdTo" type="datetime" value-format="YYYY-MM-DDTHH:mm:ss[+08:00]" clearable /></el-form-item>
-          <el-form-item class="filter-actions"><ActionButton variant="primary" @click="search">{{ $t('common.search') }}</ActionButton><ActionButton @click="resetFilters">{{ $t('common.reset') }}</ActionButton></el-form-item>
+          <div class="filter-keywords">
+            <el-form-item :label="tr('taskNo')"><el-input v-model="filters.taskNo" clearable /></el-form-item>
+            <el-form-item :label="tr('targetKey')"><el-input v-model="filters.targetKey" clearable /></el-form-item>
+          </div>
+          <div class="filter-conditions">
+            <el-form-item :label="tr('productionStatus')"><el-select v-model="filters.productionStatus" clearable><el-option v-for="s in productionStates" :key="s" :value="s" :label="tr(`statuses.${s}`)" /></el-select></el-form-item>
+            <el-form-item :label="tr('createdFrom')"><el-date-picker v-model="filters.createdFrom" type="datetime" value-format="YYYY-MM-DDTHH:mm:ss[+08:00]" clearable /></el-form-item>
+            <el-form-item :label="tr('createdTo')"><el-date-picker v-model="filters.createdTo" type="datetime" value-format="YYYY-MM-DDTHH:mm:ss[+08:00]" clearable /></el-form-item>
+            <el-form-item class="filter-actions"><ActionButton variant="primary" @click="search">{{ $t('common.search') }}</ActionButton><ActionButton @click="resetFilters">{{ $t('common.reset') }}</ActionButton></el-form-item>
+          </div>
         </el-form>
       </div>
       <div class="table-scroll">
@@ -83,19 +88,17 @@
         <el-button v-if="canEditRemark || mode === 'supplement'" type="primary" :loading="saving" @click="save">{{ $t('common.save') }}</el-button>
       </template>
     </el-dialog>
-    <TaskConfigDialog v-if="user.isAdmin" v-model="configOpen" :kind="kind" :api="api" @saved="loadConfigAndList" />
   </div>
 </template>
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { QuestionFilled, Setting } from '@element-plus/icons-vue'
+import { QuestionFilled } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
 import { useTableColumnWidths } from '@/utils/tableColumnWidths'
 import BaseCard from '@/components/common/BaseCard.vue'
 import ActionButton from '@/components/common/ActionButton.vue'
-import TaskConfigDialog from './TaskConfigDialog.vue'
 import { useTaskPagePadding } from './useTaskPagePadding'
 
 const props = defineProps({ kind: { type: String, required: true }, api: { type: Object, required: true } })
@@ -117,7 +120,7 @@ const { pageRoot, pagePadding } = useTaskPagePadding()
 
 const fields = ref([]), formFields = ref([]), items = ref([]), total = ref(0)
 const loading = ref(false), saving = ref(false), configAvailable = ref(false)
-const configOpen = ref(false), detailOpen = ref(false)
+const detailOpen = ref(false)
 const record = ref(null), form = ref(null), original = ref(null), mode = ref('view'), planFields = ref(null)
 const fixedColumns = computed(() => props.kind === 'plan'
   ? ['taskNo', 'targetKey', 'productionStatus', 'priority', 'createdAt', 'updatedAt']
@@ -173,7 +176,6 @@ async function load() {
     if (id === loadId) loading.value = false
   }
 }
-const loadConfigAndList = load
 function search() { filters.page = 1; load() }
 function resetFilters() { Object.assign(filters, defaults); load() }
 function setForm(row) {
@@ -259,18 +261,27 @@ onMounted(load)
 .help-trigger:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .help-content { max-width: min(340px, calc(100vw - 56px)); white-space: normal; overflow-wrap: anywhere; }
 .filter-section { padding: 16px 24px; border-bottom: 1px solid var(--border-secondary); }
-.filter-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 185px), 1fr)); gap: 12px; align-items: end; }
+.filter-form { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.filter-keywords, .filter-conditions { display: grid; min-width: 0; gap: 12px; align-items: end; }
+.filter-keywords { flex: 1 1 240px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.filter-conditions {
+  flex: 2 1 680px;
+  grid-template-columns: minmax(110px, 1fr) repeat(2, minmax(180px, 1.4fr)) max-content;
+}
 .filter-form :deep(.el-form-item) { min-width: 0; margin-bottom: 0; }
 .filter-form :deep(.el-form-item__label) { height: auto; line-height: 1.4; white-space: normal; overflow-wrap: anywhere; }
 .filter-form :deep(.el-select), .filter-form :deep(.el-input), .filter-form :deep(.el-date-editor) { width: 100%; max-width: 100%; min-width: 0; }
-.filter-actions { grid-column: -2 / -1; }
 .filter-actions :deep(.el-form-item__content) { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
 .filter-actions :deep(.el-button + .el-button) { margin-left: 0; }
 .table-scroll { width: 100%; padding: 20px 24px 0; overflow-x: auto; }
 .pagination-scroll { width: 100%; padding: 18px 24px 24px; overflow-x: auto; }
 .pagination { display: flex; justify-content: flex-end; width: max-content; min-width: 100%; }
-@container (max-width: 700px) {
-  .filter-actions { grid-column: auto; }
+@container (max-width: 730px) {
+  .filter-conditions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filter-conditions > :first-child, .filter-actions { grid-column: 1 / -1; }
+}
+@container (max-width: 440px) {
+  .filter-conditions { grid-template-columns: minmax(0, 1fr); }
   .filter-actions :deep(.el-form-item__content) { justify-content: flex-start; }
 }
 @media (max-width: 600px) {

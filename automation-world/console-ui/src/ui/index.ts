@@ -7,4 +7,5 @@ export { default as ConsoleActionButton } from './components/ConsoleActionButton
 export { default as StatusCapsule } from './components/StatusCapsule.vue'
 export { default as ThemeToggle } from './components/ThemeToggle.vue'
 export { default as LanguageSwitch } from './components/LanguageSwitch.vue'
-export type { UiTheme, UiTone, ActionTone, NavigationItem, NavigationChildItem } from './types'
+export type { UiTheme, UiTone, ActionTone, CardHeaderStatus, NavigationItem, NavigationChildItem } from './types'
+export { useTableColumnWidths } from './useTableColumnWidths'

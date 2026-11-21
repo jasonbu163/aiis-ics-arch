@@ -3,9 +3,9 @@
   <div class="page-layout observation-page">
     <BaseCard :title="$t(route.meta.titleKey)" v-loading="loading">
       <div class="observation-toolbar">
-        <el-select v-model="equipment" :placeholder="t('equipment.observation.selectDevice')" filterable>
+        <el-select v-model="equipment" :placeholder="t('equipment.observation.selectDeviceOrSource')" filterable>
           <el-option v-for="device in devices" :key="device.equipmentId" :value="device.equipmentId"
-            :label="locale.startsWith('en') ? device.nameEn : device.nameZh" />
+            :label="sourceLabel(device, locale.startsWith('en') ? device.nameEn : device.nameZh)" />
         </el-select>
         <el-select v-model="manualTask" :placeholder="t('equipment.observation.followRecent')" clearable>
           <el-option v-for="item in tasks" :key="item.taskNo" :value="item.taskNo" :label="item.taskNo" />
@@ -43,6 +43,7 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import ActionButton from '@/components/common/ActionButton.vue'
+import { sourceLabel } from '@/app/equipment/components/observations/columnModel'
 import BaseCard from '@/components/common/BaseCard.vue'
 import { formatShanghaiDateTime } from '@/utils/date'
 import { equipmentOptions, latestCards, sampledTasks } from '../../api/observations'

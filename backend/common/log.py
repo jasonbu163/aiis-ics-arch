@@ -4,8 +4,8 @@
 主要功能:
     - 导出全局 loguru logger
     - 为 API、迁移与维护进程注册独立日志文件
-    - 同时保留 stdout 与 error-only 日志文件
-    - 将标准库 logging 桥接到 JSON Lines 输出
+    - 开发终端输出简洁文本，常规与错误文件保留 JSON Lines
+    - 将标准库 logging 桥接到统一日志
 """
 import logging
 import os
@@ -76,6 +76,7 @@ def setup_logger(
     level: str | None = None,
     max_bytes: int | None = None,
     backup_count: int | None = None,
+    development: bool = False,
 ) -> None:
     """注册当前进程日志输出。"""
     log_level = (level or settings.LOG_LEVEL).upper()
@@ -84,15 +85,17 @@ def setup_logger(
 
     max_file_bytes = max_bytes or settings.LOG_MAX_BYTES
     file_backup_count = backup_count or settings.LOG_BACKUP_COUNT
-    enqueue_logs = _should_enqueue_logs()
+    # Uvicorn can re-raise the shutdown signal before Loguru's exit hook runs.
+    # The single server under the development reloader can write synchronously.
+    enqueue_logs = not development and _should_enqueue_logs()
 
     logger.remove()
     logger.configure(extra={"process_name": process_name, "channel": process_name})
     logger.add(
         sys.stdout,
         level=log_level,
-        format=LOG_FORMAT,
-        serialize=True,
+        format="{level}: {message}" if development else LOG_FORMAT,
+        serialize=not development,
         enqueue=enqueue_logs,
         backtrace=False,
         diagnose=False,

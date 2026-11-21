@@ -2,7 +2,19 @@
 
 [English](equipment-status-process-monitoring-guide.md) · [项目文档](README.zh-CN.md) · [r10 操作与背景](equipment-status-process-monitoring.zh-CN.md#r10-guide) · [v2 机器合同](../contracts/published/http-api/equipment-observation-v2/README.zh-CN.md)
 
-过程监控的能耗统计页面地址为 `/monitor/consumption`，唯一页面授权键为 `monitor.energy`。旧直链 `/monitor/energy` 已退出。已有 `monitor.consumption` 的部署须由负责人审查并显式处理，页面权限不会增加 `energy-consumption-read`、表计范围或管理权限。 私有 profile 的目标 revision 须为 `c9e1a3b5d720`，历史样例中的 revision 按实际获批目标填写。 [清退规格](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+过程监控的能耗统计页面地址为 `/monitor/consumption`，唯一页面授权键为 `monitor.energy`。旧直链 `/monitor/energy` 已退出。已有 `monitor.consumption` 的部署须由负责人审查并显式处理，页面权限不会增加 `energy-consumption-read`、表计范围或管理权限。 私有 profile 的目标 revision 须为 `e9f3b5d7c021`，历史样例中的 revision 按实际获批目标填写。 [清退规格](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+
+## 写入登记来源
+
+发送端只需提供登记标识，后端仍需启用并核验 MySQL 全局目标及仓库外私有 profile。该候选源码要求 revision `e9f3b5d7c021`。后续章节中的原 v2 示例仍需机器凭据和设备 profile。真实环境的迁移、服务切换需另行确认。
+
+1. 按第 2–3 节配置区域、指标、各目标槽位，以及对应的卡片或曲线。
+2. 用管理员账号登录，打开 **设备状态 → 配置管理 → 写入登记**，新增 `sma-demo-1`，填写可选名称并启用。列表支持按标识或名称查找。普通列可拖动表头边界调整宽度，**重置列宽**只恢复当前表。
+3. 向 `POST /api/v1/integration/observations` 发送 JSON，`observedAt` 填实际采样时间并携带时区。实时和历史可使用同一来源标识，分两个请求写入。具体请求和响应见合同中的合成向量。
+4. 在设备状态或过程监控选择该来源。实时按任务整包替换，要同时显示多个区域就一并发送。历史按包追加，缺少的指标形成缺测。可通过 `GET /api/v1/integration/observations/latest` 获取一条实际保存的指标。
+5. 停用后可读已有数据，写入会被拒绝。删除后普通选择和公开查询隐藏来源，管理员可在数据管理中按已删除来源查看保留记录。
+
+[写入登记合同及示例](../contracts/published/http-api/observation-write-sources-v1/README.zh-CN.md)
 
 ## 1. 准备环境和权限
 
@@ -18,7 +30,7 @@
 
 ## 2. 创建加热区、指标和两路槽位
 
-以 admin 打开 **设备状态 → 配置管理**，在每个页签点 **新增**，填完点 **保存**。
+以 admin 打开 **设备状态 → 配置管理**，在上卡选择配置类别，在下卡点 **新增**，填完点 **保存**。槽位设置默认列出全部已绑定槽位，包含实时、历史和停用项。选择写入目标、采样组或输入关键词后点 **查询**，点 **重置**恢复全部。**重置列宽**只恢复当前表的列宽。
 
 1. **区域配置**。此处的 **指标键** 填区域键 `heatZone1`（`groupKey`）。**类别**选 **温控工艺**，**中文名称／英文名称**填「加热区 1」／「Heating Zone 1」，**排序**填 `10`，打开 **启用**。
 2. **指标设置**。新增下表两条，**采样组**下拉选择「加热区 1」，**类别**随区域带出，**类型**选 **数字**，**单位**填 `°C`（可选），**小数位**填 `1`。
@@ -107,7 +119,7 @@ printf 'Authorization: Bearer %s\n' "$OBS_MACHINE_TOKEN" |
 
 ## 6. 配置并上报能耗
 
-1. 打开 **过程监控 → 配置管理 → 表计指标配置**。选测试表计，**采样组**填 `electricity`，**先点查询，再点新增**。在表单确认 **采样组**、**指标键** `energyInterval`、**槽位** `1`，双语名称「时段用电量」／「Interval electricity use」，**物理量键** `electricityConsumption`，**计量方式**选 **时段增量**（`interval`），**单位** `kWh`，**小数位** `1`。打开 **启用**和 **显示列**，**列顺序**可设 `10`，保存。连续性和最大采样间隔规则用于累计读数。
+1. 打开 **过程监控 → 配置管理 → 表计指标配置**。默认显示有权访问的所有表计指标。可选表计和采样组或输入关键词后点 **查询**，点 **重置**恢复全部。点 **新增**，在表单选择具体的测试表计，将 **采样组**填为 `electricity`。确认 **采样组**、**指标键** `energyInterval`、**槽位** `1`，双语名称「时段用电量」／「Interval electricity use」，**物理量键** `electricityConsumption`，**计量方式**选 **时段增量**（`interval`），**单位** `kWh`，**小数位** `1`。打开 **启用**和 **显示列**，**列顺序**可设 `10`，保存。连续性和最大采样间隔规则用于累计读数。
 2. 用机器 GET 发现获准且启用的表计定义，再用独立的能耗 POST 提交下面的 `energy.json`。将事件号、表计、组、指标和时间替换为本次获准的实际配置和采样；增量样本用真实区间，起点早于终点。能耗按表计与组上报，无需任务号。
 
    ```json

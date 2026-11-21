@@ -255,6 +255,6 @@ defines authorized HTTP ingestion for SMA, third parties and other programs; it 
 SMA or PLC has been integrated. See the [r10 guide](../docs/equipment-status-process-monitoring.md#r10-guide) for
 configuration, display, history and access.
 
-The [Plan and Performance candidate](../contracts/published/http-api/generic-task-workflow-v2/README.md) uses current field definitions and the existing list routes. Both pages display Shanghai business times and remember column widths locally. Administrators have separate local-field controls and share one settings dialog for shared fields. Performance detail can open ordinary plan creation when no plan exists.
+The [Plan and Performance candidate](../contracts/published/http-api/generic-task-workflow-v2/README.md) uses current field definitions and the existing list routes. Both pages display Shanghai business times and remember column widths locally. Administrators open the standalone local field pages at `/plan/local-fields` and `/performance/local-fields` from the sidebar under Plan Management or Performance Management. The Shared Field Management entries under Plan and Performance both open the same standalone page and use the same shared configuration. Performance detail can open ordinary plan creation when no plan exists.
 
-See the [field settings guide (Chinese)](FIELD_SETTINGS_GUIDE.zh-CN.md) for field groups, editing, display, deactivation and deletion.
+See the [Plan and Performance User Guide](../docs/generic-plan-performance-guide.md) for operations and API simulations, or the [field settings quick guide (Chinese)](FIELD_SETTINGS_GUIDE.zh-CN.md).

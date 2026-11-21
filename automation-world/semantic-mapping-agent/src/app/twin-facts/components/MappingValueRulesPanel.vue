@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import { ElDialog } from "element-plus";
 import { useTableWidths, vTableWidths } from "../../../console/tableWidths";
-import { ConsoleCard, ConsoleActionButton, StatusCapsule } from "@aw-ui";
+import { ConsoleCard, ConsoleActionButton, type CardHeaderStatus } from "@aw-ui";
 import { computed, ref, watch } from "vue";
 
 import type { LocaleMessages } from "../../../locales";
@@ -210,31 +210,42 @@ function draftState() {
   return props.labels.mappingValueRuleDraft;
 }
 
-const rulesTable = useTableWidths("value-rules", [{ id: "select", width: 64, min: 64, fixed: true }, { id: "state", width: 140 }, { id: "key", width: 180 }, { id: "name", width: 220 }, { id: "origin", width: 240 }, { id: "dataType", width: 130 }, { id: "values", width: 260 }, { id: "enabled", width: 140 }, { id: "actions", width: 230, min: 230, fixed: true }]);
+const rulesTable = useTableWidths("value-rules", [{ id: "select", width: 64, min: 64, fixed: true }, { id: "state", width: 140 }, { id: "key", width: 180 }, { id: "name", width: 220 }, { id: "origin", width: 240 }, { id: "dataType", width: 130 }, { id: "values", width: 260 }, { id: "enabled", width: 140 }, { id: "actions", width: 184, min: 184, fixed: true }]);
+
+const headerStatuses = computed<CardHeaderStatus[]>(() => {
+  const { labels, busy, status, configurations } = props;
+  const entries: CardHeaderStatus[] = [];
+  if (busy) entries.push({ id: "working", label: labels.loading });
+  else if (status === "saved") entries.push({ id: "saved", label: labels.mappingValueRuleSaved, tone: "success" });
+  entries.push({ id: "total", label: labels.savedItemCount.replace("{count}", String(configurations.length)), tone: "success" });
+  return entries;
+});
 </script>
 
 <template>
   <div class="mapping-page-stack mapping-value-rules-stack">
-    <ConsoleCard :title="labels.mappingValueRulesTitle">
-    <p v-if="busy" class="hint" role="status">{{ labels.loading }}</p>
-<template #actions><StatusCapsule :label="labels.mappingValueRulePreset" /></template>
-      <p>{{ labels.mappingValueRulesHint }}</p>
-      <div class="action-row">
-        <ConsoleActionButton tone="secondary" native-type="button" :disabled="!enabled || busy" @click="emit('load-saved-facts')">{{ labels.mappingValueRulesLoadSavedFacts }}</ConsoleActionButton>
-        <ConsoleActionButton tone="danger" native-type="button" :disabled="!enabled || busy || !selectedDraftKeys.length" @click="requestSelectedDraftRemoval">{{ labels.mappingValueRuleRemoveSelectedDrafts.replace('{count}', String(selectedDraftKeys.length)) }}</ConsoleActionButton>
-        <ConsoleActionButton tone="secondary" native-type="button" :disabled="!enabled || busy" @click="batchOpen = true">{{ labels.mappingBatchOperations }}</ConsoleActionButton>
-        <ConsoleActionButton tone="primary" native-type="button" :disabled="!enabled || busy" @click="startCreate">{{ labels.mappingValueRuleNewGeneric }}</ConsoleActionButton>
-      </div>
+    <ConsoleCard :title="labels.mappingValueRulesTitle" :header-statuses="headerStatuses" :status-overflow-label="labels.moreCardStatuses" :help="labels.mappingValueRulesHint" :help-label="labels.mappingValueRulesTitle + labels.cardHelpSuffix" help-append-to="#sma-overlays">
+      <template #actions>
+        <div class="action-row">
+          <ConsoleActionButton tone="secondary" native-type="button" :disabled="!enabled || busy" @click="emit('load-saved-facts')">{{ labels.mappingValueRulesLoadSavedFacts }}</ConsoleActionButton>
+          <ConsoleActionButton tone="danger" native-type="button" :disabled="!enabled || busy || !selectedDraftKeys.length" @click="requestSelectedDraftRemoval">{{ labels.mappingValueRuleRemoveSelectedDrafts.replace('{count}', String(selectedDraftKeys.length)) }}</ConsoleActionButton>
+          <ConsoleActionButton tone="secondary" native-type="button" :disabled="!enabled || busy" @click="batchOpen = true">{{ labels.mappingBatchOperations }}</ConsoleActionButton>
+          <ConsoleActionButton tone="primary" native-type="button" :disabled="!enabled || busy" @click="startCreate">{{ labels.mappingValueRuleNewGeneric }}</ConsoleActionButton>
+        </div>
+      </template>
+
       <p v-if="displayedError" class="warning" role="alert">{{ displayedError }}</p>
-      <p v-if="status === 'saved'" class="notice">{{ labels.mappingValueRuleSaved }}</p>
     </ConsoleCard>
 
     <ConsoleCard :title="labels.mappingValueRulesListTitle">
-      <div class="table-scroll mapping-list-scroll" tabindex="0"><ConsoleActionButton size="small" @click="rulesTable.reset">{{ labels.resetTableWidths }}</ConsoleActionButton>
-<table v-table-widths="[rulesTable, labels.resizeTableColumn]" class="mapping-list-table mapping-value-rules-table"><thead><tr><th><input :aria-label="labels.mappingValueRuleSelectAll" :checked="allDraftsSelected" :disabled="!enabled || busy || !factOriginDrafts.length" :indeterminate="draftSelectionIndeterminate" type="checkbox" @change="toggleAllDrafts(($event.target as HTMLInputElement).checked)" /></th><th>{{ labels.mappingValueRuleState }}</th><th>{{ labels.mappingValueRuleKey }}</th><th>{{ labels.targetApiName }}</th><th>{{ labels.mappingValueRuleOrigin }}</th><th>{{ labels.collectionFactsDataType }}</th><th>{{ labels.mappingValueRuleValues }}</th><th>{{ labels.targetApiState }}</th><th>{{ labels.targetApiActions }}</th></tr></thead>
+      <template #actions>
+        <ConsoleActionButton size="small" @click="rulesTable.reset" :title="labels.resetTableWidthsHelp">{{ labels.resetTableWidths }}</ConsoleActionButton>
+      </template>
+      <div class="table-scroll mapping-list-scroll" tabindex="0">
+        <table v-table-widths="[rulesTable, labels.resizeTableColumn]" class="mapping-list-table mapping-value-rules-table"><thead><tr><th><input :aria-label="labels.mappingValueRuleSelectAll" :checked="allDraftsSelected" :disabled="!enabled || busy || !factOriginDrafts.length" :indeterminate="draftSelectionIndeterminate" type="checkbox" @change="toggleAllDrafts(($event.target as HTMLInputElement).checked)" /></th><th>{{ labels.mappingValueRuleState }}</th><th>{{ labels.mappingValueRuleKey }}</th><th>{{ labels.targetApiName }}</th><th>{{ labels.mappingValueRuleOrigin }}</th><th>{{ labels.collectionFactsDataType }}</th><th>{{ labels.mappingValueRuleValues }}</th><th>{{ labels.targetApiState }}</th><th>{{ labels.targetApiActions }}</th></tr></thead>
         <tbody>
-          <tr v-for="pending in factOriginDrafts" :key="`${pending.originSourceKey}/${pending.originFactName}`"><td><input type="checkbox" :checked="isDraftSelected(pending)" :disabled="!enabled || busy" @change="toggleDraft(pending, ($event.target as HTMLInputElement).checked)" /></td><td>{{ draftState() }}</td><td>—</td><td>{{ pending.name }}</td><td><code>{{ originLabel(pending) }}</code></td><td>{{ pending.dataType }}</td><td><code>{{ pending.valuesJson }}</code></td><td>{{ presetState(pending) }}</td><td><div class="mapping-list-row-actions"><ConsoleActionButton size="small" tone="secondary" native-type="button" :disabled="!enabled || busy" @click="openOriginDraft(pending)">{{ labels.mappingValueRuleConfigure }}</ConsoleActionButton><ConsoleActionButton size="small" tone="danger" native-type="button" :disabled="!enabled || busy" @click="requestSingleDraftRemoval(pending)">{{ labels.mappingValueRuleRemoveDraft }}</ConsoleActionButton></div></td></tr>
-          <tr v-for="rule in configurations" :key="rule.id"><td>—</td><td>{{ presetState(rule) }}</td><td><code>{{ rule.valueRuleKey }}</code></td><td>{{ rule.name }}</td><td><code>{{ originLabel(rule) }}</code></td><td>{{ rule.dataType }}</td><td><code>{{ JSON.stringify(rule.values) }}</code></td><td>{{ rule.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td><div class="mapping-list-row-actions"><ConsoleActionButton size="small" tone="secondary" native-type="button" :disabled="!enabled || busy" @click="openEditor(rule.id)">{{ labels.targetApiEdit }}</ConsoleActionButton><ConsoleActionButton size="small" tone="danger" native-type="button" :disabled="!enabled || busy" @click="remove(rule)">{{ labels.targetApiDelete }}</ConsoleActionButton></div></td></tr>
+          <tr v-for="pending in factOriginDrafts" :key="`${pending.originSourceKey}/${pending.originFactName}`"><td><input type="checkbox" :checked="isDraftSelected(pending)" :disabled="!enabled || busy" @change="toggleDraft(pending, ($event.target as HTMLInputElement).checked)" /></td><td>{{ draftState() }}</td><td>—</td><td>{{ pending.name }}</td><td><code>{{ originLabel(pending) }}</code></td><td>{{ pending.dataType }}</td><td><code>{{ pending.valuesJson }}</code></td><td>{{ presetState(pending) }}</td><td><div class="console-row-actions"><ConsoleActionButton variant="row" tone="primary" native-type="button" :disabled="!enabled || busy" @click="openOriginDraft(pending)">{{ labels.mappingValueRuleConfigure }}</ConsoleActionButton><ConsoleActionButton variant="row" tone="danger" native-type="button" :disabled="!enabled || busy" @click="requestSingleDraftRemoval(pending)">{{ labels.mappingValueRuleRemoveDraft }}</ConsoleActionButton></div></td></tr>
+          <tr v-for="rule in configurations" :key="rule.id"><td>—</td><td>{{ presetState(rule) }}</td><td><code>{{ rule.valueRuleKey }}</code></td><td>{{ rule.name }}</td><td><code>{{ originLabel(rule) }}</code></td><td>{{ rule.dataType }}</td><td><code>{{ JSON.stringify(rule.values) }}</code></td><td>{{ rule.enabled ? labels.targetApiEnabled : labels.targetApiDisabled }}</td><td><div class="console-row-actions"><ConsoleActionButton variant="row" tone="primary" native-type="button" :disabled="!enabled || busy" @click="openEditor(rule.id)">{{ labels.targetApiEdit }}</ConsoleActionButton><ConsoleActionButton variant="row" tone="danger" native-type="button" :disabled="!enabled || busy" @click="remove(rule)">{{ labels.targetApiDelete }}</ConsoleActionButton></div></td></tr>
         </tbody>
       </table></div>
       <p v-if="!configurations.length && !factOriginDrafts.length" class="empty-state">{{ labels.mappingValueRulesEmpty }}</p>

@@ -2,7 +2,9 @@
 
 [English](README.md) · [OpenAPI](openapi.json) · [合成请求](vectors.json) · [私有配置样例](example-profile.json) · [批准的 r10 规格](../../../../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md#r10-source-independent-energy)
 
-清退后的源码仅接受 v2，鉴权后明确拒绝旧 v1 且不重放归档回执。设备观察私有 profile 仅接受 `c9e1a3b5d720`；同目录已发布的向量、OpenAPI 和 profile 样例保留原版本。 [清退规格](../../../../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+清退后的源码仅接受 v2，鉴权后明确拒绝旧 v1 且不重放归档回执。设备观察私有 profile 仅接受 `d8f2a4c6b915`；同目录已发布的向量、OpenAPI 和 profile 样例保留原版本。 [清退规格](../../../../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+
+设备和过程共用 `observation_metric_*` 配置表，写入回执保存到 `observation_ingest_receipts`。表计样本独立使用 `energy_ingest_receipts`。迁移保留原 ID 和重试结果。
 
 本合同说明当前接口沿用的 r10 v2 报文。机器 Bearer 的 producer、设备、目标、区域、指标与表计权限在服务端私有 profile 中配置，提交方类型可为 SMA、第三方或其他授权程序，正文不可授予权限；不要求 PLC 证据，也不表示 SMA 产品已经实现该投递。profile 在进程加载时缓存，修改需按运行环境协调重载；样例中的目标、摘要均为不可使用的占位符，不能提交真实 token 或 profile。
 

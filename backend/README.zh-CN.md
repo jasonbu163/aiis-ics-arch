@@ -60,6 +60,9 @@ API 服务复用。它只连接同一 Compose 的 `mysql:3306`，使用可丢弃
 
 宿主机源码开发请按[database-only 与账号初始化教程](../INITIALIZATION.zh-CN.md#宿主机源码开发与-database-only)操作。完成迁移并在 `backend/.env` 配置所需 bootstrap 账号后，在本目录执行 `uv run python main.py --maintenance bootstrap-users`，再执行 `uv run python run.py`。Alembic 和 API 启动都不会创建登录账号；ENABLED 开关只在维护命令执行时生效。
 
+`uv run run.py` 保留热重载，终端显示简洁文本。API 日志仍以 JSON Lines 写入 `LOG_DIR` 下的
+`api.log` 和 `api-error.log`，默认目录为 `logs/`。设置 `LOG_LEVEL=DEBUG` 可查看逐模块的加载和跳过明细。
+
 ## 打包
 
 main.py 是禁用 reload 的应用入口；run.py 是本地开发入口；build.py 是可选 PyInstaller 源码打包路径，不会复制真实 .env、数据 dump 或客户输入。详见 BUILD.zh-CN.md。
@@ -198,6 +201,43 @@ Bootstrap 继续是显式账号维护动作：数组不会创建/删除账号或
 | `LOG_LEVEL` | 日志阈值，例如 DEBUG、INFO、WARNING、ERROR。 (str) | `'INFO'` | `INFO` |
 | `LOG_MAX_BYTES` | 日志轮转前单文件大小上限，字节。 (int) | `10 * 1024 * 1024` | `10485760` |
 | `LOG_BACKUP_COUNT` | 保留的轮转日志备份数量。 (int) | `5` | `5` |
+
+后端模块通过 `common.log` 记录结构化事件。事件名采用 `task.saved` 这类稳定名称，任务编号等每次变化的值放在
+`task_no` 等结构化字段里。
+
+- 开发终端只需显示事件名时，用 `log_event(...)`。
+- 开发终端需要直接看到任务编号等关键信息时，用 `logger.bind(...).info(...)`。
+
+下面是同一个事件的两种写法，每次记录选用其中一种。
+
+```python
+from common.log import log_event, logger
+
+task_no = "TASK-001"
+
+# 开发终端：INFO: task.saved
+log_event("INFO", "task.saved", task_no=task_no, result="success")
+
+# 开发终端：INFO: Task TASK-001 saved
+logger.bind(event="task.saved", task_no=task_no, result="success").info(
+    "Task {} saved", task_no
+)
+```
+
+两种写法都会在 `api.log` 的 `record.extra` 中保留 `event`、`task_no` 和 `result`。按事件名筛查时读取
+`record.extra.event`，终端消息可以按排查需要调整。
+
+当字段能帮助决定下一步查什么时，才值得把它显示在开发终端，例如定位失败模块、找到对应业务记录或区分错误原因。
+例行状态检查通常只显示事件名即可，完整上下文留在结构化日志中。
+
+以下是现有调用中的例子。建议显示的字段可在遇到具体排查需求时加入终端消息。
+
+- [`schema_maintenance_status_checked`](app/schema_maintenance/services/async_schema.py) 是例行状态检查。
+  终端显示事件名即可，表清单和警告留在文件里。
+- [`business_integration_rejected`](common/integration/http.py) 涵盖多个业务模块和拒绝原因。
+  联调排查时可显示 `module`、HTTP `status` 和 `error_code`。
+- [`plan_performance_linked`](app/plan/services/async_service.py) 在核对计划与实绩关联时可显示
+  `plan_id`、`performance_id` 和 `action`，直接确认涉及的两条记录和关联动作。
 
 ### 数据库路由
 
@@ -357,7 +397,9 @@ Numeric保持声明的小数位；FLOAT采用有界binary32规范化，相对误
 
 ## 设备、过程与能耗的当前入口
 
-当前设备、过程和能耗由 `equipment_observation` 注册，分别使用 `equipment_status_main`、`process_monitor_main` 和 `energy_consumption_main`。清退后的观测源码要求目标 revision `c9e1a3b5d720`，两条设备观测写入仅接受 v2，旧 collector 状态、常规旧设备／过程／能耗路由和 r8 归档查询已退出源码。真实目标采用状态由任务记录维护。 [清退规格](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+当前设备、过程和能耗由 `equipment_observation` 注册，分别使用 `equipment_main`、`monitor_main` 和 `energy_consumption_main`。清退后的观测源码要求目标 revision `d8f2a4c6b915`，两条设备观测写入仅接受 v2，旧 collector 状态、常规旧设备／过程／能耗路由和 r8 归档查询已退出源码。真实目标采用状态由任务记录维护。 [清退规格](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+
+设备和过程共用 `observation_metric_*` 配置表，写入回执保存到 `observation_ingest_receipts`。表计样本独立使用 `energy_ingest_receipts`。迁移保留原 ID 和重试结果。
 
 ## 通用任务流程 v2 候选
 

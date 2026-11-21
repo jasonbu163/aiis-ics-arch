@@ -38,15 +38,24 @@ test('actual list setup saves independent display settings and restores stable c
     }).replace('export default', 'return')
   const fields = [{ groupKey: 'temperature', slotNo: 7, metricKey: 'actual', enabled: false, listVisible: false,
     listOrder: null, nameZh: '实际温度', nameEn: 'Actual temperature', unit: '°C' }]
+  fields.push(...Array.from({ length: 8 }, (_, i) => ({
+    ...fields[0], slotNo: 8 + i, metricKey: 'other' + i, nameEn: 'Other ' + i
+  })))
   const calls = [], hooks = [], store = new Map()
+  let rejectLast = true
   globalThis.localStorage = { getItem: key => store.get(key) ?? null, setItem: (key, value) => store.set(key, value), removeItem: key => store.delete(key) }
   const api = {
     equipmentOptions: async () => [], latestList: async () => ({ items: [], total: 0 }), latestDetail: async () => ({}), updateLatest: async () => {},
     observationListColumns: async target => ({ target, items: structuredClone(fields) }),
-    updateBinding: async (target, group, slot, changes) => { calls.push({ target, group, slot, changes }); Object.assign(fields[0], changes) }
+    updateBinding: async (target, group, slot, changes) => {
+      calls.push({ target, group, slot, changes })
+      if (slot === 15 && rejectLast) throw new Error('temporary failure')
+      Object.assign(fields.find(field => field.slotNo === slot), changes)
+    }
   }
   const deps = {
-    vue: { ...vue, onMounted: fn => hooks.push(fn) }, 'vue-i18n': { useI18n: () => ({ t: key => key, locale: vue.ref('zh-CN') }) },
+    vue: { ...vue, onMounted: fn => hooks.push(fn), onBeforeUnmount: () => {} }, 'vue-i18n': { useI18n: () => ({ t: key => key, locale: vue.ref('zh-CN') }) },
+    '@element-plus/icons-vue': {}, '@/components/common/BaseCard.vue': {},
     '@/components/common/ActionButton.vue': {}, '@/utils/date': { formatShanghaiDateTime: v => v, shanghaiInputToRfc3339: v => v },
     '@/utils/tableColumnWidths': { useTableColumnWidths }, '../../api/observations': api,
     '@/app/monitor/api/observations': { monitorOptions: async () => [], historyList: async () => ({ items: [], total: 0 }), historyDetail: async () => ({}), updateHistory: async () => {} },
@@ -58,8 +67,30 @@ test('actual list setup saves independent display settings and restores stable c
     const state = scope.run(() => component.setup({ target: 'history' }, { expose() {} }))
     await Promise.all(hooks.map(fn => fn()))
     assert.equal(state.visibleColumns.value.length, 0)
-    await state.setColumn(state.listColumns.value[0], { listVisible: true, listOrder: 10 })
-    assert.deepEqual(calls, [{ target: 'history', group: 'temperature', slot: 7, changes: { listVisible: true, listOrder: 10 } }])
+    state.openColumnSettings()
+    state.columnPageRows.value[0].listVisible = true
+    state.columnDialog.value = false
+    state.openColumnSettings()
+    assert.equal(state.columnPageRows.value[0].listVisible, false)
+    Object.assign(state.columnPageRows.value[0], { listVisible: true, listOrder: 10 })
+    state.columnPage.value = 2
+    state.columnPageRows.value[0].listVisible = true
+    state.columnFilters.keyword = 'Other 3'
+    state.searchColumnSettings()
+    assert.equal(state.columnPageRows.value.length, 1)
+    assert.equal(calls.length, 0)
+    await state.saveColumnSettings()
+    assert.deepEqual(calls, [
+      { target: 'history', group: 'temperature', slot: 7, changes: { listVisible: true, listOrder: 10 } },
+      { target: 'history', group: 'temperature', slot: 15, changes: { listVisible: true } }
+    ])
+    assert.equal(state.columnDialog.value, true)
+    assert.deepEqual(state.columnSaveFailures.value, ['other7'])
+    rejectLast = false
+    await state.saveColumnSettings()
+    assert.equal(calls.length, 3)
+    assert.equal(calls[2].slot, 15)
+    assert.equal(state.columnDialog.value, false)
     assert.equal(fields[0].enabled, false)
     assert.equal(state.visibleColumns.value[0].metricKey, 'actual')
     state.columns.value.onHeaderDragEnd(240, 160, { property: 'metric:actual' })
@@ -105,9 +136,8 @@ test('energy settings save column order and the sample list respects it', async 
     await state.load()
     assert.deepEqual(state.visibleColumns.value.map(field => field.metricKey), ['b', 'a', 'd'])
     assert.match(descriptor.template.content, /v-model="form\.listOrder"/)
-    const editor = scope.run(() => component.setup({ kind: 'config' }, { expose() {} }))
-    editor.meter.value = 'meter1'
-    await editor.load()
+    const editor = scope.run(() => component.setup({ kind: 'config', active: true }, { expose() {} }))
+    await editor.loadConfig()
     editor.openConfig(editor.configs.value[0])
     editor.form.listOrder = 5
     await editor.save()
@@ -127,30 +157,37 @@ async function energyAdminFixture(kind, api) {
     }).replace('export default', 'return')
   const store = new Map()
   globalThis.localStorage = { getItem: key => store.get(key) ?? null, setItem: (key, value) => store.set(key, value), removeItem: key => store.delete(key) }
-  const deps = { vue: { ...vue, onMounted: () => {} },
+  const deps = { vue: { ...vue, onMounted: () => {}, onBeforeUnmount: () => {} },
     'vue-i18n': { useI18n: () => ({ t: key => key, locale: vue.ref('zh-CN') }) },
     '@/components/common/ActionButton.vue': {}, '@/utils/date': { formatShanghaiDateTime: value => value },
     '@/utils/tableColumnWidths': { useTableColumnWidths }, '../../api/observations': api }
   const scope = vue.effectScope()
   const component = new Function('deps', script)(deps)
-  const state = scope.run(() => component.setup({ kind }, { expose() {} }))
+  const state = scope.run(() => component.setup({ kind, active: true }, { expose() {} }))
   return { state, close() { scope.stop(); delete globalThis.localStorage } }
 }
 
 test('energy config selection rejects out-of-order results and stale edit targets', async () => {
   const requests = { A: deferred(), B: deferred() }, counts = {}, writes = []
   const field = meterId => ({ meterId, groupKey: 'power', metricKey: 'reading', slotNo: 1, rules: {}, listVisible: true })
-  const api = { energyOptions: async () => [], energyConfigs: ({ meterId }) => {
+  const api = { energyOptions: async () => [{ meterId: 'A' }, { meterId: 'B' }], energyConfigs: ({ meterId }) => {
+    if (!meterId) return Promise.resolve([field('A'), field('B')])
     counts[meterId] = (counts[meterId] || 0) + 1
     return counts[meterId] === 1 ? requests[meterId].promise : Promise.resolve([field(meterId)])
   }, createEnergyConfig: async value => writes.push(value), energyAdminSamples: async () => ({ items: [], total: 0 }),
   updateEnergySample: async () => {}, updateEnergyConfig: async (...args) => writes.push(args) }
   const { state, close } = await energyAdminFixture('config', api)
   try {
-    state.meter.value = 'A'; await vue.nextTick()
-    state.meter.value = 'B'; await vue.nextTick()
-    requests.B.resolve([field('B')]); await vue.nextTick(); await Promise.resolve()
-    requests.A.resolve([field('A')]); await vue.nextTick(); await Promise.resolve()
+    await state.loadConfig()
+    assert.deepEqual(state.configs.value.map(item => item.meterId), ['A', 'B'])
+    state.openConfig()
+    assert.equal(state.form.meterId, '')
+    await state.save()
+    assert.equal(writes.length, 0)
+    state.draft.meter = 'A'; const first = state.searchConfig()
+    state.draft.meter = 'B'; const second = state.searchConfig()
+    requests.B.resolve([field('B')]); await second
+    requests.A.resolve([field('A')]); await first
     assert.deepEqual(state.configs.value.map(item => item.meterId), ['B'])
     state.openConfig(field('A')); await state.save()
     assert.equal(writes.length, 0)
@@ -158,9 +195,12 @@ test('energy config selection rejects out-of-order results and stale edit target
     state.form.meterId = 'A'; state.form.groupKey = 'other'; state.form.metricKey = 'other'
     await state.save()
     assert.deepEqual(writes[0].slice(0, 3), ['B', 'power', 'reading'])
-    state.openConfig(state.configs.value[0]); state.meter.value = 'A'
+    state.openConfig(state.configs.value[0]); state.draft.meter = 'A'
+    await state.searchConfig()
     await state.save()
     assert.equal(writes.length, 1)
+    await state.resetConfigFilters()
+    assert.deepEqual(state.configs.value.map(item => item.meterId), ['A', 'B'])
   } finally { close() }
 })
 
@@ -206,18 +246,19 @@ test('energy samples retain current meter, group and page across delayed results
 test('energy retry and an obsolete save failure cannot alter the new selection', async () => {
   const save = deferred(), writes = [], options = { attempts: 0 }
   const field = meterId => ({ meterId, groupKey: 'power', metricKey: 'reading', slotNo: 1, rules: {} })
-  const api = { energyOptions: async () => { if (++options.attempts === 1) throw new Error('unavailable'); return [{ meterId: 'A' }] },
-    energyConfigs: async ({ meterId }) => [field(meterId)], energyAdminSamples: async () => ({ items: [], total: 0 }),
+  const api = { energyOptions: async () => { if (++options.attempts === 1) throw new Error('unavailable'); return [{ meterId: 'A' }, { meterId: 'B' }] },
+    energyConfigs: async ({ meterId }) => meterId ? [field(meterId)] : [field('A'), field('B')], energyAdminSamples: async () => ({ items: [], total: 0 }),
     createEnergyConfig: async () => {}, updateEnergyConfig: (...args) => { writes.push(args); return save.promise }, updateEnergySample: async () => {} }
   const { state, close } = await energyAdminFixture('config', api)
   try {
-    await state.load(); assert.equal(state.failed.value, true)
-    await state.load(); await vue.nextTick(); await Promise.resolve()
-    assert.equal(state.meter.value, 'A'); assert.equal(state.failed.value, false)
+    await state.loadConfig(); assert.equal(state.failed.value, true)
+    await state.loadConfig()
+    assert.equal(state.failed.value, false)
+    assert.deepEqual(state.configs.value.map(item => item.meterId), ['A', 'B'])
     state.openConfig(state.configs.value[0]); const saving = state.save()
-    state.meter.value = 'B'; await vue.nextTick(); await Promise.resolve()
+    state.draft.meter = 'B'; await state.searchConfig()
     save.reject(new Error('old save failure')); await saving
-    assert.equal(state.meter.value, 'B'); assert.equal(state.failed.value, false)
+    assert.equal(state.failed.value, false)
     assert.deepEqual(state.configs.value.map(item => item.meterId), ['B'])
     assert.equal(writes[0][0], 'A')
   } finally { close() }
@@ -573,4 +614,60 @@ test('same metric labels from different regions remain identifiable and individu
     assert.match(html, /&lt;区域&amp;一&gt;.*&lt;实际值&gt;/)
     assert.doesNotMatch(html, /<区域|<实际值/)
   } finally { chart?.dispose(); scope.stop() }
+})
+
+test('slots initially load both targets, preserve submitted filters, and reject stale results', async () => {
+  const source = await readFile(new URL('../../src/app/equipment/views/observations/admin.vue', import.meta.url), 'utf8')
+  const script = compileScript(parse(source).descriptor, { id: 'observation-config' }).content
+    .replace(/^import\s+([\s\S]+?)\s+from\s+['"](.+?)['"];?$/gm, (_line, binding, name) => {
+      if (binding.startsWith('{')) binding = binding.replace(/\bas\b/g, ':')
+      return `const ${binding} = deps[${JSON.stringify(name)}]`
+    }).replace('export default', 'return')
+  const hooks = [], requests = []
+  const slot1 = { target: 'latest', groupKey: 'heatZone1', slotNo: 1, metricKey: 'actual', enabled: true }
+  const slot2 = { target: 'history', groupKey: 'heatZone2', slotNo: 1, metricKey: 'set', enabled: false }
+  const deps = {
+    vue: { ...vue, onMounted: fn => hooks.push(fn), onBeforeUnmount: () => {} },
+    'element-plus': {},
+    'vue-i18n': { useI18n: () => ({ t: key => key, locale: vue.ref('zh-CN') }) },
+    '@/components/common/ActionButton.vue': {}, '@/components/common/BaseCard.vue': {},
+    '@/utils/date': {}, '@/utils/tableColumnWidths': { useTableColumnWidths },
+    '../../api/observations': {
+      metricGroups: async () => [{ groupKey: 'heatZone1' }, { groupKey: 'heatZone2' }],
+      metrics: async () => [{ metricKey: 'set', nameZh: '设定值', nameEn: 'Set temperature' }],
+      cards: async () => [],
+      bindings: params => { const wait = deferred(); requests.push({ params, ...wait }); return wait.promise }
+    }
+  }
+  const scope = vue.effectScope()
+  const settle = () => new Promise(resolve => setImmediate(resolve))
+  try {
+    const component = new Function('deps', script)(deps)
+    const state = scope.run(() => component.setup({}, { expose() {} }))
+    await hooks[0]()
+    state.selectTab('slot')
+    assert.deepEqual(requests[0].params, { target: undefined, groupKey: undefined })
+    requests[0].resolve({ items: [slot1, slot2] })
+    await settle()
+    assert.deepEqual(state.visibleRows.value, [slot1, slot2])
+    state.draft.scope = 'heatZone2'; state.draft.target = 'history'; state.draft.keyword = ' SET TEMPERATURE '
+    assert.deepEqual(state.visibleRows.value, [slot1, slot2])
+    state.search()
+    assert.deepEqual(requests[1].params, { target: 'history', groupKey: 'heatZone2' })
+    requests[1].resolve({ items: [slot2] })
+    await settle()
+    assert.deepEqual(state.visibleRows.value, [slot2])
+    state.draft.keyword = 'unsubmitted'
+    state.selectTab('group')
+    state.selectTab('slot')
+    assert.equal(state.draft.keyword, 'SET TEMPERATURE')
+    state.resetFilters()
+    assert.deepEqual(requests[3].params, { target: undefined, groupKey: undefined })
+    requests[3].resolve({ items: [slot1, slot2] })
+    await settle()
+    requests[2].reject(new Error('old lookup'))
+    await settle()
+    assert.deepEqual(state.visibleRows.value, [slot1, slot2])
+    assert.equal(state.failed.value, false)
+  } finally { scope.stop() }
 })

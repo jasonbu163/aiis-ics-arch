@@ -21,6 +21,9 @@ pub fn validate(d: &ConfigurationDocument) -> Result<(), String> {
             return Err("SMA_CONFIGURATION_LIMIT_EXCEEDED".into());
         }
     }
+    if let Some(config) = &d.acquisition_loopback {
+        crate::domain::acquisition::validate_config(config)?;
+    }
     if d.source_metadata.len() > MAX_ITEMS
         || serde_json::to_vec_pretty(&backup(d))
             .map_err(|_| "SMA_CONFIGURATION_INVALID")?

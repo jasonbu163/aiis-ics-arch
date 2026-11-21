@@ -129,7 +129,7 @@ async def test_http_preserves_raw_number_until_admission(monkeypatch, path):
 
 
 def test_new_areas_do_not_need_legacy_group_settings_or_plc_binding():
-    profile = {"target": {"serverUuid": "00000000-0000-4000-8000-000000000001", "schema": "fixture", "schemaRevision": "c9e1a3b5d720"},
+    profile = {"target": {"serverUuid": "00000000-0000-4000-8000-000000000001", "schema": "fixture", "schemaRevision": "e9f3b5d7c021"},
         "devices": [{"equipmentId": "line", "nameZh": "线", "nameEn": "Line", "staleAfterSeconds": 20, "futureToleranceSeconds": 60}],
         "readScopes": {"admin": ["line"]}, "meters": [{"meterId": "meter", "nameZh": "表", "nameEn": "Meter"}],
         "meterReadScopes": {"admin": ["meter"]}, "historyRules": [], "groupSettings": [],

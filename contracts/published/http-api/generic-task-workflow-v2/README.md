@@ -16,6 +16,30 @@ The fixed statuses are `new`, `running`, `completed`, and `error`. A partial upd
 
 The first performance for an existing plan copies the configured order snapshot once. When performance exists first, ordinary plan upsert can create the plan. Set `backfillExisting` to request eligible historical feedback. Values explicitly included in the plan request take precedence over one-time backfill.
 
+## Field administration
+
+The existing configuration GET, PUT, and single-delete operations remain compatible. GET returns definitions.
+An administrator can submit multiple changed shared fields in one PUT with `module=shared` and the current `configRevision`.
+
+`POST /api/v1/task-field-configs/batch-delete` accepts the current `configRevision` and 1–100 distinct shared field
+identities (`scope=shared_sync`, `slotNo`, `name`). Only administrators can execute it. The server applies the existing
+history and usage protection to every field under the configuration lock and commits the batch atomically.
+Success returns `outcome=deleted`, `deleted` in request order, and `configVersion` and `configRevision`, each advanced once.
+
+A stale revision or protected field returns 409, a missing identity returns 404, and invalid input returns 422.
+An indexed detail such as `fields.1.name` identifies an item when available. A global history failure can refer to `fields`.
+Those rejections leave the entire batch intact. After `503 task.commit_unknown` or a lost response, read the
+current configuration to check identities and revision before deciding whether to submit again.
+Check MES, SMA and other external references separately. GET does not provide deletion eligibility.
+
+Plan and Performance local fields use the same PUT for single or batched changes with `module=plan` or
+`module=performance`. The standalone local field pages use `POST /api/v1/task-field-configs/local/batch-delete`
+for batch deletion. Only signed-in administrators may call it. Supply the module, current `configRevision`,
+and 1–100 distinct identities. Every identity must have `scope=plan_local` for Plan or
+`scope=performance_local` for Performance. Mixed scopes and shared identities are rejected.
+The response, atomicity, failure and reconciliation rules above also apply. The existing shared deletion path
+still accepts only shared identities. Both administration endpoints are outside the integration API.
+
 ## Access and migration
 
 Integration operations use the project's trusted network boundary. The task flow has no frontend Bearer requirement or producer registration requirement. `producerId` is a label, and `fieldConfigVersion` is informational. Frontend read and write operations require login and the corresponding role grants. Configuration writes and deletes require admin.

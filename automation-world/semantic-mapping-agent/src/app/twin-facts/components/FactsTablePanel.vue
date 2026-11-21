@@ -1,6 +1,7 @@
 <!-- SMA只读源事实：查询、筛选、分页和导出，不提供事实生产入口。 -->
 <script setup lang="ts">
-import { ConsoleCard, ConsoleActionButton, StatusCapsule } from "@aw-ui";
+import { ConsoleCard, ConsoleActionButton, type CardHeaderStatus } from "@aw-ui";
+import { Refresh } from "@element-plus/icons-vue";
 import { computed, ref, watch } from "vue";
 import PaginationBar from "../../../components/PaginationBar.vue";
 import type { LocaleMessages } from "../../../locales";
@@ -43,27 +44,36 @@ function exportValues(format: CollectionFactFileFormat) {
   exportError.value = false;
   emit("export-values", format, failed => { savingFile.value = false; exportError.value = failed; });
 }
+
+const headerStatuses = computed<CardHeaderStatus[]>(() => {
+  const readOnly: CardHeaderStatus = { id: "read-only", label: props.labels.sourceFactsReadOnly };
+  return busy.value ? [{ id: "working", label: props.labels.loading }, readOnly] : [readOnly];
+});
 </script>
 <template>
-  <ConsoleCard class="facts-table-panel" :title="labels.factsTableTitle">
-<template #actions><StatusCapsule :label="labels.sourceFactsReadOnly" /></template>
-    <p>{{ labels.factsTableHint }}</p>
-    <div class="facts-source-controls">
-      <label class="field"><span>{{ labels.twinSourceKey }}</span><input v-model="sourceInput" :disabled="busy" @keyup.enter="emit('load-source', sourceInput.trim())" /></label>
-      <ConsoleActionButton tone="secondary" :disabled="!enabled || busy" @click="emit('load-source', sourceInput.trim())">{{ labels.collectionFactsLoad }}</ConsoleActionButton>
+  <ConsoleCard class="facts-table-panel" :title="labels.factsTableTitle" :header-statuses="headerStatuses" :status-overflow-label="labels.moreCardStatuses" :help="labels.factsTableHint + '\n' + labels.businessTimeHint" :help-label="labels.factsTableTitle + labels.cardHelpSuffix" help-append-to="#sma-overlays">
+    <template #actions>
       <ConsoleActionButton tone="secondary" v-for="format in (['json', 'xlsx'] as const)" :key="format" :disabled="!enabled || !contract || busy || savingFile" @click="exportValues(format)">{{ labels.collectionFactsExportValues }} {{ format.toUpperCase() }}</ConsoleActionButton>
-    </div>
+      <ConsoleActionButton tone="secondary" @click="table.reset" :title="labels.resetTableWidthsHelp">{{ labels.resetTableWidths }}</ConsoleActionButton>
+    </template>
+    <template #refresh>
+      <ConsoleActionButton tone="secondary" :icon="Refresh" :disabled="!enabled || busy" @click="emit('query', { page: query.page })">{{ labels.refresh }}</ConsoleActionButton>
+    </template>
+
+    <template #tools>
+      <div class="facts-source-controls">
+        <label class="field"><span>{{ labels.twinSourceKey }}</span><input v-model="sourceInput" :disabled="busy" @keyup.enter="emit('load-source', sourceInput.trim())" /></label>
+        <ConsoleActionButton tone="secondary" :disabled="!enabled || busy" @click="emit('load-source', sourceInput.trim())">{{ labels.collectionFactsLoad }}</ConsoleActionButton>
+      </div>
+      <div class="collection-fact-filters">
+        <label>{{ labels.collectionFactsName }}<input v-model="nameInput" :disabled="busy" @change="emit('query', { name: nameInput, page: 1 })" /></label>
+        <label>{{ labels.collectionFactsKind }}<select :value="query.factKind || ''" :disabled="busy" @change="selectQuery('factKind', $event)"><option value="">{{ labels.collectionFactsAll }}</option><option v-for="kind in kinds" :key="kind">{{ kind }}</option></select></label>
+        <label>{{ labels.collectionFactsDataType }}<select :value="query.dataType || ''" :disabled="busy" @change="selectQuery('dataType', $event)"><option value="">{{ labels.collectionFactsAll }}</option><option v-for="type in types" :key="type">{{ type }}</option></select></label>
+      </div>
+    </template>
     <p v-if="sourceKey && !contract && !busy && !error" class="notice">{{ labels.sourceFactsMissing }}</p>
     <p v-if="error" class="warning">{{ labels.collectionFactsOperationFailed }}</p>
     <p v-if="exportError" class="warning">{{ labels.collectionFactsExportFailed }}</p>
-    <div class="collection-fact-filters">
-      <label>{{ labels.collectionFactsName }}<input v-model="nameInput" :disabled="busy" @change="emit('query', { name: nameInput, page: 1 })" /></label>
-      <label>{{ labels.collectionFactsKind }}<select :value="query.factKind || ''" :disabled="busy" @change="selectQuery('factKind', $event)"><option value="">{{ labels.collectionFactsAll }}</option><option v-for="kind in kinds" :key="kind">{{ kind }}</option></select></label>
-      <label>{{ labels.collectionFactsDataType }}<select :value="query.dataType || ''" :disabled="busy" @change="selectQuery('dataType', $event)"><option value="">{{ labels.collectionFactsAll }}</option><option v-for="type in types" :key="type">{{ type }}</option></select></label>
-      <ConsoleActionButton tone="secondary" :disabled="!enabled || busy" @click="emit('query', { page: query.page })">{{ labels.refresh }}</ConsoleActionButton>
-      <ConsoleActionButton tone="secondary" @click="table.reset">{{ labels.resetTableWidths }}</ConsoleActionButton>
-    </div>
-    <p class="hint">{{ labels.businessTimeHint }}</p>
     <div class="table-scroll facts-table-scroll" tabindex="0">
       <table class="facts-table" :style="{ width: `${table.totalWidth.value}px` }">
         <colgroup><col v-for="column in columns" :key="column.id" :style="{ width: `${table.widths.value[column.id]}px` }" /></colgroup>
@@ -79,9 +89,9 @@ function exportValues(format: CollectionFactFileFormat) {
   </ConsoleCard>
 </template>
 <style>
-.facts-source-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin-top: 16px; }
+.facts-source-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
 .facts-source-controls .field { flex: 1 1 280px; }
-.collection-fact-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin: 18px 0; }
+.collection-fact-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin-top: 12px; }
 .collection-fact-filters label { display: grid; gap: 6px; }
 .facts-table-scroll { overflow-x: auto; }
 .facts-table { table-layout: fixed; }

@@ -1,0 +1,1071 @@
+{
+  "$defs": {
+    "AckIn": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "const": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "contractVersion": {
+          "const": "plc-facts/v2",
+          "title": "Contractversion",
+          "type": "string"
+        },
+        "httpStatus": {
+          "const": 200,
+          "title": "Httpstatus",
+          "type": "integer"
+        },
+        "instanceId": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Instanceid",
+          "type": "string",
+          "x-utf8-max-bytes": 128
+        },
+        "operationId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Operationid",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "created",
+            "duplicate"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "sampleId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Sampleid",
+          "type": "string"
+        },
+        "status": {
+          "const": "committed",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "operationId",
+        "httpStatus",
+        "code",
+        "contractVersion",
+        "instanceId",
+        "sampleId",
+        "status",
+        "outcome"
+      ],
+      "title": "AckIn",
+      "type": "object"
+    },
+    "ConfirmedOut": {
+      "properties": {
+        "confirmedAt": {
+          "title": "Confirmedat",
+          "type": "string"
+        },
+        "deliveryId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Deliveryid",
+          "type": "string"
+        },
+        "lastConfirmedSeq": {
+          "pattern": "^[1-9][0-9]{0,18}$",
+          "title": "Lastconfirmedseq",
+          "type": "string"
+        },
+        "status": {
+          "const": "confirmed",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "deliveryId",
+        "lastConfirmedSeq",
+        "confirmedAt"
+      ],
+      "title": "ConfirmedOut",
+      "type": "object"
+    },
+    "ConsumerCreatedOut": {
+      "properties": {
+        "consumerId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Consumerid",
+          "type": "string"
+        },
+        "desiredState": {
+          "const": "paused",
+          "title": "Desiredstate",
+          "type": "string"
+        },
+        "excludedHistory": {
+          "$ref": "#/$defs/ExcludedOut"
+        },
+        "lastConfirmedSeq": {
+          "title": "Lastconfirmedseq",
+          "type": "string"
+        },
+        "startAt": {
+          "title": "Startat",
+          "type": "string"
+        },
+        "startSeq": {
+          "title": "Startseq",
+          "type": "string"
+        }
+      },
+      "required": [
+        "consumerId",
+        "startAt",
+        "startSeq",
+        "lastConfirmedSeq",
+        "excludedHistory",
+        "desiredState"
+      ],
+      "title": "ConsumerCreatedOut",
+      "type": "object"
+    },
+    "ConsumerStatusOut": {
+      "properties": {
+        "consumerId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Consumerid",
+          "type": "string"
+        },
+        "dbNumber": {
+          "maximum": 65535.0,
+          "minimum": 1.0,
+          "title": "Dbnumber",
+          "type": "integer"
+        },
+        "desiredState": {
+          "enum": [
+            "running",
+            "paused"
+          ],
+          "title": "Desiredstate",
+          "type": "string"
+        },
+        "excludedHistory": {
+          "$ref": "#/$defs/ExcludedOut"
+        },
+        "lastConfirmedSeq": {
+          "title": "Lastconfirmedseq",
+          "type": "string"
+        },
+        "lease": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LeaseOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pending": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PendingOut"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "plcId": {
+          "title": "Plcid",
+          "type": "string"
+        },
+        "startAt": {
+          "title": "Startat",
+          "type": "string"
+        },
+        "startMode": {
+          "enum": [
+            "now",
+            "retained"
+          ],
+          "title": "Startmode",
+          "type": "string"
+        },
+        "startSeq": {
+          "title": "Startseq",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "idle",
+            "pending",
+            "confirmed",
+            "blocked"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/TargetOut"
+        }
+      },
+      "required": [
+        "desiredState",
+        "consumerId",
+        "plcId",
+        "dbNumber",
+        "startMode",
+        "startAt",
+        "startSeq",
+        "lastConfirmedSeq",
+        "excludedHistory",
+        "target",
+        "lease",
+        "pending",
+        "status"
+      ],
+      "title": "ConsumerStatusOut",
+      "type": "object"
+    },
+    "CreateConsumerIn": {
+      "additionalProperties": false,
+      "properties": {
+        "dbNumber": {
+          "maximum": 65535.0,
+          "minimum": 1.0,
+          "title": "Dbnumber",
+          "type": "integer"
+        },
+        "plcId": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Plcid",
+          "type": "string",
+          "x-utf8-max-bytes": 128
+        },
+        "startMode": {
+          "enum": [
+            "now",
+            "retained"
+          ],
+          "title": "Startmode",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/TargetIn"
+        }
+      },
+      "required": [
+        "plcId",
+        "dbNumber",
+        "startMode",
+        "target"
+      ],
+      "title": "CreateConsumerIn",
+      "type": "object"
+    },
+    "DeliveryTargetIn": {
+      "additionalProperties": false,
+      "properties": {
+        "dbNumber": {
+          "maximum": 65535.0,
+          "minimum": 1.0,
+          "title": "Dbnumber",
+          "type": "integer"
+        },
+        "instanceId": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Instanceid",
+          "type": "string",
+          "x-utf8-max-bytes": 128
+        },
+        "kind": {
+          "const": "plc-facts-v2",
+          "title": "Kind",
+          "type": "string"
+        },
+        "plcId": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Plcid",
+          "type": "string",
+          "x-utf8-max-bytes": 128
+        },
+        "sampleId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Sampleid",
+          "type": "string"
+        },
+        "sourceGeneration": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Sourcegeneration",
+          "type": "string",
+          "x-utf8-max-bytes": 128
+        },
+        "sourceSeq": {
+          "pattern": "^[1-9][0-9]{0,18}$",
+          "title": "Sourceseq",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "instanceId",
+        "plcId",
+        "dbNumber",
+        "sourceGeneration",
+        "sampleId",
+        "sourceSeq"
+      ],
+      "title": "DeliveryTargetIn",
+      "type": "object"
+    },
+    "DeliveryTargetOut": {
+      "properties": {
+        "dbNumber": {
+          "maximum": 65535.0,
+          "minimum": 1.0,
+          "title": "Dbnumber",
+          "type": "integer"
+        },
+        "instanceId": {
+          "title": "Instanceid",
+          "type": "string"
+        },
+        "kind": {
+          "const": "plc-facts-v2",
+          "title": "Kind",
+          "type": "string"
+        },
+        "plcId": {
+          "title": "Plcid",
+          "type": "string"
+        },
+        "sampleId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Sampleid",
+          "type": "string"
+        },
+        "sourceGeneration": {
+          "title": "Sourcegeneration",
+          "type": "string"
+        },
+        "sourceSeq": {
+          "pattern": "^[1-9][0-9]{0,18}$",
+          "title": "Sourceseq",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "instanceId",
+        "plcId",
+        "dbNumber",
+        "sourceGeneration",
+        "sampleId",
+        "sourceSeq"
+      ],
+      "title": "DeliveryTargetOut",
+      "type": "object"
+    },
+    "EmptyOut": {
+      "properties": {
+        "status": {
+          "const": "empty",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "EmptyOut",
+      "type": "object"
+    },
+    "ExcludedOut": {
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "string"
+        },
+        "firstEventSeq": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Firsteventseq"
+        },
+        "lastEventSeq": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Lasteventseq"
+        }
+      },
+      "required": [
+        "count",
+        "firstEventSeq",
+        "lastEventSeq"
+      ],
+      "title": "ExcludedOut",
+      "type": "object"
+    },
+    "FailureOut": {
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "integer"
+        },
+        "data": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Data"
+        },
+        "errorCode": {
+          "title": "Errorcode",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "errorCode"
+      ],
+      "title": "FailureOut",
+      "type": "object"
+    },
+    "LeaseIn": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "acquire",
+            "renew",
+            "release"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "operationId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Operationid",
+          "type": "string"
+        },
+        "workerId": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Workerid",
+          "type": "string",
+          "x-utf8-max-bytes": 128
+        }
+      },
+      "required": [
+        "operationId",
+        "workerId",
+        "action"
+      ],
+      "title": "LeaseIn",
+      "type": "object"
+    },
+    "LeaseOut": {
+      "properties": {
+        "expiresAt": {
+          "title": "Expiresat",
+          "type": "string"
+        },
+        "leaseGeneration": {
+          "pattern": "^[1-9][0-9]{0,18}$",
+          "title": "Leasegeneration",
+          "type": "string"
+        },
+        "leaseId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Leaseid",
+          "type": "string"
+        },
+        "renewAfterAt": {
+          "title": "Renewafterat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "leaseId",
+        "leaseGeneration",
+        "expiresAt",
+        "renewAfterAt"
+      ],
+      "title": "LeaseOut",
+      "type": "object"
+    },
+    "PendingIn": {
+      "additionalProperties": false,
+      "properties": {
+        "bodySha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Bodysha256",
+          "type": "string"
+        },
+        "configHash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Confighash",
+          "type": "string"
+        },
+        "configVersion": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Configversion",
+          "type": "string",
+          "x-utf8-max-bytes": 128
+        },
+        "eventSeq": {
+          "pattern": "^[1-9][0-9]{0,18}$",
+          "title": "Eventseq",
+          "type": "string"
+        },
+        "serializerVersion": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Serializerversion",
+          "type": "string",
+          "x-utf8-max-bytes": 128
+        },
+        "target": {
+          "$ref": "#/$defs/DeliveryTargetIn"
+        }
+      },
+      "required": [
+        "eventSeq",
+        "configVersion",
+        "configHash",
+        "serializerVersion",
+        "bodySha256",
+        "target"
+      ],
+      "title": "PendingIn",
+      "type": "object"
+    },
+    "PendingOut": {
+      "properties": {
+        "bodySha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Bodysha256",
+          "type": "string"
+        },
+        "configHash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Confighash",
+          "type": "string"
+        },
+        "configVersion": {
+          "title": "Configversion",
+          "type": "string"
+        },
+        "deliveryId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Deliveryid",
+          "type": "string"
+        },
+        "eventSeq": {
+          "pattern": "^[1-9][0-9]{0,18}$",
+          "title": "Eventseq",
+          "type": "string"
+        },
+        "serializerVersion": {
+          "title": "Serializerversion",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/DeliveryTargetOut"
+        }
+      },
+      "required": [
+        "deliveryId",
+        "eventSeq",
+        "configVersion",
+        "configHash",
+        "serializerVersion",
+        "bodySha256",
+        "target"
+      ],
+      "title": "PendingOut",
+      "type": "object"
+    },
+    "PointV2In": {
+      "additionalProperties": false,
+      "properties": {
+        "dataType": {
+          "pattern": "^(?:BOOL|BYTE|USINT|INT|UINT|WORD|DINT|UDINT|DWORD|REAL|CHAR|STRING\\[(?:[1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-4])\\])$",
+          "title": "Datatype",
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "maxLength": 100,
+          "title": "Name",
+          "type": "string",
+          "x-utf8-max-bytes": 100
+        },
+        "observedAt": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?\\+08:00$",
+          "title": "Observedat",
+          "type": "string"
+        },
+        "pointId": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Pointid",
+          "type": "string",
+          "x-utf8-max-bytes": 128
+        },
+        "quality": {
+          "enum": [
+            "good",
+            "bad"
+          ],
+          "title": "Quality",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason",
+          "x-utf8-max-bytes": 128
+        },
+        "value": {
+          "title": "Value"
+        }
+      },
+      "required": [
+        "pointId",
+        "dataType",
+        "value",
+        "quality",
+        "observedAt"
+      ],
+      "title": "PointV2In",
+      "type": "object"
+    },
+    "ReadyOut": {
+      "properties": {
+        "deliveryId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Deliveryid",
+          "type": "string"
+        },
+        "eventSeq": {
+          "pattern": "^[1-9][0-9]{0,18}$",
+          "title": "Eventseq",
+          "type": "string"
+        },
+        "sample": {
+          "$ref": "#/$defs/SampleDetail"
+        },
+        "status": {
+          "const": "ready",
+          "title": "Status",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/DeliveryTargetOut"
+        }
+      },
+      "required": [
+        "status",
+        "eventSeq",
+        "deliveryId",
+        "target",
+        "sample"
+      ],
+      "title": "ReadyOut",
+      "type": "object"
+    },
+    "RunStateIn": {
+      "additionalProperties": false,
+      "properties": {
+        "desiredState": {
+          "enum": [
+            "running",
+            "paused"
+          ],
+          "title": "Desiredstate",
+          "type": "string"
+        },
+        "operationId": {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "title": "Operationid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "operationId",
+        "desiredState"
+      ],
+      "title": "RunStateIn",
+      "type": "object"
+    },
+    "RunStateOut": {
+      "properties": {
+        "desiredState": {
+          "enum": [
+            "running",
+            "paused"
+          ],
+          "title": "Desiredstate",
+          "type": "string"
+        }
+      },
+      "required": [
+        "desiredState"
+      ],
+      "title": "RunStateOut",
+      "type": "object"
+    },
+    "SampleDetail": {
+      "properties": {
+        "configRevision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Configrevision"
+        },
+        "dbNumber": {
+          "title": "Dbnumber",
+          "type": "integer"
+        },
+        "groupId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Groupid"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "instanceId": {
+          "title": "Instanceid",
+          "type": "string"
+        },
+        "plcId": {
+          "title": "Plcid",
+          "type": "string"
+        },
+        "pointCount": {
+          "title": "Pointcount",
+          "type": "integer"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/$defs/PointV2In"
+          },
+          "title": "Points",
+          "type": "array"
+        },
+        "sampleId": {
+          "title": "Sampleid",
+          "type": "string"
+        },
+        "sampledAt": {
+          "title": "Sampledat",
+          "type": "string"
+        },
+        "sourceGeneration": {
+          "title": "Sourcegeneration",
+          "type": "string"
+        },
+        "sourceSeq": {
+          "title": "Sourceseq",
+          "type": "string"
+        },
+        "sourceType": {
+          "anyOf": [
+            {
+              "enum": [
+                "daa",
+                "external"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sourcetype"
+        },
+        "storedAt": {
+          "title": "Storedat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "instanceId",
+        "sampleId",
+        "plcId",
+        "dbNumber",
+        "groupId",
+        "configRevision",
+        "sourceType",
+        "sourceGeneration",
+        "sourceSeq",
+        "sampledAt",
+        "storedAt",
+        "pointCount",
+        "points"
+      ],
+      "title": "SampleDetail",
+      "type": "object"
+    },
+    "StandardResponse_ConfirmedOut_": {
+      "properties": {
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "data": {},
+        "message": {
+          "default": "success",
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "title": "StandardResponse[ConfirmedOut]",
+      "type": "object"
+    },
+    "StandardResponse_ConsumerCreatedOut_": {
+      "properties": {
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "data": {},
+        "message": {
+          "default": "success",
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "title": "StandardResponse[ConsumerCreatedOut]",
+      "type": "object"
+    },
+    "StandardResponse_ConsumerStatusOut_": {
+      "properties": {
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "data": {},
+        "message": {
+          "default": "success",
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "title": "StandardResponse[ConsumerStatusOut]",
+      "type": "object"
+    },
+    "StandardResponse_LeaseOut_": {
+      "properties": {
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "data": {},
+        "message": {
+          "default": "success",
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "title": "StandardResponse[LeaseOut]",
+      "type": "object"
+    },
+    "StandardResponse_PendingOut_": {
+      "properties": {
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "data": {},
+        "message": {
+          "default": "success",
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "title": "StandardResponse[PendingOut]",
+      "type": "object"
+    },
+    "StandardResponse_RunStateOut_": {
+      "properties": {
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "data": {},
+        "message": {
+          "default": "success",
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "title": "StandardResponse[RunStateOut]",
+      "type": "object"
+    },
+    "StandardResponse_Union_ReadyOut__EmptyOut__": {
+      "properties": {
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "data": {
+          "title": "Data"
+        },
+        "message": {
+          "default": "success",
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "title": "StandardResponse[Union[ReadyOut, EmptyOut]]",
+      "type": "object"
+    },
+    "TargetIn": {
+      "additionalProperties": false,
+      "properties": {
+        "dbNumber": {
+          "maximum": 65535.0,
+          "minimum": 1.0,
+          "title": "Dbnumber",
+          "type": "integer"
+        },
+        "instanceId": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Instanceid",
+          "type": "string",
+          "x-utf8-max-bytes": 128
+        },
+        "kind": {
+          "const": "plc-facts-v2",
+          "title": "Kind",
+          "type": "string"
+        },
+        "plcId": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Plcid",
+          "type": "string",
+          "x-utf8-max-bytes": 128
+        },
+        "sourceGeneration": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Sourcegeneration",
+          "type": "string",
+          "x-utf8-max-bytes": 128
+        }
+      },
+      "required": [
+        "kind",
+        "instanceId",
+        "plcId",
+        "dbNumber",
+        "sourceGeneration"
+      ],
+      "title": "TargetIn",
+      "type": "object"
+    },
+    "TargetOut": {
+      "properties": {
+        "dbNumber": {
+          "maximum": 65535.0,
+          "minimum": 1.0,
+          "title": "Dbnumber",
+          "type": "integer"
+        },
+        "instanceId": {
+          "title": "Instanceid",
+          "type": "string"
+        },
+        "kind": {
+          "const": "plc-facts-v2",
+          "title": "Kind",
+          "type": "string"
+        },
+        "plcId": {
+          "title": "Plcid",
+          "type": "string"
+        },
+        "sourceGeneration": {
+          "title": "Sourcegeneration",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "instanceId",
+        "plcId",
+        "dbNumber",
+        "sourceGeneration"
+      ],
+      "title": "TargetOut",
+      "type": "object"
+    }
+  },
+  "$id": "urn:aiis:acquisition-consumers:v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

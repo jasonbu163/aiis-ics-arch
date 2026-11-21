@@ -3,6 +3,7 @@
   "temperature": "Temperature Curve",
   "energy": "Energy Stats",
   "observation": {
+    "meter": "Meter",
     "configManagement": "Configuration",
     "dataManagement": "Data management",
     "processRecords": "Process samples",

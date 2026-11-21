@@ -40,7 +40,7 @@ async def identities(db, sample):
 
 
 async def insert_sample(db, sample, document, digest, observed, expires, now, source_type):
-    row = SampleV2(
+    statement = insert(SampleV2).values(
         instance_id=key(sample.instance_id), sample_id=key(sample.sample_id),
         plc_id=key(sample.plc_id), db_number=sample.db_number,
         group_id=key(sample.group_id) if sample.group_id is not None else None,
@@ -49,8 +49,7 @@ async def insert_sample(db, sample, document, digest, observed, expires, now, so
         source_seq=int(sample.source_seq), points_json=stored_points(document['points']), content_hash=digest,
         sampled_at=max(observed), stored_at=now, expires_at=min(expires),
     )
-    db.add(row)
-    await db.flush()
+    await db.execute(statement)
 
 
 async def advance_latest(db, sample, observed, expires):

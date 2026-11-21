@@ -14,7 +14,10 @@ from app.plc_facts.v2_domain import V2Error
 pytestmark = pytest.mark.no_db
 PREDECESSOR = '9d1f3a5c7e20'
 TASK_SUCCESSOR = 'ae20b4d6f831'
-SUCCESSOR = 'c9e1a3b5d720'
+RETIREMENT = 'c9e1a3b5d720'
+ACQUISITION = 'da6c32f8a701'
+RECEIPT_SEPARATION = 'd8f2a4c6b915'
+SUCCESSOR = 'e9f3b5d7c021'
 UUID = '00000000-0000-4000-8000-000000000001'
 NOW = datetime(2026, 11, 18, 12, 0)
 
@@ -31,6 +34,9 @@ class Result:
         return iter(self.value)
 
     def one(self):
+        return self.value
+
+    def all(self):
         return self.value
 
 
@@ -51,6 +57,19 @@ class SyncProbe:
         if 'alembic_version' in sql:
             assert 'FOR SHARE' in sql
             return Result(self.revisions)
+        if 'information_schema.COLUMNS' in sql:
+            return Result([
+                ("source_key", "varchar(64)", "NO", "utf8mb4_bin", None),
+                ("storage_identity", "varchar(64)", "NO", "utf8mb4_bin", None),
+                ("name", "varchar(128)", "YES", "utf8mb4_0900_ai_ci", None),
+                ("enabled", "tinyint(1)", "NO", None, "1"),
+                ("created_at", "datetime(6)", "NO", None, None),
+                ("updated_at", "datetime(6)", "NO", None, None),
+                ("deleted_at", "datetime(6)", "YES", None, None),
+            ])
+        if 'information_schema.STATISTICS' in sql:
+            return Result([("InnoDB", "PRIMARY", 0, 1, "source_key", None),
+                           ("InnoDB", "uq_obs_write_source_identity", 0, 1, "storage_identity", None)])
         assert '@@server_uuid' in sql and 'UTC_TIMESTAMP' in sql
         return Result(self.row)
 
@@ -61,7 +80,7 @@ class AsyncProbe(SyncProbe):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize('revision', ('7b9d1f3a5c7e', '8c0e2a4d6f18', PREDECESSOR, TASK_SUCCESSOR, SUCCESSOR))
+@pytest.mark.parametrize('revision', ('7b9d1f3a5c7e', '8c0e2a4d6f18', PREDECESSOR, TASK_SUCCESSOR, RETIREMENT, ACQUISITION, RECEIPT_SEPARATION, SUCCESSOR))
 async def test_facts_accepts_only_approved_exact_revision(revision, tmp_path):
     path = tmp_path / 'v2.json'
     config = SimpleNamespace(PLC_FACTS_V2_PROFILE_FILE=path)
@@ -83,7 +102,7 @@ def observation_document(revision):
 
 @pytest.mark.asyncio
 async def test_observation_exact_target_and_device_timing():
-    for revision in ('8c0e2a4d6f18', PREDECESSOR, TASK_SUCCESSOR):
+    for revision in ('8c0e2a4d6f18', PREDECESSOR, TASK_SUCCESSOR, RETIREMENT, ACQUISITION, RECEIPT_SEPARATION):
         with pytest.raises(ValueError, match='invalid target'):
             observation.parse_profile(observation_document(revision))
     document = observation_document(SUCCESSOR)

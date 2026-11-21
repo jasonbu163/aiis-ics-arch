@@ -3,13 +3,14 @@ File Path: /automation-world/semantic-mapping-agent/src/app/connection/component
 Description: Local API-first Backend connection bootstrap form.
 Main Features:
   - Edits the protocol, backend host, and port without database credentials
-  - Shows the derived base URL and emits explicit save and OpenAPI test intentions
+  - Shows connection status and derived addresses, and emits explicit save and test intentions
 -->
 <script setup lang="ts">
-import { ConsoleCard, ConsoleActionButton, StatusCapsule } from "@aw-ui";
+import { ConsoleCard, ConsoleActionButton, type CardHeaderStatus } from "@aw-ui";
 import { computed } from "vue";
 
 import type { LocaleMessages } from "../../../locales";
+import { formatBackendOpenApiBaseUrl } from "../api";
 import type { BackendConnectionProfile } from "../types";
 
 const profile = defineModel<BackendConnectionProfile>("profile", { required: true });
@@ -36,24 +37,51 @@ const baseUrl = computed(() => {
     ? `${profile.value.scheme}://${host}:${port}`
     : "—";
 });
+
+const openApiAddress = computed(() => {
+  if (props.testTarget) return props.testTarget;
+  try {
+    return `${formatBackendOpenApiBaseUrl(profile.value)}/openapi.json`;
+  } catch {
+    return "—";
+  }
+});
+
+const headerStatuses = computed<CardHeaderStatus[]>(() => {
+  const { labels, saveMessage, saveStatus, testMessage, testStatus } = props;
+  const test: CardHeaderStatus = {
+    id: "test",
+    label: testStatus === "failed" ? labels.openApiTestFailed : testMessage,
+    tone: testStatus === "failed" ? "danger" : testStatus === "connected" ? "success" : "neutral",
+  };
+  if (!saveMessage) return [test];
+
+  const save: CardHeaderStatus = {
+    id: "save",
+    label: saveStatus === "failed" ? labels.backendConnectionSaveFailed : saveMessage,
+    tone: saveStatus === "failed" ? "danger" : saveStatus === "saved" ? "success" : "warning",
+  };
+  return testStatus === "failed" && saveStatus !== "failed" ? [test, save] : [save, test];
+});
 </script>
 
 <template>
-  <ConsoleCard class="connection-panel" :title="props.labels.backendConnection">
-<template #actions><div class="action-row">
+  <ConsoleCard class="connection-panel" :title="props.labels.backendConnection" :header-statuses="headerStatuses" :status-overflow-label="props.labels.moreCardStatuses" :help="props.labels.backendConnectionHint" :help-label="props.labels.backendConnectionHelp" help-append-to="#sma-overlays">
+    <template #actions>
+      <div class="action-row">
         <ConsoleActionButton tone="secondary" native-type="button" :disabled="saving" @click="$emit('save')">
           {{ props.labels.saveBackendConnection }}
         </ConsoleActionButton>
         <ConsoleActionButton tone="primary" native-type="button" :disabled="saving || testing" @click="$emit('testOpenApi')">
           {{ testing ? props.labels.testingOpenApi : props.labels.testOpenApi }}
         </ConsoleActionButton>
-      </div></template>
+      </div>
+    </template>
 
-    <p v-if="saveMessage" class="connection-status" role="status"><StatusCapsule :label="saveMessage" :tone="saveStatus === 'failed' ? 'danger' : saveStatus === 'saved' ? 'success' : 'neutral'" /></p>
-    <p class="connection-status" role="status"><StatusCapsule :label="testMessage" :tone="testStatus === 'failed' ? 'danger' : testStatus === 'connected' ? 'success' : 'neutral'" /></p>
-    <p v-if="testTarget" class="hint test-address">{{ props.labels.openApiTestAddress }} <code>{{ testTarget }}</code></p>
+    <p v-if="saveStatus === 'failed' && saveMessage" class="warning" role="alert">{{ saveMessage }}</p>
+    <p v-if="testStatus === 'failed'" class="warning" role="alert">{{ testMessage }}</p>
 
-    <div class="form-grid">
+    <div class="form-grid connection-form">
       <label class="field">
         <span>{{ props.labels.backendScheme }}</span>
         <select v-model="profile.scheme" :disabled="saving">
@@ -73,12 +101,10 @@ const baseUrl = computed(() => {
         <span>{{ props.labels.backendBaseUrl }}</span>
         <input :value="baseUrl" type="text" readonly />
       </label>
+      <label class="field test-address">
+        <span>{{ props.labels.openApiTestAddress }}</span>
+        <input :value="openApiAddress" type="text" readonly />
+      </label>
     </div>
-
-    <p class="hint">{{ props.labels.backendConnectionHint }}</p>
   </ConsoleCard>
 </template>
-
-<style scoped>
-.test-address { overflow-wrap: anywhere; }
-</style>

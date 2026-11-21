@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createServer } from 'vite';
 import * as XLSX from 'xlsx';
+import { ID_INJECTION_KEY, ZINDEX_INJECTION_KEY } from 'element-plus';
 import vue from '@vitejs/plugin-vue';
 import { resolve } from 'node:path';
 import { createSSRApp, defineComponent, effectScope, proxyRefs, ssrContextKey } from 'vue';
@@ -83,7 +84,7 @@ test('backup uses the native UTF-8 save contract and file controls select withou
  const props={labels:getMessages('zh-CN'),operations:[],savedMaterials:[],selectedIdentities:[],missingSavedCount:0,busy:false,canSave:false,result:null,error:'',enabled:true,emit:(...event)=>events.push(event)};
  const materials=await setupHandlers(Materials,props);materials.openApiFileInput={click(){chooserClicks++;}};materials.chooseOpenApiFile();assert.equal(chooserClicks,2);
  const openapi=new File(['{}'],'source-api.json');materials.importOpenApiFile({target:{files:[openapi],value:'selected'}});assert.equal(materials.openApiFileName,openapi.name);assert.deepEqual(events,[['import-open-api',openapi]]);
- for(const locale of ['zh-CN','en-US']){const labels=getMessages(locale);const html=await renderToString(createSSRApp(Materials,{...props,labels}));assert.ok(html.includes(labels.localOpenApiImport));assert.ok(html.includes(labels.localConfigurationNoFileSelected));assert.match(html,/<button[^>]*type="button"/);assert.match(html,/class="facts-file-input"[^>]*type="file"/);}
+ for(const locale of ['zh-CN','en-US']){const labels=getMessages(locale);const html=await renderToString(createSSRApp(Materials,{...props,labels}).provide(ID_INJECTION_KEY,{prefix:1,current:0}).provide(ZINDEX_INJECTION_KEY,{current:0}));assert.ok(html.includes(labels.localOpenApiImport));assert.ok(html.includes(labels.localConfigurationNoFileSelected));assert.match(html,/<button[^>]*type="button"/);assert.match(html,/class="facts-file-input"[^>]*type="file"/);}
 }));
 test('real batch-dialog content renders create/update/unchanged/error keys for each resource in both locales',()=>fixture(async({server})=>{
  const {getMessages}=await server.ssrLoadModule('/src/locales/index.ts');const {default:Dialog}=await server.ssrLoadModule('/src/app/twin-facts/components/MappingBatchOperationsDialog.vue');
@@ -204,7 +205,7 @@ test('runtime diagnostics expose only applicable pause and stop controls in both
  const {default:Panel}=await server.ssrLoadModule('/src/app/twin-facts/components/ApiFirstMappingRuntimePanel.vue');
  for(const locale of ['zh-CN','en-US'])for(const status of ['idle','running','paused']){
   const labels=getMessages(locale),runtime={status,processedItems:2,successfulTransactions:1,failedTransactions:1,cursor:null,lastErrorCode:null,logs:[]};
-  const html=await renderToString(createSSRApp(Panel,{labels,runtime,busy:false,error:''}));
+  const html=await renderToString(createSSRApp(Panel,{labels,runtime,busy:false,error:''}).provide(ID_INJECTION_KEY,{prefix:1,current:0}).provide(ZINDEX_INJECTION_KEY,{current:0}));
   const buttons=html.match(/<button\b[^>]*>[\s\S]*?<\/button>/g) ?? [];
   const hasButton=label=>buttons.some(button=>button.includes(label));
   assert.ok(html.includes(labels.mappingDeliveryUnavailable));assert.equal(hasButton(labels.startRuntime),false);

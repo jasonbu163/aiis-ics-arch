@@ -3,6 +3,7 @@
   "temperature": "温度曲线",
   "energy": "能耗统计",
   "observation": {
+    "meter": "表计",
     "configManagement": "配置管理",
     "dataManagement": "数据管理",
     "processRecords": "过程样本",

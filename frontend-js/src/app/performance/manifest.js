@@ -1,4 +1,4 @@
-/** 通用实绩列表和管理员共享字段管理入口。 */
+/** 通用实绩列表和管理员字段管理入口。 */
 export const performanceModule = {
   name: 'performance', enabled: true,
   navigation: { titleKey: 'performance.title', icon: 'DataLine' }, order: 30,
@@ -11,5 +11,11 @@ export const performanceModule = {
     props: { module: 'performance' },
     meta: { titleKey: 'performance.workflow.sharedFieldSettings', pageId: 'performance.shared-fields',
       parentTitleKey: 'performance.title', requiresAdmin: true,
-      navigation: { visible: true, order: 20, icon: 'Setting' } } }]
+      navigation: { visible: true, order: 20, icon: 'Setting' } } },
+  { path: 'performance/local-fields', name: 'PerformanceLocalFields',
+    component: () => import('@/app/plan/views/local-fields/index.vue'),
+    props: { module: 'performance' },
+    meta: { titleKey: 'performance.workflow.fieldSettings', pageId: 'performance.local-fields',
+      parentTitleKey: 'performance.title', requiresAdmin: true,
+      navigation: { visible: true, order: 15, icon: 'Setting' } } }]
 }

@@ -12,7 +12,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.equipment_observation.api import routes
 from app.equipment_observation.profile import authenticate
-from app.equipment_observation.models import CardConfig, CurveGroup, EnergySample, HistorySample, LatestSnapshot, MetricConfig, MetricGroup, Receipt, SlotBinding
+from app.equipment_observation.models import CardConfig, CurveGroup, EnergyMetric, EnergyReceipt, EnergySample, HistorySample, LatestSnapshot, MetricConfig, MetricGroup, Receipt, SlotBinding
 from app.equipment_observation.services import energy_reads, ingest_v2, reads
 from core.deps import get_current_user
 from database import get_db
@@ -35,14 +35,15 @@ class AsyncSQLite:
 def app_and_db(monkeypatch):
     engine = create_engine('sqlite://', connect_args={'check_same_thread': False}, poolclass=StaticPool)
     statements = [
-        'CREATE TABLE equipment_metric_groups (group_key TEXT PRIMARY KEY, category TEXT NOT NULL, name_zh TEXT NOT NULL, name_en TEXT NOT NULL, enabled BOOLEAN NOT NULL, sort_order INTEGER NOT NULL)',
-        'CREATE TABLE equipment_metric_configs (metric_key TEXT PRIMARY KEY, source_group_key TEXT NOT NULL, category TEXT NOT NULL, name_zh TEXT NOT NULL, name_en TEXT NOT NULL, value_type TEXT NOT NULL, unit TEXT, decimals INTEGER)',
-        'CREATE TABLE equipment_metric_slot_bindings (target TEXT NOT NULL, group_key TEXT NOT NULL, slot_no INTEGER NOT NULL, metric_key TEXT NOT NULL, enabled BOOLEAN NOT NULL, list_visible BOOLEAN NOT NULL DEFAULT 0, list_order INTEGER, first_used_at DATETIME, PRIMARY KEY(target,group_key,slot_no))',
+        'CREATE TABLE observation_metric_groups (group_key TEXT PRIMARY KEY, category TEXT NOT NULL, name_zh TEXT NOT NULL, name_en TEXT NOT NULL, enabled BOOLEAN NOT NULL, sort_order INTEGER NOT NULL)',
+        'CREATE TABLE observation_metric_configs (metric_key TEXT PRIMARY KEY, source_group_key TEXT NOT NULL, category TEXT NOT NULL, name_zh TEXT NOT NULL, name_en TEXT NOT NULL, value_type TEXT NOT NULL, unit TEXT, decimals INTEGER)',
+        'CREATE TABLE observation_metric_slot_bindings (target TEXT NOT NULL, group_key TEXT NOT NULL, slot_no INTEGER NOT NULL, metric_key TEXT NOT NULL, enabled BOOLEAN NOT NULL, list_visible BOOLEAN NOT NULL DEFAULT 0, list_order INTEGER, first_used_at DATETIME, PRIMARY KEY(target,group_key,slot_no))',
         'CREATE TABLE equipment_card_configs (card_key TEXT PRIMARY KEY, page_key TEXT NOT NULL, title_zh TEXT NOT NULL, title_en TEXT NOT NULL, enabled BOOLEAN NOT NULL, sort_order INTEGER NOT NULL, items JSON NOT NULL)',
         'CREATE TABLE monitor_curve_group_configs (curve_group_key TEXT PRIMARY KEY, category TEXT NOT NULL, title_zh TEXT NOT NULL, title_en TEXT NOT NULL, enabled BOOLEAN NOT NULL, sort_order INTEGER NOT NULL, series JSON NOT NULL)',
-        'CREATE TABLE metric_ingest_receipts (id INTEGER PRIMARY KEY AUTOINCREMENT, target TEXT NOT NULL, producer_id TEXT NOT NULL, event_id TEXT NOT NULL, request_digest BLOB NOT NULL, outcome TEXT NOT NULL, processed_at DATETIME NOT NULL, result_record_id INTEGER, mapping_id TEXT, mapping_revision TEXT, source_refs JSON, task_evidence JSON, contract_version TEXT NOT NULL, result_version TEXT NOT NULL, result_detail JSON, UNIQUE(target,producer_id,event_id))',
-        'CREATE TABLE equipment_status_main (id INTEGER PRIMARY KEY AUTOINCREMENT, equipment_id TEXT NOT NULL, task_no TEXT NOT NULL, observed_at DATETIME NOT NULL, quality TEXT NOT NULL, source_sample_key BLOB NOT NULL, ingest_receipt_id INTEGER NOT NULL, local_values JSON NOT NULL, remark TEXT, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, UNIQUE(equipment_id,task_no))',
-        'CREATE TABLE process_monitor_main (id INTEGER PRIMARY KEY AUTOINCREMENT, equipment_id TEXT NOT NULL, task_no TEXT NOT NULL, observed_at DATETIME NOT NULL, quality TEXT NOT NULL, source_sample_key BLOB NOT NULL, ingest_receipt_id INTEGER NOT NULL, local_values JSON NOT NULL, remark TEXT, review_mark TEXT, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL)',
+        'CREATE TABLE observation_ingest_receipts (id INTEGER PRIMARY KEY AUTOINCREMENT, target TEXT NOT NULL, producer_id TEXT NOT NULL, event_id TEXT NOT NULL, request_digest BLOB NOT NULL, outcome TEXT NOT NULL, processed_at DATETIME NOT NULL, result_record_id INTEGER, mapping_id TEXT, mapping_revision TEXT, source_refs JSON, task_evidence JSON, contract_version TEXT NOT NULL, result_version TEXT NOT NULL, result_detail JSON, UNIQUE(target,producer_id,event_id))',
+        'CREATE TABLE energy_ingest_receipts (id INTEGER PRIMARY KEY AUTOINCREMENT, target TEXT NOT NULL, producer_id TEXT NOT NULL, event_id TEXT NOT NULL, request_digest BLOB NOT NULL, outcome TEXT NOT NULL, processed_at DATETIME NOT NULL, result_record_id INTEGER, mapping_id TEXT, mapping_revision TEXT, source_refs JSON, task_evidence JSON, contract_version TEXT NOT NULL, result_version TEXT NOT NULL, result_detail JSON, UNIQUE(target,producer_id,event_id))',
+        'CREATE TABLE equipment_main (id INTEGER PRIMARY KEY AUTOINCREMENT, equipment_id TEXT NOT NULL, task_no TEXT NOT NULL, observed_at DATETIME NOT NULL, quality TEXT NOT NULL, source_sample_key BLOB NOT NULL, ingest_receipt_id INTEGER NOT NULL, local_values JSON NOT NULL, remark TEXT, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, UNIQUE(equipment_id,task_no))',
+        'CREATE TABLE monitor_main (id INTEGER PRIMARY KEY AUTOINCREMENT, equipment_id TEXT NOT NULL, task_no TEXT NOT NULL, observed_at DATETIME NOT NULL, quality TEXT NOT NULL, source_sample_key BLOB NOT NULL, ingest_receipt_id INTEGER NOT NULL, local_values JSON NOT NULL, remark TEXT, review_mark TEXT, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL)',
         'CREATE TABLE energy_metric_configs (meter_id TEXT NOT NULL,group_key TEXT NOT NULL,metric_key TEXT NOT NULL,slot_no INTEGER NOT NULL,name_zh TEXT NOT NULL,name_en TEXT NOT NULL,value_type TEXT NOT NULL,quantity_key TEXT NOT NULL,measurement_mode TEXT NOT NULL,unit TEXT,decimals INTEGER,enabled BOOLEAN NOT NULL,list_visible BOOLEAN NOT NULL DEFAULT 0,list_order INTEGER,rules JSON NOT NULL,first_used_at DATETIME,PRIMARY KEY(meter_id,group_key,metric_key), UNIQUE(meter_id,group_key,slot_no))',
         'CREATE TABLE energy_consumption_main (id INTEGER PRIMARY KEY AUTOINCREMENT,meter_id TEXT NOT NULL,group_key TEXT NOT NULL,observed_at DATETIME NOT NULL,quality TEXT NOT NULL,interval_start_at DATETIME,interval_end_at DATETIME,ingest_receipt_id INTEGER NOT NULL,local_values JSON NOT NULL,remark TEXT,review_mark TEXT,created_at DATETIME NOT NULL,updated_at DATETIME NOT NULL)',
     ]
@@ -221,7 +222,7 @@ async def test_missing_history_events_make_real_breaks_and_late_samples_keep_obs
         older = session.execute(select(HistorySample).where(HistorySample.observed_at == datetime(2026,11,17,12,0,0))).scalar_one()
         changed = await client.patch(f'/monitor/admin/history-samples/{older.id}', json={'remark':'late management change'})
         assert changed.status_code == 200, changed.text
-        session.execute(text('UPDATE process_monitor_main SET updated_at=:stamp WHERE id=:id'),
+        session.execute(text('UPDATE monitor_main SET updated_at=:stamp WHERE id=:id'),
                         {'stamp':datetime(2026,11,17,13), 'id':older.id})
         session.commit()
         query = {'equipmentId':'line','category':'temperature','taskNo':'000042',
@@ -354,6 +355,8 @@ async def test_meter_configuration_ingest_and_separate_statistics(app_and_db):
             assert result.status_code == 200, result.text
             receipts.append(result.json()['data'])
         assert (await client.post('/integration/energy/samples', json=samples[-1])).json()['data'] == receipts[-1]
+        assert session.execute(select(Receipt)).scalars().all() == []
+        assert {row.target for row in session.execute(select(EnergyReceipt)).scalars()} == {'energy'}
         changed = energy('m2-2','meter2','09:00:00',{'reading':4},'08:30:00','09:00:00')
         assert (await client.post('/integration/energy/samples', json=changed)).status_code == 409
         params = {'groupKey':'electricity','metricKey':'reading','from':'2026-11-17T08:00:00+08:00',
@@ -400,3 +403,76 @@ async def test_disabling_group_hides_cards_and_curves_without_stopping_history(a
         curves = (await client.get('/monitor/history-curves', params=query)).json()['data']
         assert cards['cards'][0]['items'][0]['value'] == 0
         assert curves['groups'][0]['series'][0]['points'][0]['value'] == 0
+
+
+@pytest.mark.asyncio
+async def test_admin_slot_query_supports_all_optional_filters(app_and_db):
+    app, session, profile, _ = app_and_db
+    profile['devices'] = {}
+    profile['readScopes'] = {}
+    used_at = datetime(2026, 11, 20, 10, 15, 30)
+    slot = session.get(SlotBinding, ('history', 'heatZone1', 7))
+    slot.enabled = False
+    slot.first_used_at = used_at
+    session.commit()
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url='http://test/api/v1') as client:
+        path = '/equipment/metric-slot-bindings'
+
+        async def read(params):
+            res = await client.get(path, params=params)
+            assert res.status_code == 200
+            return res.json()['data']
+
+        all_bindings = await read({})
+        assert all_bindings['remaining'] is None
+        assert [(row['target'], row['groupKey'], row['slotNo']) for row in all_bindings['items']] == [
+            ('history', 'heatZone1', 7),
+            ('latest', 'driveRoll1', 1), ('latest', 'heatZone1', 1), ('latest', 'production', 1),
+        ]
+        disabled, *rest = all_bindings['items']
+        assert disabled['enabled'] is False and disabled['firstUsedAt'] == '2026-11-20T10:15:30+08:00'
+        assert all(row['firstUsedAt'] is None for row in rest)
+        assert await read({'target': 'latest'}) == {'items': rest, 'remaining': None}
+        same_group = [row for row in all_bindings['items'] if row['groupKey'] == 'heatZone1']
+        assert await read({'groupKey': 'heatZone1'}) == {'items': same_group, 'remaining': None}
+        assert await read({'target': 'history', 'groupKey': 'heatZone1'}) == {'items': [disabled], 'remaining': 99}
+        assert await read({'target': 'history', 'groupKey': 'production'}) == {'items': [], 'remaining': 100}
+        for params in ({'target': ''}, {'target': 'all'}, {'groupKey': ''}, {'groupKey': ' heatZone1'}):
+            assert (await client.get(path, params=params)).status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_admin_energy_config_query_respects_authorized_meter_scope(app_and_db):
+    app, session, profile, _ = app_and_db
+    for meter, group, slot, key, enabled in [
+        ('meter3', 'power', 1, 'reading', True),
+        ('meter2', 'power', 1, 'reading', False),
+        ('meter1', 'water', 2, 'another', True),
+        ('meter1', 'power', 1, 'reading', True),
+    ]:
+        session.add(EnergyMetric(meter_id=meter, group_key=group, metric_key=key, slot_no=slot,
+            name_zh=key, name_en=key, value_type='number', quantity_key='energy', measurement_mode='cumulative',
+            unit='kWh', enabled=enabled, rules={}))
+    session.commit()
+    profile['meters']['meter3'] = {'meterId': 'meter3', 'nameZh': '表3', 'nameEn': 'Meter 3'}
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url='http://test/api/v1') as client:
+        path = '/energy/metric-configs'
+        response = await client.get(path)
+        assert response.status_code == 200
+        rows = response.json()['data']
+        assert [(row['meterId'], row['groupKey'], row['enabled']) for row in rows] == [
+            ('meter1', 'power', True), ('meter1', 'water', True), ('meter2', 'power', False),
+        ]
+        assert (await client.get(path, params={'groupKey': 'power'})).json()['data'] == [rows[0], rows[2]]
+        assert (await client.get(path, params={'meterId': 'meter2', 'groupKey': 'power'})).json()['data'] == [rows[2]]
+        assert (await client.get(path, params={'meterId': 'meter1', 'groupKey': ''})).json()['data'] == rows[:2]
+        for meter_id in ('', 'meter3'):
+            assert (await client.get(path, params={'meterId': meter_id})).status_code == 403
+        profile['meterReadScopes']['admin'] = []
+        assert (await client.get(path)).json()['data'] == []
+        assert (await client.get(path, params={'meterId': 'meter1'})).status_code == 403
+        app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(role='operator')
+        assert (await client.get(path)).status_code == 403
+        assert (await client.get('/equipment/metric-slot-bindings')).status_code == 403
+        app.dependency_overrides.pop(get_current_user)
+        assert (await client.get(path, headers={'Authorization': 'Bearer machine-fixture'})).status_code == 401

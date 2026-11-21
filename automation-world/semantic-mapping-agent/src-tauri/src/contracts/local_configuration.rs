@@ -15,6 +15,8 @@ pub struct ConfigurationDocument {
     pub mapping_value_rules: Vec<Value>,
     pub mappings: Vec<Value>,
     pub source_metadata: Vec<SourceMetadata>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub acquisition_loopback: Option<super::acquisition::LoopbackConfig>,
 }
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -47,6 +49,7 @@ impl Default for ConfigurationDocument {
             mapping_value_rules: vec![],
             mappings: vec![],
             source_metadata: vec![],
+            acquisition_loopback: None,
         }
     }
 }

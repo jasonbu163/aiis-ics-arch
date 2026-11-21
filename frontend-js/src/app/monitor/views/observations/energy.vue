@@ -10,7 +10,8 @@
           <el-option v-for="item in groups" :key="item" :value="item" :label="item" />
         </el-select>
         <el-select v-model="metric" :placeholder="t('monitor.observation.selectMetric')">
-          <el-option v-for="item in groupMetrics" :key="item.metricKey" :value="item.metricKey" :label="locale.startsWith('en') ? item.nameEn : item.nameZh" />
+          <el-option v-for="item in groupMetrics" :key="item.metricKey" :value="item.metricKey"
+            :label="t('equipment.observation.metricOptionLabel', { name: locale.startsWith('en') ? item.nameEn : item.nameZh, key: item.metricKey })" />
         </el-select>
         <el-date-picker v-model="range" type="datetimerange" value-format="YYYY-MM-DD HH:mm:ss" format="YYYY-MM-DD HH:mm:ss" :range-separator="'–'" />
         <ActionButton variant="primary" @click="load">{{ t('equipment.observation.search') }}</ActionButton>

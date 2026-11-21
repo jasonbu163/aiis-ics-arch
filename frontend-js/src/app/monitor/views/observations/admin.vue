@@ -1,30 +1,57 @@
-<!-- 过程曲线配置与历史记录管理。 -->
+<!-- 过程监控曲线和能耗指标配置分类、筛选与表单。 -->
 <template>
-  <div class="page-layout">
-    <BaseCard :title="t('monitor.observation.management')">
-      <el-tabs v-model="active">
-        <el-tab-pane :label="t('equipment.observation.curveConfig')" name="curves">
-          <div class="table-actions">
-            <ActionButton variant="primary" @click="open()">{{ t('equipment.observation.add') }}</ActionButton>
-            <ActionButton @click="columns.reset">{{ t('equipment.observation.resetWidths') }}</ActionButton>
-          </div>
-          <el-table :key="columns.version.value" :data="rows" border @header-dragend="columns.onHeaderDragEnd">
-            <el-table-column prop="curveGroupKey" :label="t('equipment.observation.key')" :width="columns.widths.curveGroupKey" :min-width="140" />
-            <el-table-column prop="category" :label="t('equipment.observation.category')" :width="columns.widths.category" :min-width="110" />
-            <el-table-column prop="titleZh" :label="t(locale.startsWith('en') ? 'equipment.observation.titleEn' : 'equipment.observation.titleZh')" :width="columns.widths.titleZh" :min-width="160">
-              <template #default="{ row }">{{ locale.startsWith('en') ? row.titleEn : row.titleZh }}</template>
-            </el-table-column>
-            <el-table-column prop="enabled" :label="t('equipment.observation.enabled')" :width="columns.widths.enabled" :min-width="100" />
-            <el-table-column :label="t('equipment.observation.actions')" width="120">
-              <template #default="{ row }"><div class="row-actions"><ActionButton size="small" variant="row" @click="open(row)">{{ t('equipment.observation.edit') }}</ActionButton></div></template>
-            </el-table-column>
-          </el-table>
-        </el-tab-pane>
-        <el-tab-pane :label="t('monitor.observation.energyConfig')" name="energy">
-          <EnergyAdmin v-if="active === 'energy'" kind="config" />
-        </el-tab-pane>
-      </el-tabs>
+  <div class="page-layout config-page">
+    <BaseCard :title="t('monitor.observation.management')" compact>
+      <el-radio-group :model-value="active" class="card-action-segmented"
+        :aria-label="t('monitor.observation.management')" @change="selectTab">
+        <el-radio-button value="curves">{{ tr('curveConfig') }}</el-radio-button>
+        <el-radio-button value="energy">{{ t('monitor.observation.energyConfig') }}</el-radio-button>
+      </el-radio-group>
     </BaseCard>
+    <BaseCard v-if="active === 'curves'" :title="tr('curveConfig')">
+      <template #actions>
+        <div class="table-actions">
+          <ActionButton variant="primary" :disabled="saving || loading || failed" @click="open()">{{ tr('add') }}</ActionButton>
+          <el-tooltip :content="tr('resetWidths')" placement="top">
+            <ActionButton @click="columns.reset">{{ tr('resetWidthsButton') }}</ActionButton>
+          </el-tooltip>
+        </div>
+      </template>
+      <el-form class="config-toolbar" label-position="top" @submit.prevent="search">
+        <el-form-item :label="tr('category')">
+          <el-select v-model="draft.category" clearable :placeholder="tr('allConfigs')">
+            <el-option v-for="(label, category) in categories" :key="category" :value="category" :label="t(label)" />
+          </el-select>
+        </el-form-item>
+        <el-form-item class="config-toolbar__keyword" :label="tr('configKeyword')"><el-input v-model="draft.keyword" clearable /></el-form-item>
+        <el-form-item class="config-toolbar__actions">
+          <div class="table-actions">
+            <ActionButton variant="primary" @click="search">{{ tr('search') }}</ActionButton>
+            <ActionButton @click="resetFilters">{{ t('common.reset') }}</ActionButton>
+          </div>
+        </el-form-item>
+      </el-form>
+      <el-alert v-if="failed" type="error" show-icon :closable="false" :title="tr('loadFailed')" />
+      <div v-else class="config-table" v-loading="loading">
+        <el-table :key="columns.version.value" :data="visibleRows" :empty-text="emptyText" border @header-dragend="columns.onHeaderDragEnd">
+        <el-table-column prop="curveGroupKey" :label="t('equipment.observation.key')" :width="columns.widths.curveGroupKey" :min-width="140" />
+        <el-table-column prop="category" :label="t('equipment.observation.category')" :width="columns.widths.category" :min-width="110">
+            <template #default="{ row }">{{ t(categories[row.category]) }}</template>
+          </el-table-column>
+        <el-table-column prop="titleZh" :label="t(locale.startsWith('en') ? 'equipment.observation.titleEn' : 'equipment.observation.titleZh')" :width="columns.widths.titleZh" :min-width="160">
+          <template #default="{ row }">{{ locale.startsWith('en') ? row.titleEn : row.titleZh }}</template>
+        </el-table-column>
+        <el-table-column prop="series" :label="tr('items')" :width="columns.widths.series" :min-width="160">
+            <template #default="{ row }">{{ row.series.map(metricLabel).join(' / ') || '—' }}</template>
+          </el-table-column>
+          <el-table-column prop="enabled" :label="t('equipment.observation.enabled')" :width="columns.widths.enabled" :min-width="100" />
+        <el-table-column :label="t('equipment.observation.actions')" width="120">
+          <template #default="{ row }"><div class="row-actions"><ActionButton size="small" variant="row" @click="open(row)">{{ t('equipment.observation.edit') }}</ActionButton></div></template>
+        </el-table-column>
+        </el-table>
+      </div>
+    </BaseCard>
+    <EnergyAdmin v-show="active === 'energy'" kind="config" :active="active === 'energy'" />
     <el-dialog v-model="dialog" :title="t(editing ? 'equipment.observation.edit' : 'equipment.observation.add')"
       class="standard-form-dialog" width="min(680px, 94vw)">
       <el-form label-position="top">
@@ -45,7 +72,7 @@
             <div v-for="(item, index) in form.series" :key="index" class="item-row">
               <el-select v-model="item.metricKey" filterable>
                 <el-option v-for="metric in available" :key="metric.metricKey" :value="metric.metricKey"
-                  :label="locale.startsWith('en') ? metric.nameEn : metric.nameZh" />
+                  :label="t('equipment.observation.metricOptionLabel', { name: locale.startsWith('en') ? metric.nameEn : metric.nameZh, key: metric.metricKey })" />
               </el-select>
               <el-switch v-model="item.enabled" />
               <ActionButton size="small" @click="form.series.splice(index, 1)">{{ t('equipment.observation.remove') }}</ActionButton>
@@ -55,15 +82,17 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <ActionButton @click="dialog = false">{{ t('equipment.observation.cancel') }}</ActionButton>
-        <ActionButton variant="primary" :loading="saving" @click="save">{{ t('equipment.observation.save') }}</ActionButton>
+        <div class="core-dialog-footer">
+          <ActionButton @click="dialog = false">{{ t('equipment.observation.cancel') }}</ActionButton>
+          <ActionButton variant="primary" :loading="saving" @click="save">{{ t('equipment.observation.save') }}</ActionButton>
+        </div>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ActionButton from '@/components/common/ActionButton.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
@@ -73,11 +102,18 @@ import { metrics } from '@/app/equipment/api/observations'
 import { curves, createCurve, updateCurve } from '../../api/observations'
 
 const { t, locale } = useI18n()
+const tr = key => t(`equipment.observation.${key}`)
+const categories = { temperature: 'equipment.temperature', drive: 'equipment.drive', cleaning: 'equipment.observation.cleaning' }
 const columns = useTableColumnWidths('observation.curves', {
   curveGroupKey: { width: 180, minWidth: 140 }, category: { width: 130, minWidth: 110 },
-  titleZh: { width: 220, minWidth: 160 }, enabled: { width: 120, minWidth: 100 }
+  titleZh: { width: 220, minWidth: 160 }, series: { width: 210, minWidth: 160 }, enabled: { width: 120, minWidth: 100 }
 })
 const active = ref('curves')
+const draft = reactive({ category: '', keyword: '' })
+const submitted = ref({ ...draft })
+const loading = ref(false)
+const failed = ref(false)
+let generation = 0
 const rows = ref([])
 const metricRows = ref([])
 const dialog = ref(false)
@@ -85,30 +121,124 @@ const editing = ref(false)
 const saving = ref(false)
 const form = reactive({})
 const available = computed(() => metricRows.value.filter(metric => metric.category === form.category && metric.valueType === 'number'))
+const metricsByKey = computed(() => new Map(metricRows.value.map(metric => [metric.metricKey, metric])))
+function metricLabel(item) {
+  const metric = metricsByKey.value.get(item.metricKey)
+  return (locale.value.startsWith('en') ? metric?.nameEn : metric?.nameZh) || item.metricKey
+}
+const visibleRows = computed(() => {
+  const keyword = submitted.value.keyword.toLowerCase()
+  return rows.value.filter(row => !keyword || [row.curveGroupKey, row.titleZh, row.titleEn]
+    .some(value => value?.toLowerCase().includes(keyword)))
+})
+const emptyText = computed(() => loading.value ? t('common.loading') :
+  tr(Object.values(submitted.value).some(Boolean) ? 'noMatchingConfigs' : 'noConfigs'))
+function selectTab(tab) {
+  if (active.value === tab) return
+  generation++
+  dialog.value = false
+  Object.assign(draft, submitted.value)
+  active.value = tab
+  if (tab === 'curves') load()
+}
+function search() {
+  dialog.value = false
+  submitted.value = { ...draft, keyword: draft.keyword.trim() }
+  load()
+}
+function resetFilters() { Object.assign(draft, { category: '', keyword: '' }); search() }
 function open(row) {
+  if (saving.value || loading.value || failed.value) return
   editing.value = !!row
   for (const key of Object.keys(form)) delete form[key]
   Object.assign(form, row ? JSON.parse(JSON.stringify(row)) : {
-    curveGroupKey: '', category: 'temperature', titleZh: '', titleEn: '', enabled: true, sortOrder: 0, series: []
+    curveGroupKey: '', category: submitted.value.category || 'temperature', titleZh: '', titleEn: '', enabled: true, sortOrder: 0, series: []
   })
   dialog.value = true
 }
-async function load() { [rows.value, metricRows.value] = await Promise.all([curves(), metrics()]) }
+async function load() {
+  const id = ++generation
+  loading.value = true
+  failed.value = false
+  try {
+    const [curveRows, definitions] = await Promise.all([curves({ category: submitted.value.category || undefined }), metrics()])
+    if (id !== generation) return
+    rows.value = curveRows
+    metricRows.value = definitions
+  } catch {
+    if (id === generation) failed.value = true
+  } finally {
+    if (id === generation) loading.value = false
+  }
+}
 async function save() {
+  if (!dialog.value || saving.value) return
   saving.value = true
   try {
     const payload = JSON.parse(JSON.stringify(form))
     if (editing.value) { delete payload.curveGroupKey; await updateCurve(form.curveGroupKey, payload) }
     else await createCurve(payload)
     dialog.value = false
-    await load()
+    if (active.value === 'curves') await load()
   } finally { saving.value = false }
 }
 onMounted(load)
+onBeforeUnmount(() => { generation++; active.value = null; dialog.value = false })
 </script>
 
 <style scoped>
+.config-page { display: flex; flex-direction: column; gap: var(--space-lg); min-width: 0; container: observation-config / inline-size; }
+.config-page > :deep(.base-card) { height: auto; min-width: 0; }
+.config-page :deep(.base-card__header) { flex-wrap: wrap; padding-block: 10px; }
+.config-page :deep(.card-action-segmented.el-radio-group) { flex-wrap: wrap; height: auto; }
+.config-toolbar {
+  --config-card-inset: var(--space-lg);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 4px 16px;
+  margin: 0 calc(-1 * var(--config-card-inset)) 16px;
+  padding-inline: var(--config-card-inset);
+  border-bottom: 1px solid var(--border-secondary);
+}
+.config-toolbar :deep(.el-form-item) { flex: 0 1 180px; min-width: 0; }
+.config-toolbar :deep(.config-toolbar__keyword) { flex: 1 1 180px; }
+.config-toolbar :deep(.config-toolbar__actions) { flex: 0 1 auto; margin-inline-start: auto; max-width: 100%; }
+@media (max-width: 768px) {
+  .config-toolbar { --config-card-inset: 18px; }
+}
+@container observation-config (max-width: 300px) {
+  .config-toolbar { --config-card-inset: 8px; }
+}
+.config-toolbar :deep(.el-input), .config-toolbar :deep(.el-select) { width: 100%; }
+.config-table { min-width: 0; min-height: 60px; }
 .item-list { display: grid; gap: 8px; width: 100%; }
 .item-row { display: flex; align-items: center; gap: 10px; }
 .item-row .el-select { flex: 1; }
+
+@container observation-config (max-width: 300px) {
+  .config-page :deep(.base-card__header), .config-page :deep(.base-card__body) { padding-inline: 8px; }
+  .config-page :deep(.base-card__title) { white-space: normal; overflow-wrap: anywhere; }
+  .config-page :deep(.base-card__actions) { flex: 1 1 100%; min-width: 0; justify-content: flex-start; }
+  .config-page :deep(.table-actions) { max-width: 100%; min-width: 0; justify-content: flex-start; }
+  .config-page :deep(.table-actions .action-button) { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+  .config-page :deep(.card-action-segmented.el-radio-group) { max-width: 100%; }
+  .config-page :deep(.card-action-segmented .el-radio-button),
+  .config-page :deep(.card-action-segmented .el-radio-button__inner) { min-width: 0; max-width: 100%; }
+  .config-page :deep(.card-action-segmented .el-radio-button__inner) {
+    height: auto; min-height: 26px; white-space: normal; overflow-wrap: anywhere;
+  }
+}
+@media (max-width: 768px) {
+  /* 展开侧栏时，为绝对定位的多行顶栏预留空间。 */
+  @container observation-config (max-width: 300px) {
+    .config-page > :deep(.base-card:first-child) { margin-block-start: 56px; }
+  }
+  @container observation-config (max-width: 250px) {
+    .config-page > :deep(.base-card:first-child) { margin-block-start: 108px; }
+  }
+  @container observation-config (max-width: 200px) {
+    .config-page > :deep(.base-card:first-child) { margin-block-start: 160px; }
+  }
+}
 </style>

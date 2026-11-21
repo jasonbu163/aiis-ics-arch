@@ -3,9 +3,9 @@
   <div class="page-layout">
     <BaseCard :title="$t(route.meta.titleKey)" v-loading="loading">
       <div class="curve-toolbar">
-        <el-select v-model="equipment" :placeholder="t('equipment.observation.selectDevice')" filterable>
+        <el-select v-model="equipment" :placeholder="t('equipment.observation.selectDeviceOrSource')" filterable>
           <el-option v-for="device in devices" :key="device.equipmentId" :value="device.equipmentId"
-            :label="locale.startsWith('en') ? device.nameEn : device.nameZh" />
+            :label="sourceLabel(device, locale.startsWith('en') ? device.nameEn : device.nameZh)" />
         </el-select>
         <el-input v-model="task" clearable :placeholder="t('equipment.observation.taskNo')" />
         <el-date-picker v-model="range" type="datetimerange" value-format="YYYY-MM-DD HH:mm:ss"
@@ -30,6 +30,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import ActionButton from '@/components/common/ActionButton.vue'
+import { sourceLabel } from '@/app/equipment/components/observations/columnModel'
 import BaseCard from '@/components/common/BaseCard.vue'
 import { shanghaiInputToRfc3339 } from '@/utils/date'
 import CurveChart from '../../components/observations/CurveChart.vue'

@@ -1,10 +1,11 @@
 /** SMA配置IPC门面：Rust/SQLite唯一权威；不自动读旧localStorage或远端配置。 */
+import type { LoopbackConfig } from "./acquisition";
 import { shallowRef } from "vue";
 import { invokeCommand, isTauriRuntime } from "../../tauri";
 import type { BackendConnectionProfile, BackendOpenApiOperation } from "../../connection/types";
 import type { ApiMaterialConfiguration, TargetApiConfiguration, MappingValueRuleConfiguration, MappingConfiguration, ConfigurationImportPreview } from "../types";
 export interface SourceMetadata { sourceKey: string; factName: string; dataType: string; factKind: string | null; sourceLocator: string; definitionVersion: string | null }
-export interface ConfigurationDocument { connection: BackendConnectionProfile; catalog: (BackendOpenApiOperation & { sourceLocator: string })[]; materials: ApiMaterialConfiguration[]; targetApis: TargetApiConfiguration[]; mappingValueRules: MappingValueRuleConfiguration[]; mappings: MappingConfiguration[]; sourceMetadata: SourceMetadata[] }
+export interface ConfigurationDocument { connection: BackendConnectionProfile; catalog: (BackendOpenApiOperation & { sourceLocator: string })[]; materials: ApiMaterialConfiguration[]; targetApis: TargetApiConfiguration[]; mappingValueRules: MappingValueRuleConfiguration[]; mappings: MappingConfiguration[]; sourceMetadata: SourceMetadata[]; acquisitionLoopback?: LoopbackConfig }
 export interface ConfigurationSnapshot { schemaVersion: number; revision: number; updatedAt: string; document: ConfigurationDocument }
 export interface ChangeIntent { kind: string; resource: string; id: string | null; payload: unknown }
 export interface LocalImportPreview extends ConfigurationImportPreview { token: string; expectedRevision: number; deletedKeys: string[] }

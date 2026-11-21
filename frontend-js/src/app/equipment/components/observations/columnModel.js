@@ -10,3 +10,8 @@ export function metricValue(row, key) {
   const item = row.values?.find(value => value.metricKey === key)
   return item ? String(item.value) : '—'
 }
+
+export function sourceLabel(row, fallback) {
+  if (!row.sourceKey) return fallback
+  return row.sourceName && row.sourceName !== row.sourceKey ? `${row.sourceName} (${row.sourceKey})` : row.sourceKey
+}

@@ -1,7 +1,10 @@
 <!-- CU 私有工作台：共用宿主主题与最近有效方案，同屏组合公共组件和私有样例。 -->
 <template>
   <ElConfigProvider :locale="locale === 'zh-CN' ? zhCn : en">
-    <AgentLayout :style="previewVariables" :theme="theme" :sidebar-hidden="sidebarHidden">
+    <Teleport to="body">
+      <div id="cu-page-sample-overlays" class="aw-ui aw-ui--dense" :data-aw-theme="theme" :style="previewVariables"></div>
+    </Teleport>
+    <AgentLayout class="aw-ui--dense" :style="previewVariables" :theme="theme" :sidebar-hidden="sidebarHidden">
       <template #sidebar><AgentSidebar :items="navigation" :active-id="section" :brand="t('workbench.brand')" :detail="t('workbench.footer')" @select="section = $event" /></template>
       <template #topbar>
         <AgentTopbar :title="t('workbench.title')" :subtitle="t('workbench.subtitle')" :sidebar-label="t('workbench.sidebar')" :sidebar-hidden="sidebarHidden" @toggle-sidebar="sidebarHidden = !sidebarHidden">
@@ -14,8 +17,10 @@
         </AgentTopbar>
       </template>
       <div class="workbench-page">
-        <PageSamples v-if="section === 'pages'" :theme="theme" :preview-variables="previewVariables" />
-        <div class="workbench-notice"><strong>{{ t('workbench.sample') }}</strong><span>{{ t('workbench.sampleNote') }}</span></div>
+        <KeepAlive>
+          <PageSamples v-if="pageScenario" :scenario="pageScenario" table-id="page-samples" @recover="section = 'pages-normal'" />
+        </KeepAlive>
+        <div v-if="!pageScenario" class="workbench-notice"><strong>{{ t('workbench.sample') }}</strong><span>{{ t('workbench.sampleNote') }}</span></div>
         <p v-if="refreshEvents" class="workbench-feedback" role="status">{{ t('workbench.refreshSample', { count: refreshEvents }) }}</p>
         <ConsoleCard v-if="section === 'shell'" :title="t('workbench.shellTitle')" :icon="Monitor">
           <p>{{ t('workbench.shellNote') }}</p>
@@ -35,8 +40,10 @@
           <template #footer>{{ t('workbench.footer') }}</template>
         </ConsoleCard>
         <ConsoleCard v-if="section === 'components'" :title="t('workbench.componentTitle')" :icon="Grid">
-          <template #tools><div class="workbench-row"><StatusCapsule v-for="item in tones" :key="item" :tone="item" :label="t(`workbench.${item}`)" /></div></template>
-          <div class="workbench-row"><ConsoleActionButton tone="primary" :label="t('workbench.primary')" @click="actionShown = true" /><ConsoleActionButton :label="t('workbench.secondary')" @click="actionShown = true" /><ConsoleActionButton disabled :label="t('workbench.disabled')" /><ConsoleActionButton size="small" :label="t('workbench.reset')" @click="resetPreview" /></div>
+          <div class="workbench-columns">
+            <div class="workbench-row"><StatusCapsule v-for="item in tones" :key="item" :tone="item" :label="t(`workbench.${item}`)" /></div>
+            <div class="workbench-row"><ConsoleActionButton tone="primary" :label="t('workbench.primary')" @click="actionShown = true" /><ConsoleActionButton :label="t('workbench.secondary')" @click="actionShown = true" /><ConsoleActionButton disabled :label="t('workbench.disabled')" /><ConsoleActionButton size="small" :label="t('workbench.reset')" @click="resetPreview" /></div>
+          </div>
           <p v-if="actionShown" class="workbench-feedback" role="status">{{ t('workbench.result') }}</p>
         </ConsoleCard>
         <div v-if="section === 'parameters'" class="design-profile-layout">
@@ -66,7 +73,7 @@
                 <p v-if="actionShown" class="workbench-feedback" role="status">{{ t('workbench.result') }}</p>
                 <template #footer>{{ t('workbench.footer') }}</template>
               </ConsoleCard>
-              <PageSamples :theme="theme" :preview-variables="previewVariables" />
+              <PageSamples scenario="normal" table-id="parameter-preview" />
             </div>
           </aside>
         </div>
@@ -85,7 +92,7 @@ import { useI18n } from 'vue-i18n'
 import { ElConfigProvider, ElForm, ElFormItem, ElInput, ElRadio, ElRadioGroup, ElSwitch } from 'element-plus'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import en from 'element-plus/es/locale/lang/en'
-import { Grid, Monitor, Operation, Refresh } from '@element-plus/icons-vue'
+import { Box, CircleClose, Grid, Loading, Monitor, Operation, Refresh, Tickets } from '@element-plus/icons-vue'
 import { AgentLayout, AgentSidebar, AgentTopbar, ConsoleCard, ConsoleActionButton, StatusCapsule, ThemeToggle, LanguageSwitch, type UiTone, type UiTheme, type NavigationItem } from '../ui'
 const { t, locale } = useI18n()
 const storedTheme = localStorage.getItem('cu.theme')
@@ -111,14 +118,29 @@ const customLabel = ref('')
 const actionShown = ref(false)
 const refreshEvents = ref(0)
 const tones: UiTone[] = ['neutral', 'success', 'warning', 'danger']
-const navigation = computed(() => [{ id: 'shell', label: t('workbench.shell'), icon: Monitor }, { id: 'components', label: t('workbench.components'), icon: Grid }, { id: 'parameters', label: t('workbench.parameters'), icon: Operation }, { id: 'pages', label: t('workbench.pageSamples.pages'), icon: Grid }])
+const scenarios = [
+  { id: 'normal', icon: Tickets },
+  { id: 'loading', icon: Loading },
+  { id: 'empty', icon: Box },
+  { id: 'error', icon: CircleClose }
+] as const
+const pageScenario = computed(() => scenarios.find(({ id }) => section.value === `pages-${id}`)?.id)
+const navigation = computed<NavigationItem[]>(() => [
+  { id: 'shell', label: t('workbench.shell'), icon: Monitor },
+  { id: 'components', label: t('workbench.components'), icon: Grid },
+  { id: 'parameters', label: t('workbench.parameters'), icon: Operation },
+  {
+    id: 'pages', label: t('workbench.pageSamples.pages'), icon: Grid,
+    children: scenarios.map(({ id, icon }) => ({ id: `pages-${id}`, label: t(`workbench.pageSamples.navigation.${id}`), icon }))
+  }
+])
 const sampleActive = ref('panel-a')
 const sampleSelections = ref(0)
 const sampleNavigation = computed<NavigationItem[]>(() => [
   { id: 'overview', label: t('workbench.navigationSample.overview'), icon: Monitor },
   { id: 'panels', label: t('workbench.navigationSample.group'), icon: Grid, children: [
     { id: 'panel-a', label: t('workbench.navigationSample.alpha'), icon: Monitor },
-    { id: 'panel-b', label: t('workbench.navigationSample.beta') }
+    { id: 'panel-b', label: t('workbench.navigationSample.beta'), icon: Operation }
   ] }
 ])
 const sampleLabel = computed(() => t(`workbench.navigationSample.${sampleActive.value === 'overview' ? 'overview' : sampleActive.value === 'panel-a' ? 'alpha' : 'beta'}`))

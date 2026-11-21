@@ -1,0 +1,101 @@
+{
+  "cases": [
+    {
+      "name": "create-retained",
+      "request": {
+        "dbNumber": 21,
+        "plcId": "fixture-source",
+        "startMode": "retained",
+        "target": {
+          "dbNumber": 21,
+          "instanceId": "fixture-external",
+          "kind": "plc-facts-v2",
+          "plcId": "fixture-target",
+          "sourceGeneration": "g1"
+        }
+      },
+      "requestSchema": "CreateConsumerIn",
+      "response": {
+        "code": 200,
+        "data": {
+          "consumerId": "c0000000-0000-4000-8000-000000000001",
+          "desiredState": "paused",
+          "excludedHistory": {
+            "count": "1",
+            "firstEventSeq": "2",
+            "lastEventSeq": "2"
+          },
+          "lastConfirmedSeq": "0",
+          "startAt": "2026-11-19T15:00:00+08:00",
+          "startSeq": "3"
+        },
+        "message": "success"
+      },
+      "responseSchema": "StandardResponse_ConsumerCreatedOut_"
+    },
+    {
+      "deliveryId": "d5af5af0-2c60-57de-80ec-78135baba08d",
+      "deliveryTarget": {
+        "dbNumber": 21,
+        "instanceId": "fixture-external",
+        "kind": "plc-facts-v2",
+        "plcId": "fixture-target",
+        "sampleId": "d5af5af0-2c60-57de-80ec-78135baba08d",
+        "sourceGeneration": "g1",
+        "sourceSeq": "1"
+      },
+      "eventSeq": "1",
+      "name": "ready-identity"
+    },
+    {
+      "name": "ack-first-commit",
+      "request": {
+        "code": 200,
+        "contractVersion": "plc-facts/v2",
+        "httpStatus": 200,
+        "instanceId": "fixture-external",
+        "operationId": "c0000000-0000-4000-8000-000000000002",
+        "outcome": "created",
+        "sampleId": "d5af5af0-2c60-57de-80ec-78135baba08d",
+        "status": "committed"
+      },
+      "requestSchema": "AckIn",
+      "response": {
+        "code": 200,
+        "data": {
+          "confirmedAt": "2026-11-19T15:01:00+08:00",
+          "deliveryId": "d5af5af0-2c60-57de-80ec-78135baba08d",
+          "lastConfirmedSeq": "1",
+          "status": "confirmed"
+        },
+        "message": "success"
+      },
+      "responseSchema": "StandardResponse_ConfirmedOut_"
+    },
+    {
+      "name": "included-event-expired",
+      "response": {
+        "code": 410,
+        "data": {
+          "eventSeq": "2",
+          "lastConfirmedSeq": "1"
+        },
+        "errorCode": "acquisition_consumer.gap",
+        "message": "acquisition_consumer.gap"
+      },
+      "status": 410
+    },
+    {
+      "name": "known-identity-cross-scope",
+      "response": {
+        "code": 403,
+        "data": null,
+        "errorCode": "acquisition_consumer.scope_rejected",
+        "message": "acquisition_consumer.scope_rejected"
+      },
+      "status": 403
+    }
+  ],
+  "contractVersion": "acquisition-consumers/v1",
+  "syntheticConsumerId": "c0000000-0000-4000-8000-000000000001"
+}

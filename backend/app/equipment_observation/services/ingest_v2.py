@@ -9,9 +9,9 @@ from sqlalchemy.exc import IntegrityError
 from ..services.guard import EvidenceUnavailable, probe_target
 from common.integration.canonical import canonical_bytes
 from ..domain import ObservationError, reject
-from ..models import EnergyMetric, EnergySample, HistorySample, LatestSnapshot, MetricConfig, MetricGroup, Receipt, SlotBinding
+from ..models import EnergyMetric, EnergyReceipt, EnergySample, HistorySample, LatestSnapshot, MetricConfig, MetricGroup, Receipt, SlotBinding
 from ..profile import permitted, permitted_energy
-from . import v2_domain
+from . import v2_domain, write_sources
 
 
 def receipt_data(row):
@@ -22,13 +22,13 @@ def receipt_data(row):
     return data
 
 
-async def _previous(db, target, producer_id, event_id):
-    query = select(Receipt).where(Receipt.target == target, Receipt.producer_id == producer_id,
-                                  Receipt.event_id == event_id).with_for_update()
+async def _previous(db, model, target, producer_id, event_id):
+    query = select(model).where(model.target == target, model.producer_id == producer_id,
+                                model.event_id == event_id).with_for_update()
     return (await db.execute(query)).scalar_one_or_none()
 
 
-def _receipt(target, producer, event, doc, now):
+def _receipt(model, target, producer, event, doc, now):
     def json_safe(value):
         if isinstance(value, Decimal):
             return v2_domain.scalar(value, "number")
@@ -37,15 +37,15 @@ def _receipt(target, producer, event, doc, now):
         if isinstance(value, dict):
             return {key: json_safe(item) for key, item in value.items()}
         return value
-    return Receipt(target=target, producer_id=producer["producerId"], event_id=event["eventId"],
+    return model(target=target, producer_id=producer["producerId"], event_id=event["eventId"],
                    request_digest=event["requestDigest"], outcome="pending", processed_at=now,
                    mapping_id=doc.get("mappingId"), mapping_revision=doc.get("mappingRevision"),
                    source_refs=json_safe(doc.get("sourceRefs")), task_evidence=None,
                    contract_version="aiis.metric-ingest/v2", result_version="r10")
 
 
-async def _retry_receipt(db, target, producer, event):
-    previous = await _previous(db, target, producer["producerId"], event["eventId"])
+async def _retry_receipt(db, model, target, producer, event):
+    previous = await _previous(db, model, target, producer["producerId"], event["eventId"])
     if previous is None:
         return None
     if (previous.contract_version, previous.result_version) != ("aiis.metric-ingest/v2", "r10") or bytes(previous.request_digest) != event["requestDigest"]:
@@ -85,6 +85,7 @@ async def device(db, profile, producer, target, document, decimal_document=None)
         commit_started = False
         try:
             now = await probe_target(db, profile["target"])
+            await write_sources.check_profile(db, profile, writing_as=(equipment, producer["producerId"]))
             device_profile = profile["devices"][equipment]
             record = None
             if target == "latest":
@@ -110,7 +111,7 @@ async def device(db, profile, producer, target, document, decimal_document=None)
                             if target == "latest" else set(event["groups"][group]))
                 if not required.issubset(allowed):
                     reject("forbidden", 403)
-            previous = await _retry_receipt(db, target, producer, event)
+            previous = await _retry_receipt(db, Receipt, target, producer, event)
             if previous is not None:
                 return previous
             if event["observedAt"] > now + timedelta(seconds=device_profile["futureToleranceSeconds"]):
@@ -145,7 +146,7 @@ async def device(db, profile, producer, target, document, decimal_document=None)
                     local[group] = output
                     stored.append({"groupKey": group, "metricKeys": accepted})
             has_history = any(slot.enabled and slot.group_key in configured_groups for slot in slots)
-            receipt = _receipt(target, producer, event, decimal_document or document, now)
+            receipt = _receipt(Receipt, target, producer, event, decimal_document or document, now)
             db.add(receipt)
             await db.flush()
             outcome = "stored"
@@ -214,7 +215,7 @@ async def energy(db, profile, producer, document):
         commit_started = False
         try:
             now = await probe_target(db, profile["target"])
-            previous = await _retry_receipt(db, "energy", producer, event)
+            previous = await _retry_receipt(db, EnergyReceipt, "energy", producer, event)
             if previous is not None:
                 return previous
             query = select(EnergyMetric).where(EnergyMetric.meter_id == event["meterId"],
@@ -228,7 +229,7 @@ async def energy(db, profile, producer, document):
                 reject("invalid_time_range")
             values = {f"{configs[key].slot_no:02d}": v2_domain.scalar(value, "number")
                       for key, value in event["values"].items()}
-            receipt = _receipt("energy", producer, event, document, now)
+            receipt = _receipt(EnergyReceipt, "energy", producer, event, document, now)
             db.add(receipt)
             await db.flush()
             row = EnergySample(meter_id=event["meterId"], group_key=event["groupKey"], observed_at=event["observedAt"],

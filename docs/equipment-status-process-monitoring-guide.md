@@ -2,7 +2,19 @@
 
 [中文](equipment-status-process-monitoring-guide.zh-CN.md) · [Project documentation](README.md) · [r10 operations and background](equipment-status-process-monitoring.md#r10-guide) · [Machine contract v2](../contracts/published/http-api/equipment-observation-v2/README.md)
 
-Energy statistics are served at `/monitor/consumption` with the sole page grant `monitor.energy`. The old `/monitor/energy` URL is retired. A deployment still using `monitor.consumption` requires explicit owner review and grant migration. The page grant adds no API permission, meter scope or management access. Set the private profile’s schema revision to `c9e1a3b5d720` on the adopted target. The checked-in example retains its published revision. [Retirement specification](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+Energy statistics are served at `/monitor/consumption` with the sole page grant `monitor.energy`. The old `/monitor/energy` URL is retired. A deployment still using `monitor.consumption` requires explicit owner review and grant migration. The page grant adds no API permission, meter scope or management access. Set the private profile’s schema revision to `e9f3b5d7c021` on the adopted target. The checked-in example retains its published revision. [Retirement specification](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+
+## Registered write sources
+
+Use this flow for a sender that supplies only a registered source key. The private observation profile and enabled, verified MySQL target still apply. This candidate requires revision `e9f3b5d7c021`. Legacy v2 examples below still use the machine credential and device profile. Any migration or service switch on a real environment needs separate approval.
+
+1. Follow sections 2–3 to configure areas, metrics, slots for each target, and the card or curve for that target.
+2. Sign in as admin. Under **Device Status → Configuration → Write source registration**, add `sma-demo-1` with an optional name, and enable it. The table can be filtered by key or name. Drag ordinary column boundaries to resize them. **Reset widths** restores this table's defaults.
+3. Send a JSON sample to `POST /api/v1/integration/observations` with the actual offset-bearing `observedAt`. Use the same key for both targets. One request writes one target. The request and response examples are available in the contract vectors.
+4. Select the source in the equipment or process page. Latest replaces the full snapshot for each task, so include all areas that should remain visible. History appends samples and leaves gaps for metrics absent from each sample. Query one saved item set using `GET /api/v1/integration/observations/latest`.
+5. Disabling stops writes while retaining reads. Deleting hides the source from normal selection and the public API. Admin data management still shows retained rows under a label with the deleted status.
+
+[Registered-source contract and examples](../contracts/published/http-api/observation-write-sources-v1/README.md)
 
 ## 1. Prepare the environment and access
 
@@ -36,6 +48,8 @@ As admin, open **Device Status → Configuration**. In each tab, click **Add**, 
    | Latest (`latest`) | `heatZone1` | 2 | `zone1Set` |
    | History (`history`) | `heatZone1` | 1 | `zone1Actual` |
    | History (`history`) | `heatZone1` | 2 | `zone1Set` |
+
+Choose a configuration category in the upper card. Use **Add**, filters and the table in the lower card. Slots start with all existing bindings, including latest, history and disabled rows. Select a target, sampling group or keyword, then click **Search**. Click **Reset** to show all again. **Reset widths** only restores the current table's column widths.
 
 Each target and area has its own slots 1–100. Once used, slot bindings and physical meaning, including type and unit, are protected. For a latest-only metric, add just the latest slot. Keep using the same keys in reports after editing display names.
 
@@ -107,7 +121,7 @@ These controls change display settings and annotations. Raw values have no edit 
 
 ## 6. Configure and submit energy samples
 
-1. Open **Process Monitoring → Configuration → Meter metrics**. Select the test meter and enter `electricity` as the **Sampling group**. **Click Search before Add**. In the form, confirm **Sampling group**, enter `energyInterval` as **Metric key**, `1` as **Slot**, “时段用电量” and “Interval electricity use” as the names, and `electricityConsumption` as **Physical quantity key**. Select **Interval** (`interval`) for **Measurement mode**, enter `kWh` as **Unit** and `1` for **Decimal places**. Turn on **Enabled** and **Show column**. Set **Column order** to `10` if desired, then save. The continuity and maximum sampling interval rules apply to cumulative readings.
+1. Open **Process Monitoring → Configuration → Meter metrics**. The list starts with all meter metrics you can access. Choose a meter or sampling group, or enter a keyword and click **Search**. Click **Reset** to show all again. Click **Add**, select a specific test meter in the form and enter `electricity` as **Sampling group**. Enter `energyInterval` as **Metric key**, `1` as **Slot**, “时段用电量” and “Interval electricity use” as the names, and `electricityConsumption` as **Physical quantity key**. Select **Interval** (`interval`) for **Measurement mode**, enter `kWh` as **Unit** and `1` for **Decimal places**. Turn on **Enabled** and **Show column**. Set **Column order** to `10` if desired, then save. The continuity and maximum sampling interval rules apply to cumulative readings.
 2. Use the machine GET to discover authorized, enabled meter definitions. Send the body below as `energy.json` to the independent energy POST. Set the event ID, meter, group, metric, and times for your actual authorized test sample. Interval samples carry a real window with the start before the end. Energy samples are submitted by meter and group without a task number.
 
    ```json

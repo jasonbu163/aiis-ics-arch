@@ -234,6 +234,6 @@ runtime。runtime 不挂载源码或 `node_modules`，`/api/v1` 反向代理到 
 规定 SMA、第三方及其他程序经授权的 HTTP 上报；它不代表某个 SMA 或 PLC 已完成接入。配置、显示、
 历史留存及访问权限参见 [r10 使用说明](../docs/equipment-status-process-monitoring.zh-CN.md#r10-guide)。
 
-[计划与实绩候选](../contracts/published/http-api/generic-task-workflow-v2/README.zh-CN.md)按当前字段配置读取，沿用列表路径、上海业务时间和本机列宽。两页分别管理本地字段，通过同一设置弹窗管理共享字段。没有同号计划时，实绩详情可进入普通计划创建。
+[计划与实绩候选](../contracts/published/http-api/generic-task-workflow-v2/README.zh-CN.md)按当前字段配置读取，沿用列表路径、上海业务时间和本机列宽。管理员从计划管理和实绩管理各自侧栏的「本地字段管理」进入独立页面（`/plan/local-fields` 和 `/performance/local-fields`）；计划管理与实绩管理侧栏的共享字段管理入口进入同一个独立页面，使用同一份共享配置。没有同号计划时，实绩详情可进入普通计划创建。
 
-管理员可参阅[计划与实绩字段设置说明](FIELD_SETTINGS_GUIDE.zh-CN.md)了解字段组、编辑、显示、停用和删除口径。
+操作步骤与接口模拟见[计划与实绩交互手册](../docs/generic-plan-performance-guide.zh-CN.md)；管理员也可参阅[字段设置简要说明](FIELD_SETTINGS_GUIDE.zh-CN.md)。

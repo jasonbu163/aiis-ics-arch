@@ -1,12 +1,14 @@
 """指标发现、双路写入、配置和查询 HTTP 入口。"""
 import json
-from typing import Literal
+from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Header, Query, Request, Security
+from fastapi import APIRouter, Depends, Header, Path, Query, Request, Security
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..services.guard import EvidenceUnavailable, probe_target
@@ -20,13 +22,17 @@ from ..machine_openapi import request_body
 from ..profile import allowed_meter, authenticate, get_profile, permitted_energy
 from ..schemas import (Card, CardPatch, Curve, CurvePatch, EnergyMetric as EnergyMetricInput,
                        EnergyMetricPatch, Group, GroupPatch, HistoryReview, Metric, MetricPatch, Remark, Slot, SlotPatch)
-from ..services import configuration, energy_reads, ingest_v2, reads
+from ..services import configuration, energy_reads, ingest_v2, reads, registered_ingest, write_sources
+from .write_source_contract import CreateWriteSource, PatchWriteSource, WRITE_REQUEST
 
 
 class ObservationRoute(APIRoute):
     def get_route_handler(self):
         handler = super().get_route_handler()
         async def protected(request):
+            path = request.url.path
+            is_registered = (path.endswith(("/integration/observations", "/integration/observations/latest"))
+                             or "/equipment/write-sources" in path)
             try:
                 if request.method == "POST" and request.url.path.endswith((
                     "/integration/equipment/latest-snapshots", "/integration/monitor/history-samples", "/integration/energy/samples"
@@ -35,7 +41,16 @@ class ObservationRoute(APIRoute):
                     producer = authenticate(profile, request.headers.get("authorization"))
                     request.state.observation_identity = (profile, producer)
                     await strict_body(request)
-                return await handler(request)
+                try:
+                    return await handler(request)
+                except RequestValidationError:
+                    if not is_registered:
+                        raise
+                    reject()
+                except DBAPIError:
+                    if not is_registered:
+                        raise
+                    reject("not_ready", 503)
             except EvidenceUnavailable:
                 return JSONResponse(status_code=503, content={"code": 503, "message": "equipment_observation.not_ready",
                                     "data": None, "errorCode": "equipment_observation.not_ready"})
@@ -77,9 +92,15 @@ def language(request):
     return "en-US" if request.headers.get("accept-language", "").lower().startswith("en") else "zh-CN"
 
 
-async def strict_body(request):
+async def strict_body(request, *, decimal_only=False):
     if request.headers.get("content-type", "").split(";", 1)[0].strip().lower() != "application/json":
         raise ObservationError(415, "media_type")
+    if decimal_only:
+        parameters = request.headers.get("content-type", "").split(";")[1:]
+        if (request.headers.get("content-encoding", "identity").strip().lower() != "identity"
+                or any(key.strip().lower() == "charset" and value.strip().strip('"').lower() != "utf-8"
+                       for key, _, value in (parameter.partition("=") for parameter in parameters))):
+            reject("media_type", 415)
     body = bytearray()
     async for chunk in request.stream():
         if len(body) + len(chunk) > 65536:
@@ -97,10 +118,14 @@ async def strict_body(request):
         raise ValueError("invalid number")
     try:
         request._obs_decimal = strict_json(bytes(body))
+        if decimal_only:
+            return request._obs_decimal
         document = json.loads(body.decode("utf-8"), object_pairs_hook=pairs, parse_constant=invalid)
         request._json = document
         return document
     except IntegrationPayloadError as exc:
+        if decimal_only:
+            reject()
         raise ObservationError(exc.status, exc.suffix) from None
     except (ValueError, UnicodeError, RecursionError):
         reject()
@@ -118,6 +143,7 @@ async def definitions(equipment_id: str = Query(alias="equipmentId"), identity=D
     if not scopes:
         reject("forbidden", 403)
     await probe_target(db, profile["target"])
+    await write_sources.check_profile(db, profile)
     groups = (await db.execute(select(MetricGroup).order_by(MetricGroup.sort_order, MetricGroup.group_key))).scalars().all()
     metrics = (await db.execute(select(MetricConfig).order_by(MetricConfig.metric_key))).scalars().all()
     slots = (await db.execute(select(SlotBinding))).scalars().all()
@@ -181,14 +207,64 @@ async def write_energy(request: Request, payload: dict, identity=Depends(machine
     return response(await ingest_v2.energy(db, profile, producer, request._obs_decimal))
 
 
+@router.post("/integration/observations", openapi_extra=WRITE_REQUEST)
+async def write_observation(request: Request, db: AsyncSession = Depends(get_db)):
+    document = await strict_body(request, decimal_only=True)
+    result = await registered_ingest.submit(db, get_profile(), document)
+    try:
+        log_event("INFO", "observation.registered_ingest", target=result["target"],
+                  source_key=result["sourceKey"], outcome=result["outcome"])
+    except Exception:
+        pass
+    return response(result)
+
+
+@router.get("/integration/observations/latest")
+async def read_observation(source_key: str = Query(alias="sourceKey"), target: Literal["latest", "history"] = Query(),
+                           task: str | None = Query(None, alias="taskNo"), db: AsyncSession = Depends(get_db)):
+    return response(await reads.public_latest(db, get_profile(), source_key, target, task))
+
+
+@router.get("/equipment/write-sources")
+async def list_write_sources(user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
+    return response(await write_sources.list_sources(db, admin_scope(user)))
+
+
+@router.post("/equipment/write-sources")
+async def add_write_source(item: CreateWriteSource, user=Depends(get_current_active_admin),
+                           db: AsyncSession = Depends(get_db)):
+    return response(await write_sources.create(db, admin_scope(user), item.source_key, item.name, item.enabled))
+
+
+def _source_path_key(key):
+    # 浏览器会消去点路径段；只恢复这两个已知的、双层百分号编码段。
+    return {"%2E": ".", "%2E%2E": ".."}.get(key, key)
+
+
+@router.patch("/equipment/write-sources/{sourceKey}")
+async def patch_write_source(source_key: Annotated[str, Path(alias="sourceKey")], item: PatchWriteSource, user=Depends(get_current_active_admin),
+                             db: AsyncSession = Depends(get_db)):
+    changes = item.model_dump(exclude_unset=True)
+    if not changes or ("enabled" in changes and changes["enabled"] is None):
+        reject()
+    return response(await write_sources.change(db, admin_scope(user), _source_path_key(source_key), changes))
+
+
+@router.delete("/equipment/write-sources/{sourceKey}")
+async def delete_write_source(source_key: Annotated[str, Path(alias="sourceKey")], user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
+    return response(await write_sources.change(db, admin_scope(user), _source_path_key(source_key), {}, delete=True))
+
+
 @router.get("/equipment/observation-options")
-async def equipment_options(user=Depends(equipment_reader)):
-    return response(await reads.options(get_profile(), user))
+async def equipment_options(include_deleted: bool = Query(False, alias="includeDeleted"), user=Depends(equipment_reader),
+                            db: AsyncSession = Depends(get_db)):
+    return response(await reads.options(db, get_profile(), user, include_deleted))
 
 
 @router.get("/monitor/observation-options")
-async def monitor_options(user=Depends(monitor_reader)):
-    return response(await reads.options(get_profile(), user))
+async def monitor_options(include_deleted: bool = Query(False, alias="includeDeleted"), user=Depends(monitor_reader),
+                          db: AsyncSession = Depends(get_db)):
+    return response(await reads.options(db, get_profile(), user, include_deleted))
 
 
 @router.get("/equipment/latest-cards")
@@ -241,16 +317,17 @@ async def energy_read_definitions(meter_id: str = Query(alias="meterId"), user=D
 
 
 @router.get("/energy/metric-configs")
-async def energy_configs(meter_id: str = Query(alias="meterId"), group_key: str | None = Query(None, alias="groupKey"),
+async def energy_configs(meter_id: str | None = Query(None, alias="meterId"),
+                         group_key: str | None = Query(None, alias="groupKey"),
                          user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
     profile = get_profile()
-    allowed_meter(profile, user, meter_id)
+    if meter_id is not None:
+        allowed_meter(profile, user, meter_id)
+        meter_ids = (meter_id,)
+    else:
+        meter_ids = profile["meterReadScopes"].get(user.role, ())
     await probe_target(db, profile["target"])
-    query = select(EnergyMetric).where(EnergyMetric.meter_id == meter_id)
-    if group_key:
-        query = query.where(EnergyMetric.group_key == group_key)
-    rows = (await db.execute(query.order_by(EnergyMetric.group_key, EnergyMetric.slot_no))).scalars().all()
-    return response([configuration.energy_metric_data(row) for row in rows])
+    return response(await configuration.energy_metric_configs(db, meter_ids, group_key))
 
 
 @router.post("/energy/metric-configs")
@@ -327,7 +404,8 @@ async def patch_metric(metric_key: str, item: MetricPatch, user=Depends(get_curr
 
 
 @router.get("/equipment/metric-slot-bindings")
-async def list_bindings(target: str, group_key: str = Query(alias="groupKey"), user=Depends(get_current_active_admin),
+async def list_bindings(target: str | None = None, group_key: str | None = Query(None, alias="groupKey"),
+                        user=Depends(get_current_active_admin),
                         db: AsyncSession = Depends(get_db)):
     profile = admin_scope(user)
     await probe_target(db, profile["target"])
@@ -441,7 +519,7 @@ async def history_curves(request: Request, equipment_id: str = Query(alias="equi
 async def admin_list(target, equipment_id, group_key, task, start, end, page, size, user, db):
     profile = admin_scope(user)
     return response(await reads.samples(db, profile, user, target,
-        dict(equipment=equipment_id, group=group_key, task=task, start=start, end=end), page, size))
+        dict(equipment=equipment_id, group=group_key, task=task, start=start, end=end), page, size, admin=True))
 
 
 @router.get("/equipment/admin/latest-snapshots")
@@ -478,8 +556,7 @@ async def edit_latest(record_id: int, item: Remark, user=Depends(get_current_act
     for name, value in item.model_dump(exclude_unset=True).items():
         setattr(row, name, value)
     await db.commit()
-    await db.refresh(row)
-    return response(await reads.sample_data(db, row, "latest", details=True))
+    return response((await reads.detail(db, get_profile(), user, "latest", record_id))[1])
 
 
 @router.patch("/monitor/admin/history-samples/{record_id}")
@@ -489,5 +566,4 @@ async def edit_history(record_id: int, item: HistoryReview, user=Depends(get_cur
     for name, value in item.model_dump(exclude_unset=True).items():
         setattr(row, name, value)
     await db.commit()
-    await db.refresh(row)
-    return response(await reads.sample_data(db, row, "history", details=True))
+    return response((await reads.detail(db, get_profile(), user, "history", record_id))[1])

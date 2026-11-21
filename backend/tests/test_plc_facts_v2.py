@@ -360,16 +360,15 @@ async def test_real_numeric_tokens_roundtrip_storage_and_http(monkeypatch):
     assert [point['value'] for point in stored] == list(tokens)
     assert [v2_domain.stored_value(point) for point in parsed.points] == list(tokens)
     class Capture:
-        def __init__(self): self.rows, self.statements = [], []
-        def add(self, row): self.rows.append(row)
-        async def flush(self): pass
+        def __init__(self): self.statements = []
         async def execute(self, statement): self.statements.append(statement)
     capture = Capture()
     observed, expiries = v2_domain.validate_times(parsed, NOW)
     await async_v2.insert_sample(capture, parsed, payload, b'x' * 32, observed, expiries, NOW, 'daa')
     await async_v2.advance_latest(capture, parsed, observed, expiries)
-    assert [point['value'] for point in capture.rows[0].points_json] == list(tokens)
-    bound = capture.statements[0].compile(dialect=dialect()).params
+    history = capture.statements[0].compile(dialect=dialect()).params
+    assert [point['value'] for point in history['points_json']] == list(tokens)
+    bound = capture.statements[1].compile(dialect=dialect()).params
     assert set(tokens) <= {str(value) for key, value in bound.items() if key.startswith('value_json')}
     with pytest.raises(v2_domain.V2Error):
         v2_domain.real_number('0,"injected":true')

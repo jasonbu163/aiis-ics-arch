@@ -31,15 +31,23 @@ source topology or important entrypoints change.
 - `backend/alembic/versions/20261013_1200_a6c8e0f2b4d6_add_public_energy_prices.py` — one-table successor to the unchanged Core root.
 - `backend/tests/test_energy_price_api.py` / `test_energy_price_service.py` / `test_energy_price_migration.py` — no-DB HTTP, transaction, SQL and metadata checks.
 - `backend/app/equipment_observation/` — configurable equipment cards, multi-region history, independent energy statistics, administration and source-independent ingest.
+- `backend/app/equipment_observation/services/write_sources.py` — write registration, legacy identity collision guard and source mapping.
+- `backend/app/equipment_observation/services/registered_ingest.py` — canonical sample identity and transactional registered-source writes.
+- `backend/alembic/versions/20261120_1600_e9f3b5d7c021_observation_write_sources.py` — guarded single-table source registration.
+- `contracts/published/http-api/observation-write-sources-v1/` — token-free observation API and admin registration contract.
 - `backend/app/equipment_observation/machine_openapi.py` — v2 machine request schemas shared by the live OpenAPI routes.
 - `backend/app/plc_facts/services/observation_evidence.py` — retained r8 task attribution helper; r10 observation ingest does not require PLC evidence.
 - `backend/alembic/versions/20261116_1800_8c0e2a4d6f18_add_equipment_observation.py` — explicit seven-table r8 successor.
 - `backend/alembic/versions/20261117_1200_9d1f3a5c7e20_observation_bundles.py` — guarded r10 bundle, archive and independent energy successor.
 - `backend/alembic/versions/20261118_1645_c9e1a3b5d720_retire_legacy_observation.py` — guarded forward retirement of 18 empty legacy tables; current receipts stay intact.
+- `backend/alembic/versions/20261119_1700_d8f2a4c6b915_observation_receipt_separation.py` — guarded observation table renames and ID-preserving energy receipt separation.
+- `backend/tests/test_observation_receipt_separation.py` / `backend/tests_mysql/test_observation_receipt_separation_mysql.py` — migration graph, database structure and three-route retry proofs.
 - `backend/tests/test_observation_retirement.py` — source graph, metadata and the 22 retired operations.
 - [Historical observation regressions](backend/tests/historical_observation/README.md) — exact pre-retirement tests and pinned reproduction source.
 - `contracts/published/http-api/equipment-observation-v2/` — source-independent machine discovery, ingest, synthetic examples and private-profile template.
 - `backend/app/plc_facts/api/v2.py` — sample upload, exact point reads, scoped realtime browsing and sample history.
+- `backend/app/plc_facts/{api,schemas,models}/consumption.py` and `{crud,services}/async_consumption.py` — committed sample stream, fenced consumers, pending deliveries and atomic ACK.
+- `backend/alembic/versions/20261119_1500_da6c32f8a701_acquisition_consumption.py` — guarded forward migration and retained-history indexing.
 - `backend/app/plc_facts/{api,schemas,models}/source_registry.py` and `{crud,services}/async_source_registry.py` — single-table registry, transactional admission, takeover and confirmed deletion.
 - `backend/app/plc_facts/services/sync_source_registry_import.py` / `backend/scripts/plc_facts_maintenance/source_registry.py` — historical r2 source import and recovery export, used from the frozen predecessor.
 - `backend/alembic/versions/20261113_0800_6a8c0e2b4d16_acquisition_source_registry.py` — historical guarded six-table registry successor.
@@ -188,6 +196,9 @@ documentation initialization in this repository.
 - `automation-world/data-acquisition-agent/vite.validation.config.ts` / `src-tauri/tests/fixtures/local-acquisition/` — env-isolated validation build and bounded sanitized parser/layout/transport fixtures.
 - `automation-world/data-acquisition-agent/src-tauri/tests/fixtures/source-import-minimal/` — handwritten DB21/UDT three-leaf controlled import pair, independent expected checklist and paired notes; no TIA export or live address proof.
 - `automation-world/semantic-mapping-agent/` — Rust/SQLite-owned local connection/catalog/materials/targets/rules/mappings and saved-revision pure preview; normal delivery admission disabled for SMA-004. Read-only facts and inert startup v1 compatibility remain; production/help/legacy SQL responsibilities stay retired.
+- `automation-world/console-ui/src/ui/components/{ConsoleCard,ConsoleActionButton}.vue` / `src/ui/styles/components.css` — 标题说明、按优先级折叠的标题栏状态、末位刷新插槽、工具栏及 24 px 表格行操作。
+- `automation-world/console-ui/src/workbench/{Workbench,PageSamples}.vue` — 常驻主题弹层、两级页面导航、筛选分页与可操作列表状态范例。
+- `automation-world/console-ui/src/ui/useTableColumnWidths.ts` — Element Plus 表格列宽的本机记忆、最小宽度和单表恢复。
 - `automation-world/semantic-mapping-agent/src/console/uiPreferences.ts` — isolated SMA theme/language preferences; App consumes CU public layout/sidebar/topbar/cards/actions/status and themed Element Plus dialogs without business-state remounts.
 - `automation-world/semantic-mapping-agent/tests/cu-integration.test.mjs` — UI preference persistence/fallback, cross-application/business-key isolation and no-HTTP regression; all native business tables reuse SMA tableWidths state/directive.
 - `automation-world/semantic-mapping-agent/src-tauri/src/contracts/local_configuration.rs` — finite local configuration, CAS intent, import preview and complete JSON backup DTOs.
@@ -196,6 +207,9 @@ documentation initialization in this repository.
 - `automation-world/semantic-mapping-agent/src-tauri/src/services/local_configuration/mod.rs` — serialized local configuration use cases, runtime-busy guard and content/revision-bound preview/apply.
 - `automation-world/semantic-mapping-agent/src-tauri/src/commands/local_configuration/mod.rs` — thin local configuration/load/change/import/export/saved-preview IPC adapters.
 - `automation-world/semantic-mapping-agent/src/app/twin-facts/api/localConfiguration.ts` — native configuration facade with observed revision and explicit import token; no remote/localStorage fallback.
+- `automation-world/semantic-mapping-agent/src-tauri/src/{contracts,domain,infrastructure,services,commands}/acquisition.rs` — SMA-008 r3 手工采集回环、类型与映射校验、现有采集 HTTP、会话暂存的单次请求与回读。
+- `automation-world/semantic-mapping-agent/src/app/twin-facts/components/{AcquisitionLoopbackPanel,AcquisitionPointsTable}.vue` — 采集 GET、历史详情、测试映射配置、单次 POST 确认及回读。
+- `automation-world/semantic-mapping-agent/{src-tauri/tests/acquisition_loopback_tests.rs,tests/acquisition-loopback.browser.cjs}` — 本机原生回环、SQLite 非写入、收据丢失、同字节重试及浏览器交互夹具。
 - `automation-world/semantic-mapping-agent/src-tauri/tests/local_configuration_tests.rs` — disposable SQLite CAS/rollback/busy/corruption/reference/limits/profile/process-reopen tests.
 - `automation-world/semantic-mapping-agent/tests/local-configuration.test.mjs` — explicit in-memory IPC/store tests for stale editor CAS, no implicit network and JSON/XLSX boundaries.
   - `src/app/twin-facts/store/mappingStartup.ts` — Mapping-only startup state; `src/console/tableWidths.ts` / `time.ts` — stable field column preferences and Shanghai calendar display.
@@ -310,9 +324,16 @@ Package `__init__.py` files, `mocks/` and `seeds/` are import-safe and do not ex
 - `backend/app/performance/models/performance.py` / `services/async_workflow.py` / `api/routes.py` — partial performance reports, order snapshots, manual feedback and atomic plan synchronization.
 - `backend/alembic/versions/20261111_1400_5f7a9c1e3b25_generic_task.py` — historical r1 successor for 19 empty legacy tables and six task tables.
 - `backend/alembic/versions/20261118_1200_ae20b4d6f831_generic_task_r2.py` — guarded forward-only successor for task history, configuration-use evidence and task constraints.
-- `frontend-js/src/app/plan/components/TaskPage.vue` / `TaskConfigDialog.vue` — two lists, partial edits and local field management dialogs.
+- `frontend-js/src/app/plan/components/TaskPage.vue` — two lists, partial edits and local field management navigation.
 - `frontend-js/src/app/plan/components/TaskFieldEditor.vue` / `frontend-js/src/app/plan/views/shared-fields/index.vue` — shared editor, one administrator page behind two module routes, and persistent table widths.
 - `frontend-js/src/app/plan/components/useTaskPagePadding.js` — adapts task pages to the application header height.
 - `backend/tests/test_generic_task_source.py`, `test_generic_task_flow.py`, `test_generic_task_migration_r3.py`, `test_generic_task_revision_guards.py` — offline task contracts, HTTP/ORM transaction checks, migration preflight and protected revision probes.
 - `contracts/published/http-api/generic-task-workflow-v1/` — historical contract and A/B integration examples.
 - `contracts/published/http-api/generic-task-workflow-v2/` — candidate OpenAPI and synthetic requests for the current flow.
+
+## ARCH-TASK-002 shared field management
+
+- `frontend-js/src/app/plan/views/shared-fields/index.vue` / `SharedFieldForm.vue` — shared and local administrator list, cross-page selection, edit and deletion dialogs, and revision reconciliation.
+- `frontend-js/src/app/plan/views/local-fields/index.vue` / `components/fieldSettings.js` — standalone local field route and reusable scope-specific field settings.
+- `backend/app/task/api/routes.py` / `schemas/fields.py` / `services/async_fields.py` — atomic shared-field batch deletion using the existing history protection and configuration lock.
+- `backend/tests_mysql/test_generic_task_shared_batch.py` — dedicated native MySQL checks for field-configuration races and rollback.

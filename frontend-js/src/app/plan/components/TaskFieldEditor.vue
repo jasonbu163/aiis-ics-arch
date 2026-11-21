@@ -1,14 +1,19 @@
 <!-- 计划、实绩与共享字段共用的管理表格、草稿和保存流程。 -->
 <template>
   <div v-loading="loading" class="task-field-editor">
-    <div class="config-toolbar">
+    <div v-if="draftRows" class="config-toolbar">
+      <el-tooltip :content="tr('resetWidthsHint')" :trigger="['hover','focus']">
+        <el-button @click="columns.reset">{{ tr('resetWidths') }}</el-button>
+      </el-tooltip>
+    </div>
+    <div v-else class="config-toolbar">
       <span v-if="config">{{ tr('configVersion') }}: {{ config?.configVersion }} / {{ tr('revision') }}: {{ config?.configRevision }}</span>
       <el-button @click="columns.reset">{{ tr('resetConfigWidths') }}</el-button>
     </div>
-    <p class="config-hint">{{ tr('configHint') }}</p>
+    <p v-if="!draftRows" class="config-hint">{{ tr('configHint') }}</p>
     <el-alert v-if="conflict" :title="tr('errors.config_revision_conflict')" type="warning" :closable="false" show-icon />
     <div class="config-table-wrap">
-      <el-table :key="columns.version.value" :data="rows" border stripe scrollbar-always-on max-height="min(52vh, 560px)" class="vibe-table config-table" @header-dragend="columns.onHeaderDragEnd">
+      <el-table :key="columns.version.value" :data="draftRows ?? rows" border stripe scrollbar-always-on max-height="min(52vh, 560px)" class="vibe-table config-table" @header-dragend="columns.onHeaderDragEnd">
         <el-table-column prop="name" :label="tr('fieldName')" :width="columns.widths.name" :min-width="columnDefinitions.name.minWidth" :fixed="isNarrow ? false : 'left'">
           <template #default="{ row }">
             <div class="field-key-cell">
@@ -35,7 +40,7 @@
         <el-table-column v-for="name in orderNames" :key="name" :prop="name" :label="tr(name)" :width="columns.widths[name]" :min-width="definition(name).minWidth">
           <template #default="{ row }"><el-input-number v-model="row[name]" :min="0" :max="65535" :precision="0" :value-on-clear="null" :placeholder="tr('slotDefault')" controls-position="right" /></template>
         </el-table-column>
-        <el-table-column :label="tr('actions')" width="100" fixed="right">
+        <el-table-column v-if="!draftRows" :label="tr('actions')" width="100" fixed="right">
           <template #default="{ row }">
             <el-popconfirm v-if="!row._new" :title="tr('confirmFieldDelete')" :confirm-button-text="tr('deleteField')" :cancel-button-text="$t('common.cancel')" @confirm="deleteSaved(row)">
               <template #reference><el-button link type="danger" :disabled="saving">{{ tr('deleteField') }}</el-button></template>
@@ -44,7 +49,7 @@
         </el-table-column>
       </el-table>
     </div>
-    <div class="config-footer">
+    <div v-if="!draftRows" class="config-footer">
       <el-button :disabled="!config || loading || saving" @click="addRow">{{ tr('addField') }}</el-button>
       <el-button @click="cancel">{{ $t('common.cancel') }}</el-button>
       <el-button type="primary" :disabled="!config || loading" :loading="saving" @click="save">{{ $t('common.save') }}</el-button>
@@ -56,9 +61,10 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { useTableColumnWidths } from '@/utils/tableColumnWidths'
+import { fieldSettings, settingDisabled as optionDisabled, updateFieldOwner as changeOwner } from './fieldSettings'
 
 const props = defineProps({ kind: { type: String, required: true }, module: { type: String, required: true },
-  api: { type: Object, required: true } })
+  api: { type: Object, default: null }, draftRows: { type: Array, default: null } })
 const emit = defineEmits(['saved', 'deleted', 'cancel'])
 const { t, te } = useI18n()
 const tr = key => t(`${props.module}.workflow.${key}`)
@@ -66,7 +72,8 @@ const scope = computed(() => props.kind === 'shared' ? 'shared_sync' : `${props.
 const config = ref(null), rows = ref([]), original = ref([])
 const loading = ref(false), saving = ref(false), conflict = ref(false)
 const types = ['string', 'number', 'boolean']
-const owners = computed(() => props.kind === 'shared' ? ['order_snapshot', 'automated', 'manual'] : ['automated', 'manual'])
+const settings = computed(() => fieldSettings[props.kind])
+const owners = computed(() => settings.value.owners)
 
 const isNarrow = ref(false)
 let viewportQuery
@@ -82,23 +89,10 @@ const columnDefinitions = {
 }
 const definition = key => columnDefinitions[key]
 const columns = useTableColumnWidths(`generic-task.field-settings.${props.kind}`, columnDefinitions)
-const boolNames = computed(() => [
-  'enabled', 'isNullable',
-  ...(props.kind === 'shared' ? ['syncEnabled'] : []),
-  ...(props.kind !== 'performance' ? ['planEditable', 'planVisible'] : []),
-  ...(props.kind !== 'plan' ? ['performanceEditable', 'performanceVisible'] : [])
-])
-const orderNames = computed(() => props.kind === 'shared' ? ['planOrder', 'performanceOrder'] : [`${props.kind}Order`])
+const boolNames = computed(() => settings.value.switches)
+const orderNames = computed(() => settings.value.orders)
 const clone = value => JSON.parse(JSON.stringify(value))
 
-function optionDisabled(row, name) {
-  return (name === 'performanceEditable' && row.performanceOwner !== 'manual')
-    || (name === 'syncEnabled' && row.performanceOwner === 'order_snapshot')
-}
-function changeOwner(row) {
-  if (row.performanceOwner !== 'manual') row.performanceEditable = false
-  if (row.performanceOwner === 'order_snapshot') row.syncEnabled = false
-}
 function showError(error) {
   const key = error.response?.data?.errorCode?.replace('task.', '')
   if (key === 'config_revision_conflict') conflict.value = true
@@ -188,7 +182,7 @@ onMounted(() => {
     updateViewport(viewportQuery)
     viewportQuery.addEventListener('change', updateViewport)
   }
-  load()
+  if (!props.draftRows) load()
 })
 onBeforeUnmount(() => {
   ++loadId

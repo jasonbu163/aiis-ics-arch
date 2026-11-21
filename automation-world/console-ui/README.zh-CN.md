@@ -67,15 +67,23 @@ interface NavigationItem extends NavigationChildItem { children?: NavigationChil
 
 Tab/Shift+Tab 可遍历可见叶项与组标题并离开菜单；上下键在可见项间移动，右键展开组并进入首子项，左键从子项回父组或折叠当前组。Enter/Space 单次激活叶项或切换组。折叠包含焦点的子树时焦点回父标题；已折叠子项不进入 Tab，外部 prop 变化不移动焦点。组 aria-expanded、叶项 aria-current、父组标题强调色及焦点轮廓均在当前明暗主题作用域内。窄窗分组内联展开并局部滚动，平铺菜单保留换行。
 
-工作台保留四个平铺主导航，在壳层预览增加受控分组“设计样例”。独立消费者可在相同稳定 id 的平铺/分组模式间切换，提供宿主外部 active 按钮与事件计数，表格/表单/弹窗状态保持挂载。其 [App.vue](examples/source-consumer/src/App.vue) 通过公共导出实际编译；导航无需 CU 服务在线。固定未提交源码时应引用精确 CU-008 Revision 与 [Development handoff](plans/CU-008-grouped-sidebar-navigation/tasks.md) 的完整路径/SHA-256 清单，以及之后真实形成的独立 Verification/Owner 依据；HEAD 本身不能代表这些工作树字节。DAA 接入及其验收继续归 DAA 自身任务。
+工作台的**页面样例**使用两级带图标的侧栏。点击分组标题可展开或折叠，选择子项可进入正常列表、加载列表、空数据列表或失败列表。壳层预览另有宿主主动切换子项的示例。独立消费者可在相同稳定 id 的平铺/分组模式间切换，提供宿主外部 active 按钮与事件计数，表格/表单/弹窗状态保持挂载。其 [App.vue](examples/source-consumer/src/App.vue) 通过公共导出编译，导航无需 CU 服务在线。CU-008 的历史证据见 [Development handoff](plans/CU-008-grouped-sidebar-navigation/tasks.md)。
 
 ## Element Plus 页面组合
 
-CU 私有的**页面样例**演示表格、校验表单、编辑弹窗及手动选择的正常/加载/空数据/失败状态。数据与重试/提交/编辑反馈只在内存中，刷新会重置样例。八个公共组件及 API 保持不变。独立消费者直接用自身 Element Plus 依赖组合更小的表格/表单/弹窗，拥有自己的 locale 与状态，不导入 PageSamples 或工作台文件。
+卡片默认由标题栏和内容区组成。存在筛选或其他作用于内容的控件时，使用 `#tools` 单独增加中间工具栏。标题栏左侧放标题和可选问号说明，中间为靠右对齐的状态区，右侧依次放 `#actions` 和 `#refresh`。按优先级传入 `headerStatuses`，标题栏只完整显示首项。多项时用细分隔线和小箭头标记，悬停或激活标签可查看全部。配置了刷新时，它始终在最右。窄窗可把右侧整组移到标题下，仍在标题栏内。会影响下一步操作的警告和错误直接显示在内容区。已有独立 `#status` 行的用法继续兼容。
+
+`help` 和 `helpLabel` 提供可悬停或聚焦的问号说明。`statusOverflowLabel` 提供本地化的更多状态按钮名称。`helpAppendTo` 指向卡片挂载前已存在的主题容器，问号说明和状态弹层共用该容器。用 `#footer` 放底部分页。
+
+通用 `size="small"` 保持 30 px。表格操作使用 `variant="row"` 的 24 px 按钮，多个按钮放入 `.console-row-actions`。编辑等主要动作使用 `tone="primary"`，查看或预览使用 `secondary`，删除使用 `danger`。紧凑工作区可使用 `.aw-ui--dense`，页标题 18 px、卡片标题 15 px、默认正文与导航 13 px。分组导航可为一级分组和二级入口分别传入 `icon`。
+
+在[列表范例](src/workbench/PageSamples.vue)里可按名称或类别查询，再用表格下方的页码、上一页、下一页或每页条数切换数据。查询、重置筛选和更改每页条数后回第一页。新增和编辑使用带校验的弹窗，详情以只读弹窗查看。刷新和重试使用本地样例，修改只在当前工作台会话有效，重新打开应用会恢复样例数据。
+
+拖动名称或类别表头的右缘可调整列宽，操作列宽度固定，窄窗支持横向滚动。翻页、筛选、刷新、切页和重新打开后保留各自的列宽。标题栏的「重置列宽」使用「恢复默认列宽」提示，只清除当前表偏好。消费者可从 `@aw-ui` 导入 `useTableColumnWidths(appId, tableId, minimums)`。将返回的 `resize` 绑定到 `ElTable` 的 `header-dragend`，`tableVersion` 绑定到表的 key，`reset` 绑定到重置动作。启用 `border`，为可拖拽列绑定稳定的 `prop`、最小宽度和保存的 `width`。固定列无需加入 `minimums`，设置 `resizable` 为 false。工作台列表和参数实时预览各有独立表标识，列宽保存在本机。
 
 先导入 Element Plus CSS，再导入 `@aw-ui-styles`。`ElTable` 使用 `aw-data-table`，`ElForm` 使用 `aw-sample-form`，动作区使用 `aw-form-actions`，状态内容使用 `aw-page-state`。公共 CSS 将 Element Plus 变量映射到当前作用域的 `--agent-*` tokens；页面布局由各宿主负责。这些类是样式约定，不是新增公共 Vue 组件。
 
-脱离布局的弹窗需要显式主题作用域。本例用 Vue `Teleport to="body"` 包裹 `<div class="aw-ui aw-sample-overlays" :data-aw-theme="theme">`，其内嵌套 `:append-to-body="false"` 的 `ElDialog`。每个 `ElSelect`（包括弹窗内）使用 `:teleported="false"`，使下拉继承该作用域。主题容器持续绑定宿主主题，并通过 `ElConfigProvider` 提供宿主 Element Plus 语言；不设置全局 html/body 主题变量。标签、校验、反馈及所有状态切换归宿主负责。页面样例业务数据仅在内存中；下述独立参数编辑器管理样式草稿。
+[工作台](src/workbench/Workbench.vue)在两个预览页面挂载前，先把常驻的 `.aw-ui` 弹层容器传送到 `body`。问号提示、弹窗和下拉通过 `helpAppendTo` 或 `append-to` 指向它，分页的条数下拉使用 `append-size-to`。容器持续绑定宿主主题和预览变量，Element Plus 语言由 `ElConfigProvider` 提供。
 
 ## 样式方案：预览、草稿与共享源码
 

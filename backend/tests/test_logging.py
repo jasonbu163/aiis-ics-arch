@@ -136,6 +136,28 @@ def test_uvicorn_access_stdout_is_jsonl(tmp_path, capsys):
             setup_logger("api")
 
 
+def test_development_console_is_text_and_files_stay_jsonl(tmp_path, capsys):
+    """开发终端简化显示，常规及错误文件仍保留结构化事件。"""
+    access_message = '127.0.0.1 - "GET /health HTTP/1.1" 200'
+    error_event = "backend.test_development_log_error"
+
+    try:
+        setup_logger("api", log_dir=tmp_path, level="INFO", development=True)
+        logging.getLogger("uvicorn.access").info(access_message)
+        log_event("ERROR", error_event, reason="test")
+
+        assert capsys.readouterr().out.splitlines() == [
+            f"INFO: {access_message}",
+            f"ERROR: {error_event}",
+        ]
+        assert_process_logs(tmp_path, "api", access_message, error_event)
+        [error_record] = read_jsonl_records(tmp_path / "api-error.log")
+        assert error_record["record"]["extra"]["reason"] == "test"
+    finally:
+        with capsys.disabled():
+            setup_logger("api")
+
+
 def test_packaged_logging_avoids_multiprocessing_queue(monkeypatch):
     """冻结的单进程 package 不创建会在 SIGTERM 泄漏的日志 queue。"""
     monkeypatch.setattr(log_module.sys, "frozen", True, raising=False)

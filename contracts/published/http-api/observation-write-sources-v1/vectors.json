@@ -1,0 +1,54 @@
+{
+  "contractVersion": "aiis.observation-write/v1",
+  "description": "Synthetic history sample and replay; IDs in the response are illustrative.",
+  "request": {
+    "sourceKey": "sma-demo-1",
+    "target": "history",
+    "taskNo": " demo-0001 ",
+    "observedAt": "2026-11-20T06:30:00Z",
+    "items": {
+      "heatZone1": {
+        "zone1Actual": 123,
+        "zone1Set": 0
+      }
+    }
+  },
+  "equivalentReplayJson": "{\"items\":{\"heatZone1\":{\"zone1Set\":0.0,\"zone1Actual\":123.0}},\"observedAt\":\"2026-11-20T14:30:00.000000+08:00\",\"taskNo\":\"DEMO-0001\",\"target\":\"history\",\"sourceKey\":\"sma-demo-1\"}",
+  "normalizedTimestamp": "2026-11-20T14:30:00.000000+08:00",
+  "normalizedTaskNo": "DEMO-0001",
+  "internalTestExpectations": {
+    "storageIdentity": "obsreg_6945841f66f54dc16ce107cf098613163796009ae57daf0ab2750f0af",
+    "eventId": "obsreg1_acbbf4d8eb08551043a44b6795aefb642784c1b7211f2e79c40489bc57fb929d",
+    "requestDigestSha256": "baeb6dba060719b13e86532692a724b559fee746628c2c8bc778ba5eeec9e669"
+  },
+  "postResponse": {
+    "code": 200,
+    "message": "success",
+    "data": {
+      "sourceKey": "sma-demo-1",
+      "target": "history",
+      "taskNo": "DEMO-0001",
+      "observedAt": "2026-11-20T14:30:00.000000+08:00",
+      "outcome": "stored",
+      "receiptId": "42",
+      "recordId": "87"
+    }
+  },
+  "getResponse": {
+    "code": 200,
+    "message": "success",
+    "data": {
+      "items": {
+        "heatZone1": {
+          "zone1Set": 0.0,
+          "zone1Actual": 123.0
+        }
+      },
+      "observedAt": "2026-11-20T14:30:00.000000+08:00",
+      "taskNo": "DEMO-0001",
+      "target": "history",
+      "sourceKey": "sma-demo-1",
+      "quality": "unknown"
+    }
+  }
+}

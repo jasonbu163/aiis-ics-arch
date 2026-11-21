@@ -1,0 +1,647 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Registered observation write sources",
+    "version": "aiis.observation-write/v1"
+  },
+  "paths": {
+    "/api/v1/equipment/write-sources": {
+      "get": {
+        "summary": "List non-deleted write sources",
+        "security": [
+          {
+            "UserBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "code": {
+                      "const": 200
+                    },
+                    "message": {
+                      "const": "success"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Registration"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User token missing or invalid"
+          },
+          "403": {
+            "description": "Admin role required or source not enabled, depending on the operation"
+          },
+          "503": {
+            "description": "Unverified or unavailable target, or unknown commit outcome"
+          }
+        }
+      },
+      "post": {
+        "summary": "Register a write source",
+        "security": [
+          {
+            "UserBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRegistration"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "code": {
+                      "const": 200
+                    },
+                    "message": {
+                      "const": "success"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Registration"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User token missing or invalid"
+          },
+          "403": {
+            "description": "Admin role required or source not enabled, depending on the operation"
+          },
+          "409": {
+            "description": "Source or sample identity conflict"
+          },
+          "422": {
+            "description": "Invalid request, time, metric value or configuration"
+          },
+          "503": {
+            "description": "Unverified or unavailable target, or unknown commit outcome"
+          }
+        }
+      }
+    },
+    "/api/v1/equipment/write-sources/{sourceKey}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "sourceKey",
+          "required": true,
+          "schema": {
+            "oneOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.-]{1,64}$"
+              },
+              {
+                "enum": [
+                  "%2E",
+                  "%2E%2E"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "patch": {
+        "summary": "Update a write source",
+        "security": [
+          {
+            "UserBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeRegistration"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "code": {
+                      "const": 200
+                    },
+                    "message": {
+                      "const": "success"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Registration"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User token missing or invalid"
+          },
+          "403": {
+            "description": "Admin role required or source not enabled, depending on the operation"
+          },
+          "404": {
+            "description": "Source not found or deleted"
+          },
+          "422": {
+            "description": "Invalid request, time, metric value or configuration"
+          },
+          "503": {
+            "description": "Unverified or unavailable target, or unknown commit outcome"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a write source and preserve its data",
+        "security": [
+          {
+            "UserBearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "code": {
+                      "const": 200
+                    },
+                    "message": {
+                      "const": "success"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DeletedRegistration"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User token missing or invalid"
+          },
+          "403": {
+            "description": "Admin role required or source not enabled, depending on the operation"
+          },
+          "404": {
+            "description": "Source not found or deleted"
+          },
+          "422": {
+            "description": "Invalid request, time, metric value or configuration"
+          },
+          "503": {
+            "description": "Unverified or unavailable target, or unknown commit outcome"
+          }
+        }
+      }
+    },
+    "/api/v1/integration/observations": {
+      "post": {
+        "summary": "Write a complete latest snapshot or append one history sample",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "sourceKey",
+                  "target",
+                  "taskNo",
+                  "observedAt",
+                  "items"
+                ],
+                "properties": {
+                  "sourceKey": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.-]{1,64}$"
+                  },
+                  "target": {
+                    "enum": [
+                      "latest",
+                      "history"
+                    ]
+                  },
+                  "taskNo": {
+                    "type": "string"
+                  },
+                  "observedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "items": {
+                    "type": "object",
+                    "minProperties": 1,
+                    "additionalProperties": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": [
+                          "number",
+                          "boolean",
+                          "string"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "code": {
+                      "const": 200
+                    },
+                    "message": {
+                      "const": "success"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Receipt"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Admin role required or source not enabled, depending on the operation"
+          },
+          "409": {
+            "description": "Source or sample identity conflict"
+          },
+          "413": {
+            "description": "Request exceeds 65,536 bytes"
+          },
+          "415": {
+            "description": "Media type must be UTF-8 application/json"
+          },
+          "422": {
+            "description": "Invalid request, time, metric value or configuration"
+          },
+          "503": {
+            "description": "Unverified or unavailable target, or unknown commit outcome"
+          }
+        }
+      }
+    },
+    "/api/v1/integration/observations/latest": {
+      "get": {
+        "summary": "Read one most recent saved observation",
+        "security": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sourceKey",
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.-]{1,64}$"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "target",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "latest",
+                "history"
+              ]
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "taskNo",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "code": {
+                      "const": 200
+                    },
+                    "message": {
+                      "const": "success"
+                    },
+                    "data": {
+                      "oneOf": [
+                        {
+                          "$ref": "#/components/schemas/SavedObservation"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Source not found or deleted"
+          },
+          "422": {
+            "description": "Invalid request, time, metric value or configuration"
+          },
+          "503": {
+            "description": "Unverified or unavailable target, or unknown commit outcome"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "UserBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Registration": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sourceKey",
+          "name",
+          "enabled",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "sourceKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]{1,64}$"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateRegistration": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sourceKey"
+        ],
+        "properties": {
+          "sourceKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]{1,64}$"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "ChangeRegistration": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [],
+        "properties": {
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "minProperties": 1
+      },
+      "DeletedRegistration": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sourceKey",
+          "deleted"
+        ],
+        "properties": {
+          "sourceKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]{1,64}$"
+          },
+          "deleted": {
+            "const": true
+          }
+        }
+      },
+      "Receipt": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sourceKey",
+          "target",
+          "taskNo",
+          "observedAt",
+          "outcome",
+          "receiptId",
+          "recordId"
+        ],
+        "properties": {
+          "sourceKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]{1,64}$"
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "latest",
+              "history"
+            ]
+          },
+          "taskNo": {
+            "type": "string"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "outcome": {
+            "enum": [
+              "stored",
+              "stale"
+            ]
+          },
+          "receiptId": {
+            "type": "string"
+          },
+          "recordId": {
+            "type": "string"
+          }
+        }
+      },
+      "SavedObservation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sourceKey",
+          "target",
+          "taskNo",
+          "observedAt",
+          "quality",
+          "items"
+        ],
+        "properties": {
+          "sourceKey": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]{1,64}$"
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "latest",
+              "history"
+            ]
+          },
+          "taskNo": {
+            "type": "string"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "quality": {
+            "const": "unknown"
+          },
+          "items": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": [
+                  "number",
+                  "boolean",
+                  "string"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -20,18 +20,7 @@ export const monitorModule = {
         titleKey: 'monitor.temperature',
         pageId: 'monitor.temperature', observationCategory: 'temperature',
         parentTitleKey: 'monitor.title',
-        navigation: { visible: true, order: 20, icon: 'TrendCharts' }
-      }
-    },
-    {
-      path: 'monitor/consumption',
-      name: 'MonitorEnergy',
-      component: () => import('./views/observations/energy.vue'),
-      meta: {
-        titleKey: 'monitor.energy',
-        pageId: 'monitor.energy',
-        parentTitleKey: 'monitor.title',
-        navigation: { visible: true, order: 30, icon: 'Cpu' }
+        navigation: { visible: true, order: 30, icon: 'TrendCharts' }
       }
     },
     {
@@ -45,6 +34,17 @@ export const monitorModule = {
       component: () => import('./views/observations/curves.vue'),
       meta: { titleKey: 'monitor.observation.cleaning', pageId: 'monitor.cleaning', observationCategory: 'cleaning',
         parentTitleKey: 'monitor.title', navigation: { visible: true, order: 50, icon: 'TrendCharts' } }
+    },
+    {
+      path: 'monitor/consumption',
+      name: 'MonitorEnergy',
+      component: () => import('./views/observations/energy.vue'),
+      meta: {
+        titleKey: 'monitor.energy',
+        pageId: 'monitor.energy',
+        parentTitleKey: 'monitor.title',
+        navigation: { visible: true, order: 55, icon: 'Cpu' }
+      }
     },
     {
       path: 'monitor/observations/admin', name: 'MonitorObservationAdmin',

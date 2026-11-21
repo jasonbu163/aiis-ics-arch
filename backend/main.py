@@ -36,7 +36,7 @@ def configure_timezone() -> None:
 
 
 configure_timezone()
-setup_logger("api")
+setup_logger("api", development=os.environ.get("_AIIS_BACKEND_DEV_LOGGING") == "1")
 
 app = create_app()
 

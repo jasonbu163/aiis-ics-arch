@@ -4,6 +4,7 @@ import time
 from sqlalchemy import text
 
 from ..crud import sync_v2_maintenance as crud
+from ..v2_config import CONSUMPTION_REVISIONS
 from ..v2_domain import wire_time
 
 MAX_ROWS_PER_TRANSACTION = 200
@@ -65,7 +66,10 @@ def run(db, target, apply):
             if (batch_bytes + size > MAX_BYTES_PER_TRANSACTION or byte_count + batch_bytes + size > MAX_BYTES_PER_TICK
                     or time.monotonic() >= deadline):
                 break
-            batch_rows += crud.clear(db, candidate, now)
+            if target.get('schemaRevision') in CONSUMPTION_REVISIONS:
+                batch_rows += crud.clear(db, candidate, now, guarded=True)
+            else:
+                batch_rows += crud.clear(db, candidate, now)
             batch_bytes += size
         db.commit()
         rows += batch_rows

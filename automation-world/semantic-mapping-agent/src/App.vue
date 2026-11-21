@@ -1,6 +1,7 @@
 <!-- SMA消费CU公共壳层；主题、语言、导航与业务状态由本应用持有。 -->
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { Connection, DataAnalysis, Document, Grid, Link, Operation, Setting, Share, Tickets, VideoPlay } from "@element-plus/icons-vue";
 import { ElConfigProvider } from "element-plus";
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 import en from "element-plus/es/locale/lang/en";
@@ -23,31 +24,31 @@ const configurationError = ref("");
 const ioEnabled = ref(false);
 const resolve = (key: string) => (labels.value as unknown as Record<string, string>)[key] ?? key;
 const leaves = [
-  { id: "connection", page: "backendConnection", view: "", label: "navBackendConnection" },
-  { id: "source-facts", page: "twinFacts", view: "contract", label: "factsTableTitle" },
-  { id: "api-materials", page: "mappingIdentity", view: "apiMaterials", label: "apiMaterialsTitle" },
-  { id: "target-apis", page: "mappingIdentity", view: "targetApis", label: "targetApiConfigurationTitle" },
-  { id: "value-rules", page: "mappingIdentity", view: "valueRules", label: "mappingValueRulesTitle" },
-  { id: "mappings", page: "mappingIdentity", view: "mappings", label: "mappingConfigurationsTitle" },
-  { id: "runtime", page: "mappingRuntime", view: "execution", label: "mappingExecutionTitle" },
+  { id: "connection", page: "backendConnection", view: "", label: "navBackendConnection", icon: Link },
+  { id: "source-facts", page: "twinFacts", view: "contract", label: "factsTableTitle", icon: Tickets },
+  { id: "api-materials", page: "mappingIdentity", view: "apiMaterials", label: "apiMaterialsTitle", icon: Document },
+  { id: "target-apis", page: "mappingIdentity", view: "targetApis", label: "targetApiConfigurationTitle", icon: Setting },
+  { id: "value-rules", page: "mappingIdentity", view: "valueRules", label: "mappingValueRulesTitle", icon: Operation },
+  { id: "mappings", page: "mappingIdentity", view: "mappings", label: "mappingConfigurationsTitle", icon: Share },
+  { id: "runtime", page: "mappingRuntime", view: "execution", label: "mappingExecutionTitle", icon: VideoPlay },
 ] as const;
 const activeId = computed(() => leaves.find(item => item.page === activePage.value && item.view === activeView.value)?.id ?? "connection");
 const groups = [
-  { id: "connection-group", label: "navConnectionGroup", ids: ["connection"] },
-  { id: "facts-group", label: "sourceFactsWorkspace", ids: ["source-facts"] },
-  { id: "interfaces-group", label: "navInterfacesGroup", ids: ["api-materials", "target-apis"] },
-  { id: "mappings-group", label: "navMappingGroup", ids: ["value-rules", "mappings"] },
-  { id: "runtime-group", label: "mappingRuntimeWorkspace", ids: ["runtime"] },
+  { id: "connection-group", label: "navConnectionGroup", icon: Connection, ids: ["connection"] },
+  { id: "facts-group", label: "sourceFactsWorkspace", icon: DataAnalysis, ids: ["source-facts"] },
+  { id: "interfaces-group", label: "navInterfacesGroup", icon: Grid, ids: ["api-materials", "target-apis"] },
+  { id: "mappings-group", label: "navMappingGroup", icon: Share, ids: ["value-rules", "mappings"] },
+  { id: "runtime-group", label: "mappingRuntimeWorkspace", icon: VideoPlay, ids: ["runtime"] },
 ];
-const navigation = computed<NavigationItem[]>(() => groups.map(group => ({ id: group.id, label: resolve(group.label), children: leaves.filter(leaf => group.ids.includes(leaf.id)).map(leaf => ({ id: leaf.id, label: resolve(leaf.label) })) })));
+const navigation = computed<NavigationItem[]>(() => groups.map(group => ({ id: group.id, label: resolve(group.label), icon: group.icon, children: leaves.filter(leaf => group.ids.includes(leaf.id)).map(leaf => ({ id: leaf.id, label: resolve(leaf.label), icon: leaf.icon })) })));
 const title = computed(() => resolve(leaves.find(item => item.id === activeId.value)!.label));
 function select(id: string) { const leaf = leaves.find(item => item.id === id); if (leaf) { activePage.value = leaf.page; activeView.value = leaf.view; } }
 onMounted(async () => { try { await loadAppDefaults(); ioEnabled.value = externalIoEnabled(); if (isTauriRuntime()) await loadLocalConfiguration(); } catch (error) { configurationError.value = String(error); } finally { ready.value = true; } });
 </script>
 <template>
   <ElConfigProvider :locale="locale === 'zh-CN' ? zhCn : en">
-    <div id="sma-overlays" class="aw-ui sma-overlays" :data-aw-theme="theme" />
-    <AgentLayout :theme="theme" :sidebar-hidden="sidebarHidden">
+    <div id="sma-overlays" class="aw-ui aw-ui--dense sma-overlays" :data-aw-theme="theme" />
+    <AgentLayout class="aw-ui--dense" :theme="theme" :sidebar-hidden="sidebarHidden">
       <template #sidebar><AgentSidebar :items="navigation" :active-id="activeId" :brand="labels.appTitle" :detail="labels.subtitle" @select="select" /></template>
       <template #topbar>
         <AgentTopbar :title="title" :subtitle="labels.eyebrow" :sidebar-hidden="sidebarHidden" :sidebar-label="sidebarHidden ? labels.expandSidebar : labels.collapseSidebar" @toggle-sidebar="sidebarHidden = !sidebarHidden">

@@ -2,7 +2,9 @@
 import request from '@/utils/request'
 
 const quiet = { suppressErrorMessage: true }
-export const equipmentOptions = () => request.get('/equipment/observation-options', quiet)
+export const equipmentOptions = includeDeleted => request.get('/equipment/observation-options', {
+  ...quiet, params: includeDeleted ? { includeDeleted: true } : undefined
+})
 export const latestCards = (params, language) => request.get('/equipment/latest-cards', { ...quiet, params, headers: { 'Accept-Language': language } })
 export const sampledTasks = equipmentId => request.get('/equipment/sampled-tasks', { ...quiet, params: { equipmentId } })
 export const metricGroups = () => request.get('/equipment/metric-groups', quiet)
@@ -22,3 +24,11 @@ export const updateCard = (key, data) => request.patch(`/equipment/card-configs/
 export const latestList = params => request.get('/equipment/admin/latest-snapshots', { ...quiet, params })
 export const latestDetail = id => request.get(`/equipment/admin/latest-snapshots/${encodeURIComponent(id)}`, quiet)
 export const updateLatest = (id, data) => request.patch(`/equipment/admin/latest-snapshots/${encodeURIComponent(id)}`, data)
+
+const sourcePath = key => '/equipment/write-sources/' + (
+  key === '.' || key === '..' ? key.replaceAll('.', '%252E') : encodeURIComponent(key)
+)
+export const writeSources = () => request.get('/equipment/write-sources', quiet)
+export const createWriteSource = data => request.post('/equipment/write-sources', data, quiet)
+export const updateWriteSource = (key, data) => request.patch(sourcePath(key), data, quiet)
+export const deleteWriteSource = key => request.delete(sourcePath(key), quiet)

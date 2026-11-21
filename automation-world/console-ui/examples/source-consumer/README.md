@@ -59,7 +59,7 @@ import '@aw-ui-styles'
 </AgentLayout>
 ```
 
-Import these names from `@aw-ui`. `AgentLayout` accepts `theme: 'light' | 'dark'` and `sidebarHidden`; it exposes sidebar/topbar/default slots. `AgentSidebar` receives translated `{id,label,icon?}` items and emits `select(id)`. `AgentTopbar` receives title/subtitle/sidebarLabel and emits `toggle-sidebar`. `ConsoleCard` supports actions/tools/default/footer slots and compact mode. `ConsoleActionButton` accepts translated label/title or slot, tone, small/large size and emits click. `StatusCapsule` accepts label plus neutral/success/warning/danger display tone. These tones are presentation values, not device statuses.
+Import these names from `@aw-ui`. `AgentLayout` accepts `theme: 'light' | 'dark'` and `sidebarHidden`; it exposes sidebar/topbar/default slots. `AgentSidebar` receives translated `{id,label,icon?}` items and emits `select(id)`. `AgentTopbar` receives title/subtitle/sidebarLabel and emits `toggle-sidebar`. `ConsoleCard` supports title-aside/actions/status/tools/default/footer slots and compact mode. `ConsoleActionButton` accepts translated label/title or slot, tone, small/large size and the `variant="row"` table treatment, and emits click. `StatusCapsule` accepts label plus neutral/success/warning/danger display tone. These tones are presentation values, not device statuses.
 
 Language installation is entirely consumer-owned: create or reuse your vue-i18n instance, load your own symmetric locale resources and pass `t(...)` results. Theme installation is explicit through AgentLayout; standalone components require an `.aw-ui` wrapper with `data-aw-theme="light"` or `"dark"`. Element Plus controls should stay within that scope. Consumer CSS owns body resets and sample-specific spacing. Neither public code nor styles write storage, create an app or contact CU. This example intentionally does not persist preferences.
 
@@ -102,7 +102,7 @@ The actual App.vue starts flat and uses a radio to switch grouping without chang
 
 ## Element Plus page composition
 
-CU's private **Page samples** page demonstrates a table, validated form, edit dialog and manually selected normal/loading/empty/failed states. Data and retry/submit/edit feedback exist only in memory; reload resets samples. The eight public components and their APIs stay unchanged. The independent consumer composes a smaller table/form/dialog directly from its own Element Plus dependency, with its own locale and state; it never imports PageSamples or workbench files.
+CU's private **Page samples** page demonstrates a table, validated form, edit dialog and manually selected normal/loading/empty/failed states. Data and retry/submit/edit feedback exist only in memory; reload resets samples. The page sample composes the public card and button components. The independent consumer composes a smaller table/form/dialog directly from its own Element Plus dependency, with its own locale and state; it never imports PageSamples or workbench files.
 
 Import Element Plus CSS before `@aw-ui-styles`. Use `aw-data-table` on `ElTable`, `aw-sample-form` on `ElForm`, `aw-form-actions` for actions and `aw-page-state` for state content. Public CSS maps Element Plus variables to the current scoped `--agent-*` tokens; page layout belongs to each host. These classes are style conventions, not new public Vue components.
 

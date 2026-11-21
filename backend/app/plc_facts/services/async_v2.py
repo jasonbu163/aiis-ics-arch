@@ -4,8 +4,11 @@ import hmac
 
 from sqlalchemy.exc import IntegrityError
 
+from ..consumption_domain import ConsumerError
+from ..crud import async_consumption as consumption_crud
 from ..crud import async_v2 as crud
 from ..crud import async_source_registry as registry
+from ..v2_config import CONSUMPTION_REVISIONS
 from ..v2_domain import V2Error, public_points, real_number, validate_times, wire_time
 
 
@@ -27,12 +30,28 @@ def existing_outcome(rows, sample, digest):
 
 
 async def write_sample(db, profile, sample, document, digest, boundary):
+    from . import async_consumption as consumption
+
+    tracked = profile['target'].get('schemaRevision') in CONSUMPTION_REVISIONS
+    request = boundary.get('target_write')
     try:
         now = await crud.target_now(db, profile['target'])
         source_type = await registry.admit(db, sample)
+        if tracked:
+            seq = await consumption.reserve_sample_event(db, sample, digest, request, source_type)
+            now = await consumption_crud.clock(db)
         observed, expires = validate_times(sample, now)
-        await crud.insert_sample(db, sample, document, digest, observed, expires, now,
-                                 source_type)
+        if tracked:
+            await consumption_crud.set_append_marker(db, seq, digest)
+        try:
+            await crud.insert_sample(db, sample, document, digest, observed, expires, now, source_type)
+        finally:
+            if tracked:
+                try:
+                    await consumption_crud.set_append_marker(db, None)
+                except Exception:
+                    await db.invalidate()
+                    raise
         await crud.advance_latest(db, sample, observed, expires)
         validate_times(sample, await crud.target_now(db, profile['target']))
         boundary['commit_attempted'] = True
@@ -48,20 +67,23 @@ async def write_sample(db, profile, sample, document, digest, boundary):
         try:
             await db.rollback()
             await crud.target_now(db, profile['target'])
-            await registry.admit(db, sample)
+            source_type = await registry.admit(db, sample)
+            if tracked:
+                await consumption_crud.lock_stream(db, crud.key(sample.plc_id), sample.db_number)
+                await consumption.enforce_target(db, sample, digest, request, source_type)
             rows = await crud.identities(db, sample)
             validate_times(sample, await crud.target_now(db, profile['target']))
             outcome = existing_outcome(rows, sample, digest)
             await db.rollback()
             if outcome:
                 return receipt(sample, outcome)
-        except V2Error:
+        except (V2Error, ConsumerError):
             await db.rollback()
             raise
         except Exception:
             raise V2Error('not_ready', 503) from None
         raise V2Error('not_ready', 503) from None
-    except V2Error:
+    except (V2Error, ConsumerError):
         await db.rollback()
         raise
     except Exception:
@@ -160,6 +182,10 @@ async def detail(db, profile, identity):
     row = await crud.detail(db, identity, now)
     if row is None:
         raise V2Error('not_found', 404)
+    return sample_detail(row)
+
+
+def sample_detail(row):
     result = summary(row, len(row.points_json))
     result['points'] = public_points(row.points_json)
     return result

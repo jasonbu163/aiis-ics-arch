@@ -252,8 +252,10 @@ test('actual source preserves Core route identity, shell locales and default-dis
   assert.deepEqual(registry.activeModuleNames.filter(name => name !== 'acquisition-data'), ['plan', 'performance', 'monitor', 'equipment', 'auxiliary', 'quality', 'system', 'maintenance'])
   assert.deepEqual(registry.routes.filter(route => !route.path.startsWith('acquisition-data/')).map(route => [route.name, route.path, route.meta.pageId]), [
     ['PlanList', 'plan/list', 'plan.list'],
+    ['PlanLocalFields', 'plan/local-fields', 'plan.local-fields'],
     ['PlanSharedFields', 'plan/shared-fields', 'plan.shared-fields'],
     ['PerformanceList', 'performance/list', 'performance.list'],
+    ['PerformanceLocalFields', 'performance/local-fields', 'performance.local-fields'],
     ['PerformanceSharedFields', 'performance/shared-fields', 'performance.shared-fields'],
     ['MonitorTemperature', 'monitor/temperature', 'monitor.temperature'],
     ['MonitorEnergy', 'monitor/consumption', 'monitor.energy'],
@@ -308,6 +310,7 @@ test('five adapted modules retain order, owned bilingual titles and current visi
   ]
   const pages = [
     ['performance.list', 'performance.list', 10, 'List'],
+    ['performance.local-fields', 'performance.workflow.fieldSettings', 15, 'Setting'],
     ['performance.shared-fields', 'performance.workflow.sharedFieldSettings', 20, 'Setting'],
     ['monitor.temperature', 'monitor.temperature', 20, 'TrendCharts'],
     ['monitor.energy', 'monitor.energy', 30, 'Cpu'],

@@ -2,7 +2,9 @@
 
 [中文](README.zh-CN.md) · [OpenAPI](openapi.json) · [Synthetic requests](vectors.json) · [Private profile example](example-profile.json) · [Approved r10 spec](../../../../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md#r10-source-independent-energy)
 
-Post-retirement source accepts only v2, rejects old v1 after authentication and authorization, and never replays archived receipts. Its private profile accepts only `c9e1a3b5d720`. The published vectors, OpenAPI and example profile retain their original version. [Retirement specification](../../../../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+Post-retirement source accepts only v2, rejects old v1 after authentication and authorization, and never replays archived receipts. Its private profile accepts only `d8f2a4c6b915`. The published vectors, OpenAPI and example profile retain their original version. [Retirement specification](../../../../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+
+Equipment and process observations share the `observation_metric_*` configuration tables and write receipts to `observation_ingest_receipts`. Meter samples use `energy_ingest_receipts` independently. The migration preserves existing IDs and retry results.
 
 This contract describes the r10 v2 payload and current operations. A private server profile binds each machine Bearer producer to allowed equipment, targets, groups, metrics and meters; the producer can be SMA, a third party or another authorized program. The request cannot grant access, and no PLC evidence is required. This does not establish that an SMA product has implemented delivery. Profiles are cached by the process and changes require a coordinated reload. The example target and hash are unusable placeholders; never commit a real token or private profile.
 

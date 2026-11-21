@@ -36,7 +36,7 @@ def test_task_no_ascii_and_numeric_domain():
 
 
 def test_profile_rejects_nonstring_uuid():
-    profile = {"target": {"serverUuid": 123, "schema": "fixture", "schemaRevision": "c9e1a3b5d720"},
+    profile = {"target": {"serverUuid": 123, "schema": "fixture", "schemaRevision": "d8f2a4c6b915"},
                "devices": [], "readScopes": {}, "producers": [], "historyRules": [], "groupSettings": []}
     with pytest.raises(ValueError):
         parse_profile(profile)

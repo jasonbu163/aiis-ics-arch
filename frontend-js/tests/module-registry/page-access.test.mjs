@@ -31,7 +31,7 @@ test('role arrays reject missing, broken, duplicate, forbidden and non-subset co
   assert.throws(() => parseRolePageAccess(env(['aiis_demo.example']), registry), /disabled pageId aiis_demo.example/)
   assert.throws(() => parseRolePageAccess(env(['system.projection-mapping']), registry), /unknown pageId/)
   assert.throws(() => parseRolePageAccess(env(['monitor.realtime']), registry), /unknown pageId/)
-  for (const id of ['equipment.observations.admin', 'monitor.observations.admin'])
+  for (const id of ['equipment.observations.admin', 'monitor.observations.admin', 'plan.local-fields', 'performance.local-fields'])
     assert.throws(() => parseRolePageAccess(env([id]), registry), /admin-only pageId/)
   for (const retired of ['dashboard.home','performance.split','performance.print','performance.efficiency','performance.quality']) assert.throws(() => parseRolePageAccess(env([retired]), registry), /unknown pageId|disabled pageId/)
   assert.throws(() => parseRolePageAccess(env(['plan.list'], ['performance.list']), registry), /absent from VITE_SUPERVISOR/)
@@ -42,7 +42,8 @@ test('admin, supervisor, operator and unknown share route/menu/default decisions
   const grants = parseRolePageAccess(env(['plan.list', 'performance.list'], ['plan.list']), registry)
   const matrix = {
     admin: { paths: [
-      '/plan/list', '/plan/shared-fields', '/performance/list', '/performance/shared-fields', '/monitor/temperature', '/monitor/consumption', '/monitor/drive',
+      '/plan/list', '/plan/local-fields', '/plan/shared-fields', '/performance/list', '/performance/local-fields', '/performance/shared-fields',
+      '/monitor/temperature', '/monitor/consumption', '/monitor/drive',
       '/monitor/cleaning', '/monitor/observations/admin', '/monitor/observations/data', '/equipment/production-parameters', '/equipment/drive',
       '/equipment/temperature', '/equipment/cleaning', '/equipment/observations/admin', '/equipment/observations/data',
       '/auxiliary/stop', '/auxiliary/shift', '/auxiliary/price', '/quality/list', '/quality/spc',

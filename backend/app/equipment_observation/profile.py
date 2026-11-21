@@ -12,7 +12,8 @@ from settings import resolve_env_file
 from common.integration.envelope import identifier as core_identifier
 from .domain import ObservationError
 
-REVISIONS = ("c9e1a3b5d720",)
+WRITE_SOURCES_REVISION = "e9f3b5d7c021"
+REVISIONS = (WRITE_SOURCES_REVISION,)
 
 
 def valid_identifier(value, limit=64):
