@@ -427,3 +427,7 @@ The [Plan and Performance v2 candidate](../contracts/published/http-api/generic-
 The forward-only candidate `ae20b4d6f831` follows `9d1f3a5c7e20`. It requires the exact target and reviewed timezone/dependency/history evidence. It creates field-configuration usage evidence and updates task constraints. MySQL DDL may commit in stages. Follow the [task cutover proposal](../plans/ARCH-TASK-001-generic-plan-performance/tasks.md) before any data or service operation. PLC Facts, equipment observation and business-time adoption still require matching target profiles and valid evidence.
 
 Generic task integration uses the project's trusted network boundary. The r1 task integration profile and dispatch/producer admission are historical. Login roles still apply to frontend APIs, and configuration changes require admin.
+
+## Task quality results
+
+The Quality module stores structured results in `quality_main` and manages its definitions in `quality_field_config`. The explicit Alembic successor `f0a2b4c6d8e1` introduces the two tables. Trusted-network ingestion, web editing and field administration use the [quality results HTTP contract](../contracts/published/http-api/quality-results-v1/README.md). File parsing belongs to the external caller.

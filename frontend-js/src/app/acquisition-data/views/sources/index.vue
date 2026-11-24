@@ -2,16 +2,19 @@
      功能描述: 管理员登记、接管或删除 PLC 来源。 -->
 <template>
   <div ref="pageRoot" class="page-layout" :style="{ paddingTop: `${pagePadding}px` }">
-    <BaseCard>
-      <template #title><h3>{{ t('acquisition-data.sourceConfig.title') }}</h3></template>
+    <BaseCard class="data-card" :title="t('acquisition-data.sourceConfig.title')">
       <template #actions>
-        <ActionButton @click="columns.reset">{{ t('acquisition-data.resetWidths') }}</ActionButton>
-        <ActionButton variant="refresh" :loading="loading" @click="load">{{ t('acquisition-data.refresh') }}</ActionButton>
-        <ActionButton variant="primary" @click="openNew">{{ t('acquisition-data.sourceConfig.new') }}</ActionButton>
+        <div class="table-actions">
+          <ActionButton variant="primary" @click="openNew">{{ t('acquisition-data.sourceConfig.new') }}</ActionButton>
+          <el-tooltip :content="t('acquisition-data.resetWidthsHint')" placement="top" :trigger="['hover', 'focus']">
+            <ActionButton @click="columns.reset">{{ t('acquisition-data.resetWidths') }}</ActionButton>
+          </el-tooltip>
+          <ActionButton variant="refresh" :loading="loading" @click="load">{{ t('acquisition-data.refresh') }}</ActionButton>
+        </div>
       </template>
-      <div v-if="loadError" role="alert">{{ t('acquisition-data.sourceConfig.loadFailed') }}</div>
+      <div v-if="loadError" class="message" role="alert">{{ t('acquisition-data.sourceConfig.loadFailed') }}</div>
       <div class="table-scroll">
-        <el-table :key="columns.version.value" v-loading="loading" :data="rows" border stripe
+        <el-table :key="columns.version.value" v-loading="loading" :data="rows" border stripe class="vibe-table"
           :empty-text="t('acquisition-data.sourceConfig.empty')" @header-dragend="columns.onHeaderDragEnd">
           <el-table-column prop="plcId" :label="t('acquisition-data.sourceConfig.plcId')" :width="columns.widths.plcId" min-width="130" show-overflow-tooltip />
           <el-table-column prop="sourceType" :label="t('acquisition-data.sourceConfig.sourceType')" :width="columns.widths.sourceType" min-width="110">
@@ -22,21 +25,26 @@
           <el-table-column prop="createdAt" :label="t('acquisition-data.sourceConfig.createdAt')" :width="columns.widths.createdAt" min-width="170">
             <template #default="{ row }">{{ formatShanghaiDateTime(row.createdAt) || '—' }}</template>
           </el-table-column>
-          <el-table-column :label="t('acquisition-data.columns.actions')" width="320" fixed="right">
+          <el-table-column :label="t('acquisition-data.columns.actions')" width="280" fixed="right" align="center">
             <template #default="{ row }">
-              <ActionButton size="small" @click="openEdit(row)">{{ t('acquisition-data.sourceConfig.edit') }}</ActionButton>
-              <ActionButton size="small" @click="showParameters(row)">{{ t('acquisition-data.sourceConfig.parameters') }}</ActionButton>
-              <ActionButton size="small" :loading="deleting === row.plcId" @click="removeSource(row)">{{ t('acquisition-data.sourceConfig.delete') }}</ActionButton>
+              <div class="row-actions">
+                <ActionButton variant="row" @click="openEdit(row)">{{ t('acquisition-data.sourceConfig.edit') }}</ActionButton>
+                <ActionButton variant="row" @click="showParameters(row)">{{ t('acquisition-data.sourceConfig.parameters') }}</ActionButton>
+                <ActionButton variant="danger" size="small" :loading="deleting === row.plcId" @click="removeSource(row)">{{ t('acquisition-data.sourceConfig.delete') }}</ActionButton>
+              </div>
             </template>
           </el-table-column>
         </el-table>
       </div>
-      <el-pagination v-if="!loadError" :current-page="page" :page-size="pageSize" :total="total"
-        :page-sizes="[20, 50, 100]" layout="total, sizes, prev, pager, next"
-        @current-change="changePage" @size-change="changeSize" />
+      <div v-if="!loadError" class="pagination-scroll">
+        <el-pagination :current-page="page" :page-size="pageSize" :total="total"
+          :page-sizes="[20, 50, 100]" layout="total, sizes, prev, pager, next" class="pagination"
+          @current-change="changePage" @size-change="changeSize" />
+      </div>
     </BaseCard>
 
-    <el-dialog v-model="visible" :title="t(editing ? 'acquisition-data.sourceConfig.editTitle' : 'acquisition-data.sourceConfig.new')" width="min(680px, 95vw)">
+    <el-dialog v-model="visible" :title="t(editing ? 'acquisition-data.sourceConfig.editTitle' : 'acquisition-data.sourceConfig.new')"
+      class="standard-form-dialog compact-form-dialog" :show-close="false" align-center width="min(680px, calc(100vw - 24px))">
       <el-form label-position="top" @submit.prevent="save">
         <div class="source-fields">
           <el-form-item :label="t('acquisition-data.sourceConfig.sourceType')">
@@ -57,17 +65,27 @@
           </el-form-item>
         </div>
         <div v-if="formError" role="alert" class="source-error">{{ formError }}</div>
-        <div class="source-actions">
+      </el-form>
+      <template #footer>
+        <div class="core-dialog-footer">
           <ActionButton @click="visible = false">{{ t('acquisition-data.sourceConfig.cancel') }}</ActionButton>
           <ActionButton variant="primary" :loading="saving" @click="save">{{ t('acquisition-data.sourceConfig.save') }}</ActionButton>
         </div>
-      </el-form>
+      </template>
     </el-dialog>
-    <el-dialog v-model="parametersVisible" :title="t('acquisition-data.sourceConfig.parameters')" width="min(680px, 95vw)">
+    <el-dialog v-model="parametersVisible" :title="t('acquisition-data.sourceConfig.parameters')"
+      class="standard-form-dialog compact-form-dialog" :show-close="false" align-center width="min(680px, calc(100vw - 24px))">
+      <template #header="{ titleId, titleClass }">
+        <h2 :id="titleId" :class="titleClass">{{ t('acquisition-data.sourceConfig.parameters') }}</h2>
+        <div class="table-actions">
+          <ActionButton @click="copyParameters">{{ t('acquisition-data.sourceConfig.copy') }}</ActionButton>
+        </div>
+      </template>
       <el-input ref="parametersInput" :model-value="parameters" type="textarea" :rows="8" readonly />
       <template #footer>
-        <ActionButton @click="copyParameters">{{ t('acquisition-data.sourceConfig.copy') }}</ActionButton>
-        <ActionButton @click="parametersVisible = false">{{ t('acquisition-data.close') }}</ActionButton>
+        <div class="core-dialog-footer">
+          <ActionButton @click="parametersVisible = false">{{ t('acquisition-data.close') }}</ActionButton>
+        </div>
       </template>
     </el-dialog>
   </div>
@@ -165,7 +183,7 @@ async function removeSource(row) {
     await ElMessageBox.confirm(t('acquisition-data.sourceConfig.deleteNotice', { plcId: row.plcId }),
       t('acquisition-data.sourceConfig.deleteTitle'), {
         confirmButtonText: t('acquisition-data.sourceConfig.deleteConfirm'),
-        cancelButtonText: t('acquisition-data.sourceConfig.cancel'), type: 'warning'
+        cancelButtonText: t('acquisition-data.sourceConfig.cancel'), type: 'warning', confirmButtonType: 'danger', showClose: false
       })
   } catch { return }
   deleting.value = row.plcId
@@ -202,7 +220,8 @@ async function save() {
         newType: t(`acquisition-data.source.${draft.sourceType}`),
         newInstance: draft.instanceId, newGeneration: draft.sourceGeneration
       }), t('acquisition-data.sourceConfig.takeoverTitle'), {
-        confirmButtonText: t('acquisition-data.sourceConfig.confirm'), cancelButtonText: t('acquisition-data.sourceConfig.cancel'), type: 'warning'
+        confirmButtonText: t('acquisition-data.sourceConfig.confirm'), cancelButtonText: t('acquisition-data.sourceConfig.cancel'),
+        type: 'warning', confirmButtonType: 'warning', showClose: false
       })
     } catch { return }
   }
@@ -251,8 +270,24 @@ onBeforeUnmount(() => { requestSequence++; observer?.disconnect() })
 <style scoped>
 .source-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
 .source-fields small { display: block; width: 100%; color: var(--el-text-color-secondary); }
-.source-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .source-error { color: var(--el-color-danger); margin-bottom: 12px; }
-.table-scroll { overflow-x: auto; }
+.page-layout { container-type: inline-size; }
+.data-card { --data-inset: 24px; }
+.data-card :deep(.base-card__body) { padding: 0; }
+.data-card :deep(.base-card__header) { flex-wrap: wrap; padding-block: 12px; }
+.data-card :deep(.base-card__actions) { min-width: 0; max-width: 100%; flex: 0 1 auto; }
+.message { padding: 20px var(--data-inset); color: var(--text-secondary); }
+.table-scroll { padding: 20px var(--data-inset) 0; overflow-x: auto; }
+.pagination-scroll { padding: 18px var(--data-inset) 24px; overflow-x: auto; }
+.pagination { display: flex; justify-content: flex-end; width: max-content; min-width: 100%; }
+@container (max-width: 640px) {
+  .data-card { --data-inset: 16px; }
+  .data-card :deep(.base-card__header) { padding-inline: var(--data-inset); }
+}
+@container (max-width: 320px) {
+  .data-card { --data-inset: 8px; }
+  .data-card :deep(.base-card__actions) { width: 100%; }
+  .table-scroll :deep(.el-table-fixed-column--right) { position: static !important; }
+}
 @media (max-width: 620px) { .source-fields { grid-template-columns: minmax(0, 1fr); } }
 </style>

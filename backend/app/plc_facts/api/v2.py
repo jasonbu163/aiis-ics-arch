@@ -151,14 +151,15 @@ async def latest_browse(plc_id: str | None = Query(None, alias='plcId'),
 
 
 @router.get('/acquisition-data/history', operation_id='plc_facts_v2_history', response_model=HistoryOut, responses=HISTORY_RESPONSES)
-async def history(start: str = Query(alias='from'), end: str = Query(alias='to'),
+async def history(start: str | None = Query(None, alias='from'), end: str | None = Query(None, alias='to'),
                   plc_id: str | None = Query(None, alias='plcId'),
                   db_number: int | None = Query(None, alias='dbNumber', ge=1, le=65535), page: int = Query(1, ge=1),
                   page_size: int = Query(50, alias='pageSize', ge=1, le=100)):
     profile = get_profile()
     if plc_id is not None:
         identifier(plc_id)
-    start_time, end_time = parse_time(start), parse_time(end)
+    start_time = parse_time(start) if start is not None else None
+    end_time = parse_time(end) if end is not None else None
     db = await get_db_session()
     try:
         return success(await service.history(db, profile, plc_id, db_number, start_time, end_time, page, page_size))

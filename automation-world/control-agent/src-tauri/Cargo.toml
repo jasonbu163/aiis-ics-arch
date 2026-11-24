@@ -29,3 +29,7 @@ tracing = "0.1"
 tracing-appender = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
 libc = "0.2"
+reqwest = { version = "0.13.4", default-features = false, features = ["blocking", "rustls"] }
+sha2 = "0.10"
+uuid = { version = "1", features = ["v4"] }
+tauri-plugin-dialog = "2.7.2"

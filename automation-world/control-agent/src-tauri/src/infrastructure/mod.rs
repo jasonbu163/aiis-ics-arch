@@ -14,3 +14,4 @@ pub(crate) mod plc_points;
 pub(crate) mod plc_s7;
 pub(crate) mod plc_snapshot_policy;
 pub(crate) mod rust_snap7_adapter;
+pub(crate) mod ca_store;

@@ -408,3 +408,7 @@ Numeric保持声明的小数位；FLOAT采用有界binary32规范化，相对误
 仅向前的后继候选 `ae20b4d6f831` 接续 `9d1f3a5c7e20`。执行前须精确识别目标，并核实历史、依赖与时区证据。它补录字段配置使用证据并调整任务约束。MySQL DDL 可能分段提交，操作前按[任务切换提案](../plans/ARCH-TASK-001-generic-plan-performance/tasks.md)取得相应授权。采集事实、设备观测及业务时间采用仍要求 profile 和真实目标匹配，并具备有效证据。
 
 通用任务集成依赖项目可信网络边界。r1 任务集成 profile、下发与来源登记属历史流程。网页入口仍要求登录及角色授予，字段设置仅管理员可写入。
+
+## 任务质量结果
+
+质量模块将结构化结果保存在 `quality_main`，本地字段定义保存在 `quality_field_config`。显式 Alembic 后继修订 `f0a2b4c6d8e1` 引入两表，可信网络上报、人工编辑和字段管理见[质量结果 HTTP 合同](../contracts/published/http-api/quality-results-v1/README.zh-CN.md)。报告文件由外部调用方解析。

@@ -64,12 +64,13 @@ def main(argv=None):
         from settings import settings
         target=load_profile(V2Settings())['target']
         expected_target={'alias':args.target_alias,'schema':args.schema,'serverUuid':args.expected_server_uuid,'schemaRevision':args.expected_schema_revision}
-        if target!=expected_target: raise ValueError('target mismatch')
+        if any(target[key] != expected_target[key] for key in ('alias', 'schema', 'serverUuid')):
+            raise ValueError('target mismatch')
         engine=create_engine(settings.SYNC_DATABASE_URL,poolclass=NullPool,
                              connect_args={'connect_timeout':2,'read_timeout':2,'write_timeout':2})
         db=Session(engine,expire_on_commit=False,autoflush=False)
         try:
-            result=run(db,target,apply)
+            result=run(db,expected_target,apply)
         finally:
             try:
                 db.close()

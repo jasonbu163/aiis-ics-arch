@@ -11,7 +11,7 @@ pytestmark = pytest.mark.no_db
 @pytest.fixture
 def migration():
     graph = ScriptDirectory.from_config(Config('alembic.ini'))
-    assert graph.get_heads() == ['e9f3b5d7c021']
+    assert graph.get_heads() == ['a1c307f8d2e4']
     assert graph.get_revision('ae20b4d6f831').down_revision == '9d1f3a5c7e20'
     return graph.get_revision('ae20b4d6f831').module
 

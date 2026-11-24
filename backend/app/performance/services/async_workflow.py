@@ -35,7 +35,8 @@ def _order_snapshot(fields, plan):
     if plan is None:
         return {}
     return {slot: plan.sync_values[slot] for field in fields
-            if field.scope == 'shared_sync' and field.enabled and field.performance_owner == 'order_snapshot'
+            if field.scope == 'shared_sync' and field.enabled
+            and field.performance_owner in ('order_snapshot', 'snapshot_auto')
             and (slot := slot_key(field.slot_no)) in plan.sync_values}
 
 

@@ -34,13 +34,13 @@ For a later r2 adoption, pass the complete export as `--generation-file <source-
 
 ## v2 expiry cleanup
 
-`cleanup-v2` requires an explicit `--plan` or `--apply`, target alias, schema, server UUID, revision, operation approval reference and confirmer. The target must match the private v2 profile and the live database. This preview uses synthetic target values.
+`cleanup-v2` requires an explicit `--plan` or `--apply`, target alias, schema, server UUID, revision, operation approval reference and confirmer. The alias, schema and server UUID must match the private v2 profile, and the supplied revision must match the live database exactly. Cleanup requires the active nine-table layout. This preview uses synthetic target values.
 
 ```bash
-uv run --offline --frozen --no-sync python scripts/plc_facts_maintenance/main.py cleanup-v2 --plan --target-alias dev-example --schema fixture_schema --expected-server-uuid 00000000-0000-4000-8000-000000000001 --expected-schema-revision 7b9d1f3a5c7e --operation-approval fixture-approval --confirmed-by fixture-operator
+uv run --offline --frozen --no-sync python scripts/plc_facts_maintenance/main.py cleanup-v2 --plan --target-alias dev-example --schema fixture_schema --expected-server-uuid 00000000-0000-4000-8000-000000000001 --expected-schema-revision a1c307f8d2e4 --operation-approval fixture-approval --confirmed-by fixture-operator
 ```
 
-The cleanup byte budget includes the nullable history `source_type`; history cleanup removes whole samples from `plc_facts_history`, while latest cleanup clears values and preserves the ordering watermark in `plc_facts_latest`.
+The cleanup byte budget includes the nullable history `source_type`; history cleanup removes whole samples from `acq_plc_facts_history`, while latest cleanup clears values and preserves the ordering watermark in `acq_plc_facts_latest`.
 
 For execution, set `PLC_FACTS_MAINTENANCE_ENABLED=True`, replace `--plan` with `--apply`, and provide `--confirm APPLY:cleanup-v2:<alias>:<schema>:<server-uuid>:<revision>`. Plan and apply emit JSON Lines with row and byte counts, oldest backlog and completion time. Each transaction processes at most 200 rows and 2 MiB. Each tick processes at most 2000 rows and 20 MiB with a two-second processing budget. An external scheduler invokes the command every minute and monitors completion and backlog. History rows are deleted while latest rows retain their instance, generation and sequence watermark.
 
@@ -49,3 +49,13 @@ Each transaction sets bounded row-lock and metadata-lock waits before the target
 Use the existing project environment: `uv run --offline --frozen --no-sync python scripts/plc_facts_maintenance/main.py` prints help before settings/database imports, as does `--help`. There is no default input/output file, target, seed, DDL, scheduler or packaged artifact.
 
 The old v1 `status`, `adopt` and `cleanup` commands are retired. Actual cleanup remains separately authorized and target-scoped.
+
+## ARCH-ACQ-007 table-name cutover
+
+The forward-only migration `a1c307f8d2e4` starts from the single quality predecessor `f0a2b4c6d8e1`. Obtain approval for the actual MySQL UUID, schema and predecessor. Preserve a restorable backup and a nine-table baseline with keys, row counts and evidence for the latest watermark and existing consumers. Stop and drain source changes, sample writes, consumers, cleanup and direct database writers. Keep old and new processes stopped during the entire window.
+
+Have the target owner review table-level grants, SQL tools and reports, plus views, foreign keys, routines, scheduled events and other trigger bodies. The migration rejects known foreign-key and view references visible to the maintenance account. Inventory references outside that account's visibility before confirming the window. MySQL table-level grants on old names stay with those names. Verify existing schema-level access or arrange separately approved grants before adoption. The maintenance account must be able to inspect the three history triggers and perform the rename. The online account does not require trigger metadata access.
+
+For an explicitly approved window, set `ACQ_TABLE_NAMES_EXPECTED_SCHEMA`, `ACQ_TABLE_NAMES_EXPECTED_SERVER_UUID` and `ACQ_TABLE_NAMES_WINDOW_CONFIRMED=<schema>:<uuid>:f0a2b4c6d8e1` and run `uv run --offline --frozen --no-sync alembic upgrade a1c307f8d2e4` from `backend/`. Confirm the new revision, nine tables, row and key evidence and all three history trigger definitions and behaviors before resuming. Check the runtime account against the new names and confirm that other modules sharing the database accept the new revision. A missing append event prevents a successful write or duplicate response. An online account cannot detect privileged edits to the immutable or expiry triggers outside this window.
+
+The three names change in one same-schema statement. MySQL commits DDL separately from the Alembic revision update. After an error keep writes stopped and capture the exact names, constraints, trigger definitions, consumer state and actual revision. An already or partially renamed predecessor is rejected on rerun. Compare the observed state and any committed facts to the backup before obtaining approval for a forward repair or restore. Avoid blind stamping, deleting tables or overwriting facts that cannot be replayed.

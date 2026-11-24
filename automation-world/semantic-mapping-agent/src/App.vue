@@ -1,7 +1,7 @@
 <!-- SMA消费CU公共壳层；主题、语言、导航与业务状态由本应用持有。 -->
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { Connection, DataAnalysis, Document, Grid, Link, Operation, Setting, Share, Tickets, VideoPlay } from "@element-plus/icons-vue";
+import { Connection, DataAnalysis, Document, Grid, Link, Operation, RefreshRight, Setting, Share, Tickets, VideoPlay } from "@element-plus/icons-vue";
 import { ElConfigProvider } from "element-plus";
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 import en from "element-plus/es/locale/lang/en";
@@ -26,6 +26,7 @@ const resolve = (key: string) => (labels.value as unknown as Record<string, stri
 const leaves = [
   { id: "connection", page: "backendConnection", view: "", label: "navBackendConnection", icon: Link },
   { id: "source-facts", page: "twinFacts", view: "contract", label: "factsTableTitle", icon: Tickets },
+  { id: "acquisition-loopback", page: "twinFacts", view: "loopback", label: "acquisitionLoopbackTitle", icon: RefreshRight },
   { id: "api-materials", page: "mappingIdentity", view: "apiMaterials", label: "apiMaterialsTitle", icon: Document },
   { id: "target-apis", page: "mappingIdentity", view: "targetApis", label: "targetApiConfigurationTitle", icon: Setting },
   { id: "value-rules", page: "mappingIdentity", view: "valueRules", label: "mappingValueRulesTitle", icon: Operation },
@@ -35,7 +36,7 @@ const leaves = [
 const activeId = computed(() => leaves.find(item => item.page === activePage.value && item.view === activeView.value)?.id ?? "connection");
 const groups = [
   { id: "connection-group", label: "navConnectionGroup", icon: Connection, ids: ["connection"] },
-  { id: "facts-group", label: "sourceFactsWorkspace", icon: DataAnalysis, ids: ["source-facts"] },
+  { id: "facts-group", label: "sourceFactsWorkspace", icon: DataAnalysis, ids: ["source-facts", "acquisition-loopback"] },
   { id: "interfaces-group", label: "navInterfacesGroup", icon: Grid, ids: ["api-materials", "target-apis"] },
   { id: "mappings-group", label: "navMappingGroup", icon: Share, ids: ["value-rules", "mappings"] },
   { id: "runtime-group", label: "mappingRuntimeWorkspace", icon: VideoPlay, ids: ["runtime"] },
@@ -65,7 +66,7 @@ onMounted(async () => { try { await loadAppDefaults(); ioEnabled.value = externa
         <p v-if="!ioEnabled" class="hint io-notice" role="status">{{ labels.externalIoDisabled }}</p>
         <p v-if="!ready" role="status">{{ labels.loading }}</p>
         <div v-if="ready" v-show="activePage === 'backendConnection'"><ConnectionModuleView :labels="labels" /></div>
-        <div v-if="ready" v-show="activePage !== 'backendConnection'"><TwinFactsModuleView :labels="labels" :enabled="isTauriRuntime()" :page="activePage" :view="activeView" /></div>
+        <div v-if="ready" v-show="activePage !== 'backendConnection'"><TwinFactsModuleView :labels="labels" :enabled="isTauriRuntime()" :page="activePage" :view="activeView" @navigate="select" /></div>
       </section>
       <BackToTopButton :label="labels.backToTop" />
     </AgentLayout>

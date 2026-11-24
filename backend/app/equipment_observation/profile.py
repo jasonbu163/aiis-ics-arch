@@ -13,7 +13,7 @@ from common.integration.envelope import identifier as core_identifier
 from .domain import ObservationError
 
 WRITE_SOURCES_REVISION = "e9f3b5d7c021"
-REVISIONS = (WRITE_SOURCES_REVISION,)
+REVISIONS = (WRITE_SOURCES_REVISION, "f0a2b4c6d8e1")
 
 
 def valid_identifier(value, limit=64):

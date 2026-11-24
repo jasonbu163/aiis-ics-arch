@@ -11,7 +11,6 @@ from ..crud import async_consumption as crud
 from ..crud import async_source_registry as registry
 from ..crud import async_v2 as facts
 from ..models.consumption import AcquisitionConsumer, AcquisitionDelivery, AcquisitionOperation
-from ..v2_config import CONSUMPTION_REVISIONS
 from ..v2_domain import MAX_SEQUENCE, V2Error, wire_time
 from . import async_v2 as facts_service
 
@@ -105,8 +104,6 @@ async def first_event(db, item, now):
 
 async def dispatch(db, profile, boundary, action, grant, *args):
     """统一目标守卫及提交未知；纯查询关闭会话时归还行锁。"""
-    if profile['target'].get('schemaRevision') not in CONSUMPTION_REVISIONS:
-        raise ConsumerError('not_ready', 503)
     await facts.target_now(db, profile['target'])
     result = await action(db, grant, *args)
     if action in (create, set_run_state, change_lease, mark_pending, acknowledge):

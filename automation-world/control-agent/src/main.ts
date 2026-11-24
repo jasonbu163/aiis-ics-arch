@@ -32,7 +32,6 @@ import 'element-plus/dist/index.css'
 import App from './App.vue'
 import { i18n } from './locales'
 import './styles/theme.css'
-import './styles/app.css'
 
 const app = createApp(App)
 

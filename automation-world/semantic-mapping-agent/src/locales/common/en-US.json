@@ -45,7 +45,7 @@
   "httpEnabled": "HTTP enabled",
   "httpDisabled": "HTTP off",
   "batchFormatHint": "JSON / XLSX · Backend preview",
-  "localConfigurationOnly": "Local mapping configurations support pure preview. The source page supports a manual acquisition loopback. Continuous delivery and automatic resume are unavailable.",
+  "localConfigurationOnly": "Local mapping configurations support pure preview. Use Manual Loopback to test acquisition data. Continuous delivery and automatic resume are unavailable.",
   "cardHelpSuffix": " help",
   "savedItemCount": "Saved · {count}",
   "localConfigurationHelp": "The full backup includes local business configuration. Preview the replacement and deletion scope before confirming a restore.",

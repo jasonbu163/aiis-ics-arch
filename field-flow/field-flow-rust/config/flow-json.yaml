@@ -1,0 +1,10 @@
+schema_version: 2
+instance_id: ff-rust-flow-json
+plc_files: []
+plc_runtime: []
+flows: []
+flow_files: [demo01.json]
+flow_http_endpoints:
+  - {id: demo_feed, base_url: "http://127.0.0.1:34880", source_id: demo01-feed, input_max_age_ms: 10000}
+http: {connect_timeout_ms: 500, total_timeout_ms: 1500, pool_wait_ms: 500, max_connections: 8, max_body_bytes: 4096}
+shutdown_timeout_ms: 15000

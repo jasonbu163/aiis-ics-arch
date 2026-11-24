@@ -19,6 +19,7 @@ def _task_time_input(value):
 
 
 TaskDateTime = Annotated[datetime, BeforeValidator(_task_time_input)]
+PerformanceOwner = Literal['order_snapshot', 'automated', 'manual', 'snapshot_auto']
 
 
 class FieldChange(BaseModel):
@@ -32,7 +33,7 @@ class FieldChange(BaseModel):
     isNullable: StrictBool | None = None
     enabled: StrictBool | None = None
     syncEnabled: StrictBool | None = None
-    performanceOwner: Literal['order_snapshot', 'automated', 'manual'] | None = None
+    performanceOwner: PerformanceOwner | None = None
     planEditable: StrictBool | None = None
     performanceEditable: StrictBool | None = None
     planVisible: StrictBool | None = None
@@ -93,7 +94,7 @@ class FieldDefinitionResult(BaseModel):
     enabled: bool
     isNullable: bool
     syncEnabled: bool | None
-    performanceOwner: Literal['order_snapshot', 'automated', 'manual'] | None
+    performanceOwner: PerformanceOwner | None
     planEditable: bool | None
     performanceEditable: bool | None
     planVisible: bool | None

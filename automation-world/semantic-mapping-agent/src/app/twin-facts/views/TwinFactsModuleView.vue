@@ -14,8 +14,9 @@ defineProps<{
   page: AppPage;
   view: string;
 }>();
+const emit = defineEmits<{ navigate: [id: string] }>();
 </script>
 
 <template>
-  <TwinJsonContractPanel :labels="labels" :enabled="enabled" :page="page" :view="view" />
+  <TwinJsonContractPanel :labels="labels" :enabled="enabled" :page="page" :view="view" @navigate="emit('navigate', $event)" />
 </template>

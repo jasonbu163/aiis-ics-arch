@@ -84,7 +84,9 @@
       </div></template></el-table-column>
     </el-table>
     <el-pagination v-if="kind === 'samples'" v-model:current-page="page" :disabled="saving" :page-size="20" :total="total" layout="total, prev, pager, next" @current-change="load" />
-    <el-dialog v-model="dialog" :title="tr(isConfig ? (editing ? 'edit' : 'add') : 'detail')" class="standard-form-dialog" width="min(680px, 94vw)">
+    <el-dialog v-model="dialog" :title="tr(isConfig ? (editing ? 'edit' : 'add') : 'detail')" class="standard-form-dialog"
+      :class="{ 'observation-config-dialog': isConfig }" width="min(680px, 94vw)" :align-center="isConfig"
+      :show-close="!isConfig" :close-on-click-modal="!isConfig">
       <el-form v-if="kind === 'config'" label-position="top">
         <el-form-item :label="t('monitor.observation.meter')">
           <el-select v-model="form.meterId" :disabled="editing" :placeholder="t('monitor.observation.selectMeter')">

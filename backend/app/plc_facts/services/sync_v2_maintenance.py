@@ -4,7 +4,6 @@ import time
 from sqlalchemy import text
 
 from ..crud import sync_v2_maintenance as crud
-from ..v2_config import CONSUMPTION_REVISIONS
 from ..v2_domain import wire_time
 
 MAX_ROWS_PER_TRANSACTION = 200
@@ -33,7 +32,7 @@ def run(db, target, apply):
         if time.monotonic() >= deadline:
             db.rollback()
             raise TimeoutError('cleanup budget exhausted before target verification')
-        now = crud.target_now(db, target)
+        now = crud.target_now(db, target, require_layout=True)
         selected = []
         for item in crud.candidates(db, now, MAX_ROWS_PER_TRANSACTION, False, deadline):
             if len(selected) == MAX_ROWS_PER_TRANSACTION or sum(row[3] for row in selected) + item[3] > MAX_BYTES_PER_TRANSACTION:
@@ -54,7 +53,7 @@ def run(db, target, apply):
             if now is None:
                 raise TimeoutError('cleanup budget exhausted before target verification')
             break
-        now = crud.target_now(db, target)
+        now = crud.target_now(db, target, require_layout=True)
         if time.monotonic() >= deadline:
             db.rollback()
             break
@@ -66,10 +65,7 @@ def run(db, target, apply):
             if (batch_bytes + size > MAX_BYTES_PER_TRANSACTION or byte_count + batch_bytes + size > MAX_BYTES_PER_TICK
                     or time.monotonic() >= deadline):
                 break
-            if target.get('schemaRevision') in CONSUMPTION_REVISIONS:
-                batch_rows += crud.clear(db, candidate, now, guarded=True)
-            else:
-                batch_rows += crud.clear(db, candidate, now)
+            batch_rows += crud.clear(db, candidate, now)
             batch_bytes += size
         db.commit()
         rows += batch_rows

@@ -135,7 +135,7 @@
       <el-backtop
         target=".main-content"
         :right="32"
-        :bottom="32"
+        :bottom="84"
         :visibility-height="240"
         class="main-backtop"
         :title="$t('common.backToTop')"
@@ -1077,7 +1077,6 @@ onBeforeUnmount(() => {
 
   :deep(.main-backtop.el-backtop) {
     right: 18px !important;
-    bottom: 18px !important;
   }
 
   .sidebar-hidden {

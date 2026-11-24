@@ -1,5 +1,9 @@
 # Control Agent Plan
 
+## Editable workflows
+
+[ARCH-AW-009 r2](../../plans/ARCH-AW-009-ca-flow-editor-json/spec.md) adds the current editor entry. Full-flow execution, a reusable S7 connection pool and FF consumption are later work. The retained console and headless collector follow the historical compatibility baseline below. DAA continues bulk acquisition and SMA continues batch HTTP mapping.
+
 ## Current baseline
 
 The Control Agent is an optional companion runtime for AIIS ICS Architecture.

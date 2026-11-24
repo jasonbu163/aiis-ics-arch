@@ -6,6 +6,7 @@ English version: [PLAN.md](PLAN.md)
 
 | Task ID | 聚合状态 | 范围 | 最新事实 / 下一 gate |
 | --- | --- | --- | --- |
+| FF-006 | `qa_passed` (r1) | [Rust 流程 JSON 接入](plans/FF-006-rust-flow-json/spec.md) | 独立 QA2 通过 AC01–AC08，关闭边定位问题。待 Human Owner 最终验收及 CA 实际导出往返验证。 |
 | FF-005 | `owner_accepted` (r1) | [基础与进阶案例库](plans/FF-005-basic-and-advanced-examples/spec.md) | Human Owner已于2026-11-04终验精确r1 A，QA2通过AC01–AC12；QA1历史及旧hold_ack限制保留，自有构建环境已收尾、原始证据保留。后续能力与现场gate仍独立。 [Development](plans/FF-005-basic-and-advanced-examples/tasks.md); [Verification](plans/FF-005-basic-and-advanced-examples/checklist.md). 此处保持FF-005的接受范围；FF-004随后已独立推进至下行r2 A。 |
 | FF-004 | `owner_accepted` (r2 A) | [每PLC一个JSON与多PLC调用](plans/FF-004-plc-json-catalog-and-multi-plc/spec.md) | QA3 在 macOS arm64 回环环境通过 AC01–AC14，Human Owner 于 2026-11-10 最终验收精确 r2 A。旧驱动限制与失败历史保留，现场验证仍属后续。 [Development](plans/FF-004-plc-json-catalog-and-multi-plc/tasks.md); [Verification](plans/FF-004-plc-json-catalog-and-multi-plc/checklist.md). |
 | FF-003 | `dev_blocked` (r2) | [C# 运行时与 demo01](plans/FF-003-csharp-runtime-demo01/spec.md) | C# 源码和 macOS arm64 开发自检已完成。正式树与独立副本各通过 21 项测试，5 组回环进程场景通过。Win10 x64 原生验证待实验宿主。 [开发记录](plans/FF-003-csharp-runtime-demo01/tasks.md). |

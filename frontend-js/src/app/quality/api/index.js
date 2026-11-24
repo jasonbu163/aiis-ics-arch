@@ -46,3 +46,31 @@ export async function getSPCData(params) {
 export async function getSPCStats(params) {
   return callApi(() => mockApi.getSPCStats(params), () => request.get('/quality/spc/stats', { params }), 'quality.getSPCStats')
 }
+
+const qualityResultOptions = { suppressErrorMessage: true }
+
+export const listQualityResults = params => callApi(
+  () => mockApi.listQualityResults(params),
+  () => request.get('/quality/results', { ...qualityResultOptions, params }),
+  'quality.listQualityResults'
+)
+export const getQualityResult = taskNo => callApi(
+  () => mockApi.getQualityResult(taskNo),
+  () => request.get(`/quality/results/by-task/${encodeURIComponent(taskNo)}`, qualityResultOptions),
+  'quality.getQualityResult'
+)
+export const saveQualityResult = body => callApi(
+  () => mockApi.saveQualityResult(body),
+  () => request.post('/quality/results/upsert', body, qualityResultOptions),
+  'quality.saveQualityResult'
+)
+export const getQualityFieldConfig = () => callApi(
+  () => mockApi.getQualityFieldConfig(),
+  () => request.get('/quality/field-config', qualityResultOptions),
+  'quality.getQualityFieldConfig'
+)
+export const saveQualityFieldConfig = body => callApi(
+  () => mockApi.saveQualityFieldConfig(body),
+  () => request.put('/quality/field-config', body, qualityResultOptions),
+  'quality.saveQualityFieldConfig'
+)

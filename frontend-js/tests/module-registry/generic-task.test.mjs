@@ -37,7 +37,7 @@ const details = { id: '1', taskNo: 'FIXTURE-1', productionStatus: 'running', tar
 const config = { configVersion: 7, configRevision: '12', fields: savedFields }
 
 function mount(component, kind, options = {}) {
-  const hooks = [], calls = [], notices = [], local = options.local ?? new Map(), locale = vue.ref(options.locale ?? 'en-US')
+  const hooks = [], unmountHooks = [], leaveHooks = [], calls = [], notices = [], local = options.local ?? new Map(), locale = vue.ref(options.locale ?? 'en-US')
   const open = vue.ref(true)
   const events = []
   const api = {
@@ -56,12 +56,12 @@ function mount(component, kind, options = {}) {
     setItem: (key, value) => local.set(key, value),
     removeItem: key => local.delete(key)
   }
-  const deps = { vue: { ...vue, onMounted: hook => hooks.push(hook), onBeforeUnmount() {}, useModel: () => open },
+  const deps = { vue: { ...vue, onMounted: hook => hooks.push(hook), onBeforeUnmount: hook => unmountHooks.push(hook), useModel: () => open },
     'vue-i18n': { useI18n: () => ({ t: options.t ?? (key => key), te: options.te ?? (() => true), locale }) },
-    'vue-router': { useRouter: () => ({ push: path => calls.push(['navigate', path]) }) },
-    'element-plus': { ElMessage: { error: message => notices.push(message), success() {}, warning() {}, info: message => notices.push(message) } },
+    'vue-router': { onBeforeRouteLeave: hook => leaveHooks.push(hook), useRouter: () => ({ push: path => calls.push(['navigate', path]) }) },
+    'element-plus': { ElMessage: { error: message => notices.push(message), success: message => notices.push(message), warning() {}, info: message => notices.push(message) } },
     '@element-plus/icons-vue': { Setting: {}, QuestionFilled: {} },
-    '@/store/user': { useUserStore: () => ({ role, isAdmin: role === 'admin', hasPageAccess: () => true, username: 'fixture' }) },
+    '@/store/user': { useUserStore: () => ({ role, isAdmin: role === 'admin', hasPageAccess: () => options.planAccess ?? true, username: 'fixture' }) },
     '@/utils/tableColumnWidths': { useTableColumnWidths },
     './useTaskPagePadding': { useTaskPagePadding: () => ({ pageRoot: vue.ref(null), pagePadding: vue.ref(0) }) },
     '../../components/useTaskPagePadding': { useTaskPagePadding: () => ({ pageRoot: vue.ref(null), pagePadding: vue.ref(0) }) },
@@ -73,7 +73,8 @@ function mount(component, kind, options = {}) {
   const state = effect.run(() => component.make(deps).setup({ kind, module: options.module ?? kind, scope: options.scope, api },
     { expose() {}, emit: event => events.push(event) }))
   return { state, api, open, calls, notices, local, locale, events, start: async () => { for (const hook of hooks) await hook() },
-    close: () => { effect.stop(); delete globalThis.localStorage } }
+    leave: () => leaveHooks.forEach(hook => hook()),
+    close: () => { unmountHooks.forEach(hook => hook()); effect.stop(); delete globalThis.localStorage } }
 }
 
 test('plans use current columns, distinct fields and a fixed production state', async () => {
@@ -118,7 +119,7 @@ test('both pages preserve canonical +08:00 wall time from historical and current
 test('plan edits submit only changed allowed values, including a shared feedback field', async () => {
   const p = mount(page, 'plan')
   try {
-    await p.state.openDetail(details)
+    await p.state.openDetail(details, 'edit')
     assert.equal(p.state.fieldEditable(savedFields[0]), true)
     p.state.form.value.items.feedback = 0
     p.state.form.value.productionStatus = 'error'
@@ -135,7 +136,7 @@ test('plan edits submit only changed allowed values, including a shared feedback
 test('performance manual editing and optional backfill use the correct entry points', async () => {
   const p = mount(page, 'performance', { role: 'supervisor' })
   try {
-    await p.state.openDetail(details)
+    await p.state.openDetail(details, 'edit')
     assert.equal(p.state.fieldEditable(savedFields[0]), false)
     p.state.form.value.items.manual = 0
     await p.state.save()
@@ -632,4 +633,297 @@ test('local field saves explain duplicate and reserved keys in each locale and r
       } finally { p.close() }
     }
   }
+})
+
+function deferred() {
+  let resolve, reject
+  const promise = new Promise((ok, fail) => { resolve = ok; reject = fail })
+  return { promise, resolve, reject }
+}
+
+const older = { ...details, id: 'A', taskNo: 'PLAN-A' }
+const newer = { ...details, id: 'B', taskNo: 'PLAN-B', hasPlan: true }
+const olderConfig = { ...config, fields: [field('shared_sync', 1, 'aOnly')] }
+const newerConfig = { ...config, fields: [field('shared_sync', 2, 'bOnly')] }
+const missingTask = { response: { data: { errorCode: 'task.not_found' } } }
+
+test('detail and edit own their record and config across switches, and retry in the same mode', async () => {
+  for (const kind of ['plan', 'performance']) {
+    for (const slow of ['record', 'config']) {
+      for (const fail of [false, true]) {
+        const stale = deferred(), current = deferred()
+        let configCount = 0, detailCount = 0
+        const p = mount(page, kind, { api: {
+          detail: id => id === 'A' ? slow === 'record' ? stale.promise : older
+            : ++detailCount === 1 ? current.promise : newer,
+          getConfig: () => ++configCount === 1 ? slow === 'config' ? stale.promise : olderConfig : newerConfig
+        } })
+        try {
+          const first = p.state.openDetail(older, fail ? 'view' : 'edit')
+          const activeMode = fail ? 'edit' : 'view'
+          const second = p.state.openDetail(newer, activeMode)
+          assert.equal(p.state.detailTarget.value.taskNo, newer.taskNo)
+          assert.equal(p.state.detailOpen.value, true)
+          assert.equal(p.state.record.value, null)
+          assert.equal(p.state.canEditRemark.value, false)
+          assert.equal(p.state.detailLoading.value, true)
+          current.resolve(newer)
+          await second
+          if (fail) stale.reject(missingTask)
+          else stale.resolve(slow === 'record' ? older : olderConfig)
+          await first
+          assert.equal(p.state.record.value.taskNo, newer.taskNo)
+          assert.equal(p.state.mode.value, activeMode)
+          assert.deepEqual(p.state.formFields.value.map(row => row.name), ['bOnly'])
+          assert.equal(p.state.detailLoading.value, false)
+          assert.equal(p.state.detailError.value, '')
+          assert.deepEqual(p.notices, [])
+        } finally { p.close() }
+      }
+      const failure = deferred()
+      let request = 0
+      const p = mount(page, kind, { api: {
+        detail: id => id === 'A' ? { ...older, hasPlan: true } : slow === 'record' && request++ === 0 ? failure.promise : newer,
+        getConfig: () => slow === 'config' && request++ === 1 ? failure.promise : newerConfig
+      } })
+      try {
+        await p.state.openDetail({ ...older, hasPlan: true })
+        const activeMode = slow === 'record' ? 'edit' : 'view'
+        const second = p.state.openDetail(newer, activeMode)
+        failure.reject(missingTask)
+        await second
+        assert.equal(p.state.detailOpen.value, true)
+        assert.equal(p.state.detailLoading.value, false)
+        assert.equal(p.state.record.value, null)
+        assert.ok(p.state.detailError.value)
+        assert.equal(p.state.canEditRemark.value, false)
+        await p.state.openDetail(p.state.detailTarget.value, p.state.mode.value)
+        assert.equal(p.state.record.value.taskNo, newer.taskNo)
+        assert.equal(p.state.mode.value, activeMode)
+        assert.equal(p.state.detailError.value, '')
+      } finally { p.close() }
+    }
+  }
+})
+
+test('optional supplement config follows the active performance and access permissions', async () => {
+  for (const failStale of [false, true]) {
+    for (const currentState of ['has-plan', 'ready', 'failed']) {
+      const stale = deferred(), current = deferred()
+      const active = { ...newer, hasPlan: currentState === 'has-plan' }
+      let supplementRequests = 0
+      const p = mount(page, 'performance', { api: {
+        detail: id => id === 'A' ? older : active,
+        getConfig: kind => kind === 'plan' ? (++supplementRequests === 1 ? stale.promise : current.promise) : config
+      } })
+      try {
+        const first = p.state.openDetail(older)
+        await Promise.resolve()
+        await Promise.resolve()
+        assert.equal(p.state.record.value.taskNo, older.taskNo)
+        assert.equal(Boolean(p.state.canSupplement.value), false)
+        const second = p.state.openDetail(active)
+        await Promise.resolve()
+        await Promise.resolve()
+        assert.equal(p.state.record.value.taskNo, newer.taskNo)
+        assert.equal(Boolean(p.state.canSupplement.value), false)
+        if (currentState === 'ready') current.resolve(newerConfig)
+        if (currentState === 'failed') current.reject(missingTask)
+        await second
+        if (failStale) stale.reject(missingTask)
+        else stale.resolve(olderConfig)
+        await first
+        assert.equal(Boolean(p.state.canSupplement.value), currentState === 'ready')
+        assert.equal(p.state.detailError.value, '')
+        if (currentState === 'ready') {
+          p.state.startSupplement()
+          assert.deepEqual(p.state.formFields.value.map(row => row.name), ['bOnly'])
+          assert.equal(p.state.form.value.backfillExisting, false)
+          p.state.cancelEdit()
+          assert.equal(p.state.mode.value, 'view')
+          assert.equal(p.state.record.value.taskNo, newer.taskNo)
+        }
+      } finally { p.close() }
+    }
+  }
+  for (const permissions of [{ role: 'operator' }, { role: 'supervisor', planAccess: false }, { role: 'viewer' }]) {
+    const p = mount(page, 'performance', { ...permissions, api: { getConfig: async kind => {
+      assert.equal(kind, 'performance')
+      return config
+    } } })
+    try {
+      await p.state.openDetail(older)
+      assert.equal(Boolean(p.state.canSupplement.value), false)
+      assert.equal(p.state.canEditRemark.value, permissions.role !== 'viewer')
+    } finally { p.close() }
+  }
+})
+
+test('close, route leave, unmount and switching new plan invalidate earlier dialog work', async () => {
+  assert.doesNotMatch(page.template, /@closed=|v-model="detailOpen"|@update:model-value=/)
+  assert.match(page.template, /:before-close="closeDetail"/)
+  for (const next of ['close', 'leave', 'unmount', 'reopen', 'new', 'detail']) {
+    for (const fail of [false, true]) {
+      const previous = deferred()
+      let configCount = 0
+      const p = mount(page, 'plan', { api: {
+        getConfig: () => next === 'detail' && ++configCount === 1 ? previous.promise : config,
+        detail: id => id === 'A' ? previous.promise : newer
+      } })
+      try {
+        const first = next === 'detail' ? p.state.newPlan() : p.state.openDetail(older)
+        if (next === 'close') p.state.closeDetail()
+        if (next === 'leave') p.leave()
+        if (next === 'unmount') p.close()
+        if (next === 'reopen') { p.state.closeDetail(); await p.state.openDetail(newer) }
+        if (next === 'new') await p.state.newPlan()
+        if (next === 'detail') await p.state.openDetail(newer)
+        if (fail) previous.reject(missingTask)
+        else previous.resolve(next === 'detail' ? olderConfig : older)
+        await first
+        assert.equal(p.state.detailOpen.value, ['reopen', 'new', 'detail'].includes(next))
+        assert.equal(p.state.record.value?.taskNo, ['reopen', 'detail'].includes(next) ? newer.taskNo : undefined)
+        assert.equal(p.state.mode.value, next === 'new' ? 'new' : 'view')
+        assert.deepEqual(p.notices, [])
+        assert.equal(p.state.detailError.value, '')
+      } finally { p.close() }
+    }
+  }
+})
+
+test('save owns its draft, pending flag, errors and refresh in both modules', async () => {
+  for (const kind of ['plan', 'performance']) {
+    for (const result of ['stale-success', 'stale-failure', 'left-success', 'left-failure', 'current-failure', 'current-success']) {
+      const saving = deferred(), current = deferred()
+      const writes = []
+      const p = mount(page, kind, { api: {
+        detail: id => id === 'A' ? { ...older, hasPlan: true } : current.promise,
+        upsert: body => { writes.push(body); return saving.promise }
+      } })
+      try {
+        await p.state.openDetail(older, 'edit')
+        p.state.form.value.remark = 'canceled'
+        p.state.cancelEdit()
+        assert.deepEqual(writes, [])
+        assert.equal(p.state.detailOpen.value, false)
+        await p.state.openDetail(older, 'edit')
+        assert.equal(p.state.form.value.remark, null)
+        p.state.form.value.remark = 'owned edit'
+        const save = p.state.save()
+        await p.state.save()
+        assert.deepEqual(writes, [{ taskNo: older.taskNo, remark: 'owned edit' }])
+        assert.equal(p.state.saving.value, true)
+        const next = result.startsWith('stale') ? p.state.openDetail(newer) : null
+        if (result.startsWith('left')) p.leave()
+        if (result.endsWith('failure')) saving.reject(missingTask)
+        else saving.resolve({})
+        await save
+        assert.equal(p.state.saving.value, false)
+        if (next) {
+          assert.equal(p.state.detailLoading.value, true)
+          current.resolve(newer)
+          await next
+          assert.equal(p.state.record.value.taskNo, newer.taskNo)
+          assert.equal(p.state.saveError.value, '')
+        }
+        const success = result === 'current-success'
+        const retained = result === 'current-failure'
+        assert.equal(p.state.detailOpen.value, Boolean(next) || retained)
+        assert.equal(p.calls.filter(([key]) => key === 'list').length, Number(success))
+        assert.deepEqual(p.notices, success ? [kind + '.workflow.saved'] : [])
+        if (retained) {
+          assert.equal(p.state.form.value.remark, 'owned edit')
+          assert.ok(p.state.saveError.value)
+        }
+      } finally { p.close() }
+    }
+  }
+})
+
+test('detail edit keeps existing target locks, roles and authorized nullable or falsy values', async () => {
+  for (const kind of ['plan', 'performance']) {
+    for (const role of ['admin', 'supervisor', 'operator', 'viewer']) {
+      for (const targetKey of ['locked-target', null]) {
+        const businessFields = [
+          field('shared_sync', 1, 'manual', { performanceOwner: 'manual', performanceEditable: true, isNullable: false }),
+          field('shared_sync', 2, 'flag', { performanceOwner: 'manual', performanceEditable: true, type: 'boolean' }),
+          field('shared_sync', 3, 'auto', { performanceOwner: 'automated', performanceEditable: true }),
+          field('shared_sync', 4, 'readOnly', { planEditable: false, performanceEditable: false })
+        ]
+        const row = { ...newer, targetKey, items: { manual: 2, flag: true, auto: 1, readOnly: 1 } }
+        const p = mount(page, kind, { role, api: {
+          detail: async () => row,
+          getConfig: async () => ({ ...config, fields: businessFields })
+        } })
+        try {
+          await p.state.openDetail(row, 'edit')
+          const canEdit = role !== 'viewer' && (kind === 'performance' || role !== 'operator')
+          assert.equal(p.state.canEditRecord.value, canEdit)
+          assert.equal(p.state.detailOpen.value, canEdit)
+          assert.equal(p.state.mode.value, canEdit ? 'edit' : 'view')
+          assert.equal(p.state.canEditTarget.value, canEdit && kind === 'plan' && !targetKey)
+          if (canEdit) {
+            p.state.form.value.targetKey = 'candidate'
+            Object.assign(p.state.form.value.items, { manual: null, flag: false, auto: 0, readOnly: 0 })
+          }
+          await p.state.save()
+          const write = p.calls.find(([key]) => key === 'upsert')
+          if (!canEdit) assert.equal(write, undefined)
+          else assert.deepEqual(write[1], { taskNo: newer.taskNo,
+            ...(kind === 'plan' && !targetKey ? { targetKey: 'candidate' } : {}),
+            items: { flag: false, ...(kind === 'plan' ? { auto: 0 } : {}) }
+          })
+        } finally { p.close() }
+      }
+    }
+  }
+})
+
+test('settling a stale save never ends a newer draft save already in progress', async () => {
+  for (const kind of ['plan', 'performance']) {
+    for (const staleFails of [false, true]) {
+      const stale = deferred(), current = deferred()
+      const writes = []
+      const p = mount(page, kind, { api: {
+        detail: async id => id === 'A' ? { ...older, hasPlan: true } : newer,
+        upsert: body => {
+          writes.push(body)
+          return body.taskNo === older.taskNo ? stale.promise : current.promise
+        }
+      } })
+      try {
+        await p.state.openDetail(older, 'edit')
+        p.state.form.value.remark = 'A'
+        const saveA = p.state.save()
+        await p.state.openDetail(newer, 'edit')
+        p.state.form.value.remark = 'B'
+        const saveB = p.state.save()
+        if (staleFails) stale.reject(missingTask)
+        else stale.resolve({})
+        await saveA
+        assert.equal(p.state.saving.value, true)
+        assert.equal(p.state.form.value.remark, 'B')
+        assert.equal(p.state.detailOpen.value, true)
+        assert.equal(p.state.saveError.value, '')
+        assert.deepEqual(p.notices, [])
+        current.resolve({})
+        await saveB
+        assert.deepEqual(writes, [{ taskNo: older.taskNo, remark: 'A' }, { taskNo: newer.taskNo, remark: 'B' }])
+        assert.equal(p.state.detailOpen.value, false)
+        assert.deepEqual(p.notices, [kind + '.workflow.saved'])
+      } finally { p.close() }
+    }
+  }
+})
+
+test('localized dialog copy has paired keys across both modules', async () => {
+  const keys = await Promise.all(['plan', 'performance'].flatMap(module => ['zh-CN', 'en-US'].map(async locale => {
+    const messages = JSON.parse(await readFile(new URL(
+      `../../src/app/${module}/locales/${locale}.json`, import.meta.url), 'utf8'))
+    const dialog = messages.workflow.dialog
+    for (const name of ['viewTitle', 'editTitle', 'supplementTitle']) assert.match(dialog[name], /\{taskNo\}/)
+    for (const value of Object.values(dialog)) assert.ok(value.trim())
+    return Object.keys(dialog).sort()
+  })))
+  for (const result of keys) assert.deepEqual(result, keys[0])
 })

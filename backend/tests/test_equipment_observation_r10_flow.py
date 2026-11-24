@@ -1,12 +1,14 @@
 """在独立内存 SQLite 验证 r10 HTTP、业务事务及权限，不连接真实数据库。"""
-from datetime import datetime
+from datetime import datetime, timedelta
 import hashlib
+import json
 from types import SimpleNamespace
 
 import httpx
 import pytest
 from fastapi import FastAPI
 from sqlalchemy import create_engine, text, select
+from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
@@ -27,7 +29,7 @@ class AsyncSQLite:
     async def flush(self): self.session.flush()
     async def commit(self): self.session.commit()
     async def rollback(self): self.session.rollback()
-    async def get(self, model, key): return self.session.get(model, key)
+    async def get(self, model, key, **options): return self.session.get(model, key, **options)
     async def refresh(self, row): self.session.refresh(row)
 
 
@@ -476,3 +478,185 @@ async def test_admin_energy_config_query_respects_authorized_meter_scope(app_and
         assert (await client.get('/equipment/metric-slot-bindings')).status_code == 403
         app.dependency_overrides.pop(get_current_user)
         assert (await client.get(path, headers={'Authorization': 'Bearer machine-fixture'})).status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_history_default_context_uses_latest_drawable_sample_within_source_permissions(app_and_db, monkeypatch):
+    app, session, profile, _ = app_and_db
+    # SQLite uses different JSON type names and scalar extraction rules from MySQL.
+    def extract(document, path):
+        item = json.loads(document)
+        for key in path.removeprefix('$.').split('.'):
+            item = item.get(json.loads(key)) if isinstance(item, dict) else None
+        return json.dumps(item)
+
+    def json_type(value):
+        return {int: 'INTEGER', float: 'DOUBLE'}.get(type(json.loads(value)), 'OTHER')
+
+    connection = session.connection()
+    connection.connection.driver_connection.create_function('json_extract', 2, extract)
+    connection.connection.driver_connection.create_function('json_type', 1, json_type)
+    connection.exec_driver_sql('CREATE INDEX ix_obs_history_equipment_time_v2 ON monitor_main (equipment_id, observed_at, id)')
+    connection.exec_driver_sql('CREATE INDEX ix_obs_history_task_time_v2 ON monitor_main (task_no, observed_at, id)')
+    app.state.role_api_permissions = {'operator': {'monitor-observation-read'}}
+    app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(role='operator')
+    profile['devices'].update({key: {'equipmentId': key} for key in ('empty', 'hidden')})
+    profile['readScopes']['operator'] = ['line', 'empty']
+    async def visible_sources(_db, _profile):
+        return [SimpleNamespace(storage_identity='registered')]
+    async def registered_device(_db, _profile, equipment):
+        return equipment == 'registered' or None
+    monkeypatch.setattr(reads.write_sources, 'visible_sources', visible_sources)
+    monkeypatch.setattr(reads, '_registered_device', registered_device)
+    history_slot = session.get(SlotBinding, ('history', 'heatZone1', 7))
+    history_slot.enabled = False
+    metric = MetricConfig(metric_key='extra', source_group_key='heatZone1', category='temperature',
+                          name_zh='额外指标', name_en='Extra metric', value_type='number', unit='°C')
+    session.add(metric)
+    session.add(SlotBinding(target='history', group_key='heatZone1', slot_no=8, metric_key='extra', enabled=True))
+    session.add(CurveGroup(curve_group_key='disabled', category='temperature', title_zh='停用', title_en='Disabled',
+                           enabled=False, sort_order=0, series=[{'metricKey': 'extra', 'enabled': True}]))
+    latest = datetime(2026, 11, 23, 8, 0, 0, 123456)
+    fixtures = [
+        ('registered', 'OLDER', -9, {'07': 7}),
+        ('registered', 'SELECTED', -8, {'07': 8.1}),
+        ('registered', 'SELECTED', -9, {'07': 9}),
+        ('line', 'LINE', -1, {'07': 1}),
+        ('registered', 'SAME-TIME-LOSER', 0, {'07': 3}),
+        ('registered', 'SELECTED', 0, {'07': 0}),
+        ('registered', 'SELECTED', 0, {'07': 5}),
+        ('registered', 'NO-CURVE', 1, {'08': 27}),
+        ('registered', 'TEXT', 2, {'07': '27'}),
+        ('registered', 'BOOLEAN', 3, {'07': False}),
+        ('registered', 'NULL', 4, {'07': None}),
+        ('hidden', 'UNAUTHORIZED', 5, {'07': 9}),
+        ('line', 'ARCHIVED-42', -26, {'07': 12}),
+        ('registered', 'ARCHIVED-42', -34, {'07': 18}),
+        ('registered', 'ARCHIVED-42', -26, {'07': 0}),
+        ('registered', 'ARCHIVED-42', -26, {'07': 0.5}),
+        ('registered', 'ARCHIVED-42', -24, {'07': 'newer but not drawable'}),
+        ('hidden', 'ARCHIVED-42', -22, {'07': 93}),
+        ('deleted-source', 'ARCHIVED-42', -20, {'07': 94}),
+        ('line', 'ZERO-ONLY', -40, {'07': 0}),
+    ]
+    fixtures.extend(('registered', 'UNPLOTTED', hour, {'08': hour}) for hour in range(6, 134))
+    for index, (equipment, task, hours, values) in enumerate(fixtures, 1):
+        session.add(HistorySample(id=index, equipment_id=equipment, task_no=task, quality='unknown',
+                                  observed_at=latest + timedelta(hours=hours), local_values={'heatZone1': values},
+                                  source_sample_key=b'fixture', ingest_receipt_id=index,
+                                  created_at=latest + timedelta(days=1), updated_at=latest + timedelta(days=1)))
+    session.commit()
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url='http://test/api/v1') as client:
+        path = '/monitor/history-default-context'
+        data = (await client.get(path, params={'category': 'temperature'})).json()['data']
+        assert data['hasCurves'] is True
+        assert data['anchor'] == {
+            'equipmentId': 'registered', 'taskNo': 'SELECTED',
+            'observedAt': '2026-11-23T08:00:00.123456+08:00',
+            'from': '2026-11-23T00:00:00.123456+08:00', 'to': '2026-11-23T08:00:00.123456+08:00'
+        }
+        assert [row['taskNo'] for row in data['recentTasks']] == ['SELECTED', 'SAME-TIME-LOSER', 'OLDER', 'ARCHIVED-42']
+        range_params = {key: value for key, value in data['anchor'].items() if key != 'observedAt'}
+        response = await client.get('/monitor/history-curves', params={'category': 'temperature', **range_params})
+        points = response.json()['data']['groups'][0]['series'][0]['points']
+        assert [point['value'] for point in points] == [8.1, 0, 5]
+        scoped = (await client.get(path, params={'category': 'temperature', 'equipmentId': 'line'})).json()['data']
+        assert scoped['anchor']['taskNo'] == 'LINE'
+        empty = (await client.get(path, params={'category': 'temperature', 'equipmentId': 'empty'})).json()['data']
+        assert empty == {'anchor': None, 'hasCurves': True, 'recentTasks': []}
+        no_curves = (await client.get(path, params={'category': 'cleaning'})).json()['data']
+        assert no_curves == {'anchor': None, 'hasCurves': False, 'recentTasks': []}
+        for source, status in [('hidden', 403), ('', 422), ('invalid source ', 422)]:
+            result = await client.get(path, params={'category': 'temperature', 'equipmentId': source})
+            assert result.status_code == status
+        assert (await client.get(path, params={'category': 'bogus'})).status_code == 422
+
+        archived = {'category': 'temperature', 'taskNo': ' \tarchived-42 '}
+        task = (await client.get(path, params=archived)).json()['data']
+        assert task['anchor'] == {
+            'equipmentId': 'registered', 'taskNo': 'ARCHIVED-42',
+            'observedAt': '2026-11-22T06:00:00.123456+08:00',
+            'from': '2026-11-21T22:00:00.123456+08:00', 'to': '2026-11-22T06:00:00.123456+08:00'
+        }
+        assert task['recentTasks'] == data['recentTasks']
+        task_range = {key: value for key, value in task['anchor'].items() if key != 'observedAt'}
+        response = await client.get('/monitor/history-curves', params={'category': 'temperature', **task_range})
+        assert [point['value'] for point in response.json()['data']['groups'][0]['series'][0]['points']] == [18, 0, 0.5]
+        source_task = (await client.get(path, params={**archived, 'equipmentId': 'line'})).json()['data']
+        assert source_task['anchor']['equipmentId'] == 'line'
+        for source in ('hidden', 'deleted-source'):
+            denied = await client.get(path, params={**archived, 'equipmentId': source})
+            assert denied.status_code == 403
+        for task_no in ('UNKNOWN-TASK', 'UNAUTHORIZED', 'TEXT', 'NULL'):
+            assert (await client.get(path, params={**archived, 'taskNo': task_no})).json()['data'] == empty
+        assert (await client.get(path, params={**archived, 'equipmentId': 'empty'})).json()['data'] == empty
+        no_curves_task = (await client.get(path, params={**archived, 'category': 'drive'})).json()['data']
+        assert no_curves_task == {'anchor': None, 'hasCurves': False, 'recentTasks': []}
+        zero_task = (await client.get(path, params={**archived, 'taskNo': 'ZERO-ONLY'})).json()['data']
+        assert zero_task['anchor']['equipmentId'] == 'line'
+        for invalid in ('', ' \t ', '非ASCII', 'A/B', 'A' * 51):
+            bad = await client.get(path, params={**archived, 'taskNo': invalid})
+            assert bad.status_code == 422
+            assert bad.json()['errorCode'] == 'equipment_observation.invalid_task'
+        async def unavailable(_db, _target):
+            raise routes.EvidenceUnavailable()
+        with monkeypatch.context() as guard:
+            guard.setattr(reads, 'probe_target', unavailable)
+            unavailable_task = await client.get(path, params=archived)
+            assert unavailable_task.status_code == 503
+            assert unavailable_task.json()['errorCode'] == 'equipment_observation.not_ready'
+
+        app.state.role_api_permissions = {}
+        assert (await client.get(path, params={'category': 'temperature'})).status_code == 403
+        assert (await client.get(path, params=archived)).status_code == 403
+
+    statement = reads._drawable_history_query({'line'}, {('heatZone1', '07')}).limit(1)
+    sql = str(statement.compile(dialect=mysql.dialect(), compile_kwargs={'literal_binds': True}))
+    assert 'json_type(json_extract' in sql
+    assert "IN ('INTEGER', 'DOUBLE', 'DECIMAL')" in sql
+    assert 'ORDER BY monitor_main.observed_at DESC, monitor_main.id DESC' in sql
+    assert 'LIMIT 1' in sql
+    task_statement = reads._drawable_history_query({'line', 'registered'}, {('heatZone1', '07')}, 'ARCHIVED-42').limit(1)
+    task_sql = str(task_statement.compile(dialect=mysql.dialect(), compile_kwargs={'literal_binds': True}))
+    assert "monitor_main.task_no = 'ARCHIVED-42'" in task_sql
+    assert task_sql.index("monitor_main.task_no = 'ARCHIVED-42'") < task_sql.index('ORDER BY')
+    sqlite_sql = statement.compile(compile_kwargs={'literal_binds': True})
+    plan = session.connection().exec_driver_sql('EXPLAIN QUERY PLAN ' + str(sqlite_sql)).all()
+    assert any('ix_obs_history_equipment_time_v2' in str(step) for step in plan)
+    task_sqlite = task_statement.compile(compile_kwargs={'literal_binds': True})
+    task_plan = session.connection().exec_driver_sql('EXPLAIN QUERY PLAN ' + str(task_sqlite)).all()
+    assert any('ix_obs_history_task_time_v2' in str(step) for step in task_plan)
+
+
+@pytest.mark.asyncio
+async def test_curve_line_style_defaults_projects_and_survives_legacy_patch(app_and_db):
+    app, session, _, _ = app_and_db
+    session.add(MetricConfig(metric_key='desired', source_group_key='heatZone1', category='temperature',
+                             name_zh='设定', name_en='Desired', value_type='number', unit='°C'))
+    session.add(SlotBinding(target='history', group_key='heatZone1', slot_no=8,
+                            metric_key='desired', enabled=True))
+    session.commit()
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url='http://test/api/v1') as client:
+        path = '/monitor/curve-configs'
+        old = (await client.get(path)).json()['data'][0]['series']
+        assert old == [{'metricKey': 'actual', 'enabled': True, 'lineStyle': 'solid'}]
+        assert 'lineStyle' not in session.get(CurveGroup, 'temp-curve').series[0]
+        patch = path + '/temp-curve'
+        configured = [{'metricKey': 'actual', 'enabled': True, 'lineStyle': 'dashed'},
+                      {'metricKey': 'desired', 'enabled': True}]
+        assert (await client.patch(patch, json={'series': configured})).status_code == 200
+        legacy = [{'metricKey': 'desired', 'enabled': True}, {'metricKey': 'actual', 'enabled': False}]
+        updated = (await client.patch(patch, json={'series': legacy})).json()['data']['series']
+        assert [(x['metricKey'], x['lineStyle']) for x in updated] == [('desired', 'solid'), ('actual', 'dashed')]
+        for style in [None, 'guess']:
+            assert (await client.patch(patch, json={'series': [{'metricKey': 'actual', 'enabled': True,
+                                                              'lineStyle': style}]})).status_code == 422
+        assert (await client.patch(patch, json={'series': [configured[0]]})).status_code == 200
+        series = (await client.get('/monitor/history-curves', params={
+            'equipmentId': 'line', 'category': 'temperature', 'from': '2026-11-23T00:00:00+08:00',
+            'to': '2026-11-23T08:00:00+08:00'
+        })).json()['data']['groups'][0]['series']
+        assert [(x['metricKey'], x['lineStyle']) for x in series] == [('actual', 'dashed')]
+        created = await client.post(path, json={'curveGroupKey': 'new-curve', 'category': 'temperature',
+            'titleZh': '新曲线', 'titleEn': 'New curve', 'enabled': True, 'sortOrder': 5, 'series': legacy})
+        assert [item['lineStyle'] for item in created.json()['data']['series']] == ['solid', 'solid']

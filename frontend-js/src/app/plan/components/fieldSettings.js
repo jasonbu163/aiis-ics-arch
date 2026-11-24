@@ -6,7 +6,7 @@ const performanceOwners = ['automated', 'manual']
 
 export const fieldSettings = {
   shared: {
-    owners: ['order_snapshot', ...performanceOwners],
+    owners: ['order_snapshot', 'snapshot_auto', ...performanceOwners],
     switches: [...basic, 'syncEnabled', ...plan, ...performance],
     orders: ['planOrder', 'performanceOrder']
   },

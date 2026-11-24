@@ -45,7 +45,7 @@
   "httpEnabled": "HTTP 已启用",
   "httpDisabled": "HTTP 已关闭",
   "batchFormatHint": "JSON / XLSX · Backend 预览",
-  "localConfigurationOnly": "本地配置可纯预览。采集数据可在来源页手工回环，连续投递和自动恢复暂不可用。",
+  "localConfigurationOnly": "本地配置可纯预览。采集数据可在「手工回环」页测试，连续投递和自动恢复暂不可用。",
   "cardHelpSuffix": "说明",
   "savedItemCount": "已保存 · {count} 项",
   "localConfigurationHelp": "完整备份包含本地业务配置。恢复前请预览并复核替换与删除范围。",

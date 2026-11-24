@@ -64,7 +64,7 @@ class SourceInitialization(LegacyBase):
 
 class PlcSourceRegistry(Base):
     """单台 PLC 的活跃上报身份与已退役代次。"""
-    __tablename__ = 'plc_source_registry'
+    __tablename__ = 'acq_plc_source_registry'
 
     plc_id = Column(VARBINARY(128), primary_key=True)
     instance_id = Column(VARBINARY(128), nullable=False)

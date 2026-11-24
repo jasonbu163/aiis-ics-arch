@@ -26,7 +26,8 @@ def card_data(row):
 
 def curve_data(row):
     return {"curveGroupKey": row.curve_group_key, "category": row.category, "titleZh": row.title_zh,
-            "titleEn": row.title_en, "enabled": row.enabled, "sortOrder": row.sort_order, "series": row.series}
+            "titleEn": row.title_en, "enabled": row.enabled, "sortOrder": row.sort_order,
+            "series": [{"lineStyle": "solid", **item} for item in row.series]}
 
 
 async def commit(db):
@@ -245,9 +246,16 @@ async def validate_items(db, items, category=None):
 
 
 async def save_display(db, model, key, data, category=None, existing=False):
-    row = await db.get(model, key) if existing else None
+    row = None
+    if existing:
+        row = await db.get(model, key, with_for_update=True) if model is CurveGroup else await db.get(model, key)
     if existing and row is None:
         reject("not_found", 404)
+    if model is CurveGroup and "series" in data:
+        previous = {item["metricKey"]: item.get("lineStyle", "solid") for item in row.series} if row else {}
+        data = {**data, "series": [
+            {"lineStyle": previous.get(item["metricKey"], "solid"), **item} for item in data["series"]
+        ]}
     if row is None:
         row = model(**data)
         db.add(row)

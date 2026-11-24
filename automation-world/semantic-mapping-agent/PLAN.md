@@ -14,6 +14,7 @@ This PLAN owns SMA task tracking. The [AW PLAN](../PLAN.md) tracks cross-project
 | SMA-006 | draft | [r1 dialog interactions, first batch](plans/SMA-006-dialog-interaction/spec.md) | Form feedback (#7), draft protection (#8) and scrolling in long dialogs (#9). |
 | SMA-007 | qa_passed | [r1 development profile paths](plans/SMA-007-dev-profile-path/spec.md) | [Independent verification](plans/SMA-007-dev-profile-path/checklist.md) passed for the relative and absolute path rules. Human Owner acceptance is pending. |
 | SMA-008 | qa_blocked | [r3 manual acquisition round trip](plans/SMA-008-acquisition-data-get/spec.md) | [QA2](plans/SMA-008-acquisition-data-get/checklist.md) passed software and fixture checks for rework-1. Owner-operated dev POST, receipt and history readback remain for AC04. |
+| SMA-009 | qa_passed | [r1 workspace and manual loopback UI](plans/SMA-009-workspace-and-loopback-ui/spec.md) | [Independent QA2](plans/SMA-009-workspace-and-loopback-ui/checklist.md) passed first-slice rework-1. Human Owner acceptance is pending. |
 
 Implementation order: **SMA-002 → SMA-003 → SMA-004**. All three stages are owner-accepted. Stages 4–6 remain goals and dependencies in the overall draft.
 

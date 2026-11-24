@@ -1,5 +1,9 @@
 # Control Agent 计划
 
+## 流程编辑
+
+[ARCH-AW-009 r2](../../plans/ARCH-AW-009-ca-flow-editor-json/spec.md)增加当前编辑器入口。整流执行、S7 连接复用和 FF 对流程 JSON 的消费留待后续。旧控制台和 headless 采集沿用下方历史兼容基线。DAA 继续承担大量采集，SMA 继续承担表格化批量 HTTP 映射。
+
 ## 当前基线
 
 Control Agent 是 AIIS ICS Architecture 的可选配套运行时。当前源码基线保留

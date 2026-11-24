@@ -370,6 +370,65 @@ async def test_partial_writes_current_configuration_and_independent_times(client
     assert session.scalar(select(func.count()).select_from(Performance)) == 1
 
 
+@pytest.mark.parametrize('writeback', [False, True])
+async def test_snapshot_auto_inherits_once_and_accepts_explicit_reports(client, writeback):
+    http, _, _, _ = client
+    await configure(http, 'shared', field('shared_sync', 1, 'temperature', 'number',
+                                         performanceOwner='snapshot_auto', syncEnabled=writeback))
+    await put(http, PLAN, 'INHERIT', items={'temperature': 180})
+    first = await put(http, PERF, 'INHERIT')
+    assert first['performance']['items']['temperature'] == 180
+    assert first['planSync']['fieldsChanged'] == []
+
+    await put(http, PLAN, 'INHERIT', items={'temperature': 190})
+    repeated = await put(http, PERF, 'INHERIT')
+    assert repeated['performance']['items']['temperature'] == 180
+    assert repeated['planSync']['fieldsChanged'] == []
+    assert (await get(http, PLAN, 'INHERIT'))['items']['temperature'] == 190
+    updated = await put(http, PERF, 'INHERIT', items={'temperature': 185})
+    assert updated['performance']['items']['temperature'] == 185
+    assert updated['planSync']['fieldsChanged'] == (['temperature'] if writeback else [])
+    assert (await get(http, PLAN, 'INHERIT'))['items']['temperature'] == (185 if writeback else 190)
+    rejection(await http.post('/performances/upsert', json={
+        'taskNo': 'INHERIT', 'items': {'temperature': 200}
+    }), 403, 'forbidden', 'items.temperature', 'field_owner')
+
+    await put(http, PLAN, 'EXPLICIT', items={'temperature': 180})
+    explicit = await put(http, PERF, 'EXPLICIT', items={'temperature': 0})
+    assert explicit['performance']['items']['temperature'] == 0
+    assert (await get(http, PLAN, 'EXPLICIT'))['items']['temperature'] == (0 if writeback else 180)
+
+    no_plan = await put(http, PERF, 'LATE-PLAN')
+    assert no_plan['performance']['items']['temperature'] is None
+    await put(http, PLAN, 'LATE-PLAN', items={'temperature': 195})
+    assert (await put(http, PERF, 'LATE-PLAN'))['performance']['items']['temperature'] is None
+
+
+async def test_snapshot_auto_configuration_is_shared_and_plain_snapshot_stays_read_only(client):
+    http, _, _, _ = client
+    config = await configure(http, 'shared', field('shared_sync', 1, 'snapshot',
+                                                  performanceOwner='order_snapshot'))
+    for module, scope, changes, expected_field, reason in (
+        ('performance', 'performance_local',
+         field('performance_local', 1, 'local', performanceOwner='snapshot_auto'),
+         'changes.performanceOwner', 'invalid_field_owner'),
+        ('shared', 'shared_sync', {'performanceOwner': 'snapshot_auto', 'performanceEditable': True},
+         'changes.performanceEditable', 'field_owner'),
+        ('shared', 'shared_sync', {'syncEnabled': True}, 'changes.syncEnabled', 'field_cannot_sync'),
+    ):
+        change = {'scope': scope, 'slotNo': 1, **changes}
+        response = await http.put(CONFIG, json={
+            'module': module, 'configRevision': config['configRevision'], 'changes': [change]
+        })
+        rejection(response, 422, 'invalid_request', expected_field, reason)
+    await put(http, PLAN, 'PLAIN', items={'snapshot': 'original'})
+    await put(http, PERF, 'PLAIN')
+    rejection(await http.post(PERF + '/upsert', json={
+        'taskNo': 'PLAIN', 'items': {'snapshot': 'overwrite'}
+    }), 403, 'forbidden', 'items.snapshot', 'field_owner')
+    assert (await get(http, PERF, 'PLAIN'))['items']['snapshot'] == 'original'
+
+
 async def test_backfill_versions_targets_errors_and_pagination(client):
     http, session, _, _ = client
     await fields(http)

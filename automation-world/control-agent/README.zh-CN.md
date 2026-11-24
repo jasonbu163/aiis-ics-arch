@@ -1,5 +1,15 @@
 # AIIS ICS Control Agent
 
+## 流程编辑器
+
+在本目录执行 `pnpm tauri dev`，打开流程编辑器并启用 S7 driver feature。pnpm 11 若提示 Vue 3 兼容层的可选构建步骤，可先执行 `pnpm --config.strict-dep-builds=false install --frozen-lockfile` 准备依赖。编辑器启动时不加载旧配置，数据保存在 CA 应用数据子目录 `flow-editor-v1`。
+
+工作台支持打开已保存的流程版本。Vue Flow 编辑器支持拖拽、类型化连线、布局编辑和 JSON 交换。在「PLC 与点位」导入 DAA 或 DS 的原始点表，再分别绑定逻辑点位与 HTTP 目标。单节点测试默认模拟，确认解析后的目标才可调用 HTTP GET/POST 或读取 S7 的 INT 点位。PLC 写入仅可模拟。整流执行留待后续任务。
+
+旧桌面进入方式为 `pnpm tauri dev -- --ca-legacy-console`。既有 headless 采集和独立运行时命令继续保留。下方兼容基线描述这些原有入口。
+
+参阅[候选合同](../../contracts/demands/ca-field-flow-v1/README.zh-CN.md)及 [ARCH-AW-009 r2](../../plans/ARCH-AW-009-ca-flow-editor-json/spec.md)。
+
 `automation-world/control-agent/` 是 AIIS ICS Architecture 配套的可选 Rust/Tauri 现场运行时
 和本地运维控制台。它负责 PLC 采集以及后端拥有的 raw/latest 快照合同；它
 不是第二套 Web 后端，也不替代后端模块注册机制。

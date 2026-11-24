@@ -1,5 +1,15 @@
 # AIIS ICS Control Agent
 
+## Workflow editor
+
+Run `pnpm tauri dev` in this directory to open the workflow editor with the S7 driver feature. With pnpm 11, prepare a clean install with `pnpm --config.strict-dep-builds=false install --frozen-lockfile` if the Vue 3 compatibility shim's optional build step is reported. The editor starts without loading the legacy configuration and keeps its data in the application data subdirectory `flow-editor-v1`.
+
+The workbench opens saved workflow revisions. The Vue Flow editor supports typed connections, layout edits and JSON exchange. Import DAA/DS PLC catalogs under PLC and points, then bind logical points and HTTP targets separately. A single-node test defaults to simulation. Confirm the resolved target to invoke HTTP GET/POST or an S7 INT point read. PLC writes are simulation only. Whole-flow execution belongs to a later task.
+
+Use `pnpm tauri dev -- --ca-legacy-console` for the original desktop entry. The existing headless collector and runtime commands remain available. The compatibility baseline below describes those preserved paths.
+
+See the [candidate contract](../../contracts/demands/ca-field-flow-v1/README.md) and [ARCH-AW-009 r2](../../plans/ARCH-AW-009-ca-flow-editor-json/spec.md).
+
 `automation-world/control-agent/` is the optional Rust/Tauri field runtime and local operations
 console paired with the AIIS ICS Architecture backend. It owns PLC collection
 and the backend-owned raw/latest snapshot contract; it is not a second web

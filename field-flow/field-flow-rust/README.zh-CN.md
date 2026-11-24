@@ -19,3 +19,5 @@ Rust是后续长期部署runtime的主要建设方向。当前独立工程已实
 三个基础案例及独立命令见[案例目录](examples/README.zh-CN.md)，对应[YAML配置说明](config/README.zh-CN.md)。
 
 Rust YAML v2见[点目录教程](USER_GUIDE.zh-CN.md#catalog-v2)：每PLC独立ff.plc JSON，正式kind仅demo01/read_points，S7标准DB int16。Modbus仅结构validate；Python/C#尚未加载、DS尚未导出。
+
+[只读 JSON 流程](USER_GUIDE.zh-CN.md#flow-json)通过 YAML v2 显式选择 `flows/` 中的文件，每轮读取 demo01 HTTP 命令并记录分支。原来的手写流继续按既有方式运行。

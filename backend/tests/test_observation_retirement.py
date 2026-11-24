@@ -55,7 +55,7 @@ def retirement_graph():
 
 def test_single_forward_only_revision_with_precise_retirement_allowlist(retirement_graph):
     graph = retirement_graph
-    assert graph.get_heads() == ["e9f3b5d7c021"]
+    assert graph.get_heads() == ["a1c307f8d2e4"]
     script = graph.get_revision("c9e1a3b5d720")
     assert script.down_revision == "ae20b4d6f831"
     assert set(script.module.RETIRED_TABLES) == RETIRED_TABLES
@@ -136,7 +136,7 @@ async def test_old_operations_absent_from_routes_openapi_and_metadata():
     assert RETIRED_TABLES.isdisjoint(Base.metadata.tables)
     assert {"equipment_main", "monitor_main", "energy_consumption_main",
             "observation_ingest_receipts", "energy_ingest_receipts", "energy_prices", "energy_price_hours",
-            "plc_facts_latest", "plc_facts_history", "plc_source_registry"} <= set(Base.metadata.tables)
+            "acq_plc_facts_latest", "acq_plc_facts_history", "acq_plc_source_registry"} <= set(Base.metadata.tables)
     for path in ("/integration/equipment/latest-snapshots", "/integration/monitor/history-samples",
                  "/integration/energy/samples"):
         assert "post" in paths["/api/v1" + path]

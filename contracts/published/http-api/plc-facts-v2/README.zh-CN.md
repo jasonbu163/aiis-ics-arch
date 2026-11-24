@@ -8,7 +8,7 @@
 
 ## 来源登记
 
-后端只用 `plcId`、`instanceId` 和 `sourceGeneration` 匹配 `plc_source_registry` 的当前行。管理员每台 PLC 登记四项：三个标识和用于展示的 `sourceType`；DB 随样本发送，不参与登记校对。Web 可从已提交行复制三标识，登记提交后即时生效。登记 API 需要管理员登录，采集 POST/GET 在开发阶段免 Bearer。接管需使用该 PLC 的新代次并先处理旧队列。后端用该 PLC 登记行的 `sourceType` 标注历史，供展示，不参与准入或样本校验；正文包含 `sourceType` 返回 `422`。 [管理 API](openapi-acquisition-sources-r4.json) · [来源登记说明](../../../../backend/app/plc_facts/README.zh-CN.md)
+后端只用 `plcId`、`instanceId` 和 `sourceGeneration` 匹配 `acq_plc_source_registry` 的当前行。管理员每台 PLC 登记四项：三个标识和用于展示的 `sourceType`；DB 随样本发送，不参与登记校对。Web 可从已提交行复制三标识，登记提交后即时生效。登记 API 需要管理员登录，采集 POST/GET 在开发阶段免 Bearer。接管需使用该 PLC 的新代次并先处理旧队列。后端用该 PLC 登记行的 `sourceType` 标注历史，供展示，不参与准入或样本校验；正文包含 `sourceType` 返回 `422`。 [管理 API](openapi-acquisition-sources-r4.json) · [来源登记说明](../../../../backend/app/plc_facts/README.zh-CN.md)
 
 管理员确认删除来源后，使用该身份的后续上报及重试返回 `403`，未过期历史仍可查询。删除同时移除该行的退役代次记录；相关事实和最新值都不存在时，系统可能无法识别旧代次。重新登记同一 PLC 应使用从未用过的新代次，并保留冻结样本原身份。
 
@@ -45,7 +45,7 @@
 
 ## 提交与补传
 
-完整样本写入 `plc_facts_history`，逐点最新值写入 `plc_facts_latest`，同一事务提交后返回 HTTP `200` 和 `data.status=committed`。首次提交的 `data.outcome` 为 `created`。样本仍在有效期内，且 `plcId`、`instanceId`、`sourceGeneration` 仍与该 PLC 当前登记匹配时，同一实例和样本 ID 使用相同正文字节重试，`outcome` 为 `duplicate`，历史仍只有一条。接管后，即使正文未变，使用旧身份重试也可能返回 `403 plc_facts_v2.scope_rejected`。
+完整样本写入 `acq_plc_facts_history`，逐点最新值写入 `acq_plc_facts_latest`，同一事务还写入匹配的消费事件，提交后返回 HTTP `200` 和 `data.status=committed`。首次提交的 `data.outcome` 为 `created`。样本仍在有效期内，且 `plcId`、`instanceId`、`sourceGeneration` 仍与该 PLC 当前登记匹配时，同一实例和样本 ID 使用相同正文字节重试，`outcome` 为 `duplicate`，历史仍只有一条。接管后，即使正文未变，使用旧身份重试也可能返回 `403 plc_facts_v2.scope_rejected`。
 
 调用方保存原样本的 ID、序号、采集时间和实际发送的 UTF-8 正文。遇到超时、丢回执或 `503 plc_facts_v2.commit_outcome_unknown` 时，保留待确认样本并重发原字节。收到 `committed` 后，核对回执中的 `contractVersion`、`instanceId` 和 `sampleId`，再标记为已确认。
 
@@ -71,7 +71,7 @@
 | `GET /options` | 默认返回已登记 PLC 的有效历史和当前最新值的 DB；`?view=history` 返回所有未过期历史的 PLC/DB 选项。 |
 | `GET /latest` | 必填 `plcId`、`dbNumber`，可选精确 `pointId`。省略 `pointId` 返回该 DB 的有效最新点位，指定时 `data.items` 至多一条。 |
 | `GET /latest/browse` | 可选 `plcId`、`dbNumber` 和点位搜索词 `pointSearch`。在读取范围内分页。 |
-| `GET /history` | 必填 `from`、`to`，可选 `plcId`、`dbNumber`。按样本采集时间查询摘要，从 `data.items` 取历史 `id`。 |
+| `GET /history` | 同时省略 `from` 和 `to` 时，按采集时间倒序查看最近最多 50 条未过期样本。同时填写两项时按时间区间查询。两种方式都可以按 `plcId`、`dbNumber` 筛选，从 `data.items` 取历史 `id`。 |
 | `GET /history/{id}` | 用十进制字符串 `id` 查询一份样本，在 `data.points` 中读取完整点集。 |
 
 分页默认 50 条，每页最多 100 条。历史用上海时间 `[from, to)`，最大跨度 7 天。历史 `sourceType`、`groupId`、`configRevision` 可为 `null`。每个点的原值查询截止为原采集时间加三个自然月再减 24 小时，整份样本取最早截止。REAL 的内部 JSON 值以校验过的十进制数字文本保存，读取时恢复为 JSON number，保留输入精度、负零和科学计数法。 [维护 CLI](../../../../backend/scripts/plc_facts_maintenance/README.zh-CN.md)

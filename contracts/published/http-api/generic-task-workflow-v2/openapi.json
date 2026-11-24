@@ -480,7 +480,8 @@
                 "enum": [
                   "order_snapshot",
                   "automated",
-                  "manual"
+                  "manual",
+                  "snapshot_auto"
                 ],
                 "type": "string"
               },
@@ -676,7 +677,8 @@
                 "enum": [
                   "order_snapshot",
                   "automated",
-                  "manual"
+                  "manual",
+                  "snapshot_auto"
                 ],
                 "type": "string"
               },

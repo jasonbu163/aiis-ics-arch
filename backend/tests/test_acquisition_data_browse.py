@@ -112,19 +112,28 @@ async def test_sql_scope_current_source_order_and_literal_search():
     count_sql = str(session.statements[0].compile(dialect=dialect()))
     page = session.statements[1].compile(dialect=dialect())
     page_sql = str(page)
-    assert 'plc_facts_latest.instance_id' in count_sql and 'plc_facts_latest.source_generation' in count_sql
-    assert 'plc_facts_latest.expires_at >' in count_sql and ' OR ' in count_sql
-    assert 'ORDER BY plc_facts_latest.plc_id, plc_facts_latest.db_number, plc_facts_latest.point_id' in page_sql
+    assert 'acq_plc_facts_latest.instance_id' in count_sql and 'acq_plc_facts_latest.source_generation' in count_sql
+    assert 'acq_plc_facts_latest.expires_at >' in count_sql and ' OR ' in count_sql
+    assert 'ORDER BY acq_plc_facts_latest.plc_id, acq_plc_facts_latest.db_number, acq_plc_facts_latest.point_id' in page_sql
     assert r'%\_\%\\\\Temp%' in page.params.values()
     assert list(page.params.values()).count(10) >= 2
     history = SQLCapture()
     await crud.history(history, None, None, NOW.replace(hour=9), NOW, 1, 50, NOW)
     hsql = str(history.statements[0].compile(dialect=dialect()))
-    assert 'plc_source_registry' not in hsql and 'plc_facts_history.plc_id' not in hsql
+    assert 'plc_source_registry' not in hsql and 'acq_plc_facts_history.plc_id' not in hsql
     filtered = SQLCapture()
     await crud.history(filtered, 'PLC-Z', 23, NOW.replace(hour=9), NOW, 1, 50, NOW)
     hsql = str(filtered.statements[0].compile(dialect=dialect()))
-    assert 'plc_facts_history.plc_id' in hsql and 'plc_source_registry' not in hsql
+    assert 'acq_plc_facts_history.plc_id' in hsql and 'plc_source_registry' not in hsql
+    recent = SQLCapture()
+    await crud.history(recent, 'PLC-Z', 23, None, None, 1, 50, NOW)
+    statement, = recent.statements
+    compiled = statement.compile(dialect=dialect())
+    sql = str(compiled)
+    assert 'acq_plc_facts_history.expires_at >' in sql and 'sampled_at >=' not in sql
+    assert 'acq_plc_facts_history.plc_id =' in sql and 'acq_plc_facts_history.db_number =' in sql
+    assert 'ORDER BY acq_plc_facts_history.sampled_at DESC, acq_plc_facts_history.id DESC' in sql
+    assert 'LIMIT' in sql and 50 in compiled.params.values() and 'count(' not in sql.lower()
 
 
 @pytest.mark.asyncio
@@ -163,8 +172,8 @@ async def test_http_default_optional_filters_limits_and_nullable_history(monkeyp
     old = SimpleNamespace(id=1, instance_id=b'old', sample_id=b's1', plc_id=b'PLC-A', db_number=21,
                           group_id=None, config_revision=None, source_type=None, source_generation=b'g',
                           source_seq=1, sampled_at=NOW, stored_at=NOW)
-    async def history(_db, plc, number, *_):
-        calls.append((plc, number))
+    async def history(_db, plc, number, start, end, *_):
+        calls.append((plc, number, start, end))
         return 1, [(old, 1)]
     monkeypatch.setattr(api, 'get_db_session', session)
     monkeypatch.setattr(crud, 'target_now', now)
@@ -196,14 +205,19 @@ async def test_http_default_optional_filters_limits_and_nullable_history(monkeyp
         assert (await client.get(path, params={'pointSearch': 'a' * 129})).status_code == 422
         assert (await client.get(path, params={'pageSize': 101})).status_code == 422
         history_path = '/api/v1/acquisition-data/history'
+        recent = await client.get(history_path, params={'plcId': 'PLC-Z', 'dbNumber': 24})
+        assert recent.status_code == 200 and recent.json()['data']['items'][0]['id'] == '1'
+        assert calls[-1] == ('PLC-Z', 24, None, None)
         params = {'from': '2026-11-09T10:00:03+08:00', 'to': '2026-11-10T10:00:03+08:00'}
+        assert (await client.get(history_path, params={'from': params['from']})).status_code == 422
+        assert (await client.get(history_path, params={'to': params['to']})).status_code == 422
         result = await client.get(history_path, params=params)
         assert result.status_code == 200
         item = result.json()['data']['items'][0]
         assert item['groupId'] is None and item['configRevision'] is None and item['sourceType'] is None
-        assert calls[-1] == (None, None)
+        assert calls[-1][:2] == (None, None)
         assert (await client.get(history_path, params={**params, 'plcId': 'PLC-Z'})).status_code == 200
-        assert calls[-1] == ('PLC-Z', None)
+        assert calls[-1][:2] == ('PLC-Z', None)
         params['from'] = '2026-11-02T10:00:03+08:00'
         assert (await client.get(history_path, params=params)).status_code == 422
 

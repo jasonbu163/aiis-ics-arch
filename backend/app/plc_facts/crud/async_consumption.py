@@ -26,6 +26,12 @@ async def set_append_marker(db, event_seq, digest=None):
                      {'seq': event_seq, 'digest': digest.hex() if digest is not None else None})
 
 
+async def event_for_history(db, history_id):
+    query = (select(ConsumptionEvent).where(ConsumptionEvent.history_id == history_id)
+             .with_for_update(read=True))
+    return (await db.execute(query)).scalar_one_or_none()
+
+
 async def target_occupied(db, plc, number, generation):
     for model in (ConsumptionEvent, SampleV2):
         query = (select(model.plc_id).where(model.plc_id == plc, model.db_number == number,

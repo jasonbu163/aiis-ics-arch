@@ -34,13 +34,13 @@ uv run --offline --frozen --no-sync python scripts/plc_facts_maintenance/main.py
 
 ## v2 到期清理
 
-`cleanup-v2` 需要显式选择 `--plan` 或 `--apply`，并提供目标 alias、schema、server UUID、revision、操作批准引用及确认人。目标必须与仓库外 v2 私有配置和实际数据库一致。预览示例使用合成目标。
+`cleanup-v2` 需要显式选择 `--plan` 或 `--apply`，并提供目标 alias、schema、server UUID、revision、操作批准引用及确认人。alias、库名和实例 UUID 须匹配仓库外 v2 私有配置，传入 revision 须精确匹配数据库实际版本。清理要求九表结构已启用消费。预览示例使用合成目标。
 
 ```bash
-uv run --offline --frozen --no-sync python scripts/plc_facts_maintenance/main.py cleanup-v2 --plan --target-alias dev-example --schema fixture_schema --expected-server-uuid 00000000-0000-4000-8000-000000000001 --expected-schema-revision 7b9d1f3a5c7e --operation-approval fixture-approval --confirmed-by fixture-operator
+uv run --offline --frozen --no-sync python scripts/plc_facts_maintenance/main.py cleanup-v2 --plan --target-alias dev-example --schema fixture_schema --expected-server-uuid 00000000-0000-4000-8000-000000000001 --expected-schema-revision a1c307f8d2e4 --operation-approval fixture-approval --confirmed-by fixture-operator
 ```
 
-清理字节预算包括可空的历史 `source_type`；`plc_facts_history` 按整份样本删除，`plc_facts_latest` 清除值并保留顺序水位。
+清理字节预算包括可空的历史 `source_type`；`acq_plc_facts_history` 按整份样本删除，`acq_plc_facts_latest` 清除值并保留顺序水位。
 
 执行时设置 `PLC_FACTS_MAINTENANCE_ENABLED=True`，将 `--plan` 换为 `--apply`，并提供 `--confirm APPLY:cleanup-v2:<alias>:<schema>:<server-uuid>:<revision>`。计划和执行输出 JSON Lines，结果含行数、字节、最早积压及完成时刻。每事务最多 200 行和 2 MiB，每次最多 2000 行、20 MiB 和 2 秒处理预算。外部调度每分钟调用，按完成时刻与最早积压配置告警。历史整行删除，latest 保留实例、代次和序号水位。
 
@@ -49,3 +49,13 @@ uv run --offline --frozen --no-sync python scripts/plc_facts_maintenance/main.py
 使用现有项目环境：`uv run --offline --frozen --no-sync python scripts/plc_facts_maintenance/main.py`只显示帮助，不加载settings/数据库。`--help`同样无副作用。本工具无默认输入目录、输出文件、目标、seed、DDL、调度器或打包产物。
 
 旧 v1 `status`、`adopt` 和 `cleanup` 命令已退役。实际清理仍需单独授权并限定目标。
+
+## ARCH-ACQ-007 表名切换
+
+前向迁移 `a1c307f8d2e4` 的单一前驱是质量迁移 `f0a2b4c6d8e1`。对实际 MySQL UUID、库名和前驱取得操作批准。保留可恢复备份及九表基线，包含键、行数、latest 水位和现有消费者证据。暂停来源变更、样本写入、消费者、清理和直库写入，等待在途事务结束。整个窗口内停止新旧进程。
+
+由目标 Owner 审查表级授权、SQL 工具、报表，以及视图、外键、存储程序、定时事件和其他触发器正文。迁移拒绝维护账号可见的已知外键及视图引用。确认窗口前由目标 Owner 核对权限可见范围以外的引用。MySQL 旧表名的表级授权不随表名迁移，采用前核对已有库级访问权或取得单独授权。维护账号须能读取三个 history 触发器并执行改名。在线账号无需查看触发器元数据。
+
+仅在明确批准的窗口内设置 `ACQ_TABLE_NAMES_EXPECTED_SCHEMA`、`ACQ_TABLE_NAMES_EXPECTED_SERVER_UUID` 和 `ACQ_TABLE_NAMES_WINDOW_CONFIRMED=<schema>:<uuid>:f0a2b4c6d8e1`，从 `backend/` 运行 `uv run --offline --frozen --no-sync alembic upgrade a1c307f8d2e4`。恢复前确认新版本、九表及其行与键证据、三个 history 触发器定义和行为，并核对在线账号能访问新表名及其他共库模块能否接受新版本。缺少追加事件时，写入和重复回执均不得成功。在线账号无法察觉窗口外特权账号对不可变或到期守卫的修改。
+
+三张表在同库的一条语句中更名。MySQL DDL 提交与 Alembic 版本更新分离。出错时保持停写，记录实际表名、键约束、触发器定义、消费状态和 revision。前驱版本下已更名或部分更名时，重跑会拒绝。将现场状态和已提交事实与备份核对后，另行批准前向修复或恢复。禁止盲目 stamp、删表和覆盖不可安全重放的事实。

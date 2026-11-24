@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "strict": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@aw-ui": [
+        "../console-ui/src/ui/index.ts"
+      ],
+      "vue": [
+        "node_modules/vue"
+      ],
+      "element-plus": [
+        "node_modules/element-plus"
+      ],
+      "@element-plus/icons-vue": [
+        "node_modules/@element-plus/icons-vue"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue"
+  ]
+}

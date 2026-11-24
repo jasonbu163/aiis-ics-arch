@@ -25,6 +25,14 @@ impl Http {
         })
     }
     pub async fn get(&self, url: &str) -> Result<Input> {
+        self.get_input(url, false).await
+    }
+
+    pub(crate) async fn get_strict(&self, url: &str) -> Result<Input> {
+        self.get_input(url, true).await
+    }
+
+    async fn get_input(&self, url: &str, strict: bool) -> Result<Input> {
         tokio::time::timeout(Duration::from_millis(self.config.total_timeout_ms), async {
             let _slot = tokio::time::timeout(
                 Duration::from_millis(self.config.pool_wait_ms),
@@ -68,8 +76,11 @@ impl Http {
                 b.extend_from_slice(&chunk);
             }
             {
-                let v: serde_json::Value =
-                    serde_json::from_slice(&b).map_err(|_| "input_schema")?;
+                let v = if strict {
+                    crate::config::catalog::parse(&b, false).map_err(|_| "input_schema")?
+                } else {
+                    serde_json::from_slice(&b).map_err(|_| "input_schema")?
+                };
                 let object = v.as_object().ok_or("input_schema")?;
                 let keys = [
                     "schema_version",

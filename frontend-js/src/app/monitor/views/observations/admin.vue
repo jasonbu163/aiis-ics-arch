@@ -53,7 +53,8 @@
     </BaseCard>
     <EnergyAdmin v-show="active === 'energy'" kind="config" :active="active === 'energy'" />
     <el-dialog v-model="dialog" :title="t(editing ? 'equipment.observation.edit' : 'equipment.observation.add')"
-      class="standard-form-dialog" width="min(680px, 94vw)">
+      class="standard-form-dialog observation-config-dialog" width="min(680px, 94vw)" align-center
+      :show-close="false" :close-on-click-modal="false">
       <el-form label-position="top">
         <el-form-item :label="t('equipment.observation.key')"><el-input v-model="form.curveGroupKey" :disabled="editing" /></el-form-item>
         <el-form-item :label="t('equipment.observation.category')">
@@ -74,10 +75,14 @@
                 <el-option v-for="metric in available" :key="metric.metricKey" :value="metric.metricKey"
                   :label="t('equipment.observation.metricOptionLabel', { name: locale.startsWith('en') ? metric.nameEn : metric.nameZh, key: metric.metricKey })" />
               </el-select>
+              <el-select v-model="item.lineStyle" class="series-line-style" :aria-label="t('monitor.observation.lineStyle')">
+                <el-option value="solid" :label="t('monitor.observation.lineSolid')" />
+                <el-option value="dashed" :label="t('monitor.observation.lineDashed')" />
+              </el-select>
               <el-switch v-model="item.enabled" />
               <ActionButton size="small" @click="form.series.splice(index, 1)">{{ t('equipment.observation.remove') }}</ActionButton>
             </div>
-            <ActionButton size="small" @click="form.series.push({ metricKey: '', enabled: true })">{{ t('equipment.observation.addItem') }}</ActionButton>
+            <ActionButton size="small" @click="form.series.push({ metricKey: '', enabled: true, lineStyle: 'solid' })">{{ t('equipment.observation.addItem') }}</ActionButton>
           </div>
         </el-form-item>
       </el-form>
@@ -154,6 +159,7 @@ function open(row) {
   Object.assign(form, row ? JSON.parse(JSON.stringify(row)) : {
     curveGroupKey: '', category: submitted.value.category || 'temperature', titleZh: '', titleEn: '', enabled: true, sortOrder: 0, series: []
   })
+  form.series = form.series.map(item => ({ lineStyle: 'solid', ...item }))
   dialog.value = true
 }
 async function load() {
@@ -214,7 +220,9 @@ onBeforeUnmount(() => { generation++; active.value = null; dialog.value = false 
 .config-table { min-width: 0; min-height: 60px; }
 .item-list { display: grid; gap: 8px; width: 100%; }
 .item-row { display: flex; align-items: center; gap: 10px; }
-.item-row .el-select { flex: 1; }
+.item-row .el-select { flex: 1; min-width: 110px; }
+.item-row .series-line-style { flex: 0 1 110px; }
+.item-row { flex-wrap: wrap; }
 
 @container observation-config (max-width: 300px) {
   .config-page :deep(.base-card__header), .config-page :deep(.base-card__body) { padding-inline: 8px; }

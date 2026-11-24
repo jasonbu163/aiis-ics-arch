@@ -237,3 +237,7 @@ runtime。runtime 不挂载源码或 `node_modules`，`/api/v1` 反向代理到 
 [计划与实绩候选](../contracts/published/http-api/generic-task-workflow-v2/README.zh-CN.md)按当前字段配置读取，沿用列表路径、上海业务时间和本机列宽。管理员从计划管理和实绩管理各自侧栏的「本地字段管理」进入独立页面（`/plan/local-fields` 和 `/performance/local-fields`）；计划管理与实绩管理侧栏的共享字段管理入口进入同一个独立页面，使用同一份共享配置。没有同号计划时，实绩详情可进入普通计划创建。
 
 操作步骤与接口模拟见[计划与实绩交互手册](../docs/generic-plan-performance-guide.zh-CN.md)；管理员也可参阅[字段设置简要说明](FIELD_SETTINGS_GUIDE.zh-CN.md)。
+
+## 质量管理
+
+质量列表展示结构化任务结果，可用原页面权限进入历史检验。管理员可以在本地字段管理中配置质量字段。结果列表和字段列表使用公共的本机列宽偏好。[质量 HTTP 合同](../contracts/published/http-api/quality-results-v1/README.zh-CN.md)

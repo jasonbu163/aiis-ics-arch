@@ -1,6 +1,7 @@
 //! 文件：src/config/runtime_v2.rs；版本分派、v2闭合结构和只读点引用规范化；不更改旧typed身份。
 use super::{
     catalog::{self, Catalog},
+    flow_json::{self, JsonFlow},
     Config, Flow, Http, Plc, Target,
 };
 use crate::Result;
@@ -24,6 +25,7 @@ pub struct Loaded {
     pub config: Config,
     pub catalogs: Vec<Catalog>,
     pub reads: Vec<ReadFlow>,
+    pub(crate) json_flows: Vec<JsonFlow>,
 }
 fn reference(v: &Value) -> Result<PointRef> {
     let m = catalog::object(v, &["device_id", "point_id"], &[])?;
@@ -34,6 +36,10 @@ fn reference(v: &Value) -> Result<PointRef> {
 }
 impl Loaded {
     pub fn load(path: &Path) -> Result<Self> {
+        Self::load_with_flows(path, None)
+    }
+
+    pub(crate) fn load_with_flows(path: &Path, flows_dir: Option<&Path>) -> Result<Self> {
         let meta = std::fs::metadata(path).map_err(|_| "config_read")?;
         if !meta.is_file() {
             return Err("config_file".into());
@@ -63,15 +69,16 @@ impl Loaded {
                 config: Config::load(path)?,
                 catalogs: vec![],
                 reads: vec![],
+                json_flows: vec![],
             }),
             Some(2) => {
                 catalog::check_path(path)?;
-                Self::v2(path, &bytes)
+                Self::v2(path, &bytes, flows_dir)
             }
             _ => Err("config_version".into()),
         }
     }
-    fn v2(path: &Path, b: &[u8]) -> Result<Self> {
+    fn v2(path: &Path, b: &[u8], flows_dir: Option<&Path>) -> Result<Self> {
         let v = catalog::parse(b, true)?;
         let m = catalog::object(
             &v,
@@ -84,8 +91,18 @@ impl Loaded {
                 "http",
                 "shutdown_timeout_ms",
             ],
-            &[],
+            &["flow_files", "flow_http_endpoints"],
         )?;
+        let graph = match (m.get("flow_files"), m.get("flow_http_endpoints")) {
+            (None, None) => None,
+            (Some(files), Some(endpoints)) => Some((
+                files,
+                endpoints,
+                flows_dir.ok_or("config_flows_dir_required")?,
+            )),
+            _ => return Err("config_flow_bindings".into()),
+        };
+        let min_count = usize::from(graph.is_none());
         catalog::integer(&m["schema_version"], 2, 2)?;
         let instance_id = catalog::identifier(&m["instance_id"])?.to_string();
         let base = path.parent().unwrap_or(Path::new("."));
@@ -94,7 +111,7 @@ impl Loaded {
         let mut ids = HashSet::new();
         let mut endpoints = std::collections::HashMap::new();
         let mut total = 0;
-        for file in catalog::array(&m["plc_files"], 1, 4)? {
+        for file in catalog::array(&m["plc_files"], min_count, 4)? {
             let path = catalog::relative(base, catalog::text(file, 255)?)?;
             if !paths.insert(path.clone()) {
                 return Err("config_duplicate_path".into());
@@ -121,7 +138,7 @@ impl Loaded {
         let mut plcs = Vec::new();
         let mut budgets = HashSet::new();
         let mut largest = 0;
-        for p in catalog::array(&m["plc_runtime"], 1, 4)? {
+        for p in catalog::array(&m["plc_runtime"], min_count, 4)? {
             let p = catalog::object(
                 p,
                 &[
@@ -192,7 +209,7 @@ impl Loaded {
         let mut reads = Vec::new();
         let mut flow_ids = HashSet::new();
         let mut targets = Vec::new();
-        for f in catalog::array(&m["flows"], 1, 8)? {
+        for f in catalog::array(&m["flows"], min_count, 8)? {
             let kind = f["kind"].as_str().ok_or("config_flow_kind_unsupported")?;
             let common = ["id", "kind", "business_name", "interval_ms", "device_ids"];
             let mut required = common.to_vec();
@@ -293,6 +310,14 @@ impl Loaded {
                 });
             }
         }
+        let json_flows = if let Some((files, endpoints, dir)) = graph {
+            flow_json::load(files, endpoints, dir, &mut flow_ids)?
+        } else {
+            vec![]
+        };
+        if flows.is_empty() && reads.is_empty() && !json_flows.is_empty() {
+            plcs.clear();
+        }
         Ok(Self {
             config: Config {
                 schema_version: 1,
@@ -304,6 +329,7 @@ impl Loaded {
             },
             catalogs,
             reads,
+            json_flows,
         })
     }
     pub fn capability(&self) -> Result<()> {
@@ -325,20 +351,39 @@ impl Loaded {
                     .map(|e| json!({"error_key":e,"path":c.path}))
             })
             .collect();
-        json!({"scope":if self.catalogs.is_empty(){"legacy_main"}else{"main"},"format_valid":true,"runtime_compatible":issues.is_empty(),"files":self.catalogs.iter().map(Catalog::file_summary).collect::<Vec<_>>(),"issues":issues,"issues_truncated":false})
+        let mut report = json!({"scope":if self.catalogs.is_empty() && self.json_flows.is_empty(){"legacy_main"}else{"main"},"format_valid":true,"runtime_compatible":issues.is_empty(),"files":self.catalogs.iter().map(Catalog::file_summary).collect::<Vec<_>>(),"issues":issues,"issues_truncated":false});
+        if !self.json_flows.is_empty() {
+            report["flow_files"] = json!(self
+                .json_flows
+                .iter()
+                .map(JsonFlow::file_summary)
+                .collect::<Vec<_>>());
+        }
+        report
     }
 }
 pub fn validate(path: &Path, single: bool) -> (Value, i32) {
+    validate_with_flows(path, single, None)
+}
+
+pub(crate) fn validate_with_flows(
+    path: &Path,
+    single: bool,
+    flows_dir: Option<&Path>,
+) -> (Value, i32) {
     let result = if single {
         Catalog::load(path).map(|c|{let issues=c.capability().err().map(|e|vec![json!({"error_key":e,"path":"$.connection"})]).unwrap_or_default();json!({"scope":"plc_file","format_valid":true,"runtime_compatible":issues.is_empty(),"files":[c.file_summary()],"issues":issues,"issues_truncated":false})})
     } else {
-        Loaded::load(path).map(|c| c.report())
+        Loaded::load_with_flows(path, flows_dir).map(|c| c.report())
     };
     match result {
         Ok(v) => (v, 0),
-        Err(e) => (
-            json!({"scope":if single{"plc_file"}else{"main"},"format_valid":false,"runtime_compatible":false,"files":[],"issues":[{"error_key":e,"path":"$"}],"issues_truncated":false}),
-            2,
-        ),
+        Err(e) => {
+            let (key, path) = e.split_once(':').unwrap_or((&e, "$"));
+            (
+                json!({"scope":if single{"plc_file"}else{"main"},"format_valid":false,"runtime_compatible":false,"files":[],"issues":[{"error_key":key,"path":path}],"issues_truncated":false}),
+                2,
+            )
+        }
     }
 }

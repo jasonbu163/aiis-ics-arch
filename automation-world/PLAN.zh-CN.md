@@ -13,6 +13,7 @@
 | DS-003 | qa_passed | [r5 导出规格](device-simulator/plans/DS-003-plc-json-export/spec.md) | 返修后的 DS→DAA 原生联测完成，QA2 已通过；待 Human Owner 验收。 |
 | DAA-017 | qa_passed | [r5 导入规格](data-acquisition-agent/plans/DAA-017-plc-json-import/spec.md) | 返修后的 DS→DAA 原生联测完成，QA2 已通过；待 Human Owner 验收。 |
 | SMA-001 | draft | [r2 总规格](semantic-mapping-agent/plans/SMA-001-cu-integration-and-scope-cleanup/spec.md) | SMA-002、SMA-003 已验收。[SMA-004 r1 于 2026-11-14 验收](semantic-mapping-agent/plans/SMA-004-local-configuration/checklist.md#owner-acceptance-r1)，独立 QA2 已通过。正常投递处于关闭状态。 |
+| ARCH-AW-009 | `qa_blocked` | [r2 spec](../plans/ARCH-AW-009-ca-flow-editor-json/spec.md) | 已验证 CU 公共壳及部分原生交互，剩余原生复验受阻，FF 联合验收待进行。 |
 | ARCH-AW-007 | owner_accepted | [r2](../plans/ARCH-AW-007-general-agent-fleet-roadmap/spec.md) | Human Owner 于 2026-10-21 最终验收精确 r2 文档，原独立 AC01–AC14 QA 保留。DAA、SMA 表格、CA 通用编排/内部连接器及未来全类型健康分工明确，首版无登录；完整 r1 历史/QA 保留，证据已归档，两处自有临时目录共 49 文件已清理，未改代码、未追加测试。 |
 | ARCH-AW-006 | owner_approved | [r2](../plans/ARCH-AW-006-unified-flow-agent-design/spec.md) | 精确 r2 设计已批准：DAA 大量采集、SMA 表格/工作台、CA 节点编排/版本/上下文/扩展；首版无登录。完整 r1 保留，文档实施统一归 007 r2，软件工作另立范围。 |
 | ARCH-AW-001 | owner_accepted | [r1](../plans/ARCH-AW-001-agent-foundation/spec.md) | CA已迁入并冻结，DAA/SMA可构建并独立启动；定向复核通过，Human Owner于2026-10-14接受r1；本轮未追加测试。UI与SQLite后续处理。 |

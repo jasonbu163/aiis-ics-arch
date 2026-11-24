@@ -8,7 +8,7 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from ..domain import ObservationError, reject, wire_time
 from ..models import HistorySample, LatestSnapshot, Receipt, WriteSource
-from ..profile import WRITE_SOURCES_REVISION
+from ..profile import REVISIONS
 from .guard import current_clock, probe_target
 
 _SOURCE_KEY = re.compile(r"[A-Za-z0-9_.-]{1,64}")
@@ -26,7 +26,7 @@ def storage_identity(key):
 
 
 def registry_available(profile):
-    return profile.get("target", {}).get("schemaRevision") == WRITE_SOURCES_REVISION
+    return profile.get("target", {}).get("schemaRevision") in REVISIONS
 
 
 def profile_identities(profile):

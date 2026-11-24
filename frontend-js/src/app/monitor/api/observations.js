@@ -5,6 +5,7 @@ const quiet = { suppressErrorMessage: true }
 export const monitorOptions = includeDeleted => request.get('/monitor/observation-options', {
   ...quiet, params: includeDeleted ? { includeDeleted: true } : undefined
 })
+export const historyDefaultContext = params => request.get('/monitor/history-default-context', { ...quiet, params })
 export const historyCurves = (params, language) => request.get('/monitor/history-curves', { ...quiet, params, headers: { 'Accept-Language': language } })
 export const curves = params => request.get('/monitor/curve-configs', { ...quiet, params })
 export const createCurve = data => request.post('/monitor/curve-configs', data)

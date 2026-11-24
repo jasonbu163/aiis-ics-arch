@@ -794,6 +794,50 @@ select {
   flex-wrap: wrap;
 }
 
+.card-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 4px 10px;
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+  border-radius: 999px;
+  background: var(--primary-subtle);
+  color: color-mix(in srgb, var(--primary) 70%, var(--text-primary));
+  font-size: 13px;
+  font-weight: 560;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.card-status-pill::before {
+  content: '';
+  flex: 0 0 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.card-action-switch.el-switch {
+  box-sizing: border-box;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--border-primary);
+  border-radius: 14px;
+  background: var(--bg-overlay);
+}
+
+.card-action-switch .el-switch__label,
+.card-action-switch .el-switch__label.is-active {
+  color: var(--text-secondary);
+  font-weight: 590;
+}
+
+.card-action-switch:has(.el-switch__input:focus-visible) {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .row-actions {
   display: inline-flex;
   align-items: center;
@@ -1100,6 +1144,44 @@ select {
   background: var(--bg-dialog);
 }
 
+.observation-config-dialog.el-dialog {
+  --config-dialog-inset: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px);
+  padding: 0;
+}
+
+.observation-config-dialog .el-dialog__header {
+  flex: none;
+  min-height: 68px;
+  padding: 10px var(--config-dialog-inset);
+}
+
+.observation-config-dialog .el-dialog__title {
+  font-size: 16px;
+  font-weight: 590;
+  line-height: 1.35;
+}
+
+.observation-config-dialog .el-dialog__body {
+  min-height: 0;
+  padding: 20px var(--config-dialog-inset);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.observation-config-dialog .el-dialog__footer {
+  flex: none;
+  padding: 12px var(--config-dialog-inset);
+}
+
+@media (max-width: 768px) {
+  .observation-config-dialog.el-dialog { --config-dialog-inset: 18px; }
+  .observation-config-dialog .el-dialog__header { min-height: 60px; }
+}
+
 .standard-dialog-form {
   display: grid;
   gap: 28px;
@@ -1143,6 +1225,104 @@ select {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+}
+
+.standard-form-dialog.compact-form-dialog.el-dialog {
+  --compact-dialog-inset: clamp(16px, 4vw, 32px);
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px);
+  padding: 0;
+}
+
+.compact-form-dialog .el-dialog__header {
+  position: relative;
+  flex: none;
+  min-height: 0;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px var(--compact-dialog-inset);
+}
+
+.compact-form-dialog .el-dialog__header.show-close {
+  padding-right: calc(var(--compact-dialog-inset) + 40px);
+}
+
+.compact-form-dialog .el-dialog__headerbtn {
+  top: 50%;
+  right: var(--compact-dialog-inset);
+  width: 32px;
+  height: 32px;
+  transform: translateY(-50%);
+}
+
+.compact-form-dialog .el-dialog__title {
+  min-width: 0;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 590;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.compact-form-dialog .el-dialog__body {
+  min-height: 0;
+  padding: 18px var(--compact-dialog-inset);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.compact-form-dialog .el-dialog__footer {
+  flex: none;
+  padding: 14px var(--compact-dialog-inset);
+}
+
+.compact-form-dialog .dialog-section {
+  min-width: 0;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-secondary);
+  border-radius: 12px;
+}
+
+.compact-form-dialog .dialog-section + .dialog-section {
+  margin-top: 12px;
+}
+
+.compact-form-dialog .dialog-section__title {
+  padding: 0;
+  border: 0;
+  font-size: 14px;
+  font-weight: 590;
+}
+
+.compact-form-dialog .dialog-form-grid {
+  margin: 0;
+  gap: 10px 16px;
+}
+
+.compact-form-dialog .dialog-form-grid dt {
+  color: var(--text-secondary);
+}
+
+.compact-form-dialog .dialog-form-grid dd {
+  margin: 4px 0 0;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.compact-form-dialog .dialog-form-grid .el-form-item__label,
+.compact-form-dialog .dialog-form-grid .el-checkbox,
+.compact-form-dialog .dialog-form-grid .el-checkbox__label {
+  height: auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.compact-form-dialog .core-dialog-footer .el-button + .el-button {
+  margin-left: 0;
 }
 
 @media (max-width: 768px) {

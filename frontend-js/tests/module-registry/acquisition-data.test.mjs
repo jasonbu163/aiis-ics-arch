@@ -218,21 +218,26 @@ test('empty authorized scope still makes the default list request and exposes fa
   }
 })
 
-test('actual history setup queries 24h, filters independently and only submits valid edited times', async () => {
+test('actual history setup queries recent samples, filters independently and validates explicit times', async () => {
   const p = acquisitionPage('history')
   await p.mount()
   assert.deepEqual(p.optionCalls, [{ view: 'history' }])
   assert.equal(p.calls.length, 1)
   assert.equal(p.calls[0].page, 1)
-  assert.equal(p.calls[0].pageSize, 50)
-  assert.equal(Date.parse(p.calls[0].to) - Date.parse(p.calls[0].from), 24 * 60 * 60 * 1000)
+  assert.equal(p.calls[0].pageSize, 20)
+  assert.equal('from' in p.calls[0], false)
+  assert.equal('to' in p.calls[0], false)
   assert.equal('plcId' in p.calls[0], false)
   assert.equal('dbNumber' in p.calls[0], false)
-  p.state.from.value = '2026-11-01 10:00:00'; p.state.to.value = '2026-11-08 10:00:00'
+  p.state.from.value = '2026-11-01 10:00:00'
+  p.state.submit(); await tick()
+  assert.equal(p.state.state.value, 'invalid')
+  p.state.to.value = '2026-11-08 10:00:00'
   await tick(); assert.equal(p.calls.length, 1)
   p.state.submit(); await tick()
   assert.equal(p.calls.length, 2)
   assert.equal(p.calls.at(-1).from, '2026-11-01T10:00:00+08:00')
+  assert.equal(p.calls.at(-1).pageSize, 50)
   p.state.dbNumber.value = 2; await tick()
   assert.equal(p.calls.length, 3)
   assert.equal(p.calls.at(-1).dbNumber, 2)
@@ -243,6 +248,14 @@ test('actual history setup queries 24h, filters independently and only submits v
   p.state.to.value = '2026-11-08 10:00:01'; p.state.submit(); await tick()
   assert.equal(p.calls.length, 4)
   assert.equal(p.state.state.value, 'invalid')
+  p.state.from.value = ''; p.state.to.value = ''; await tick()
+  assert.equal(p.calls.length, 5)
+  assert.deepEqual(p.calls.at(-1), { plcId: 'PLC-A', page: 1, pageSize: 20 })
+  p.state.changePage(2); await tick()
+  assert.deepEqual(p.calls.at(-1), { plcId: 'PLC-A', page: 2, pageSize: 20 })
+  p.state.changeSize(50); await tick()
+  assert.deepEqual(p.calls.at(-1), { plcId: 'PLC-A', page: 1, pageSize: 50 })
+  assert.match(p.template, /columns\.actions[^\n]*fixed="right"/)
   for (const field of ['plcId', 'dbNumber', 'sourceType']) assert.match(p.template, new RegExp(`prop="${field}"`))
   p.unmount()
 })

@@ -31,7 +31,7 @@ test('role arrays reject missing, broken, duplicate, forbidden and non-subset co
   assert.throws(() => parseRolePageAccess(env(['aiis_demo.example']), registry), /disabled pageId aiis_demo.example/)
   assert.throws(() => parseRolePageAccess(env(['system.projection-mapping']), registry), /unknown pageId/)
   assert.throws(() => parseRolePageAccess(env(['monitor.realtime']), registry), /unknown pageId/)
-  for (const id of ['equipment.observations.admin', 'monitor.observations.admin', 'plan.local-fields', 'performance.local-fields'])
+  for (const id of ['equipment.observations.admin', 'monitor.observations.admin', 'plan.local-fields', 'performance.local-fields', 'quality.local-fields'])
     assert.throws(() => parseRolePageAccess(env([id]), registry), /admin-only pageId/)
   for (const retired of ['dashboard.home','performance.split','performance.print','performance.efficiency','performance.quality']) assert.throws(() => parseRolePageAccess(env([retired]), registry), /unknown pageId|disabled pageId/)
   assert.throws(() => parseRolePageAccess(env(['plan.list'], ['performance.list']), registry), /absent from VITE_SUPERVISOR/)
@@ -46,7 +46,7 @@ test('admin, supervisor, operator and unknown share route/menu/default decisions
       '/monitor/temperature', '/monitor/consumption', '/monitor/drive',
       '/monitor/cleaning', '/monitor/observations/admin', '/monitor/observations/data', '/equipment/production-parameters', '/equipment/drive',
       '/equipment/temperature', '/equipment/cleaning', '/equipment/observations/admin', '/equipment/observations/data',
-      '/auxiliary/stop', '/auxiliary/shift', '/auxiliary/price', '/quality/list', '/quality/spc',
+      '/auxiliary/stop', '/auxiliary/shift', '/auxiliary/price', '/quality/list', '/quality/local-fields', '/quality/spc',
       '/quality/control/:id', '/system/user', '/maintenance/log'
     ], menus: ['plan', 'performance', 'monitor', 'equipment', 'auxiliary', 'quality', 'system', 'maintenance'], entry: '/plan/list' },
     supervisor: { paths: ['/plan/list', '/performance/list'], menus: ['plan', 'performance'], entry: '/plan/list' },

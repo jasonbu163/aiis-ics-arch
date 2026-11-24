@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import runpy
 from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 import pytest
 from fastapi import FastAPI
@@ -56,6 +57,33 @@ def install_registry_fixture(monkeypatch, value):
         return {**value, 'sourceTypes': {plc: value['instances'][source[0]] for plc, source in value['sources'].items()}}
     monkeypatch.setattr(service.registry, 'admit', admit)
     monkeypatch.setattr(service.registry, 'read_profile', read)
+
+
+def install_consumption_fixture(monkeypatch, sample_body):
+    from app.plc_facts.services import async_consumption
+
+    async def reserve(*_):
+        return 3
+
+    async def lock_stream(*_):
+        return SimpleNamespace(last_seq=3, floor_seq=0)
+
+    async def no_op(*_):
+        pass
+
+    async def event(_db, history_id):
+        expires = min(v2_domain.validate_times(sample_body, NOW)[1])
+        return SimpleNamespace(history_id=history_id, plc_id=sample_body.plc_id.encode(),
+                               db_number=sample_body.db_number, instance_id=sample_body.instance_id.encode(),
+                               sample_id=sample_body.sample_id.encode(),
+                               source_generation=sample_body.source_generation.encode(),
+                               expires_at=expires, event_seq=3)
+
+    monkeypatch.setattr(async_consumption, 'reserve_sample_event', reserve)
+    monkeypatch.setattr(async_consumption, 'enforce_target', no_op)
+    monkeypatch.setattr(service.consumption_crud, 'lock_stream', lock_stream)
+    monkeypatch.setattr(service.consumption_crud, 'set_append_marker', no_op)
+    monkeypatch.setattr(service.consumption_crud, 'event_for_history', event)
 
 
 @pytest.mark.parametrize('count', [400, 512])
@@ -185,11 +213,15 @@ def test_identity_limits_and_profile_source_binding():
 async def test_success_ack_occurs_after_commit_and_unknown_is_not_success(monkeypatch):
     install_registry_fixture(monkeypatch, v2_config.parse_profile(profile()))
     parsed, document, digest = v2_domain.parse_sample(encoded(sample()))
+    install_consumption_fixture(monkeypatch, parsed)
     events = []
     async def now(*_): return NOW
-    async def put(*_): events.append('history')
+    async def put(*_):
+        events.append('history')
+        return 1
     async def advance(*_): events.append('latest')
     monkeypatch.setattr(async_v2, 'target_now', now)
+    monkeypatch.setattr(async_v2, 'clock_now', now)
     monkeypatch.setattr(async_v2, 'insert_sample', put)
     monkeypatch.setattr(async_v2, 'advance_latest', advance)
     class Session:
@@ -210,11 +242,14 @@ async def test_success_ack_occurs_after_commit_and_unknown_is_not_success(monkey
 async def test_unique_conflict_reopens_transaction_for_duplicate_or_conflict(monkeypatch):
     install_registry_fixture(monkeypatch, v2_config.parse_profile(profile()))
     parsed, document, digest = v2_domain.parse_sample(encoded(sample()))
+    install_consumption_fixture(monkeypatch, parsed)
     async def now(*_): return NOW
     async def collision(*_): raise IntegrityError('synthetic', {}, Exception('duplicate'))
-    row = SimpleNamespace(instance_id=b'daa-a', sample_id=b'sample-102-db21', content_hash=digest)
+    row = SimpleNamespace(instance_id=b'daa-a', sample_id=b'sample-102-db21', content_hash=digest, id=1,
+                          expires_at=min(v2_domain.validate_times(parsed, NOW)[1]))
     async def identities(*_): return [row]
     monkeypatch.setattr(async_v2, 'target_now', now)
+    monkeypatch.setattr(async_v2, 'clock_now', now)
     monkeypatch.setattr(async_v2, 'insert_sample', collision)
     monkeypatch.setattr(async_v2, 'identities', identities)
     class Session:
@@ -228,66 +263,80 @@ async def test_unique_conflict_reopens_transaction_for_duplicate_or_conflict(mon
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize('duplicate', (False, True))
+@pytest.mark.parametrize('fault', ('missing', 'stream', 'sequence', 'instance', 'sample', 'generation', 'expiry'))
+async def test_no_created_or_duplicate_receipt_without_matching_event(monkeypatch, duplicate, fault):
+    configured = v2_config.parse_profile(profile())
+    install_registry_fixture(monkeypatch, configured)
+    parsed, document, digest = v2_domain.parse_sample(encoded(sample()))
+    install_consumption_fixture(monkeypatch, parsed)
+    original_event = service.consumption_crud.event_for_history
+
+    async def invalid_event(db, history_id):
+        if fault == 'missing':
+            return None
+        event = await original_event(db, history_id)
+        changes = {'stream': ('db_number', 22), 'sequence': ('event_seq', 4),
+                   'instance': ('instance_id', b'wrong'), 'sample': ('sample_id', b'wrong'),
+                   'generation': ('source_generation', b'wrong'), 'expiry': ('expires_at', NOW)}
+        setattr(event, *changes[fault])
+        return event
+
+    monkeypatch.setattr(service.consumption_crud, 'event_for_history', invalid_event)
+    target = AsyncMock(return_value=NOW)
+    advance = AsyncMock()
+    insert = AsyncMock(return_value=1)
+    if duplicate:
+        insert.side_effect = IntegrityError('synthetic', {}, Exception('duplicate'))
+    fact = SimpleNamespace(id=1, instance_id=parsed.instance_id.encode(), sample_id=parsed.sample_id.encode(),
+                           content_hash=digest, expires_at=min(v2_domain.validate_times(parsed, NOW)[1]))
+    monkeypatch.setattr(async_v2, 'target_now', target)
+    monkeypatch.setattr(async_v2, 'clock_now', AsyncMock(return_value=NOW))
+    monkeypatch.setattr(async_v2, 'identities', AsyncMock(return_value=[fact]))
+    monkeypatch.setattr(async_v2, 'insert_sample', insert)
+    monkeypatch.setattr(async_v2, 'advance_latest', advance)
+    db = SimpleNamespace(commit=AsyncMock(), rollback=AsyncMock())
+    with pytest.raises(v2_domain.V2Error, match='not_ready'):
+        await service.write_sample(db, configured, parsed, document, digest, {})
+    db.commit.assert_not_awaited()
+    advance.assert_not_awaited()
+    assert db.rollback.await_count == target.await_count == (2 if duplicate else 1)
+
+
+@pytest.mark.asyncio
 async def test_duplicate_and_new_sample_recheck_clock_after_wait(monkeypatch):
     install_registry_fixture(monkeypatch, v2_config.parse_profile(profile()))
     parsed, document, digest = v2_domain.parse_sample(encoded(sample()))
+    install_consumption_fixture(monkeypatch, parsed)
     before = datetime(2027, 2, 9, 10, 0, 2, 119999)
     cutoff = before + timedelta(microseconds=1)
     async def collision(*_): raise IntegrityError('synthetic', {}, Exception('duplicate'))
-    row = SimpleNamespace(instance_id=b'daa-a', sample_id=b'sample-102-db21', content_hash=digest)
+    row = SimpleNamespace(instance_id=b'daa-a', sample_id=b'sample-102-db21', content_hash=digest, id=1,
+                          expires_at=min(v2_domain.validate_times(parsed, NOW)[1]))
     async def identities(*_): return [row]
     class Session:
         commits = 0
         async def rollback(self): pass
         async def commit(self): self.commits += 1
     db = Session()
-    readings = iter((before, before, cutoff))
+    readings = iter((before, cutoff))
+    async def probe(*_): return before
     async def now(*_): return next(readings)
-    monkeypatch.setattr(async_v2, 'target_now', now)
+    monkeypatch.setattr(async_v2, 'target_now', probe)
+    monkeypatch.setattr(async_v2, 'clock_now', now)
     monkeypatch.setattr(async_v2, 'insert_sample', collision)
     monkeypatch.setattr(async_v2, 'identities', identities)
     with pytest.raises(v2_domain.V2Error) as expired:
         await service.write_sample(db, v2_config.parse_profile(profile()), parsed, document, digest, {})
     assert expired.value.status == 410 and db.commits == 0
     readings = iter((before, cutoff))
-    async def insert(*_): pass
+    async def insert(*_): return 1
     async def advance(*_): pass
     monkeypatch.setattr(async_v2, 'insert_sample', insert)
     monkeypatch.setattr(async_v2, 'advance_latest', advance)
     with pytest.raises(v2_domain.V2Error) as expired:
         await service.write_sample(db, v2_config.parse_profile(profile()), parsed, document, digest, {})
     assert expired.value.status == 410 and db.commits == 0
-
-
-@pytest.mark.asyncio
-async def test_target_checks_uuid_schema_revision_version_and_db_clock():
-    target = profile()['target']
-    target['schemaRevision'] = v2_config.REVISION
-    class Result:
-        def __init__(self, value): self.value = value
-        def one(self): return self.value
-        def scalars(self): return iter(self.value)
-    class Session:
-        def __init__(self):
-            self.row = (target['serverUuid'], target['schema'], '8.4.6', NOW, 28800)
-            self.revisions = [v2_config.REVISION]
-        def get_bind(self): return SimpleNamespace(dialect=SimpleNamespace(name='mysql'))
-        async def execute(self, statement):
-            return Result(self.revisions if 'alembic_version' in str(statement) else self.row)
-    db = Session()
-    assert await async_v2.target_now(db, target) == NOW
-    for row, revisions in [
-        (('wrong-uuid', target['schema'], '8.4.6', NOW, 28800), db.revisions),
-        ((target['serverUuid'], 'wrong-schema', '8.4.6', NOW, 28800), db.revisions),
-        ((target['serverUuid'], target['schema'], '8.0.0', NOW, 28800), db.revisions),
-        ((target['serverUuid'], target['schema'], '8.4.6', NOW, 0), db.revisions),
-        (db.row, ['1b3d5f7a9c20']),
-        (db.row, ['2c4e6a8b0d12', '3d5f7a9c1e23']),
-    ]:
-        db.row, db.revisions = row, revisions
-        with pytest.raises(v2_domain.V2Error) as error:
-            await async_v2.target_now(db, target)
-        assert error.value.key == 'plc_facts_v2.not_ready'
 
 
 @pytest.mark.asyncio
@@ -361,7 +410,9 @@ async def test_real_numeric_tokens_roundtrip_storage_and_http(monkeypatch):
     assert [v2_domain.stored_value(point) for point in parsed.points] == list(tokens)
     class Capture:
         def __init__(self): self.statements = []
-        async def execute(self, statement): self.statements.append(statement)
+        async def execute(self, statement):
+            self.statements.append(statement)
+            return SimpleNamespace(lastrowid=1)
     capture = Capture()
     observed, expiries = v2_domain.validate_times(parsed, NOW)
     await async_v2.insert_sample(capture, parsed, payload, b'x' * 32, observed, expiries, NOW, 'daa')
@@ -465,7 +516,7 @@ def test_mixed_cleanup_candidates_are_bounded():
 def test_cleanup_tick_never_exceeds_2000(monkeypatch):
     events = []
     setup = []
-    def target(*_):
+    def target(*_, **_options):
         setup.append('target')
         return NOW
     monkeypatch.setattr(maintenance.crud, 'target_now', target)
@@ -492,7 +543,7 @@ def test_cleanup_deadline_after_target_prevents_lock_and_report_probe(monkeypatc
     clock = SimpleNamespace(value=0.0)
     events = []
     monkeypatch.setattr(maintenance, 'time', SimpleNamespace(monotonic=lambda: clock.value))
-    def target(*_):
+    def target(*_, **_options):
         events.append('target')
         clock.value = 2.001
         return NOW

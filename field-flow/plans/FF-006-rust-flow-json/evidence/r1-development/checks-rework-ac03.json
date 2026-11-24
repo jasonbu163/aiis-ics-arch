@@ -1,0 +1,147 @@
+{
+  "formal": {
+    "product_sha256": "cc7170015f05eede632dbfa6a1a872603ae84a7afd017f898a2077ec0e01ee98",
+    "valid_report": {
+      "files": [],
+      "flow_files": [
+        {
+          "file": "demo01.json",
+          "flow_id": "demo01_read_condition",
+          "revision": 1,
+          "sha256": "54bfefd486dfaf97ba0b6ff55e278019c2283d2fb081ef4cf8e1c66cf42638d0"
+        }
+      ],
+      "format_valid": true,
+      "issues": [],
+      "issues_truncated": false,
+      "runtime_compatible": true,
+      "scope": "main"
+    },
+    "rejected_mutations": {
+      "edge0": {
+        "report": {
+          "files": [],
+          "format_valid": false,
+          "issues": [
+            {
+              "error_key": "config_flow_edge",
+              "path": "flow_files[demo01.json].flow.edges[0].to_node_id"
+            }
+          ],
+          "issues_truncated": false,
+          "runtime_compatible": false,
+          "scope": "main"
+        },
+        "exit_code": 2,
+        "vector_sha256": "fffb1a3fa17aa2750741a9f4f819b7605d3fb163c739a183ccc7544117b91fff"
+      },
+      "edge2": {
+        "report": {
+          "files": [],
+          "format_valid": false,
+          "issues": [
+            {
+              "error_key": "config_flow_edge",
+              "path": "flow_files[demo01.json].flow.edges[2].to_node_id"
+            }
+          ],
+          "issues_truncated": false,
+          "runtime_compatible": false,
+          "scope": "main"
+        },
+        "exit_code": 2,
+        "vector_sha256": "e2b28df410aa7a51ca4bcd3eece23c60176fa40eed06d90680fe38c1ffc11486"
+      }
+    },
+    "test_exit_code": 0,
+    "passed": {
+      "cli_contract": 3,
+      "flow_json": 4
+    },
+    "release_build_exit_code": 0,
+    "release_build_log_sha256": "7c7d0a3009b7edac5fa542cba066ff588e93ec608fb53cc8b0be04a870b7c049",
+    "test_log_sha256": "91c37b042dba4fa6898105f4a2984af3dc50e2651fcdc52cd36e8a05a21aa926",
+    "fixed_loopback_ports_clear": [
+      34102,
+      34103,
+      34112,
+      34113,
+      34880
+    ],
+    "post_test_check_at_utc": "2026-11-24T06:28:57Z"
+  },
+  "copy": {
+    "product_sha256": "84552ec954b6e02dfda950b1628d28c70e52526a22fa338161c7fcc6755a5c51",
+    "valid_report": {
+      "files": [],
+      "flow_files": [
+        {
+          "file": "demo01.json",
+          "flow_id": "demo01_read_condition",
+          "revision": 1,
+          "sha256": "54bfefd486dfaf97ba0b6ff55e278019c2283d2fb081ef4cf8e1c66cf42638d0"
+        }
+      ],
+      "format_valid": true,
+      "issues": [],
+      "issues_truncated": false,
+      "runtime_compatible": true,
+      "scope": "main"
+    },
+    "rejected_mutations": {
+      "edge0": {
+        "report": {
+          "files": [],
+          "format_valid": false,
+          "issues": [
+            {
+              "error_key": "config_flow_edge",
+              "path": "flow_files[demo01.json].flow.edges[0].to_node_id"
+            }
+          ],
+          "issues_truncated": false,
+          "runtime_compatible": false,
+          "scope": "main"
+        },
+        "exit_code": 2,
+        "vector_sha256": "fffb1a3fa17aa2750741a9f4f819b7605d3fb163c739a183ccc7544117b91fff"
+      },
+      "edge2": {
+        "report": {
+          "files": [],
+          "format_valid": false,
+          "issues": [
+            {
+              "error_key": "config_flow_edge",
+              "path": "flow_files[demo01.json].flow.edges[2].to_node_id"
+            }
+          ],
+          "issues_truncated": false,
+          "runtime_compatible": false,
+          "scope": "main"
+        },
+        "exit_code": 2,
+        "vector_sha256": "e2b28df410aa7a51ca4bcd3eece23c60176fa40eed06d90680fe38c1ffc11486"
+      }
+    },
+    "test_exit_code": 0,
+    "passed": {
+      "cli_contract": 3,
+      "flow_json": 4
+    },
+    "release_build_exit_code": 0,
+    "release_build_log_sha256": "e178a96512082b2e3138a9a13205b1f7b657e0a84bf5a39b279e10342412d4d0",
+    "test_log_sha256": "5a54f108fcd35949b609bc12e553db00541df2990b7643118621c8d7bb5abaee",
+    "fixed_loopback_ports_clear": [
+      34102,
+      34103,
+      34112,
+      34113,
+      34880
+    ],
+    "post_test_check_at_utc": "2026-11-24T06:29:03Z"
+  },
+  "candidate_manifest_sha256": "db05105914d4e82bf0ae1728d6f379098b255e676bce7724ca2b468935636eec",
+  "qa1_checklist_sha256_at_rework_handoff": "486063697e15f99d747ad32ee47ec41ed1e6dde847f7091d609a120e6e39d1bd",
+  "raw_evidence_root": "/private/tmp/ff-006-dev-xd8TnW/rework-ac03"
+}

@@ -540,3 +540,27 @@ For quantitative S1 acceptance, first stop both manual scenes and confirm the fi
 ```bash
 FF004_EVIDENCE_ROOT="$FF_RUN_ROOT/s1-acceptance" cargo test --locked --features test-fixture --target-dir "$FF_RUN_ROOT/acceptance-target" --test multi_plc catalog_cli_matrix -- --nocapture --test-threads=1
 ```
+
+<a id="flow-json"></a>
+
+## Read-only demo01 JSON flow
+
+The [main YAML v2 example](config/flow-json.yaml) selects [demo01.json](flows/demo01.json) explicitly. `--flows-dir` resolves relative to the shell working directory, independently of the main YAML path. Use a regular local directory and individual file names. Each selected file is checked and frozen at startup. Edits take effect on a new run.
+
+From the Rust project directory, using its build of `field-flow` on PATH:
+
+```sh
+field-flow config validate --config config/flow-json.yaml --flows-dir flows
+field-flow state init --synthetic --mode dry_run --state-dir "$FF_RUN_ROOT/json-state" --instance-id ff-rust-flow-json
+field-flow run --config config/flow-json.yaml --flows-dir flows --state-dir "$FF_RUN_ROOT/json-state"
+```
+
+Use a fresh state directory under an existing private `FF_RUN_ROOT`. Before running, connect the example configuration to an owned synthetic HTTP service that returns the demo01 command shape. For an automated local fixture and the simulated and error paths:
+
+```sh
+cargo test --locked --offline --features test-fixture --test flow_json -- --test-threads=1
+```
+
+The flow supports one HTTP GET, one Boolean equality condition and two terminal branches. The endpoint origin, source ID and command age limit are bound in YAML. On `ready=false`, the sample records `not_matched` and ends the round; the interval then schedules a new GET. On `ready=true`, it records `matched` and ends the round. Invalid or stale replies produce a round error. Check `flow_json_round` events in stdout and `runtime.jsonl`; their context includes the flow/revision, round ID, file SHA-256 and result or error key. Stop with SIGINT or SIGTERM and wait for exit.
+
+The graph performs zero PLC I/O and creates no command execution records. YAML v2 handwritten flows can still run alongside it using their own PLC configuration. Graph preflight rejects unsupported nodes, versions, references and bindings before opening state or network connections. `config validate` reports the location and stable error key. The CA export round trip awaits an actual export.

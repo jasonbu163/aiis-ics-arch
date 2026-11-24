@@ -35,14 +35,21 @@
         </el-form>
       </div>
       <div class="table-scroll">
-        <el-table :key="columns.version.value" v-loading="loading" :data="items" stripe border class="vibe-table" @header-dragend="columns.onHeaderDragEnd" @row-click="openDetail">
+        <el-table :key="columns.version.value" v-loading="loading" :data="items" stripe border class="vibe-table" @header-dragend="columns.onHeaderDragEnd" @row-click="openDetail($event)">
           <el-table-column v-for="col in fixedColumns" :key="col" :prop="col" :label="tr(col)" :width="columns.widths[col]" :min-width="100" show-overflow-tooltip>
             <template #default="{ row }">{{ displayFixed(row, col) }}</template>
           </el-table-column>
           <el-table-column v-for="field in visibleFields" :key="fieldKey(field)" :prop="fieldKey(field)" :label="fieldLabel(field)" :width="columns.widths[fieldKey(field)]" :min-width="100" show-overflow-tooltip>
             <template #default="{ row }">{{ displayValue(row.items?.[field.name]) }}</template>
           </el-table-column>
-          <el-table-column :label="tr('actions')" width="100" fixed="right"><template #default="{ row }"><div class="row-actions" @click.stop><ActionButton size="small" variant="row" @click="openDetail(row)">{{ tr('detail') }}</ActionButton></div></template></el-table-column>
+          <el-table-column :label="tr('actions')" :width="canEditRecord ? 144 : 100" fixed="right">
+            <template #default="{ row }">
+              <div class="row-actions" :class="{ 'task-row-actions-pair': canEditRecord }" @click.stop>
+                <ActionButton size="small" variant="row" class="task-row-detail" @click="openDetail(row)">{{ tr('detail') }}</ActionButton>
+                <ActionButton v-if="canEditRecord" size="small" variant="row" @click="openDetail(row, 'edit')">{{ tr('dialog.edit') }}</ActionButton>
+              </div>
+            </template>
+          </el-table-column>
         </el-table>
       </div>
       <div class="pagination-scroll">
@@ -50,49 +57,111 @@
       </div>
     </BaseCard>
 
-    <el-dialog v-model="detailOpen" :title="tr(mode === 'new' ? 'newPlan' : mode === 'supplement' ? 'supplement' : 'detail')" width="760px" class="standard-form-dialog" @closed="closeDetail">
-      <el-form v-if="form" label-position="top">
-        <el-row :gutter="16">
-          <el-col :span="12"><el-form-item :label="tr('taskNo')"><el-input v-model="form.taskNo" :disabled="mode !== 'new'" /></el-form-item></el-col>
-          <el-col :span="12"><el-form-item :label="tr('targetKey')"><el-input v-model="form.targetKey" :disabled="!canEditOrders || (mode === 'view' && Boolean(record?.targetKey))" /></el-form-item></el-col>
-          <el-col v-if="kind === 'plan' || mode === 'supplement'" :span="12"><el-form-item :label="tr('priority')"><el-input-number v-model="form.priority" :min="1" :max="10" :disabled="!canEditOrders" /></el-form-item></el-col>
-          <el-col :span="12">
-            <el-form-item :label="tr('productionStatus')">
-              <el-select v-if="canEditOrders" v-model="form.productionStatus" clearable>
-                <el-option v-for="s in productionStates" :key="s" :value="s" :label="tr(`statuses.${s}`)" />
-              </el-select>
-              <span v-else>{{ stateLabel(record?.productionStatus) }}</span>
-            </el-form-item>
-          </el-col>
-          <el-col v-if="record && kind === 'performance'" :span="12"><el-form-item :label="tr('lastObservedAt')">{{ displayFixed(record, 'lastObservedAt') }}</el-form-item></el-col>
-          <el-col v-for="field in formFields" :key="fieldKey(field)" :span="12">
-            <el-form-item :label="fieldLabel(field)">
-              <el-input v-if="field.type === 'string'" v-model="form.items[field.name]" :maxlength="255" :disabled="!fieldEditable(field)" />
-              <el-input-number v-else-if="field.type === 'number'" v-model="form.items[field.name]" :precision="4" :disabled="!fieldEditable(field)" controls-position="right" />
-              <el-select v-else v-model="form.items[field.name]" :disabled="!fieldEditable(field)" :clearable="field.isNullable" @clear="form.items[field.name] = null">
-                <el-option :label="tr('yes')" :value="true" /><el-option :label="tr('no')" :value="false" />
-              </el-select>
-              <el-button v-if="field.isNullable && fieldEditable(field)" link @click="form.items[field.name] = null">{{ tr('clearValue') }}</el-button>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24"><el-form-item :label="tr('remark')"><el-input v-model="form.remark" type="textarea" :maxlength="500" :disabled="!canEditRemark" /></el-form-item></el-col>
-          <el-col v-if="mode === 'supplement'" :span="24"><el-checkbox v-model="form.backfillExisting">{{ tr('backfillExisting') }}</el-checkbox></el-col>
-        </el-row>
-      </el-form>
-      <el-descriptions v-if="record && mode !== 'supplement'" :column="2" border>
-        <el-descriptions-item v-for="key in detailKeys" :key="key" :label="tr(key)">{{ displayFixed(record, key) }}</el-descriptions-item>
-      </el-descriptions>
+    <el-dialog :model-value="detailOpen" :title="dialogTitle" width="min(760px, calc(100vw - 24px))"
+      class="standard-form-dialog task-detail-dialog" align-center
+      :show-close="false" :close-on-click-modal="false" :before-close="closeDetail">
+      <template #header="{ titleId, titleClass }">
+        <h2 :id="titleId" ref="dialogHeading" :class="titleClass" tabindex="-1">{{ dialogTitle }}</h2>
+        <div v-if="mode === 'view' && canSupplement" class="detail-actions">
+          <ActionButton @click="startSupplement">{{ tr('supplement') }}</ActionButton>
+        </div>
+      </template>
+      <p v-if="detailLoading" class="detail-state" role="status">{{ tr('dialog.loading') }}</p>
+      <div v-else-if="detailError" class="detail-load-error">
+        <el-alert :title="detailError" type="error" :closable="false" show-icon />
+        <ActionButton @click="openDetail(detailTarget, mode)">{{ tr('dialog.retry') }}</ActionButton>
+      </div>
+      <template v-else-if="record && mode === 'view'">
+        <section class="detail-section">
+          <h3>{{ tr('dialog.basic') }}</h3>
+          <dl class="detail-grid">
+            <div v-for="key in basicKeys" :key="key"><dt>{{ tr(key) }}</dt><dd>{{ displayFixed(record, key) }}</dd></div>
+          </dl>
+        </section>
+        <section class="detail-section">
+          <h3>{{ tr('dialog.business') }}</h3>
+          <dl class="detail-grid">
+            <div v-for="field in formFields" :key="fieldKey(field)">
+              <dt>{{ fieldLabel(field) }}</dt><dd>{{ displayValue(record.items?.[field.name]) }}</dd>
+            </div>
+            <div class="detail-full"><dt>{{ tr('remark') }}</dt><dd>{{ displayValue(record.remark) }}</dd></div>
+          </dl>
+        </section>
+        <section class="detail-section">
+          <h3>{{ tr('dialog.times') }}</h3>
+          <dl class="detail-grid">
+            <div v-for="key in timeKeys" :key="key"><dt>{{ tr(key) }}</dt><dd>{{ displayFixed(record, key) }}</dd></div>
+          </dl>
+        </section>
+      </template>
+      <template v-else-if="form">
+        <div v-if="saveError" ref="saveAlert" class="detail-save-error">
+          <el-alert :title="saveError" type="error" :closable="false" show-icon />
+        </div>
+        <el-form label-position="top" :disabled="saving" @submit.prevent>
+          <section class="detail-section">
+            <h3>{{ tr('dialog.basic') }}</h3>
+            <el-row :gutter="16" class="detail-form-row">
+              <el-col :span="12"><el-form-item :label="tr('taskNo')" :required="mode === 'new'"><el-input v-model="form.taskNo" :disabled="mode !== 'new'" /></el-form-item></el-col>
+              <el-col :span="12"><el-form-item :label="tr('targetKey')"><el-input v-model="form.targetKey" :disabled="!canEditTarget" /></el-form-item></el-col>
+              <el-col v-if="kind === 'plan' || mode === 'supplement'" :span="12"><el-form-item :label="tr('priority')"><el-input-number v-model="form.priority" :min="1" :max="10" :disabled="!canEditOrders" /></el-form-item></el-col>
+              <el-col :span="12">
+                <el-form-item :label="tr('productionStatus')">
+                  <el-select v-if="canEditOrders" v-model="form.productionStatus" clearable>
+                    <el-option v-for="s in productionStates" :key="s" :value="s" :label="tr(`statuses.${s}`)" />
+                  </el-select>
+                  <span v-else>{{ stateLabel(record?.productionStatus) }}</span>
+                </el-form-item>
+              </el-col>
+              <el-col v-if="record && kind === 'performance'" :span="12"><el-form-item :label="tr('lastObservedAt')">{{ displayFixed(record, 'lastObservedAt') }}</el-form-item></el-col>
+            </el-row>
+          </section>
+          <section class="detail-section">
+            <h3>{{ tr('dialog.business') }}</h3>
+            <el-row :gutter="16" class="detail-form-row">
+              <el-col v-for="field in formFields" :key="fieldKey(field)" :span="12">
+                <el-form-item :label="fieldLabel(field)">
+                  <el-input v-if="field.type === 'string'" v-model="form.items[field.name]" :maxlength="255" :disabled="!fieldEditable(field)" />
+                  <el-input-number v-else-if="field.type === 'number'" v-model="form.items[field.name]" :precision="4" :disabled="!fieldEditable(field)" controls-position="right" />
+                  <el-select v-else v-model="form.items[field.name]" :disabled="!fieldEditable(field)" :clearable="field.isNullable" @clear="form.items[field.name] = null">
+                    <el-option :label="tr('yes')" :value="true" /><el-option :label="tr('no')" :value="false" />
+                  </el-select>
+                  <el-button v-if="mode !== 'new' && field.isNullable && fieldEditable(field)" link :disabled="saving" @click="form.items[field.name] = null">{{ tr('clearValue') }}</el-button>
+                </el-form-item>
+              </el-col>
+              <el-col :span="24"><el-form-item :label="tr('remark')"><el-input v-model="form.remark" type="textarea" :maxlength="500" :disabled="!canEditRemark" /></el-form-item></el-col>
+              <el-col v-if="mode === 'supplement'" :span="24">
+                <div class="backfill-option">
+                  <el-checkbox v-model="form.backfillExisting">{{ tr('backfillExisting') }}</el-checkbox>
+                  <el-tooltip placement="top" :trigger="['hover', 'focus']" :trigger-keys="[]">
+                    <template #content><div class="help-content">{{ tr('dialog.backfillHint') }}</div></template>
+                    <button class="help-trigger" type="button" :aria-label="tr('dialog.backfillHint')"
+                      @click="$event.currentTarget.focus()" @keydown.esc.stop="$event.currentTarget.blur()">
+                      <el-icon><QuestionFilled /></el-icon>
+                    </button>
+                  </el-tooltip>
+                </div>
+              </el-col>
+            </el-row>
+          </section>
+        </el-form>
+      </template>
       <template #footer>
-        <el-button v-if="canSupplement && mode !== 'supplement'" @click="startSupplement">{{ tr('supplement') }}</el-button>
-        <el-button @click="detailOpen = false">{{ $t('common.close') }}</el-button>
-        <el-button v-if="canEditRemark || mode === 'supplement'" type="primary" :loading="saving" @click="save">{{ $t('common.save') }}</el-button>
+        <div class="detail-actions">
+          <ActionButton v-if="mode === 'view'" @click="closeDetail">{{ $t('common.close') }}</ActionButton>
+          <template v-else>
+            <ActionButton :disabled="saving" @click="cancelEdit">{{ $t('common.cancel') }}</ActionButton>
+            <ActionButton v-if="canEditRemark" variant="primary" :loading="saving" @click="save">{{ $t('common.save') }}</ActionButton>
+          </template>
+        </div>
       </template>
     </el-dialog>
   </div>
 </template>
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { onBeforeRouteLeave } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { QuestionFilled } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
@@ -103,7 +172,7 @@ import { useTaskPagePadding } from './useTaskPagePadding'
 
 const props = defineProps({ kind: { type: String, required: true }, api: { type: Object, required: true } })
 const { t, te, locale } = useI18n()
-const tr = key => t(`${props.kind}.workflow.${key}`)
+const tr = (key, params = {}) => t(`${props.kind}.workflow.${key}`, params)
 const user = useUserStore()
 const canManage = computed(() => user.isAdmin || user.role === 'supervisor')
 const productionStates = ['new', 'running', 'completed', 'error']
@@ -118,10 +187,13 @@ try {
 
 const { pageRoot, pagePadding } = useTaskPagePadding()
 
-const fields = ref([]), formFields = ref([]), items = ref([]), total = ref(0)
+const fields = ref([]), recordFields = ref([]), items = ref([]), total = ref(0)
 const loading = ref(false), saving = ref(false), configAvailable = ref(false)
 const detailOpen = ref(false)
 const record = ref(null), form = ref(null), original = ref(null), mode = ref('view'), planFields = ref(null)
+const detailTarget = ref(null), detailLoading = ref(false), detailError = ref(''), saveError = ref('')
+const dialogHeading = ref(null), saveAlert = ref(null)
+const formFields = computed(() => mode.value === 'supplement' ? planFields.value ?? [] : recordFields.value)
 const fixedColumns = computed(() => props.kind === 'plan'
   ? ['taskNo', 'targetKey', 'productionStatus', 'priority', 'createdAt', 'updatedAt']
   : ['taskNo', 'targetKey', 'productionStatus', 'hasPlan', 'createdAt', 'lastObservedAt', 'updatedAt'])
@@ -134,11 +206,22 @@ const columns = computed(() => useTableColumnWidths(`generic-task.${props.kind}`
 ])))
 const fieldLabel = field => `${field.labels?.[locale.value] || field.labels?.['en-US'] || field.name}${field.unit ? ` (${field.unit})` : ''}`
 const canEditOrders = computed(() => canManage.value && (props.kind === 'plan' || mode.value === 'supplement'))
-const canEditRemark = computed(() => !!form.value && (canEditOrders.value || (props.kind === 'performance' && ['admin', 'supervisor', 'operator'].includes(user.role))))
+const canEditTarget = computed(() => canEditOrders.value && (mode.value !== 'edit' || !record.value?.targetKey))
+const canEditRecord = computed(() => props.kind === 'plan'
+  ? canManage.value
+  : ['admin', 'supervisor', 'operator'].includes(user.role))
+const canEditRemark = computed(() => !!form.value && (canEditOrders.value || canEditRecord.value))
 const canSupplement = computed(() => props.kind === 'performance' && canManage.value && user.hasPageAccess('plan.list') && record.value && !record.value.hasPlan && planFields.value)
-const detailKeys = computed(() => props.kind === 'performance'
-  ? ['createdAt', 'updatedAt', 'startedAt', 'completedAt', 'hasPlan']
+const basicKeys = computed(() => ['taskNo', 'targetKey', 'productionStatus', props.kind === 'plan' ? 'priority' : 'hasPlan'])
+const timeKeys = computed(() => props.kind === 'performance'
+  ? ['createdAt', 'updatedAt', 'lastObservedAt', 'startedAt', 'completedAt']
   : ['createdAt', 'updatedAt'])
+const dialogTitle = computed(() => {
+  if (mode.value === 'new') return tr('newPlan')
+  const identity = record.value?.taskNo ?? detailTarget.value?.taskNo ?? detailTarget.value?.id
+  const key = { view: 'viewTitle', edit: 'editTitle', supplement: 'supplementTitle' }[mode.value]
+  return identity == null ? tr('detail') : tr(`dialog.${key}`, { taskNo: identity })
+})
 
 function displayValue(value) {
   if (value == null) return '—'
@@ -154,9 +237,9 @@ function fieldEditable(field) {
   if (canEditOrders.value) return field.planEditable
   return props.kind === 'performance' && field.performanceOwner === 'manual' && field.performanceEditable && canEditRemark.value
 }
-function showError(error) {
+function errorLabel(error) {
   const key = error.response?.data?.errorCode?.replace('task.', '')
-  ElMessage.error(key && te(`${props.kind}.workflow.errors.${key}`) ? tr(`errors.${key}`) : tr('requestFailed'))
+  return key && te(`${props.kind}.workflow.errors.${key}`) ? tr(`errors.${key}`) : tr('requestFailed')
 }
 let loadId = 0
 async function load() {
@@ -171,7 +254,7 @@ async function load() {
     items.value = result.items
     total.value = result.total
   } catch (error) {
-    if (id === loadId) showError(error)
+    if (id === loadId) ElMessage.error(errorLabel(error))
   } finally {
     if (id === loadId) loading.value = false
   }
@@ -184,34 +267,86 @@ function setForm(row) {
   original.value = initial
   form.value = { ...initial, items: { ...initial.items } }
 }
+let intent = 0
+function resetDetail(nextMode, target = null) {
+  intent += 1
+  mode.value = nextMode
+  detailTarget.value = target
+  record.value = null
+  form.value = null
+  original.value = null
+  recordFields.value = []
+  planFields.value = null
+  detailLoading.value = false
+  detailError.value = ''
+  saveError.value = ''
+  saving.value = false
+  return intent
+}
+function closeDetail() {
+  // 关闭时立即失效，淡出期间保留画面。每次打开初始化，不消费动画结束后的 model 更新。
+  intent += 1
+  detailOpen.value = false
+  saving.value = false
+  detailLoading.value = false
+}
 async function newPlan() {
+  const id = resetDetail('new')
+  detailOpen.value = false
   try {
     const config = await props.api.getConfig('plan')
-    record.value = null
-    formFields.value = config.fields.filter(f => f.enabled)
+    if (id !== intent) return
+    recordFields.value = config.fields.filter(f => f.enabled)
     setForm()
-    mode.value = 'new'
     detailOpen.value = true
-  } catch (error) { showError(error) }
+  } catch (error) {
+    if (id === intent) ElMessage.error(errorLabel(error))
+  }
 }
-async function openDetail(row) {
+async function openDetail(row, nextMode = 'view') {
+  if (nextMode === 'edit' && !canEditRecord.value) return
+  const id = resetDetail(nextMode, { id: row.id, taskNo: row.taskNo })
+  detailLoading.value = true
+  detailOpen.value = true
   try {
     const [value, config] = await Promise.all([props.api.detail(row.id), props.api.getConfig(props.kind)])
+    if (id !== intent) return
     record.value = value
-    formFields.value = config.fields.filter(f => f.enabled)
+    recordFields.value = config.fields.filter(f => f.enabled)
     setForm(value)
-    mode.value = 'view'
-    planFields.value = null
-    if (props.kind === 'performance' && canManage.value && user.hasPageAccess('plan.list') && !value.hasPlan) {
-      try { planFields.value = (await props.api.getConfig('plan')).fields.filter(f => f.enabled) } catch { planFields.value = null }
-    }
-    detailOpen.value = true
-  } catch (error) { showError(error) }
+  } catch (error) {
+    if (id === intent) detailError.value = errorLabel(error)
+    return
+  } finally {
+    if (id === intent) detailLoading.value = false
+  }
+  if (nextMode === 'view' && props.kind === 'performance' && canManage.value && user.hasPageAccess('plan.list') && !record.value.hasPlan) {
+    try {
+      const config = await props.api.getConfig('plan')
+      if (id === intent) planFields.value = config.fields.filter(f => f.enabled)
+    } catch { /* 实绩可继续查看，补建入口等待有效计划配置。 */ }
+  }
+}
+function focusHeading() {
+  const id = intent
+  nextTick(() => { if (id === intent) dialogHeading.value?.focus() })
 }
 function startSupplement() {
+  if (mode.value !== 'view' || !canSupplement.value) return
   mode.value = 'supplement'
-  formFields.value = planFields.value
   setForm({ taskNo: record.value.taskNo })
+  focusHeading()
+}
+function cancelEdit() {
+  if (saving.value) return
+  if (mode.value !== 'supplement') {
+    closeDetail()
+    return
+  }
+  mode.value = 'view'
+  saveError.value = ''
+  setForm(record.value)
+  focusHeading()
 }
 function changedValues() {
   const current = form.value
@@ -219,7 +354,7 @@ function changedValues() {
   const body = { taskNo: current.taskNo }
   if (current.remark !== initial.remark) body.remark = current.remark
   if (canEditOrders.value) {
-    if (current.targetKey && current.targetKey !== initial.targetKey) body.targetKey = current.targetKey
+    if (canEditTarget.value && current.targetKey && current.targetKey !== initial.targetKey) body.targetKey = current.targetKey
     if (Number.isInteger(current.priority) && current.priority !== initial.priority) body.priority = current.priority
     if (current.productionStatus && current.productionStatus !== initial.productionStatus) body.productionStatus = current.productionStatus
   }
@@ -232,21 +367,35 @@ function changedValues() {
   return body
 }
 async function save() {
+  if (!detailOpen.value || mode.value === 'view' || saving.value || !canEditRemark.value) return
+  const id = intent
   saving.value = true
+  saveError.value = ''
   try {
     const update = mode.value === 'supplement' ? props.api.upsertPlan : props.api.upsert
     await update(changedValues())
-    detailOpen.value = false
+    if (id !== intent) return
+    closeDetail()
     ElMessage.success(tr('saved'))
     await load()
-  } catch (error) { showError(error) } finally { saving.value = false }
+  } catch (error) {
+    if (id !== intent) return
+    if (mode.value === 'new') ElMessage.error(errorLabel(error))
+    else {
+      saveError.value = errorLabel(error)
+      nextTick(() => { if (id === intent) saveAlert.value?.scrollIntoView({ block: 'nearest' }) })
+    }
+  } finally {
+    if (id === intent) saving.value = false
+  }
 }
-function closeDetail() { form.value = null; record.value = null }
 
 watch(filters, value => {
   try { localStorage.setItem(filterKey, JSON.stringify(value)) } catch { /* 本机偏好不可用不影响查询。 */ }
 }, { deep: true })
 onMounted(load)
+onBeforeRouteLeave(closeDetail)
+onBeforeUnmount(() => { closeDetail(); loadId += 1 })
 </script>
 
 <style scoped>
@@ -274,6 +423,17 @@ onMounted(load)
 .filter-actions :deep(.el-form-item__content) { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
 .filter-actions :deep(.el-button + .el-button) { margin-left: 0; }
 .table-scroll { width: 100%; padding: 20px 24px 0; overflow-x: auto; }
+.task-row-actions-pair { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; }
+.task-row-detail.el-button {
+  background: transparent;
+  border-color: var(--border-strong);
+  color: var(--text-secondary);
+}
+.task-row-detail.el-button:hover,
+.task-row-detail.el-button:focus-visible {
+  background: var(--bg-overlay);
+  color: var(--text-primary);
+}
 .pagination-scroll { width: 100%; padding: 18px 24px 24px; overflow-x: auto; }
 .pagination { display: flex; justify-content: flex-end; width: max-content; min-width: 100%; }
 @container (max-width: 730px) {
@@ -286,5 +446,66 @@ onMounted(load)
 }
 @media (max-width: 600px) {
   .filter-section, .table-scroll, .pagination-scroll { padding-inline: 16px; }
+}
+
+
+:global(.task-detail-dialog.el-dialog) {
+  --task-dialog-inset: clamp(16px, 4vw, 32px);
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100vw - 24px);
+  padding: 0;
+  max-height: calc(100dvh - 24px);
+}
+:global(.task-detail-dialog .el-dialog__header) {
+  flex: none;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  min-height: 0;
+  padding: 16px var(--task-dialog-inset);
+}
+:global(.task-detail-dialog .el-dialog__title) {
+  min-width: 0;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 590;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+:global(.task-detail-dialog .el-dialog__body) {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 18px var(--task-dialog-inset);
+}
+:global(.task-detail-dialog .el-dialog__footer) {
+  flex: none;
+  padding: 14px var(--task-dialog-inset);
+}
+.detail-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-left: auto; }
+.detail-actions :deep(.el-button + .el-button) { margin-left: 0; }
+.detail-state { margin: 0; color: var(--text-secondary); }
+.detail-load-error { display: grid; gap: 12px; justify-items: start; }
+.detail-save-error { margin-bottom: 12px; }
+.detail-section {
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--border-secondary);
+  border-radius: 12px;
+}
+.detail-section + .detail-section { margin-top: 12px; }
+.detail-section h3 { margin: 0 0 12px; color: var(--text-primary); font-size: 14px; font-weight: 590; }
+.detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; margin: 0; }
+.detail-grid dt { color: var(--text-secondary); overflow-wrap: anywhere; }
+.detail-grid dd { margin: 4px 0 0; color: var(--text-primary); white-space: pre-wrap; overflow-wrap: anywhere; }
+.detail-full { grid-column: 1 / -1; }
+.detail-form-row :deep(.el-form-item__label) { height: auto; white-space: normal; overflow-wrap: anywhere; }
+.detail-form-row :deep(.el-input-number), .detail-form-row :deep(.el-select) { width: 100%; }
+.detail-form-row :deep(.el-checkbox), .detail-form-row :deep(.el-checkbox__label) { height: auto; white-space: normal; }
+.backfill-option { display: flex; align-items: center; gap: 4px; }
+@media (max-width: 520px) {
+  .detail-grid { grid-template-columns: minmax(0, 1fr); }
+  .detail-form-row :deep(.el-col-12) { flex: 0 0 100%; max-width: 100%; }
 }
 </style>

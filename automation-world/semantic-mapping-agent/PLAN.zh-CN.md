@@ -14,6 +14,7 @@
 | SMA-006 | draft | [r1 弹窗交互首批](plans/SMA-006-dialog-interaction/spec.md) | 框内错误反馈（#7）、未保存输入保护（#8）和长弹窗滚动（#9）。 |
 | SMA-007 | qa_passed | [r1 开发 profile 路径对齐](plans/SMA-007-dev-profile-path/spec.md) | 相对和绝对路径的[独立验证](plans/SMA-007-dev-profile-path/checklist.md)通过，待 Human Owner 最终验收。 |
 | SMA-008 | qa_blocked | [r3 现有采集 API 手动回环](plans/SMA-008-acquisition-data-get/spec.md) | rework-1 的[独立复验](plans/SMA-008-acquisition-data-get/checklist.md)通过软件与夹具检查。AC04 等待 Human Owner 操作 dev POST、核对回执及历史回读。 |
+| SMA-009 | qa_passed | [r1 工作区与手工回环界面](plans/SMA-009-workspace-and-loopback-ui/spec.md) | 首批 rework-1 [独立复验](plans/SMA-009-workspace-and-loopback-ui/checklist.md)通过，等待 Human Owner 最终验收。 |
 
 实施顺序为 **SMA-002 → SMA-003 → SMA-004**。三个阶段均已验收。阶段④–⑥的目标与依赖见总规格草案。
 

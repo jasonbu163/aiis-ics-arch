@@ -1,0 +1,24 @@
+{
+  "requests": [
+    {
+      "method": "PUT",
+      "path": "/api/v1/quality/field-config",
+      "body": {
+        "revision": 1,
+        "definitions": [
+          {"name": "defectCount", "labels": {"zh-CN": "缺陷数量", "en-US": "Defect count"}, "type": "number", "isNullable": false, "order": 1},
+          {"name": "reportUrl", "labels": {"zh-CN": "报告", "en-US": "Report"}, "type": "link", "linkText": "下载", "order": 2},
+          {"name": "reviewed", "labels": {"zh-CN": "已复核", "en-US": "Reviewed"}, "type": "boolean", "editable": true, "order": 3}
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/integration/quality/upsert",
+      "body": {"taskNo": " fixture-123 ", "targetKey": "line-01", "items": {"defectCount": 0, "reportUrl": "https://example.com/report/123", "reviewed": false}}
+    },
+    {"method": "GET", "path": "/api/v1/integration/quality/by-task/FIXTURE-123"},
+    {"method": "GET", "path": "/api/v1/integration/quality", "query": {"targetKey": "line-01", "createdFrom": "2026-11-23T00:00:00+08:00", "pageSize": 20}},
+    {"method": "POST", "path": "/api/v1/quality/results/upsert", "body": {"taskNo": "FIXTURE-123", "items": {"reviewed": true}}}
+  ]
+}

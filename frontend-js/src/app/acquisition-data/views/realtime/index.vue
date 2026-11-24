@@ -14,7 +14,9 @@
       </template>
       <template #actions>
         <div class="table-actions">
-          <ActionButton @click="columns.reset">{{ $t('acquisition-data.resetWidths') }}</ActionButton>
+          <el-tooltip :content="$t('acquisition-data.resetWidthsHint')" placement="top" :trigger="['hover', 'focus']">
+            <ActionButton @click="columns.reset">{{ $t('acquisition-data.resetWidths') }}</ActionButton>
+          </el-tooltip>
           <ActionButton variant="refresh" :disabled="optionsState !== 'ready' || !options.length" :loading="state === 'loading'" @click="loadLatest">
             {{ $t('acquisition-data.refresh') }}
           </ActionButton>
@@ -154,6 +156,7 @@ onBeforeUnmount(() => { sequence++; clearTimeout(searchTimer) })
 <style scoped>
 /* 按侧栏展开后的实际内容宽度适配页面。 */
 .page-layout { container-type: inline-size; }
+.data-card { --data-inset: 24px; }
 .data-card :deep(.base-card__body) { padding: 0; }
 .data-card :deep(.base-card__header) { flex-wrap: wrap; padding-block: 12px; }
 .data-card :deep(.base-card__actions) { min-width: 0; max-width: 100%; flex: 0 1 auto; }
@@ -164,25 +167,26 @@ onBeforeUnmount(() => { sequence++; clearTimeout(searchTimer) })
 .help-trigger:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .help-content { max-width: min(340px, calc(100vw - 56px)); white-space: normal; overflow-wrap: anywhere; }
 .data-card :deep(.table-actions) { min-width: 0; max-width: 100%; flex-wrap: wrap; }
-.data-card :deep(.table-actions .action-button) { max-width: 100%; min-height: 40px; height: auto; padding-block: 8px; white-space: normal; overflow-wrap: anywhere; }
 .plc-option { height: auto; min-height: 34px; padding-block: 6px; line-height: 1.4; white-space: normal; overflow-wrap: anywhere; }
-.filter-section { padding: 20px 24px; border-bottom: 1px solid var(--border-secondary); }
+.filter-section { padding: 16px var(--data-inset); border-bottom: 1px solid var(--border-secondary); }
 .filter-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 16px; }
 .filter-form :deep(.el-form-item) { margin: 0; }
 .filter-form :deep(.el-select), .filter-form :deep(.el-input) { width: 100%; }
-.table-scroll { width: 100%; padding: 24px; overflow-x: auto; }
-.pagination-scroll { width: 100%; padding: 0 24px 24px; overflow-x: auto; }
+.table-scroll { width: 100%; padding: 20px var(--data-inset) 0; overflow-x: auto; }
+.pagination-scroll { width: 100%; padding: 18px var(--data-inset) 24px; overflow-x: auto; }
 .pagination { display: flex; justify-content: flex-end; width: max-content; min-width: 100%; }
-.message { padding: 24px; color: var(--text-secondary); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-@media (max-width: 768px) { .filter-section, .table-scroll { padding: 16px; } }
+.message { padding: 20px var(--data-inset); color: var(--text-secondary); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+@container (max-width: 640px) {
+  .data-card { --data-inset: 16px; }
+  .data-card :deep(.base-card__header) { padding-inline: var(--data-inset); }
+}
 
 @container (max-width: 180px) {
   .data-card :deep(.base-card__header) { padding: 12px 6px; gap: 8px; }
   .data-card :deep(.base-card__title-wrap), .data-card :deep(.base-card__actions) { width: 100%; min-width: 0; }
   .data-card :deep(.base-card__title) { white-space: normal; overflow-wrap: anywhere; }
-  .data-card :deep(.table-actions) { width: 100%; flex-wrap: wrap; justify-content: flex-start; }
-  .data-card :deep(.table-actions .action-button) { max-width: 100%; height: auto; min-height: 40px; padding: 8px 6px; margin-left: 0; white-space: normal; overflow-wrap: anywhere; }
-  .filter-section, .table-scroll, .pagination-scroll { padding-inline: 4px; }
+  .data-card :deep(.table-actions) { width: 100%; }
+  .data-card { --data-inset: 6px; }
   .filter-form { gap: 8px; }
   .filter-form :deep(.el-form-item__label) { white-space: normal; height: auto; line-height: 1.4; overflow-wrap: anywhere; }
   .filter-form :deep(.el-input__wrapper) { padding-inline: 4px; }

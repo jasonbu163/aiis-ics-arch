@@ -175,3 +175,4 @@ impl Config {
 
 pub mod catalog;
 pub mod runtime_v2;
+pub(crate) mod flow_json;

@@ -273,6 +273,7 @@ test('actual source preserves Core route identity, shell locales and default-dis
     ['AuxiliaryShift', 'auxiliary/shift', 'auxiliary.shift'],
     ['AuxiliaryPrice', 'auxiliary/price', 'auxiliary.price'],
     ['QualityList', 'quality/list', 'quality.list'],
+    ['QualityLocalFields', 'quality/local-fields', 'quality.local-fields'],
     ['QualitySPC', 'quality/spc', 'quality.spc'],
     ['QualityControl', 'quality/control/:id', 'quality.control'],
     ['SystemUser', 'system/user', 'system.user'],
@@ -325,6 +326,7 @@ test('five adapted modules retain order, owned bilingual titles and current visi
     ['equipment.observations.admin', 'equipment.observation.configManagement', 50, 'Setting'],
     ['equipment.observations.data', 'equipment.observation.dataManagement', 60, 'List'],
     ['quality.list', 'quality.list', 10, 'List'],
+    ['quality.local-fields', 'quality.localFields.title', 15, 'Setting'],
     ['quality.spc', 'quality.spc', 20, 'DataAnalysis'],
     ['maintenance.log', 'maintenance.log.title', 10, 'Document']
   ]

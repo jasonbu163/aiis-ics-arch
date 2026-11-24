@@ -455,6 +455,38 @@
     }
   },
   "workflow": {
+    "dialog": {
+      "viewTitle": "Performance details · {taskNo}",
+      "editTitle": "Edit performance · {taskNo}",
+      "supplementTitle": "Create plan for · {taskNo}",
+      "backfillHint": "When you save, copy existing shared values eligible for write-back from the matching performance to the new plan once. Values entered in this form take precedence.",
+      "edit": "Edit",
+      "basic": "Basic information",
+      "business": "Business fields",
+      "times": "Times (UTC+08:00)",
+      "loading": "Loading details…",
+      "retry": "Retry",
+      "definition": "Field definition",
+      "usage": "Usage settings",
+      "plan": "Plan display and editing",
+      "performance": "Performance display and editing",
+      "deleteTitle": "Delete field",
+      "deletePrompt": "Delete the field below?",
+      "externalReferences": "Review external references such as MES and SMA before deleting."
+    },
+    "fieldHelp": {
+      "label": "Help for {section}",
+      "enabled": "Enabled: Use the field for reads and permitted writes. Disabling it preserves historical values.",
+      "nullable": "Allow clearing: Send null to clear a saved value. Omitting the field keeps the saved value.",
+      "manual": "Manual: Authorized users can enter the value on the Performance page when Performance editable is enabled.",
+      "automated": "Automated: SMA or third parties write the value through the Performance API.",
+      "snapshot": "Order snapshot: When a Performance record is first created, it copies the value from the existing Plan with the same task number. Later Plan edits do not change the snapshot. It cannot be edited through the Performance page or API.",
+      "snapshotAuto": "Order snapshot + automatic reporting: Start with the matching Plan value when Performance is first created. API values take precedence, and writeback to Plan can be enabled.",
+      "writeback": "Write back to Plan: A value submitted to Performance is copied to the matching Plan. This option is unavailable for the plain Order snapshot mode.",
+      "plan": "Plan visible shows the column in the Plan list. Plan editable allows authorized users to edit the field on the Plan page. MES API writes are unaffected.",
+      "performance": "Performance visible shows the column in the Performance list. Performance editable applies only to manual fields and requires edit permission.",
+      "order": "Lower numbers appear first. Leave the order blank to use the slot number."
+    },
     "title": "Performance",
     "newPlan": "New plan",
     "fieldSettings": "Local Field Management",
@@ -513,6 +545,7 @@
     },
     "owners": {
       "order_snapshot": "Order snapshot",
+      "snapshot_auto": "Order snapshot + automatic reporting",
       "automated": "Automated",
       "manual": "Manual"
     },

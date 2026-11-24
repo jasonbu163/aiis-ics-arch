@@ -258,3 +258,7 @@ configuration, display, history and access.
 The [Plan and Performance candidate](../contracts/published/http-api/generic-task-workflow-v2/README.md) uses current field definitions and the existing list routes. Both pages display Shanghai business times and remember column widths locally. Administrators open the standalone local field pages at `/plan/local-fields` and `/performance/local-fields` from the sidebar under Plan Management or Performance Management. The Shared Field Management entries under Plan and Performance both open the same standalone page and use the same shared configuration. Performance detail can open ordinary plan creation when no plan exists.
 
 See the [Plan and Performance User Guide](../docs/generic-plan-performance-guide.md) for operations and API simulations, or the [field settings quick guide (Chinese)](FIELD_SETTINGS_GUIDE.zh-CN.md).
+
+## Quality Management
+
+The Quality list shows structured task results and links to historical inspections under the existing page grant. Administrators can manage independent field definitions under Local Field Management. Result and field lists use the shared local column-width preferences. [Quality HTTP contract](../contracts/published/http-api/quality-results-v1/README.md)

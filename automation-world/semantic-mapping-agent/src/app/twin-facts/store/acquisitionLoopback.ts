@@ -17,6 +17,7 @@ export function useAcquisitionLoopback() {
   const ready = ref(false);
   const busy = ref("");
   const error = ref("");
+  const errorAt = ref("");
   const sources = ref<SourceChoice[] | null>(null);
   const choices = ref<AcquisitionPoint[]>([]);
   const latest = ref<AcquisitionPoint[] | null>(null);
@@ -32,12 +33,20 @@ export function useAcquisitionLoopback() {
   const readback = ref<Detail | null>();
   const sendState = ref<"ready" | "unknown" | "done" | "rejected">("ready");
   let epoch = 0;
-  let running = 0;
+  let savedLoopback = "";
   const materials = computed(() => localConfiguration.value?.document.materials.filter(
     item => item.httpMethod === "GET" && item.path === "/api/v1/acquisition-data/latest",
   ) ?? []);
   const databases = computed(() => sources.value?.find(item => item.plcId === config.value.plcId)?.dbNumbers ?? []);
-  const sourceReady = computed(() => ready.value && Boolean(config.value.materialKey && config.value.plcId && config.value.dbNumber));
+  const materialReady = computed(() => materials.value.some(item => item.materialKey === config.value.materialKey));
+  const sourceReady = computed(() => ready.value && materialReady.value && Boolean(config.value.plcId && config.value.dbNumber));
+  const pointsReady = computed(() => allPoints.value || config.value.pointIds.length > 0);
+  const asShanghai = (value: string) => value.length === 16 ? value + ":00+08:00" : value + "+08:00";
+  const rangeValid = computed(() => {
+    const start = Date.parse(asShanghai(from.value));
+    const end = Date.parse(asShanghai(to.value));
+    return end > start && end - start <= 7 * 24 * 60 * 60 * 1000;
+  });
   const mixed = computed(() => new Set(latest.value?.map(point => point.sampleId).filter(Boolean)).size > 1);
   const canPost = computed(() => Boolean(preview.value) && (sendState.value === "ready" || sendState.value === "unknown"));
   const canReadback = computed(() => Boolean(preview.value) && (sendState.value === "done" || sendState.value === "unknown"));
@@ -64,13 +73,16 @@ export function useAcquisitionLoopback() {
   watch(() => JSON.stringify(config.value), invalidate, { flush: "sync" });
   watch(() => JSON.stringify(query()), () => {
     clearSourceResults();
-  });
+  }, { flush: "sync" });
   watch([allPoints, () => JSON.stringify(config.value.pointIds)], () => {
     latest.value = null;
     missing.value = [];
   });
-  watch([sourceSeq, from, to], () => {
+  watch(sourceSeq, invalidate, { flush: "sync" });
+  watch([from, to], () => {
     invalidate();
+    history.value = null;
+    detail.value = null;
   }, { flush: "sync" });
   watch(() => JSON.stringify(localConfiguration.value?.document.connection), () => {
     if (busy.value === "load") return;
@@ -79,14 +91,16 @@ export function useAcquisitionLoopback() {
     clearSourceResults();
   });
   watch(() => localConfiguration.value?.revision, (value) => {
-    if (ready.value && busy.value !== "save" && busy.value !== "load" && revision.value !== value) invalidate();
+    if (!ready.value || busy.value === "save" || busy.value === "load" || value === undefined || revision.value === value) return;
+    invalidate();
+    if (JSON.stringify(localConfiguration.value?.document.acquisitionLoopback ?? null) === savedLoopback) revision.value = value;
   });
 
   async function run<T>(name: string, action: () => Promise<T>, apply: (value: T) => void) {
     if (busy.value) return;
-    const token = ++running;
     const current = epoch;
     error.value = "";
+    errorAt.value = "";
     busy.value = name;
     try {
       const result = await action();
@@ -94,16 +108,18 @@ export function useAcquisitionLoopback() {
     } catch (failure) {
       if (current === epoch) {
         error.value = String(failure);
+        errorAt.value = name;
         if (name === "push") sendState.value = error.value.includes("SMA_ACQUISITION_RESULT_UNKNOWN") ? "unknown" : "rejected";
       }
     } finally {
-      if (running === token) busy.value = "";
+      busy.value = "";
     }
   }
 
   function restoreSaved() {
     return run("load", loadLocalConfiguration, snapshot => {
       const stored = snapshot.document.acquisitionLoopback;
+      savedLoopback = JSON.stringify(stored ?? null);
       config.value = stored ? clone(stored) : emptyConfig();
       if (!stored && materials.value.length === 1) config.value.materialKey = materials.value[0].materialKey;
       allPoints.value = !config.value.pointIds.length;
@@ -137,6 +153,7 @@ export function useAcquisitionLoopback() {
     missing.value = [];
     if (!allCandidates && !allPoints.value && !config.value.pointIds.length) {
       error.value = "SMA_ACQUISITION_SELECTION_REQUIRED";
+      errorAt.value = "latest";
       return;
     }
     return run("latest", () => acquisition.latest(query(), allCandidates || allPoints.value ? [] : [...config.value.pointIds]), result => {
@@ -147,11 +164,8 @@ export function useAcquisitionLoopback() {
   }
 
   function applyHistory(page = 1) {
-    if (!sourceReady.value) return;
-    invalidate();
-    history.value = null;
-    detail.value = null;
-    const asShanghai = (value: string) => value.length === 16 ? value + ":00+08:00" : value + "+08:00";
+    if (!sourceReady.value || !rangeValid.value || busy.value) return;
+    if (page === 1) history.value = null;
     return run("history", () => acquisition.history(query(), asShanghai(from.value), asShanghai(to.value), page), result => {
       history.value = result;
     });
@@ -168,6 +182,7 @@ export function useAcquisitionLoopback() {
   function save() {
     if (!allPoints.value && config.value.pointIds.length === 0) {
       error.value = "SMA_ACQUISITION_SELECTION_REQUIRED";
+      errorAt.value = "save";
       return;
     }
     const pruned = clone(config.value);
@@ -175,6 +190,7 @@ export function useAcquisitionLoopback() {
     pruned.moves = pruned.moves.filter(item => (item.to || item.name) && (!pruned.pointIds.length || pruned.pointIds.includes(item.from)));
     const configToSave = { ...pruned, groupId: pruned.groupId || null, configRevision: pruned.configRevision || null };
     return run("save", () => acquisition.save(configToSave, revision.value), snapshot => {
+      savedLoopback = JSON.stringify(snapshot.document.acquisitionLoopback ?? null);
       revision.value = snapshot.revision;
       config.value = configToSave;
     });
@@ -203,6 +219,7 @@ export function useAcquisitionLoopback() {
   function checkTarget() {
     const id = preview.value?.id;
     if (!id || !canReadback.value) return;
+    readback.value = undefined;
     return run("readback", () => acquisition.readback(id), result => {
       readback.value = result;
     });
@@ -225,8 +242,8 @@ export function useAcquisitionLoopback() {
   }
 
   onBeforeUnmount(invalidate);
-  return { config, ready, busy, error, sources, choices, latest, missing, allPoints, history, detail,
-    from, to, sourceSeq, preview, receipt, readback, sendState, materials, databases, sourceReady,
+  return { config, ready, busy, error, errorAt, sources, choices, latest, missing, allPoints, history, detail,
+    from, to, sourceSeq, preview, receipt, readback, sendState, materials, databases, materialReady, sourceReady, pointsReady, rangeValid,
     mixed, canPost, canReadback, saved, restoreSaved, loadSources, sourceChanged, dbChanged, testLatest,
-    applyHistory, pickSample, save, prepare, push, checkTarget, changeAllPoints, setMove };
+    applyHistory, pickSample, save, prepare, push, checkTarget, changeAllPoints, setMove, invalidate };
 }

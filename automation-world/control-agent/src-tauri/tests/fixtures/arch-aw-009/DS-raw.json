@@ -1,0 +1,109 @@
+{
+  "dbs": [
+    {
+      "id": "26c553a7-009e-4ddb-a949-006af205b977",
+      "name": "DB one",
+      "number": 21,
+      "points": [
+        {
+          "bit": 1,
+          "byte_offset": 0,
+          "data_type": "BOOL",
+          "description": "独立描述",
+          "display_name": "旧名称",
+          "display_names": {
+            "en-US": "Ready",
+            "zh-CN": "就绪"
+          },
+          "id": "21081af1-772a-4508-a44c-fa163572fa3d",
+          "name": "Ready",
+          "source_enabled": true
+        },
+        {
+          "byte_offset": 2,
+          "data_type": "INT",
+          "description": "",
+          "display_names": {
+            "en-US": "",
+            "zh-CN": ""
+          },
+          "id": "30941fc7-4857-49a1-8ef7-7a889dc2148b",
+          "name": "Count",
+          "source_enabled": true
+        },
+        {
+          "byte_offset": 4,
+          "data_type": "REAL",
+          "description": "",
+          "display_names": {
+            "en-US": "",
+            "zh-CN": "温度"
+          },
+          "id": "199571c6-3af7-409d-a563-980953a429e8",
+          "name": "Temperature",
+          "source_enabled": false
+        },
+        {
+          "byte_offset": 8,
+          "data_type": "STRING[10]",
+          "description": "",
+          "display_names": {
+            "en-US": "",
+            "zh-CN": ""
+          },
+          "id": "963e8c0d-e5de-4518-9265-62b447e729c9",
+          "name": "Text",
+          "source_enabled": true
+        }
+      ],
+      "size_bytes": 24,
+      "source_enabled": true
+    },
+    {
+      "id": "7e340bf1-a8d6-41a9-af58-02fe6d8ebc7a",
+      "name": "Disabled DB",
+      "number": 22,
+      "points": [
+        {
+          "byte_offset": 0,
+          "data_type": "INT",
+          "description": "",
+          "display_names": {
+            "en-US": "",
+            "zh-CN": ""
+          },
+          "id": "b9bf4e5f-b989-480a-a95c-2a59c34f06de",
+          "name": "DisabledDbPoint",
+          "source_enabled": false
+        }
+      ],
+      "size_bytes": 2,
+      "source_enabled": false
+    }
+  ],
+  "export": {
+    "config_state": "saved_revision",
+    "exported_at": "2026-11-24T13:52:45.728+08:00",
+    "payload_sha256": "8b40e81304a14206d17f9fbeb43cf95554456949620d5a50ff0b5f3358b5cf99",
+    "producer": "device_simulator",
+    "profile_id": "ef383b52-c3d6-4527-a186-32f1d04eb9d6",
+    "revision_id": "295c1df3-562d-459a-b674-f121269bd63b"
+  },
+  "format": "aiis.plc_points",
+  "origin": {
+    "kind": "device_simulator",
+    "plc_id": "c92f7ad9-144a-465e-9a70-5fb7b88c6621",
+    "profile_id": "ef383b52-c3d6-4527-a186-32f1d04eb9d6"
+  },
+  "plc": {
+    "connection": {
+      "host": "127.0.0.1",
+      "port": 32194,
+      "rack": 0,
+      "slot": 1
+    },
+    "name": "DS003 synthetic",
+    "protocol": "s7"
+  },
+  "schema_version": 1
+}

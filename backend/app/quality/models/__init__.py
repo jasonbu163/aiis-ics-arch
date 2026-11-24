@@ -6,4 +6,6 @@
 """
 from app.quality.models.quality import QualityDefectRecord, QualityInspection, QualitySPCMeasurement
 
-__all__ = ["QualityInspection", "QualityDefectRecord", "QualitySPCMeasurement"]
+from app.quality.models.results import QualityFieldConfig, QualityResult
+
+__all__ = ["QualityInspection", "QualityDefectRecord", "QualitySPCMeasurement", "QualityFieldConfig", "QualityResult"]

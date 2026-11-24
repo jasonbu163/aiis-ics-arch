@@ -2,7 +2,7 @@
 from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 
-from ..profile import REVISIONS, WRITE_SOURCES_REVISION
+from ..profile import REVISIONS
 
 
 class EvidenceUnavailable(Exception):
@@ -26,8 +26,7 @@ async def _verified_clock(db, target):
             or not str(row[2]).split("-")[0].startswith("8.4.") or row[4] != 28800
             or target["schemaRevision"] not in REVISIONS or revisions != [target["schemaRevision"]]):
         raise EvidenceUnavailable()
-    if target["schemaRevision"] == WRITE_SOURCES_REVISION:
-        await _check_registry_layout(db)
+    await _check_registry_layout(db)
     return row[3].replace(tzinfo=None)
 
 

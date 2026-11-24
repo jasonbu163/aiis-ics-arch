@@ -155,6 +155,36 @@ mod boundary_tests {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let context = tauri::generate_context!();
+    if commands::ca_flow::legacy_mode() {
+        run_legacy_console(context);
+        return;
+    }
+    tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .setup(|app| commands::ca_flow::open_workspace(app))
+        .invoke_handler(tauri::generate_handler![
+            commands::ca_flow::ca_app_mode,
+            commands::ca_flow::ca_flow_validate,
+            commands::ca_flow::ca_flow_list,
+            commands::ca_flow::ca_flow_get,
+            commands::ca_flow::ca_flow_save,
+            commands::ca_flow::ca_flow_import,
+            commands::ca_flow::ca_flow_export,
+            commands::ca_flow::ca_plc_catalog_preview,
+            commands::ca_flow::ca_plc_catalog_commit,
+            commands::ca_flow::ca_resource_list,
+            commands::ca_flow::ca_resource_save_binding,
+            commands::ca_flow::ca_node_test_preview,
+            commands::ca_flow::ca_node_test_run,
+            commands::ca_flow::ca_node_test_list,
+            commands::ca_flow::ca_node_test_get
+        ])
+        .run(context)
+        .expect("error while running the Control Agent editor");
+}
+
+fn run_legacy_console(context: tauri::Context<tauri::Wry>) {
     let config = config::AgentConfig::load();
     let logging_guards = infrastructure::logging::init_logging(&config);
     infrastructure::logging::emit_startup_event(&config);
@@ -166,6 +196,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            commands::ca_flow::ca_app_mode,
             commands::plc_collection::start_plc_read,
             commands::plc_collection::start_plc_read_for_plc,
             commands::plc_collection::stop_plc_read,
@@ -186,6 +217,6 @@ pub fn run() {
             commands::plc_diagnostics::read_plc_samples_once_for_plc,
             commands::runtime_snapshot::get_runtime_snapshot
         ])
-        .run(tauri::generate_context!())
+        .run(context)
         .expect("error while running AIIS ICS Control Agent");
 }

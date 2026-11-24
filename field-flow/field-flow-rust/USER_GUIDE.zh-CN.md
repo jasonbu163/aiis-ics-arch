@@ -540,3 +540,27 @@ printf 'runtime PID=%s\n' "$FF_PID"
 ```bash
 FF004_EVIDENCE_ROOT="$FF_RUN_ROOT/s1-acceptance" cargo test --locked --features test-fixture --target-dir "$FF_RUN_ROOT/acceptance-target" --test multi_plc catalog_cli_matrix -- --nocapture --test-threads=1
 ```
+
+<a id="flow-json"></a>
+
+## 只读 demo01 JSON 流程
+
+[YAML v2 主配置样例](config/flow-json.yaml)显式选择 [demo01.json](flows/demo01.json)。`--flows-dir` 相对于 shell 的当前工作目录解析，与主配置位置独立。请使用本地真实目录和单个文件名。启动时完整校验并冻结所选文件，编辑后需重新启动才生效。
+
+在 Rust 工程目录下，将本工程构建的 `field-flow` 放入 PATH 后运行：
+
+```sh
+field-flow config validate --config config/flow-json.yaml --flows-dir flows
+field-flow state init --synthetic --mode dry_run --state-dir "$FF_RUN_ROOT/json-state" --instance-id ff-rust-flow-json
+field-flow run --config config/flow-json.yaml --flows-dir flows --state-dir "$FF_RUN_ROOT/json-state"
+```
+
+`FF_RUN_ROOT` 应指向已存在的私有根目录，状态目录须新建。启动前请在示例配置中绑定自有合成 HTTP 服务，返回 demo01 命令格式。可用以下命令启动自动回环夹具，验证分支和错误路径：
+
+```sh
+cargo test --locked --offline --features test-fixture --test flow_json -- --test-threads=1
+```
+
+本图支持一次 HTTP GET、一个布尔等值判断和两个结束分支。HTTP 来源地址、来源 ID 和命令时效在 YAML 中绑定。样例遇到 `ready=false` 时记录 `not_matched` 并结束本轮，等到下一轮重新 GET；遇到 `ready=true` 时记录 `matched` 并结束本轮。无效或过期响应产生本轮错误。可在标准输出和 `runtime.jsonl` 检查 `flow_json_round`，其中记录流程与 revision、轮次 ID、文件 SHA-256 及结果或错误码。使用 SIGINT 或 SIGTERM 停止并等待进程退出。
+
+JSON 图不操作 PLC，也不创建命令执行记录。YAML v2 手写流可以用自己的 PLC 配置与图同时运行。预检在打开状态或联网前拒绝不支持的节点、版本、引用和绑定，`config validate` 返回位置及稳定错误码。CA 往返验证等待实际导出文件。

@@ -103,6 +103,10 @@ class DisplayItem(Input):
     enabled: bool
 
 
+class CurveSeries(DisplayItem):
+    line_style: Literal["solid", "dashed"] = "solid"
+
+
 class Card(Input):
     card_key: Key
     page_key: Literal["production", "cleaning", "temperature", "drive"]
@@ -120,7 +124,7 @@ class Curve(Input):
     title_en: Title
     enabled: bool
     sort_order: Order
-    series: list[DisplayItem]
+    series: list[CurveSeries]
 
 
 class Remark(Input):
@@ -147,4 +151,4 @@ class CurvePatch(Input):
     title_en: Title | None = None
     enabled: bool | None = None
     sort_order: Order | None = None
-    series: list[DisplayItem] | None = None
+    series: list[CurveSeries] | None = None

@@ -17,3 +17,5 @@
 ## Rust YAML v2
 
 新增[catalog-demo.yaml](catalog-demo.yaml)通过plc_files加载[两个独立S7 JSON](plcs/README.zh-CN.md)，相对路径按主文件目录解析、拒symlink及穿越。每文件ff.plc/schema_version=1；主文件schema_version=2，与执行SQLite schema1分开。v1三配置和basic02/basic03保持；v2只demo01/read_points。完整[运行步骤](../USER_GUIDE.zh-CN.md#catalog-v2)。
+
+[flow-json.yaml](flow-json.yaml)从显式指定的 `--flows-dir` 选择只读 `aiis.flow`，并为 HTTP 逻辑端点提供本地绑定。v2 的可选 `flow_files` 和 `flow_http_endpoints` 须成对配置。见[流程 JSON 指南](../USER_GUIDE.zh-CN.md#flow-json)。

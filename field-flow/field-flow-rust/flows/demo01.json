@@ -1,0 +1,22 @@
+{
+  "format": "aiis.flow",
+  "schema_version": 1,
+  "flow": {
+    "flow_id": "demo01_read_condition",
+    "revision": 1,
+    "trigger": {"type": "interval", "interval_ms": 500},
+    "entry_node_id": "fetch",
+    "nodes": [
+      {"id": "fetch", "type": "http.request", "version": 1, "config": {"endpoint_ref": "demo_feed", "method": "GET", "path": "/demo01/command", "query": {}}},
+      {"id": "check", "type": "condition.compare", "version": 1, "config": {"left": {"node_id": "fetch", "field": "ready"}, "op": "eq", "right": {"type": "bool", "value": true}}},
+      {"id": "yes", "type": "end", "version": 1, "config": {"result": "matched"}},
+      {"id": "no", "type": "end", "version": 1, "config": {"result": "not_matched"}}
+    ],
+    "edges": [
+      {"from_node_id": "fetch", "from_port": "next", "to_node_id": "check"},
+      {"from_node_id": "check", "from_port": "true", "to_node_id": "yes"},
+      {"from_node_id": "check", "from_port": "false", "to_node_id": "no"}
+    ]
+  },
+  "layout": {"nodes": {"fetch": {"x": 0, "y": 0}, "check": {"x": 200, "y": 0}, "yes": {"x": 400, "y": 0}, "no": {"x": 400, "y": 150}}}
+}

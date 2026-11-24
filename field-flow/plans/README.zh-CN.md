@@ -6,6 +6,7 @@ FF 任务 bundle 归本目录；迁移时保留历史 Task ID，仓库根目录�
 
 | 任务 | 状态 | PM 范围 | Development | Verification |
 | --- | --- | --- | --- | --- |
+| FF-006 Rust 流程 JSON 接入 | `qa_passed` (r1) | [r1 spec](FF-006-rust-flow-json/spec.md) | [Development](FF-006-rust-flow-json/tasks.md) | [Verification](FF-006-rust-flow-json/checklist.md)。 独立 QA2 通过 AC01–AC08，关闭边定位问题。待 Human Owner 最终验收及 CA 实际导出往返验证。 |
 | FF-005 基础与进阶案例库 | `owner_accepted` (r1) | [r1 spec](FF-005-basic-and-advanced-examples/spec.md) | [Development](FF-005-basic-and-advanced-examples/tasks.md) | [Verification](FF-005-basic-and-advanced-examples/checklist.md); Human Owner已于2026-11-04终验精确r1 A，QA2通过AC01–AC12；QA1历史及旧hold_ack限制保留，自有构建环境已收尾、原始证据保留。后续能力与现场gate仍独立。 |
 | FF-004 每PLC一个JSON与多PLC调用 | `owner_accepted` (r2 A) | [r2 spec](FF-004-plc-json-catalog-and-multi-plc/spec.md) | [Development](FF-004-plc-json-catalog-and-multi-plc/tasks.md) | [Verification](FF-004-plc-json-catalog-and-multi-plc/checklist.md); QA3 在 macOS arm64 回环环境通过 AC01–AC14，Human Owner 于 2026-11-10 最终验收精确 r2 A。旧驱动限制与失败历史保留，现场验证仍属后续。 |
 | FF-003 C# 运行时与 demo01 | `dev_blocked` (r2) | [r2 spec](FF-003-csharp-runtime-demo01/spec.md) | [开发记录](FF-003-csharp-runtime-demo01/tasks.md) | Win10 x64 原生验证待实验宿主，真实交接后进入独立 QA |

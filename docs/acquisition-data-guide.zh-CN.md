@@ -11,12 +11,12 @@
 ```mermaid
 flowchart LR
     Admin["管理员"] -->|"Web 新增、编辑或删除"| Manage["来源管理 API<br/>管理员登录"]
-    Manage -->|"提交登记"| Registry[("plc_source_registry<br/>每台 PLC 一行")]
+    Manage -->|"提交登记"| Registry[("acq_plc_source_registry<br/>每台 PLC 一行")]
     PLC["PLC 的一个 DB"] --> Sender["DAA 或第三方采集程序"]
     Sender -->|"一份样本一次 POST"| Write["采集数据 POST"]
     Registry -.->|"核对三个来源标识"| Write
-    Write -->|"同一事务保存"| History[("plc_facts_history<br/>完整样本")]
-    Write -->|"同一事务更新"| Latest[("plc_facts_latest<br/>逐点最新值")]
+    Write -->|"同一事务保存"| History[("acq_plc_facts_history<br/>完整样本")]
+    Write -->|"同一事务更新"| Latest[("acq_plc_facts_latest<br/>逐点最新值")]
     Write -->|"提交后返回匹配回执"| Sender
     Registry -.->|"核对当前来源"| Realtime["实时 GET"]
     Latest --> Realtime
@@ -41,7 +41,7 @@ flowchart LR
 
 ## 2. 先理解来源和这三个字段
 
-在已采用 r3 的后端，每台 PLC 在 `plc_source_registry` 中有一行。上报只匹配该行的 `plcId`、`instanceId` 和 `sourceGeneration`，`sourceType` 仅用于标注和展示。`dbNumber` 是样本必填字段，不与登记校对。 [来源管理说明](../backend/app/plc_facts/README.zh-CN.md#arch-acq-004-r3-来源管理)
+采用 ARCH-ACQ-007 表名切换后，每台 PLC 在 `acq_plc_source_registry` 中有一行。上报只匹配该行的 `plcId`、`instanceId` 和 `sourceGeneration`，`sourceType` 仅用于标注和展示。`dbNumber` 是样本必填字段，不与登记校对。 [来源管理说明](../backend/app/plc_facts/README.zh-CN.md#arch-acq-004-r3-来源管理)
 
 | 字段 | 含义 | 什么时候变化 |
 | --- | --- | --- |
@@ -75,7 +75,7 @@ flowchart LR
 
 ### 3.1 PLC 来源登记表
 
-`plc_source_registry` 每台 PLC 一行，登记 `plcId`、`instanceId`、`sourceGeneration` 和展示标签 `sourceType`。系统还保存登记版本、创建及修改时间和已退役代次，用于并发编辑与接管防重。标签可单独修改；改变实例或代次须确认接管并使用该 PLC 从未使用的新代次。
+`acq_plc_source_registry` 每台 PLC 一行，登记 `plcId`、`instanceId`、`sourceGeneration` 和展示标签 `sourceType`。系统还保存登记版本、创建及修改时间和已退役代次，用于并发编辑与接管防重。标签可单独修改；改变实例或代次须确认接管并使用该 PLC 从未使用的新代次。
 
 管理员可在来源列表确认删除一条登记。删除后该来源不能继续上报，原历史仍按有效期可查；发送方已冻结的样本应保留原身份和正文。登记行内的退役代次记录也随删除移除：若相关事实和最新值均已不存在，系统可能无法识别过去用过的代次。重新登记同一 PLC 应使用从未使用的新代次。
 
@@ -85,8 +85,8 @@ flowchart LR
 
 | 表 | 一行代表什么 | 主要用途 |
 | --- | --- | --- |
-| `plc_facts_history` | 一次完整的 PLC/DB 样本，点集保存在 `points_json`。 | 查看过去某次采集的完整点集和来源信息。 |
-| `plc_facts_latest` | 一个 PLC、DB、点位的最新值。 | 按点快速读取当前值，也可查看一个 DB 的所有最新点位。 |
+| `acq_plc_facts_history` | 一次完整的 PLC/DB 样本，点集保存在 `points_json`。 | 查看过去某次采集的完整点集和来源信息。 |
+| `acq_plc_facts_latest` | 一个 PLC、DB、点位的最新值。 | 按点快速读取当前值，也可查看一个 DB 的所有最新点位。 |
 
 例如一次 `DB21` 样本里有温度和运行状态两个点。历史表增加一行，这一行包含两个点。最新值表分别更新温度行和运行状态行。
 
@@ -248,7 +248,7 @@ curl 'http://127.0.0.1:8000/api/v1/acquisition-data/history/123'
 | 查看实时 PLC/DB 选项；查看历史选项 | `GET /api/v1/acquisition-data/options`；`GET /api/v1/acquisition-data/options?view=history` |
 | 获取一个点或一个 DB 的最新值 | `GET /api/v1/acquisition-data/latest` |
 | 分页浏览最新值，可按点位搜索 | `GET /api/v1/acquisition-data/latest/browse` |
-| 按采集时间查历史样本摘要 | `GET /api/v1/acquisition-data/history` |
+| 查最近 50 条未过期历史样本，或指定采集时段 | `GET /api/v1/acquisition-data/history`，指定时段时同时传 `from` 和 `to` |
 | 用历史列表的 `id` 取完整样本 | `GET /api/v1/acquisition-data/history/{id}` |
 
 历史摘要中，`id` 是详情查询 ID，`sampledAt` 是样本采集时间，`storedAt` 是保存时间，`pointCount` 是样本点数。读取程序需要知道来源时，可查看 `instanceId`、`sourceType`、`sourceGeneration` 和 `sourceSeq`。 [完整读接口](../contracts/published/http-api/plc-facts-v2/README.zh-CN.md#读取接口)

@@ -1,7 +1,7 @@
 //! 文件：src/commands.rs；双语CLI解析与装配；无参/help无配置读取及状态IO。
 use crate::{config::runtime_v2::Loaded, domain::id, infrastructure::state, Result};
 use serde_json::Value;
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::HashMap, path::{Path, PathBuf}};
 fn locale(lang: &str) -> Value {
     serde_json::from_str(if lang == "zh-CN" {
         include_str!("../locales/zh-CN.json")
@@ -75,17 +75,30 @@ pub async fn execute(mut args: Vec<String>) -> i32 {
         return 0;
     }
     if args.get(0).is_some_and(|s|s=="config") && args.get(1).is_some_and(|s|s=="validate") {
-        let result=(||->Result<_>{let f=flags(&args[2..],&["--config","--plc-file"],&[])?;if f.len()!=1{return Err("cli_arguments".into());}let single=f.contains_key("--plc-file");let p=PathBuf::from(required(&f,if single{"--plc-file"}else{"--config"})?);Ok(crate::config::runtime_v2::validate(&p,single))})();
+        let result = (|| -> Result<_> {
+            let f = flags(&args[2..], &["--config", "--plc-file", "--flows-dir"], &[])?;
+            let single = f.contains_key("--plc-file");
+            if single == f.contains_key("--config") || single && f.contains_key("--flows-dir") {
+                return Err("cli_arguments".into());
+            }
+            let p = PathBuf::from(required(&f, if single {"--plc-file"} else {"--config"})?);
+            let flows_dir = f.get("--flows-dir").map(Path::new);
+            Ok(crate::config::runtime_v2::validate_with_flows(&p, single, flows_dir))
+        })();
         match result{Ok((v,code))=>{println!("{v}");return code;},Err(e)=>{eprintln!("{}: {e}",text["error"].as_str().unwrap());return 2;}}
     }
     let result:Result<()>=async{
   match args[0].as_str(){
    "state" if args.get(1).is_some_and(|s|s=="init")=>{let f=flags(&args[2..],&["--mode","--state-dir","--instance-id"],&["--synthetic"])?;if !f.contains_key("--synthetic"){return Err("synthetic_required".into())}let dir=PathBuf::from(required(&f,"--state-dir")?);let instance=required(&f,"--instance-id")?;state::init(&dir,&required(&f,"--mode")?,&instance)?;let mut audit=crate::infrastructure::audit::Audit::open(&dir,&id(),&instance)?;audit.emit("state_init",serde_json::json!({"result":"ok"}))?;Ok(())},
    "state" if args.get(1).is_some_and(|s|s=="inspect")=>{let f=flags(&args[2..],&["--state-dir"],&[])?;let v=state::inspect(&PathBuf::from(required(&f,"--state-dir")?))?;println!("{v}");Ok(())},
-   "run"=>{let f=flags(&args[1..],&["--config","--state-dir"],&["--execute"])?;let loaded=Loaded::load(&PathBuf::from(required(&f,"--config")?))?;loaded.capability()?;let c=&loaded.config;let dir=PathBuf::from(required(&f,"--state-dir")?);let mode=if f.contains_key("--execute"){"execute"}else{"dry_run"};let(state,state_task)=state::State::open(&dir,mode,&c.instance_id,&id())?;
+   "run"=>{let f=flags(&args[1..],&["--config","--state-dir","--flows-dir"],&["--execute"])?;let loaded=Loaded::load_with_flows(&PathBuf::from(required(&f,"--config")?),f.get("--flows-dir").map(Path::new))?;loaded.capability()?;let c=&loaded.config;let dir=PathBuf::from(required(&f,"--state-dir")?);let mode=if f.contains_key("--execute"){"execute"}else{"dry_run"};
+    use tokio::signal::unix::{signal, SignalKind};
+    let mut interrupt = signal(SignalKind::interrupt()).map_err(|_| "signal_setup")?;
+    let mut terminate = signal(SignalKind::terminate()).map_err(|_| "signal_setup")?;
+    let (state, state_task) = state::State::open(&dir, mode, &c.instance_id, &id())?;
     let mut runtime=crate::runtime::Runtime::start(&c,&dir,&std::env::current_exe().map_err(|_|"runtime_executable")?,state.clone())?;runtime.launch_catalog(&loaded).await?;
-    let mut terminate=tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate()).map_err(|_|"signal_setup")?;let mut tick=tokio::time::interval(std::time::Duration::from_secs(5));
-    loop{tokio::select!{_=tokio::signal::ctrl_c()=>break,_=terminate.recv()=>break,_=tick.tick()=>{let _=runtime.health().await;}}}
+    let mut tick=tokio::time::interval(std::time::Duration::from_secs(5));
+    loop{tokio::select!{_=interrupt.recv()=>break,_=terminate.recv()=>break,_=tick.tick()=>{let _=runtime.health().await;}}}
     let end=tokio::time::Instant::now()+std::time::Duration::from_millis(c.shutdown_timeout_ms);
     let mut outcome=runtime.shutdown(c.shutdown_timeout_ms).await;
     if outcome.is_ok(){match tokio::time::timeout_at(end,state.finalize()).await{Ok(Ok(()))=>{},Ok(Err(e))=>outcome=Err(format!("runtime_finalize:{e}")),Err(_)=>outcome=Err("shutdown_incomplete".into())}}

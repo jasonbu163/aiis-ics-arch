@@ -14,7 +14,9 @@ This source candidate belongs to ARCH-TASK-001 r3. Confirm the deployed contract
 
 The fixed statuses are `new`, `running`, `completed`, and `error`. A partial update preserves omitted fields. Explicit `null` clears an allowed item; zero, false and the empty string are values. Automatic performance writes update the observation time from the report, clearing it when items were submitted without a time. Status-only calls with no observation time keep it. Business timestamps carry an offset and return in Shanghai time. Processing order determines the last write. A later accepted report can move a completed task back to running.
 
-The first performance for an existing plan copies the configured order snapshot once. When performance exists first, ordinary plan upsert can create the plan. Set `backfillExisting` to request eligible historical feedback. Values explicitly included in the plan request take precedence over one-time backfill.
+The first Performance record for an existing Plan copies enabled `order_snapshot` and `snapshot_auto` shared fields once. The `snapshot_auto` mode is available only to shared fields. The Performance integration POST accepts explicit values for this mode, including on the first request, and those values take precedence. With `syncEnabled`, only a submitted value is written back to the matching Plan. Inheriting the initial value alone does not write back the field. Plain `order_snapshot` remains read-only on Performance and cannot be written back. The `automated` mode does not inherit Plan values.
+
+When Performance exists first, ordinary Plan upsert can create the Plan without recreating existing Performance snapshots. Set `backfillExisting` to request eligible historical feedback. Values explicitly included in the Plan request take precedence over one-time backfill.
 
 ## Field administration
 

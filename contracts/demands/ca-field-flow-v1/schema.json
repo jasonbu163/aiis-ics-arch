@@ -1,0 +1,505 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "schema_version",
+    "flow"
+  ],
+  "properties": {
+    "format": {
+      "const": "aiis.flow"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "flow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "flow_id",
+        "revision",
+        "trigger",
+        "entry_node_id",
+        "nodes",
+        "edges"
+      ],
+      "properties": {
+        "flow_id": {
+          "$ref": "#/$defs/id"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "trigger": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "interval_ms"
+          ],
+          "properties": {
+            "type": {
+              "const": "interval"
+            },
+            "interval_ms": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4294967295
+            }
+          }
+        },
+        "entry_node_id": {
+          "$ref": "#/$defs/id"
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/node"
+          },
+          "minItems": 1,
+          "maxItems": 256
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "from_node_id",
+              "from_port",
+              "to_node_id"
+            ],
+            "properties": {
+              "from_node_id": {
+                "$ref": "#/$defs/id"
+              },
+              "from_port": {
+                "enum": [
+                  "next",
+                  "true",
+                  "false"
+                ]
+              },
+              "to_node_id": {
+                "$ref": "#/$defs/id"
+              }
+            }
+          },
+          "minItems": 0,
+          "maxItems": 512
+        }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nodes"
+      ],
+      "properties": {
+        "nodes": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/id"
+          },
+          "maxProperties": 256,
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "x",
+              "y"
+            ],
+            "properties": {
+              "x": {
+                "type": "number",
+                "minimum": -100000,
+                "maximum": 100000
+              },
+              "y": {
+                "type": "number",
+                "minimum": -100000,
+                "maximum": 100000
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CA/FF candidate flow JSON v1",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_-]{0,99}$"
+    },
+    "literal": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "value"
+          ],
+          "properties": {
+            "type": {
+              "const": "int16"
+            },
+            "value": {
+              "type": "integer",
+              "minimum": -32768,
+              "maximum": 32767
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "value"
+          ],
+          "properties": {
+            "type": {
+              "const": "boolean"
+            },
+            "value": {
+              "type": "boolean"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "value"
+          ],
+          "properties": {
+            "type": {
+              "const": "string"
+            },
+            "value": {
+              "type": "string",
+              "maxLength": 4096
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "value"
+          ],
+          "properties": {
+            "type": {
+              "const": "real"
+            },
+            "value": {
+              "type": "number"
+            }
+          }
+        }
+      ]
+    },
+    "operand": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/literal"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "node_id",
+            "field"
+          ],
+          "properties": {
+            "node_id": {
+              "$ref": "#/$defs/id"
+            },
+            "field": {
+              "enum": [
+                "value",
+                "matched",
+                "status"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "node": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "version",
+            "config"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/id"
+            },
+            "type": {
+              "const": "plc.read"
+            },
+            "version": {
+              "const": 1
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "plc_ref",
+                "point_ref",
+                "value_type"
+              ],
+              "properties": {
+                "plc_ref": {
+                  "$ref": "#/$defs/id"
+                },
+                "point_ref": {
+                  "$ref": "#/$defs/id"
+                },
+                "value_type": {
+                  "enum": [
+                    "int16",
+                    "string",
+                    "boolean",
+                    "real"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "version",
+            "config"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/id"
+            },
+            "type": {
+              "const": "plc.write"
+            },
+            "version": {
+              "const": 1
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "plc_ref",
+                "point_ref",
+                "value_type",
+                "value"
+              ],
+              "properties": {
+                "plc_ref": {
+                  "$ref": "#/$defs/id"
+                },
+                "point_ref": {
+                  "$ref": "#/$defs/id"
+                },
+                "value_type": {
+                  "enum": [
+                    "int16",
+                    "string",
+                    "boolean",
+                    "real"
+                  ]
+                },
+                "value": {
+                  "$ref": "#/$defs/operand"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "version",
+            "config"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/id"
+            },
+            "type": {
+              "const": "condition.compare"
+            },
+            "version": {
+              "const": 1
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "left",
+                "op",
+                "right"
+              ],
+              "properties": {
+                "left": {
+                  "$ref": "#/$defs/operand"
+                },
+                "op": {
+                  "const": "eq"
+                },
+                "right": {
+                  "$ref": "#/$defs/literal"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "version",
+            "config"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/id"
+            },
+            "type": {
+              "const": "http.request"
+            },
+            "version": {
+              "const": 1
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "endpoint_ref",
+                "method",
+                "path"
+              ],
+              "properties": {
+                "endpoint_ref": {
+                  "$ref": "#/$defs/id"
+                },
+                "method": {
+                  "enum": [
+                    "GET",
+                    "POST"
+                  ]
+                },
+                "path": {
+                  "type": "string",
+                  "pattern": "^/(?!/)[^\\\\?#\\u0000-\\u001f\\u007f]*$",
+                  "maxLength": 1024
+                },
+                "query": {
+                  "type": "object",
+                  "propertyNames": {
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "maxProperties": 64,
+                  "additionalProperties": {
+                    "$ref": "#/$defs/operand"
+                  }
+                },
+                "body": {
+                  "type": "object",
+                  "propertyNames": {
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "maxProperties": 64,
+                  "additionalProperties": {
+                    "$ref": "#/$defs/operand"
+                  }
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "required": [
+                      "method"
+                    ],
+                    "properties": {
+                      "method": {
+                        "const": "GET"
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "body": {
+                        "maxProperties": 0
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "type",
+            "version",
+            "config"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/id"
+            },
+            "type": {
+              "const": "end"
+            },
+            "version": {
+              "const": 1
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "result"
+              ],
+              "properties": {
+                "result": {
+                  "enum": [
+                    "matched",
+                    "not_matched"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

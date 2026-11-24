@@ -585,6 +585,10 @@ impl Runtime {
     }
     pub fn launch_flows(&mut self, config: &Config) -> Result<()> {
         let http = crate::services::Http::new(&config.http)?;
+        self.launch_handwritten(config, &http);
+        Ok(())
+    }
+    fn launch_handwritten(&mut self, config: &Config, http: &crate::services::Http) {
         for f in config.flows.clone() {
             let plc = config
                 .plcs
@@ -615,7 +619,6 @@ impl Runtime {
    tokio::select!{_=stop.wait()=>break,_=tokio::time::sleep(Duration::from_millis(f.interval_ms))=>{}}
   }health.lock().unwrap().get_mut(&f.id).unwrap().state="stopped".into();}));
         }
-        Ok(())
     }
     pub async fn health(&self) -> Result<()> {
         let flows = self.flows.lock().unwrap().clone();

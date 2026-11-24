@@ -1,0 +1,66 @@
+/* CA 工作区布局和画布。公共壳、按钮与卡片由 CU 提供。 */
+.ca-content { display:grid; gap:10px; min-width:0; }
+.ca-bar,.ca-actions { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+.ca-content h1, .ca-content h2, .ca-content h3, .ca-content p { margin:0; }
+.ca-content h1 { font-size:24px; line-height:1.2; letter-spacing:-.024em; }
+.ca-content h2 { font-size:16px; line-height:1.35; }
+.ca-content h3 { font-size:15px; }
+.ca-content label { display:grid; gap:4px; }
+.ca-content :is(button:not(.console-action-button),input,select,textarea) { font:inherit; background:var(--agent-surface); color:var(--agent-text); border:1px solid var(--agent-border-strong); border-radius:7px; }
+.ca-content :is(button:not(.console-action-button),input,select) { min-height:34px; padding:5px 9px; max-width:100%; }
+.ca-content :is(button,summary) { cursor:pointer; }
+.ca-content button:not(.console-action-button):disabled { cursor:not-allowed; color:var(--agent-text-muted); background:var(--agent-surface-muted); border-color:var(--agent-border); }
+.ca-content button:not(.console-action-button):not(:disabled):hover,.ca-content button[aria-pressed="true"] { background:var(--agent-accent-surface); border-color:var(--agent-accent-strong); color:var(--agent-text); }
+.ca-content button.ca-primary:not(:disabled) { background:var(--agent-accent-strong); color:var(--agent-on-accent); border-color:var(--agent-accent-strong); font-weight:650; }
+.ca-content button.ca-danger { color:var(--agent-danger); }
+.ca-content :focus-visible { outline:2px solid var(--agent-accent-strong); outline-offset:2px; }
+.ca-content :is(pre,textarea[readonly]) { overflow:auto; max-width:100%; margin:0; padding:10px; border:1px solid var(--agent-border); border-radius:7px; color:var(--agent-text); background:var(--agent-surface-muted); font:13px/1.55 ui-monospace,monospace; tab-size:2; }
+.ca-content pre { white-space:pre-wrap; overflow-wrap:anywhere; max-height:350px; }
+.ca-content small,.ca-content .ca-node-id,.ca-content .ca-digest { color:var(--agent-text-muted); }
+.ca-content fieldset { min-width:0; display:grid; gap:8px; padding:8px; margin:0; border:1px solid var(--agent-border); border-radius:7px; }
+.ca-bar { justify-content:space-between; }
+.ca-tag { border-radius:10px; padding:2px 8px; background:var(--agent-accent-surface); color:var(--agent-text); }
+.ca-card { background:var(--agent-surface); border:1px solid var(--agent-border); border-radius:12px; padding:14px; min-width:0; }
+.ca-fields { display:grid; gap:9px; }
+.ca-fields > button { justify-self:start; }
+.ca-card .ca-check,.ca-check { display:flex; align-items:center; }
+.ca-note,.ca-error { margin:0; padding:6px 9px; border-radius:7px; background:var(--agent-surface-muted); }
+.ca-error { color:var(--agent-danger); }
+.ca-table-wrap { overflow:auto; }
+.ca-content table { border-collapse:collapse; width:100%; text-align:left; }
+.ca-content th,.ca-content td { border-bottom:1px solid var(--agent-border); padding:7px 10px; vertical-align:top; }
+.ca-content th { white-space:nowrap; background:var(--agent-surface-muted); }
+.ca-editor { min-height:555px; min-height:max(555px, calc(100dvh - 115px)); }
+.ca-editor.console-card--compact > .console-card__body { flex:1; display:flex; flex-direction:column; padding:0; }
+.ca-editor > .console-card__footer { padding:0; }
+.ca-editor-footer { display:flex; justify-content:space-between; gap:9px; align-items:center; padding:10px 14px; }
+.ca-editor-footer { border-top:1px solid var(--agent-border); }
+.ca-editor-footer ul { max-height:100px; overflow:auto; padding-left:20px; margin:0; }
+.ca-editor-body { flex:1; min-height:335px; display:grid; grid-template-columns:134px minmax(0,1fr) 294px; }
+.ca-compact-editor { grid-template-columns:134px minmax(0,1fr); }
+.ca-palette,.ca-inspector { min-width:0; overflow:auto; padding:10px; }
+.ca-palette { display:flex; flex-direction:column; align-items:stretch; gap:7px; border-right:1px solid var(--agent-border); }
+.ca-palette button { text-align:left; cursor:grab; touch-action:none; user-select:none; }
+.ca-palette-ghost { position:fixed; transform:translate(8px,8px); z-index:30; pointer-events:none; padding:6px 10px; border:1px solid var(--agent-accent-strong); border-radius:7px; color:var(--agent-text); background:var(--agent-surface); }
+.ca-inspector { display:flex; flex-direction:column; gap:8px; border-left:1px solid var(--agent-border); }
+.ca-inspector button { text-align:left; }
+.ca-node-id,.ca-digest { font-family:ui-monospace,monospace; overflow-wrap:anywhere; }
+.ca-canvas { position:relative; min-height:335px; min-width:0; background-color:var(--agent-bg); background-image:radial-gradient(var(--agent-border-strong) .75px, transparent .75px); background-size:16px 16px; }
+.ca-canvas > .vue-flow { width:100%; height:100%; }
+.ca-canvas-tools { display:flex; position:absolute; z-index:5; inset:8px auto auto 8px; gap:4px; }
+.ca-graph-node { display:grid; width:142px; gap:1px; padding:9px 12px; background:var(--agent-surface); color:var(--agent-text); border:1px solid var(--agent-border-strong); border-radius:8px; box-shadow:var(--agent-card-shadow); }
+.ca-graph-node.selected { outline:2px solid var(--agent-accent-strong); }
+.ca-graph-node.invalid { border-color:var(--agent-danger); }
+.ca-node-kind { font-size:13px; font-weight:680; }
+.ca-node-caption { overflow:hidden; text-overflow:ellipsis; color:var(--agent-text-muted); font:11px ui-monospace,monospace; }
+.ca-graph-node .vue-flow__handle { background:var(--agent-accent-strong); border:1px solid var(--agent-surface); width:10px; height:10px; }
+.ca-canvas .vue-flow__edge-path { stroke:var(--agent-text-muted); stroke-width:2; }
+.ca-canvas .vue-flow__edge.selected .vue-flow__edge-path,.ca-canvas .ca-edge-selected .vue-flow__edge-path,.ca-canvas .vue-flow__connection-path { stroke:var(--agent-accent-strong); stroke-width:2.5; }
+.ca-canvas .vue-flow__edge-text { fill:var(--agent-text); font-size:12px; }
+.ca-canvas .vue-flow__edge-textbg { fill:var(--agent-surface); }
+.ca-json-view { flex:1; min-height:0; display:grid; grid-template-rows:auto minmax(0,1fr); gap:8px; padding:12px 14px; }
+.ca-json-view textarea { width:100%; min-height:320px; height:100%; resize:none; }
+@media (max-width:1100px) {
+  .ca-editor-body { grid-template-columns:112px minmax(0,1fr) 236px; }
+  .ca-compact-editor { grid-template-columns:112px minmax(0,1fr); }
+}

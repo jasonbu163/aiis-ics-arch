@@ -1,8 +1,17 @@
 <!-- 文件路径: /frontend-js/src/app/acquisition-data/views/history/HistoryDetailDialog.vue
      功能描述: 展示当前历史样本的完整只读点值与采集时间。 -->
 <template>
-  <el-dialog :model-value="visible" :title="$t('acquisition-data.detail')" width="min(1100px, 95vw)"
-    class="standard-form-dialog" destroy-on-close @update:model-value="$emit('update:visible', $event)">
+  <el-dialog :model-value="visible" :title="$t('acquisition-data.detail')" width="min(1100px, calc(100vw - 24px))"
+    class="standard-form-dialog compact-form-dialog" :show-close="false" align-center destroy-on-close
+    @update:model-value="$emit('update:visible', $event)">
+    <template #header="{ titleId, titleClass }">
+      <h2 :id="titleId" :class="titleClass">{{ $t('acquisition-data.detail') }}</h2>
+      <div v-if="state === 'ready' && detail" class="table-actions">
+        <el-tooltip :content="$t('acquisition-data.resetWidthsHint')" placement="top" :trigger="['hover', 'focus']">
+          <ActionButton @click="columns.reset">{{ $t('acquisition-data.resetWidths') }}</ActionButton>
+        </el-tooltip>
+      </div>
+    </template>
     <div v-if="state === 'loading'" class="message" role="status">{{ $t('acquisition-data.loading') }}</div>
     <div v-else-if="state === 'unavailable'" class="message" role="alert">{{ $t('acquisition-data.unavailable') }}</div>
     <div v-else-if="state === 'error' || state === 'forbidden'" class="message" role="alert">
@@ -19,7 +28,6 @@
         <div><strong>{{ $t('acquisition-data.columns.groupId') }}:</strong> {{ detail.groupId ?? '—' }}</div>
         <div><strong>{{ $t('acquisition-data.columns.configRevision') }}:</strong> {{ detail.configRevision ?? '—' }}</div>
         <div><strong>{{ $t('acquisition-data.columns.sampledAt') }}:</strong> <span :title="detail.sampledAt || ''">{{ formatShanghaiDateTime(detail.sampledAt) || $t('acquisition-data.missingTime') }}</span></div>
-        <ActionButton size="small" @click="columns.reset">{{ $t('acquisition-data.resetWidths') }}</ActionButton>
       </div>
       <div class="table-scroll">
         <el-table :key="columns.version.value" :data="detail.points" border stripe class="vibe-table" @header-dragend="columns.onHeaderDragEnd">
@@ -41,6 +49,11 @@
             <template #default="{ row }"><span :title="row.observedAt || ''">{{ formatShanghaiDateTime(row.observedAt) || $t('acquisition-data.missingTime') }}</span></template>
           </el-table-column>
         </el-table>
+      </div>
+    </template>
+    <template #footer>
+      <div class="core-dialog-footer">
+        <ActionButton @click="$emit('update:visible', false)">{{ $t('acquisition-data.close') }}</ActionButton>
       </div>
     </template>
   </el-dialog>

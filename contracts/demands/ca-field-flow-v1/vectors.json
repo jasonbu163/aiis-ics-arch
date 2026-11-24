@@ -1,0 +1,74 @@
+{
+  "example": "examples/status-gate.json",
+  "semantic_sha256": "a84851e3b56f08c566d19cc0ac08d0cc07289e17c5c286e2a3b51cf71c89368c",
+  "file_sha256": "28ae535c79f1b8e001d611b50eac9ca53dc1c08a0072fcddc51f1c8d426ada3c",
+  "semantic_preserving": [
+    "remove layout",
+    "change layout coordinates",
+    "change revision",
+    "reorder nodes/edges"
+  ],
+  "cases": [
+    {
+      "value": {
+        "type": "int16",
+        "value": 1
+      },
+      "quality": "good",
+      "branch": "true",
+      "result": "matched"
+    },
+    {
+      "value": {
+        "type": "int16",
+        "value": 0
+      },
+      "quality": "good",
+      "branch": "false",
+      "result": "not_matched"
+    },
+    {
+      "value": {
+        "type": "string",
+        "value": "1"
+      },
+      "quality": "good",
+      "error": "invalid_type"
+    },
+    {
+      "value": {
+        "type": "boolean",
+        "value": true
+      },
+      "quality": "good",
+      "error": "invalid_type"
+    },
+    {
+      "value": null,
+      "quality": "good",
+      "error": "missing_value"
+    },
+    {
+      "value": {
+        "type": "int16",
+        "value": 1
+      },
+      "quality": "bad",
+      "error": "bad_quality"
+    }
+  ],
+  "invalid_documents": [
+    "unknown schema_version",
+    "unknown node version",
+    "unreachable node",
+    "cycle",
+    "parallel merge",
+    "dangling edge",
+    "missing condition port",
+    "illegal upstream reference",
+    "mismatched operand types",
+    "absolute HTTP path",
+    "unknown field",
+    "duplicate JSON key"
+  ]
+}

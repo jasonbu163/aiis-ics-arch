@@ -1,4 +1,4 @@
-"""ARCH-ACQ-006 r1 隔离 MySQL 8.4 迁移、并发和 HTTP 消费回归。"""
+"""ARCH-ACQ-007 隔离 MySQL 8.4 更名、并发和 HTTP 消费回归。"""
 import asyncio
 from contextlib import closing
 from contextvars import ContextVar
@@ -9,42 +9,51 @@ import os
 from pathlib import Path
 from secrets import token_urlsafe
 from sqlite3 import connect as sqlite_connect
+from types import SimpleNamespace
 import subprocess
 import sys
 from uuid import UUID, uuid4
 
 import pytest
 
-ENV = ('ACQ006_TEST_ROLE', 'ACQ006_TEST_PORT', 'ACQ006_TEST_SERVER_UUID',
-       'ACQ006_TEST_PASSWORD', 'ACQ006_TEST_EXECUTION_ACK')
+ENV = ('ACQ007_TEST_ROLE', 'ACQ007_TEST_PORT', 'ACQ007_TEST_SERVER_UUID',
+       'ACQ007_TEST_PASSWORD', 'ACQ007_TEST_EXECUTION_ACK')
 if not all(os.environ.get(key) for key in ENV):
-    pytest.skip('ARCH-ACQ-006 requires a dedicated throwaway MySQL instance', allow_module_level=True)
+    pytest.skip('ARCH-ACQ-007 requires a dedicated throwaway MySQL instance', allow_module_level=True)
 
 import httpx
 import pymysql
 import pytest_asyncio
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import Session
 
+from app.equipment_observation.services import guard as observation_guard
 from app.plc_facts.api import consumption, source_registry, v2
 from app.plc_facts.consumption_config import get_grants
 from app.plc_facts.crud import async_v2
-from app.plc_facts.services import async_consumption, sync_v2_maintenance
-from app.plc_facts.v2_config import CONSUMPTION_REVISION
-from app.plc_facts.v2_domain import wire_time
+from app.plc_facts.services import async_consumption, observation_evidence, sync_v2_maintenance
+from app.plc_facts.v2_config import CONSUMPTION_REVISION, TABLE_NAMES_REVISION, load_profile
+from app.plc_facts.v2_domain import V2Error, wire_time
 from core.registrar import create_app
 
 ROLE, PORT, SERVER, PASSWORD, CONFIRM = (os.environ[key] for key in ENV)
 if (ROLE not in {'dev', 'qa'} or not PORT.isdecimal() or not 20000 <= int(PORT) <= 65535
-        or str(UUID(SERVER)) != SERVER or CONFIRM != f'ARCH-ACQ-006-r1:{ROLE}:127.0.0.1:{PORT}:{SERVER}'):
+        or str(UUID(SERVER)) != SERVER or CONFIRM != f'ARCH-ACQ-007-r2:{ROLE}:127.0.0.1:{PORT}:{SERVER}'):
     raise RuntimeError('isolated MySQL identity not explicitly confirmed')
 
 ROOT = Path(__file__).resolve().parents[1]
 API = '/api/v1/acquisition-consumers'
 SAMPLES = '/api/v1/integration/plc-facts/samples'
 PREDECESSOR = 'c9e1a3b5d720'
+TABLE_NAMES_PREDECESSOR = 'f0a2b4c6d8e1'
+UNRELATED_FIXTURE_REVISION = 'eeeeeeeeeeee'
+LEGACY_FACT_TABLES = ('plc_source_registry', 'plc_facts_history', 'plc_facts_latest')
+CONSUMPTION_TABLES = ('acq_consumption_streams', 'acq_consumption_events', 'acq_consumers',
+                      'acq_consumer_deliveries', 'acq_consumer_operations', 'acq_consumption_activation')
 PUBLIC_PERMISSIONS = ['create', 'read', 'run', 'lease', 'pending', 'ack', 'target']
 
 
@@ -60,13 +69,13 @@ def connection(schema=None):
     return conn
 
 
-def run_sql(schema, statement, params=()):
+def run_sql(schema, statement, params=None):
     with connection(schema) as conn, conn.cursor() as cursor:
         cursor.execute(statement, params)
         return cursor.fetchall()
 
 
-def migrate(schema, revision, *, confirmed=True):
+def migrate(schema, revision, *, confirmed=True, extra_versions=None):
     env = dict(os.environ)
     env.update(APP_NAME='ACQ006 fixture', APP_VERSION='1.0.0', DEBUG='False', TESTING='True',
                PRIMARY_DATABASE='mysql', MYSQL_ENABLED='True', MYSQL_HOST='127.0.0.1',
@@ -75,21 +84,38 @@ def migrate(schema, revision, *, confirmed=True):
                JWT_SECRET_KEY='0' * 64, JWT_ALGORITHM='HS256', ACCESS_TOKEN_EXPIRE_MINUTES='5',
                REFRESH_TOKEN_EXPIRE_DAYS='1', API_V1_PREFIX='/api/v1',
                BACKEND_MOCK_ENABLED='False', ADMIN_BOOTSTRAP_ENABLED='False', PYTHONDONTWRITEBYTECODE='1')
-    for prefix in ('ACQ_RETIREMENT', 'ACQ_FACTS', 'ACQ_REGISTRY', 'OBS_RETIREMENT', 'ACQ_CONSUMPTION'):
+    for prefix in ('ACQ_RETIREMENT', 'ACQ_FACTS', 'ACQ_REGISTRY', 'OBS_RETIREMENT', 'ACQ_CONSUMPTION',
+                   'OBS_RECEIPT', 'OBS_WRITE', 'QUALITY', 'ACQ_TABLE_NAMES'):
         env[f'{prefix}_EXPECTED_SCHEMA'] = schema
         env[f'{prefix}_EXPECTED_SERVER_UUID'] = SERVER
     env.update(ACQ_FACTS_OPERATION_ID='arch-acq006-bootstrap', ACQ_REGISTRY_R3_EMPTY_CONFIRMED='1',
                TASK_CUTOVER_SCHEMA=schema, TASK_CUTOVER_SERVER_UUID=SERVER, TASK_CUTOVER_OPERATION_ID='arch-acq006',
                TASK_R2_SCHEMA=schema, TASK_R2_SERVER_UUID=SERVER, TASK_R2_OPERATION_ID='arch-acq006-r2',
                TASK_R2_HISTORY_TIME_VERIFIED='Asia/Shanghai', OBS_RETIREMENT_WINDOW_CONFIRMED=f'{schema}:{SERVER}',
-               ACQ_CONSUMPTION_WINDOW_CONFIRMED=f'{schema}:{SERVER}' if confirmed else 'unconfirmed')
-    return subprocess.run([sys.executable, '-m', 'alembic', '-x', 'obs_r10_writers_quiesced=yes', 'upgrade', revision], cwd=ROOT, env=env,
-                          capture_output=True, text=True, timeout=90)
+               OBS_RECEIPT_WINDOW_CONFIRMED=f'{schema}:{SERVER}',
+               ACQ_CONSUMPTION_WINDOW_CONFIRMED=f'{schema}:{SERVER}' if confirmed else 'unconfirmed',
+               ACQ_TABLE_NAMES_WINDOW_CONFIRMED=(
+                   f'{schema}:{SERVER}:{TABLE_NAMES_PREDECESSOR}' if confirmed else 'unconfirmed'))
+    if extra_versions is None:
+        command = [sys.executable, '-m', 'alembic', '-x', 'obs_r10_writers_quiesced=yes', 'upgrade', revision]
+    else:
+        command = [sys.executable, '-c', '''
+from alembic import command
+from alembic.config import Config
+from pathlib import Path
+import os
+import sys
+configuration = Config("alembic.ini", cmd_opts=type("Args", (), {"x": ["obs_r10_writers_quiesced=yes"]})())
+configuration.set_main_option("version_locations", os.pathsep.join((str(Path("alembic/versions").resolve()), sys.argv[1])))
+command.upgrade(configuration, sys.argv[2])
+''', str(extra_versions), revision]
+    return subprocess.run(command, cwd=ROOT, env=env, capture_output=True, text=True, timeout=90)
 
 
-def add_source(schema, plc, kind='daa', generation='g1'):
-    run_sql(schema, """
-        INSERT INTO plc_source_registry (plc_id, instance_id, source_generation, source_type,
+def add_source(schema, plc, kind='daa', generation='g1', *, legacy=False):
+    table = 'plc_source_registry' if legacy else 'acq_plc_source_registry'
+    run_sql(schema, f"""
+        INSERT INTO {table} (plc_id, instance_id, source_generation, source_type,
              retired_generations, registration_revision)
         VALUES (%s, %s, %s, %s, JSON_ARRAY(), %s)
     """, (plc, 'instance-' + plc, generation, kind, str(uuid4())))
@@ -116,15 +142,63 @@ def insert_old(schema, seq, observed, expires, stored):
           bytes_body(sample('old', seq, observed)['points']), b'x' * 32, observed, stored, expires))
 
 
-@pytest.fixture(scope='module')
-def isolated():
-    schema = f'arch_acq006_r1_{ROLE}_{uuid4().hex[:12]}'
+def test_fresh_schema_uses_full_alembic_chain_from_same_candidate():
+    schema = f'arch_acq007_r2_{ROLE}_fresh_{uuid4().hex[:12]}'
     run_sql(None, f'CREATE DATABASE `{schema}` CHARACTER SET utf8mb4')
     try:
+        assert run_sql(schema, 'SHOW TABLES') == ()
+        result = migrate(schema, TABLE_NAMES_REVISION)
+        assert result.returncode == 0, result.stderr
+        for step in ('-> d4e6f8a0b2c4', '6a8c0e2b4d16 -> 7b9d1f3a5c7e',
+                     f'{TABLE_NAMES_PREDECESSOR} -> {TABLE_NAMES_REVISION}'):
+            assert step in result.stderr
+        names = {name for (name,) in run_sql(schema, 'SHOW TABLES')}
+        assert names.isdisjoint(LEGACY_FACT_TABLES)
+        assert names.issuperset(tuple('acq_' + name for name in LEGACY_FACT_TABLES) + CONSUMPTION_TABLES)
+        assert run_sql(schema, 'SELECT version_num FROM alembic_version') == ((TABLE_NAMES_REVISION,),)
+        assert run_sql(schema, 'SELECT id, ready FROM acq_consumption_activation') == ((1, 1),)
+        assert run_sql(schema, 'SELECT COUNT(*) FROM acq_plc_source_registry') == ((0,),)
+    finally:
+        run_sql(None, f'DROP DATABASE `{schema}`')
+
+
+@pytest.fixture(scope='module')
+def isolated(tmp_path_factory):
+    schema = f'arch_acq007_r2_{ROLE}_{uuid4().hex[:12]}'
+    run_sql(None, f'CREATE DATABASE `{schema}` CHARACTER SET utf8mb4')
+    try:
+        r2_registry = migrate(schema, '6a8c0e2b4d16')
+        assert r2_registry.returncode == 0, r2_registry.stderr
+        timestamp = datetime(2026, 1, 2, 3, 4, 5, 987654)
+        registration = str(uuid4())
+        run_sql(schema, "INSERT INTO acq_source_instances VALUES ('fixture-instance','daa')")
+        run_sql(schema, '''
+            INSERT INTO acq_source_bindings
+            VALUES ('frozen-source','fixture-instance','active-gen',%s,%s,%s)
+        ''', (registration, timestamp, timestamp))
+        run_sql(schema, '''
+            INSERT INTO acq_source_generations (plc_id, source_generation, instance_id)
+            VALUES ('frozen-source','retired-gen','fixture-instance'), ('frozen-source','active-gen','fixture-instance')
+        ''')
+        run_sql(schema, '''
+            INSERT INTO acq_source_initialization (id, input_hash, logical_hash, target_hash)
+            VALUES (1, UNHEX(REPEAT('11',32)), UNHEX(REPEAT('22',32)), UNHEX(REPEAT('33',32)))
+        ''')
         pre = migrate(schema, PREDECESSOR)
         assert pre.returncode == 0, pre.stderr
+        assert run_sql(schema, '''
+            SELECT instance_id, source_generation, source_type, retired_generations,
+                   registration_revision, created_at, updated_at
+            FROM plc_source_registry WHERE plc_id='frozen-source'
+        ''') == ((b'fixture-instance', b'active-gen', 'daa', '["retired-gen"]',
+                  registration, timestamp, timestamp),)
+        ddl = run_sql(schema, 'SHOW CREATE TABLE plc_source_registry')[0][1]
+        for fragment in ("PRIMARY KEY (`plc_id`)", "ENGINE=InnoDB", "DEFAULT CURRENT_TIMESTAMP(6)",
+                         "ascii_bin", "ck_plc_source_type"):
+            assert fragment in ddl
+        assert not run_sql(schema, "SHOW TABLES LIKE 'acq_plc_source_registry'")
         now = run_sql(schema, 'SELECT CURRENT_TIMESTAMP(6)')[0][0]
-        add_source(schema, 'old')
+        add_source(schema, 'old', legacy=True)
         insert_old(schema, 1, now - timedelta(days=2), now + timedelta(days=30), now - timedelta(seconds=15))
         insert_old(schema, 2, now - timedelta(days=100), now - timedelta(days=1), now - timedelta(seconds=10))
         insert_old(schema, 3, now - timedelta(days=1), now + timedelta(days=31), now - timedelta(seconds=5))
@@ -187,15 +261,110 @@ def isolated():
             (1, b'old-g1-1'), (2, b'old-g1-3'),
         )
         assert run_sql(schema, 'SELECT version_num FROM alembic_version') == ((CONSUMPTION_REVISION,),)
+        quality = migrate(schema, TABLE_NAMES_PREDECESSOR)
+        assert quality.returncode == 0, quality.stderr
+        run_sql(schema, '''
+            INSERT INTO acq_consumers VALUES
+            ('fixture-consumer','old',21,'retained',NOW(6),2,1,0,NULL,NULL,
+             'reserved-target',21,'reserved-instance','g1','paused',NULL,0,NULL,NULL)
+        ''')
+        run_sql(schema, '''
+            INSERT INTO acq_consumer_deliveries VALUES
+            ('fixture-consumer','fixture-delivery',2,'config-v1',UNHEX(REPEAT('10',32)),
+             'serializer.v1',UNHEX(REPEAT('20',32)),NOW(6),NULL)
+        ''')
+        run_sql(schema, '''
+            INSERT INTO acq_consumer_operations VALUES
+            ('fixture-consumer','fixture-operation',UNHEX(REPEAT('30',32)),JSON_OBJECT('eventSeq','2'))
+        ''')
+
+        def snapshot(tables):
+            return [(sorted(run_sql(schema, f'SELECT * FROM {table}'), key=repr),
+                     sorted((r[1:6], r[7], r[10], r[13], r[14]) for r in run_sql(schema, f'SHOW INDEX FROM {table}')))
+                    for table in tables]
+
+        before_rename = snapshot(LEGACY_FACT_TABLES + CONSUMPTION_TABLES)
+        refused = migrate(schema, TABLE_NAMES_REVISION, confirmed=False)
+        assert refused.returncode != 0 and 'exact inspected MySQL maintenance target' in refused.stderr
+        run_sql(schema, 'DROP TRIGGER acq006_history_immutable')
+        run_sql(schema, """
+            CREATE TRIGGER acq006_history_immutable BEFORE UPDATE ON plc_facts_latest
+            FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'acq006 immutable history'
+        """)
+        wrong_trigger = migrate(schema, TABLE_NAMES_REVISION)
+        assert wrong_trigger.returncode != 0 and 'incompatible acquisition history trigger' in wrong_trigger.stderr
+        assert snapshot(LEGACY_FACT_TABLES + CONSUMPTION_TABLES) == before_rename
+        run_sql(schema, 'DROP TRIGGER acq006_history_immutable')
+        for timing, event, message in (
+            ('AFTER', 'UPDATE', 'acq006 immutable history'),
+            ('BEFORE', 'DELETE', 'acq006 immutable history'),
+            ('BEFORE', 'UPDATE', 'wrong definition'),
+        ):
+            run_sql(schema, f'''
+                CREATE TRIGGER acq006_history_immutable {timing} {event} ON plc_facts_history
+                FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = %s
+            ''', (message,))
+            rejected = migrate(schema, TABLE_NAMES_REVISION)
+            assert rejected.returncode != 0 and 'incompatible acquisition history trigger' in rejected.stderr
+            run_sql(schema, 'DROP TRIGGER acq006_history_immutable')
+        run_sql(schema, """
+            CREATE TRIGGER acq006_history_immutable BEFORE UPDATE ON plc_facts_history
+            FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'acq006 immutable history'
+        """)
+        run_sql(schema, 'CREATE TABLE acq_plc_facts_history LIKE plc_facts_history')
+        collision = migrate(schema, TABLE_NAMES_REVISION)
+        assert collision.returncode != 0 and 'missing, conflicting or partially renamed' in collision.stderr
+        run_sql(schema, 'DROP TABLE acq_plc_facts_history')
+        run_sql(schema, 'RENAME TABLE plc_source_registry TO acq_plc_source_registry')
+        partial = migrate(schema, TABLE_NAMES_REVISION)
+        assert partial.returncode != 0 and 'missing, conflicting or partially renamed' in partial.stderr
+        run_sql(schema, 'RENAME TABLE acq_plc_source_registry TO plc_source_registry')
+        renamed = migrate(schema, TABLE_NAMES_REVISION)
+        assert renamed.returncode == 0, renamed.stderr
+        assert snapshot(tuple('acq_' + name for name in LEGACY_FACT_TABLES) + CONSUMPTION_TABLES) == before_rename
+        with pytest.raises(pymysql.MySQLError, match='immutable history'):
+            run_sql(schema, "UPDATE acq_plc_facts_history SET source_type='external' WHERE sample_id='old-g1-1'")
+        with pytest.raises(pymysql.MySQLError, match='guarded history expiry'):
+            run_sql(schema, "DELETE FROM acq_plc_facts_history WHERE sample_id='old-g1-2'")
+
+        extra_versions = tmp_path_factory.mktemp('acq007_unrelated_revision')
+        (extra_versions / 'unrelated_fixture.py').write_text(f'''
+from alembic import op
+revision = {UNRELATED_FIXTURE_REVISION!r}
+down_revision = {TABLE_NAMES_REVISION!r}
+
+def upgrade():
+    op.execute("CREATE TABLE unrelated_fixture (id INTEGER PRIMARY KEY) ENGINE=InnoDB")
+
+def downgrade():
+    op.drop_table("unrelated_fixture")
+''')
+        unrelated = migrate(schema, UNRELATED_FIXTURE_REVISION, extra_versions=extra_versions)
+        assert unrelated.returncode == 0, unrelated.stderr
+        assert run_sql(schema, 'SELECT version_num FROM alembic_version') == ((UNRELATED_FIXTURE_REVISION,),)
         yield schema, now
     finally:
         run_sql(None, f'DROP DATABASE `{schema}`')
 
 
+@pytest.fixture
+def runtime_credentials(isolated):
+    schema, _ = isolated
+    username, password = 'arch_acq007_' + uuid4().hex[:12], token_urlsafe(32)
+    account = (username, '%')
+    run_sql(None, 'CREATE USER %s@%s IDENTIFIED BY %s', (*account, password))
+    try:
+        run_sql(None, f'GRANT SELECT, INSERT, UPDATE, DELETE ON `{schema}`.* TO %s@%s', account)
+        yield username, password
+    finally:
+        run_sql(None, 'DROP USER %s@%s', account)
+
+
 @pytest_asyncio.fixture
-async def runtime(isolated, monkeypatch, tmp_path):
+async def runtime(isolated, runtime_credentials, monkeypatch, tmp_path):
     schema, now = isolated
-    engine = create_async_engine(URL.create('mysql+aiomysql', username='root', password=PASSWORD,
+    username, password = runtime_credentials
+    engine = create_async_engine(URL.create('mysql+aiomysql', username=username, password=password,
                                             host='127.0.0.1', port=int(PORT), database=schema), pool_size=12)
     factory = async_sessionmaker(engine, expire_on_commit=False)
     commit_fault = ContextVar('fault', default=None)
@@ -216,11 +385,17 @@ async def runtime(isolated, monkeypatch, tmp_path):
         return db
 
     profile = {'target': {'schemaRevision': CONSUMPTION_REVISION, 'schema': schema,
-                          'serverUuid': SERVER, 'alias': 'isolated-acq006'}}
+                          'serverUuid': SERVER, 'alias': 'isolated-acq007'}}
+    profile_path = tmp_path / 'old-facts-profile.json'
+    profile_bytes = bytes_body(profile)
+    profile_path.write_bytes(profile_bytes)
+    profile_settings = SimpleNamespace(PLC_FACTS_V2_PROFILE_FILE=profile_path)
     for module in (consumption, source_registry, v2):
-        monkeypatch.setattr(module, 'get_profile', lambda: profile)
+        monkeypatch.setattr(module, 'get_profile', lambda: load_profile(profile_settings))
         monkeypatch.setattr(module, 'get_db_session', session)
+    monkeypatch.setattr(observation_evidence, 'get_profile', lambda: load_profile(profile_settings))
     app = create_app(testing=True)
+    app.dependency_overrides[source_registry.get_current_active_admin] = lambda: SimpleNamespace(id=1)
     credentials = tmp_path / 'consumer-credential-digests.json'
     credentials.touch(mode=0o600)
     monkeypatch.setenv('ACQ_CONSUMPTION_CREDENTIALS_FILE', str(credentials))
@@ -247,6 +422,7 @@ async def runtime(isolated, monkeypatch, tmp_path):
     finally:
         get_grants.cache_clear()
         await engine.dispose()
+        assert profile_path.read_bytes() == profile_bytes
 
 
 def response(result, code=200, error=None):
@@ -270,6 +446,118 @@ async def start(http, path, headers, worker='worker-a'):
                                      json={'operationId': str(uuid4()), 'workerId': worker, 'action': 'acquire'}))
     return {**headers, 'X-Consumer-Lease-Id': lease['leaseId'],
             'X-Consumer-Lease-Generation': lease['leaseGeneration']}
+
+
+@pytest.mark.asyncio
+async def test_stale_profile_source_management_and_observation_evidence(runtime):
+    http, schema, now, *_ = runtime
+    route = '/api/v1/admin/acquisition-sources'
+    plc, instance, generation = 'tasks-evidence', 'instance-tasks-evidence', 'g1'
+    registered = {'plcId': plc, 'instanceId': instance, 'sourceGeneration': generation, 'sourceType': 'external'}
+    created = response(await http.post(route, json=registered))
+    assert created['outcome'] == 'created'
+    records = response(await http.get(route))
+    assert created['source'] in records['items']
+    body = sample(plc, 1, now)
+    body['points'] = [{'pointId': 'task', 'dataType': 'STRING[16]', 'value': 'ORDER-001',
+                       'quality': 'good', 'observedAt': wire_time(now)}]
+    assert response(await push(http, body))['outcome'] == 'created'
+    assert response(await push(http, body))['outcome'] == 'duplicate'
+    binding = {'plcId': plc, 'dbNumber': 21, 'taskPointId': 'task', 'idleValue': '',
+               'maxTaskAgeSeconds': 600}
+    async with await v2.get_db_session() as db:
+        target = {'schema': schema, 'serverUuid': SERVER, 'schemaRevision': TABLE_NAMES_PREDECESSOR}
+        with pytest.raises(observation_guard.EvidenceUnavailable):
+            await observation_guard.probe_target(db, target)
+        await db.rollback()
+        assert await observation_evidence.current_task(db, binding) == {
+            'state': 'active', 'taskNo': 'ORDER-001', 'observedAt': wire_time(now),
+        }
+        evidence = await observation_evidence.confirm_task(db, binding, 'ORDER-001', now, [], 'external')
+        assert evidence['sampleId'] == body['sampleId'] and evidence['sourceGeneration'] == generation
+        config = Config(str(ROOT / 'alembic.ini'))
+        config.set_main_option('script_location', str(ROOT / 'alembic'))
+        migration = ScriptDirectory.from_config(config).get_revision(TABLE_NAMES_REVISION).module
+        with pytest.raises(RuntimeError, match='inaccessible acquisition history trigger set'):
+            connection = await db.connection()
+            await connection.run_sync(migration._require_triggers, 'acq_plc_facts_history')
+    expected = {key: created['source'][key] for key in ('instanceId', 'sourceGeneration', 'registrationRevision')}
+    removed = response(await http.patch(route, json={'plcId': plc, 'action': 'delete', 'expected': expected, 'confirmDelete': True}))
+    assert removed['outcome'] == 'deleted'
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('break_layout, restore_layout', (
+    ('RENAME TABLE acq_consumer_operations TO acq_consumer_operations_fixture',
+     'RENAME TABLE acq_consumer_operations_fixture TO acq_consumer_operations'),
+    ('ALTER TABLE acq_consumer_operations RENAME COLUMN result TO fixture_result',
+     'ALTER TABLE acq_consumer_operations RENAME COLUMN fixture_result TO result'),
+    ('ALTER TABLE acq_consumption_streams MODIFY last_seq BIGINT UNSIGNED NOT NULL',
+     'ALTER TABLE acq_consumption_streams MODIFY last_seq BIGINT NOT NULL'),
+    ('ALTER TABLE acq_consumption_events DROP INDEX uq_acq_consumption_history',
+     'ALTER TABLE acq_consumption_events ADD CONSTRAINT uq_acq_consumption_history UNIQUE (history_id)'),
+    ('UPDATE acq_consumption_activation SET ready=0 WHERE id=1',
+     'UPDATE acq_consumption_activation SET ready=1 WHERE id=1'),
+    ('DELETE FROM acq_consumption_activation WHERE id=1',
+     'INSERT INTO acq_consumption_activation (id, cutoff_at, ready) VALUES (1, %s, 1)'),
+), ids=('table', 'column', 'type', 'unique', 'inactive', 'missing-ready'))
+async def test_incompatible_layout_declines_read_and_write(runtime, break_layout, restore_layout):
+    http, schema, now, *_ = runtime
+    plc = 'layout-' + uuid4().hex[:12]
+    add_source(schema, plc)
+    cutoff = run_sql(schema, 'SELECT cutoff_at FROM acq_consumption_activation WHERE id=1')[0][0]
+    run_sql(schema, break_layout)
+    try:
+        response(await http.get('/api/v1/acquisition-data/latest', params={'plcId': plc, 'dbNumber': 21}),
+                 503, 'plc_facts_v2.not_ready')
+        response(await push(http, sample(plc, 1, now)), 503, 'plc_facts_v2.not_ready')
+        for table in ('acq_plc_facts_history', 'acq_plc_facts_latest', 'acq_consumption_events',
+                      'acq_consumption_streams'):
+            assert not run_sql(schema, f'SELECT plc_id FROM {table} WHERE plc_id=%s', (plc,))
+    finally:
+        run_sql(schema, restore_layout, (cutoff,) if '%s' in restore_layout else None)
+
+
+@pytest.mark.asyncio
+async def test_exact_maintenance_revision_identity_and_live_clock(runtime, runtime_credentials, tmp_path):
+    _, schema, _, *_ = runtime
+    valid = {'schema': schema, 'serverUuid': SERVER, 'schemaRevision': UNRELATED_FIXTURE_REVISION}
+    async with await v2.get_db_session() as db:
+        for bad in ({'schema': 'other-schema'}, {'serverUuid': str(uuid4())}):
+            with pytest.raises(V2Error, match='not_ready'):
+                await async_v2.target_now(db, {**valid, **bad})
+            await db.rollback()
+        await db.execute(text("SET time_zone = '+00:00'"))
+        try:
+            with pytest.raises(V2Error, match='not_ready'):
+                await async_v2.target_now(db, valid)
+        finally:
+            await db.execute(text("SET time_zone = '+08:00'"))
+        await async_v2.target_now(db, valid)
+    engine = create_engine(URL.create('mysql+pymysql', username='root', password=PASSWORD,
+                                      host='127.0.0.1', port=int(PORT), database=schema))
+    try:
+        for bad in ({'schemaRevision': CONSUMPTION_REVISION}, {'serverUuid': str(uuid4())}, {'schema': 'other-schema'}):
+            with Session(engine) as db, pytest.raises(V2Error, match='not_ready'):
+                sync_v2_maintenance.run(db, {**valid, **bad}, apply=False)
+        with Session(engine) as db:
+            assert sync_v2_maintenance.run(db, valid, apply=False)['rows'] >= 0
+    finally:
+        engine.dispose()
+
+    username, password = runtime_credentials
+    env = dict(os.environ, MYSQL_USER=username, MYSQL_PASSWORD=password, TEST_MYSQL_DATABASE=schema,
+               PLC_FACTS_V2_PROFILE_FILE=str(tmp_path / 'old-facts-profile.json'))
+    command = [sys.executable, 'scripts/plc_facts_maintenance/main.py', 'cleanup-v2', '--plan',
+               '--target-alias', 'isolated-acq007', '--schema', schema, '--expected-server-uuid', SERVER,
+               '--operation-approval', 'isolated-fixture', '--confirmed-by', 'test-executor',
+               '--expected-schema-revision']
+    actual = subprocess.run([*command, UNRELATED_FIXTURE_REVISION], cwd=ROOT, env=env,
+                            capture_output=True, text=True, timeout=10)
+    assert actual.returncode == 0 and '"event":"dry-run"' in actual.stdout
+    stale = subprocess.run([*command, CONSUMPTION_REVISION], cwd=ROOT, env=env,
+                           capture_output=True, text=True, timeout=10)
+    assert stale.returncode == 1 and '"errorCode":"plc_facts.maintenance_failed"' in stale.stdout
 
 
 @pytest.mark.asyncio
@@ -312,7 +600,7 @@ async def test_locked_stream_rollback_duplicate_and_generation(runtime, monkeypa
     headers, path = grant(identity, 'lock-a'), API + '/' + identity
     response(await http.put(path, headers=headers, json=make_target('lock-a')))
     leased = await start(http, path, headers)
-    run_sql(schema, "DELETE FROM plc_source_registry WHERE plc_id='lock-a'")
+    run_sql(schema, "DELETE FROM acq_plc_source_registry WHERE plc_id='lock-a'")
     assert response(await http.get(path + '/next', headers=leased))['sample']['sourceGeneration'] == 'g1'
     response(await push(http, sample('lock-a', 5, now)), 403, 'plc_facts_v2.scope_rejected')
     add_source(schema, 'lock-a', generation='g2')
@@ -320,6 +608,45 @@ async def test_locked_stream_rollback_duplicate_and_generation(runtime, monkeypa
     assert run_sql(schema, """
         SELECT event_seq, source_generation FROM acq_consumption_events WHERE plc_id='lock-a' ORDER BY event_seq
     """) == ((1, b'g1'), (2, b'g1'), (3, b'g1'), (4, b'g2'))
+
+
+@pytest.mark.asyncio
+async def test_event_mismatch_and_missing_append_never_commit_a_fact(runtime):
+    http, schema, now, *_ = runtime
+    add_source(schema, 'event-guard')
+    first, second = (sample('event-guard', seq, now) for seq in (1, 2))
+    assert response(await push(http, first))['outcome'] == 'created'
+
+    def state():
+        return [run_sql(schema, f"SELECT * FROM {table} WHERE plc_id='event-guard'")
+                for table in ('acq_plc_facts_history', 'acq_plc_facts_latest', 'acq_consumption_streams')]
+
+    before = state()
+    (event,) = run_sql(schema, "SELECT * FROM acq_consumption_events WHERE plc_id='event-guard'")
+    run_sql(schema, "DELETE FROM acq_consumption_events WHERE plc_id='event-guard'")
+    try:
+        response(await push(http, first), 503, 'plc_facts_v2.not_ready')
+        assert state() == before
+    finally:
+        run_sql(schema, "INSERT INTO acq_consumption_events VALUES (%s,%s,%s,%s,%s,%s,%s,%s)", event)
+    run_sql(schema, "UPDATE acq_consumption_events SET sample_id='wrong' WHERE plc_id='event-guard'")
+    try:
+        response(await push(http, first), 503, 'plc_facts_v2.not_ready')
+        assert state() == before
+    finally:
+        run_sql(schema, "UPDATE acq_consumption_events SET sample_id=%s WHERE plc_id='event-guard'",
+                (first['sampleId'],))
+
+    original = run_sql(schema, 'SHOW CREATE TRIGGER acq006_history_append')[0][2]
+    run_sql(schema, 'DROP TRIGGER acq006_history_append')
+    try:
+        response(await push(http, second), 503, 'plc_facts_v2.not_ready')
+        assert state() == before
+        assert run_sql(schema, "SELECT event_seq FROM acq_consumption_events WHERE plc_id='event-guard'") == ((1,),)
+    finally:
+        run_sql(schema, original)
+    assert response(await push(http, second))['outcome'] == 'created'
+    assert response(await push(http, second))['outcome'] == 'duplicate'
 
 
 @pytest.mark.asyncio
@@ -384,12 +711,12 @@ async def test_origin_retained_now_and_midstream_gap(runtime, monkeypatch):
         with Session(maintenance) as session:
             session.execute(text('SET timestamp = UNIX_TIMESTAMP(:mid)'), {'mid': mid})
             result = sync_v2_maintenance.run(session, {
-                'serverUuid': SERVER, 'schema': schema, 'schemaRevision': CONSUMPTION_REVISION,
+                'serverUuid': SERVER, 'schema': schema, 'schemaRevision': UNRELATED_FIXTURE_REVISION,
             }, apply=True)
         assert result['rows'] > 0
     finally:
         maintenance.dispose()
-    assert not run_sql(schema, 'SELECT id FROM plc_facts_history WHERE id=%s', (history_id,))
+    assert not run_sql(schema, 'SELECT id FROM acq_plc_facts_history WHERE id=%s', (history_id,))
     assert run_sql(schema, 'SELECT history_id FROM acq_consumption_events WHERE history_id=%s', (history_id,)) == ((history_id,),)
     assert response(await http.get(live_path, headers=living))['status'] == 'blocked'
     response(await http.get(live_path + '/next', headers=living), 410, 'acquisition_consumer.gap')
@@ -535,7 +862,7 @@ async def test_lease_lost_commit_replay_restart_and_compatibility(runtime, tmp_p
         rebuild_from_config(config_path, rebuilt, frozen['configVersion'], frozen)
     assert response(await http.get(path, headers=headers)) == frozen_state
     target_plc = create['target']['plcId']
-    assert run_sql(schema, 'SELECT sample_id FROM plc_facts_history WHERE plc_id=%s', (target_plc,)) == (
+    assert run_sql(schema, 'SELECT sample_id FROM acq_plc_facts_history WHERE plc_id=%s', (target_plc,)) == (
         (delivery.encode(),),
     )
     save_fixture_config(config_path, 'version-one', 'zero-mapped')
@@ -552,7 +879,7 @@ async def test_lease_lost_commit_replay_restart_and_compatibility(runtime, tmp_p
                  'acquisition_consumer.receipt_mismatch' if status == 409 else 'acquisition_consumer.invalid_request')
         after_bad_ack = response(await http.get(path, headers=headers))
         assert after_bad_ack['lastConfirmedSeq'] == '0' and after_bad_ack['pending'] == frozen
-        assert run_sql(schema, 'SELECT sample_id FROM plc_facts_history WHERE plc_id=%s', (target_plc,)) == (
+        assert run_sql(schema, 'SELECT sample_id FROM acq_plc_facts_history WHERE plc_id=%s', (target_plc,)) == (
             (delivery.encode(),),
         )
     fault.set('after')
@@ -619,7 +946,7 @@ async def test_pause_and_target_rollover_preserve_pending(runtime):
                             json={'operationId': str(uuid4()), 'desiredState': 'running'}))
     response(await http.put(pending_path, headers=leased, json={**pending, 'configVersion': 'edited'}), 409,
              'acquisition_consumer.pending_conflict')
-    run_sql(schema, "UPDATE plc_source_registry SET source_generation='g2' WHERE plc_id=%s", (create['target']['plcId'],))
+    run_sql(schema, "UPDATE acq_plc_source_registry SET source_generation='g2' WHERE plc_id=%s", (create['target']['plcId'],))
     response(await push(http, sample_body, target_headers(path, leased, delivery), raw), 403,
              'plc_facts_v2.scope_rejected')
     blocked = response(await http.get(path, headers=headers))
@@ -759,7 +1086,7 @@ async def test_all_consumer_mutations_are_recoverable_on_both_sides_of_commit(ru
         finally:
             fault.reset(reset)
         assert await snapshot() == before_target
-        assert run_sql(schema, 'SELECT COUNT(*) FROM plc_facts_history WHERE plc_id=%s', (sample_body['plcId'],)) == (
+        assert run_sql(schema, 'SELECT COUNT(*) FROM acq_plc_facts_history WHERE plc_id=%s', (sample_body['plcId'],)) == (
             (target_rows,),
         )
     posted = await push(http, sample_body, write_headers, raw)

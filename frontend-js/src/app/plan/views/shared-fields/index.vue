@@ -15,7 +15,7 @@
       <template #actions>
         <div class="table-actions">
           <ActionButton v-if="isLocal" :disabled="busy" @click="router.push(`/${module}/list`)">{{ tr('local.back') }}</ActionButton>
-          <span v-if="config" class="shared-version">{{ tr('configVersion') }} {{ config.configVersion }} / {{ tr('revision') }} {{ config.configRevision }}</span>
+          <span v-if="config" class="card-status-pill">{{ tr('configVersion') }} {{ config.configVersion }} / {{ tr('revision') }} {{ config.configRevision }}</span>
           <ActionButton variant="primary" :disabled="!config || loading" @click="addField">{{ tr('addField') }}</ActionButton>
           <el-tooltip :content="tr('resetWidthsHint')" :trigger="['hover', 'focus']">
             <ActionButton @click="columns.reset">{{ tr('resetWidths') }}</ActionButton>
@@ -92,9 +92,9 @@
 
     <el-dialog v-model="editOpen" :title="tr(editTitle)"
       :width="editMode === 'batch' ? 'min(1400px, calc(100vw - 24px))' : 'min(720px, calc(100vw - 24px))'"
-      align-center destroy-on-close class="standard-form-dialog shared-dialog"
-      :close-on-click-modal="false" :close-on-press-escape="!busy" :show-close="!isLocal && !busy">
-      <el-alert v-if="message" :title="message" type="warning" :closable="false" show-icon />
+      align-center destroy-on-close class="standard-form-dialog shared-dialog" :class="{ 'single-field-dialog': editMode !== 'batch' }"
+      :close-on-click-modal="false" :close-on-press-escape="!busy" :show-close="editMode === 'batch' && !isLocal && !busy">
+      <el-alert v-if="message" ref="editAlert" :title="message" type="warning" :closable="false" show-icon />
       <ActionButton v-if="isLocal && pendingReconciliation && !reconciliation.length"
         :loading="busy" @click="retryReconciliation">{{ tr('local.retryRead') }}</ActionButton>
       <div v-if="reconciliation.length" class="shared-reconciliation" role="status">
@@ -105,20 +105,22 @@
       <TaskFieldEditor v-if="editMode === 'batch'" v-loading="busy" :kind="settingsKind" :module="module" :draft-rows="draftRows" />
       <SharedFieldForm v-else-if="draftRows.length" v-model="draftRows[0]" :kind="settingsKind" :tr="tr" :is-new="editMode === 'new'" :disabled="busy" />
       <template #footer>
-        <div class="table-actions">
+        <div class="table-actions" :class="{ 'single-field-actions': editMode !== 'batch' }">
           <ActionButton :disabled="busy" @click="editOpen = false">{{ t('common.cancel') }}</ActionButton>
           <ActionButton variant="primary" :loading="busy" :disabled="blocked" @click="save">{{ t('common.save') }}</ActionButton>
         </div>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="deleteOpen" :title="groupText('deleteTitle', { count: targets.length })"
+    <el-dialog v-model="deleteOpen" :title="deleteMode === 'single' ? tr('dialog.deleteTitle') : groupText('deleteTitle', { count: targets.length })"
       width="min(540px, calc(100vw - 24px))" align-center destroy-on-close class="standard-form-dialog shared-dialog"
-      :close-on-click-modal="false" :close-on-press-escape="!busy" :show-close="!isLocal && !busy">
-      <el-alert v-if="message" :title="message" type="warning" :closable="false" show-icon />
+      :class="{ 'single-field-dialog': deleteMode === 'single' }"
+      :close-on-click-modal="false" :close-on-press-escape="!busy" :show-close="deleteMode === 'batch' && !isLocal && !busy">
+      <el-alert v-if="message" ref="deleteAlert" :title="message" type="warning" :closable="false" show-icon />
       <ActionButton v-if="isLocal && pendingReconciliation && !reconciliation.length"
         :loading="busy" @click="retryReconciliation">{{ tr('local.retryRead') }}</ActionButton>
-      <p class="shared-description">{{ tr('shared.deleteHint') }}</p>
+      <p class="shared-description">{{ tr(deleteMode === 'single' ? 'dialog.deletePrompt' : 'shared.deleteHint') }}</p>
+      <p v-if="deleteMode === 'single'" class="shared-description">{{ tr('dialog.externalReferences') }}</p>
       <p v-if="reconciliation.length">{{ tr('shared.currentRevision', { revision: config.configRevision }) }}</p>
       <ul class="shared-targets">
         <li v-for="item in (reconciliation.length ? reconciliation : targets)" :key="identity(item)">
@@ -126,9 +128,9 @@
         </li>
       </ul>
       <template #footer>
-        <div class="table-actions">
+        <div class="table-actions" :class="{ 'single-field-actions': deleteMode === 'single' }">
           <ActionButton :disabled="busy" @click="deleteOpen = false">{{ t('common.cancel') }}</ActionButton>
-          <ActionButton variant="danger" :loading="busy" :disabled="blocked" @click="confirmDelete">{{ tr(isLocal ? 'local.confirmDelete' : 'deleteField') }}</ActionButton>
+          <ActionButton variant="danger" :loading="busy" :disabled="blocked" @click="confirmDelete">{{ tr(deleteMode === 'single' || isLocal ? 'local.confirmDelete' : 'deleteField') }}</ActionButton>
         </div>
       </template>
     </el-dialog>
@@ -235,6 +237,7 @@ async function load() {
 
 const editOpen = ref(false), deleteOpen = ref(false), busy = ref(false), blocked = ref(false)
 const message = ref('')
+const editAlert = ref(null), deleteAlert = ref(null)
 const reconciliation = ref([])
 const pendingReconciliation = ref(null)
 const editMode = ref('')
@@ -244,7 +247,13 @@ const draftRows = ref([])
 const targets = ref([])
 let original = []
 let revision
-let deleteMode
+const deleteMode = ref('')
+watch(message, value => {
+  if (!value) return
+  const alert = editOpen.value && editMode.value !== 'batch' ? editAlert.value
+    : deleteOpen.value && deleteMode.value === 'single' ? deleteAlert.value : null
+  alert?.$el.scrollIntoView({ block: 'nearest' })
+}, { flush: 'post' })
 const cloneRows = rows => rows.map(row => ({ ...row, labels: { ...row.labels } }))
 const changeKeys = ['name', 'type', 'unit', ...(settings.owners.length ? ['performanceOwner'] : []),
   ...settings.orders, ...settings.switches]
@@ -274,7 +283,7 @@ function addField() {
 }
 function openDelete(mode, rows) {
   beginOperation()
-  deleteMode = mode
+  deleteMode.value = mode
   targets.value = rows
   deleteOpen.value = true
 }
@@ -332,7 +341,7 @@ async function reportFailure(error, rows, isDelete, patches = []) {
   const path = body?.details?.field ?? ''
   const reason = body?.details?.reason
   const index = /^fields\.(\d+)\.(?:name|scope|slotNo)$/.exec(path)?.[1]
-  const row = index !== undefined ? rows[Number(index)] : isDelete && deleteMode === 'single' && path === 'name' ? rows[0] : null
+  const row = index !== undefined ? rows[Number(index)] : isDelete && deleteMode.value === 'single' && path === 'name' ? rows[0] : null
   const reasonKey = `shared.reasons.${reason}`
   const localSaveKey = `local.saveReasons.${reason}`
   const errorKey = `errors.${code}`
@@ -372,7 +381,7 @@ async function confirmDelete() {
   const requested = rows.map(wireIdentity)
   const batch = { fields: requested, configRevision: revision }
   try {
-    const result = deleteMode === 'single' ? await deleteField({ ...requested[0], configRevision: revision })
+    const result = deleteMode.value === 'single' ? await deleteField({ ...requested[0], configRevision: revision })
       : isLocal ? await deleteLocalFields({ ...batch, module: settingsKind }) : await deleteSharedFields(batch)
     const removed = new Set((result.deleted ?? [result]).map(identity))
     config.value = { ...config.value, configVersion: result.configVersion, configRevision: result.configRevision,
@@ -405,29 +414,6 @@ watch(() => props.module, () => {
 .help-trigger:hover { color: var(--primary); }
 .help-trigger:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 .help-content { max-width: min(340px, calc(100vw - 56px)); white-space: normal; overflow-wrap: anywhere; }
-.shared-version {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 100%;
-  min-width: 0;
-  padding: 4px 10px;
-  border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
-  border-radius: 999px;
-  background: var(--primary-subtle);
-  color: color-mix(in srgb, var(--primary) 70%, var(--text-primary));
-  font-size: 13px;
-  font-weight: 560;
-  font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
-}
-.shared-version::before {
-  content: '';
-  flex: 0 0 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--primary);
-}
 .shared-filters { display: grid; grid-template-columns: minmax(0, 2fr) repeat(var(--shared-filter-columns, 2), minmax(0, 1fr)) auto; gap: 12px; align-items: end; padding: 16px var(--shared-inset); border-bottom: 1px solid var(--border-secondary); }
 .shared-filters--plan { --shared-filter-columns: 1; }
 .shared-filters :deep(.el-form-item) { min-width: 0; margin-bottom: 0; }
@@ -440,6 +426,38 @@ watch(() => props.module, () => {
 .shared-targets, .shared-reconciliation ul { padding-inline-start: 20px; margin: 8px 0; overflow-wrap: anywhere; }
 .shared-dialog :deep(.el-alert) { margin-bottom: 10px; }
 :global(.standard-form-dialog.shared-dialog.el-dialog) { max-height: calc(100dvh - 24px); overflow: auto; }
+:global(.standard-form-dialog.shared-dialog.single-field-dialog.el-dialog) {
+  --field-dialog-inset: clamp(16px, 4vw, 32px);
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100vw - 24px);
+  padding: 0;
+  overflow: hidden;
+}
+:global(.single-field-dialog .el-dialog__header) {
+  flex: none;
+  min-height: 0;
+  padding: 16px var(--field-dialog-inset);
+}
+:global(.single-field-dialog .el-dialog__title) {
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 590;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+:global(.single-field-dialog .el-dialog__body) {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 18px var(--field-dialog-inset);
+}
+:global(.single-field-dialog .el-dialog__footer) {
+  flex: none;
+  padding: 14px var(--field-dialog-inset);
+}
+.single-field-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.single-field-actions :deep(.el-button + .el-button) { margin-left: 0; }
 @container (max-width: 680px) {
   .shared-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .shared-filters > :first-child { grid-column: 1 / -1; }

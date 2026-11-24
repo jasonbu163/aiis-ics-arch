@@ -10,3 +10,5 @@ pub(crate) mod authorization_gate;
 pub(crate) mod plc_collection;
 pub(crate) mod plc_diagnostics;
 pub(crate) mod runtime_snapshot;
+pub(crate) mod ca_node_test;
+pub(crate) mod ca_workspace;

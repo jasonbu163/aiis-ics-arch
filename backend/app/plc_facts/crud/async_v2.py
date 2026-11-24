@@ -1,12 +1,13 @@
 """v2 异步数据库访问；事务由 Service 持有。"""
 from sqlalchemy import and_, case, cast, false, func, or_, select, text, union
 from sqlalchemy.dialects.mysql import CHAR, insert
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import load_only
 
 from ..models.v2 import LatestPointV2, SampleV2
 from ..models.source_registry import PlcSourceRegistry
-from ..v2_config import ALLOWED_REVISIONS
-from ..v2_domain import V2Error, stored_points, stored_value
+from ..v2_domain import stored_points, stored_value
+from .sync_v2_maintenance import CLOCK_SQL, checked_clock, reject_target, runtime_target_now
 
 
 def key(value):
@@ -14,18 +15,14 @@ def key(value):
 
 
 async def target_now(db, target):
-    if db.get_bind().dialect.name != 'mysql':
-        raise V2Error('not_ready', 503)
-    revisions = list((await db.execute(text('SELECT version_num FROM alembic_version FOR SHARE'))).scalars())
-    row = (await db.execute(text(
-        'SELECT @@server_uuid, DATABASE(), VERSION(), CURRENT_TIMESTAMP(6), '
-        'TIMESTAMPDIFF(SECOND, UTC_TIMESTAMP(6), CURRENT_TIMESTAMP(6))'
-    ))).one()
-    if (str(row[0]).lower() != target['serverUuid'] or row[1] != target['schema']
-            or not str(row[2]).split('-')[0].startswith('8.4.') or row[4] != 28800
-            or target['schemaRevision'] not in ALLOWED_REVISIONS or revisions != [target['schemaRevision']]):
-        raise V2Error('not_ready', 503)
-    return row[3].replace(tzinfo=None)
+    return await db.run_sync(runtime_target_now, target)
+
+
+async def clock_now(db):
+    try:
+        return checked_clock(*(await db.execute(CLOCK_SQL)).one())
+    except SQLAlchemyError:
+        reject_target('database_clock_probe_failed')
 
 
 async def identities(db, sample):
@@ -49,7 +46,8 @@ async def insert_sample(db, sample, document, digest, observed, expires, now, so
         source_seq=int(sample.source_seq), points_json=stored_points(document['points']), content_hash=digest,
         sampled_at=max(observed), stored_at=now, expires_at=min(expires),
     )
-    await db.execute(statement)
+    result = await db.execute(statement)
+    return result.lastrowid
 
 
 async def advance_latest(db, sample, observed, expires):
@@ -139,22 +137,26 @@ async def browse_latest(db, scope, sources, search, page, page_size, now):
 
 
 async def history(db, plc, number, start, end, page, page_size, now):
-    predicates = [SampleV2.sampled_at >= start, SampleV2.sampled_at < end, SampleV2.expires_at > now]
+    predicates = [SampleV2.expires_at > now]
+    if start is not None:
+        predicates.extend((SampleV2.sampled_at >= start, SampleV2.sampled_at < end))
     if plc is not None:
         predicates.append(SampleV2.plc_id == key(plc))
     if number is not None:
         predicates.append(SampleV2.db_number == number)
-    total = (await db.execute(select(func.count()).select_from(SampleV2).where(*predicates))).scalar_one()
     offset = (page - 1) * page_size
-    if offset >= total:
-        return total, []
     summary_fields = (SampleV2.id, SampleV2.instance_id, SampleV2.sample_id, SampleV2.plc_id,
                       SampleV2.db_number, SampleV2.group_id, SampleV2.config_revision, SampleV2.source_type,
                       SampleV2.source_generation, SampleV2.source_seq, SampleV2.sampled_at, SampleV2.stored_at)
     statement = (select(SampleV2, func.json_length(SampleV2.points_json)).options(load_only(*summary_fields)).where(*predicates)
-                 .order_by(SampleV2.sampled_at.desc(), SampleV2.id.desc())
-                 .limit(page_size).offset(offset))
-    return total, list((await db.execute(statement)).all())
+                 .order_by(SampleV2.sampled_at.desc(), SampleV2.id.desc()))
+    if start is None:
+        recent = (await db.execute(statement.limit(50))).all()
+        return len(recent), list(recent[offset:offset + page_size])
+    total = (await db.execute(select(func.count()).select_from(SampleV2).where(*predicates))).scalar_one()
+    if offset >= total:
+        return total, []
+    return total, list((await db.execute(statement.limit(page_size).offset(offset))).all())
 
 
 async def detail(db, identity, now):

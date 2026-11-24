@@ -6,7 +6,7 @@ from database import Base
 
 
 class SampleV2(Base):
-    __tablename__ = 'plc_facts_history'
+    __tablename__ = 'acq_plc_facts_history'
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     instance_id = Column(VARBINARY(128), nullable=False)
@@ -34,7 +34,7 @@ class SampleV2(Base):
 
 
 class LatestPointV2(Base):
-    __tablename__ = 'plc_facts_latest'
+    __tablename__ = 'acq_plc_facts_latest'
 
     plc_id = Column(VARBINARY(128), primary_key=True)
     db_number = Column(SMALLINT(unsigned=True), primary_key=True)

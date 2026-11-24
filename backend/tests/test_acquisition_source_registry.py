@@ -384,10 +384,10 @@ async def test_options_query_uses_registered_plcs_and_current_latest_identity():
     rows = await async_v2.options(Session(), object())
     sql = statements[0]
     assert rows == [(b'PLC-A', 21), (b'PLC-A', 22)]
-    assert 'UNION' in sql and 'plc_source_registry' in sql
-    assert 'plc_facts_history.expires_at' in sql and 'plc_facts_latest.expires_at' in sql
-    assert 'plc_facts_latest.instance_id = plc_source_registry.instance_id' in sql
-    assert 'plc_facts_latest.source_generation = plc_source_registry.source_generation' in sql
+    assert 'UNION' in sql and 'acq_plc_source_registry' in sql
+    assert 'acq_plc_facts_history.expires_at' in sql and 'acq_plc_facts_latest.expires_at' in sql
+    assert 'acq_plc_facts_latest.instance_id = acq_plc_source_registry.instance_id' in sql
+    assert 'acq_plc_facts_latest.source_generation = acq_plc_source_registry.source_generation' in sql
     assert 'ORDER BY' in sql
 
 

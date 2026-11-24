@@ -451,7 +451,7 @@ def display_fields(item, collection):
     if any(value is None for value in data.values()):
         reject()
     if collection in data:
-        data[collection] = [entry.model_dump(by_alias=True) for entry in getattr(item, collection)]
+        data[collection] = [entry.model_dump(by_alias=True, exclude_unset=True) for entry in getattr(item, collection)]
     return data
 
 
@@ -506,6 +506,14 @@ async def history_samples(equipment_id: str | None = Query(None, alias="equipmen
     filters = dict(equipment=equipment_id, group=group_key, task=task, start=start, end=end,
                    category=category, metric_key=metric_key)
     return response(await reads.samples(db, get_profile(), user, "history", filters, page, size))
+
+
+@router.get("/monitor/history-default-context")
+async def history_default_context(category: Literal["temperature", "drive", "cleaning"],
+                                  equipment_id: str | None = Query(None, alias="equipmentId", min_length=1),
+                                  task: str | None = Query(None, alias="taskNo"),
+                                  user=Depends(monitor_reader), db: AsyncSession = Depends(get_db)):
+    return response(await reads.history_default_context(db, get_profile(), user, category, equipment_id, task))
 
 
 @router.get("/monitor/history-curves")

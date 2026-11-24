@@ -80,3 +80,11 @@ PLC 事实 v2 定义 DAA 和外部程序的原值上报及按 PLC/DB 范围读�
 [通用任务流程 v1](published/http-api/generic-task-workflow-v1/README.zh-CN.md)保存 ARCH-TASK-001 r1 实际注册的计划/实绩源码合同和 A/B 合成样例。业务集成 v1 的四条历史实绩操作随本候选退出，设备和监控操作保留。部署、独立验证和 Human Owner 终验分别进行。
 
 [通用任务流程 v2 候选](published/http-api/generic-task-workflow-v2/README.zh-CN.md)提供部分更新、当前字段定义、普通计划查询、可选回填和同事务实绩同步。切换前需适配 v1 调用方。候选保留 v1 工件和历史，并列明退役入口及环境采用条件。
+
+## 质量结果 v1
+
+[质量结果 v1](published/http-api/quality-results-v1/README.zh-CN.md) 收录独立的结构化质量结果、本地字段及可信网络接口合同，附合成请求和源码 OpenAPI 快照。
+
+## CA 到 Field Flow 候选合同
+
+[流程 JSON v1](demands/ca-field-flow-v1/README.zh-CN.md)记录 CA 候选结构、语义摘要和向量。Field Flow 接受门槛待验证。

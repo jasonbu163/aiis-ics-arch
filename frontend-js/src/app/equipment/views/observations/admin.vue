@@ -118,7 +118,8 @@
       </div>
     </BaseCard>
     <el-dialog v-model="dialog" :title="t(editing ? 'equipment.observation.edit' : 'equipment.observation.add')"
-      class="standard-form-dialog" width="min(680px, 94vw)">
+      class="standard-form-dialog observation-config-dialog" width="min(680px, 94vw)" align-center
+      :show-close="false" :close-on-click-modal="false">
       <el-form v-if="mode === 'group'" label-position="top">
         <el-form-item :label="t('equipment.observation.key')"><el-input v-model="form.groupKey" :disabled="editing" /></el-form-item>
         <el-form-item :label="t('equipment.observation.category')"><el-select v-model="form.category">
@@ -132,7 +133,8 @@
       <el-form v-else-if="mode === 'metric'" label-position="top">
         <el-form-item :label="t('equipment.observation.key')"><el-input v-model="form.metricKey" :disabled="editing" /></el-form-item>
         <el-form-item :label="t('equipment.observation.group')"><el-select v-model="form.sourceGroupKey" :disabled="editing" @change="selectMetricGroup">
-          <el-option v-for="group in groupRows" :key="group.groupKey" :value="group.groupKey" :label="locale.startsWith('en') ? group.nameEn : group.nameZh" />
+          <el-option v-for="group in groupRows" :key="group.groupKey" :value="group.groupKey"
+            :label="t('equipment.observation.metricOptionLabel', { name: locale.startsWith('en') ? group.nameEn : group.nameZh, key: group.groupKey })" />
         </el-select></el-form-item>
         <el-form-item :label="t('equipment.observation.category')"><el-input v-model="form.category" disabled /></el-form-item>
         <el-form-item :label="t('equipment.observation.nameZh')"><el-input v-model="form.nameZh" /></el-form-item>

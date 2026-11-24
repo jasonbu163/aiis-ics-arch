@@ -8,7 +8,6 @@ from ..consumption_domain import ConsumerError
 from ..crud import async_consumption as consumption_crud
 from ..crud import async_v2 as crud
 from ..crud import async_source_registry as registry
-from ..v2_config import CONSUMPTION_REVISIONS
 from ..v2_domain import V2Error, public_points, real_number, validate_times, wire_time
 
 
@@ -29,31 +28,38 @@ def existing_outcome(rows, sample, digest):
     raise V2Error('sample_content_conflict', 409)
 
 
+async def verify_sample_event(db, sample, history_id, expires_at, first_seq, last_seq):
+    event = await consumption_crud.event_for_history(db, history_id)
+    if (event is None or event.history_id != history_id or event.plc_id != crud.key(sample.plc_id)
+            or event.db_number != sample.db_number or event.instance_id != crud.key(sample.instance_id)
+            or event.sample_id != crud.key(sample.sample_id)
+            or event.source_generation != crud.key(sample.source_generation) or event.expires_at != expires_at
+            or not first_seq <= event.event_seq <= last_seq):
+        crud.reject_target('sample_event_mismatch')
+
+
 async def write_sample(db, profile, sample, document, digest, boundary):
     from . import async_consumption as consumption
 
-    tracked = profile['target'].get('schemaRevision') in CONSUMPTION_REVISIONS
     request = boundary.get('target_write')
     try:
-        now = await crud.target_now(db, profile['target'])
+        await crud.target_now(db, profile['target'])
         source_type = await registry.admit(db, sample)
-        if tracked:
-            seq = await consumption.reserve_sample_event(db, sample, digest, request, source_type)
-            now = await consumption_crud.clock(db)
+        seq = await consumption.reserve_sample_event(db, sample, digest, request, source_type)
+        now = await crud.clock_now(db)
         observed, expires = validate_times(sample, now)
-        if tracked:
-            await consumption_crud.set_append_marker(db, seq, digest)
+        await consumption_crud.set_append_marker(db, seq, digest)
         try:
-            await crud.insert_sample(db, sample, document, digest, observed, expires, now, source_type)
+            history_id = await crud.insert_sample(db, sample, document, digest, observed, expires, now, source_type)
         finally:
-            if tracked:
-                try:
-                    await consumption_crud.set_append_marker(db, None)
-                except Exception:
-                    await db.invalidate()
-                    raise
+            try:
+                await consumption_crud.set_append_marker(db, None)
+            except Exception:
+                await db.invalidate()
+                raise
+        await verify_sample_event(db, sample, history_id, min(expires), seq, seq)
         await crud.advance_latest(db, sample, observed, expires)
-        validate_times(sample, await crud.target_now(db, profile['target']))
+        validate_times(sample, await crud.clock_now(db))
         boundary['commit_attempted'] = True
         await db.commit()
         boundary['committed'] = True
@@ -68,12 +74,14 @@ async def write_sample(db, profile, sample, document, digest, boundary):
             await db.rollback()
             await crud.target_now(db, profile['target'])
             source_type = await registry.admit(db, sample)
-            if tracked:
-                await consumption_crud.lock_stream(db, crud.key(sample.plc_id), sample.db_number)
-                await consumption.enforce_target(db, sample, digest, request, source_type)
+            stream = await consumption_crud.lock_stream(db, crud.key(sample.plc_id), sample.db_number)
+            await consumption.enforce_target(db, sample, digest, request, source_type)
             rows = await crud.identities(db, sample)
-            validate_times(sample, await crud.target_now(db, profile['target']))
+            validate_times(sample, await crud.clock_now(db))
             outcome = existing_outcome(rows, sample, digest)
+            if outcome:
+                row = rows[0]
+                await verify_sample_event(db, sample, row.id, row.expires_at, stream.floor_seq + 1, stream.last_seq)
             await db.rollback()
             if outcome:
                 return receipt(sample, outcome)
@@ -170,7 +178,9 @@ async def browse_latest(db, profile, plc, number, search, page, page_size):
 
 
 async def history(db, profile, plc, number, start, end, page, page_size):
-    if end <= start or end - start > timedelta(days=7):
+    if (start is None) != (end is None):
+        raise V2Error('invalid_request', 422)
+    if start is not None and (end <= start or end - start > timedelta(days=7)):
         raise V2Error('invalid_request', 422)
     now = await crud.target_now(db, profile['target'])
     total, rows = await crud.history(db, plc, number, start, end, page, page_size, now)

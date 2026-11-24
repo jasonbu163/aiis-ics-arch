@@ -1,0 +1,357 @@
+<div id="aiis-energy-preview" lang="zh-CN">
+  <header class="ep-top"><strong>AIIS 工业管理</strong><span>交互原型 · 示例数据</span></header>
+  <div class="ep-shell">
+    <nav aria-label="主菜单">
+      <div class="ep-group"><i data-lucide="zap" aria-hidden="true"></i>能耗管理</div>
+      <button data-page="stats" aria-current="page">能耗统计</button>
+      <button data-page="price">能耗单价</button>
+      <button data-page="samples">数据管理</button>
+      <button data-page="config">配置管理</button>
+      <div class="ep-group ep-next"><i data-lucide="monitor" aria-hidden="true"></i>过程监控</div>
+      <button data-page="process-config">配置管理</button>
+      <button data-page="process-data">数据管理</button>
+    </nav>
+    <main>
+      <div class="ep-crumb"></div>
+      <div class="ep-upper" hidden></div>
+      <section class="ep-card">
+        <header class="ep-card-head"><h2></h2><div class="ep-actions"></div></header>
+        <form class="ep-filters"></form>
+        <div class="ep-content"></div>
+      </section>
+    </main>
+  </div>
+  <dialog>
+    <form class="ep-dialog-form">
+      <header class="ep-card-head"><h2></h2><button type="button" data-close aria-label="关闭">×</button></header>
+      <div class="ep-dialog-fields"></div>
+      <footer><button type="button" data-close>取消</button><button class="ep-primary">保存示例</button></footer>
+    </form>
+  </dialog>
+  <style>
+    #aiis-energy-preview {
+      color-scheme: light dark;
+      --ep-panel: light-dark(#fff,#242a34); --ep-canvas: light-dark(#f3f5f8,#1a1e26);
+      --ep-side: light-dark(#f9fafc,#202530); --ep-text: light-dark(#253347,#edf1f9);
+      --ep-muted: light-dark(#5a687b,#aab7ca); --ep-border: light-dark(#dce3ec,#404857);
+      --ep-accent: light-dark(#245cbe,#9fc2ff); --ep-soft: light-dark(#eaf2ff,#273d60);
+      --ep-on-accent: light-dark(#fff,#14213b); --ep-good: light-dark(#146c4a,#8de0bb);
+      --ep-chart: light-dark(#3573d6,#8cb7ff); --ep-chart-alt: light-dark(#00816c,#72d5bd);
+      color:var(--ep-text); background:var(--ep-canvas);
+      font: 13px/1.5 "Instrument Sans", "PingFang SC", system-ui, sans-serif;
+    }
+    #aiis-energy-preview *, #aiis-energy-preview *::before {box-sizing:border-box}
+    #aiis-energy-preview [hidden] {display:none!important}
+    #aiis-energy-preview .ep-top {height:55px;padding:0 22px;display:flex;align-items:center;gap:18px;background:var(--ep-panel);border-bottom:1px solid var(--ep-border)}
+    #aiis-energy-preview .ep-top strong {font-size:15px;font-weight:650}
+    #aiis-energy-preview .ep-top span, #aiis-energy-preview .ep-crumb {color:var(--ep-muted);font-size:12px}
+    #aiis-energy-preview .ep-shell {display:grid;grid-template-columns:154px minmax(0,1fr);min-height:510px}
+    #aiis-energy-preview nav {padding:16px 10px;background:var(--ep-side);border-right:1px solid var(--ep-border)}
+    #aiis-energy-preview .ep-group {display:flex;align-items:center;gap:7px;font-weight:650;padding:6px 8px}
+    #aiis-energy-preview .ep-next {margin-top:15px}
+    #aiis-energy-preview nav button {display:block;text-align:left;width:100%;border-color:transparent;background:transparent;padding-left:28px;margin-top:3px}
+    #aiis-energy-preview nav button[aria-current], #aiis-energy-preview button[aria-pressed="true"] {color:var(--ep-accent);background:var(--ep-soft);border-color:transparent;font-weight:600}
+    #aiis-energy-preview main {padding:18px 20px 24px;min-width:0}
+    #aiis-energy-preview .ep-crumb {margin:0 0 13px}
+    #aiis-energy-preview .ep-card, #aiis-energy-preview .ep-upper {background:var(--ep-panel);border:1px solid var(--ep-border);border-radius:8px}
+    #aiis-energy-preview .ep-upper {display:flex;align-items:center;gap:12px;padding:11px 15px;margin-bottom:14px;flex-wrap:wrap}
+    #aiis-energy-preview .ep-card-head, #aiis-energy-preview .ep-filters, #aiis-energy-preview .ep-content {padding:13px 15px}
+    #aiis-energy-preview .ep-card-head {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--ep-border)}
+    #aiis-energy-preview h2 {font-size:16px;font-weight:650;margin:0}
+    #aiis-energy-preview h3 {font-size:14px;font-weight:600;margin:0}
+    #aiis-energy-preview .ep-actions, #aiis-energy-preview .ep-filters, #aiis-energy-preview .ep-segments {display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+    #aiis-energy-preview .ep-filters {align-items:end;gap:10px;border-bottom:1px solid var(--ep-border)}
+    #aiis-energy-preview label {display:grid;gap:4px;min-width:0;color:var(--ep-muted)}
+    #aiis-energy-preview button, #aiis-energy-preview select, #aiis-energy-preview input, #aiis-energy-preview textarea {font:inherit;color:var(--ep-text);border:1px solid var(--ep-border);border-radius:5px;background:var(--ep-panel);min-height:32px;padding:4px 9px;max-width:100%}
+    #aiis-energy-preview button {cursor:var(--cursor-interaction,pointer);white-space:nowrap}
+    #aiis-energy-preview button:hover {border-color:var(--ep-accent)}
+    #aiis-energy-preview .ep-primary {background:var(--ep-accent);color:var(--ep-on-accent);border-color:var(--ep-accent)}
+    #aiis-energy-preview .ep-good {color:var(--ep-good)}
+    #aiis-energy-preview .ep-table-wrap {overflow-x:auto}
+    #aiis-energy-preview table {border-collapse:collapse;width:100%;white-space:nowrap;font-variant-numeric:tabular-nums}
+    #aiis-energy-preview th, #aiis-energy-preview td {text-align:left;border:1px solid var(--ep-border);padding:7px 9px}
+    #aiis-energy-preview th {background:var(--ep-side);font-weight:600;position:relative}
+    #aiis-energy-preview .ep-resize {position:absolute;right:0;top:0;height:100%;width:7px;cursor:col-resize;touch-action:none}
+    #aiis-energy-preview .ep-rates {display:flex;gap:25px;flex-wrap:wrap;margin-bottom:14px}
+    #aiis-energy-preview .ep-rates span {display:grid;gap:3px}
+    #aiis-energy-preview .ep-rates strong {font-size:19px}
+    #aiis-energy-preview .ep-meta {margin-top:10px;color:var(--ep-muted);font-size:12px}
+    #aiis-energy-preview .ep-summary {display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:2px 0 13px}
+    #aiis-energy-preview .ep-summary strong {font-size:23px}
+    #aiis-energy-preview .ep-plot {border:1px solid var(--ep-border);border-radius:6px;padding:11px 12px 8px;margin-bottom:10px}
+    #aiis-energy-preview .ep-plot:last-child {margin-bottom:0}
+    #aiis-energy-preview .ep-plot-top, #aiis-energy-preview .ep-axis {display:flex;align-items:center;justify-content:space-between;gap:8px}
+    #aiis-energy-preview .ep-axis {color:var(--ep-muted);font-size:11px;padding-left:42px}
+    #aiis-energy-preview .ep-plot svg {width:100%;height:83px;display:block;overflow:visible}
+    #aiis-energy-preview .ep-plot svg text {fill:var(--ep-muted);font-size:11px}
+    #aiis-energy-preview .ep-plot svg polyline {stroke:var(--ep-chart);stroke-width:2;fill:none;vector-effect:non-scaling-stroke}
+    #aiis-energy-preview .ep-plot svg line {stroke:var(--ep-border);vector-effect:non-scaling-stroke}
+    #aiis-energy-preview dialog {width:min(470px,94%);max-height:90%;padding:0;border:1px solid var(--ep-border);border-radius:9px;color:var(--ep-text);background:var(--ep-panel)}
+    #aiis-energy-preview dialog::backdrop {background:#0b132460}
+    #aiis-energy-preview .ep-dialog-fields {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:14px 15px}
+    #aiis-energy-preview .ep-dialog-fields .ep-wide {grid-column:1/-1}
+    #aiis-energy-preview footer {display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--ep-border);padding:11px 15px}
+    @media(max-width:620px) {
+      #aiis-energy-preview .ep-shell {display:block}
+      #aiis-energy-preview nav {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;border:0;border-bottom:1px solid var(--ep-border)}
+      #aiis-energy-preview .ep-group {grid-column:1/-1;padding:2px 4px}
+      #aiis-energy-preview .ep-next {margin-top:4px;grid-column:1/3}
+      #aiis-energy-preview nav button {text-align:center;padding:4px 2px}
+      #aiis-energy-preview main {padding:12px 8px}
+    }
+    @media(pointer:coarse) {#aiis-energy-preview button, #aiis-energy-preview input, #aiis-energy-preview select {min-height:44px}}
+  </style>
+  <script>
+    (() => {
+      const root = document.getElementById('aiis-energy-preview');
+      const $ = selector => root.querySelector(selector);
+      const upper = $('.ep-upper');
+      const fields = $('.ep-filters');
+      const content = $('.ep-content');
+      const dialog = $('dialog');
+      const saved = window.openai?.widgetState?.modelContent;
+      const pages = {stats:'能耗统计', price:'能耗单价', samples:'数据管理', config:'配置管理', 'process-config':'配置管理', 'process-data':'数据管理'};
+      let page = Object.hasOwn(pages, saved?.page) ? saved.page : 'stats';
+      let configTab = saved?.configTab === 'source' ? 'source' : 'metric';
+      let saveEdit;
+      let applied = {};
+      const day = '2026-11-23';
+      const start = day + 'T08:00', end = day + 'T12:00';
+      const meters = ['1 号电表','2 号电表'];
+      const unitModes = ['累计读数','时段增量','瞬时读数'];
+      const samples = [
+        ['1048',meters[0],'electricity','12:00:00','良好','已复核','12680.0','120.0','32.8',''],
+        ['1047',meters[0],'electricity','11:00:00','良好','—','12560.0','104.0','25.4',''],
+        ['1046',meters[0],'electricity','10:00:00','良好','—','12456.0','116.0','34.6',''],
+        ['1045',meters[0],'electricity','09:00:00','良好','—','12340.0','100.0','27.2',''],
+        ['1044',meters[0],'electricity','08:00:00','良好','—','12240.0','—','20.4','起始读数'],
+        ['1043',meters[1],'electricity','12:00:00','良好','—','9820.0','81.0','21.3','']
+      ];
+      const metricNames = ['累计电量','时段用电量','瞬时功率'];
+      const metricKeys = ['totalEnergy','intervalEnergy','activePower'];
+      const metrics = meters.flatMap(meter => metricNames.map((name,i) => [meter,'electricity',metricKeys[i],name,unitModes[i],i===2?'kW':'kWh','启用',String(i+1),'显示','']));
+      const sources = [['sma-energy-01','配电柜采集',meters[0],'electricity','启用']];
+      const curves = [['heatingTemperature','温度曲线','加热区温度','实际温度 / 设定温度','启用']];
+      const processSamples = [['2081','000042','温控采集','heatZone1','12:00:00','良好','已复核','810.2','']];
+      const prices = [['12:00','0.83','3.12','4.20','管理员',day],['11:00','0.76','3.12','4.20','管理员',day]];
+      const tableWidths = {};
+      const tableKey = () => page === 'config' ? page + '-' + configTab : page;
+      const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const button = (label, action, primary = false) => `<button type="button" data-action="${action}"${primary?' class="ep-primary"':''}>${label}</button>`;
+      const label = (caption, html, wide = false) => `<label${wide?' class="ep-wide"':''}>${caption}${html}</label>`;
+      const select = (caption,name,options,value) => label(caption,`<select name="${name}">${options.map(option=>`<option${value===option?' selected':''}>${esc(option)}</option>`).join('')}</select>`);
+      const input = (caption,name,value='',type='text') => label(caption,`<input name="${name}" value="${esc(value)}" type="${type}">`);
+      const search = '<button class="ep-primary">查询</button>' + button('重置','reset');
+      const now = () => new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date());
+      function remember() {
+        window.openai?.setWidgetState?.({modelContent:{page,configTab}})?.catch(()=>{});
+      }
+      function closeDialog() { dialog.close(); }
+      function openDialog(title, inputs, onSave) {
+        $('.ep-dialog-form h2').textContent = title;
+        $('.ep-dialog-fields').innerHTML = inputs;
+        saveEdit = onSave;
+        dialog.showModal();
+      }
+      function list(headers, rows, action, changes) {
+        const body = rows.map(row => `<tr>${row.slice(0,headers.length).map(value=>`<td>${esc(value)}</td>`).join('')}${action?`<td>${button(action,'row-'+changes.indexOf(row))}</td>`:''}</tr>`).join('');
+        const widths = tableWidths[tableKey()] || {};
+        content.innerHTML = `<div class="ep-table-wrap"><table><thead><tr>${headers.map((name,i)=>`<th scope="col"${widths[i]?` style="min-width:${widths[i]}px"`:''}>${name}<span class="ep-resize" data-column="${i}" aria-hidden="true"></span></th>`).join('')}${action?'<th scope="col">操作</th>':''}</tr></thead><tbody>${body || `<tr><td colspan="${headers.length+(action?1:0)}">暂无匹配记录</td></tr>`}</tbody></table></div><div class="ep-meta" role="status">共 ${rows.length} 条</div>`;
+      }
+      function matches(value, needle) { return !needle || String(value).toLowerCase().includes(needle.toLowerCase()); }
+      function wording(value) { return value && value !== '全部'; }
+      function plot(name,unit,values,ticks,alt) {
+        const min=Math.min(...ticks), max=Math.max(...ticks);
+        const y = value => 72 - (value-min)/(max-min)*60;
+        const x = index => index*100/(values.length-1);
+        const marks = values.map((value,i)=>`${x(i)},${y(value)}`).join(' ');
+        return `<section class="ep-plot"><div class="ep-plot-top"><h3>${name}</h3><span>${unit}</span></div><svg role="img" aria-label="${name}示例曲线" height="83">
+          ${ticks.map(t=>`<line x1="44" x2="100%" y1="${y(t)}" y2="${y(t)}"/><text x="0" y="${y(t)+3}">${t}</text>`).join('')}
+          <svg x="44" style="width:calc(100% - 44px)" height="83" viewBox="0 0 100 83" preserveAspectRatio="none"><polyline points="${marks}"${alt?' style="stroke:var(--ep-chart-alt)"':''}/></svg></svg>
+          <div class="ep-axis"><span>${esc(applied.from?.slice(11) || '08:00')}</span><span>${esc(applied.to?.slice(11) || '12:00')}</span></div></section>`;
+      }
+      function showResults() {
+        const {meter,group,keyword,category,task} = applied;
+        if (page === 'stats') {
+          if (applied.from >= applied.to) {
+            content.innerHTML = '<p role="alert">结束时间须晚于开始时间。</p>';
+            return;
+          }
+          const second = meter === meters[1];
+          const metric = applied.metric || metricNames[0];
+          const power = metric === metricNames[2], interval = metric === metricNames[1];
+          const points = second ? [9500,9578,9659,9739,9820] : [12240,12340,12456,12560,12680];
+          const fullRange = (!applied.from || applied.from===start) && (!applied.to || applied.to===end);
+          content.innerHTML = `<div class="ep-summary" role="status"><span>${power?'最新读数':'时段用量'}</span><strong>${fullRange?(power?(second?'21.3 kW':'32.8 kW'):(second?'320.0 kWh':'440.0 kWh')):'—'}</strong><span class="ep-good">${fullRange?(power?'瞬时读数':'统计完整'):'示例区间无完整数据'}</span></div>`
+            + (fullRange ? (power ? '' : interval
+              ? plot('时段用电量','kWh',second?[78,81,80,81]:[100,116,104,120],second?[60,80,100]:[80,100,120],false)
+              : plot('累计电量','kWh',points,second?[9500,9700,9900]:[12200,12450,12700],false))
+              + plot('瞬时功率','kW',second?[17,20,18,24,21.3]:[20.4,27.2,34.6,25.4,32.8],[15,25,35],true) : '');
+          return;
+        }
+        if (page === 'samples') {
+          const rows = samples.filter(row=>row[1]===(meter||meters[0]) && matches(row[2],group));
+          list(['记录 ID','表计','采样组','采集时间','质量','复核','累计电量 (kWh)','时段用量 (kWh)','功率 (kW)'],rows, '详情',samples);
+          return;
+        }
+        if (page === 'config' && configTab === 'metric') {
+          list(['表计','采样组','指标键','名称','计量方式','单位','状态'],
+            metrics.filter(row=>(!wording(meter)||row[0]===meter)&&matches(row[1],group)&&(matches(row[2],keyword)||matches(row[3],keyword))), '编辑',metrics);
+          return;
+        }
+        if (page === 'config') {
+          list(['来源标识','名称','允许表计','采样组','状态'],sources.filter(row=>matches(row[0],keyword)||matches(row[1],keyword)),'编辑',sources);
+          return;
+        }
+        if (page === 'process-config') {
+          list(['曲线组键','类别','标题','指标','状态'],curves.filter(row=>(!wording(category)||row[1]===category)&&(matches(row[0],keyword)||matches(row[2],keyword))), '编辑',curves);
+          return;
+        }
+        if (page === 'process-data') {
+          list(['记录 ID','任务号','设备或来源','采样组','采集时间','质量','复核','实际温度 (°C)'],processSamples.filter(row=>matches(row[1],task)&&matches(row[3],group)), '详情',processSamples);
+          return;
+        }
+        const latest = [...prices].sort((a,b)=>(b[5]+b[0]).localeCompare(a[5]+a[0]))[0];
+        list(['记录小时','电价（元/kWh）','氢气（元/m³）','氩气（元/m³）','记录人'],
+          prices.filter(row=>row[5]===applied.date).sort((a,b)=>b[0].localeCompare(a[0])));
+        content.insertAdjacentHTML('afterbegin',`<div class="ep-rates" aria-label="当前单价">${['电价 · 元/kWh','氢气 · 元/m³','氩气 · 元/m³'].map((name,i)=>`<span>${name}<strong>${esc(latest[i+1])}</strong></span>`).join('')}</div>`);
+      }
+      function render() {
+        const process = page.startsWith('process-');
+        $('.ep-crumb').textContent = (process?'过程监控':'能耗管理') + ' / ' + pages[page];
+        root.querySelectorAll('nav button').forEach(item=>{
+          if (item.dataset.page===page) item.setAttribute('aria-current','page');
+          else item.removeAttribute('aria-current');
+        });
+        let title = pages[page], toolbar = '', actions = '', top = '';
+        if (page==='stats') {
+          toolbar = select('表计','meter',meters) + select('采样组','group',['electricity']) + select('指标','metric',metricNames)
+            + input('起始时间','from',start,'datetime-local') + input('结束时间','to',end,'datetime-local')
+            + '<button class="ep-primary">查询</button>' + button('恢复默认','reset');
+          actions = '<span class="ep-meta ep-updated"></span>' + button('刷新','refresh');
+        } else if (page==='price') {
+          toolbar = input('历史日期','date',day,'date') + search;
+          actions = button('新增单价','add',true);
+        } else if (page==='samples') {
+          title = '能耗样本';
+          toolbar = select('表计','meter',meters) + input('采样组','group') + search;
+          actions = button('重置列宽','widths');
+        } else if (page==='config') {
+          const metric = configTab==='metric';
+          title = metric ? '表计指标配置' : '写入登记';
+          top = '<strong>配置类别</strong><div class="ep-segments">' + [['metric','表计指标配置'],['source','写入登记']].map(([key,name])=>
+            `<button type="button" data-tab="${key}" aria-pressed="${configTab===key}">${name}</button>`).join('') + '</div>';
+          toolbar = (metric ? select('表计','meter',['全部',...meters]) + input('采样组','group') : '') + input('关键词','keyword') + search;
+          actions = button('新增','add',true) + button('重置列宽','widths');
+        } else if (page==='process-config') {
+          title = '曲线设置';
+          top = '<strong>曲线与历史管理</strong><button type="button" aria-disabled="true" aria-pressed="true">曲线设置</button>';
+          toolbar = select('类别','category',['全部','温度曲线','传动监控','清洗监控']) + input('关键词','keyword') + search;
+          actions = button('新增','add',true) + button('重置列宽','widths');
+        } else {
+          title = '过程样本';
+          top = '<strong>数据管理</strong><button type="button" aria-disabled="true" aria-pressed="true">过程样本</button>';
+          toolbar = select('设备或来源','equipment',['全部','温控采集']) + input('采样组','group') + input('任务号','task') + search;
+          actions = button('重置列宽','widths');
+        }
+        upper.innerHTML = top;
+        upper.hidden = !top;
+        $('.ep-card-head h2').textContent = title;
+        $('.ep-actions').innerHTML = actions;
+        fields.innerHTML = toolbar;
+        applied = Object.fromEntries(new FormData(fields));
+        showResults();
+      }
+      function edit(index) {
+        if (page==='samples'||page==='process-data') {
+          const energy = page==='samples', row = (energy?samples:processSamples)[index];
+          if (!row) return;
+          const meta = energy ? [row[1],row[2],row[3]+' · '+day,row[4],...row.slice(6,9).map((v,i)=>v+' '+(i===2?'kW':'kWh'))] : [row[1],row[2],row[4]+' · '+day,row[5],row[7]+' °C'];
+          const labels = energy ? ['表计','采样组','采集时间','质量',...metricNames] : ['任务号','来源','采集时间','质量','实际温度'];
+          const reviewIndex = energy?5:6, remarkIndex = energy?9:8;
+          openDialog('样本详情', labels.map((name,i)=>`<div><small>${name}</small><div>${esc(meta[i])}</div></div>`).join('')
+            + select('复核标记','review',['—','异常','已复核'],row[reviewIndex])
+            + label('备注',`<textarea name="remark" rows="2">${esc(row[remarkIndex])}</textarea>`,true),
+            data=>{row[reviewIndex]=data.review;row[remarkIndex]=data.remark;});
+        } else if (page==='config' && configTab==='metric') {
+          const row = metrics[index] || [meters[0],'electricity','','',unitModes[0],'kWh','启用','1','显示',''];
+          openDialog(index===undefined?'新增表计指标':'编辑表计指标', select('表计','meter',meters,row[0]) + input('采样组','group',row[1])
+            + input('指标键','key',row[2]) + input('中文名称','name',row[3]) + select('计量方式','mode',unitModes,row[4])
+            + input('单位','unit',row[5]) + input('槽位','slot',row[7],'number') + select('显示列','visible',['显示','隐藏'],row[8])
+            + select('状态','status',['启用','停用'],row[6]), data=>{
+            if(!data.key.trim()||!data.name.trim()) return false;
+            const item=[data.meter,data.group,data.key,data.name,data.mode,data.unit,data.status,data.slot,data.visible,''];
+            if(index===undefined) metrics.push(item); else metrics[index]=item;
+          });
+        } else if (page==='config') {
+          const row=sources[index] || ['','',meters[0],'electricity','启用'];
+          openDialog(index===undefined?'新增写入登记':'编辑写入登记',input('来源标识','key',row[0])+input('名称','name',row[1])
+            +select('允许表计','meter',meters,row[2])+input('采样组','group',row[3])+select('状态','status',['启用','停用'],row[4]),
+            data=>{if(!data.key.trim()) return false;const item=[data.key,data.name,data.meter,data.group,data.status];
+              if(index===undefined) sources.push(item);else sources[index]=item;});
+        } else if (page==='process-config') {
+          const row=curves[index] || ['','温度曲线','','','启用'];
+          openDialog(index===undefined?'新增曲线设置':'编辑曲线设置',input('曲线组键','key',row[0])
+            +select('类别','category',['温度曲线','传动监控','清洗监控'],row[1])+input('标题','name',row[2])
+            +input('指标','metrics',row[3])+select('状态','status',['启用','停用'],row[4]),
+            data=>{if(!data.key.trim()||!data.name.trim()) return false;const item=[data.key,data.category,data.name,data.metrics,data.status];
+              if(index===undefined) curves.push(item);else curves[index]=item;});
+        } else if(page==='price') {
+          openDialog('新增单价',input('记录时间','time',end,'datetime-local')+input('电价（元/kWh）','electric','0.83')
+            +input('氢气（元/m³）','hydrogen','3.12')+input('氩气（元/m³）','argon','4.20'),
+            data=>{if(!data.time||!data.electric||!data.hydrogen||!data.argon) return false;
+              applied.date=data.time.slice(0,10); fields.elements.date.value=applied.date;
+              const hour=data.time.slice(11,13)+':00', item=[hour,data.electric,data.hydrogen,data.argon,'管理员',applied.date];
+              const old=prices.findIndex(row=>row[0]===hour&&row[5]===applied.date);
+              if(old<0) prices.unshift(item);else prices[old]=item;});
+        }
+      }
+      root.addEventListener('click', event=>{
+        const target=event.target.closest('button');
+        if(!target) return;
+        const {page:next,tab,action}=target.dataset;
+        if(target.hasAttribute('data-close')) closeDialog();
+        if(next){page=next;render();remember();}
+        if(tab){configTab=tab;render();remember();}
+        if(action==='reset'){fields.reset(); applied=Object.fromEntries(new FormData(fields));showResults();}
+        if(action==='refresh'){showResults();$('.ep-updated').textContent='刷新于 '+now();}
+        if(action==='widths'){delete tableWidths[tableKey()]; showResults();}
+        if(action==='add') edit();
+        if(action?.startsWith('row-')) edit(Number(action.slice(4)));
+      });
+      content.addEventListener('pointerdown',event=>{
+        const dragging = event.target.closest('.ep-resize');
+        if(!dragging) return;
+        event.preventDefault();
+        dragging.setPointerCapture(event.pointerId);
+        const header = dragging.parentElement;
+        const key = tableKey();
+        const original = header.getBoundingClientRect().width;
+        const startX = event.clientX;
+        const move = next=>{
+          const width = Math.max(70,Math.round(original+next.clientX-startX));
+          (tableWidths[key] ??= {})[dragging.dataset.column] = width;
+          header.style.minWidth = width+'px';
+        };
+        dragging.addEventListener('pointermove',move);
+        dragging.addEventListener('lostpointercapture',()=>dragging.removeEventListener('pointermove',move),{once:true});
+      });
+      fields.addEventListener('submit',event=>{
+        event.preventDefault();
+        applied=Object.fromEntries(new FormData(fields));
+        showResults();
+      });
+      $('.ep-dialog-form').addEventListener('submit',event=>{
+        event.preventDefault();
+        const invalid=$('.ep-dialog-fields [role="alert"]');
+        if(saveEdit(Object.fromEntries(new FormData(event.currentTarget)))===false){
+          if(!invalid) $('.ep-dialog-fields').insertAdjacentHTML('beforeend','<div class="ep-wide" role="alert">请填写必填字段。</div>');
+          return;
+        }
+        closeDialog();
+        showResults();
+      });
+      render();
+    })();
+  </script>
+</div>

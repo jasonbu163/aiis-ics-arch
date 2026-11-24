@@ -9,7 +9,7 @@
 export const systemModule = {
   name: 'system',
   enabled: true,
-  order: 80,
+  order: 200,
   navigation: { titleKey: 'system.title', icon: 'Setting' },
   routes: [
     {

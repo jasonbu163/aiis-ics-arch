@@ -119,7 +119,7 @@ def item_patch(fields, incoming, module, writer):
         if module == 'plan':
             allowed = writer == 'integration' or field.plan_editable
         elif writer == 'integration':
-            allowed = field.performance_owner == 'automated'
+            allowed = field.performance_owner in ('automated', 'snapshot_auto')
         else:
             allowed = field.performance_owner == 'manual' and field.performance_editable
         if not allowed:

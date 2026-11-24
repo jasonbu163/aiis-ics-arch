@@ -81,19 +81,12 @@ impl Resource {
 }
 impl Intent {
     pub fn validate_time(&self, now: i64) -> Result<()> {
-        if self
-            .expires_at_ms
-            .checked_sub(self.issued_at_ms)
-            .is_none_or(|ttl| ttl <= 0 || ttl > 60000)
-            || self.issued_at_ms > now.saturating_add(1000)
-            || now >= self.expires_at_ms
-            || now
-                .checked_sub(self.issued_at_ms)
-                .is_none_or(|age| age > self.input_max_age_ms as i64)
-        {
-            return Err("input_stale".into());
-        }
-        Ok(())
+        validate_input_time(
+            self.issued_at_ms,
+            self.expires_at_ms,
+            self.input_max_age_ms,
+            now,
+        )
     }
     pub fn deadline(&self) -> Instant {
         Instant::now()
@@ -106,9 +99,29 @@ impl Intent {
             )
     }
 }
+fn validate_input_time(
+    issued_at_ms: i64,
+    expires_at_ms: i64,
+    input_max_age_ms: u64,
+    now: i64,
+) -> Result<()> {
+    if expires_at_ms
+        .checked_sub(issued_at_ms)
+        .is_none_or(|ttl| ttl <= 0 || ttl > 60000)
+        || issued_at_ms > now.saturating_add(1000)
+        || now >= expires_at_ms
+        || now
+            .checked_sub(issued_at_ms)
+            .is_none_or(|age| age > input_max_age_ms as i64)
+    {
+        return Err("input_stale".into());
+    }
+    Ok(())
+}
+
 impl Input {
-    pub fn intent(self, f: &Flow, p: &Plc) -> Result<Option<Intent>> {
-        if self.schema_version != 1 || self.source_id != f.source_id {
+    fn command(&self, source_id: &str) -> Result<Option<(&str, i16, i64, i64)>> {
+        if self.schema_version != 1 || self.source_id != source_id {
             return Err("input_schema".into());
         }
         if !self.ready {
@@ -122,10 +135,31 @@ impl Input {
                 Err("input_schema".into())
             };
         }
-        let command_id = self
-            .command_id
-            .filter(|x| valid_id(x))
-            .ok_or("input_schema")?;
+        Ok(Some((
+            self.command_id
+                .as_deref()
+                .filter(|x| valid_id(x))
+                .ok_or("input_schema")?,
+            self.value.ok_or("input_schema")?,
+            self.issued_at_ms.ok_or("input_schema")?,
+            self.expires_at_ms.ok_or("input_schema")?,
+        )))
+    }
+
+    pub(crate) fn validated_ready(&self, source_id: &str, max_age_ms: u64) -> Result<bool> {
+        let Some((_, _, issued, expires)) = self.command(source_id)? else {
+            return Ok(false);
+        };
+        validate_input_time(issued, expires, max_age_ms, now_ms())?;
+        Ok(true)
+    }
+
+    pub fn intent(self, f: &Flow, p: &Plc) -> Result<Option<Intent>> {
+        let Some((command_id, value, issued_at_ms, expires_at_ms)) = self.command(&f.source_id)?
+        else {
+            return Ok(None);
+        };
+        let command_id = command_id.to_owned();
         let intent = Intent {
             source_id: self.source_id,
             command_id,
@@ -140,9 +174,9 @@ impl Input {
                 length: 2,
             },
             config_identity_hash: hash(&(f, &f.target, p.host.as_str(), p.port, p.rack, p.slot)),
-            value: self.value.ok_or("input_schema")?,
-            issued_at_ms: self.issued_at_ms.ok_or("input_schema")?,
-            expires_at_ms: self.expires_at_ms.ok_or("input_schema")?,
+            value,
+            issued_at_ms,
+            expires_at_ms,
             input_max_age_ms: f.input_max_age_ms,
         };
         intent.validate_time(now_ms())?;

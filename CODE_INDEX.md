@@ -208,7 +208,7 @@ documentation initialization in this repository.
 - `automation-world/semantic-mapping-agent/src-tauri/src/commands/local_configuration/mod.rs` — thin local configuration/load/change/import/export/saved-preview IPC adapters.
 - `automation-world/semantic-mapping-agent/src/app/twin-facts/api/localConfiguration.ts` — native configuration facade with observed revision and explicit import token; no remote/localStorage fallback.
 - `automation-world/semantic-mapping-agent/src-tauri/src/{contracts,domain,infrastructure,services,commands}/acquisition.rs` — SMA-008 r3 手工采集回环、类型与映射校验、现有采集 HTTP、会话暂存的单次请求与回读。
-- `automation-world/semantic-mapping-agent/src/app/twin-facts/components/{AcquisitionLoopbackPanel,AcquisitionPointsTable}.vue` — 采集 GET、历史详情、测试映射配置、单次 POST 确认及回读。
+- `automation-world/semantic-mapping-agent/src/app/twin-facts/components/{AcquisitionLoopbackPanel,AcquisitionPointsTable}.vue` — 事实表的只读采集查询、独立四步手工回环、预览确认与样本回读。
 - `automation-world/semantic-mapping-agent/{src-tauri/tests/acquisition_loopback_tests.rs,tests/acquisition-loopback.browser.cjs}` — 本机原生回环、SQLite 非写入、收据丢失、同字节重试及浏览器交互夹具。
 - `automation-world/semantic-mapping-agent/src-tauri/tests/local_configuration_tests.rs` — disposable SQLite CAS/rollback/busy/corruption/reference/limits/profile/process-reopen tests.
 - `automation-world/semantic-mapping-agent/tests/local-configuration.test.mjs` — explicit in-memory IPC/store tests for stale editor CAS, no implicit network and JSON/XLSX boundaries.
@@ -337,3 +337,14 @@ Package `__init__.py` files, `mocks/` and `seeds/` are import-safe and do not ex
 - `frontend-js/src/app/plan/views/local-fields/index.vue` / `components/fieldSettings.js` — standalone local field route and reusable scope-specific field settings.
 - `backend/app/task/api/routes.py` / `schemas/fields.py` / `services/async_fields.py` — atomic shared-field batch deletion using the existing history protection and configuration lock.
 - `backend/tests_mysql/test_generic_task_shared_batch.py` — dedicated native MySQL checks for field-configuration races and rollback.
+
+## ARCH-QUALITY-001 task quality results
+
+- `backend/app/quality/{domain.py,models/results.py,schemas/results.py}` — independent result tables, typed fields, and validation.
+- `backend/app/quality/{api,services,crud}/results.py` — quality read/write routes, permissions, configuration revisions, and transactional partial writes.
+- `backend/alembic/versions/20261123_1500_f0a2b4c6d8e1_quality_results.py` — guarded two-table forward migration and initial field configuration.
+- `frontend-js/src/app/quality/views/results/` and `views/local-fields/index.vue` — task results, historical inspections entrance, and administrator field management.
+- `frontend-js/src/app/quality/components/QualityFieldForm.vue` — editor for local field definitions and link text.
+- `backend/tests/test_quality_results.py`, `test_quality_revision_guards.py`, and `backend/tests_mysql/test_quality_results_mysql.py` — synthetic HTTP, migration, and revision compatibility checks.
+- `frontend-js/tests/module-registry/quality-results.test.mjs` — quality page component checks.
+- `contracts/published/http-api/quality-results-v1/` — scoped HTTP OpenAPI and synthetic examples.

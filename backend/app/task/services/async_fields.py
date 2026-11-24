@@ -114,7 +114,7 @@ def _validate(row):
             invalid('changes.performanceOwner', 'invalid_field_owner')
         if row['plan_editable'] or row['plan_visible'] or row['plan_order'] is not None:
             invalid('changes', 'setting_not_applicable')
-    elif owner not in ('order_snapshot', 'automated', 'manual'):
+    elif owner not in ('order_snapshot', 'automated', 'manual', 'snapshot_auto'):
         invalid('changes.performanceOwner', 'invalid_field_owner')
     if row['sync_enabled'] and (scope != 'shared_sync' or owner == 'order_snapshot'):
         invalid('changes.syncEnabled', 'field_cannot_sync')

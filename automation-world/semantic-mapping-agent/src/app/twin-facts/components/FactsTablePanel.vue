@@ -16,6 +16,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   "load-source": [sourceKey: string]; query: [patch: Partial<BackendCollectionFactListQuery>];
   "export-values": [format: CollectionFactFileFormat, complete: (failed: boolean) => void];
+  "open-loopback": [];
 }>();
 const sourceInput = ref(props.sourceKey);
 const nameInput = ref(props.query.name || "");
@@ -53,6 +54,7 @@ const headerStatuses = computed<CardHeaderStatus[]>(() => {
 <template>
   <ConsoleCard class="facts-table-panel" :title="labels.factsTableTitle" :header-statuses="headerStatuses" :status-overflow-label="labels.moreCardStatuses" :help="labels.factsTableHint + '\n' + labels.businessTimeHint" :help-label="labels.factsTableTitle + labels.cardHelpSuffix" help-append-to="#sma-overlays">
     <template #actions>
+      <ConsoleActionButton tone="secondary" @click="emit('open-loopback')">{{ labels.acquisitionLoopbackTitle }}</ConsoleActionButton>
       <ConsoleActionButton tone="secondary" v-for="format in (['json', 'xlsx'] as const)" :key="format" :disabled="!enabled || !contract || busy || savingFile" @click="exportValues(format)">{{ labels.collectionFactsExportValues }} {{ format.toUpperCase() }}</ConsoleActionButton>
       <ConsoleActionButton tone="secondary" @click="table.reset" :title="labels.resetTableWidthsHelp">{{ labels.resetTableWidths }}</ConsoleActionButton>
     </template>

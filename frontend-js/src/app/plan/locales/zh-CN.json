@@ -122,6 +122,38 @@
     "special": "特殊"
   },
   "workflow": {
+    "dialog": {
+      "viewTitle": "计划详情 · {taskNo}",
+      "editTitle": "编辑计划 · {taskNo}",
+      "supplementTitle": "补建计划 · {taskNo}",
+      "backfillHint": "保存补建计划时，把同号实绩已有且允许回写的共享字段值复制到计划一次。表单里已填写的值优先。",
+      "edit": "编辑",
+      "basic": "基本信息",
+      "business": "业务字段",
+      "times": "时间信息（UTC+08:00）",
+      "loading": "正在读取详情…",
+      "retry": "重试",
+      "definition": "字段定义",
+      "usage": "使用设置",
+      "plan": "计划显示与编辑",
+      "performance": "实绩显示与编辑",
+      "deleteTitle": "删除字段",
+      "deletePrompt": "确认删除以下字段？",
+      "externalReferences": "删除前请核对 MES、SMA 等外部引用。"
+    },
+    "fieldHelp": {
+      "label": "{section}说明",
+      "enabled": "启用：字段可按配置读取和写入；停用保留历史值。",
+      "nullable": "可清空：允许显式提交空值（null）。省略字段会保留原值。",
+      "manual": "人工：启用「实绩可编辑」后，有权限的用户可在实绩页面填写。",
+      "automated": "自动：由 SMA 或第三方通过实绩接口写入。",
+      "snapshot": "订单快照：首次创建实绩时复制已有同号计划的值。已有实绩的快照不会随计划更新，也不能通过实绩接口或页面改写。",
+      "snapshotAuto": "订单快照 + 自动上报：首次创建实绩时从同号计划带入初值。接口有传值时以上报值为准，可开启回写计划。",
+      "writeback": "回写计划：实绩提交该字段时，把值同步到同号计划。仅选「订单快照」时不能开启回写。",
+      "plan": "计划可见控制是否在计划列表显示此列。计划可编辑允许有权限的用户在计划页面修改，不影响 MES 接口写入。",
+      "performance": "实绩可见控制是否在实绩列表显示此列。实绩可编辑只适用于人工归属，且需要账号有编辑权限。",
+      "order": "列顺序数值越小越靠前；留空使用槽位号。"
+    },
     "title": "计划管理",
     "newPlan": "新建计划",
     "fieldSettings": "本地字段管理",
@@ -180,6 +212,7 @@
     },
     "owners": {
       "order_snapshot": "订单快照",
+      "snapshot_auto": "订单快照 + 自动上报",
       "automated": "自动",
       "manual": "人工"
     },

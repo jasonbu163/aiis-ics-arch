@@ -12,7 +12,8 @@ import os
 from uuid import UUID
 
 from alembic import context, op
-from sqlalchemy import inspect, select, text
+from sqlalchemy import CheckConstraint, Column, JSON, MetaData, Table, inspect, select, text
+from sqlalchemy.dialects.mysql import DATETIME, VARBINARY, VARCHAR
 
 revision = '7b9d1f3a5c7e'
 down_revision = '6a8c0e2b4d16'
@@ -22,6 +23,22 @@ depends_on = None
 OLD_TABLES = (
     'acq_source_instances', 'acq_source_bindings', 'acq_source_generations',
     'acq_source_write_scopes', 'acq_source_read_scopes', 'acq_source_initialization',
+)
+
+
+# 冻结当期登记表定义。后继迁移负责更名，现役 ORM 不参与历史建表。
+SOURCE_REGISTRY = Table(
+    'plc_source_registry', MetaData(),
+    Column('plc_id', VARBINARY(128), primary_key=True),
+    Column('instance_id', VARBINARY(128), nullable=False),
+    Column('source_generation', VARBINARY(128), nullable=False),
+    Column('source_type', VARCHAR(8, charset='ascii', collation='ascii_bin'), nullable=False),
+    Column('retired_generations', JSON, nullable=False, default=list),
+    Column('registration_revision', VARCHAR(36, charset='ascii', collation='ascii_bin'), nullable=False),
+    Column('created_at', DATETIME(fsp=6), nullable=False, server_default=text('CURRENT_TIMESTAMP(6)')),
+    Column('updated_at', DATETIME(fsp=6), nullable=False, server_default=text('CURRENT_TIMESTAMP(6)')),
+    CheckConstraint("source_type IN ('daa', 'external')", name='ck_plc_source_type'),
+    mysql_engine='InnoDB',
 )
 
 
@@ -128,10 +145,10 @@ def upgrade():
         raise RuntimeError('retired generations have missing bindings')
 
     from app.plc_facts.models.source_registry import (
-        PlcSourceRegistry, SourceBinding, SourceGeneration, SourceInitialization,
+        SourceBinding, SourceGeneration, SourceInitialization,
         SourceInstance, SourceReadScope, SourceWriteScope,
     )
-    table = PlcSourceRegistry.__table__
+    table = SOURCE_REGISTRY
     table.create(conn, checkfirst=False)
     if records:
         conn.execute(table.insert(), records)

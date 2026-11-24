@@ -9,7 +9,7 @@ import * as echarts from 'echarts'
 import { splitObservedPoints } from '../../src/app/monitor/components/observations/curveSeries.js'
 import { metricField, metricTitle, metricValue } from '../../src/app/equipment/components/observations/columnModel.js'
 import { useTableColumnWidths } from '../../src/utils/tableColumnWidths.js'
-import { formatShanghaiDateTime } from '../../src/utils/date.js'
+import { formatShanghaiDateTime, shanghaiInputToRfc3339 } from '../../src/utils/date.js'
 
 test('metric columns retain stable keys and distinguish zero, false, empty and missing', () => {
   const row = { values: [{ metricKey: 'temperature', value: 0 }, { metricKey: 'ready', value: false }, { metricKey: 'coil', value: '' }] }
@@ -302,11 +302,11 @@ test('curve area picker uses localized labels while retaining stable group keys'
     const component = new Function('deps', script)(deps)
     const state = scope.run(() => component.setup({ group, range: [] }, { expose() {} }))
     assert.deepEqual(state.available.value, ['heatZone1'])
-    assert.equal(state.areaLabel('heatZone1'), '一号加热区')
+    assert.equal(state.areaLabels.value.get('heatZone1'), '一号加热区')
     group.series[0].groupLabel = 'Renamed Zone One'
-    assert.equal(state.areaLabel('heatZone1'), 'Renamed Zone One')
+    assert.equal(state.areaLabels.value.get('heatZone1'), 'Renamed Zone One')
     assert.deepEqual(state.selected.value, ['heatZone1'])
-    assert.match(descriptor.template.content, /:value="key"\s+:label="areaLabel\(key\)"/)
+    assert.match(descriptor.template.content, /:value="key"\s+:label="areaLabels\.get\(key\)"/)
   } finally { scope.stop() }
 })
 
@@ -337,7 +337,7 @@ test('actual ECharts time axis retains microsecond order and missing or simultan
   }
   const scope = vue.effectScope()
   try {
-    const component = new Function('deps', script)(deps)
+    const component = new Function('deps', 'getComputedStyle', script)(deps, () => ({ getPropertyValue: () => '#555555' }))
     const state = scope.run(() => component.setup({ group, range: [time('00'), time('04')] }, { expose() {} }))
     state.element.value = {}
     state.render()
@@ -366,7 +366,7 @@ test('actual ECharts time axis retains microsecond order and missing or simultan
     wide.render()
     assert.equal(wide.precisionLimited.value, true)
     assert.equal(chart.getModel().getSeriesByIndex(0).getData().count(), 2)
-    assert.match(descriptor.template.content, /v-if="precisionLimited"/)
+    assert.match(descriptor.template.content, /v-if="canPlot && precisionLimited"/)
   } finally { chart?.dispose(); scope.stop() }
 })
 
@@ -527,28 +527,41 @@ test('stale device cards render their own real observed time in both languages',
   const render = vue.compile(descriptor.template.content)
   const labels = { 'zh-CN': { sampledAt:'采集时间', stale:'陈旧' }, 'en-US': { sampledAt:'Sampled at', stale:'Stale' } }
   for (const language of ['zh-CN', 'en-US']) {
-    const context = { route:{ meta:{ titleKey:'test.title' } }, locale:language, equipment:'line', devices:[], tasks:[], manualTask:'',
-      manualUnavailable:false, failed:false, loading:false, refresh() {},
+    const context = { applied:{ task:'' }, expanded:new Set(['c']), page:'production', initializing:false, loadingTasks:false,
+      taskOptionsFailed:false, timeLabel:() => 'Clock', autoRefresh:true, missing:item => item.dataState === 'missing',
+      tr:key => labels[language][key] || key, route:{ meta:{ titleKey:'test.title' } }, locale:language, equipment:'line', devices:[], tasks:[], manualTask:'',
+      manualUnavailable:false, failed:false, loading:false, apply() {}, restore() {}, toggleTime() {},
       t:key => labels[language][key.split('.').at(-1)] || key,
       formatted:item => item.value === null ? '—' : String(item.value), formatShanghaiDateTime,
       data:{ taskNo:'task', tied:false, cards:[{ cardKey:'c', title:'Card', items:[
         { metricKey:'stale', label:'A', value:0, dataState:'stale', observedAt:'2026-11-17T02:30:45.123456Z' },
         { metricKey:'fresh', label:'B', value:1, dataState:'fresh', observedAt:'2026-11-17T03:00:00Z' },
-        { metricKey:'missing', label:'C', value:null, dataState:'missing', observedAt:null },
+        { metricKey:'missing', label:'C', value:null, dataState:'missing', observedAt:'2026-11-17T01:00:00Z' },
         { metricKey:'unknown-time', label:'D', value:false, dataState:'stale', observedAt:null }
       ] }] } }
     const app = vue.createSSRApp({ setup:() => context, render })
     app.config.globalProperties.$t = context.t
-    const slot = { inheritAttrs:false, render() { return vue.h('div', this.$slots.default?.()) } }
-    for (const name of ['BaseCard','el-select','el-option','ActionButton','el-alert','el-empty','el-tag']) app.component(name, slot)
+    const slot = { inheritAttrs:false, render() { return vue.h('div', { class: this.$attrs.class }, this.$slots.default?.()) } }
+    for (const name of ['BaseCard','el-select','el-option','ActionButton','el-alert','el-empty','el-tag','el-switch','el-form','el-form-item','el-icon','Clock']) app.component(name, slot)
+    app.component('el-tooltip', {
+      inheritAttrs:false,
+      render() { return vue.cloneVNode(this.$slots.default()[0], { 'aria-expanded':undefined }) }
+    })
     app.directive('loading', { getSSRProps:() => ({}) })
     const html = await renderToString(app)
+    assert.match(html, /<button[^>]*class="clock-action"[^>]*aria-expanded="true"/)
     assert.match(html, /2026-11-17 10:30:45/)
     assert.match(html, new RegExp(labels[language].sampledAt))
     assert.match(html, new RegExp(labels[language].stale))
     assert.match(html, new RegExp(`${labels[language].sampledAt}: —`))
     assert.match(html, /false/)
-    assert.doesNotMatch(html, /2026-11-17 11:00:00/)
+    assert.match(html, /2026-11-17 11:00:00/)
+    assert.doesNotMatch(html, /2026-11-17 09:00:00/)
+    assert.match(html, /observation-boolean[^>]*>false/)
+    context.expanded.clear()
+    const collapsed = await renderToString(app)
+    assert.match(collapsed, /<button[^>]*class="clock-action"[^>]*aria-expanded="false"/)
+    assert.doesNotMatch(collapsed, /class="observation-time"/)
   }
 })
 
@@ -565,10 +578,10 @@ test('same metric labels from different regions remain identifiable and individu
       return `const ${binding} = deps[${JSON.stringify(name)}]`
     }).replace('export default', 'return')
   const time = '2026-11-17T10:00:00.123456+08:00'
-  const group = { title:'Temperature', unit:'°C', series:[
+  const group = vue.reactive({ title:'Temperature', unit:'°C', series:[
     { groupKey:'zoneA', groupLabel:'Zone A', metricKey:'a', label:'Actual temperature', points:[{ observedAt:time,value:1 },{ observedAt:time,value:2 }] },
-    { groupKey:'zoneB', groupLabel:'Zone B', metricKey:'b', label:'Actual temperature', points:[{ observedAt:time,value:3 }] }
-  ] }
+    { groupKey:'zoneB', groupLabel:'Zone B', metricKey:'b', label:'Actual temperature', lineStyle:'dashed', points:[{ observedAt:time,value:3 }] }
+  ] })
   let chart
   const deps = { vue:{ ...vue, onMounted:() => {}, onBeforeUnmount:() => {} },
     'vue-i18n':{ useI18n:() => ({ t:key => key }) },
@@ -577,42 +590,46 @@ test('same metric labels from different regions remain identifiable and individu
     '@/components/common/ActionButton.vue':{}, './curveSeries':{ splitObservedPoints } }
   const scope = vue.effectScope()
   try {
-    const component = new Function('deps', script)(deps)
+    const component = new Function('deps', 'getComputedStyle', script)(deps, () => ({ getPropertyValue: () => '#555555' }))
     const state = scope.run(() => component.setup({ group, range:['2026-11-17T09:00:00+08:00','2026-11-17T11:00:00+08:00'] }, { expose() {} }))
-    state.element.value = {}; state.render()
-    const legend = chart.getOption().legend[0]
-    assert.equal(new Set(legend.data).size, 2)
-    assert.match(legend.formatter(legend.data[0]), /Zone A.*Actual temperature/)
-    assert.match(legend.formatter(legend.data[1]), /Zone B.*Actual temperature/)
-    const tooltip = chart.getOption().tooltip[0].formatter(legend.data.map((name, i) => ({ axisValue:1, marker:'', seriesName:name, value:[1,i], data:[1,i,time] })))
+    state.element.value = {}
+    state.render()
+    const legend = state.shown.value
+    assert.equal(new Set(legend.map(item => item.key)).size, 2)
+    assert.match(legend[0].label, /Zone A.*Actual temperature/)
+    assert.match(legend[1].label, /Zone B.*Actual temperature/)
+    assert.equal(legend[1].type, 'dashed')
+    const tooltip = chart.getOption().tooltip[0].formatter(legend.map(({ key }, i) => ({
+      axisValue:1, marker:'', seriesName:key, value:[1,i], data:[1,i,time]
+    })))
     assert.match(tooltip, /Zone A.*Actual temperature/)
     assert.match(tooltip, /Zone B.*Actual temperature/)
-    const all = [0,1,2].map(i => chart.getModel().getSeriesByIndex(i))
-    chart.dispatchAction({ type:'legendToggleSelect', name:legend.data[0] })
-    assert.deepEqual(all.map(series => chart.getModel().isSeriesFiltered(series)), [true,true,false])
+    state.toggleSeries(legend[0].key)
+    state.render()
+    assert.equal(chart.getOption().series.length, 1)
+    assert.equal(chart.getOption().series[0].lineStyle.type, 'dashed')
     group.series[0].groupLabel = '一区'; group.series[1].groupLabel = '二区'
     group.series.forEach(item => { item.label = '实际温度' })
-    state.render()
-    const localized = chart.getOption().legend[0]
-    assert.match(localized.formatter(localized.data[0]), /一区.*实际温度/)
-    assert.match(localized.formatter(localized.data[1]), /二区.*实际温度/)
-    assert.equal(localized.selected[localized.data[0]], false)
-    assert.deepEqual([0,1,2].map(i => chart.getModel().isSeriesFiltered(chart.getModel().getSeriesByIndex(i))), [true,true,false])
+    assert.match(state.shown.value[0].label, /一区.*实际温度/)
+    assert.match(state.shown.value[1].label, /二区.*实际温度/)
+    assert.equal(state.hidden.value.has(state.shown.value[0].key), true)
+    state.toggleSeries(state.shown.value[1].key)
+    assert.equal(state.canPlot.value, false)
+    assert.equal(state.shown.value.length, 2)
+    assert.equal(state.emptyReason.value, 'noVisibleSeries')
     chart.dispose()
     const identical = { ...group, series:group.series.map((item, index) => ({ ...item, groupLabel:'同名区域',
       groupKey:index ? 'zone' : 'zone / part', metricKey:index ? 'part / value' : 'value', label:'实际值' })) }
     const same = scope.run(() => component.setup({ group:identical, range:[] }, { expose() {} }))
-    same.element.value = {}; same.render()
-    const duplicate = chart.getOption().legend[0]
-    assert.notEqual(duplicate.formatter(duplicate.data[0]), duplicate.formatter(duplicate.data[1]))
-    chart.dispose()
+    assert.notEqual(same.shown.value[0].label, same.shown.value[1].label)
     const escaped = { ...group, series:[{ ...group.series[0], groupLabel:'<区域&一>', label:'<实际值>' }] }
     const escapedState = scope.run(() => component.setup({ group:escaped, range:[] }, { expose() {} }))
     escapedState.element.value = {}; escapedState.render()
-    const option = chart.getOption(), key = option.legend[0].data[0]
-    const html = option.tooltip[0].formatter([{ axisValue:1, marker:'', seriesName:key, value:[1,1], data:[1,1,time] }])
-    assert.match(html, /&lt;区域&amp;一&gt;.*&lt;实际值&gt;/)
-    assert.doesNotMatch(html, /<区域|<实际值/)
+    const formatter = chart.getOption().tooltip[0].formatter
+    const key = escapedState.shown.value[0].key
+    const html = formatter([{ axisValue:1, marker:'', seriesName:key, value:[1,1], data:[1,1,time] }])
+    assert.match(html, /&lt;实际值&gt;/)
+    assert.doesNotMatch(html, /<实际值/)
   } finally { chart?.dispose(); scope.stop() }
 })
 
@@ -669,5 +686,189 @@ test('slots initially load both targets, preserve submitted filters, and reject 
     await settle()
     assert.deepEqual(state.visibleRows.value, [slot1, slot2])
     assert.equal(state.failed.value, false)
+  } finally { scope.stop() }
+})
+
+test('process page discovers scoped history and applies exact task or manual ranges', async t => {
+  const source = await readFile(new URL('../../src/app/monitor/views/observations/curves.vue', import.meta.url), 'utf8')
+  const { descriptor } = parse(source)
+  const script = compileScript(descriptor, { id:'history-default-context' }).content
+    .replace(/^import\s+(.+?)\s+from\s+['"](.+?)['"];?$/gm, (_line, binding, name) =>
+      `const ${binding} = deps[${JSON.stringify(name)}]`).replace('export default', 'return')
+  const at = hour => `2026-11-23T${hour}:00:00.123456+08:00`
+  const anchor = { equipmentId:'newest', taskNo:'LATEST', observedAt:at('08'), from:at('00'), to:at('08') }
+  const result = { groups:[{ curveGroupKey:'curve', series:[{ points:[{ value:0 }] }] }] }
+  const empty = { anchor:null, recentTasks:[], hasCurves:true }
+  const calls = [], hooks = []
+  let nextContext = async params => params.equipmentId === 'empty' ? empty : { anchor, recentTasks:[anchor], hasCurves:true }
+  const window = { clearInterval:() => {}, setInterval:() => 1 }
+  const deps = {
+    vue:{ ...vue, onMounted:fn => hooks.push(fn), onBeforeUnmount:() => {} },
+    'vue-i18n':{ useI18n:() => ({ t:key => key, locale:vue.ref('zh-CN') }) },
+    'vue-router':{ useRoute:() => vue.reactive({ meta:{ observationCategory:'temperature' } }) },
+    '@/components/common/ActionButton.vue':{}, '@/components/common/BaseCard.vue':{},
+    '@/app/equipment/components/observations/columnModel':{ sourceLabel: ({ equipmentId }) => equipmentId },
+    '@/utils/date':{ formatShanghaiDateTime, shanghaiInputToRfc3339 },
+    '../../components/observations/CurveChart.vue':{},
+    '../../api/observations':{
+      monitorOptions:async () => [{ equipmentId:'empty' }, { equipmentId:'newest' }, { equipmentId:'later' }],
+      historyDefaultContext:async params => { calls.push(['context', params]); return nextContext(params) },
+      historyCurves:async params => { calls.push(['curves', params]); return result }
+    }
+  }
+  const scope = vue.effectScope()
+  try {
+    const component = new Function('deps','window',script)(deps,window)
+    const state = scope.run(() => component.setup({}, { expose() {} }))
+    await hooks[0]()
+    assert.deepEqual(calls[0], ['context', { category:'temperature', equipmentId:undefined }])
+    assert.equal(state.draft.equipmentId, '')
+    assert.equal(state.appliedSource.value, 'newest')
+    assert.equal(state.groups.value.length, 1)
+    assert.deepEqual(state.draft.range, ['2026-11-23 00:00:00','2026-11-23 08:00:00'])
+    assert.equal(calls[1][1].to, at('08'))
+
+    const older = { equipmentId:'later', taskNo:'OLDER-MANUAL', from:'2026-11-21T22:00:00.654321+08:00',
+      observedAt:'2026-11-22T06:00:00.654321+08:00', to:'2026-11-22T06:00:00.654321+08:00' }
+    nextContext = async params => ({ anchor:params.taskNo ? older : anchor, recentTasks:[older], hasCurves:true })
+    state.draft.taskNo = ' \tolder-manual  '
+    state.editTask()
+    await state.submit()
+    assert.deepEqual(calls.at(-2), ['context', { category:'temperature', equipmentId:undefined, taskNo:'OLDER-MANUAL' }])
+    assert.equal(calls.at(-1)[1].equipmentId, 'later')
+    assert.equal(calls.at(-1)[1].from, older.from)
+    assert.equal(calls.at(-1)[1].to, older.to)
+    assert.equal(state.displayedMode.value, 'fixed')
+    assert.equal(state.draft.equipmentId, '')
+    assert.deepEqual(state.draft.range, ['2026-11-21 22:00:00','2026-11-22 06:00:00'])
+    state.draft.taskNo = 'not-submitted'
+    state.editTask()
+    const callsBeforeRefresh = calls.length
+    await state.refresh()
+    assert.equal(calls.length, callsBeforeRefresh + 1)
+    assert.equal(calls.at(-1)[1].taskNo, 'OLDER-MANUAL')
+    assert.equal(calls.at(-1)[1].from, older.from)
+    assert.equal(state.draft.taskNo, 'not-submitted')
+
+    state.draft.taskNo = 'older-manual'
+    const inputs = [{ value:'' }, { value:'2026-11-22 06:00:00' }]
+    state.typeRange({ target:inputs[0], currentTarget:{ querySelectorAll:() => inputs } })
+    const callsBeforeIncomplete = calls.length
+    await state.submit()
+    assert.equal(calls.length, callsBeforeIncomplete)
+    assert.equal(state.formError.value, 'monitor.observation.invalidHistoryRange')
+    assert.equal(state.applied.value.from, older.from)
+    // Restore the untouched range before simulating an accepted calendar selection below.
+    nextContext = async () => ({ anchor:older, recentTasks:[older], hasCurves:true })
+    await state.restore()
+    state.draft.range = ['2026-11-21 23:00:00','2026-11-22 02:00:00']
+    state.editRange()
+    const callsBeforeManual = calls.length
+    await state.submit()
+    assert.equal(calls.length, callsBeforeManual + 1)
+    assert.equal(calls.at(-1)[1].taskNo, 'OLDER-MANUAL')
+    assert.equal(calls.at(-1)[1].from, '2026-11-21T23:00:00+08:00')
+    state.draft.taskNo = 'not-submitted'
+    await state.refresh()
+    assert.equal(calls.at(-1)[1].taskNo, 'OLDER-MANUAL')
+    state.draft.range = ['2026-11-23 09:00:00','2026-11-23 00:00:00']
+    state.editRange()
+    await state.submit()
+    assert.equal(state.formError.value, 'monitor.observation.invalidHistoryRange')
+    assert.equal(state.applied.value.taskNo, 'OLDER-MANUAL')
+    let release
+    nextContext = () => new Promise(resolve => { release = resolve })
+    const lateDefault = state.restore()
+    state.draft.range = ['2026-11-23 00:00:00','2026-11-23 08:00:00']
+    state.draft.taskNo = 'manual2'
+    state.editRange()
+    await state.submit()
+    release({ anchor, recentTasks:[], hasCurves:true })
+    await lateDefault
+    assert.equal(state.applied.value.taskNo, 'MANUAL2')
+    assert.equal(state.applied.value.to, '2026-11-23T08:00:00+08:00')
+    assert.equal(state.displayedMode.value, 'fixed')
+    nextContext = async () => empty
+    state.draft.equipmentId = 'empty'
+    await state.selectSource()
+    await state.restore()
+    assert.deepEqual(calls.at(-1), ['context', { category:'temperature', equipmentId:'empty' }])
+    assert.equal(state.groups.value.length, 0)
+    assert.equal(state.emptyMessage.value, 'monitor.observation.noHistorySamples')
+    assert.equal(!!descriptor.template.content.match(/<EmptyAxes/), false)
+
+    await t.test('repeated pending restores share a request, a changed source supersedes it', async () => {
+      const pending = []
+      nextContext = params => new Promise(resolve => pending.push({ params, resolve }))
+      const restores = Array.from({ length: 12 }, () => state.restore())
+      const oldRequests = [...pending]
+      state.draft.equipmentId = 'newest'
+      const suggestions = state.selectSource()
+      const changed = state.restore()
+      const changedRequest = pending.at(-1)
+      for (const request of pending.slice(oldRequests.length)) request.resolve({ anchor, recentTasks:[anchor], hasCurves:true })
+      await Promise.all([suggestions, changed])
+      for (const request of oldRequests) request.resolve(empty)
+      await Promise.all(restores)
+      assert.deepEqual(oldRequests.map(({ params }) => params.equipmentId), ['empty'])
+      assert.equal(changedRequest.params.equipmentId, 'newest')
+      assert.equal(state.applied.value.equipmentId, 'newest')
+    })
+
+    await t.test('clearing an explicit source keeps later restores global', async () => {
+      const later = { ...anchor, equipmentId:'later', taskNo:'LATER' }
+      nextContext = async () => ({ anchor, recentTasks:[anchor], hasCurves:true })
+      state.draft.equipmentId = ''
+      await state.selectSource()
+      await state.restore()
+      assert.equal(state.draft.equipmentId, '')
+      assert.equal(state.appliedSource.value, 'newest')
+      assert.equal(calls.at(-2)[1].equipmentId, undefined)
+      nextContext = async params => ({ anchor:params.equipmentId ? anchor : later, recentTasks:[], hasCurves:true })
+      await state.restore()
+      assert.equal(calls.at(-2)[1].equipmentId, undefined)
+      assert.equal(state.draft.equipmentId, '')
+      assert.equal(state.appliedSource.value, 'later')
+      assert.equal(state.applied.value.taskNo, 'LATER')
+    })
+
+    await t.test('task discovery deduplicates, isolates late responses and retries errors by task', async () => {
+      const pending = []
+      nextContext = params => new Promise((resolve, reject) => pending.push({ params, resolve, reject }))
+      state.draft.taskNo = 'slow'
+      state.editTask()
+      const repeated = Array.from({ length: 12 }, () => state.submit())
+      assert.equal(pending.length, 1)
+      assert.equal(state.emptyMessage.value, '')
+      assert.equal(state.groups.value.length, 0)
+      state.draft.taskNo = 'newer'
+      state.editTask()
+      const next = state.submit()
+      assert.equal(pending.length, 2)
+      state.draft.taskNo = 'still editing'
+      state.editTask()
+      pending[1].resolve({ anchor: { ...older, taskNo:'NEWER' }, recentTasks:[], hasCurves:true })
+      await next
+      pending[0].resolve({ anchor: { ...older, taskNo:'SLOW' }, recentTasks:[], hasCurves:true })
+      await Promise.all(repeated)
+      assert.equal(state.applied.value.taskNo, 'NEWER')
+      assert.equal(state.draft.taskNo, 'still editing')
+
+      state.draft.equipmentId = 'later'
+      nextContext = async () => empty
+      await state.selectSource()
+      state.draft.taskNo = 'missing'
+      state.editTask()
+      await state.submit()
+      assert.equal(calls.at(-1)[1].equipmentId, 'later')
+      assert.equal(state.emptyMessage.value, 'monitor.observation.noHistoryTaskSamples')
+      assert.equal(state.draft.taskNo, 'MISSING')
+      assert.equal(state.applied.value, null)
+      nextContext = async () => { throw { response:{ status:403 } } }
+      await state.retry()
+      assert.equal(calls.at(-1)[1].taskNo, 'MISSING')
+      assert.equal(state.requestError.value, 'historySourceForbidden')
+      assert.equal(state.emptyMessage.value, '')
+    })
   } finally { scope.stop() }
 })

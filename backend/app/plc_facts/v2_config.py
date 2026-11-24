@@ -2,6 +2,7 @@
 from functools import lru_cache
 import json
 from pathlib import Path
+import re
 from uuid import UUID
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -12,8 +13,7 @@ from .v2_domain import V2Error, identifier
 LEGACY_REVISION = '5f7a9c1e3b25'
 REVISION = '7b9d1f3a5c7e'
 CONSUMPTION_REVISION = 'da6c32f8a701'
-CONSUMPTION_REVISIONS = (CONSUMPTION_REVISION, 'd8f2a4c6b915', 'e9f3b5d7c021')
-ALLOWED_REVISIONS = (REVISION, '8c0e2a4d6f18', '9d1f3a5c7e20', 'ae20b4d6f831', 'c9e1a3b5d720', *CONSUMPTION_REVISIONS)
+TABLE_NAMES_REVISION = 'a1c307f8d2e4'
 
 
 class V2Settings(BaseSettings):
@@ -39,12 +39,15 @@ def _db_numbers(values):
     return frozenset(values)
 
 
-def validate_target(target, revision):
+def validate_target(target, revision=None):
     if not isinstance(target, dict) or set(target) != {'alias', 'serverUuid', 'schema', 'schemaRevision'}:
         raise ValueError('invalid target')
     identifier(target['alias'])
     identifier(target['schema'])
-    if (target['schemaRevision'] != revision or not isinstance(target['serverUuid'], str)
+    supplied_revision = target['schemaRevision']
+    if (not isinstance(supplied_revision, str) or not re.fullmatch(r'[0-9a-f]{12}', supplied_revision)
+            or (revision is not None and supplied_revision != revision)
+            or not isinstance(target['serverUuid'], str)
             or str(UUID(target['serverUuid'])) != target['serverUuid']):
         raise ValueError('invalid target revision or UUID')
     return target
@@ -110,10 +113,8 @@ def load_profile(settings):
         document = json.loads(path.read_text(encoding='utf-8'), object_pairs_hook=_unique_pairs)
         if not isinstance(document, dict) or set(document) != {'target'}:
             raise ValueError('invalid target profile')
-        revision = document['target'].get('schemaRevision') if isinstance(document['target'], dict) else None
-        if revision not in ALLOWED_REVISIONS:
-            raise ValueError('invalid target revision')
-        return {'target': validate_target(document['target'], revision)}
+        # schemaRevision remains in the old profile format for diagnostics.
+        return {'target': validate_target(document['target'])}
     except (ValueError, TypeError, OSError, UnicodeError, V2Error):
         raise V2Error('not_ready', 503) from None
 

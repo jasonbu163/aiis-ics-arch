@@ -54,3 +54,11 @@ FF-004 Rust catalog additions:
 - `tests/plc_catalog.rs`, `tests/modbus_catalog.rs`: strict declarations, path/capability and zero-side-effect preflight.
 - `tests/multi_plc.rs`, `tests/catalog_compatibility.rs`, `tests/catalog_support/mod.rs`: bounded real CLI, sample identities, protocol/resource and legacy-state compatibility.
 - `config/catalog-demo.yaml`, `config/plcs/*.json`: explicit synthetic v2 catalog and structure-only Modbus declaration.
+
+## FF-006 read-only JSON flows
+
+- [src/config/flow_json.rs](src/config/flow_json.rs): 校验四节点 `aiis.flow` 子集、逻辑端点、路径和不可变字节摘要。
+- [src/app/flow_json.rs](src/app/flow_json.rs): 一轮 GET 和 typed 布尔比较。
+- [src/runtime/catalog.rs](src/runtime/catalog.rs): v2 的点位流及 JSON 流监督、轮次日志和退出。
+- [tests/flow_json.rs](tests/flow_json.rs) / [夹具工具](tests/flow_json_support/mod.rs): 正式 CLI 回环、错误恢复、冻结版本和手写流共存。
+- [config/flow-json.yaml](config/flow-json.yaml) / [flows/demo01.json](flows/demo01.json): 显式选择及合成样例。

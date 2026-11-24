@@ -17,3 +17,5 @@ See [own guide](../USER_GUIDE.md) for every field/budget and typed input, and [e
 ## Rust YAML v2
 
 [catalog-demo.yaml](catalog-demo.yaml) loads [two independent S7 JSON files](plcs/README.md) through plc_files. Relative paths resolve from the main file directory; symlinks/traversal are rejected. Each file uses ff.plc/schema_version=1, the main file uses schema_version=2, independently of execution SQLite schema1. All three v1 configurations and basic02/basic03 remain; v2 supports demo01/read_points only. See the [run steps](../USER_GUIDE.md#catalog-v2).
+
+[flow-json.yaml](flow-json.yaml) selects a read-only `aiis.flow` example from the explicit `--flows-dir` and maps logical HTTP endpoint references to local bindings. The optional `flow_files` and `flow_http_endpoints` appear together in v2. See the [JSON flow guide](../USER_GUIDE.md#flow-json).

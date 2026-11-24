@@ -80,3 +80,11 @@ The eight-operation business integration contract is historical. The four old de
 [Generic task workflow v1](published/http-api/generic-task-workflow-v1/README.md) contains the registered Plan/Performance source contract and synthetic A/B examples for ARCH-TASK-001 r1. The four historical performance operations in business integration v1 retire with this candidate; equipment and monitor operations remain. Deployment, verification and Owner acceptance are separate.
 
 [Generic task workflow v2 candidate](published/http-api/generic-task-workflow-v2/README.md) adds partial updates, current field definitions, ordinary plan GET, optional backfill and atomic performance feedback. Switching requires updating v1 callers. The candidate preserves v1 artifacts and documents the retired paths and target-adoption gates.
+
+## Quality results v1
+
+[Quality results v1](published/http-api/quality-results-v1/README.md) contains the independent structured result, local-field and trusted-network integration contract, with synthetic requests and a source OpenAPI snapshot.
+
+## CA to Field Flow candidate
+
+[Flow JSON v1](demands/ca-field-flow-v1/README.md) records CA's candidate wire format, semantic digest, and vectors. Field Flow acceptance is pending.

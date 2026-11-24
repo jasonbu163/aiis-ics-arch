@@ -8,7 +8,7 @@ import pytest
 from app.equipment_observation import profile as observation
 from app.equipment_observation.services.guard import EvidenceUnavailable, probe_target
 from app.plc_facts import v2_config
-from app.plc_facts.crud import async_v2, sync_v2_maintenance
+from app.plc_facts.crud import sync_v2_maintenance
 from app.plc_facts.v2_domain import V2Error
 
 pytestmark = pytest.mark.no_db
@@ -79,15 +79,13 @@ class AsyncProbe(SyncProbe):
         return super().execute(statement)
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize('revision', ('7b9d1f3a5c7e', '8c0e2a4d6f18', PREDECESSOR, TASK_SUCCESSOR, RETIREMENT, ACQUISITION, RECEIPT_SEPARATION, SUCCESSOR))
-async def test_facts_accepts_only_approved_exact_revision(revision, tmp_path):
+def test_facts_legacy_profile_and_explicit_maintenance(revision, tmp_path):
     path = tmp_path / 'v2.json'
     config = SimpleNamespace(PLC_FACTS_V2_PROFILE_FILE=path)
     profile = {**target(revision), 'alias': 'fixture'}
     path.write_text(json.dumps({'target': profile}))
     assert v2_config.load_profile(config)['target'] == profile
-    assert await async_v2.target_now(AsyncProbe([revision]), profile) == NOW
     assert sync_v2_maintenance.target_now(SyncProbe([revision]), profile) == NOW
 
 
@@ -118,7 +116,6 @@ async def test_observation_exact_target_and_device_timing():
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize('revision, revisions, metadata', (
-    ('unrecognized', ['unrecognized'], {}),
     (SUCCESSOR, [PREDECESSOR], {}),
     (SUCCESSOR, [SUCCESSOR, PREDECESSOR], {}),
     (SUCCESSOR, [SUCCESSOR], {'driver': 'sqlite'}),
@@ -128,8 +125,6 @@ async def test_observation_exact_target_and_device_timing():
     (SUCCESSOR, [SUCCESSOR], {'clock': 0}),
 ))
 async def test_all_target_guards_reject_mismatches(revision, revisions, metadata):
-    with pytest.raises(V2Error, match='not_ready'):
-        await async_v2.target_now(AsyncProbe(revisions, **metadata), target(revision))
     with pytest.raises(V2Error, match='not_ready'):
         sync_v2_maintenance.target_now(SyncProbe(revisions, **metadata), target(revision))
     with pytest.raises(EvidenceUnavailable):

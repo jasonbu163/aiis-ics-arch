@@ -14,11 +14,16 @@ manifest = ModuleManifest(
     requires=(),
     model_requires=(),
     exports=(),
-    error_codes=(),
+    error_codes=(
+        "quality.unauthenticated", "quality.forbidden", "quality.not_found", "quality.target_conflict",
+        "quality.config_revision_conflict", "quality.invalid_request", "quality.unavailable",
+        "quality.commit_unknown",
+    ),
     name="quality",
     enabled=True,
     order=100,
     routers=(
+        "app.quality.api.results:router",
         "app.quality.api.routes:router",
         "app.quality.api.routes:defect_router",
     ),

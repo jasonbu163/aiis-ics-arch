@@ -15,12 +15,24 @@ export const qualityModule = {
     {
       path: 'quality/list',
       name: 'QualityList',
-      component: () => import('./views/list/index.vue'),
+      component: () => import('./views/results/index.vue'),
       meta: {
         titleKey: 'quality.list',
         pageId: 'quality.list',
         parentTitleKey: 'quality.title',
         navigation: { visible: true, order: 10, icon: 'List' }
+      }
+    },
+    {
+      path: 'quality/local-fields',
+      name: 'QualityLocalFields',
+      component: () => import('./views/local-fields/index.vue'),
+      meta: {
+        titleKey: 'quality.localFields.title',
+        pageId: 'quality.local-fields',
+        parentTitleKey: 'quality.title',
+        requiresAdmin: true,
+        navigation: { visible: true, order: 15, icon: 'Setting' }
       }
     },
     {

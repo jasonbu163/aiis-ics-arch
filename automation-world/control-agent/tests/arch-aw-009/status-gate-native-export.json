@@ -1,0 +1,119 @@
+{
+  "format": "aiis.flow",
+  "schema_version": 1,
+  "flow": {
+    "flow_id": "status_gate",
+    "revision": 1,
+    "trigger": {
+      "type": "interval",
+      "interval_ms": 1000
+    },
+    "entry_node_id": "read_status",
+    "nodes": [
+      {
+        "id": "read_status",
+        "version": 1,
+        "type": "plc.read",
+        "config": {
+          "plc_ref": "plc_line_a",
+          "point_ref": "task_status",
+          "value_type": "int16"
+        }
+      },
+      {
+        "id": "check_status",
+        "version": 1,
+        "type": "condition.compare",
+        "config": {
+          "left": {
+            "node_id": "read_status",
+            "field": "value"
+          },
+          "op": "eq",
+          "right": {
+            "type": "int16",
+            "value": 1
+          }
+        }
+      },
+      {
+        "id": "get_info",
+        "version": 1,
+        "type": "http.request",
+        "config": {
+          "endpoint_ref": "backend_api",
+          "method": "GET",
+          "path": "/status",
+          "query": {
+            "status": {
+              "node_id": "read_status",
+              "field": "value"
+            }
+          }
+        }
+      },
+      {
+        "id": "end_true",
+        "version": 1,
+        "type": "end",
+        "config": {
+          "result": "matched"
+        }
+      },
+      {
+        "id": "end_false",
+        "version": 1,
+        "type": "end",
+        "config": {
+          "result": "not_matched"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from_node_id": "read_status",
+        "from_port": "next",
+        "to_node_id": "check_status"
+      },
+      {
+        "from_node_id": "check_status",
+        "from_port": "true",
+        "to_node_id": "get_info"
+      },
+      {
+        "from_node_id": "get_info",
+        "from_port": "next",
+        "to_node_id": "end_true"
+      },
+      {
+        "from_node_id": "check_status",
+        "from_port": "false",
+        "to_node_id": "end_false"
+      }
+    ]
+  },
+  "layout": {
+    "nodes": {
+      "check_status": {
+        "x": 200.0,
+        "y": 0.0
+      },
+      "end_false": {
+        "x": 400.0,
+        "y": 150.0
+      },
+      "end_true": {
+        "x": 600.0,
+        "y": 0.0
+      },
+      "get_info": {
+        "x": 400.0,
+        "y": 0.0
+      },
+      "read_status": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    }
+  }
+}

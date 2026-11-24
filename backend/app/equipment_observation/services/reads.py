@@ -233,6 +233,82 @@ async def detail(db, profile, user, target, identity):
     return row, await sample_data(db, row, target, details=True, source=registered.get(row.equipment_id))
 
 
+async def _curve_definitions(db, category):
+    configs = (await db.execute(select(CurveGroup).where(CurveGroup.category == category, CurveGroup.enabled.is_(True))
+                                .order_by(CurveGroup.sort_order, CurveGroup.curve_group_key))).scalars().all()
+    if not configs:
+        return []
+    metrics = await _metrics(db)
+    visible_groups = {row.group_key: row for row in
+                      (await db.execute(select(MetricGroup).where(MetricGroup.enabled.is_(True)))).scalars()}
+    slot_rows = (await db.execute(select(SlotBinding).where(SlotBinding.target == 'history'))).scalars().all()
+    slots = {(slot.group_key, slot.metric_key): slot for slot in slot_rows}
+    definitions = []
+    for config in configs:
+        series = []
+        for item in config.series:
+            if not item['enabled'] or item['metricKey'] not in metrics:
+                continue
+            metric = metrics[item['metricKey']]
+            if metric.value_type != 'number' or metric.source_group_key not in visible_groups:
+                continue
+            slot = slots.get((metric.source_group_key, metric.metric_key))
+            if slot is None:
+                continue
+            series.append((item, metric, visible_groups[metric.source_group_key], f'{slot.slot_no:02d}'))
+        if series:
+            definitions.append((config, series))
+    return definitions
+
+
+def _drawable_history_query(equipment, slots, task=None):
+    numeric_slots = [
+        func.json_type(func.json_extract(HistorySample.local_values, _json_path(group, slot))).in_(
+            ('INTEGER', 'DOUBLE', 'DECIMAL')
+        ) for group, slot in sorted(slots)
+    ]
+    query = select(HistorySample.equipment_id, HistorySample.task_no, HistorySample.observed_at).where(
+        HistorySample.equipment_id.in_(sorted(equipment)), or_(*numeric_slots))
+    if task is not None:
+        query = query.where(HistorySample.task_no == task)
+    return query.order_by(HistorySample.observed_at.desc(), HistorySample.id.desc())
+
+
+async def history_default_context(db, profile, user, category, equipment, task=None):
+    await probe_target(db, profile['target'])
+    await write_sources.check_profile(db, profile)
+    if category not in ('temperature', 'drive', 'cleaning'):
+        reject()
+    if equipment is not None:
+        identifier(equipment)
+        if await _registered_device(db, profile, equipment) is None:
+            allowed_device(profile, user, equipment)
+        sources = {equipment}
+    else:
+        registered = await write_sources.visible_sources(db, profile)
+        sources = allowed_devices(profile, user) | {row.storage_identity for row in registered}
+    if task is not None:
+        task = task_no(task)
+    definitions = await _curve_definitions(db, category)
+    result = {'anchor': None, 'recentTasks': [], 'hasCurves': bool(definitions)}
+    if not sources or not definitions:
+        return result
+    slots = {(metric.source_group_key, slot) for _, series in definitions for _, metric, _, slot in series}
+    query = _drawable_history_query(sources, slots, task)
+    row = (await db.execute(query.limit(1))).first()
+    if row is None:
+        return result
+    stamp = wire_time(row.observed_at)
+    result['anchor'] = {'equipmentId': row.equipment_id, 'taskNo': row.task_no, 'observedAt': stamp,
+                        'from': wire_time(row.observed_at - timedelta(hours=8)), 'to': stamp}
+    candidates = (await db.execute(_drawable_history_query({row.equipment_id}, slots).limit(100))).all()
+    tasks = {}
+    for candidate in candidates:
+        tasks.setdefault(candidate.task_no, wire_time(candidate.observed_at))
+    result['recentTasks'] = [{'taskNo': task, 'observedAt': observed} for task, observed in tasks.items()]
+    return result
+
+
 async def curves(db, profile, user, equipment, category, task, start, end, language):
     await probe_target(db, profile['target'])
     await write_sources.check_profile(db, profile)
@@ -241,32 +317,17 @@ async def curves(db, profile, user, equipment, category, task, start, end, langu
         allowed_device(profile, user, equipment)
     if category not in ('temperature', 'drive', 'cleaning') or not start or not end:
         reject()
-    configs = (await db.execute(select(CurveGroup).where(CurveGroup.category == category, CurveGroup.enabled.is_(True))
-                                .order_by(CurveGroup.sort_order, CurveGroup.curve_group_key))).scalars().all()
-    metrics = await _metrics(db)
-    visible_groups = {row.group_key: row for row in
-                      (await db.execute(select(MetricGroup).where(MetricGroup.enabled.is_(True)))).scalars()}
-    slot_rows = (await db.execute(select(SlotBinding).where(SlotBinding.target == 'history'))).scalars().all()
-    slots = {(slot.group_key, slot.metric_key): slot for slot in slot_rows}
     conditions = await _conditions(db, profile, user, HistorySample, equipment=equipment, task=task, start=start, end=end,
                                    registered=(equipment,) if registered is not None else ())
+    definitions = await _curve_definitions(db, category)
     rows = (await db.execute(select(HistorySample).where(*conditions)
-                             .order_by(HistorySample.observed_at, HistorySample.id))).scalars().all()
+                             .order_by(HistorySample.observed_at, HistorySample.id))).scalars().all() if definitions else []
     groups = []
-    for config in configs:
+    for config, definition in definitions:
         series = []
         unit = None
-        for item in config.series:
-            if not item['enabled'] or item['metricKey'] not in metrics:
-                continue
-            metric = metrics[item['metricKey']]
-            if metric.source_group_key not in visible_groups:
-                continue
-            slot = slots.get((metric.source_group_key, metric.metric_key))
-            if slot is None:
-                continue
+        for item, metric, group, slot_no in definition:
             unit = metric.unit
-            slot_no = f'{slot.slot_no:02d}'
             points = []
             for row in rows:
                 values = row.local_values.get(metric.source_group_key, {})
@@ -274,9 +335,10 @@ async def curves(db, profile, user, equipment, category, task, start, end, langu
                 points.append({'recordId': str(row.id), 'observedAt': wire_time(row.observed_at),
                                'present': present, 'value': values.get(slot_no) if present else None})
             rule = profile['historyRules'].get((equipment, metric.source_group_key))
-            series.append({'groupKey': metric.source_group_key, 'groupLabel': _label(visible_groups[metric.source_group_key], language),
+            series.append({'groupKey': metric.source_group_key, 'groupLabel': _label(group, language),
                            'metricKey': metric.metric_key,
                            'label': _label(metric, language), 'points': points,
+                           'lineStyle': item.get('lineStyle', 'solid'),
                            'intervalSeconds': rule['intervalSeconds'] if rule else None})
         if series:
             groups.append({'curveGroupKey': config.curve_group_key,

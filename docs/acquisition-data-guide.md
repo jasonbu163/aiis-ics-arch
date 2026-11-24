@@ -11,12 +11,12 @@ The description includes ARCH-ACQ-005 r1 source deletion and history reads indep
 ```mermaid
 flowchart LR
     Admin["Administrator"] -->|"Add, edit or delete in Web"| Manage["Source management API<br/>administrator login"]
-    Manage -->|"Commit registration"| Registry[("plc_source_registry<br/>one row per PLC")]
+    Manage -->|"Commit registration"| Registry[("acq_plc_source_registry<br/>one row per PLC")]
     PLC["One DB on a PLC"] --> Sender["DAA or third-party collector"]
     Sender -->|"One POST per sample"| Write["Acquisition data POST"]
     Registry -.->|"Match three source identifiers"| Write
-    Write -->|"Save in one transaction"| History[("plc_facts_history<br/>complete sample")]
-    Write -->|"Update in one transaction"| Latest[("plc_facts_latest<br/>latest value per point")]
+    Write -->|"Save in one transaction"| History[("acq_plc_facts_history<br/>complete sample")]
+    Write -->|"Update in one transaction"| Latest[("acq_plc_facts_latest<br/>latest value per point")]
     Write -->|"Return matching receipt after commit"| Sender
     Registry -.->|"Check current source"| Realtime["Realtime GET"]
     Latest --> Realtime
@@ -41,7 +41,7 @@ The acquisition data module records raw PLC values. Equipment status and process
 
 ## 2. Sources and three fields
 
-On a backend that has adopted r3, each PLC has one row in `plc_source_registry`. Source admission matches that row's `plcId`, `instanceId` and `sourceGeneration`; `sourceType` is a display label. `dbNumber` is required sample content, not a registered DB list. These three identifiers govern source admission, not all request validation: the remaining fields, types, limits and sample rules are also checked. [Source management](../backend/app/plc_facts/README.md#arch-acq-004-r3-source-management)
+After the ARCH-ACQ-007 table-name cutover, each PLC has one row in `acq_plc_source_registry`. Source admission matches that row's `plcId`, `instanceId` and `sourceGeneration`; `sourceType` is a display label. `dbNumber` is required sample content, not a registered DB list. These three identifiers govern source admission, not all request validation: the remaining fields, types, limits and sample rules are also checked. [Source management](../backend/app/plc_facts/README.md#arch-acq-004-r3-source-management)
 
 | Field | Meaning | When it changes |
 | --- | --- | --- |
@@ -75,7 +75,7 @@ After a switch to a new generation, the backend admits the current registration.
 
 ### 3.1 PLC source registration
 
-`plc_source_registry` has one row per PLC, containing `plcId`, `instanceId`, `sourceGeneration` and the display label `sourceType`. The system also stores the registration version, creation and modification times, and retired generations for concurrent editing and takeover protection. The label can change independently. Changing the instance or generation requires confirmation of takeover and a generation never used for that PLC.
+`acq_plc_source_registry` has one row per PLC, containing `plcId`, `instanceId`, `sourceGeneration` and the display label `sourceType`. The system also stores the registration version, creation and modification times, and retired generations for concurrent editing and takeover protection. The label can change independently. Changing the instance or generation requires confirmation of takeover and a generation never used for that PLC.
 
 An administrator may confirm deletion of a source row. That source can no longer report, but its unexpired history remains queryable; a sender must retain the original identity and body of frozen samples. Deletion also removes the row's retired-generation records. If related facts and latest values no longer exist, the system may not recognize a previously used generation. Use a never-used generation when re-registering the same PLC.
 
@@ -85,8 +85,8 @@ For example, `PLC-A` may use instance `collector-a` and generation `gen-a`, whil
 
 | Table | What one row represents | Main use |
 | --- | --- | --- |
-| `plc_facts_history` | One complete PLC/DB sample, with points in `points_json`. | Inspect the complete point set and source of a past acquisition. |
-| `plc_facts_latest` | The latest value of one PLC/DB/point. | Read a current point quickly or browse all latest points in a DB. |
+| `acq_plc_facts_history` | One complete PLC/DB sample, with points in `points_json`. | Inspect the complete point set and source of a past acquisition. |
+| `acq_plc_facts_latest` | The latest value of one PLC/DB/point. | Read a current point quickly or browse all latest points in a DB. |
 
 For a DB21 sample containing temperature and run status, history gains one row with both points; latest updates one row for each point.
 
@@ -246,7 +246,7 @@ curl 'http://127.0.0.1:8000/api/v1/acquisition-data/history/123'
 | Realtime PLC/DB options; history options | `GET /api/v1/acquisition-data/options`; `GET /api/v1/acquisition-data/options?view=history` |
 | Latest value for one point or one DB | `GET /api/v1/acquisition-data/latest` |
 | Browse latest values by page, optionally search points | `GET /api/v1/acquisition-data/latest/browse` |
-| Find history summaries by observation time | `GET /api/v1/acquisition-data/history` |
+| Find up to 50 recent unexpired samples or query a time range | `GET /api/v1/acquisition-data/history`; supply both `from` and `to` for a time range |
 | Read a complete sample using a history list `id` | `GET /api/v1/acquisition-data/history/{id}` |
 
 In a history summary, `id` identifies detail, `sampledAt` is sample time, `storedAt` is save time and `pointCount` is the number of points. To inspect provenance, use `instanceId`, `sourceType`, `sourceGeneration` and `sourceSeq`. [Complete read API](../contracts/published/http-api/plc-facts-v2/README.md#read-operations)

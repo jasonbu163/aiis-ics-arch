@@ -19,3 +19,5 @@ The exact dual-version [FF-001 r4](../plans/FF-001-dual-runtime-demo01/spec.md) 
 See the [three basic examples](examples/README.md) for standalone commands and the [YAML configuration guide](config/README.md).
 
 For Rust YAML v2 see the [catalog tutorial](USER_GUIDE.md#catalog-v2): one ff.plc JSON per PLC, registered kinds demo01/read_points, S7 standard DB int16. Modbus is structure-validation only; Python/C# loading and DS export are not implemented.
+
+The [read-only JSON flow](USER_GUIDE.md#flow-json) extends YAML v2 with explicit files from `flows/`. It reads the demo01 HTTP command each round and reports the selected branch. The existing handwritten flows retain their original behavior.

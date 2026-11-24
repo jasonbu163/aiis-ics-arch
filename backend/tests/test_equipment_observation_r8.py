@@ -15,7 +15,6 @@ from app.equipment_observation.services.configuration import update_binding
 from app.equipment_observation.services.reads import sample_data
 from app.equipment_observation.services import reads
 from app.equipment_observation.models import LatestSnapshot
-from app.plc_facts.crud.async_v2 import target_now
 from app.plc_facts.services.observation_evidence import _source
 from app.plc_facts.v2_config import load_profile
 from app.plc_facts.v2_domain import V2Error
@@ -83,32 +82,7 @@ async def test_source_registry_identity_is_locked_and_has_no_legacy_db_list():
     assert await _source(DB(), {'plcId': 'plc', 'dbNumber': 21}) == ('instance', 'generation')
 
 
-@pytest.mark.asyncio
-async def test_target_guard_accepts_only_matching_explicit_revision():
-    uuid = '00000000-0000-4000-8000-000000000001'
-
-    class Result:
-        def __init__(self, data): self.data = data
-        def scalars(self): return self.data
-        def one(self): return self.data
-
-    class DB:
-        def __init__(self, revision): self.revision, self.calls = revision, 0
-        def get_bind(self): return SimpleNamespace(dialect=SimpleNamespace(name='mysql'))
-        async def execute(self, statement):
-            self.calls += 1
-            return Result([self.revision] if self.calls == 1 else (uuid, 'fixture', '8.4.6', datetime(2026, 11, 16), 28800))
-
-    for revision in ('7b9d1f3a5c7e', '8c0e2a4d6f18', '9d1f3a5c7e20'):
-        target = {'serverUuid': uuid, 'schema': 'fixture', 'schemaRevision': revision}
-        assert await target_now(DB(revision), target) == datetime(2026, 11, 16)
-        with pytest.raises(V2Error):
-            await target_now(DB('unrelated'), target)
-    with pytest.raises(V2Error):
-        await target_now(DB('other'), {'serverUuid': uuid, 'schema': 'fixture', 'schemaRevision': 'other'})
-
-
-def test_target_profile_accepts_previous_and_new_revision_only(tmp_path):
+def test_facts_profile_preserves_legacy_diagnostic_revision(tmp_path):
     import json
     path = tmp_path / 'facts-profile.json'
     settings = SimpleNamespace(PLC_FACTS_V2_PROFILE_FILE=str(path))

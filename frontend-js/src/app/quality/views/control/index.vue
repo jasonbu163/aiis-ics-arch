@@ -379,7 +379,7 @@ const loadData = async () => {
 }
 
 const handleBack = () => {
-  router.push('/quality/list')
+  router.push({ name: 'QualityList', query: { view: 'legacy' } })
 }
 
 const handleSave = async () => {
@@ -426,7 +426,7 @@ const handleSave = async () => {
     }
     
     ElMessage.success(t('quality.control.saveSuccess'))
-    router.push('/quality/list')
+    router.push({ name: 'QualityList', query: { view: 'legacy' } })
   } catch (error) {
     if (error !== 'cancel') {
       ElMessage.error(t('quality.control.saveFailed'))
