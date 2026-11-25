@@ -2,6 +2,7 @@
 import asyncio
 import os
 from pathlib import Path
+from types import SimpleNamespace
 
 from alembic.config import Config
 from alembic.migration import MigrationContext
@@ -20,6 +21,8 @@ BACKEND = Path(__file__).resolve().parents[1]
 
 @pytest.fixture
 def disposable_target(monkeypatch):
+    from app.quality.models import QualityDefectRecord, QualityInspection, QualitySPCMeasurement
+
     required = ['QUALITY_FIXTURE_UUID', 'QUALITY_FIXTURE_PORT', 'QUALITY_FIXTURE_SCHEMA',
                 'QUALITY_FIXTURE_USER', 'QUALITY_FIXTURE_PASSWORD', 'QUALITY_FIXTURE_ACK']
     if any(not os.environ.get(key) for key in required):
@@ -46,6 +49,13 @@ def disposable_target(monkeypatch):
 
             db.execute(text("CREATE TABLE synthetic_predecessor_data (id INT PRIMARY KEY, label VARCHAR(32))"))
             db.execute(text("INSERT INTO synthetic_predecessor_data VALUES (1, 'preserved')"))
+            for model in (QualityInspection, QualityDefectRecord, QualitySPCMeasurement):
+                model.__table__.create(db)
+            db.execute(QualityInspection.__table__.insert().values(id=1, coil_no='PRESERVED'))
+            db.execute(QualityDefectRecord.__table__.insert().values(inspection_id=1, defect_type='synthetic'))
+            db.execute(QualitySPCMeasurement.__table__.insert().values(
+                coil_no='PRESERVED', item='thickness', value=1.2, is_normal=True,
+            ))
             MigrationContext.configure(db).stamp(scripts, BEFORE)
 
         monkeypatch.setenv('QUALITY_EXPECTED_SCHEMA', schema)
@@ -75,6 +85,7 @@ def disposable_target(monkeypatch):
 async def test_migrated_quality_unique_keys_and_concurrent_updates(disposable_target):
     from app.quality.schemas.results import ConfigSnapshot
     from app.quality.services.results import save_config
+    from core.deps import get_current_user
     from core.registrar import create_app
     from database import get_db
 
@@ -87,10 +98,11 @@ async def test_migrated_quality_unique_keys_and_concurrent_updates(disposable_ta
 
     app = create_app(testing=True)
     app.dependency_overrides[get_db] = private_db
+    app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(id=1, role='admin')
     try:
         async with session() as db:
             await save_config(db, ConfigSnapshot.model_validate({"revision": 1, "definitions": [
-                {"name": name, "labels": {"zh-CN": name, "en-US": name}, "type": kind}
+                {"name": name, "labels": {"zh-CN": name, "en-US": name}, "type": kind, "editable": True}
                 for name, kind in [('defects', 'number'), ('reviewed', 'boolean')]
             ]}))
             await db.commit()
@@ -107,5 +119,39 @@ async def test_migrated_quality_unique_keys_and_concurrent_updates(disposable_ta
             assert response.json()['data']['items'] == {'defects': 0, 'reviewed': False}
             assert response.json()['data']['createdAt'].endswith('+08:00')
             assert (await client.get(path)).json()['data']['total'] == 1
+
+            create = '/api/v1/quality/results'
+            contenders = [
+                {'taskNo': ' manual-1 ', 'items': {'defects': 2}},
+                {'taskNo': 'MANUAL-1', 'items': {'defects': 4}},
+            ]
+            responses = await asyncio.gather(*(client.post(create, json=body) for body in contenders))
+            assert sorted(r.status_code for r in responses) == [201, 409]
+            winner = next(i for i, r in enumerate(responses) if r.status_code == 201)
+            assert responses[winner].json()['code'] == 200
+            assert responses[1 - winner].json()['errorCode'] == 'quality.task_no_conflict'
+            manual = await client.get(path + '/by-task/manual-1')
+            assert manual.json()['data']['items'] == {**contenders[winner]['items'], 'reviewed': None}
+
+            human, integration = await asyncio.gather(
+                client.post(create, json={'taskNo': 'mixed-1', 'items': {'defects': 3}}),
+                client.post(path + '/upsert', json={'taskNo': ' MIXED-1 ', 'items': {'reviewed': False}}),
+            )
+            assert integration.status_code == 200, integration.text
+            assert human.status_code in {201, 409}, human.text
+            if human.status_code == 201:
+                assert integration.json()['data']['outcome'] == 'updated'
+            else:
+                assert human.json()['errorCode'] == 'quality.task_no_conflict'
+                assert integration.json()['data']['outcome'] == 'created'
+            mixed = await client.get(path + '/by-task/mixed-1')
+            assert mixed.json()['data']['items'] == {
+                'defects': 3 if human.status_code == 201 else None, 'reviewed': False,
+            }
+            assert (await client.get(path)).json()['data']['total'] == 3
+        async with candidate.connect() as db:
+            assert (await db.execute(text('SELECT coil_no FROM quality_inspections'))).scalar_one() == 'PRESERVED'
+            assert (await db.execute(text('SELECT inspection_id, defect_type FROM quality_defect_records'))).one() == (1, 'synthetic')
+            assert (await db.execute(text('SELECT coil_no FROM quality_spc_measurements'))).scalar_one() == 'PRESERVED'
     finally:
         await candidate.dispose()

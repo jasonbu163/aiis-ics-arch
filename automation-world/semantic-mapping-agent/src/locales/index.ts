@@ -7,6 +7,8 @@ import connectionEn from "../app/connection/locales/en-US.json";
 import connectionZh from "../app/connection/locales/zh-CN.json";
 import twinFactsEn from "../app/twin-facts/locales/en-US.json";
 import twinFactsZh from "../app/twin-facts/locales/zh-CN.json";
+import configurationExchangeEn from "../app/configuration-management/locales/en-US.json";
+import configurationExchangeZh from "../app/configuration-management/locales/zh-CN.json";
 import commonEn from "./common/en-US.json";
 import commonZh from "./common/zh-CN.json";
 
@@ -14,12 +16,14 @@ const zhCN = {
   ...commonZh,
   ...connectionZh,
   ...twinFactsZh,
+  ...configurationExchangeZh,
 };
 export type LocaleMessages = typeof zhCN;
 const enUS: LocaleMessages = {
   ...commonEn,
   ...connectionEn,
   ...twinFactsEn,
+  ...configurationExchangeEn,
 };
 const dictionaries = { "zh-CN": zhCN, "en-US": enUS };
 

@@ -113,12 +113,98 @@ test('stale field configuration retains the draft and requires current revision 
   } finally { component.close() }
 })
 
-test('field labels remain bilingual and approved historical navigation stays available', async () => {
+test('manual creation submits only touched writable fields and retains a conflicting draft', async () => {
+  const calls = []
+  const requests = []
+  const definitions = [
+    ...fields,
+    { name: 'secretNote', type: 'string', editable: true, visible: false, enabled: true },
+    { name: 'approved', type: 'boolean', editable: true, visible: true, enabled: true },
+    { name: 'disabled', type: 'string', editable: true, visible: false, enabled: false },
+  ]
+  let finish
+  const component = await mount('views/results/QualityList.vue', {
+    listQualityResults: async params => {
+      requests.push(params)
+      return { items: [], total: 0, totalPages: 0, fields: definitions }
+    },
+    createQualityResult: body => {
+      calls.push(body)
+      if (calls.length === 1) {
+        return new Promise((resolve, reject) => {
+          finish = () => reject({ response: { status: 409, data: { errorCode: 'quality.task_no_conflict' } } })
+        })
+      }
+      if (body.taskNo === 'UNCONFIRMED') {
+        throw { response: { status: 503, data: { errorCode: 'quality.commit_unknown' } } }
+      }
+      if (body.taskNo === 'EXPIRED') {
+        throw { response: { status: 401, data: { errorCode: 'quality.unauthenticated' } } }
+      }
+      return { outcome: 'created' }
+    }
+  }, 'supervisor')
+  try {
+    await component.start()
+    const { state, template } = component
+    assert.equal(state.canWrite.value, true)
+    assert.deepEqual(state.editableFields.value.map(field => field.name),
+      ['reportUrl', 'defect_count', 'secretNote', 'approved'])
+    assert.match(template, /:close-on-click-modal="true"/)
+    state.filters.targetKey = 'KeepCase'
+    state.search()
+    state.openCreate()
+    assert.deepEqual(Object.keys(state.draft.value), [])
+    state.identity.taskNo = ' duplicate '
+    state.identity.targetKey = 'KeepCase'
+    state.draft.value.defect_count = '0'
+    state.draft.value.secretNote = ''
+    state.draft.value.approved = false
+    const pending = state.submit()
+    assert.equal(state.saving.value, true)
+    await state.submit()
+    let closed = false
+    state.beforeClose(() => { closed = true })
+    assert.equal(closed, false)
+    assert.deepEqual(calls, [{
+      taskNo: 'duplicate', targetKey: 'KeepCase', items: { defect_count: 0, secretNote: '', approved: false },
+    }])
+    finish()
+    await pending
+    assert.equal(state.detailError.value, 'quality.results.taskNoConflict')
+    assert.equal(state.dialogOpen.value, true)
+    assert.equal(state.identity.taskNo, ' duplicate ')
+    assert.equal(state.draft.value.approved, false)
+    state.identity.taskNo = 'UNCONFIRMED'
+    await state.submit()
+    assert.equal(state.detailError.value, 'quality.results.createUnknown')
+    assert.equal(state.dialogOpen.value, true)
+    assert.equal(state.draft.value.approved, false)
+    assert.equal(calls.length, 2)
+    state.identity.taskNo = 'EXPIRED'
+    await state.submit()
+    assert.equal(state.detailError.value, 'quality.results.createUnauthenticated')
+    assert.equal(state.dialogOpen.value, true)
+    assert.equal(state.draft.value.approved, false)
+    assert.equal(calls.length, 3)
+    state.identity.taskNo = 'NEW'
+    await state.submit()
+    assert.equal(state.dialogOpen.value, false)
+    assert.equal(requests.at(-1).targetKey, 'KeepCase')
+    state.fields.value = []
+    state.openCreate()
+    state.identity.taskNo = 'EMPTY'
+    await state.submit()
+    assert.deepEqual(calls.at(-1), { taskNo: 'EMPTY', items: {} })
+  } finally { component.close() }
+})
+
+test('field labels remain bilingual and legacy pages carry no inspection controls', async () => {
   const chinese = JSON.parse(await source('locales/zh-CN.json'))
   const english = JSON.parse(await source('locales/en-US.json'))
   const keys = value => Object.entries(value).flatMap(([key, item]) => typeof item === 'object'
     ? keys(item).map(child => `${key}.${child}`) : [key]).sort()
   assert.deepEqual(keys(chinese), keys(english))
-  assert.match(await source('views/results/index.vue'), /view.*legacy/)
-  assert.equal((await source('views/control/index.vue')).match(/view:\s*['"]legacy['"]/g)?.length, 2)
+  assert.doesNotMatch(await source('views/results/index.vue'), /LegacyQualityList|view:\s*['"]legacy['"]/)
+  assert.match(await source('views/control/index.vue'), /router\.replace\(\{ name: 'QualityList' \}\)/)
 })

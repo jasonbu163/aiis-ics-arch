@@ -23,7 +23,7 @@ def test_single_forward_successor():
     config = Config(str(BACKEND / 'alembic.ini'))
     config.set_main_option('script_location', str(BACKEND / 'alembic'))
     graph = ScriptDirectory.from_config(config)
-    assert graph.get_heads() == ['a1c307f8d2e4']
+    assert graph.get_heads() == ['b52e9c416a07']
     assert graph.get_revision('d8f2a4c6b915').down_revision == CONSUMPTION_REVISION
     assert graph.get_revision(CONSUMPTION_REVISION).down_revision == 'c9e1a3b5d720'
 

@@ -2,7 +2,7 @@
 
 [English](equipment-status-process-monitoring-guide.md) · [项目文档](README.zh-CN.md) · [r10 操作与背景](equipment-status-process-monitoring.zh-CN.md#r10-guide) · [v2 机器合同](../contracts/published/http-api/equipment-observation-v2/README.zh-CN.md)
 
-过程监控的能耗统计页面地址为 `/monitor/consumption`，唯一页面授权键为 `monitor.energy`。旧直链 `/monitor/energy` 已退出。已有 `monitor.consumption` 的部署须由负责人审查并显式处理，页面权限不会增加 `energy-consumption-read`、表计范围或管理权限。 私有 profile 的目标 revision 须为 `e9f3b5d7c021`，历史样例中的 revision 按实际获批目标填写。 [清退规格](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+「能耗管理」下的能耗统计沿用地址 `/monitor/consumption` 和页面授权键 `monitor.energy`。能耗单价沿用地址 `/auxiliary/price` 和页面授权键 `auxiliary.price`。旧直链 `/monitor/energy` 已退出。已有 `monitor.consumption` 的部署须由负责人审查并显式处理，页面权限不会增加 `energy-consumption-read`、表计范围或管理权限。 能耗仍核对私有 profile 的 MySQL 服务和库名，其他模块迁移推进版本时无需随之调整能耗配置。 [清退规格](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
 
 ## 写入登记来源
 
@@ -113,13 +113,13 @@ printf 'Authorization: Bearer %s\n' "$OBS_MACHINE_TOKEN" |
 | --- | --- |
 | **设备状态 → 数据管理** | 按设备、采样组（填 `heatZone1`）和任务号筛选实时快照。点 **指标列设置**选择显示列和顺序，点 **详情**核对原始采样值，可保存备注。 |
 | **过程监控 → 数据管理 → 过程样本** | 同样按设备、采样组和任务号筛选，还可选采集时间范围。用 **指标列设置**选择显示列和顺序，点 **详情**核对采样值，可保存备注和 **异常／已复核** 标记。 |
-| **过程监控 → 数据管理 → 能耗样本** | 按表计和采样组查询，在 **表计指标配置**设置 **显示列**和 **列顺序**。在列表核对采样值，通过 **编辑**保存备注和 **异常／已复核** 标记。 |
+| **能耗管理 → 数据管理** | 按表计和采样组查询，在 **表计指标配置**设置 **显示列**和 **列顺序**。在列表核对采样值，通过 **详情**保存备注和 **异常／已复核** 标记。 |
 
 这些设置用于显示和标注，界面不提供原始值编辑或删除。
 
 ## 6. 配置并上报能耗
 
-1. 打开 **过程监控 → 配置管理 → 表计指标配置**。默认显示有权访问的所有表计指标。可选表计和采样组或输入关键词后点 **查询**，点 **重置**恢复全部。点 **新增**，在表单选择具体的测试表计，将 **采样组**填为 `electricity`。确认 **采样组**、**指标键** `energyInterval`、**槽位** `1`，双语名称「时段用电量」／「Interval electricity use」，**物理量键** `electricityConsumption`，**计量方式**选 **时段增量**（`interval`），**单位** `kWh`，**小数位** `1`。打开 **启用**和 **显示列**，**列顺序**可设 `10`，保存。连续性和最大采样间隔规则用于累计读数。
+1. 打开 **能耗管理 → 配置管理 → 表计指标配置**。默认显示有权访问的所有表计指标。可选表计和采样组或输入关键词后点 **查询**，点 **重置**恢复全部。点 **新增**，在表单选择具体的测试表计，将 **采样组**填为 `electricity`。确认 **采样组**、**指标键** `energyInterval`、**槽位** `1`，双语名称「时段用电量」／「Interval electricity use」，**物理量键** `electricityConsumption`，**计量方式**选 **时段增量**（`interval`），**单位** `kWh`，**小数位** `1`。打开 **启用**和 **显示列**，**列顺序**可设 `10`，保存。连续性和最大采样间隔规则用于累计读数。
 2. 用机器 GET 发现获准且启用的表计定义，再用独立的能耗 POST 提交下面的 `energy.json`。将事件号、表计、组、指标和时间替换为本次获准的实际配置和采样；增量样本用真实区间，起点早于终点。能耗按表计与组上报，无需任务号。
 
    ```json
@@ -146,7 +146,7 @@ printf 'Authorization: Bearer %s\n' "$OBS_MACHINE_TOKEN" |
      --data-binary @energy.json "$OBS_API/integration/energy/samples"
    ```
 
-3. 在 **过程监控 → 能耗统计** 选表计、`electricity` 和「时段用电量」，将统计起止设为示例样本的实际完整区间，点 **查询**。区间完整时示例为 **时段用量 2.5 kWh**。到 **能耗样本**按表计和采样组核对原记录。若区间有缺口、重叠或跨统计边界，查看不完整原因。
+3. 在 **能耗管理 → 能耗统计** 选表计、`electricity` 和「时段用电量」，将统计起止设为示例样本的实际完整区间，点 **查询**。区间完整时示例为 **时段用量 2.5 kWh**。到 **能耗管理 → 数据管理**按表计和采样组核对原记录。若区间有缺口、重叠或跨统计边界，查看不完整原因。
 
 **累计读数**（`cumulative`）的用量取起止边界读数之差，需要确认单位、连续性及换表规则，并设置允许的最大采样间隔。缺边界、连续性未知、读数下降或质量异常时，用量不补零。**时段增量**只合计完整覆盖统计区间、互不重叠的合格增量。**瞬时量**（`instantaneous`，如 kW 功率）只看读数或曲线，不能直接求和为用量。只含累计或瞬时指标的包不带区间字段。同一笔消耗避免同时叠加累计计算和区间增量。
 
@@ -157,3 +157,7 @@ printf 'Authorization: Bearer %s\n' "$OBS_MACHINE_TOKEN" |
 - **清理测试数据**。保留目标、发送方、事件号和记录 ID。需要清理时，由环境负责人核实归属、其他引用及授权后按精确记录处理。
 
 手动 HTTP 上报验证的是当前环境的配置与机器接口。SMA 产品接入、DAA／PLC 联调及生产部署各自需要对应验证。
+
+## 能耗来源登记
+
+管理员在「能耗管理 → 配置管理 → 写入登记」启用写入来源。配置好各表计的采样组和指标后，使用免 Token POST 提交同一实际采集时刻的一包数据，再通过登录后的数据管理和能耗统计查看。[能耗批量写入合同及样例](../contracts/published/http-api/energy-registered-ingest-v1/README.zh-CN.md)

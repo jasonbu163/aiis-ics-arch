@@ -19,6 +19,7 @@
     },
     {"method": "GET", "path": "/api/v1/integration/quality/by-task/FIXTURE-123"},
     {"method": "GET", "path": "/api/v1/integration/quality", "query": {"targetKey": "line-01", "createdFrom": "2026-11-23T00:00:00+08:00", "pageSize": 20}},
+    {"method": "POST", "path": "/api/v1/quality/results", "expectedStatus": 201, "body": {"taskNo": "FIXTURE-MANUAL", "targetKey": "Line-A", "items": {"reviewed": false}}},
     {"method": "POST", "path": "/api/v1/quality/results/upsert", "body": {"taskNo": "FIXTURE-123", "items": {"reviewed": true}}}
   ]
 }

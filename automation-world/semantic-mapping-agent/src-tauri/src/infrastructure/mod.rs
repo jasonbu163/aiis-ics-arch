@@ -2,4 +2,5 @@
 pub mod acquisition;
 pub mod config_store;
 pub mod file_export;
+pub mod http_mapping;
 pub mod logging;

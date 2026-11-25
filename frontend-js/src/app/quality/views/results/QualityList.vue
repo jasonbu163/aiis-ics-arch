@@ -1,4 +1,4 @@
-<!-- 读写任务质量结果，按当前质量字段投影列表、详情和人工编辑。 -->
+<!-- 按质量字段配置展示、详情查看、人工新增和编辑任务质量结果。 -->
 <template>
   <BaseCard class="quality-results-card">
     <template #title>
@@ -13,7 +13,9 @@
     </template>
     <template #actions>
       <div class="table-actions">
-        <ActionButton @click="emit('legacy')">{{ label('legacy') }}</ActionButton>
+        <ActionButton v-if="canWrite" variant="primary" :disabled="loading || !!listError" @click="openCreate">
+          {{ label('create') }}
+        </ActionButton>
         <el-tooltip :content="label('resetWidthsHint')" placement="top" :trigger="['hover', 'focus']">
           <ActionButton @click="columns.reset">{{ label('resetWidths') }}</ActionButton>
         </el-tooltip>
@@ -77,25 +79,35 @@
   </BaseCard>
 
   <el-dialog v-model="dialogOpen" class="standard-form-dialog compact-form-dialog" width="min(760px, calc(100vw - 24px))" align-center
-    :title="label(editing ? 'edit' : 'details')" :close-on-click-modal="false" :close-on-press-escape="!saving"
-    :show-close="false" @closed="detailRequest++">
+    :title="label(creating ? 'create' : editing ? 'edit' : 'details')" :close-on-click-modal="true"
+    :close-on-press-escape="!saving" :before-close="beforeClose" :show-close="false" @closed="detailRequest++">
     <div v-loading="detailLoading" class="result-dialog-body">
       <el-alert v-if="detailError" type="error" :closable="false" :title="detailError" role="alert" />
-      <ActionButton v-if="detailError && !record" @click="open(selectedTask, editing)">{{ label('refresh') }}</ActionButton>
-      <template v-if="record">
+      <ActionButton v-if="detailError && !record && !creating" @click="open(selectedTask, editing)">{{ label('refresh') }}</ActionButton>
+      <el-form v-if="record || creating" id="quality-result-form" label-position="top"
+        :disabled="saving" @submit.prevent="submit">
         <section class="dialog-section">
           <h3 class="dialog-section__title">{{ label('basicInfo') }}</h3>
-          <dl class="dialog-form-grid">
+          <div v-if="creating" class="dialog-form-grid">
+            <el-form-item :label="label('taskNo')" required>
+              <el-input v-model="identity.taskNo" maxlength="50" />
+            </el-form-item>
+            <el-form-item :label="label('targetKey')">
+              <el-input v-model="identity.targetKey" maxlength="64" />
+            </el-form-item>
+          </div>
+          <dl v-else class="dialog-form-grid">
             <div v-for="key in identityKeys" :key="key"><dt>{{ label(key) }}</dt><dd>{{ formatFixed(key, record[key]) }}</dd></div>
           </dl>
         </section>
         <section v-if="editing ? editableFields.length : fields.length" class="dialog-section">
           <h3 class="dialog-section__title">{{ label('resultFields') }}</h3>
-          <el-form v-if="editing" id="quality-result-edit" label-position="top" class="dialog-form-grid" @submit.prevent="submit">
+          <div v-if="editing" class="dialog-form-grid">
             <el-form-item v-for="field in editableFields" :key="field.name" :label="fieldLabel(field)">
               <div class="result-input">
                 <el-select v-if="field.type === 'boolean'" v-model="draft[field.name]" :empty-values="[]">
-                  <el-option v-if="field.isNullable || draft[field.name] === null" :value="null" :label="label('emptyValue')" />
+                  <el-option v-if="field.isNullable || (!creating && draft[field.name] === null)"
+                    :value="null" :label="label('emptyValue')" />
                   <el-option :value="true" :label="label('yes')" />
                   <el-option :value="false" :label="label('no')" />
                 </el-select>
@@ -104,12 +116,12 @@
                   :inputmode="field.type === 'number' ? 'decimal' : undefined"
                   :maxlength="field.type === 'link' ? 2048 : field.type === 'string' ? 255 : undefined"
                   @update:model-value="draft[field.name] = $event" />
-                <ActionButton v-if="field.isNullable && field.type !== 'boolean'" @click="draft[field.name] = null">
+                <ActionButton v-if="field.isNullable && field.type !== 'boolean'" :disabled="saving" @click="draft[field.name] = null">
                   {{ label('clearValue') }}
                 </ActionButton>
               </div>
             </el-form-item>
-          </el-form>
+          </div>
           <dl v-else class="dialog-form-grid">
             <div v-for="field in fields" :key="field.name">
               <dt>{{ fieldLabel(field) }}</dt>
@@ -123,19 +135,19 @@
             </div>
           </dl>
         </section>
-        <section class="dialog-section">
+        <section v-if="record" class="dialog-section">
           <h3 class="dialog-section__title">{{ label('timeInfo') }}</h3>
           <dl class="dialog-form-grid">
             <div v-for="key in timeKeys" :key="key"><dt>{{ label(key) }}</dt><dd>{{ formatFixed(key, record[key]) }}</dd></div>
           </dl>
         </section>
-      </template>
+      </el-form>
     </div>
     <template #footer>
       <div class="core-dialog-footer">
         <ActionButton :disabled="saving" @click="dialogOpen = false">{{ label(editing ? 'cancel' : 'close') }}</ActionButton>
-        <ActionButton v-if="editing" variant="primary" native-type="submit" form="quality-result-edit"
-          :loading="saving" :disabled="detailLoading || !record">{{ label('save') }}</ActionButton>
+        <ActionButton v-if="editing" variant="primary" native-type="submit" form="quality-result-form"
+          :loading="saving" :disabled="detailLoading || (!record && !creating)">{{ label('save') }}</ActionButton>
       </div>
     </template>
   </el-dialog>
@@ -149,9 +161,8 @@ import ActionButton from '@/components/common/ActionButton.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
 import { useUserStore } from '@/store/user'
 import { useTableColumnWidths } from '@/utils/tableColumnWidths'
-import { getQualityResult, listQualityResults, saveQualityResult } from '../../api'
+import { createQualityResult, getQualityResult, listQualityResults, saveQualityResult } from '../../api'
 
-const emit = defineEmits(['legacy'])
 const { t, locale } = useI18n()
 const label = key => t(`quality.results.${key}`)
 const emptyFilters = () => ({ taskNo: '', targetKey: '', createdFrom: '', createdTo: '' })
@@ -169,9 +180,10 @@ const timeKeys = ['createdAt', 'updatedAt']
 const fixedKeys = [...identityKeys, ...timeKeys]
 const fieldKey = field => `item.${field.name}`
 const visibleFields = computed(() => fields.value.filter(field => field.visible))
-const editableFields = computed(() => fields.value.filter(field => field.editable))
+const editableFields = computed(() => fields.value.filter(field => field.enabled !== false && field.editable))
 const user = useUserStore()
-const canEdit = computed(() => ['admin', 'supervisor', 'operator'].includes(user.role) && editableFields.value.length > 0)
+const canWrite = computed(() => ['admin', 'supervisor', 'operator'].includes(user.role))
+const canEdit = computed(() => canWrite.value && editableFields.value.length > 0)
 const columns = shallowRef()
 watch(() => visibleFields.value.map(fieldKey).join(','), () => {
   const layout = Object.fromEntries(fixedKeys.map(key => [key, { width: key.endsWith('At') ? 180 : 150, minWidth: 110 }]))
@@ -246,17 +258,36 @@ function displayValue(field, value) {
 
 const dialogOpen = ref(false)
 const editing = ref(false)
+const creating = ref(false)
 const detailLoading = ref(false)
 const detailError = ref('')
 const saving = ref(false)
 const record = ref(null)
 const selectedTask = ref('')
+const identity = reactive({ taskNo: '', targetKey: '' })
 const draft = ref({})
 let detailRequest = 0
+function openCreate() {
+  ++detailRequest
+  creating.value = true
+  editing.value = true
+  record.value = null
+  detailLoading.value = false
+  detailError.value = ''
+  Object.assign(identity, { taskNo: '', targetKey: '' })
+  draft.value = Object.create(null)
+  dialogOpen.value = true
+}
+
+function beforeClose(done) {
+  if (!saving.value) done()
+}
+
 async function open(taskNo, edit) {
   const request = ++detailRequest
   selectedTask.value = taskNo
   dialogOpen.value = true
+  creating.value = false
   record.value = null
   detailError.value = ''
   editing.value = edit
@@ -274,13 +305,26 @@ async function open(taskNo, edit) {
 }
 
 async function submit() {
-  if (saving.value || !record.value) return
+  if (!editing.value || !canWrite.value || saving.value || (!creating.value && !record.value)) return
+  const create = creating.value
   const patch = []
   detailError.value = ''
+  const taskNo = create ? identity.taskNo.trim() : record.value.taskNo
+  const targetKey = identity.targetKey.trim()
+  if (create && !/^[A-Za-z0-9._-]{1,50}$/.test(taskNo)) {
+    detailError.value = label('invalidTaskNo')
+    return
+  }
+  if (create && targetKey && !/^[A-Za-z0-9._-]{1,64}$/.test(targetKey)) {
+    detailError.value = label('invalidTargetKey')
+    return
+  }
   for (const field of editableFields.value) {
     const key = field.name
+    if (create && !Object.hasOwn(draft.value, key)) continue
     let value = draft.value[key] ?? null
-    if (value === (record.value.items[key] ?? null)) continue
+    if (!create && value === (record.value.items[key] ?? null)) continue
+    if (create && field.isNullable && value === '' && ['number', 'link'].includes(field.type)) value = null
     if (value != null && field.type === 'number') {
       if (!/^-?\d{1,10}(?:\.\d{1,4})?$/.test(String(value))) {
         detailError.value = label('invalidValue')
@@ -292,19 +336,32 @@ async function submit() {
       detailError.value = label('invalidLink')
       return
     }
-    if (value !== record.value.items[key]) patch.push([key, value])
+    if (create || value !== record.value.items[key]) patch.push([key, value])
   }
-  if (!patch.length) {
+  if (!create && !patch.length) {
     dialogOpen.value = false
     return
   }
   saving.value = true
   try {
-    await saveQualityResult({ taskNo: record.value.taskNo, items: Object.fromEntries(patch) })
+    const body = { taskNo, items: Object.fromEntries(patch) }
+    if (create) {
+      if (targetKey) body.targetKey = targetKey
+      await createQualityResult(body)
+    } else {
+      await saveQualityResult(body)
+    }
     dialogOpen.value = false
     await load()
-  } catch {
-    detailError.value = label('saveError')
+  } catch (error) {
+    const response = error?.response
+    const code = response?.data?.errorCode
+    const message = code === 'quality.task_no_conflict' ? 'taskNoConflict'
+      : response?.status === 422 ? 'createInvalid'
+      : response?.status === 401 ? 'createUnauthenticated'
+      : response?.status === 403 ? 'createForbidden'
+      : 'createUnknown'
+    detailError.value = label(create ? message : 'saveError')
   } finally {
     saving.value = false
   }

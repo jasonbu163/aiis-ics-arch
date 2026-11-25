@@ -31,7 +31,7 @@ test('role arrays reject missing, broken, duplicate, forbidden and non-subset co
   assert.throws(() => parseRolePageAccess(env(['aiis_demo.example']), registry), /disabled pageId aiis_demo.example/)
   assert.throws(() => parseRolePageAccess(env(['system.projection-mapping']), registry), /unknown pageId/)
   assert.throws(() => parseRolePageAccess(env(['monitor.realtime']), registry), /unknown pageId/)
-  for (const id of ['equipment.observations.admin', 'monitor.observations.admin', 'plan.local-fields', 'performance.local-fields', 'quality.local-fields'])
+  for (const id of ['equipment.observations.admin', 'monitor.observations.admin', 'energy.observations.admin', 'energy.observations.data', 'plan.local-fields', 'performance.local-fields', 'quality.local-fields'])
     assert.throws(() => parseRolePageAccess(env([id]), registry), /admin-only pageId/)
   for (const retired of ['dashboard.home','performance.split','performance.print','performance.efficiency','performance.quality']) assert.throws(() => parseRolePageAccess(env([retired]), registry), /unknown pageId|disabled pageId/)
   assert.throws(() => parseRolePageAccess(env(['plan.list'], ['performance.list']), registry), /absent from VITE_SUPERVISOR/)
@@ -43,12 +43,13 @@ test('admin, supervisor, operator and unknown share route/menu/default decisions
   const matrix = {
     admin: { paths: [
       '/plan/list', '/plan/local-fields', '/plan/shared-fields', '/performance/list', '/performance/local-fields', '/performance/shared-fields',
-      '/monitor/temperature', '/monitor/consumption', '/monitor/drive',
+      '/monitor/temperature', '/monitor/drive',
       '/monitor/cleaning', '/monitor/observations/admin', '/monitor/observations/data', '/equipment/production-parameters', '/equipment/drive',
       '/equipment/temperature', '/equipment/cleaning', '/equipment/observations/admin', '/equipment/observations/data',
-      '/auxiliary/stop', '/auxiliary/shift', '/auxiliary/price', '/quality/list', '/quality/local-fields', '/quality/spc',
+      '/monitor/consumption', '/auxiliary/price', '/energy/observations/data', '/energy/observations/admin',
+      '/auxiliary/stop', '/auxiliary/shift', '/quality/list', '/quality/local-fields', '/quality/spc',
       '/quality/control/:id', '/system/user', '/maintenance/log'
-    ], menus: ['plan', 'performance', 'monitor', 'equipment', 'auxiliary', 'quality', 'system', 'maintenance'], entry: '/plan/list' },
+    ], menus: ['plan', 'performance', 'monitor', 'equipment', 'energy', 'auxiliary', 'quality', 'system', 'maintenance'], entry: '/plan/list' },
     supervisor: { paths: ['/plan/list', '/performance/list'], menus: ['plan', 'performance'], entry: '/plan/list' },
     operator: { paths: ['/plan/list'], menus: ['plan'], entry: '/plan/list' },
     unknown: { paths: [], menus: [], entry: '/login' }
@@ -62,19 +63,33 @@ test('admin, supervisor, operator and unknown share route/menu/default decisions
   }
 })
 
-test('the existing page grant selects the sole current energy page', () => {
-  const grants = parseRolePageAccess(env(['monitor.energy'], ['monitor.energy']), registry)
-  const page = registry.routeRecords.find(route => route.meta.pageId === 'monitor.energy')
-  assert.equal(page.path, '/monitor/consumption')
+test('energy navigation preserves both existing page grants and restricts management to admins', () => {
+  const legacyPages = [
+    ['monitor.energy', '/monitor/consumption', 'MonitorEnergy'],
+    ['auxiliary.price', '/auxiliary/price', 'AuxiliaryPrice']
+  ]
+  for (const [id, path, name] of legacyPages) {
+    const grants = parseRolePageAccess(env([id], [id]), registry)
+    const page = registry.routeRecords.find(route => route.meta.pageId === id)
+    assert.equal(page.path, path)
+    assert.equal(page.name, name)
+    for (const role of ['supervisor', 'operator']) {
+      const access = { isAdmin: false, hasPageAccess: pageId => grants[role].includes(pageId) }
+      assert.equal(canAccessRoute(page, access), true)
+      const menu = accessibleNavigation(registry, access)
+      assert.deepEqual(menu.map(group => group.name), ['energy'])
+      assert.deepEqual(menu[0].children.map(leaf => leaf.path), [path])
+    }
+    assert.equal(canAccessRoute(page, { isAdmin: true, hasPageAccess: () => false }), true)
+    assert.equal(canAccessRoute(page, { isAdmin: false, hasPageAccess: () => false }), false)
+  }
+  const adminMenu = accessibleNavigation(registry, { isAdmin: true }).find(group => group.name === 'energy')
+  assert.deepEqual(adminMenu.children.map(leaf => leaf.path), [
+    '/monitor/consumption', '/auxiliary/price', '/energy/observations/data', '/energy/observations/admin'
+  ])
+  assert.ok(adminMenu.children.slice(2).every(leaf => leaf.route.meta.requiresAdmin))
   assert.equal(registry.routeRecords.some(route => route.path === '/monitor/energy'), false)
   assert.throws(() => parseRolePageAccess(env(['monitor.consumption'], []), registry), /monitor\.consumption/)
-  for (const role of ['supervisor', 'operator']) {
-    const access = { isAdmin: false, hasPageAccess: id => grants[role].includes(id) }
-    assert.equal(canAccessRoute(page, access), true)
-    assert.ok(accessibleNavigation(registry, access).flatMap(group => group.children).some(leaf => leaf.route === page))
-  }
-  assert.equal(canAccessRoute(page, { isAdmin: true, hasPageAccess: () => false }), true)
-  assert.equal(canAccessRoute(page, { isAdmin: false, hasPageAccess: () => false }), false)
 })
 
 test('Vite shared env, local/mode and process priority feed the same checker', async () => {

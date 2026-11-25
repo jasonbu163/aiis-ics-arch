@@ -430,4 +430,6 @@ Generic task integration uses the project's trusted network boundary. The r1 tas
 
 ## Task quality results
 
-The Quality module stores structured results in `quality_main` and manages its definitions in `quality_field_config`. The explicit Alembic successor `f0a2b4c6d8e1` introduces the two tables. Trusted-network ingestion, web editing and field administration use the [quality results HTTP contract](../contracts/published/http-api/quality-results-v1/README.md). File parsing belongs to the external caller.
+The Quality module stores structured results in `quality_main` and manages definitions in `quality_field_config`. The explicit Alembic successor `f0a2b4c6d8e1` introduces those tables. The Web UI uses the private quality API for manual creation and editing. Authorized integrations use the public trusted-network API for ingestion and queries. Edge programs handle file parsing. See the [quality results HTTP contract](../contracts/published/http-api/quality-results-v1/README.md).
+
+The former coil-inspection and defect endpoints are retired in the source. Existing inspection and defect tables remain registered and their data stays in place. SPC endpoints retain their existing behavior. Before deploying this change, verify external API callers and how they will access any retained legacy records.

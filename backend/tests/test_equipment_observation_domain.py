@@ -1,10 +1,13 @@
 """指标写入的类型、身份与省略语义回归。"""
 from datetime import datetime, timedelta
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 import pytest
 
 from app.equipment_observation.domain import ObservationError, scalar, task_no
-from app.equipment_observation.profile import parse_profile
+from app.equipment_observation.profile import parse_profile, require_energy_target
+from app.equipment_observation.services.guard import current_clock
 from app.equipment_observation.services.reads import freshness
 
 pytestmark = pytest.mark.no_db
@@ -35,11 +38,13 @@ def test_task_no_ascii_and_numeric_domain():
             scalar(invalid, "number")
 
 
-def test_profile_rejects_nonstring_uuid():
-    profile = {"target": {"serverUuid": 123, "schema": "fixture", "schemaRevision": "d8f2a4c6b915"},
+def test_nonstring_uuid_is_ignored_by_observation_and_rejected_for_energy():
+    profile = {"target": {"serverUuid": 123, "schema": "fixture", "schemaRevision": "e9f3b5d7c021"},
                "devices": [], "readScopes": {}, "producers": [], "historyRules": [], "groupSettings": []}
-    with pytest.raises(ValueError):
-        parse_profile(profile)
+    parsed = parse_profile(profile)
+    assert parsed["target"] == profile["target"]
+    with pytest.raises(ObservationError, match="not_ready"):
+        require_energy_target(parsed)
 
 
 def test_entire_bundle_uses_device_stale_threshold_not_task_age():
@@ -47,3 +52,12 @@ def test_entire_bundle_uses_device_stale_threshold_not_task_age():
     observed = now - timedelta(seconds=20)
     assert freshness(now, observed, 10) == "stale"
     assert freshness(now, observed, 30) == "fresh"
+
+
+@pytest.mark.asyncio
+async def test_observation_clock_converts_db_utc_without_session_timezone_probe():
+    utc = datetime(2026, 11, 17, 23, 30, 0, 123456)
+    db = SimpleNamespace(execute=AsyncMock(return_value=SimpleNamespace(scalar_one=lambda: utc)))
+    assert await current_clock(db) == datetime(2026, 11, 18, 7, 30, 0, 123456)
+    db.execute.assert_awaited_once()
+    assert str(db.execute.await_args.args[0]) == "SELECT UTC_TIMESTAMP(6)"

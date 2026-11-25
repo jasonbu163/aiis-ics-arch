@@ -6,7 +6,7 @@
 
 | Task ID | 唯一规格 / 关系 | 实施记录 | 独立验证 |
 | --- | --- | --- | --- |
-| SMA-001 | [r2 总规格](SMA-001-cu-integration-and-scope-cleanup/spec.md)，草案 | 总 tasks 未创建。通过已批准的子任务推进实施。 | 总 checklist 未创建。SMA-002、SMA-003 和 SMA-004 r1 已验收。 |
+| SMA-001 | [r3 整体实施规格](SMA-001-cu-integration-and-scope-cleanup/spec.md)，owner_approved | [rework-2 交接](SMA-001-cu-integration-and-scope-cleanup/tasks.md#rework-2-developer-handoff)。 | [QA3](SMA-001-cu-integration-and-scope-cleanup/checklist.md#qa3--rework-2-独立复验) 通过 14 项隔离验收，AC14 等待 Human Owner 实操（`qa_blocked`）。 |
 | SMA-002 | [r1 职责清理](SMA-002-scope-cleanup/spec.md)；SMA-001 获批子任务 | [tasks](SMA-002-scope-cleanup/tasks.md)；developer_handoff，精确候选 af7140357f2a81fa6a2870aed1c2d092dfe4e64ab7795dbf472cf62cdbcff6e2 | [checklist](SMA-002-scope-cleanup/checklist.md)；qa_passed、owner_accepted 仅对无漂移候选生效，B1 Owner 处置及事件历史保留 |
 | SMA-003 | [r1 CU 接入](SMA-003-cu-integration/spec.md)；精确 CU 阶段于 2026-11-04 获最终验收 | [tasks](SMA-003-cu-integration/tasks.md)；developer_handoff，候选 ae9b3c4900e6e3f326a61e700f1736d67338247716e609a559a90a598a1d8bcf | [checklist](SMA-003-cu-integration/checklist.md#owner-acceptance-r1)；owner_accepted / qa_passed，N1/N2 已关闭；历史失败、验证限制及资源保留边界维持 |
 | SMA-004 | [r1 配置独立化](SMA-004-local-configuration/spec.md)，owner_approved | [tasks](SMA-004-local-configuration/tasks.md)，rework-1 developer_handoff，53 项 9d514bc4 候选 | [验收记录](SMA-004-local-configuration/checklist.md)记录独立 QA2 和 2026-11-14 Owner 验收，含 QA1 历史及取证限制。 |
@@ -15,5 +15,6 @@
 | SMA-007 | [r1 开发 profile 路径对齐](SMA-007-dev-profile-path/spec.md)，SMA-001 已批准子任务 | [tasks](SMA-007-dev-profile-path/tasks.md#developer_handoff-rework-2)，第二轮返工交接 | [验证记录](SMA-007-dev-profile-path/checklist.md)，第二轮返工候选独立验证通过，待 Human Owner 最终验收。 |
 | SMA-008 | [r3 现有采集 API 手动回环](SMA-008-acquisition-data-get/spec.md)，SMA-001 已批准子任务 | [Development 交接](SMA-008-acquisition-data-get/tasks.md)，rework-1 | [独立 QA2](SMA-008-acquisition-data-get/checklist.md)，AC04 待 Human Owner 操作 dev POST、核对回执及回读，当前 qa_blocked |
 | SMA-009 | [r1 工作区与手工回环界面](SMA-009-workspace-and-loopback-ui/spec.md)，SMA-001 已批准子任务 | [Development 交接](SMA-009-workspace-and-loopback-ui/tasks.md)，rework-1 | [独立复验](SMA-009-workspace-and-loopback-ui/checklist.md)，qa_passed，等待 Human Owner 最终验收 |
+| SMA-010 | [r2 炉温 → 实绩单次闭环](SMA-010-single-performance-mapping/spec.md)，单次闭环草案，供 SMA-001 r3 整体验收用例参考 | 未创建 | 未创建 |
 
-各子任务独立批准范围、验证和验收。执行阶段④–⑥的目标与依赖见总规格。原 r1 草案保留为[历史快照](SMA-001-cu-integration-and-scope-cleanup/evidence/r1-before-task-split/spec.md)。
+各子任务独立批准范围、验证和验收。整体实施范围与验收用例见获批的 r3 规格。r2 草案保留为[历史快照](SMA-001-cu-integration-and-scope-cleanup/evidence/r2-before-r3/spec.md)。原 r1 草案保留为[历史快照](SMA-001-cu-integration-and-scope-cleanup/evidence/r1-before-task-split/spec.md)。

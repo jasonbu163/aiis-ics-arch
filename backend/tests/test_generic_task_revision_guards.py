@@ -6,6 +6,7 @@ import json
 import pytest
 
 from app.equipment_observation import profile as observation
+from app.equipment_observation.domain import ObservationError
 from app.equipment_observation.services.guard import EvidenceUnavailable, probe_target
 from app.plc_facts import v2_config
 from app.plc_facts.crud import sync_v2_maintenance
@@ -101,8 +102,9 @@ def observation_document(revision):
 @pytest.mark.asyncio
 async def test_observation_exact_target_and_device_timing():
     for revision in ('8c0e2a4d6f18', PREDECESSOR, TASK_SUCCESSOR, RETIREMENT, ACQUISITION, RECEIPT_SEPARATION):
-        with pytest.raises(ValueError, match='invalid target'):
-            observation.parse_profile(observation_document(revision))
+        observed = observation.parse_profile(observation_document(revision))
+        assert observed['target']['schemaRevision'] == revision
+        assert observation.require_energy_target(observed) is observed
     document = observation_document(SUCCESSOR)
     parsed = observation.parse_profile(document)
     assert await probe_target(AsyncProbe([SUCCESSOR]), parsed['target']) == NOW
@@ -141,13 +143,12 @@ def test_unknown_profile_revision_and_disabled_facts_stay_rejected(monkeypatch, 
     monkeypatch.setattr(v2_config, 'V2Settings', lambda: config)
     with pytest.raises(V2Error, match='not_ready'):
         v2_config.get_profile()
-    with pytest.raises(ValueError):
-        observation.parse_profile(observation_document('unrecognized'))
+    observed = observation.parse_profile(observation_document('unrecognized'))
+    assert observation.require_energy_target(observed) is observed
 
 
 def test_new_observation_revision_keeps_machine_and_user_scopes():
     from hashlib import sha256
-    from app.equipment_observation.domain import ObservationError
 
     document = observation_document(SUCCESSOR)
     document['producers'] = [{'producerId':'fixture', 'tokenSha256':sha256(b'fixture-secret').hexdigest(),

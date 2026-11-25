@@ -8,53 +8,10 @@
 import {
   MOCK_LABEL,
   createMockMarker,
-  createMockMutation,
   createMockPage,
-  createMockRecord,
   mockNow
 } from '@/api/mock/_diagnostic'
-
-const makeQualityRecord = (apiName, index) => createMockRecord(apiName, index, {
-  coilNo: `MOCK-COIL-${String(index).padStart(4, '0')}`,
-  grade: MOCK_LABEL,
-  spec: '99.99 x 9999',
-  weight: 999 + index,
-  qualityGrade: 'frontend_mock',
-  judgment: 'qualified',
-  inspector: `${MOCK_LABEL}-INSPECTOR-${index}`,
-  inspectTime: mockNow(),
-  qualityItems: [],
-  defects: []
-})
-
-export async function getQualityList(params) {
-  const apiName = 'quality.getQualityList'
-  return createMockPage(apiName, params, [makeQualityRecord(apiName, 1), makeQualityRecord(apiName, 2)])
-}
-
-export async function getQualityById(id) {
-  return makeQualityRecord('quality.getQualityById', Number(id) || 1)
-}
-
-export async function createQuality(data) {
-  return createMockMutation('quality.createQuality', data)
-}
-
-export async function updateQuality(id, data) {
-  return createMockMutation('quality.updateQuality', data, id)
-}
-
-export async function deleteQuality(id) {
-  return createMockMutation('quality.deleteQuality', {}, id)
-}
-
-export async function addDefect(qualityId, data) {
-  return createMockMutation('quality.addDefect', data, qualityId)
-}
-
-export async function deleteDefect(qualityId, defectId) {
-  return createMockMutation('quality.deleteDefect', { qualityId }, defectId)
-}
+import { formatShanghaiDateTime, shanghaiInputToRfc3339 } from '@/utils/date'
 
 export async function getSPCData() {
   const apiName = 'quality.getSPCData'
@@ -97,33 +54,60 @@ const demoReport = {
   visible: true, isNullable: true, order: 0
 }
 let demoConfig = { revision: 1, definitions: [demoReport] }
-let demoResult = { id: 'demo-quality-1', taskNo: demoTask, targetKey: 'demo',
+const demoResults = [{ id: 'demo-quality-1', taskNo: demoTask, targetKey: 'demo',
   items: { reportUrl: 'https://example.com/report/demo.pdf' },
-  createdAt: '2026-11-23T08:00:00+08:00', updatedAt: '2026-11-23T08:00:00+08:00' }
+  createdAt: '2026-11-23T08:00:00+08:00', updatedAt: '2026-11-23T08:00:00+08:00' }]
+let nextId = 2
 
 function enabledDefinitions() {
   return demoConfig.definitions.filter(field => field.enabled)
 }
 
-export async function getQualityResult() {
-  return { ...demoResult, items: Object.fromEntries(enabledDefinitions()
-    .map(field => [field.name, demoResult.items[field.name] ?? null])) }
+function projectResult(row) {
+  return { ...row, items: Object.fromEntries(enabledDefinitions()
+    .map(field => [field.name, row.items[field.name] ?? null])) }
+}
+
+export async function getQualityResult(taskNo) {
+  const row = demoResults.find(result => result.taskNo === taskNo)
+  if (!row) throw new Error('quality.not_found')
+  return projectResult(row)
 }
 
 export async function listQualityResults(params) {
-  const matches = (!params?.taskNo || params.taskNo.trim().toUpperCase() === demoTask) &&
-    (!params?.targetKey || params.targetKey === demoResult.targetKey) &&
-    (!params?.createdFrom || Date.parse(params.createdFrom) <= Date.parse(demoResult.createdAt)) &&
-    (!params?.createdTo || Date.parse(params.createdTo) > Date.parse(demoResult.createdAt))
+  const matches = demoResults.filter(row =>
+    (!params?.taskNo || params.taskNo.trim().toUpperCase() === row.taskNo) &&
+    (!params?.targetKey || params.targetKey === row.targetKey) &&
+    (!params?.createdFrom || Date.parse(params.createdFrom) <= Date.parse(row.createdAt)) &&
+    (!params?.createdTo || Date.parse(params.createdTo) > Date.parse(row.createdAt)))
+  const page = params?.page ?? 1
+  const pageSize = params?.pageSize ?? 20
+  const start = (page - 1) * pageSize
+  const results = matches.slice(start, start + pageSize).map(projectResult)
   return {
-    ...createMockPage('quality.listQualityResults', params, matches ? [await getQualityResult()] : []),
-    fields: enabledDefinitions()
+    ...createMockPage('quality.listQualityResults', { page, pageSize }, results),
+    total: matches.length, totalPages: Math.ceil(matches.length / pageSize), fields: enabledDefinitions()
   }
 }
 
+export async function createQualityResult(body) {
+  const taskNo = body.taskNo.trim().toUpperCase()
+  if (demoResults.some(row => row.taskNo === taskNo)) {
+    throw Object.assign(new Error('quality.task_no_conflict'),
+      { response: { status: 409, data: { errorCode: 'quality.task_no_conflict' } } })
+  }
+  const now = shanghaiInputToRfc3339(formatShanghaiDateTime(new Date()))
+  const row = { id: `demo-quality-${nextId++}`, taskNo, targetKey: body.targetKey ?? null,
+    items: { ...body.items }, createdAt: now, updatedAt: now }
+  demoResults.unshift(row)
+  return { outcome: 'created', quality: projectResult(row) }
+}
+
 export async function saveQualityResult(body) {
-  demoResult = { ...demoResult, items: { ...demoResult.items, ...body.items } }
-  return { outcome: 'updated', quality: await getQualityResult() }
+  const row = demoResults.find(result => result.taskNo === body.taskNo)
+  if (!row) throw new Error('quality.not_found')
+  row.items = { ...row.items, ...body.items }
+  return { outcome: 'updated', quality: projectResult(row) }
 }
 
 export async function getQualityFieldConfig() {

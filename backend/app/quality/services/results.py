@@ -1,6 +1,8 @@
 """质量结果与字段配置的用例和事务。"""
 from datetime import datetime
 
+from sqlalchemy.exc import IntegrityError
+
 from app.quality.crud.results import config_row, page_rows, result_row
 from app.quality.domain import QualityError, QualityErrorCode, validate_definitions, validate_items
 from app.quality.models.results import QualityResult
@@ -68,6 +70,38 @@ async def list_results(db, filters, *, include_fields=False):
     return page
 
 
+async def _insert_result(db, body, patch, fields):
+    now = datetime.now(BUSINESS_TIMEZONE)
+    row = QualityResult(task_no=body.taskNo, target_key=body.targetKey, items=patch,
+                        created_at=now, updated_at=now)
+    db.add(row)
+    await db.flush()
+    return {'outcome': 'created', 'quality': _result(row, fields)}
+
+
+async def create_result(db, body):
+    # 与集成 upsert 同时锁定当前配置，串行判定任务号是否已存在。
+    fields = _definitions(await _configuration(db, lock=True), enabled_only=True)
+    if await result_row(db, body.taskNo, lock=True) is not None:
+        raise QualityError(QualityErrorCode.TASK_NO_CONFLICT, 409, field='taskNo')
+    patch = validate_items(body.items, fields, human=True)
+    try:
+        return await _insert_result(db, body, patch, fields)
+    except IntegrityError as exc:
+        # 兼容直接向同一库写入的竞争，只识别任务号唯一约束。
+        args = getattr(exc.orig, 'args', ())
+        dialect = db.get_bind().dialect.name
+        mysql_duplicate = (dialect == 'mysql' and len(args) == 2 and args[0] == 1062
+                           and str(args[1]).rpartition(" for key ")[2] in
+                           {"'uq_quality_main_task_no'", "'quality_main.uq_quality_main_task_no'"})
+        sqlite_duplicate = (dialect == 'sqlite' and
+                            getattr(exc.orig, 'sqlite_errorname', '') == 'SQLITE_CONSTRAINT_UNIQUE'
+                            and str(exc.orig) == 'UNIQUE constraint failed: quality_main.task_no')
+        if mysql_duplicate or sqlite_duplicate:
+            raise QualityError(QualityErrorCode.TASK_NO_CONFLICT, 409, field='taskNo') from None
+        raise
+
+
 async def save_result(db, body, *, human):
     # 单项目配置锁也负责序列化首次写入；并发上报不会丢失不同字段。
     config = await _configuration(db, lock=True)
@@ -77,12 +111,7 @@ async def save_result(db, body, *, human):
            else await result_row(db, body.taskNo, lock=True))
     target_set = 'targetKey' in body.model_fields_set
     if row is None:
-        now = datetime.now(BUSINESS_TIMEZONE)
-        row = QualityResult(task_no=body.taskNo, target_key=body.targetKey, items=patch,
-                            created_at=now, updated_at=now)
-        db.add(row)
-        await db.flush()
-        return {'outcome': 'created', 'quality': _result(row, fields)}
+        return await _insert_result(db, body, patch, fields)
 
     target = row.target_key
     if target_set:

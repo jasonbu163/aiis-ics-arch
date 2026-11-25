@@ -6,7 +6,7 @@ import hashlib
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from ..services.guard import EvidenceUnavailable, probe_target
+from .guard import EvidenceUnavailable, current_clock, verify_energy_target
 from common.integration.canonical import canonical_bytes
 from ..domain import ObservationError, reject
 from ..models import EnergyMetric, EnergyReceipt, EnergySample, HistorySample, LatestSnapshot, MetricConfig, MetricGroup, Receipt, SlotBinding
@@ -84,7 +84,7 @@ async def device(db, profile, producer, target, document, decimal_document=None)
     for attempt in range(3):
         commit_started = False
         try:
-            now = await probe_target(db, profile["target"])
+            now = await current_clock(db)
             await write_sources.check_profile(db, profile, writing_as=(equipment, producer["producerId"]))
             device_profile = profile["devices"][equipment]
             record = None
@@ -214,7 +214,8 @@ async def energy(db, profile, producer, document):
     for attempt in range(3):
         commit_started = False
         try:
-            now = await probe_target(db, profile["target"])
+            await verify_energy_target(db, profile["target"])
+            now = await current_clock(db)
             previous = await _retry_receipt(db, EnergyReceipt, "energy", producer, event)
             if previous is not None:
                 return previous

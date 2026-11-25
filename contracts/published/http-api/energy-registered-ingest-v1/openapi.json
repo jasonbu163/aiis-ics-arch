@@ -1,0 +1,693 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AIIS Energy Registered Batch Ingest",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/energy/write-sources": {
+      "get": {
+        "tags": [
+          "Equipment observation"
+        ],
+        "summary": "List Energy Write Sources",
+        "operationId": "list_energy_write_sources_api_v1_energy_write_sources_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Equipment observation"
+        ],
+        "summary": "Add Energy Write Source",
+        "operationId": "add_energy_write_source_api_v1_energy_write_sources_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWriteSource"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/energy/write-sources/{sourceKey}": {
+      "patch": {
+        "tags": [
+          "Equipment observation"
+        ],
+        "summary": "Patch Energy Write Source",
+        "operationId": "patch_energy_write_source_api_v1_energy_write_sources__sourceKey__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sourceKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sourcekey"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchWriteSource"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Equipment observation"
+        ],
+        "summary": "Delete Energy Write Source",
+        "operationId": "delete_energy_write_source_api_v1_energy_write_sources__sourceKey__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "sourceKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sourcekey"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/integration/energy/registered-samples": {
+      "post": {
+        "tags": [
+          "Equipment observation"
+        ],
+        "summary": "Write Registered Energy",
+        "operationId": "write_registered_energy_api_v1_integration_energy_registered_samples_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "sourceKey": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.-]{1,64}$"
+                  },
+                  "target": {
+                    "const": "energy"
+                  },
+                  "observedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "items": {
+                    "additionalProperties": {
+                      "additionalProperties": {
+                        "properties": {
+                          "values": {
+                            "additionalProperties": {
+                              "type": "number"
+                            },
+                            "type": "object",
+                            "minProperties": 1
+                          },
+                          "quality": {
+                            "enum": [
+                              "good",
+                              "bad",
+                              "unknown",
+                              null
+                            ]
+                          },
+                          "intervalStartAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "intervalEndAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "additionalProperties": false,
+                        "type": "object",
+                        "required": [
+                          "values"
+                        ]
+                      },
+                      "type": "object",
+                      "minProperties": 1
+                    },
+                    "type": "object",
+                    "minProperties": 1
+                  }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "sourceKey",
+                  "target",
+                  "observedAt",
+                  "items"
+                ]
+              },
+              "example": {
+                "sourceKey": "energy-line-01",
+                "target": "energy",
+                "observedAt": "2026-11-24T12:00:00+08:00",
+                "items": {
+                  "meter-01": {
+                    "electricity": {
+                      "quality": "good",
+                      "intervalStartAt": "2026-11-24T11:00:00+08:00",
+                      "intervalEndAt": "2026-11-24T12:00:00+08:00",
+                      "values": {
+                        "intervalEnergy": 120
+                      }
+                    }
+                  },
+                  "meter-02": {
+                    "electricity": {
+                      "quality": "good",
+                      "values": {
+                        "totalEnergy": 9820,
+                        "activePower": 0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Stored or replayed batch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "const": 200
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "properties": {
+                        "sourceKey": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_.-]{1,64}$"
+                        },
+                        "target": {
+                          "const": "energy"
+                        },
+                        "observedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "outcome": {
+                          "const": "stored"
+                        },
+                        "receiptId": {
+                          "type": "string"
+                        },
+                        "records": {
+                          "items": {
+                            "properties": {
+                              "meterId": {
+                                "type": "string"
+                              },
+                              "groupKey": {
+                                "type": "string"
+                              },
+                              "recordId": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object",
+                            "required": [
+                              "meterId",
+                              "groupKey",
+                              "recordId"
+                            ]
+                          },
+                          "type": "array",
+                          "minItems": 1
+                        }
+                      },
+                      "type": "object",
+                      "required": [
+                        "sourceKey",
+                        "target",
+                        "observedAt",
+                        "outcome",
+                        "receiptId",
+                        "records"
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "message",
+                    "data"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "message": "success",
+                  "data": {
+                    "sourceKey": "energy-line-01",
+                    "target": "energy",
+                    "observedAt": "2026-11-24T12:00:00.000000+08:00",
+                    "outcome": "stored",
+                    "receiptId": "7001",
+                    "records": [
+                      {
+                        "meterId": "meter-01",
+                        "groupKey": "electricity",
+                        "recordId": "1048"
+                      },
+                      {
+                        "meterId": "meter-02",
+                        "groupKey": "electricity",
+                        "recordId": "1049"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Source not enabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "const": 403
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "null"
+                    },
+                    "errorCode": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "message",
+                    "data",
+                    "errorCode"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Batch identity conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "const": 409
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "null"
+                    },
+                    "errorCode": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "message",
+                    "data",
+                    "errorCode"
+                  ]
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "const": 413
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "null"
+                    },
+                    "errorCode": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "message",
+                    "data",
+                    "errorCode"
+                  ]
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "const": 415
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "null"
+                    },
+                    "errorCode": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "message",
+                    "data",
+                    "errorCode"
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid batch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "const": 422
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "null"
+                    },
+                    "errorCode": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "message",
+                    "data",
+                    "errorCode"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Unavailable or commit unknown",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "const": 503
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "null"
+                    },
+                    "errorCode": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "message",
+                    "data",
+                    "errorCode"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateWriteSource": {
+        "properties": {
+          "sourceKey": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.-]{1,64}$",
+            "title": "Sourcekey"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sourceKey"
+        ],
+        "title": "CreateWriteSource"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "PatchWriteSource": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 128,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enabled"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "PatchWriteSource"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "/api/v1"
+    }
+  ]
+}

@@ -81,6 +81,10 @@ The eight-operation business integration contract is historical. The four old de
 
 [Generic task workflow v2 candidate](published/http-api/generic-task-workflow-v2/README.md) adds partial updates, current field definitions, ordinary plan GET, optional backfill and atomic performance feedback. Switching requires updating v1 callers. The candidate preserves v1 artifacts and documents the retired paths and target-adoption gates.
 
+## Energy registered ingest v1
+
+[Energy registered ingest v1](published/http-api/energy-registered-ingest-v1/README.md) describes independent administrator registration and token-free multi-meter POST with atomic receipts, an OpenAPI snapshot and synthetic examples.
+
 ## Quality results v1
 
 [Quality results v1](published/http-api/quality-results-v1/README.md) contains the independent structured result, local-field and trusted-network integration contract, with synthetic requests and a source OpenAPI snapshot.

@@ -11,7 +11,7 @@ from common.integration.envelope import fact_time
 from ..domain import ObservationError, identifier, reject, task_no, wire_time
 from ..models import HistorySample, LatestSnapshot, MetricConfig, MetricGroup, Receipt, SlotBinding
 from . import v2_domain, write_sources
-from .guard import current_clock, probe_target
+from .guard import current_clock
 from .ingest_v2 import _previous
 
 CONTRACT_VERSION = "aiis.observation-write/v1"
@@ -91,7 +91,6 @@ async def submit(db, profile, document):
     result = {field: request[field] for field in ("sourceKey", "target", "taskNo", "observedAt")}
     for attempt in range(3):
         try:
-            await probe_target(db, profile["target"])
             await write_sources.check_profile(db, profile)
             source = await write_sources.source_row(db, key, lock=True)
             if source is None or source.deleted_at is not None or not source.enabled:

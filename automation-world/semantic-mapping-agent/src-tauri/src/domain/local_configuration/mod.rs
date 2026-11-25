@@ -6,7 +6,7 @@ pub fn text<'a>(v: &'a Value, k: &str) -> Result<&'a str, String> {
     v[k].as_str()
         .ok_or_else(|| format!("SMA_CONFIGURATION_FIELD_INVALID:{k}"))
 }
-fn valid_key(s: &str) -> bool {
+pub(crate) fn valid_key(s: &str) -> bool {
     !s.is_empty() && s.len() <= 256 && !s.chars().any(|c| c.is_control() || c.is_whitespace())
 }
 fn fields(v: &Value, allowed: &[&str]) -> Result<(), String> {
@@ -19,13 +19,13 @@ fn fields(v: &Value, allowed: &[&str]) -> Result<(), String> {
     }
     Ok(())
 }
-fn typed(t: &str) -> bool {
+pub(crate) fn typed(t: &str) -> bool {
     matches!(t, "string" | "integer" | "number" | "boolean" | "datetime")
 }
 fn compatible(a: &str, b: &str) -> bool {
     a == b || (a == "integer" && b == "number")
 }
-fn value_type(v: &Value, t: &str) -> bool {
+pub(crate) fn value_type(v: &Value, t: &str) -> bool {
     match t {
         "string" => v.is_string(),
         "integer" => v.as_i64().is_some(),
@@ -43,6 +43,7 @@ pub fn key_field(r: &str) -> Result<&'static str, String> {
         "mappingValueRules" => Ok("valueRuleKey"),
         "mappings" => Ok("mappingKey"),
         "materials" => Ok("materialKey"),
+        "httpSources" => Ok("sourceKey"),
         _ => Err("SMA_CONFIGURATION_RESOURCE_INVALID".into()),
     }
 }
@@ -52,6 +53,7 @@ pub fn collection<'a>(d: &'a ConfigurationDocument, r: &str) -> Result<&'a Vec<V
         "mappingValueRules" => Ok(&d.mapping_value_rules),
         "mappings" => Ok(&d.mappings),
         "materials" => Ok(&d.materials),
+        "httpSources" => Ok(&d.http_sources),
         _ => Err("SMA_CONFIGURATION_RESOURCE_INVALID".into()),
     }
 }
@@ -64,6 +66,7 @@ fn collection_mut<'a>(
         "mappingValueRules" => Ok(&mut d.mapping_value_rules),
         "mappings" => Ok(&mut d.mappings),
         "materials" => Ok(&mut d.materials),
+        "httpSources" => Ok(&mut d.http_sources),
         _ => Err("SMA_CONFIGURATION_RESOURCE_INVALID".into()),
     }
 }
@@ -74,9 +77,12 @@ pub fn backup(d: &ConfigurationDocument) -> ConfigurationBackup {
         document: d.clone(),
     }
 }
+mod merge;
 mod preview;
+mod secret_fields;
 mod transform;
 mod validation;
 pub use preview::saved_preview;
+pub use secret_fields::check_full_export;
 pub use transform::transform;
 pub use validation::validate;

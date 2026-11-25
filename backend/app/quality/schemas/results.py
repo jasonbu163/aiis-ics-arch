@@ -107,6 +107,10 @@ class SaveResult(Contract):
     quality: Result
 
 
+class CreatedResult(SaveResult):
+    outcome: Literal['created']
+
+
 class Page(Contract):
     items: list[Result]
     total: int

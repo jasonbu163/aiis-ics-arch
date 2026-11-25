@@ -26,7 +26,7 @@ def test_single_linear_observation_migration_and_guard():
     config = Config(str(root / "alembic.ini"))
     config.set_main_option("script_location", str(root / "alembic"))
     graph = ScriptDirectory.from_config(config)
-    assert graph.get_heads() == ["a1c307f8d2e4"]
+    assert graph.get_heads() == ["b52e9c416a07"]
     revision = graph.get_revision("d8f2a4c6b915")
     assert revision.down_revision == "da6c32f8a701"
     assert graph.get_revision(revision.down_revision).down_revision == "c9e1a3b5d720"

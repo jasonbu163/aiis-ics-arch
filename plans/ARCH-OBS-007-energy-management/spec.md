@@ -1,9 +1,9 @@
 Task ID: ARCH-OBS-007
 Revision: r1
-Status: draft
+Status: owner_approved
 Owner Role: PM
 Allowed Writers: PM, Human Owner
-Handoff: 提交 Human Owner 审阅 r1；当前仅获授权起草规格，Development 尚未获准
+Handoff: Human Owner 已批准精确 r1 A，交 Development 按 STD 实施；B 合同及开发仍待批准
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
 Task Namespace: aiis-ics-arch
@@ -21,10 +21,10 @@ Related Task: ARCH-OBS-001、ARCH-OBS-003、ARCH-OBS-004、ARCH-OBS-005、ARCH-O
 
 本稿分两部分：
 
-- **A：页面归并与既有功能迁移**。§3、§4、§7.1 和 §8.1 给出可独立实施、检查与交接的具体范围。A 保留当前后端合同，可在 Human Owner 明确批准 A 后实施。
+- **A：页面归并与既有功能迁移**。§3、§4、§7.1 和 §8.1 给出可独立实施、检查与交接的具体范围。A 保留当前后端合同，Human Owner 已批准精确 r1 A 按 STD 实施。
 - **B：能耗来源登记及免 Token 写入**。§5、§6、§7.2 和 §8.2 记录已确认的业务方向及待明确合同。能耗专属字段与映射尚待确定，B 当前为设计范围，须先形成明确合同并取得对应范围批准后才能实施。A 的完成不代表 B 已实现。
 
-用户已授权起草本规格。用户尚未批准 r1 A 的开发，也未批准 B 的精确实现合同。PM 不创建 Development 的 `tasks.md` 或 Verification 的 `checklist.md`。批准后仍按 STD 执行 Development、fresh-context Verification 和 Human Owner 最终验收。
+Human Owner 已批准 r1 A 的开发，B 的精确实现合同尚未批准。PM 不创建 Development 的 `tasks.md` 或 Verification 的 `checklist.md`。r1 A 按 STD 执行 Development、fresh-context Verification 和 Human Owner 最终验收。
 
 ## 2. 当前基线
 
@@ -106,7 +106,7 @@ Related Task: ARCH-OBS-001、ARCH-OBS-003、ARCH-OBS-004、ARCH-OBS-005、ARCH-O
 
 ## 7. 允许改动范围
 
-### 7.1 A · 可批准的源码与文档范围
+### 7.1 A · 已批准的源码与文档范围
 
 - `frontend-js/src/app/energy/` 下与四个能耗入口、双语 locale、业务 API facade 和必要组件有关的文件。
 - `frontend-js/src/app/monitor/manifest.js`、`api/observations.js`、`views/observations/{admin,data,energy}.vue`、`components/observations/{EnergyAdmin,CurveChart,EmptyAxes}.vue` 与 `locales/{zh-CN,en-US}.json` 中与迁出和安全复用直接相关的改动。
@@ -159,3 +159,4 @@ A 的 Development 使用 `frontend-ui`、`i18n-workflow` 和 `code-document-inde
 | 日期 | 修订 | 记录 |
 | --- | --- | --- |
 | 2026-11-23 | r1 draft | 用户授权起草规格。A 的开发批准、B 的精确合同及开发批准均待 Human Owner 确认。 |
+| 2026-11-24（Asia/Shanghai） | r1 A owner_approved | Human Owner 原话：“批准 ARCH-OBS-007 r1 A，按 STD 启动 Development。” 本次批准仅覆盖 r1 A；B 的精确合同及开发仍待批准。 |

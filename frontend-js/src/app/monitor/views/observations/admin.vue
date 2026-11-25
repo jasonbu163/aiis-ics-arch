@@ -1,14 +1,13 @@
-<!-- 过程监控曲线和能耗指标配置分类、筛选与表单。 -->
+<!-- 过程监控曲线配置、筛选与表单。 -->
 <template>
   <div class="page-layout config-page">
     <BaseCard :title="t('monitor.observation.management')" compact>
-      <el-radio-group :model-value="active" class="card-action-segmented"
-        :aria-label="t('monitor.observation.management')" @change="selectTab">
+      <el-radio-group model-value="curves" class="card-action-segmented"
+        :aria-label="t('monitor.observation.management')">
         <el-radio-button value="curves">{{ tr('curveConfig') }}</el-radio-button>
-        <el-radio-button value="energy">{{ t('monitor.observation.energyConfig') }}</el-radio-button>
       </el-radio-group>
     </BaseCard>
-    <BaseCard v-if="active === 'curves'" :title="tr('curveConfig')">
+    <BaseCard :title="tr('curveConfig')">
       <template #actions>
         <div class="table-actions">
           <ActionButton variant="primary" :disabled="saving || loading || failed" @click="open()">{{ tr('add') }}</ActionButton>
@@ -51,11 +50,10 @@
         </el-table>
       </div>
     </BaseCard>
-    <EnergyAdmin v-show="active === 'energy'" kind="config" :active="active === 'energy'" />
     <el-dialog v-model="dialog" :title="t(editing ? 'equipment.observation.edit' : 'equipment.observation.add')"
-      class="standard-form-dialog observation-config-dialog" width="min(680px, 94vw)" align-center
-      :show-close="false" :close-on-click-modal="false">
-      <el-form label-position="top">
+      class="standard-form-dialog compact-form-dialog" width="min(680px, 94vw)" align-center
+      :show-close="false" :close-on-click-modal="true" :before-close="beforeClose">
+      <el-form label-position="top" class="dialog-form-grid">
         <el-form-item :label="t('equipment.observation.key')"><el-input v-model="form.curveGroupKey" :disabled="editing" /></el-form-item>
         <el-form-item :label="t('equipment.observation.category')">
           <el-select v-model="form.category">
@@ -88,7 +86,7 @@
       </el-form>
       <template #footer>
         <div class="core-dialog-footer">
-          <ActionButton @click="dialog = false">{{ t('equipment.observation.cancel') }}</ActionButton>
+          <ActionButton :disabled="saving" @click="dialog = false">{{ t('equipment.observation.cancel') }}</ActionButton>
           <ActionButton variant="primary" :loading="saving" @click="save">{{ t('equipment.observation.save') }}</ActionButton>
         </div>
       </template>
@@ -102,7 +100,6 @@ import { useI18n } from 'vue-i18n'
 import ActionButton from '@/components/common/ActionButton.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
 import { useTableColumnWidths } from '@/utils/tableColumnWidths'
-import EnergyAdmin from '../../components/observations/EnergyAdmin.vue'
 import { metrics } from '@/app/equipment/api/observations'
 import { curves, createCurve, updateCurve } from '../../api/observations'
 
@@ -113,7 +110,6 @@ const columns = useTableColumnWidths('observation.curves', {
   curveGroupKey: { width: 180, minWidth: 140 }, category: { width: 130, minWidth: 110 },
   titleZh: { width: 220, minWidth: 160 }, series: { width: 210, minWidth: 160 }, enabled: { width: 120, minWidth: 100 }
 })
-const active = ref('curves')
 const draft = reactive({ category: '', keyword: '' })
 const submitted = ref({ ...draft })
 const loading = ref(false)
@@ -138,14 +134,6 @@ const visibleRows = computed(() => {
 })
 const emptyText = computed(() => loading.value ? t('common.loading') :
   tr(Object.values(submitted.value).some(Boolean) ? 'noMatchingConfigs' : 'noConfigs'))
-function selectTab(tab) {
-  if (active.value === tab) return
-  generation++
-  dialog.value = false
-  Object.assign(draft, submitted.value)
-  active.value = tab
-  if (tab === 'curves') load()
-}
 function search() {
   dialog.value = false
   submitted.value = { ...draft, keyword: draft.keyword.trim() }
@@ -177,6 +165,7 @@ async function load() {
     if (id === generation) loading.value = false
   }
 }
+function beforeClose(done) { if (!saving.value) done() }
 async function save() {
   if (!dialog.value || saving.value) return
   saving.value = true
@@ -185,11 +174,11 @@ async function save() {
     if (editing.value) { delete payload.curveGroupKey; await updateCurve(form.curveGroupKey, payload) }
     else await createCurve(payload)
     dialog.value = false
-    if (active.value === 'curves') await load()
+    await load()
   } finally { saving.value = false }
 }
 onMounted(load)
-onBeforeUnmount(() => { generation++; active.value = null; dialog.value = false })
+onBeforeUnmount(() => { generation++; dialog.value = false })
 </script>
 
 <style scoped>

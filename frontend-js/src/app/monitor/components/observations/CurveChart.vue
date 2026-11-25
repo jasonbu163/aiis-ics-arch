@@ -35,9 +35,13 @@ import { useThemeStore } from '@/store/theme'
 import ActionButton from '@/components/common/ActionButton.vue'
 import { splitObservedPoints } from './curveSeries'
 
-const props = defineProps({ group: { type: Object, required: true }, range: { type: Array, default: () => [] } })
+const props = defineProps({
+  group: { type: Object, required: true },
+  range: { type: Array, default: () => [] },
+  messageNamespace: { type: String, default: 'monitor.observation' }
+})
 const { t } = useI18n()
-const tr = key => t(`monitor.observation.${key}`)
+const tr = key => t(`${props.messageNamespace}.${key}`)
 const element = ref()
 const theme = useThemeStore()
 const palette = ['--primary', '--success', '--warning', '--danger', '--info', '--text-secondary']

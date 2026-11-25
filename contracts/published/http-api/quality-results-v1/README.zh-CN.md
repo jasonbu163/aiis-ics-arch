@@ -11,12 +11,13 @@
 | `GET /integration/quality` | 可信网络。按条件分页。 |
 | `GET /integration/quality/field-config` | 可信网络。读取已启用定义和配置版本。 |
 | `GET /quality/results` | 有质量权限的登录用户。通过 `data.fields` 获取用于渲染的启用定义。 |
+| `POST /quality/results` | 有质量权限的管理员、主管和操作员。新增单条结果，可填写目标及已启用且允许编辑的字段。 |
 | `GET /quality/results/by-task/{taskNo}` | 有质量权限的登录用户。读取单条结果。 |
 | `POST /quality/results/upsert` | 有质量权限的管理员、主管和操作员。编辑已有结果的可编辑字段。 |
 | `GET /quality/field-config` | 管理员。读取包括停用项在内的完整定义。 |
 | `PUT /quality/field-config` | 管理员。提交当前版本及完整定义。 |
 
-四个集成端点由部署侧隔离至可信网络。获准接入方使用统一合同。报告解析和下游转发由各自的程序负责。
+私有 `/quality` 路由供平台 Web 前端使用，沿用登录和角色权限。公共 `/integration/quality` 路由供获准接入的 SMA、CA、FF 和第三方在可信网络内使用统一合同。部署侧负责网络隔离，现场程序负责报告解析和下游转发。
 
 ## 字段与更新
 
@@ -30,6 +31,8 @@
 
 成功信封为 `{code,message,data,timestamp}`，写入返回 `data.outcome`（`created`、`updated` 或 `unchanged`）和 `data.quality`。集成入口允许空结果，空结果本身没有报告完成语义。
 
+人工新增须提供 `taskNo`，可省略 `targetKey` 和 `items`。成功时 HTTP 201，信封 `code: 200`，返回 `data.outcome: "created"` 和 `data.quality`。归一化后任务号已存在时返回 HTTP 409 和 `quality.task_no_conflict`，已有值原样保留。后续集成上报可按现有规则合并字段。
+
 错误信封另有 `errorCode` 和 `details`。常见错误包括 `quality.unauthenticated`（401）、`quality.forbidden`（403）、`quality.not_found`（404）、`quality.target_conflict` 或 `quality.config_revision_conflict`（409）和 `quality.invalid_request`（422）。响应丢失或收到 `quality.commit_unknown`（503）时，先重读结果或配置并核对再决定是否重试。`quality.unavailable`（503）表示存储暂时无法服务。
 
-以[后端路由](../../../../backend/app/quality/api/results.py)、[数据结构](../../../../backend/app/quality/schemas/results.py)及[已批准规格](../../../../plans/ARCH-QUALITY-001-task-quality-results/spec.md)为准。
+参见[后端路由](../../../../backend/app/quality/api/results.py)、[数据结构](../../../../backend/app/quality/schemas/results.py)、[基础规格](../../../../plans/ARCH-QUALITY-001-task-quality-results/spec.md)和[人工新增规格](../../../../plans/ARCH-QUALITY-002-manual-results-and-legacy-retirement/spec.md)。

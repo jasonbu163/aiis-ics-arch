@@ -35,6 +35,11 @@ source topology or important entrypoints change.
 - `backend/app/equipment_observation/services/registered_ingest.py` — canonical sample identity and transactional registered-source writes.
 - `backend/alembic/versions/20261120_1600_e9f3b5d7c021_observation_write_sources.py` — guarded single-table source registration.
 - `contracts/published/http-api/observation-write-sources-v1/` — token-free observation API and admin registration contract.
+- `backend/app/equipment_observation/models/energy_write_source.py` / `services/energy_write_sources.py` — independent energy registration and source lifecycle.
+- `backend/app/equipment_observation/services/energy_registered_ingest.py` — same-capture-time batch identity, receipt replay and atomic meter samples.
+- `backend/alembic/versions/20261124_2300_b52e9c416a07_energy_write_sources.py` — additive energy registration successor.
+- `frontend-js/src/app/energy/components/EnergyWriteSources.vue` — energy configuration write registration tab.
+- `contracts/published/http-api/energy-registered-ingest-v1/` — token-free batch and Bearer registration contract.
 - `backend/app/equipment_observation/machine_openapi.py` — v2 machine request schemas shared by the live OpenAPI routes.
 - `backend/app/plc_facts/services/observation_evidence.py` — retained r8 task attribution helper; r10 observation ingest does not require PLC evidence.
 - `backend/alembic/versions/20261116_1800_8c0e2a4d6f18_add_equipment_observation.py` — explicit seven-table r8 successor.
@@ -76,6 +81,7 @@ source topology or important entrypoints change.
 - `frontend-js/src/app/plan/` / `frontend-js/src/app/performance/` — generic task list, detail, field settings and actions; old dashboard is disabled.
 - `frontend-js/src/app/acquisition-data/` — paginated realtime PLC points and DB sample history with optional filters, source labels and sample details.
 - `frontend-js/src/app/{equipment,monitor}/views/observations/` — configurable cards, curves and administrator pages; `equipment/components/observations/RecordList.vue` provides configurable metric columns.
+- `frontend-js/src/app/energy/` — energy menu, existing statistics and hourly prices, meter definitions and sample review; statistics reuse the process time-series chart.
 - `frontend-js/src/app/acquisition-data/views/sources/index.vue` — administrator source list, copyable parameters, confirmed takeover and deletion.
 - `frontend-js/src/utils/tableColumnWidths.js` — shared local column-width preferences keyed by table and field.
 - `frontend-js/src/config/systemName.js` — independent bilingual build-time system names and optional login descriptions consumed through global i18n.
@@ -148,7 +154,7 @@ documentation initialization in this repository.
 
 - `backend/app/energy/models/energy_price_hour.py` — UTC observedAt/hourStart hourly snapshots with a unique hour key.
 - `backend/alembic/versions/20261013_1600_b8d0f2a4c6e8_add_energy_price_hours.py` — explicit hours-table successor; preserves the append archive.
-- `frontend-js/src/app/auxiliary/views/price/index.vue` — readonly current prices, Shanghai daily history and whole-group add dialog.
+- `frontend-js/src/app/energy/views/price.vue` — readonly current prices, Shanghai daily history and whole-group add dialog.
 
 ## Public module admission and reintegration
 
@@ -195,7 +201,7 @@ documentation initialization in this repository.
 - `automation-world/data-acquisition-agent/src/console/composables/useAgentConsoleShell.ts` / `components/console/YamlMigrationNotice.vue` — 纯壳偏好导航与已从普通页面解绑的历史迁入组件；无桥预览无外发/假保存。
 - `automation-world/data-acquisition-agent/vite.validation.config.ts` / `src-tauri/tests/fixtures/local-acquisition/` — env-isolated validation build and bounded sanitized parser/layout/transport fixtures.
 - `automation-world/data-acquisition-agent/src-tauri/tests/fixtures/source-import-minimal/` — handwritten DB21/UDT three-leaf controlled import pair, independent expected checklist and paired notes; no TIA export or live address proof.
-- `automation-world/semantic-mapping-agent/` — Rust/SQLite-owned local connection/catalog/materials/targets/rules/mappings and saved-revision pure preview; normal delivery admission disabled for SMA-004. Read-only facts and inert startup v1 compatibility remain; production/help/legacy SQL responsibilities stay retired.
+- `automation-world/semantic-mapping-agent/` — local HTTP GET collection and POST mapping, snapshot and configuration SQLite storage, an eight-page CU workspace, and explicit independent runtime controls.
 - `automation-world/console-ui/src/ui/components/{ConsoleCard,ConsoleActionButton}.vue` / `src/ui/styles/components.css` — 标题说明、按优先级折叠的标题栏状态、末位刷新插槽、工具栏及 24 px 表格行操作。
 - `automation-world/console-ui/src/workbench/{Workbench,PageSamples}.vue` — 常驻主题弹层、两级页面导航、筛选分页与可操作列表状态范例。
 - `automation-world/console-ui/src/ui/useTableColumnWidths.ts` — Element Plus 表格列宽的本机记忆、最小宽度和单表恢复。
@@ -203,9 +209,16 @@ documentation initialization in this repository.
 - `automation-world/semantic-mapping-agent/tests/cu-integration.test.mjs` — UI preference persistence/fallback, cross-application/business-key isolation and no-HTTP regression; all native business tables reuse SMA tableWidths state/directive.
 - `automation-world/semantic-mapping-agent/src-tauri/src/contracts/local_configuration.rs` — finite local configuration, CAS intent, import preview and complete JSON backup DTOs.
 - `automation-world/semantic-mapping-agent/src-tauri/src/domain/local_configuration/` — complete graph/type/reference validation, normalized resource transforms and saved-revision pure mapping preview.
-- `automation-world/semantic-mapping-agent/src-tauri/src/infrastructure/config_store/mod.rs` — SMA-owned schema v1 SQLite singleton; short-transaction CAS, bounded busy failure and atomic rollback.
+- `automation-world/semantic-mapping-agent/src-tauri/src/infrastructure/config_store/mod.rs` — schema-v1 configuration CAS and independent atomic source snapshots; mapping reads pin configuration and selected source snapshots in one SQLite transaction.
 - `automation-world/semantic-mapping-agent/src-tauri/src/services/local_configuration/mod.rs` — serialized local configuration use cases, runtime-busy guard and content/revision-bound preview/apply.
 - `automation-world/semantic-mapping-agent/src-tauri/src/commands/local_configuration/mod.rs` — thin local configuration/load/change/import/export/saved-preview IPC adapters.
+- `automation-world/semantic-mapping-agent/src-tauri/src/{commands,contracts,infrastructure,services}/http_mapping.rs` and `domain/http_mapping/` — source and target IPC, typed point extraction, shared POST evaluator, bounded HTTP transport and single-use confirmation.
+- `automation-world/semantic-mapping-agent/src-tauri/src/services/http_scheduler.rs` — GET and POST lanes with bounded queues, per-target limits, measured HTTP concurrency and independent drains.
+- `automation-world/semantic-mapping-agent/src-tauri/src/services/http_scheduler/tests.rs` — scheduler drain, manual concurrency reservation and isolated in-flight HTTP load checks.
+- `automation-world/semantic-mapping-agent/src-tauri/src/services/http_mapping/{acceptance_tests,fixture}.rs` — disposable SQLite and HTTP fixtures for mixed-source bindings, frozen payloads, atomic latest reads, failure handling and 128-source/384-mapping load.
+- `automation-world/semantic-mapping-agent/src/app/http-mapping/` — Fact sources, Fact points, Target API configuration, Value rules, Mapping configuration and Mapping execution.
+- `automation-world/semantic-mapping-agent/src/app/configuration-management/` — portable JSON/XLSX exchange, dependency selection, credential exclusions, import preview and legacy file entry.
+- `automation-world/semantic-mapping-agent/tests/{configuration-exchange.test.mjs,http-forwarding.browser.cjs}` — workbook and JSON roundtrips plus browser checks of the current eight pages using fixture IPC.
 - `automation-world/semantic-mapping-agent/src/app/twin-facts/api/localConfiguration.ts` — native configuration facade with observed revision and explicit import token; no remote/localStorage fallback.
 - `automation-world/semantic-mapping-agent/src-tauri/src/{contracts,domain,infrastructure,services,commands}/acquisition.rs` — SMA-008 r3 手工采集回环、类型与映射校验、现有采集 HTTP、会话暂存的单次请求与回读。
 - `automation-world/semantic-mapping-agent/src/app/twin-facts/components/{AcquisitionLoopbackPanel,AcquisitionPointsTable}.vue` — 事实表的只读采集查询、独立四步手工回环、预览确认与样本回读。
@@ -341,9 +354,11 @@ Package `__init__.py` files, `mocks/` and `seeds/` are import-safe and do not ex
 ## ARCH-QUALITY-001 task quality results
 
 - `backend/app/quality/{domain.py,models/results.py,schemas/results.py}` — independent result tables, typed fields, and validation.
-- `backend/app/quality/{api,services,crud}/results.py` — quality read/write routes, permissions, configuration revisions, and transactional partial writes.
+- `backend/app/quality/{api,services,crud}/results.py` — quality read/write routes, permissions, configuration revisions, manual creation, and transactional partial writes.
 - `backend/alembic/versions/20261123_1500_f0a2b4c6d8e1_quality_results.py` — guarded two-table forward migration and initial field configuration.
-- `frontend-js/src/app/quality/views/results/` and `views/local-fields/index.vue` — task results, historical inspections entrance, and administrator field management.
+- `frontend-js/src/app/quality/views/results/` and `views/local-fields/index.vue` — task results, manual creation, and administrator field management.
+- `frontend-js/src/app/quality/views/control/index.vue` — hidden legacy link compatibility through the quality list route guard.
+- `backend/app/quality/api/routes.py` — SPC endpoints retained after retiring legacy inspection and defect APIs.
 - `frontend-js/src/app/quality/components/QualityFieldForm.vue` — editor for local field definitions and link text.
 - `backend/tests/test_quality_results.py`, `test_quality_revision_guards.py`, and `backend/tests_mysql/test_quality_results_mysql.py` — synthetic HTTP, migration, and revision compatibility checks.
 - `frontend-js/tests/module-registry/quality-results.test.mjs` — quality page component checks.

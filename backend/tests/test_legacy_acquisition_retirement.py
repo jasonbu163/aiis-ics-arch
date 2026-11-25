@@ -83,7 +83,7 @@ def test_single_head_and_metadata_retire_only_nine_tables():
     module = migration()
     import_model_packages()
     graph = ScriptDirectory.from_config(Config('alembic.ini'))
-    assert graph.get_heads() == ['a1c307f8d2e4']
+    assert graph.get_heads() == ['b52e9c416a07']
     assert graph.get_revision('ae20b4d6f831').down_revision == '9d1f3a5c7e20'
     assert graph.get_revision('9d1f3a5c7e20').down_revision == '8c0e2a4d6f18'
     assert graph.get_revision('8c0e2a4d6f18').down_revision == '7b9d1f3a5c7e'
@@ -114,7 +114,7 @@ def test_single_head_and_metadata_retire_only_nine_tables():
         'metric_ingest_receipts': 'observation_ingest_receipts',
     }
     renames = observation_renames | graph.get_revision('a1c307f8d2e4').module.RENAMES
-    expected_current = {renames.get(table, table) for table in current} | {'energy_ingest_receipts', 'observation_write_sources', 'quality_main', 'quality_field_config'}
+    expected_current = {renames.get(table, table) for table in current} | {'energy_ingest_receipts', 'energy_write_sources', 'observation_write_sources', 'quality_main', 'quality_field_config'}
     assert set(Base.metadata.tables) == expected_current
 
 

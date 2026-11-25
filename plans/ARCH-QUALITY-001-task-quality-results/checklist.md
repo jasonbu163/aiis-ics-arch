@@ -1,12 +1,12 @@
 Task ID: ARCH-QUALITY-001
 Revision: r2
-Status: qa_passed
+Status: owner_accepted
 Owner Role: Verification
 Allowed Writers: Verification
 Workflow Mode: STD
 Execution Mode: agent_team_same_session
-Handoff: QA2 完成，交 Human Owner 最终验收
-Updated: 2026-11-23 Asia/Shanghai
+Handoff: Human Owner 已完成 r2 最终验收
+Updated: 2026-11-24 Asia/Shanghai
 
 # 第一次独立 Verification
 
@@ -70,3 +70,11 @@ Development 收到 F1 后修复并记录新的正式文件摘要、自检和 han
 - QA2 浏览器同时通过部分编辑、空态与错误态、实际拖拽列宽及刷新恢复和重置、历史入口与返回、配置冲突、英文浅色桌面与中文深色 430px 对齐回归。返修验证脚本 SHA-256 为 `09ff02f97b5ef085b9d7dbd5905c3176e9047d6128980743813f185654358462`。
 - 在正式根目录执行 `node --test frontend-js/tests/module-registry/quality-results.test.mjs`，4 passed。正式 frontend-js 执行 `pnpm check:modules`，9 模块、30 路由、9 分组通过。`pnpm test:modules` 为 111 passed、3 failed，退出 1，与上列首轮相同的 Monitor 排序三项。质量专项无失败。`git diff --check` 退出 0。
 - QA2 未重跑后端或 MySQL，未访问开发库。前后两次核对 8000 无监听。临时 Chrome 与回环服务已结束。QA2 临时目录内的构建、脚本、截图和日志可由协调者回收。当前无本任务 QA blocker，移交 Human Owner 决定最终验收。
+
+## Human Owner 最终验收 · r2
+
+2026-11-24（Asia/Shanghai），Human Owner 明确确认：“验收通过 ARCH-QUALITY-001 r2 和 ARCH-QUALITY-002 r1”。据此记录 ARCH-QUALITY-001 r2 为 `owner_accepted`。
+
+Human Owner 在开发环境的质量列表创建了 `TEST-P-01`，随后在 Swagger 通过公开接口执行 upsert 和 GET。回读结果包含 `defectCount=7`、`reportUrl=https://example.com/quality/test-p-01`，目标标识为 `null`，创建时间和更新时间分别返回。
+
+本次仅登记验收决定及手工证据。无临时资源。

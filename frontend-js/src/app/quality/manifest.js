@@ -2,7 +2,7 @@
  * 文件路径: /frontend-next-js/src/app/quality/manifest.js
  * 功能描述: 质量模块前端 manifest，集中声明模块路由
  * 主要功能:
- *   - 暴露质量列表、质量控制和 SPC 页面路由定义
+ *   - 暴露任务质量、SPC 与旧链接兼容路由
  *   - 保持 router 实例和导航守卫仍由 src/router 统一管理
  */
 

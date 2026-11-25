@@ -124,3 +124,127 @@ fn read(connection: &Connection) -> Result<ConfigurationSnapshot, String> {
         document,
     })
 }
+
+impl ConfigStore {
+    /// 读取同一 SQLite 读事务所见的配置与最新快照。
+    pub fn with_http_snapshots(
+        &mut self,
+        keys: impl FnOnce(&ConfigurationDocument) -> Vec<String>,
+    ) -> Result<
+        (
+            ConfigurationSnapshot,
+            Vec<crate::contracts::http_mapping::SourceSnapshot>,
+        ),
+        String,
+    > {
+        let transaction = self.connection.transaction().map_err(db_error)?;
+        let config = read(&transaction)?;
+        let keys = keys(&config.document);
+        let mut snapshots = Vec::new();
+        if !keys.is_empty() && has_http_snapshots(&transaction)? {
+            use rusqlite::OptionalExtension;
+            let mut statement = transaction
+                .prepare(
+                    "SELECT definition_key, snapshot FROM http_source_latest WHERE source_key=?1",
+                )
+                .map_err(db_error)?;
+            let mut rows = std::collections::BTreeMap::new();
+            for source in &config.document.http_sources {
+                if let Some(key) = source["sourceKey"].as_str() {
+                    rows.insert(key, source);
+                }
+            }
+            for key in keys {
+                let Some(definition) = rows.get(key.as_str()) else {
+                    continue;
+                };
+                let row: Option<(String, String)> = statement
+                    .query_row([&key], |row| Ok((row.get(0)?, row.get(1)?)))
+                    .optional()
+                    .map_err(db_error)?;
+                if let Some((stored_definition, snapshot)) = row {
+                    let fingerprint =
+                        crate::domain::http_mapping::source_definition_key(definition);
+                    if stored_definition == fingerprint {
+                        snapshots.push(
+                            serde_json::from_str(&snapshot)
+                                .map_err(|_| "SMA_HTTP_SNAPSHOT_INVALID")?,
+                        );
+                    }
+                }
+            }
+        }
+        transaction.commit().map_err(db_error)?;
+        Ok((config, snapshots))
+    }
+
+    pub fn publish_http_snapshot(
+        &mut self,
+        definition: &serde_json::Value,
+        collected_at: String,
+        points: Vec<crate::contracts::http_mapping::PointReading>,
+    ) -> Result<crate::contracts::http_mapping::SourceSnapshot, String> {
+        use crate::contracts::http_mapping::SourceSnapshot;
+        use rusqlite::OptionalExtension;
+
+        let key = definition["sourceKey"]
+            .as_str()
+            .ok_or("SMA_HTTP_SOURCE_INVALID")?;
+        let transaction = self
+            .connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)
+            .map_err(db_error)?;
+        let config = read(&transaction)?;
+        if !config
+            .document
+            .http_sources
+            .iter()
+            .any(|source| source == definition)
+        {
+            return Err("SMA_HTTP_SOURCE_CONFIGURATION_CHANGED".into());
+        }
+        transaction
+            .execute_batch(
+                "CREATE TABLE IF NOT EXISTS http_source_latest (
+               source_key TEXT PRIMARY KEY, definition_key TEXT NOT NULL,
+               version INTEGER NOT NULL CHECK (version > 0), snapshot TEXT NOT NULL
+             );",
+            )
+            .map_err(db_error)?;
+        let previous: Option<u64> = transaction
+            .query_row(
+                "SELECT version FROM http_source_latest WHERE source_key=?1",
+                [key],
+                |row| row.get(0),
+            )
+            .optional()
+            .map_err(db_error)?;
+        let version = previous
+            .unwrap_or_default()
+            .checked_add(1)
+            .ok_or("SMA_HTTP_VERSION_EXHAUSTED")?;
+        let snapshot = SourceSnapshot {
+            source_key: key.into(),
+            version,
+            collected_at,
+            points,
+        };
+        let data = serde_json::to_string(&snapshot).map_err(|_| "SMA_HTTP_SNAPSHOT_INVALID")?;
+        transaction.execute(
+            "INSERT INTO http_source_latest VALUES(?1,?2,?3,?4)
+             ON CONFLICT(source_key) DO UPDATE SET
+                definition_key=excluded.definition_key, version=excluded.version, snapshot=excluded.snapshot",
+            params![key, crate::domain::http_mapping::source_definition_key(definition), version, data],
+        ).map_err(db_error)?;
+        transaction.commit().map_err(db_error)?;
+        Ok(snapshot)
+    }
+}
+
+fn has_http_snapshots(connection: &Connection) -> Result<bool, String> {
+    connection.query_row(
+        "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='http_source_latest')",
+        [],
+        |row| row.get(0),
+    ).map_err(db_error)
+}

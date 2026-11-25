@@ -12,7 +12,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.quality.domain import QualityError, QualityErrorCode
 from app.quality.schemas.results import (
-    ConfigSnapshot, Envelope, ErrorEnvelope, IntegrationUpsert, Page, QueryFilters,
+    ConfigSnapshot, CreatedResult, Envelope, ErrorEnvelope, IntegrationUpsert, Page, QueryFilters,
     ReadPage, Result, SaveResult, TaskNo, Upsert,
 )
 from app.quality.services import results
@@ -103,6 +103,17 @@ async def _commit(db):
 @router.get('/quality/results', response_model=Envelope[ReadPage])
 async def quality_page(filters: Annotated[QueryFilters, Query()], _user=Depends(quality_user), db=Depends(get_db)):
     return _response(await results.list_results(db, filters, include_fields=True))
+
+
+@router.post('/quality/results', status_code=201, response_model=Envelope[CreatedResult])
+async def quality_create(body: IntegrationUpsert, user=Depends(quality_user), db=Depends(get_db)):
+    if user.role not in {'admin', 'supervisor', 'operator'}:
+        raise QualityError(QualityErrorCode.FORBIDDEN, 403)
+    result = await results.create_result(db, body)
+    await _commit(db)
+    log_event('INFO', 'quality.result.saved', source='human', actor_id=str(user.id),
+              task_no=body.taskNo, outcome=result['outcome'])
+    return _response(result)
 
 
 @router.get('/quality/results/by-task/{taskNo}', response_model=Envelope[Result])

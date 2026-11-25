@@ -37,3 +37,57 @@ WRITE_REQUEST = {
         },
     }}}},
 }
+
+
+_ENERGY_GROUP = {
+    "type": "object", "required": ["values"], "additionalProperties": False,
+    "properties": {
+        "values": {"type": "object", "minProperties": 1, "additionalProperties": {"type": "number"}},
+        "quality": {"enum": ["good", "bad", "unknown", None]},
+        "intervalStartAt": {"type": "string", "format": "date-time"},
+        "intervalEndAt": {"type": "string", "format": "date-time"},
+    },
+}
+
+ENERGY_WRITE_REQUEST = {
+    "requestBody": {"required": True, "content": {"application/json": {"schema": {
+        "type": "object", "additionalProperties": False,
+        "required": ["sourceKey", "target", "observedAt", "items"],
+        "properties": {
+            "sourceKey": {"type": "string", "pattern": SOURCE_PATTERN},
+            "target": {"const": "energy"},
+            "observedAt": {"type": "string", "format": "date-time"},
+            "items": {"type": "object", "minProperties": 1, "additionalProperties": {
+                "type": "object", "minProperties": 1, "additionalProperties": _ENERGY_GROUP,
+            }},
+        },
+    }}}},
+}
+
+_ENERGY_RECEIPT = {
+    "type": "object", "required": ["sourceKey", "target", "observedAt", "outcome", "receiptId", "records"],
+    "properties": {
+        "sourceKey": {"type": "string", "pattern": SOURCE_PATTERN},
+        "target": {"const": "energy"}, "observedAt": {"type": "string", "format": "date-time"},
+        "outcome": {"const": "stored"}, "receiptId": {"type": "string"},
+        "records": {"type": "array", "minItems": 1, "items": {
+            "type": "object", "required": ["meterId", "groupKey", "recordId"],
+            "properties": {key: {"type": "string"} for key in ("meterId", "groupKey", "recordId")},
+        }},
+    },
+}
+
+ENERGY_WRITE_REQUEST["responses"] = {
+    "200": {"description": "Stored or replayed batch", "content": {"application/json": {"schema": {
+        "type": "object", "required": ["code", "message", "data"],
+        "properties": {"code": {"const": 200}, "message": {"type": "string"}, "data": _ENERGY_RECEIPT},
+    }}}},
+    **{status: {"description": description, "content": {"application/json": {"schema": {
+        "type": "object", "required": ["code", "message", "data", "errorCode"],
+        "properties": {"code": {"const": int(status)}, "message": {"type": "string"},
+                       "data": {"type": "null"}, "errorCode": {"type": "string"}},
+    }}}} for status, description in (
+        ("403", "Source not enabled"), ("409", "Batch identity conflict"), ("413", "Payload too large"),
+        ("415", "Unsupported media type"), ("422", "Invalid batch"), ("503", "Unavailable or commit unknown"),
+    )},
+}

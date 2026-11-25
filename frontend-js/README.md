@@ -2,7 +2,7 @@
 
 Chinese version: [README.zh-CN.md](README.zh-CN.md)
 
-Energy statistics are served at `/monitor/consumption` with the sole page grant `monitor.energy`. The old `/monitor/energy` URL is retired. A deployment still using `monitor.consumption` requires explicit owner review and grant migration. The page grant adds no API permission, meter scope or management access. [Retirement specification](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+Energy statistics appear under **Energy Management** at `/monitor/consumption` with the existing page grant `monitor.energy`. Energy prices remain at `/auxiliary/price` with the existing page grant `auxiliary.price`. The old `/monitor/energy` URL is retired. A deployment still using `monitor.consumption` requires explicit owner review and grant migration. The page grant adds no API permission, meter scope or management access. [Retirement specification](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
 
 This is the JavaScript Vue 3 + Vite Core frontend template. It contains login, the authenticated shell, system pages, the generic Plan/Performance pages and shared infrastructure. Consuming projects add business modules under src/app/<module>/.
 
@@ -261,4 +261,6 @@ See the [Plan and Performance User Guide](../docs/generic-plan-performance-guide
 
 ## Quality Management
 
-The Quality list shows structured task results and links to historical inspections under the existing page grant. Administrators can manage independent field definitions under Local Field Management. Result and field lists use the shared local column-width preferences. [Quality HTTP contract](../contracts/published/http-api/quality-results-v1/README.md)
+The Quality list shows structured task results. Authorized users can create one result per task number and edit fields that permit manual entry. Old inspection links resolve to the Quality list through its existing access check. The hidden `quality.control` page ID maintains compatibility with existing grant lists. Administrators manage definitions under Local Field Management, and both lists use the shared local column-width preferences. [Quality HTTP contract](../contracts/published/http-api/quality-results-v1/README.md)
+
+In **Energy Management → Configuration → Write registration**, administrators manage source keys, names and enabled state with the existing user session. Meter metrics remain in their own tab. [Energy ingest contract](../contracts/published/http-api/energy-registered-ingest-v1/README.md)

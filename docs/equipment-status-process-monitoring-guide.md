@@ -2,7 +2,7 @@
 
 [中文](equipment-status-process-monitoring-guide.zh-CN.md) · [Project documentation](README.md) · [r10 operations and background](equipment-status-process-monitoring.md#r10-guide) · [Machine contract v2](../contracts/published/http-api/equipment-observation-v2/README.md)
 
-Energy statistics are served at `/monitor/consumption` with the sole page grant `monitor.energy`. The old `/monitor/energy` URL is retired. A deployment still using `monitor.consumption` requires explicit owner review and grant migration. The page grant adds no API permission, meter scope or management access. Set the private profile’s schema revision to `e9f3b5d7c021` on the adopted target. The checked-in example retains its published revision. [Retirement specification](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+Energy statistics appear under **Energy Management** at `/monitor/consumption` with the existing page grant `monitor.energy`. Energy prices remain at `/auxiliary/price` with the existing page grant `auxiliary.price`. The old `/monitor/energy` URL is retired. A deployment still using `monitor.consumption` requires explicit owner review and grant migration. The page grant adds no API permission, meter scope or management access. Keep the configured MySQL server and schema identity. Energy reads and writes do not require changing the profile when an unrelated migration advances the schema. [Retirement specification](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
 
 ## Registered write sources
 
@@ -115,13 +115,18 @@ Create another temperature area `heatZone2` with `zone2Actual` (“2 区实际�
 | --- | --- |
 | **Device Status → Data management** | Filter latest snapshots by equipment, sampling group (enter `heatZone1`), and task number. Use **Metric columns** to choose display columns and order. Open **Details** to inspect the source values and save a remark. |
 | **Process Monitoring → Data management → Process samples** | Filter by equipment, sampling group, task number, and optionally the sampling time range. Use **Metric columns** to choose display columns and order. Open **Details** to inspect sample values and save a remark or set **Abnormal** or **Reviewed**. |
-| **Process Monitoring → Data management → Energy samples** | Search by meter and sampling group. Set **Show column** and **Column order** in **Meter metrics**. Inspect values in the sample table and use **Edit** to save a remark or set **Abnormal** or **Reviewed**. |
+| **Energy Management → Data Management** | Search by meter and sampling group. Set **Show column** and **Column order** in **Meter metrics**. Inspect values in the sample table and use **Details** to save a remark or set **Abnormal** or **Reviewed**. |
 
 These controls change display settings and annotations. Raw values have no edit or delete action.
 
+
+## Registered energy sources
+
+Administrators enable a sender under **Energy Management → Configuration → Write registration**. Set up each meter and its group metrics, then POST one batch for the same actual capture time without a Token. Read the records and statistics from the existing signed-in pages. [Energy batch contract and sample](../contracts/published/http-api/energy-registered-ingest-v1/README.md)
+
 ## 6. Configure and submit energy samples
 
-1. Open **Process Monitoring → Configuration → Meter metrics**. The list starts with all meter metrics you can access. Choose a meter or sampling group, or enter a keyword and click **Search**. Click **Reset** to show all again. Click **Add**, select a specific test meter in the form and enter `electricity` as **Sampling group**. Enter `energyInterval` as **Metric key**, `1` as **Slot**, “时段用电量” and “Interval electricity use” as the names, and `electricityConsumption` as **Physical quantity key**. Select **Interval** (`interval`) for **Measurement mode**, enter `kWh` as **Unit** and `1` for **Decimal places**. Turn on **Enabled** and **Show column**. Set **Column order** to `10` if desired, then save. The continuity and maximum sampling interval rules apply to cumulative readings.
+1. Open **Energy Management → Configuration → Meter metrics**. The list starts with all meter metrics you can access. Choose a meter or sampling group, or enter a keyword and click **Search**. Click **Reset** to show all again. Click **Add**, select a specific test meter in the form and enter `electricity` as **Sampling group**. Enter `energyInterval` as **Metric key**, `1` as **Slot**, “时段用电量” and “Interval electricity use” as the names, and `electricityConsumption` as **Physical quantity key**. Select **Interval** (`interval`) for **Measurement mode**, enter `kWh` as **Unit** and `1` for **Decimal places**. Turn on **Enabled** and **Show column**. Set **Column order** to `10` if desired, then save. The continuity and maximum sampling interval rules apply to cumulative readings.
 2. Use the machine GET to discover authorized, enabled meter definitions. Send the body below as `energy.json` to the independent energy POST. Set the event ID, meter, group, metric, and times for your actual authorized test sample. Interval samples carry a real window with the start before the end. Energy samples are submitted by meter and group without a task number.
 
    ```json
@@ -148,7 +153,7 @@ These controls change display settings and annotations. Raw values have no edit 
      --data-binary @energy.json "$OBS_API/integration/energy/samples"
    ```
 
-3. In **Process Monitoring → Energy Stats**, select the meter, `electricity`, and **Interval electricity use**. Set the report range to the actual full interval sent in the example and click **Search**. Complete coverage gives **Period usage 2.5 kWh**. In **Energy samples**, check the raw record by meter and group. If an interval leaves a gap, overlaps another interval, or crosses the report boundary, review the incomplete-result reason.
+3. In **Energy Management → Energy Stats**, select the meter, `electricity`, and **Interval electricity use**. Set the report range to the actual full interval sent in the example and click **Search**. Complete coverage gives **Period usage 2.5 kWh**. In **Energy Management → Data Management**, check the raw record by meter and group. If an interval leaves a gap, overlaps another interval, or crosses the report boundary, review the incomplete-result reason.
 
 **Cumulative** (`cumulative`) usage is the difference between the opening and closing boundary readings. Confirm the unit, continuity, and meter-change rules, and set a maximum sampling interval. Missing boundaries, unknown continuity, a falling counter, or bad quality leave usage incomplete without a zero substitute. **Interval** usage sums good, non-overlapping increments that cover the entire report window. **Instantaneous** (`instantaneous`) values, such as power in kW, are readings or trends and cannot be summed directly as usage. A bundle containing only cumulative or instantaneous metrics omits the interval fields. Avoid adding cumulative and interval totals for the same consumption.
 

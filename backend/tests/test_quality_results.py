@@ -12,6 +12,7 @@ from fastapi import HTTPException
 from httpx import ASGITransport, AsyncClient
 import pytest
 from sqlalchemy import create_engine, inspect, text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.quality.models import QualityDefectRecord, QualityInspection, QualitySPCMeasurement
@@ -36,7 +37,7 @@ def migrate(connection, destination, *, stamp=False):
     if stamp:
         MigrationContext.configure(connection).stamp(scripts, destination)
         return
-    assert scripts.get_heads() == [AFTER]
+    assert scripts.get_revision(AFTER).down_revision == BEFORE
     with EnvironmentContext(config, scripts, fn=lambda rev, _: scripts._upgrade_revs(destination, rev)) as env:
         env.configure(connection=connection)
         env.run_migrations()
@@ -74,6 +75,7 @@ def built(tmp_path, monkeypatch):
             QualityInspection.__table__, QualityDefectRecord.__table__, QualitySPCMeasurement.__table__,
         ])
         connection.execute(QualityInspection.__table__.insert().values(coil_no="PRESERVED"))
+        connection.execute(QualityDefectRecord.__table__.insert().values(inspection_id=1, defect_type="synthetic"))
         connection.execute(QualitySPCMeasurement.__table__.insert().values(
             coil_no="PRESERVED", item="thickness", value=1.2, is_normal=True,
         ))
@@ -121,10 +123,11 @@ async def client(built):
         yield http, engine, identity
 
 
-def data(response):
-    assert response.status_code == 200, response.text
+def data(response, status=200):
+    assert response.status_code == status, response.text
     body = response.json()
     assert set(body) == {"code", "message", "data", "timestamp"}
+    assert body["code"] == 200
     return body["data"]
 
 
@@ -208,7 +211,78 @@ async def test_upsert_partial_filters_projection_and_role_permissions(client):
 
     with engine.connect() as connection:
         assert connection.execute(text("SELECT updated_at FROM quality_main WHERE task_no='ABC.1'")).scalar_one().endswith("+08:00")
-    assert "/api/v1/quality/{quality_id}" in (await http.get("/openapi.json")).json()["paths"]
+
+
+@pytest.mark.asyncio
+async def test_manual_create_validates_fields_and_never_overwrites_existing_results(client):
+    http, engine, identity = client
+    create = WEB + "/results"
+    assert data(await http.post(create, json={"taskNo": " empty-user "}), 201)["outcome"] == "created"
+    config = data(await http.put(CONFIG, json={"revision": 1, "definitions": [
+        definition("sample_no", "string", editable=True, visible=False),
+        definition("defects", "number", editable=True, isNullable=False),
+        definition("reviewed", "boolean", editable=True),
+        definition("reportUrl", "link", editable=True),
+        definition("automatic", "string"),
+        definition("disabled", "string", enabled=False, editable=True),
+    ]}))
+    body = {"taskNo": " manual.1 ", "targetKey": "Line-a", "items": {
+        "sample_no": "", "defects": 0, "reviewed": False, "reportUrl": "https://example.com/report",
+    }}
+    identity.role = "operator"
+    result = data(await http.post(create, json=body), 201)["quality"]
+    assert result["taskNo"] == "MANUAL.1" and result["targetKey"] == "Line-a"
+    assert result["items"] == {**body["items"], "automatic": None}
+    assert result["createdAt"] == result["updatedAt"] and result["updatedAt"].endswith("+08:00")
+    assert data(await http.get(WEB + "/results", params={"taskNo": "manual.1"}))["items"] == [result]
+    rejects(await http.post(create, json={"taskNo": "MANUAL.1", "items": {"defects": 4}}),
+            409, "task_no_conflict")
+    assert data(await http.get(PUB + "/by-task/manual.1")) == result
+
+    for items, status, error in (
+        ({"sample_no": "no write", "automatic": "private"}, 403, "forbidden"),
+        ({"unknown": "bad"}, 422, "invalid_request"),
+        ({"disabled": "bad"}, 422, "invalid_request"),
+        ({"reportUrl": "/bad"}, 422, "invalid_request"),
+        ({"defects": None}, 422, "invalid_request"),
+        ({"reviewed": 0}, 422, "invalid_request"),
+    ):
+        rejects(await http.post(create, json={"taskNo": "invalid", "items": items}), status, error)
+        rejects(await http.get(PUB + "/by-task/invalid"), 404, "not_found")
+    identity.role = "guest"
+    rejects(await http.post(create, json={"taskNo": "denied"}), 403, "forbidden")
+    identity.role = None
+    rejects(await http.post(create, json={"taskNo": "denied"}), 401, "unauthenticated")
+    identity.role = "admin"
+    config["definitions"] = [{**field, "enabled": False} if field["name"] == "reportUrl" else field
+                             for field in config["definitions"]]
+    data(await http.put(CONFIG, json=config))
+    identity.role = "supervisor"
+    rejects(await http.post(create, json={"taskNo": "config-race", "items": {"reportUrl": body["items"]["reportUrl"]}}),
+            422, "invalid_request")
+    assert data(await http.post(create, json={"taskNo": "supervisor"}), 201)["outcome"] == "created"
+    rejects(await http.post(PUB + "/upsert", json={"taskNo": "manual.1", "targetKey": "line-a"}),
+            409, "target_conflict")
+    updated = data(await http.post(PUB + "/upsert", json={"taskNo": "manual.1", "items": {"automatic": "FF"}}))
+    assert updated["quality"]["items"] == {"sample_no": "", "defects": 0, "reviewed": False, "automatic": "FF"}
+    with engine.connect() as connection:
+        assert connection.execute(text("SELECT JSON_EXTRACT(items, '$.reportUrl') FROM quality_main "
+                                       "WHERE task_no='MANUAL.1'")).scalar_one() == body["items"]["reportUrl"]
+
+
+@pytest.mark.asyncio
+async def test_manual_create_unknown_commit_is_reported_for_readback(client, monkeypatch):
+    http, _, _ = client
+
+    async def lose_commit_reply(self):
+        self.session.commit()
+        raise SQLAlchemyError("synthetic commit response lost")
+
+    monkeypatch.setattr(SQLiteSession, "commit", lose_commit_reply)
+    body = {"taskNo": "unknown-commit"}
+    rejects(await http.post(WEB + "/results", json=body), 503, "commit_unknown")
+    assert data(await http.get(PUB + "/by-task/unknown-commit"))["taskNo"] == "UNKNOWN-COMMIT"
+    rejects(await http.post(WEB + "/results", json=body), 409, "task_no_conflict")
 
 
 @pytest.mark.asyncio
@@ -267,38 +341,49 @@ async def test_sqlite_concurrent_partial_updates_do_not_lose_fields(client, buil
     await add_fields(http)
     _, app, _ = built
 
-    def separate_connection(items):
+    def separate_connection(items, *, task_no="parallel", path=PUB + "/upsert"):
         async def send():
-            async with AsyncClient(transport=ASGITransport(app=app), base_url="http://fixture") as call:
-                return data(await call.post(PUB + "/upsert", json={"taskNo": "parallel", "items": items}))
+            async with AsyncClient(transport=ASGITransport(app=app), base_url="http://fixture",
+                                   headers={"Authorization": "Bearer synthetic"}) as call:
+                return await call.post(path, json={"taskNo": task_no, "items": items})
         return asyncio.run(send())
 
     responses = await asyncio.gather(
         asyncio.to_thread(separate_connection, {"defects": 0}),
         asyncio.to_thread(separate_connection, {"reviewed": False}),
     )
-    assert {reply["outcome"] for reply in responses} == {"created", "updated"}
+    assert {data(reply)["outcome"] for reply in responses} == {"created", "updated"}
     assert data(await http.get(PUB + "/by-task/parallel"))["items"] == {
         "defects": 0, "reportUrl": None, "reviewed": False, "sample_no": None,
     }
+    responses = await asyncio.gather(*[
+        asyncio.to_thread(separate_connection, {"sample_no": item}, task_no=task, path=WEB + "/results")
+        for task, item in [(" private-same ", "A"), ("PRIVATE-SAME", "B")]
+    ])
+    assert sorted(response.status_code for response in responses) == [201, 409]
+    winner = next(response for response in responses if response.status_code == 201)
+    rejected = next(response for response in responses if response.status_code == 409)
+    rejects(rejected, 409, "task_no_conflict")
+    assert data(await http.get(PUB + "/by-task/private-same")) == data(winner, 201)["quality"]
 
 
 @pytest.mark.asyncio
-async def test_legacy_quality_routes_and_spc_remain_independent(client):
+async def test_legacy_quality_routes_retire_without_changing_old_storage_or_spc(client):
     http, engine, _ = client
-    assert data(await http.get(WEB))["items"][0]["coilNo"] == "PRESERVED"
-    assert data(await http.get(WEB + "/1"))["coilNo"] == "PRESERVED"
-    legacy = data(await http.post(WEB, json={"coilNo": "LEGACY-NEW"}))
-    assert legacy["coilNo"] == "LEGACY-NEW"
-    assert data(await http.put(f"{WEB}/{legacy['id']}", json={"spec": "legacy"}))["spec"] == "legacy"
-    assert (await http.get(WEB + "/spc/data", params={"item": "thickness"})).status_code == 200
+    retired = [("GET", WEB), ("POST", WEB), ("GET", WEB + "/1"), ("PUT", WEB + "/1"),
+               ("DELETE", WEB + "/1"), ("POST", WEB + "/1/defects"), ("DELETE", WEB + "/1/defects/1"),
+               ("GET", PREFIX + "/defects")]
+    for method, path in retired:
+        assert (await http.request(method, path, json={})).status_code == 404
+    spc = data(await http.get(WEB + "/spc/data", params={"item": "thickness"}))
+    assert len(spc) == 1 and spc[0]["coilNo"] == "PRESERVED"
     assert (await http.get(WEB + "/spc/stats", params={"item": "thickness"})).status_code == 200
     assert data(await http.get(WEB + "/results"))["total"] == 0
     data(await http.post(PUB + "/upsert", json={"taskNo": "PRESERVED", "items": {}}))
     assert data(await http.get(WEB + "/results"))["total"] == 1
-    assert data(await http.get(WEB))["total"] == 2
     with engine.connect() as connection:
-        assert connection.execute(text("SELECT coil_no FROM quality_inspections WHERE id=1")).scalar_one() == "PRESERVED"
+        assert connection.execute(text("SELECT coil_no FROM quality_inspections")).scalar_one() == "PRESERVED"
+        assert connection.execute(text("SELECT inspection_id, defect_type FROM quality_defect_records")).one() == (1, "synthetic")
         assert connection.execute(text("SELECT count(*) FROM quality_spc_measurements")).scalar_one() == 1
 
 
@@ -309,11 +394,11 @@ async def test_published_contract_matches_routes_and_examples(client):
     published = json.loads((contract / "openapi.json").read_text())
     source = (await http.get("/openapi.json")).json()
     assert len(published["paths"]) == 8
-    assert sum(map(len, published["paths"].values())) == 9
+    assert sum(map(len, published["paths"].values())) == 10
     for path, item in published["paths"].items():
         assert item == source["paths"][path]
     for category, entries in published["components"].items():
         assert all(schema == source["components"][category][key] for key, schema in entries.items())
     for request in json.loads((contract / "examples/requests.json").read_text())["requests"]:
         response = await http.request(request["method"], request["path"], params=request.get("query"), json=request.get("body"))
-        assert response.status_code == 200, response.text
+        data(response, request.get("expectedStatus", 200))

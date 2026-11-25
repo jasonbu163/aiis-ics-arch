@@ -10,6 +10,7 @@ class QualityErrorCode(StrEnum):
     UNAUTHENTICATED = 'quality.unauthenticated'
     FORBIDDEN = 'quality.forbidden'
     NOT_FOUND = 'quality.not_found'
+    TASK_NO_CONFLICT = 'quality.task_no_conflict'
     TARGET_CONFLICT = 'quality.target_conflict'
     CONFIG_REVISION_CONFLICT = 'quality.config_revision_conflict'
     INVALID_REQUEST = 'quality.invalid_request'

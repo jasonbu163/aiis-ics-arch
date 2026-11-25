@@ -85,6 +85,10 @@ PLC 事实 v2 定义 DAA 和外部程序的原值上报及按 PLC/DB 范围读�
 
 [质量结果 v1](published/http-api/quality-results-v1/README.zh-CN.md) 收录独立的结构化质量结果、本地字段及可信网络接口合同，附合成请求和源码 OpenAPI 快照。
 
+## 能耗登记来源写入 v1
+
+[能耗登记来源写入 v1](published/http-api/energy-registered-ingest-v1/README.zh-CN.md) 提供独立管理员登记、免 Token 多表 POST 整包回执、OpenAPI 和合成示例。
+
 ## CA 到 Field Flow 候选合同
 
 [流程 JSON v1](demands/ca-field-flow-v1/README.zh-CN.md)记录 CA 候选结构、语义摘要和向量。Field Flow 接受门槛待验证。

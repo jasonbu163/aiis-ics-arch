@@ -9,13 +9,15 @@ import pytest
 from fastapi import FastAPI
 from sqlalchemy import create_engine, text, select
 from sqlalchemy.dialects import mysql
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app.equipment_observation.api import routes
 from app.equipment_observation.profile import authenticate
-from app.equipment_observation.models import CardConfig, CurveGroup, EnergyMetric, EnergyReceipt, EnergySample, HistorySample, LatestSnapshot, MetricConfig, MetricGroup, Receipt, SlotBinding
-from app.equipment_observation.services import energy_reads, ingest_v2, reads
+from app.equipment_observation.models import CardConfig, CurveGroup, EnergyMetric, EnergyReceipt, EnergySample, HistorySample, LatestSnapshot, MetricConfig, MetricGroup, Receipt, SlotBinding, WriteSource
+from app.equipment_observation.services import (energy_reads, energy_registered_ingest, energy_write_sources,
+                                               ingest_v2, reads, registered_ingest, write_sources)
 from core.deps import get_current_user
 from database import get_db
 
@@ -25,6 +27,7 @@ pytestmark = pytest.mark.no_db
 class AsyncSQLite:
     def __init__(self, session): self.session = session
     def add(self, row): self.session.add(row)
+    def add_all(self, rows): self.session.add_all(rows)
     async def execute(self, statement): return self.session.execute(statement)
     async def flush(self): self.session.flush()
     async def commit(self): self.session.commit()
@@ -37,6 +40,8 @@ class AsyncSQLite:
 def app_and_db(monkeypatch):
     engine = create_engine('sqlite://', connect_args={'check_same_thread': False}, poolclass=StaticPool)
     statements = [
+        'CREATE TABLE observation_write_sources (source_key TEXT PRIMARY KEY, storage_identity TEXT NOT NULL UNIQUE, name TEXT, enabled BOOLEAN NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, deleted_at DATETIME)',
+        'CREATE TABLE energy_write_sources (source_key TEXT PRIMARY KEY, storage_identity TEXT NOT NULL UNIQUE, name TEXT, enabled BOOLEAN NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, deleted_at DATETIME)',
         'CREATE TABLE observation_metric_groups (group_key TEXT PRIMARY KEY, category TEXT NOT NULL, name_zh TEXT NOT NULL, name_en TEXT NOT NULL, enabled BOOLEAN NOT NULL, sort_order INTEGER NOT NULL)',
         'CREATE TABLE observation_metric_configs (metric_key TEXT PRIMARY KEY, source_group_key TEXT NOT NULL, category TEXT NOT NULL, name_zh TEXT NOT NULL, name_en TEXT NOT NULL, value_type TEXT NOT NULL, unit TEXT, decimals INTEGER)',
         'CREATE TABLE observation_metric_slot_bindings (target TEXT NOT NULL, group_key TEXT NOT NULL, slot_no INTEGER NOT NULL, metric_key TEXT NOT NULL, enabled BOOLEAN NOT NULL, list_visible BOOLEAN NOT NULL DEFAULT 0, list_order INTEGER, first_used_at DATETIME, PRIMARY KEY(target,group_key,slot_no))',
@@ -73,17 +78,19 @@ def app_and_db(monkeypatch):
     producer = {'producerId':'writer', 'kind':'other', 'grants':grants,
                 'energyGrants':[{'meterId':'meter1','groupKey':'electricity','metricKeys':['reading','power','interval']},
                                 {'meterId':'meter2','groupKey':'electricity','metricKeys':['reading']}]}
-    profile = {'target':{}, 'devices':{'line':{'equipmentId':'line', 'nameZh':'线', 'nameEn':'Line',
+    profile = {'target':{'serverUuid':'00000000-0000-4000-8000-000000000001',
+                         'schema':'fixture', 'schemaRevision':'e9f3b5d7c021'}, 'devices':{'line':{'equipmentId':'line', 'nameZh':'线', 'nameEn':'Line',
                'futureToleranceSeconds':300, 'staleAfterSeconds':3600}}, 'readScopes':{'admin':['line']},
                'groupSettings':{}, 'historyRules':{}, 'producers':{'writer':producer},
                'meters':{'meter1':{'meterId':'meter1','nameZh':'表1','nameEn':'Meter 1'},
                          'meter2':{'meterId':'meter2','nameZh':'表2','nameEn':'Meter 2'}},
                'meterReadScopes':{'admin':['meter1','meter2']}}
     async def now(db, target): return datetime(2026,11,17,12,30)
-    monkeypatch.setattr(ingest_v2, 'probe_target', now)
-    monkeypatch.setattr(reads, 'probe_target', now)
-    monkeypatch.setattr(energy_reads, 'probe_target', now)
-    monkeypatch.setattr(routes, 'probe_target', now)
+    async def business_now(db): return datetime(2026,11,17,12,30,0,123456)
+    for module in (ingest_v2, reads, registered_ingest, write_sources, routes, energy_registered_ingest, energy_write_sources):
+        monkeypatch.setattr(module, 'current_clock', business_now)
+    for module in (energy_reads, routes, ingest_v2, energy_registered_ingest):
+        monkeypatch.setattr(module, 'verify_energy_target', now)
     monkeypatch.setattr(routes, 'get_profile', lambda: profile)
     monkeypatch.setattr(routes, 'authenticate', lambda _profile, _header: producer)
     app = FastAPI()
@@ -99,6 +106,73 @@ def document(event='one', timestamp='2026-11-17T12:00:00+08:00'):
     return {'eventId':event, 'data':{'equipmentId':'line', 'taskNo':'000042', 'observedAt':timestamp,
             'quality':'good', 'groups':{'production':{'coil':''}, 'heatZone1':{'actual':0},
                                        'washTank1':{}, 'driveRoll1':{'ready':False}}}}
+
+
+@pytest.mark.asyncio
+async def test_registered_observation_ignores_revision_and_keeps_business_contract(app_and_db, monkeypatch):
+    app, session, profile, _ = app_and_db
+    profile['target']['schemaRevision'] = 'a1c307f8d2e4'
+    now = datetime(2026, 11, 17, 12, 0)
+    profile['target']['serverUuid'] = 'ignored-by-observation'
+    for source, enabled, deleted_at in (('Fixture', True, None), ('Disabled', False, None),
+                                         ('Deleted', False, now)):
+        session.add(WriteSource(source_key=source, storage_identity=write_sources.storage_identity(source),
+                                enabled=enabled, created_at=now, updated_at=now, deleted_at=deleted_at))
+    session.commit()
+
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url='http://test/api/v1') as client:
+        post_path = '/integration/observations'
+        get_path = '/integration/observations/latest'
+        payload = {'sourceKey': 'Fixture', 'target': 'latest', 'taskNo': '0123',
+                   'observedAt': '2026-11-17T04:00:00.123456Z', 'items': {'heatZone1': {'actual': 1}}}
+        empty = await client.get(get_path, params={'sourceKey': 'Fixture', 'target': 'latest'})
+        assert empty.status_code == 200 and empty.json()['data'] is None
+        for target, model in (('latest', LatestSnapshot), ('history', HistorySample)):
+            request = {**payload, 'target': target}
+            stored = await client.post(post_path, json=request)
+            assert stored.status_code == 200 and stored.json()['data']['outcome'] == 'stored'
+            assert (await client.post(post_path, json=request)).json() == stored.json()
+            changed = await client.post(post_path, json={**request, 'items': {'heatZone1': {'actual': 2}}})
+            assert changed.status_code == 409
+            observed = await client.get(get_path, params={'sourceKey': 'Fixture', 'target': target, 'taskNo': '0123'})
+            assert observed.status_code == 200
+            assert observed.json()['data']['items'] == payload['items']
+            assert observed.json()['data']['observedAt'] == '2026-11-17T12:00:00.123456+08:00'
+            assert session.execute(select(model)).scalar_one().created_at == datetime(2026, 11, 17, 12, 30, 0, 123456)
+        for source in ('Unknown', 'Disabled', 'Deleted'):
+            denied = await client.post(post_path, json={**payload, 'sourceKey': source})
+            assert denied.status_code == 403
+        for items, code in (({'heatZone1': {'missingSlot': 1}}, 'metric_scope'),
+                            ({'heatZone1': {'actual': False}}, 'metric_type')):
+            invalid = await client.post(post_path, json={**payload, 'taskNo': 'OTHER', 'items': items})
+            assert invalid.status_code == 422
+            assert invalid.json()['errorCode'] == f'equipment_observation.{code}'
+        assert (await client.get('/equipment/write-sources')).status_code == 200
+        # Missing or malformed energy target identity still fails independent of its migration revision.
+        energy = await client.get('/energy/consumption/options')
+        assert energy.status_code == 503
+        assert energy.json()['errorCode'] == 'equipment_observation.not_ready'
+
+
+@pytest.mark.asyncio
+async def test_database_error_routing_uses_template_not_group_key(app_and_db, monkeypatch):
+    app, _, _, _ = app_and_db
+
+    async def unavailable(*_args):
+        raise DBAPIError('update configuration', (), Exception('database unavailable'))
+
+    monkeypatch.setattr(routes.configuration, 'update_binding', unavailable)
+    monkeypatch.setattr(routes.configuration, 'energy_metric_configs', unavailable)
+    transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
+    async with httpx.AsyncClient(transport=transport, base_url='http://test/api/v1') as client:
+        for group_key in ('energy', 'thermal'):
+            failed = await client.patch(f'/equipment/metric-slot-bindings/latest/{group_key}/1',
+                                        json={'listVisible': False})
+            assert failed.status_code == 503
+            assert failed.json()['errorCode'] == 'equipment_observation.not_ready'
+        failed = await client.get('/energy/metric-configs')
+        assert failed.status_code == 503
+        assert failed.json()['errorCode'] == 'equipment_observation.not_ready'
 
 
 @pytest.mark.asyncio
@@ -502,9 +576,9 @@ async def test_history_default_context_uses_latest_drawable_sample_within_source
     app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(role='operator')
     profile['devices'].update({key: {'equipmentId': key} for key in ('empty', 'hidden')})
     profile['readScopes']['operator'] = ['line', 'empty']
-    async def visible_sources(_db, _profile):
+    async def visible_sources(_db):
         return [SimpleNamespace(storage_identity='registered')]
-    async def registered_device(_db, _profile, equipment):
+    async def registered_device(_db, equipment):
         return equipment == 'registered' or None
     monkeypatch.setattr(reads.write_sources, 'visible_sources', visible_sources)
     monkeypatch.setattr(reads, '_registered_device', registered_device)
@@ -598,10 +672,10 @@ async def test_history_default_context_uses_latest_drawable_sample_within_source
             bad = await client.get(path, params={**archived, 'taskNo': invalid})
             assert bad.status_code == 422
             assert bad.json()['errorCode'] == 'equipment_observation.invalid_task'
-        async def unavailable(_db, _target):
-            raise routes.EvidenceUnavailable()
+        async def unavailable(_db):
+            raise DBAPIError('select samples', (), Exception('database unavailable'))
         with monkeypatch.context() as guard:
-            guard.setattr(reads, 'probe_target', unavailable)
+            guard.setattr(reads.write_sources, 'visible_sources', unavailable)
             unavailable_task = await client.get(path, params=archived)
             assert unavailable_task.status_code == 503
             assert unavailable_task.json()['errorCode'] == 'equipment_observation.not_ready'

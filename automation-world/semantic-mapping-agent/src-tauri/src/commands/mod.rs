@@ -2,6 +2,7 @@
 pub mod acquisition;
 pub mod connection;
 pub mod file_export;
+pub mod http_mapping;
 pub mod local_configuration;
 pub mod mapping_runtime;
 pub mod runtimes;

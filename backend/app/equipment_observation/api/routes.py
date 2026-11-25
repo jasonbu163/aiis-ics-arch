@@ -11,7 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..services.guard import EvidenceUnavailable, probe_target
+from ..services.guard import EvidenceUnavailable, current_clock, verify_energy_target
 from common.log import log_event
 from common.integration.http import IntegrationPayloadError, strict_json
 from core.deps import get_current_active_admin, require_permissions
@@ -19,25 +19,28 @@ from database import get_db
 from ..domain import ObservationError, identifier, reject, response
 from ..models import CardConfig, CurveGroup, EnergyMetric, MetricConfig, MetricGroup, SlotBinding
 from ..machine_openapi import request_body
-from ..profile import allowed_meter, authenticate, get_profile, permitted_energy
+from ..profile import allowed_meter, authenticate, get_profile, permitted_energy, require_energy_target
 from ..schemas import (Card, CardPatch, Curve, CurvePatch, EnergyMetric as EnergyMetricInput,
                        EnergyMetricPatch, Group, GroupPatch, HistoryReview, Metric, MetricPatch, Remark, Slot, SlotPatch)
-from ..services import configuration, energy_reads, ingest_v2, reads, registered_ingest, write_sources
-from .write_source_contract import CreateWriteSource, PatchWriteSource, WRITE_REQUEST
+from ..services import (configuration, energy_reads, energy_registered_ingest, energy_write_sources,
+                        ingest_v2, reads, registered_ingest, write_sources)
+from .write_source_contract import CreateWriteSource, ENERGY_WRITE_REQUEST, PatchWriteSource, WRITE_REQUEST
 
 
 class ObservationRoute(APIRoute):
     def get_route_handler(self):
         handler = super().get_route_handler()
+        path = self.path
+        is_energy = "/energy/" in path
         async def protected(request):
-            path = request.url.path
             is_registered = (path.endswith(("/integration/observations", "/integration/observations/latest"))
-                             or "/equipment/write-sources" in path)
+                             or path.endswith("/integration/energy/registered-samples")
+                             or "/equipment/write-sources" in path or "/energy/write-sources" in path)
             try:
-                if request.method == "POST" and request.url.path.endswith((
+                if request.method == "POST" and path.endswith((
                     "/integration/equipment/latest-snapshots", "/integration/monitor/history-samples", "/integration/energy/samples"
                 )):
-                    profile = get_profile()
+                    profile = energy_profile() if is_energy else get_profile()
                     producer = authenticate(profile, request.headers.get("authorization"))
                     request.state.observation_identity = (profile, producer)
                     await strict_body(request)
@@ -48,8 +51,6 @@ class ObservationRoute(APIRoute):
                         raise
                     reject()
                 except DBAPIError:
-                    if not is_registered:
-                        raise
                     reject("not_ready", 503)
             except EvidenceUnavailable:
                 return JSONResponse(status_code=503, content={"code": 503, "message": "equipment_observation.not_ready",
@@ -78,9 +79,13 @@ def machine(request: Request, credentials: HTTPAuthorizationCredentials | None =
     existing = getattr(request.state, "observation_identity", None)
     if existing is not None:
         return existing
-    profile = get_profile()
+    profile = energy_profile() if "/energy/" in request.scope["route"].path else get_profile()
     header = f"{credentials.scheme} {credentials.credentials}" if credentials else ""
     return profile, authenticate(profile, header)
+
+
+def energy_profile():
+    return require_energy_target(get_profile())
 
 
 def admin_scope(_user):
@@ -142,7 +147,6 @@ async def definitions(equipment_id: str = Query(alias="equipmentId"), identity=D
               if g["equipmentId"] == equipment_id}
     if not scopes:
         reject("forbidden", 403)
-    await probe_target(db, profile["target"])
     await write_sources.check_profile(db, profile)
     groups = (await db.execute(select(MetricGroup).order_by(MetricGroup.sort_order, MetricGroup.group_key))).scalars().all()
     metrics = (await db.execute(select(MetricConfig).order_by(MetricConfig.metric_key))).scalars().all()
@@ -193,7 +197,7 @@ async def energy_definitions(meter_id: str = Query(alias="meterId"), group_key: 
                              identity=Depends(machine), db: AsyncSession = Depends(get_db)):
     profile, producer = identity
     allowed = permitted_energy(producer, meter_id, group_key)
-    await probe_target(db, profile["target"])
+    await verify_energy_target(db, profile["target"])
     rows = (await db.execute(select(EnergyMetric).where(EnergyMetric.meter_id == meter_id,
         EnergyMetric.group_key == group_key, EnergyMetric.enabled.is_(True)).order_by(EnergyMetric.slot_no))).scalars().all()
     return response({"meterId": meter_id, "groupKey": group_key, "definitions": [
@@ -281,36 +285,77 @@ async def sampled_tasks(equipment_id: str = Query(alias="equipmentId"), user=Dep
 
 @router.get("/equipment/metric-groups")
 async def metric_groups(user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
-    profile = admin_scope(user)
-    await probe_target(db, profile["target"])
+    admin_scope(user)
     rows = (await db.execute(select(MetricGroup).order_by(MetricGroup.sort_order, MetricGroup.group_key))).scalars().all()
     return response([configuration.group_data(row) for row in rows])
 
 
 @router.post("/equipment/metric-groups")
 async def add_metric_group(item: Group, user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
-    await probe_target(db, admin_scope(user)["target"])
+    admin_scope(user)
     return response(await configuration.save_group(db, item))
 
 
 @router.patch("/equipment/metric-groups/{key}")
 async def patch_metric_group(key: str, item: GroupPatch, user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
-    await probe_target(db, admin_scope(user)["target"])
+    admin_scope(user)
     return response(await configuration.save_group(db, item, key))
+
+
+@router.post("/integration/energy/registered-samples", openapi_extra=ENERGY_WRITE_REQUEST)
+async def write_registered_energy(request: Request, db: AsyncSession = Depends(get_db)):
+    document = await strict_body(request, decimal_only=True)
+    result = await energy_registered_ingest.submit(db, energy_profile(), document)
+    try:
+        log_event("INFO", "energy.registered_ingest", source_key=result["sourceKey"],
+                  outcome=result["outcome"], sample_count=len(result["records"]))
+    except Exception:
+        pass
+    return response(result)
+
+
+@router.get("/energy/write-sources")
+async def list_energy_write_sources(user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
+    await verify_energy_target(db, energy_profile()["target"])
+    return response(await energy_write_sources.list_sources(db))
+
+
+@router.post("/energy/write-sources")
+async def add_energy_write_source(item: CreateWriteSource, user=Depends(get_current_active_admin),
+                                  db: AsyncSession = Depends(get_db)):
+    await verify_energy_target(db, energy_profile()["target"])
+    return response(await energy_write_sources.create(db, item.source_key, item.name, item.enabled))
+
+
+@router.patch("/energy/write-sources/{sourceKey}")
+async def patch_energy_write_source(source_key: Annotated[str, Path(alias="sourceKey")], item: PatchWriteSource,
+                                    user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
+    changes = item.model_dump(exclude_unset=True)
+    if not changes or ("enabled" in changes and changes["enabled"] is None):
+        reject()
+    await verify_energy_target(db, energy_profile()["target"])
+    return response(await energy_write_sources.change(db, _source_path_key(source_key), changes))
+
+
+@router.delete("/energy/write-sources/{sourceKey}")
+async def delete_energy_write_source(source_key: Annotated[str, Path(alias="sourceKey")],
+                                     user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
+    await verify_energy_target(db, energy_profile()["target"])
+    return response(await energy_write_sources.change(db, _source_path_key(source_key), {}, delete=True))
 
 
 @router.get("/energy/consumption/options")
 async def energy_options(user=Depends(energy_reader)):
-    profile = get_profile()
+    profile = energy_profile()
     return response([profile["meters"][key] for key in sorted(profile["meterReadScopes"].get(user.role, []))])
 
 
 @router.get("/energy/consumption/definitions")
 async def energy_read_definitions(meter_id: str = Query(alias="meterId"), user=Depends(energy_reader),
                                   db: AsyncSession = Depends(get_db)):
-    profile = get_profile()
+    profile = energy_profile()
     allowed_meter(profile, user, meter_id)
-    await probe_target(db, profile["target"])
+    await verify_energy_target(db, profile["target"])
     rows = (await db.execute(select(EnergyMetric).where(EnergyMetric.meter_id == meter_id)
                              .order_by(EnergyMetric.group_key, EnergyMetric.slot_no))).scalars().all()
     return response([configuration.energy_metric_data(row) for row in rows])
@@ -320,30 +365,30 @@ async def energy_read_definitions(meter_id: str = Query(alias="meterId"), user=D
 async def energy_configs(meter_id: str | None = Query(None, alias="meterId"),
                          group_key: str | None = Query(None, alias="groupKey"),
                          user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
-    profile = get_profile()
+    profile = energy_profile()
     if meter_id is not None:
         allowed_meter(profile, user, meter_id)
         meter_ids = (meter_id,)
     else:
         meter_ids = profile["meterReadScopes"].get(user.role, ())
-    await probe_target(db, profile["target"])
+    await verify_energy_target(db, profile["target"])
     return response(await configuration.energy_metric_configs(db, meter_ids, group_key))
 
 
 @router.post("/energy/metric-configs")
 async def add_energy_config(item: EnergyMetricInput, user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
-    profile = get_profile()
+    profile = energy_profile()
     allowed_meter(profile, user, item.meter_id)
-    await probe_target(db, profile["target"])
+    await verify_energy_target(db, profile["target"])
     return response(await configuration.save_energy_metric(db, item))
 
 
 @router.patch("/energy/metric-configs/{meter_id}/{group_key}/{metric_key}")
 async def patch_energy_config(meter_id: str, group_key: str, metric_key: str, item: EnergyMetricPatch,
                               user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
-    profile = get_profile()
+    profile = energy_profile()
     allowed_meter(profile, user, meter_id)
-    await probe_target(db, profile["target"])
+    await verify_energy_target(db, profile["target"])
     return response(await configuration.save_energy_metric(db, item, (meter_id, group_key, metric_key)))
 
 
@@ -352,14 +397,14 @@ async def energy_samples(meter_id: str = Query(alias="meterId"), group_key: str 
                          start: str | None = Query(None, alias="from"), end: str | None = Query(None, alias="to"),
                          page: int = Query(1, ge=1), size: int = Query(20, ge=1, le=100, alias="pageSize"),
                          user=Depends(energy_reader), db: AsyncSession = Depends(get_db)):
-    return response(await energy_reads.samples(db, get_profile(), user, meter_id, group_key, start, end, page, size))
+    return response(await energy_reads.samples(db, energy_profile(), user, meter_id, group_key, start, end, page, size))
 
 
 @router.get("/energy/consumption/summary")
 async def energy_summary(meter_id: str = Query(alias="meterId"), group_key: str = Query(alias="groupKey"),
                          metric_key: str = Query(alias="metricKey"), start: str = Query(alias="from"),
                          end: str = Query(alias="to"), user=Depends(energy_reader), db: AsyncSession = Depends(get_db)):
-    return response(await energy_reads.summary(db, get_profile(), user, meter_id, group_key, metric_key, start, end))
+    return response(await energy_reads.summary(db, energy_profile(), user, meter_id, group_key, metric_key, start, end))
 
 
 @router.get("/energy/admin/consumption-samples")
@@ -367,15 +412,18 @@ async def energy_admin_samples(meter_id: str = Query(alias="meterId"), group_key
                          start: str | None = Query(None, alias="from"), end: str | None = Query(None, alias="to"),
                          page: int = Query(1, ge=1), size: int = Query(20, ge=1, le=100, alias="pageSize"),
                          user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
-    return response(await energy_reads.samples(db, get_profile(), user, meter_id, group_key, start, end, page, size))
+    return response(await energy_reads.samples(db, energy_profile(), user, meter_id, group_key, start, end, page, size))
 
 
 @router.patch("/energy/admin/consumption-samples/{identity}")
 async def patch_energy_sample(identity: int, item: HistoryReview, user=Depends(get_current_active_admin),
                               db: AsyncSession = Depends(get_db)):
-    row = await energy_reads.detail(db, get_profile(), user, identity)
-    for key, value in item.model_dump(exclude_unset=True).items():
-        setattr(row, key, value)
+    row = await energy_reads.detail(db, energy_profile(), user, identity)
+    changes = item.model_dump(exclude_unset=True)
+    if any(getattr(row, key) != value for key, value in changes.items()):
+        for key, value in changes.items():
+            setattr(row, key, value)
+        row.updated_at = await current_clock(db)
     await db.commit()
     await db.refresh(row)
     return response(await energy_reads.sample_data(db, row))
@@ -383,23 +431,20 @@ async def patch_energy_sample(identity: int, item: HistoryReview, user=Depends(g
 
 @router.get("/equipment/metric-configs")
 async def metric_configs(user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
-    profile = admin_scope(user)
-    await probe_target(db, profile["target"])
+    admin_scope(user)
     return response(await configuration.metrics(db))
 
 
 @router.post("/equipment/metric-configs")
 async def add_metric(item: Metric, user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
-    profile = admin_scope(user)
-    await probe_target(db, profile["target"])
+    admin_scope(user)
     return response(await configuration.create_metric(db, item))
 
 
 @router.patch("/equipment/metric-configs/{metric_key}")
 async def patch_metric(metric_key: str, item: MetricPatch, user=Depends(get_current_active_admin),
                        db: AsyncSession = Depends(get_db)):
-    profile = admin_scope(user)
-    await probe_target(db, profile["target"])
+    admin_scope(user)
     return response(await configuration.update_metric(db, metric_key, item))
 
 
@@ -407,39 +452,34 @@ async def patch_metric(metric_key: str, item: MetricPatch, user=Depends(get_curr
 async def list_bindings(target: str | None = None, group_key: str | None = Query(None, alias="groupKey"),
                         user=Depends(get_current_active_admin),
                         db: AsyncSession = Depends(get_db)):
-    profile = admin_scope(user)
-    await probe_target(db, profile["target"])
+    admin_scope(user)
     return response(await configuration.bindings(db, target, group_key))
 
 
 @router.post("/equipment/metric-slot-bindings")
 async def add_binding(item: Slot, user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
-    profile = admin_scope(user)
-    await probe_target(db, profile["target"])
+    admin_scope(user)
     return response(await configuration.create_binding(db, item))
 
 
 @router.patch("/equipment/metric-slot-bindings/{target}/{group_key}/{slot_no}")
 async def patch_binding(target: str, group_key: str, slot_no: int, item: SlotPatch,
                         user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
-    profile = admin_scope(user)
-    await probe_target(db, profile["target"])
+    admin_scope(user)
     return response(await configuration.update_binding(db, target, group_key, slot_no, item))
 
 
 @router.get("/equipment/observation-list-columns")
 async def observation_list_columns(target: Literal["latest", "history"], user=Depends(get_current_active_admin),
                                    db: AsyncSession = Depends(get_db)):
-    profile = admin_scope(user)
-    await probe_target(db, profile["target"])
+    admin_scope(user)
     return response(await configuration.list_columns(db, target))
 
 
 @router.get("/equipment/card-configs")
 async def list_cards(page_key: str | None = Query(None, alias="pageKey"), user=Depends(get_current_active_admin),
                      db: AsyncSession = Depends(get_db)):
-    profile = admin_scope(user)
-    await probe_target(db, profile["target"])
+    admin_scope(user)
     query = select(CardConfig).order_by(CardConfig.sort_order, CardConfig.card_key)
     if page_key:
         query = query.where(CardConfig.page_key == page_key)
@@ -457,24 +497,21 @@ def display_fields(item, collection):
 
 @router.post("/equipment/card-configs")
 async def add_card(item: Card, user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
-    profile = admin_scope(user)
-    await probe_target(db, profile["target"])
+    admin_scope(user)
     return response(await configuration.save_display(db, CardConfig, item.card_key, display_fields(item, "items")))
 
 
 @router.patch("/equipment/card-configs/{key}")
 async def patch_card(key: str, item: CardPatch, user=Depends(get_current_active_admin),
                      db: AsyncSession = Depends(get_db)):
-    profile = admin_scope(user)
-    await probe_target(db, profile["target"])
+    admin_scope(user)
     return response(await configuration.save_display(db, CardConfig, key, display_fields(item, "items"), existing=True))
 
 
 @router.get("/monitor/curve-configs")
 async def list_curves(category: str | None = None, user=Depends(get_current_active_admin),
                       db: AsyncSession = Depends(get_db)):
-    profile = admin_scope(user)
-    await probe_target(db, profile["target"])
+    admin_scope(user)
     query = select(CurveGroup).order_by(CurveGroup.sort_order, CurveGroup.curve_group_key)
     if category:
         query = query.where(CurveGroup.category == category)
@@ -483,16 +520,14 @@ async def list_curves(category: str | None = None, user=Depends(get_current_acti
 
 @router.post("/monitor/curve-configs")
 async def add_curve(item: Curve, user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
-    profile = admin_scope(user)
-    await probe_target(db, profile["target"])
+    admin_scope(user)
     return response(await configuration.save_display(db, CurveGroup, item.curve_group_key, display_fields(item, "series")))
 
 
 @router.patch("/monitor/curve-configs/{key}")
 async def patch_curve(key: str, item: CurvePatch, user=Depends(get_current_active_admin),
                       db: AsyncSession = Depends(get_db)):
-    profile = admin_scope(user)
-    await probe_target(db, profile["target"])
+    admin_scope(user)
     return response(await configuration.save_display(db, CurveGroup, key, display_fields(item, "series"), existing=True))
 
 
@@ -557,13 +592,21 @@ async def history_detail(record_id: int, user=Depends(get_current_active_admin),
     return response((await reads.detail(db, get_profile(), user, "history", record_id))[1])
 
 
+async def save_observation_edits(db, row, item):
+    changes = {name: value for name, value in item.model_dump(exclude_unset=True).items()
+               if getattr(row, name) != value}
+    if changes:
+        row.updated_at = await current_clock(db)
+        for name, value in changes.items():
+            setattr(row, name, value)
+    await db.commit()
+
+
 @router.patch("/equipment/admin/latest-snapshots/{record_id}")
 async def edit_latest(record_id: int, item: Remark, user=Depends(get_current_active_admin),
                       db: AsyncSession = Depends(get_db)):
     row, _ = await reads.detail(db, get_profile(), user, "latest", record_id)
-    for name, value in item.model_dump(exclude_unset=True).items():
-        setattr(row, name, value)
-    await db.commit()
+    await save_observation_edits(db, row, item)
     return response((await reads.detail(db, get_profile(), user, "latest", record_id))[1])
 
 
@@ -571,7 +614,5 @@ async def edit_latest(record_id: int, item: Remark, user=Depends(get_current_act
 async def edit_history(record_id: int, item: HistoryReview, user=Depends(get_current_active_admin),
                        db: AsyncSession = Depends(get_db)):
     row, _ = await reads.detail(db, get_profile(), user, "history", record_id)
-    for name, value in item.model_dump(exclude_unset=True).items():
-        setattr(row, name, value)
-    await db.commit()
+    await save_observation_edits(db, row, item)
     return response((await reads.detail(db, get_profile(), user, "history", record_id))[1])

@@ -6,9 +6,10 @@ import { readFile } from 'node:fs/promises'
 import { parse, compileScript } from 'vue/compiler-sfc'
 import * as vue from 'vue'
 import { createI18n } from 'vue-i18n'
+import { useTableColumnWidths } from '../../src/utils/tableColumnWidths.js'
 import { loadRegistry } from '../../scripts/check-module-manifests.mjs'
 
-const source = await readFile(new URL('../../src/app/auxiliary/views/price/index.vue', import.meta.url), 'utf8')
+const source = await readFile(new URL('../../src/app/energy/views/price.vue', import.meta.url), 'utf8')
 const { descriptor } = parse(source)
 const script = compileScript(descriptor, { id: 'price-page-test' }).content
 // 只替换模块导入；所有状态与 handler 均来自编译后的实际页面，未复制业务实现。
@@ -36,7 +37,7 @@ function page(api = {}, locale = 'en-US') {
       error: value => messages.push(['error', value]), success: value => messages.push(['success', value])
     } },
     '@/components/common/ActionButton.vue': {}, '@/components/common/BaseCard.vue': {},
-    '@/utils/date': { formatDateTime: value => value },
+    '@/utils/tableColumnWidths': { useTableColumnWidths },
     '@/app/auxiliary/api': {
       getCurrentPrice: () => { calls.current++; return api.current ? api.current() : Promise.resolve(current) },
       getPriceList: params => { calls.history.push(params); return api.history ? api.history(params) : Promise.resolve({ items: [] }) },
@@ -138,7 +139,7 @@ test('successful POST then failed GETs remains successful and never reopens/repl
   const p=page({current:async()=>{throw Error('get')},history:async()=>{throw Error('get')}})
   p.state.openAdd();fill(p);await p.state.handleSave()
   assert.equal(p.state.dialogVisible.value,false);assert.equal(p.calls.post.length,1)
-  assert.deepEqual(p.messages,[['success',p.t('common.success')],['error',p.t('auxiliary.price.currentLoadError')],['error',p.t('auxiliary.price.historyLoadError')]])
+  assert.deepEqual(p.messages,[['success',p.t('common.success')],['error',p.t('energy.price.currentLoadError')],['error',p.t('energy.price.historyLoadError')]])
 })
 
 test('history A/B late result/error/finally cannot replace B, current requests and unmount have same guard',async()=>{
@@ -173,11 +174,11 @@ test('save auto day and subsequent manual day use latest request; pending old cu
 })
 
 test('both languages expose identical price keys and translated labels; facade/mock remain paired',()=>{
-  const en=registry.messages['en-US'].auxiliary.price,zh=registry.messages['zh-CN'].auxiliary.price
+  const en=registry.messages['en-US'].energy.price,zh=registry.messages['zh-CN'].energy.price
   assert.deepEqual(Object.keys(en).sort(),Object.keys(zh).sort())
   for(const locale of ['en-US','zh-CN']) {
     const p=page({},locale)
-    for(const key of ['add','observedAt','lastModified','serverTimeHint','overwriteHint','historyEmpty']) assert.notEqual(p.t('auxiliary.price.'+key),'auxiliary.price.'+key)
+    for(const key of ['add','observedAt','lastModified','serverTimeHint','overwriteHint','historyEmpty']) assert.notEqual(p.t('energy.price.'+key),'energy.price.'+key)
   }
 })
 
@@ -190,5 +191,5 @@ test('Shanghai historical DST picker uses IANA offset, repeated hour fold=0, gap
   assert.throws(()=>p.state.encodeObservedAt('1991-04-14T02:30:00'))
   p.state.openAdd();fill(p);p.state.form.observedAt='1991-04-14T02:30:00'
   await p.state.handleSave();assert.equal(p.calls.post.length,0);assert.equal(p.state.dialogVisible.value,true)
-  assert.deepEqual(p.messages,[['error',p.t('auxiliary.price.invalidObservedAt')]])
+  assert.deepEqual(p.messages,[['error',p.t('energy.price.invalidObservedAt')]])
 })

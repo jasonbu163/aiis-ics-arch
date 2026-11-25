@@ -1,0 +1,126 @@
+/* SMA HTTP 页面布局，沿用 CU 主题和业务表格、表单样式。 */
+.http-table-tools, .http-table-filters, .http-inline, .http-row-fields, .http-main-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--agent-action-gap, 8px);
+  min-width: 0;
+}
+.http-table-tools {
+  justify-content: space-between;
+  padding-bottom: 12px;
+}
+.http-table-filters input { width: min(260px, 100%); }
+.http-table-scroll {
+  border: 1px solid var(--agent-border);
+  border-radius: var(--agent-control-radius);
+}
+:is(.sma-content, .sma-overlays) .http-table td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+:is(.sma-content, .sma-overlays) .http-table th {
+  padding-right: 12px;
+  white-space: normal;
+}
+.http-table-empty {
+  text-align: center !important;
+  color: var(--agent-text-muted);
+}
+.http-pagination { margin-top: 12px; flex-wrap: wrap; }
+.sma-overlays .sma-http-dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(980px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: 16px auto;
+  padding: 0;
+  overflow: hidden;
+  background: var(--agent-surface);
+}
+.sma-http-dialog .el-dialog__header,
+.sma-http-dialog .el-dialog__footer {
+  flex: 0 0 auto;
+  padding: 16px 18px;
+}
+.sma-http-dialog .el-dialog__header { border-bottom: 1px solid var(--agent-border); }
+.sma-http-dialog .el-dialog__footer { border-top: 1px solid var(--agent-border); }
+.sma-http-dialog .el-dialog__body {
+  min-height: 0;
+  padding: 16px 18px;
+  overflow: auto;
+}
+.sma-http-dialog .el-dialog__title { font-size: 15px; font-weight: 650; }
+.http-dialog-error { margin: 0 0 12px; overflow-wrap: anywhere; }
+.http-dialog-section {
+  min-width: 0;
+  margin: 16px 0 0;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--agent-border);
+}
+.http-dialog-section > summary,
+.http-detail-list > details > summary { cursor: pointer; }
+.http-detail-list { display: grid; gap: 8px; }
+.http-detail-list > details, .http-binding {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--agent-border);
+  border-radius: var(--agent-control-radius);
+}
+.http-detail-list > details > summary { overflow-wrap: anywhere; }
+.http-detail-list details[open] > summary { margin-bottom: 12px; }
+.http-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: 12px;
+}
+.http-wide { grid-column: 1 / -1; }
+.http-row-fields { align-items: end; }
+.http-row-fields > .field { flex: 1 1 160px; }
+.http-form-grid :is(.field, input, select, textarea) { min-width: 0; }
+.http-checkbox {
+  display: flex;
+  align-items: center;
+  align-self: end;
+  gap: 8px;
+  min-height: 36px;
+}
+.http-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.http-section-header h3 { margin: 0; font-size: 14px; }
+.http-text-area { max-height: 42vh; }
+.http-code {
+  max-height: 36vh;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--agent-border);
+  border-radius: var(--agent-control-radius);
+  background: var(--agent-surface-muted);
+  color: var(--agent-text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.http-request-line { overflow-wrap: anywhere; }
+.http-muted { color: var(--agent-text-muted); }
+.http-stack { display: grid; gap: 12px; min-width: 0; }
+.http-runtime-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  gap: 16px;
+}
+.http-runtime-side { min-width: 0; padding: 12px; border: 1px solid var(--agent-border); border-radius: var(--agent-control-radius); }
+.http-runtime-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(120px, 100%), 1fr));
+  gap: 12px;
+  margin: 0;
+}
+.http-runtime-metrics dt { color: var(--agent-text-muted); }
+.http-runtime-metrics dd { margin: 2px 0 0; font-weight: 650; font-variant-numeric: tabular-nums; }
+.http-point-remove { margin-top: 12px; }

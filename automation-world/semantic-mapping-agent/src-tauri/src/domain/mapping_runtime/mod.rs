@@ -359,6 +359,33 @@ impl MappingManualRunResult {
 }
 
 pub fn evaluate_snapshot(snapshot: &MappingRuntimeSnapshot) -> Result<ManualRunEvaluation, String> {
+    let facts = unique_facts(&snapshot.facts)?;
+    evaluate_bindings(snapshot, |binding, parameter| {
+        let key = |value: Option<&str>| value.is_some_and(|value| !value.trim().is_empty());
+        if !key(binding.source_key.as_deref()) || !key(binding.fact_name.as_deref()) {
+            return Err("MAPPING_MANUAL_RUN_CONFIGURATION_INVALID".into());
+        }
+        let source = binding.source_key.as_deref().unwrap_or_default();
+        let name = binding.fact_name.as_deref().unwrap_or_default();
+        let fact = facts
+            .get(&(source.to_owned(), name.to_owned()))
+            .ok_or_else(|| "tss_mapping_manual_run_fact_missing".to_string())?;
+        let raw = fact
+            .value
+            .as_deref()
+            .ok_or_else(|| "tss_mapping_manual_run_fact_null".to_string())?;
+        if !types_are_compatible(&fact.data_type, &parameter.data_type) {
+            return Err("tss_mapping_manual_run_fact_type_incompatible".to_string());
+        }
+        parse_fact_value(&fact.data_type, raw)
+            .ok_or_else(|| "tss_mapping_manual_run_fact_value_invalid".to_string())
+    })
+}
+
+pub(crate) fn evaluate_bindings(
+    snapshot: &MappingRuntimeSnapshot,
+    get_fact: impl Fn(&MappingBinding, &TargetParameter) -> Result<Value, String>,
+) -> Result<ManualRunEvaluation, String> {
     if !snapshot.mapping.enabled || !snapshot.target_api.enabled {
         return Err("MAPPING_MANUAL_RUN_CONFIGURATION_UNAVAILABLE".to_string());
     }
@@ -372,7 +399,6 @@ pub fn evaluate_snapshot(snapshot: &MappingRuntimeSnapshot) -> Result<ManualRunE
         return Err("MAPPING_MANUAL_RUN_CONFIGURATION_INVALID".to_string());
     }
 
-    let facts = unique_facts(&snapshot.facts)?;
     let rules = unique_rules(&snapshot.value_rules)?;
     let mut body = snapshot.target_api.body_template.clone();
     let mut resolved_parameter_keys = Vec::new();
@@ -399,7 +425,7 @@ pub fn evaluate_snapshot(snapshot: &MappingRuntimeSnapshot) -> Result<ManualRunE
 
         let binding = snapshot.mapping.bindings.get(&parameter.parameter_key);
         let value = match binding {
-            Some(binding) => resolve_binding(binding, parameter, &facts, &rules),
+            Some(binding) => resolve_binding(binding, parameter, &get_fact, &rules),
             None => Err("tss_mapping_manual_run_binding_missing".to_string()),
         };
         match value {
@@ -497,7 +523,7 @@ fn unique_rules(rules: &[ValueRule]) -> Result<BTreeMap<String, &ValueRule>, Str
 fn resolve_binding(
     binding: &MappingBinding,
     parameter: &TargetParameter,
-    facts: &BTreeMap<(String, String), &SnapshotFact>,
+    get_fact: &impl Fn(&MappingBinding, &TargetParameter) -> Result<Value, String>,
     rules: &BTreeMap<String, &ValueRule>,
 ) -> Result<Value, String> {
     let value = match binding.kind.as_str() {
@@ -509,32 +535,14 @@ fn resolve_binding(
             if binding.value.is_some() {
                 return Err("MAPPING_MANUAL_RUN_CONFIGURATION_INVALID".to_string());
             }
-            let source_key = binding
-                .source_key
-                .as_deref()
-                .filter(|value| !value.trim().is_empty())
-                .ok_or_else(|| "MAPPING_MANUAL_RUN_CONFIGURATION_INVALID".to_string())?;
-            let fact_name = binding
-                .fact_name
-                .as_deref()
-                .filter(|value| !value.trim().is_empty())
-                .ok_or_else(|| "MAPPING_MANUAL_RUN_CONFIGURATION_INVALID".to_string())?;
-            let fact = facts
-                .get(&(source_key.to_string(), fact_name.to_string()))
-                .ok_or_else(|| "tss_mapping_manual_run_fact_missing".to_string())?;
-            let raw_value = fact
-                .value
-                .as_deref()
-                .ok_or_else(|| "tss_mapping_manual_run_fact_null".to_string())?;
-            if !types_are_compatible(&fact.data_type, &parameter.data_type) {
-                return Err("tss_mapping_manual_run_fact_type_incompatible".to_string());
-            }
-            parse_fact_value(&fact.data_type, raw_value)
-                .ok_or_else(|| "tss_mapping_manual_run_fact_value_invalid".to_string())?
+            get_fact(binding, parameter)?
         }
         _ => return Err("MAPPING_MANUAL_RUN_CONFIGURATION_INVALID".to_string()),
     };
 
+    if !crate::domain::local_configuration::value_type(&value, &parameter.data_type) {
+        return Err("tss_mapping_manual_run_fact_type_incompatible".into());
+    }
     if let Some(value_rule_key) = &binding.value_rule_key {
         let value_rule = rules
             .get(value_rule_key)
@@ -574,9 +582,14 @@ fn parse_fact_value(data_type: &str, value: &str) -> Option<Value> {
     }
 }
 
-fn value_matches_rule(value: &Value, allowed_values: &[Value]) -> bool {
+pub(crate) fn value_matches_rule(value: &Value, allowed_values: &[Value]) -> bool {
     allowed_values.iter().any(|allowed| match (value, allowed) {
-        (Value::Number(actual), Value::Number(allowed)) => actual.as_f64() == allowed.as_f64(),
+        (Value::Number(actual), Value::Number(allowed)) => {
+            match (actual.as_i64(), allowed.as_i64()) {
+                (Some(a), Some(b)) => a == b,
+                _ => actual == allowed || matches!((actual.as_f64(),allowed.as_f64()), (Some(a),Some(b)) if a == b && a.abs() <= 9_007_199_254_740_991.0),
+            }
+        }
         _ => value == allowed,
     })
 }

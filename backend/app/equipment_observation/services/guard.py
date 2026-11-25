@@ -1,4 +1,5 @@
 """业务目标及数据库时钟核验；不查询采集事实或 PLC 数据。"""
+from common.integration.storage import to_storage_time
 from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 
@@ -30,8 +31,17 @@ async def _verified_clock(db, target):
     return row[3].replace(tzinfo=None)
 
 
+async def verify_energy_target(db, target):
+    if db.get_bind().dialect.name != "mysql":
+        raise EvidenceUnavailable()
+    uuid, schema = (await db.execute(text("SELECT @@server_uuid, DATABASE()"))).one()
+    if str(uuid).lower() != target["serverUuid"] or schema != target["schema"]:
+        raise EvidenceUnavailable()
+
+
 async def current_clock(db):
-    return (await db.execute(text("SELECT CURRENT_TIMESTAMP(6)"))).scalar_one().replace(tzinfo=None)
+    utc_now = (await db.execute(text("SELECT UTC_TIMESTAMP(6)"))).scalar_one()
+    return to_storage_time(utc_now)
 
 
 async def _check_registry_layout(db):

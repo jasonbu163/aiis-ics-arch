@@ -16,6 +16,7 @@ pub fn validate(d: &ConfigurationDocument) -> Result<(), String> {
         &d.target_apis,
         &d.mapping_value_rules,
         &d.mappings,
+        &d.http_sources,
     ] {
         if set.len() > MAX_ITEMS {
             return Err("SMA_CONFIGURATION_LIMIT_EXCEEDED".into());
@@ -32,7 +33,13 @@ pub fn validate(d: &ConfigurationDocument) -> Result<(), String> {
     {
         return Err("SMA_CONFIGURATION_LIMIT_EXCEEDED".into());
     }
-    for r in ["materials", "targetApis", "mappingValueRules", "mappings"] {
+    for r in [
+        "materials",
+        "targetApis",
+        "mappingValueRules",
+        "mappings",
+        "httpSources",
+    ] {
         let k = key_field(r)?;
         let mut keys = BTreeSet::new();
         let mut ids = BTreeSet::new();
@@ -130,6 +137,15 @@ pub fn validate(d: &ConfigurationDocument) -> Result<(), String> {
             return Err("SMA_CONFIGURATION_SOURCE_METADATA_INVALID".into());
         }
     }
+    let sources = crate::domain::http_mapping::validate_sources(&d.http_sources)?;
+    for source in &sources {
+        for point in &source.points {
+            metadata.insert((&source.source_key, &point.point_key), &point.data_type);
+        }
+    }
+    if let Some(limits) = &d.runtime_limits {
+        crate::domain::http_mapping::validate_limits(limits)?;
+    }
     let mut targets = BTreeMap::new();
     for v in &d.target_apis {
         fields(
@@ -140,6 +156,9 @@ pub fn validate(d: &ConfigurationDocument) -> Result<(), String> {
                 "name",
                 "httpMethod",
                 "path",
+                "url",
+                "timeoutMs",
+                "receipt",
                 "schemaSource",
                 "originType",
                 "originMaterialKey",
@@ -156,6 +175,7 @@ pub fn validate(d: &ConfigurationDocument) -> Result<(), String> {
         let t: runtime::TargetApi =
             serde_json::from_value(v.clone()).map_err(|_| "SMA_CONFIGURATION_TARGET_INVALID")?;
         validate_target(&t)?;
+        crate::domain::http_mapping::validate_target_options(v, &t)?;
         if v["idempotencySupported"].as_bool().is_none()
             || !matches!(text(v, "schemaSource")?, "manual" | "openapi")
         {
@@ -204,7 +224,21 @@ pub fn validate(d: &ConfigurationDocument) -> Result<(), String> {
         {
             return Err("SMA_CONFIGURATION_RULE_INVALID".into());
         }
-        rules.insert(r.value_rule_key.clone(), r);
+        if let Some(k) = v["originSourceKey"].as_str() {
+            if let Some(source) = sources.iter().find(|source| source.source_key == k) {
+                let point = source
+                    .points
+                    .iter()
+                    .find(|point| v["originFactName"] == point.point_key);
+                if !point.is_some_and(|point| point.data_type == r.data_type) {
+                    return Err(format!(
+                        "SMA_CONFIGURATION_REFERENCE_MISSING:{}:{k}",
+                        r.value_rule_key
+                    ));
+                }
+            }
+        }
+        rules.insert(r.value_rule_key.clone(), (r, v["enabled"] == true));
     }
     for v in &d.mappings {
         fields(
@@ -218,6 +252,7 @@ pub fn validate(d: &ConfigurationDocument) -> Result<(), String> {
                 "targetApiId",
                 "bindings",
                 "intervalMs",
+                "maxAgeMs",
                 "enabled",
                 "rowVersion",
                 "createdAt",
@@ -226,18 +261,30 @@ pub fn validate(d: &ConfigurationDocument) -> Result<(), String> {
         )?;
         let m: runtime::MappingConfiguration =
             serde_json::from_value(v.clone()).map_err(|_| "SMA_CONFIGURATION_MAPPING_INVALID")?;
+        let active_http = !v["maxAgeMs"].is_null();
+        if active_http
+            && !v["maxAgeMs"]
+                .as_u64()
+                .is_some_and(|ms| (1..=604_800_000).contains(&ms))
+        {
+            return Err(format!("SMA_HTTP_MAX_AGE_INVALID:{}", m.mapping_key));
+        }
         let t = targets.get(&m.target_api_key).ok_or_else(|| {
             format!(
                 "SMA_CONFIGURATION_REFERENCE_MISSING:{}:{}",
                 m.mapping_key, m.target_api_key
             )
         })?;
-        if m.target_api_id != t.id
+        if (active_http && t.http_method != "POST")
+            || m.target_api_id != t.id
             || m.name.trim().is_empty()
             || m.interval_ms == 0
             || m.interval_ms > 86_400_000
         {
             return Err("SMA_CONFIGURATION_MAPPING_INVALID".into());
+        }
+        if active_http {
+            crate::domain::http_mapping::validate_wire_parameters(t)?;
         }
         for (k, b) in &m.bindings {
             fields(
@@ -277,6 +324,19 @@ pub fn validate(d: &ConfigurationDocument) -> Result<(), String> {
                             ));
                         }
                     }
+                    if active_http
+                        && !sources.iter().any(|s| {
+                            Some(s.source_key.as_str()) == b.source_key.as_deref()
+                                && s.points
+                                    .iter()
+                                    .any(|p| Some(p.point_key.as_str()) == b.fact_name.as_deref())
+                        })
+                    {
+                        return Err(format!(
+                            "SMA_CONFIGURATION_REFERENCE_MISSING:{}:{k}",
+                            m.mapping_key
+                        ));
+                    }
                 }
                 _ => {
                     return Err(format!(
@@ -286,15 +346,18 @@ pub fn validate(d: &ConfigurationDocument) -> Result<(), String> {
                 }
             }
             if let Some(key) = &b.value_rule_key {
-                let r = rules.get(key).ok_or_else(|| {
+                let (r, enabled) = rules.get(key).ok_or_else(|| {
                     format!(
                         "SMA_CONFIGURATION_REFERENCE_MISSING:{}:{key}",
                         m.mapping_key
                     )
                 })?;
-                if r.values.is_empty()
+                if (active_http && !enabled)
+                    || r.values.is_empty()
                     || r.data_type != p.data_type
-                    || b.value.as_ref().is_some_and(|v| !r.values.contains(v))
+                    || b.value
+                        .as_ref()
+                        .is_some_and(|v| !runtime::value_matches_rule(v, &r.values))
                 {
                     return Err(format!(
                         "SMA_CONFIGURATION_RULE_INCOMPATIBLE:{}:{k}",
@@ -303,9 +366,10 @@ pub fn validate(d: &ConfigurationDocument) -> Result<(), String> {
                 }
             }
         }
-        if t.parameter_schema
-            .iter()
-            .any(|p| p.required && !m.bindings.contains_key(&p.parameter_key))
+        if m.enabled
+            && t.parameter_schema
+                .iter()
+                .any(|p| p.required && !m.bindings.contains_key(&p.parameter_key))
         {
             return Err(format!(
                 "SMA_CONFIGURATION_REQUIRED_BINDING_MISSING:{}",

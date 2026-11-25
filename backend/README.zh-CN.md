@@ -411,4 +411,6 @@ Numeric保持声明的小数位；FLOAT采用有界binary32规范化，相对误
 
 ## 任务质量结果
 
-质量模块将结构化结果保存在 `quality_main`，本地字段定义保存在 `quality_field_config`。显式 Alembic 后继修订 `f0a2b4c6d8e1` 引入两表，可信网络上报、人工编辑和字段管理见[质量结果 HTTP 合同](../contracts/published/http-api/quality-results-v1/README.zh-CN.md)。报告文件由外部调用方解析。
+质量模块将结构化结果保存在 `quality_main`，本地字段定义保存在 `quality_field_config`。显式 Alembic 后继修订 `f0a2b4c6d8e1` 引入两表。Web 前端通过私有质量 API 人工新增和编辑，获准接入的程序通过可信网络公共 API 上报和查询。现场程序负责解析报告。详见[质量结果 HTTP 合同](../contracts/published/http-api/quality-results-v1/README.zh-CN.md)。
+
+当前源码已退役旧卷号检验和缺陷接口，旧检验表、缺陷表及其中的数据继续保留。SPC 接口沿用现有行为。部署前须核对外部接口调用方及其访问旧检验数据的需求。

@@ -2,7 +2,7 @@
 
 [English](equipment-status-process-monitoring.md) · [项目文档目录](README.zh-CN.md) · [ARCH-OBS-001 规格](../plans/ARCH-OBS-001-configuration-driven-equipment-monitoring/spec.md)
 
-当前设备、过程和能耗由 `equipment_observation` 注册，分别使用 `equipment_main`、`monitor_main` 和 `energy_consumption_main`。清退后的观测源码要求目标 revision `d8f2a4c6b915`，两条设备观测写入仅接受 v2，旧 collector 状态、常规旧设备／过程／能耗路由和 r8 归档查询已退出源码。真实目标采用状态由任务记录维护。 过程监控的能耗统计页面地址为 `/monitor/consumption`，唯一页面授权键为 `monitor.energy`。旧直链 `/monitor/energy` 已退出。已有 `monitor.consumption` 的部署须由负责人审查并显式处理，页面权限不会增加 `energy-consumption-read`、表计范围或管理权限。 [清退规格](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
+当前设备、过程和能耗由 `equipment_observation` 注册，分别使用 `equipment_main`、`monitor_main` 和 `energy_consumption_main`。原有两条设备观测写入 v2 与后续登记写入入口并存；能耗日常请求按已配置 MySQL 身份及能耗自身结构运行。旧 collector 状态、常规旧设备／过程／能耗路由和 r8 归档查询已退出源码。真实目标采用状态由任务记录维护。 「能耗管理」下的能耗统计沿用地址 `/monitor/consumption` 和页面授权键 `monitor.energy`。能耗单价沿用地址 `/auxiliary/price` 和页面授权键 `auxiliary.price`。旧直链 `/monitor/energy` 已退出。已有 `monitor.consumption` 的部署须由负责人审查并显式处理，页面权限不会增加 `energy-consumption-read`、表计范围或管理权限。 [清退规格](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
 
 2026-11-17（Asia/Shanghai）。当前合同为 r10；既往章节作为历史保留。独立核验、Human Owner 最终验收、现场联调及生产部署分别记录。
 
@@ -18,7 +18,7 @@ r10 是来源无关的多区域整包：机器按稳定 `metricKey` 报单值，
 | --- | --- | --- |
 | 设备快照 | `equipment_main`：每 `(equipment_id, task_no)` 一行，较新整包替换 `local_values`；保留采集时间 `observed_at`。 | 生产、清洗、温控、传动四页共用卡片配置；默认显示最近采样任务，可手选或恢复跟随，不推断设备正在生产。 |
 | 过程历史 | `monitor_main`：一个合格整包一行，按原 `observed_at` 查询；空缺测事件可形成断点。 | 温度、传动、清洗页按单位显示配置的曲线、区域多选；选择不改变历史留存。 |
-| 能耗 | `energy_consumption_main`：每表计、每组、每事件独立行，不关联任务；每个指标使用自己的累计、增量或瞬时口径。 | 过程监控的能耗统计页、表计配置和能耗数据列表；旧能耗及价格入口仍使用原权限。 |
+| 能耗 | `energy_consumption_main`：每表计、每组、每事件独立行，不关联任务；每个指标使用自己的累计、增量或瞬时口径。 | 能耗管理的能耗统计页、表计配置和能耗数据列表；旧能耗及价格入口仍使用原权限。 |
 
 设备值的 JSON 第一层为区域键、第二层为目标／区域独立的 `01`–`100` 槽号；`observation_metric_groups`、`observation_metric_configs`、`observation_metric_slot_bindings` 定义稳定语义，卡片与曲线表单独控制显示。已用槽位和物理含义不能改绑；停用区域只影响显示，历史留存由历史槽位开关决定。单位可空，有单位时显示在指标标题旁；同单位曲线纵轴标一次。`0`、`false`、空字符串保留，缺测不补零。
 
@@ -26,7 +26,7 @@ r10 是来源无关的多区域整包：机器按稳定 `metricKey` 报单值，
 
 1. 使用具有设备状态／过程读权限的 admin 登录。`设备状态 → 配置管理` 依次建立启用的**区域配置**（类别、稳定键、中英文名称、排序）、**指标设置**（稳定键、中英文名、类型、可选单位），再在**槽位设置**分别为 `latest` 和 `history` 绑定并启用需要的项。一个区域在每个目标各有 100 个槽；仅实时值可只启用实时。可在设备状态或过程的**数据管理**中设置指标列的显示与排序。
 2. 在**卡片设置**选择页面与指标，填写中英文卡片标题；每卡最多 10 项。过期值同时显示该值的真实采集时间。在`过程监控 → 配置管理 → 曲线设置`选择温度／传动／清洗类别，给同单位的实际、设定等指标配置同一图框，可包含多个区域。区域选择使用当前语言的区域名称，图例和提示结合区域名与指标名区分曲线；名称相同时显示稳定键辅助区分，`groupKey` 保持不变。图表提示可查看原始采集时间；如果提示时间范围过大而坐标无法区分部分时刻，应缩小范围。区域及曲线显示的启停只影响显示；需要历史必须单独启用历史槽。
-3. 如果需要能耗，先由运行环境负责人在私有 profile 登记表计及读范围，再在`过程监控 → 配置管理 → 表计指标配置`按表计／组／指标设置名称、单位、物理量、`cumulative`（累计）、`interval`（区间增量）或 `instantaneous`（瞬时）和适用规则。指标的列表显示开关与列顺序在此配置，独立于写入启停。累计用量需要真实边界和已确认连续性／最大采样间隔；缺边界、重置、间隔不明、不同值同刻等显示不完整或冲突，不猜测为零。相同消耗的累计与增量不相加，瞬时值不能直接求和。
+3. 如果需要能耗，先由运行环境负责人在私有 profile 登记表计及读范围，再在`能耗管理 → 配置管理 → 表计指标配置`按表计／组／指标设置名称、单位、物理量、`cumulative`（累计）、`interval`（区间增量）或 `instantaneous`（瞬时）和适用规则。指标的列表显示开关与列顺序在此配置，独立于写入启停。累计用量需要真实边界和已确认连续性／最大采样间隔；缺边界、重置、间隔不明、不同值同刻等显示不完整或冲突，不猜测为零。相同消耗的累计与增量不相加，瞬时值不能直接求和。
 4. 人类读取分别需要 `equipment-observation-read`、`monitor-observation-read`、`energy-consumption-read` 和相应设备／表计范围；管理入口要求 admin，记录仍受范围约束。机器只可发现其授权定义，不能凭机器 token 读取管理列表或样本。
 
 ### 可重复手工验收
@@ -296,3 +296,7 @@ SMA 每次发送完整信封，包括版本、写入方、投递事件、映射�
    实时路径是 `/api/v1/integration/equipment/latest-snapshots`，历史路径是 `/api/v1/integration/monitor/history-samples`。如该机器身份授权了多个设备或采样组，`data` 还须填 `equipmentId` 和 `groupKey`。若要验证 SMA 完整信封，参照[同一份采集样本的引用示例](../contracts/published/http-api/equipment-observation-v1/vectors.json)，任务点及映射点必须在同一份样本中。
 4. 在温控卡片中确认当前任务和两个值；在过程温度页按任务号及时间查询两条曲线。分别打开两个 admin 列表，用“指标列设置”显示对应列并按任务号筛选；核对列表值、详情、质量及备注／复核标记。更改显示开关不应改变已存历史。当前任务点过期时页面应显示未确认而非假装在线。
 5. 验收完成后，如要清理，由具有相应权限的运维人员使用事先记录的**精确 ID 和独有键**逐项核对并仅清理本次采样、回执、配置和来源；先确认对象没有被其他记录引用或新的采集者接管，再处理数据库外的本次临时 profile。不要按时间范围、整表、整设备或其他共享条件批量删除。验收人也可保留自己创建的验证记录，按所在环境约定管理。
+
+## 能耗来源登记
+
+管理员在「能耗管理 → 配置管理 → 写入登记」启用写入来源。配置好各表计的采样组和指标后，使用免 Token POST 提交同一实际采集时刻的一包数据，再通过登录后的数据管理和能耗统计查看。[能耗批量写入合同及样例](../contracts/published/http-api/energy-registered-ingest-v1/README.zh-CN.md)

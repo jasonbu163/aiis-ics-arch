@@ -108,13 +108,18 @@ export async function parseMappingConfigurationFile(
   }
   if (extension !== "xlsx") throw new Error("MAPPING_FILE_TYPE_INVALID");
   const workbook = XLSX.read(await file.arrayBuffer(), { type: "array", raw: false, bookVBA: true });
+  return parseMappingConfigurationWorkbook(resource, workbook);
+}
+
+/** 统一配置页解析并校验工作簿后，在此转换旧单表合同。 */
+export function parseMappingConfigurationWorkbook(resource: MappingConfigurationResource, workbook: XLSX.WorkBook, onRow?: (line: number) => void): unknown[] {
   if (workbook.vbaraw || workbook.SheetNames.length !== 1 || workbook.SheetNames[0] !== resource) {
     throw new Error("MAPPING_FILE_WORKBOOK_INVALID");
   }
   const worksheet = workbook.Sheets[resource];
   if (!worksheet) throw new Error("MAPPING_FILE_WORKBOOK_INVALID");
   for (const [address, cell] of Object.entries(worksheet)) {
-    if (!address.startsWith("!") && typeof cell === "object" && cell && "f" in cell && cell.f) {
+    if (!address.startsWith("!") && typeof cell === "object" && cell && ("f" in cell || "F" in cell)) {
       throw new Error("MAPPING_FILE_FORMULA_UNSUPPORTED");
     }
   }
@@ -123,7 +128,7 @@ export async function parseMappingConfigurationFile(
     header: 1,
     raw: false,
     defval: "",
-    blankrows: false,
+    blankrows: true,
   }) as unknown[][];
   const [header, ...rows] = matrix;
   const legacyTarget = resource === "targetApis"
@@ -134,9 +139,18 @@ export async function parseMappingConfigurationFile(
   if (!Array.isArray(header) || header.length !== headers.length || header.some((value, index) => value !== headers[index])) {
     throw new Error("MAPPING_FILE_HEADER_INVALID");
   }
-  return rows.map((cells) => normalizeXlsxRow(resource, Object.fromEntries(
-    headers.map((key, index) => [key, cells[index]]),
-  ), legacyTarget));
+  const result: unknown[] = [];
+  rows.forEach((cells, index) => {
+    if (cells.every(value => value === "")) return;
+    try {
+      result.push(normalizeXlsxRow(resource, Object.fromEntries(headers.map((key, column) => [key, cells[column]])), legacyTarget));
+      onRow?.(index + 2);
+    } catch (error) {
+      const code = error instanceof SyntaxError ? "MAPPING_FILE_JSON_FIELD_INVALID" : String(error instanceof Error ? error.message : error);
+      throw new Error(`${code}:${resource}!${index + 2}`);
+    }
+  });
+  return result;
 }
 
 function createRowsFile(

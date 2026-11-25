@@ -15,7 +15,7 @@
       </el-tooltip>
     </template>
     <el-form v-if="kind === 'config'" class="config-toolbar" label-position="top" @submit.prevent="searchConfig">
-      <el-form-item :label="t('monitor.observation.meter')">
+      <el-form-item :label="t('energy.observation.meter')">
         <el-select v-model="draft.meter" clearable :placeholder="tr('allConfigs')">
           <el-option v-for="item in meters" :key="item.meterId" :value="item.meterId" :label="meterLabel(item.meterId)" />
         </el-select>
@@ -30,48 +30,53 @@
       </el-form-item>
     </el-form>
     <form v-else class="config-toolbar sample-toolbar" @submit.prevent="searchSamples">
-      <label>{{ t('monitor.observation.meter') }}
-        <el-select v-model="sampleFilters.meter" :disabled="saving" :placeholder="t('monitor.observation.selectMeter')">
+      <label>{{ t('energy.observation.meter') }}
+        <el-select v-model="sampleFilters.meter" :disabled="saving || !meters.length" :placeholder="t('energy.observation.selectMeter')">
           <el-option v-for="item in meters" :key="item.meterId" :value="item.meterId" :label="meterLabel(item.meterId)" />
         </el-select>
       </label>
-      <label>{{ tr('group') }} <el-input v-model="sampleFilters.group" :disabled="saving" clearable /></label>
+      <label>{{ tr('group') }} <el-input v-model="sampleFilters.group" :disabled="saving || !meters.length" clearable /></label>
       <div class="table-actions">
-        <ActionButton variant="primary" native-type="submit" :disabled="saving">{{ tr('search') }}</ActionButton>
-        <ActionButton :disabled="saving" @click="resetSamples">{{ t('common.reset') }}</ActionButton>
+        <ActionButton variant="primary" native-type="submit" :disabled="saving || !meters.length">{{ tr('search') }}</ActionButton>
+        <ActionButton :disabled="saving || !meters.length" @click="resetSamples">{{ t('common.reset') }}</ActionButton>
       </div>
     </form>
-    <el-alert v-if="failed" type="error" show-icon :closable="false" :title="t('equipment.observation.loadFailed')" />
-    <el-alert v-if="kind === 'config' && !failed && !loading && !meters.length" type="info" :closable="false" :title="t('monitor.observation.noMeters')" />
+    <el-alert v-if="failed" type="error" show-icon :closable="false" :title="t('energy.observation.loadFailed')">
+      <ActionButton v-if="!isConfig && loadedSelection !== selection()" @click="load">{{ tr('retry') }}</ActionButton>
+    </el-alert>
+    <el-alert v-if="kind === 'config' && !failed && !loading && !meters.length" type="info" :closable="false" :title="t('energy.observation.noMeters')" />
     <template v-if="kind === 'config'">
       <el-table v-if="!failed" :key="widths.version.value" v-loading="loading" :data="filteredConfigs" :empty-text="emptyText"
         border @header-dragend="widths.onHeaderDragEnd">
-        <el-table-column prop="meterId" :label="t('monitor.observation.meter')" :width="widths.widths.meterId" :min-width="160">
+        <el-table-column prop="meterId" :label="t('energy.observation.meter')" :width="widths.widths.meterId" :min-width="160">
           <template #default="{ row }">{{ meterLabel(row.meterId) }}</template>
         </el-table-column>
-        <el-table-column prop="groupKey" :label="t('equipment.observation.group')" :width="widths.widths.groupKey" :min-width="110" />
-        <el-table-column prop="metricKey" :label="t('equipment.observation.key')" :width="widths.widths.metricKey" :min-width="140" />
+        <el-table-column prop="groupKey" :label="t('energy.observation.group')" :width="widths.widths.groupKey" :min-width="110" />
+        <el-table-column prop="metricKey" :label="t('energy.observation.key')" :width="widths.widths.metricKey" :min-width="140" />
         <el-table-column prop="nameZh" :label="tr(locale.startsWith('en') ? 'nameEn' : 'nameZh')" :width="widths.widths.nameZh" :min-width="130">
           <template #default="{ row }">{{ locale.startsWith('en') ? row.nameEn : row.nameZh }}</template>
         </el-table-column>
-        <el-table-column prop="measurementMode" :label="t('monitor.observation.measurementMode')" :width="widths.widths.measurementMode" :min-width="120"><template #default="{ row }">{{ t(`monitor.observation.mode.${row.measurementMode}`) }}</template></el-table-column>
-        <el-table-column prop="unit" :label="t('equipment.observation.unit')" :width="widths.widths.unit" :min-width="80" />
+        <el-table-column prop="measurementMode" :label="t('energy.observation.measurementMode')" :width="widths.widths.measurementMode" :min-width="120"><template #default="{ row }">{{ t(`energy.observation.mode.${row.measurementMode}`) }}</template></el-table-column>
+        <el-table-column prop="unit" :label="t('energy.observation.unit')" :width="widths.widths.unit" :min-width="80" />
         <el-table-column prop="enabled" :label="tr('enabled')" :width="widths.widths.enabled" :min-width="100">
           <template #default="{ row }">{{ tr(row.enabled ? 'yes' : 'no') }}</template>
         </el-table-column>
-        <el-table-column :label="t('equipment.observation.actions')" width="120"><template #default="{ row }"><div class="row-actions">
-          <ActionButton size="small" variant="row" :disabled="saving" @click="openConfig(row)">{{ t('equipment.observation.edit') }}</ActionButton>
+        <el-table-column :label="t('energy.observation.actions')" width="120"><template #default="{ row }"><div class="row-actions">
+          <ActionButton size="small" variant="row" :disabled="saving" @click="openConfig(row)">{{ t('energy.observation.edit') }}</ActionButton>
         </div></template></el-table-column>
       </el-table>
     </template>
-    <el-table v-else :key="widths.version.value" v-loading="loading" :data="samples" border @header-dragend="widths.onHeaderDragEnd">
-      <el-table-column prop="id" :label="t('equipment.observation.recordId')" :width="widths.widths.id" :min-width="80" />
-      <el-table-column prop="meterId" :label="t('monitor.observation.meter')" :width="widths.widths.meterId" min-width="140">
+    <p v-else-if="loading" class="sample-message" role="status">{{ t('common.loading') }}</p>
+    <p v-else-if="!failed && !meters.length" class="sample-message" role="status">{{ tr('noMeters') }}</p>
+    <el-table v-else-if="!failed || loadedSelection === selection()" :key="widths.version.value" :data="samples"
+      :empty-text="tr('noMatchingSamples')" border @header-dragend="widths.onHeaderDragEnd">
+      <el-table-column prop="id" :label="t('energy.observation.recordId')" :width="widths.widths.id" :min-width="80" />
+      <el-table-column prop="meterId" :label="t('energy.observation.meter')" :width="widths.widths.meterId" min-width="140">
         <template #default="{ row }">{{ meterLabel(row.meterId) }}</template>
       </el-table-column>
-      <el-table-column prop="groupKey" :label="t('equipment.observation.group')" :width="widths.widths.groupKey" :min-width="110" />
-      <el-table-column prop="observedAt" :label="t('equipment.observation.sampledAt')" :width="widths.widths.observedAt" :min-width="170"><template #default="{ row }">{{ formatShanghaiDateTime(row.observedAt) }}</template></el-table-column>
-      <el-table-column prop="quality" :label="t('equipment.observation.quality')" :width="widths.widths.quality" :min-width="100"><template #default="{ row }">{{ qualityLabel(row.quality) }}</template></el-table-column>
+      <el-table-column prop="groupKey" :label="t('energy.observation.group')" :width="widths.widths.groupKey" :min-width="110" />
+      <el-table-column prop="observedAt" :label="t('energy.observation.sampledAt')" :width="widths.widths.observedAt" :min-width="170"><template #default="{ row }">{{ formatShanghaiDateTime(row.observedAt) }}</template></el-table-column>
+      <el-table-column prop="quality" :label="t('energy.observation.quality')" :width="widths.widths.quality" :min-width="100"><template #default="{ row }">{{ qualityLabel(row.quality) }}</template></el-table-column>
       <el-table-column prop="reviewMark" :label="tr('reviewMark')" :width="widths.widths.reviewMark" min-width="105">
         <template #default="{ row }">{{ row.reviewMark ? tr(row.reviewMark) : '—' }}</template>
       </el-table-column>
@@ -79,64 +84,71 @@
         :label="metricTitle(field)" :width="widths.widths[fieldKey(field)]" :min-width="120">
         <template #default="{ row }">{{ metricValue(row, field) }}</template>
       </el-table-column>
-      <el-table-column :label="t('equipment.observation.actions')" width="88" fixed="right"><template #default="{ row }"><div class="row-actions">
+      <el-table-column :label="t('energy.observation.actions')" width="88" fixed="right"><template #default="{ row }"><div class="row-actions">
         <ActionButton size="small" variant="row" :disabled="saving" @click="openSample(row)">{{ tr('detail') }}</ActionButton>
       </div></template></el-table-column>
     </el-table>
-    <el-pagination v-if="kind === 'samples'" v-model:current-page="page" :disabled="saving" :page-size="20" :total="total" layout="total, prev, pager, next" @current-change="load" />
-    <el-dialog v-model="dialog" :title="tr(isConfig ? (editing ? 'edit' : 'add') : 'detail')" class="standard-form-dialog"
-      :class="{ 'observation-config-dialog': isConfig }" width="min(680px, 94vw)" :align-center="isConfig"
-      :show-close="!isConfig" :close-on-click-modal="!isConfig">
-      <el-form v-if="kind === 'config'" label-position="top">
-        <el-form-item :label="t('monitor.observation.meter')">
-          <el-select v-model="form.meterId" :disabled="editing" :placeholder="t('monitor.observation.selectMeter')">
+    <el-pagination v-if="!isConfig && !loading && loadedSelection === selection()" v-model:current-page="page"
+      :disabled="saving" :page-size="20" :total="total" layout="total, prev, pager, next" @current-change="load" />
+    <el-dialog v-model="dialog" :title="tr(isConfig ? (editing ? 'edit' : 'add') : 'detail')" class="standard-form-dialog compact-form-dialog" width="min(680px, 94vw)" align-center
+      :show-close="false" :close-on-click-modal="true" :before-close="beforeClose">
+      <el-form v-if="kind === 'config'" label-position="top" class="dialog-form-grid">
+        <el-form-item :label="t('energy.observation.meter')">
+          <el-select v-model="form.meterId" :disabled="editing" :placeholder="t('energy.observation.selectMeter')">
             <el-option v-for="item in meters" :key="item.meterId" :value="item.meterId" :label="meterLabel(item.meterId)" />
           </el-select>
         </el-form-item>
-        <el-form-item :label="t('equipment.observation.group')"><el-input v-model="form.groupKey" :disabled="editing" /></el-form-item>
-        <el-form-item :label="t('equipment.observation.key')"><el-input v-model="form.metricKey" :disabled="editing" /></el-form-item>
-        <el-form-item :label="t('equipment.observation.slot')"><el-input-number v-model="form.slotNo" :min="1" :max="100" :disabled="editing && !!form.firstUsedAt" /></el-form-item>
-        <el-form-item :label="t('equipment.observation.nameZh')"><el-input v-model="form.nameZh" /></el-form-item>
-        <el-form-item :label="t('equipment.observation.nameEn')"><el-input v-model="form.nameEn" /></el-form-item>
-        <el-form-item :label="t('monitor.observation.quantityKey')"><el-input v-model="form.quantityKey" /></el-form-item>
-        <el-form-item :label="t('monitor.observation.measurementMode')"><el-select v-model="form.measurementMode">
-          <el-option v-for="mode in modes" :key="mode" :value="mode" :label="t(`monitor.observation.mode.${mode}`)" />
+        <el-form-item :label="t('energy.observation.group')"><el-input v-model="form.groupKey" :disabled="editing" /></el-form-item>
+        <el-form-item :label="t('energy.observation.key')"><el-input v-model="form.metricKey" :disabled="editing" /></el-form-item>
+        <el-form-item :label="t('energy.observation.slot')"><el-input-number v-model="form.slotNo" :min="1" :max="100" :disabled="editing && !!form.firstUsedAt" /></el-form-item>
+        <el-form-item :label="t('energy.observation.nameZh')"><el-input v-model="form.nameZh" /></el-form-item>
+        <el-form-item :label="t('energy.observation.nameEn')"><el-input v-model="form.nameEn" /></el-form-item>
+        <el-form-item :label="t('energy.observation.quantityKey')"><el-input v-model="form.quantityKey" /></el-form-item>
+        <el-form-item :label="t('energy.observation.measurementMode')"><el-select v-model="form.measurementMode">
+          <el-option v-for="mode in modes" :key="mode" :value="mode" :label="t(`energy.observation.mode.${mode}`)" />
         </el-select></el-form-item>
-        <el-form-item :label="t('equipment.observation.unit')"><el-input v-model="form.unit" clearable /></el-form-item>
-        <el-form-item :label="t('equipment.observation.decimals')"><el-input-number v-model="form.decimals" :min="0" :max="12" /></el-form-item>
-        <el-form-item :label="t('equipment.observation.enabled')"><el-switch v-model="form.enabled" /></el-form-item>
-        <el-form-item :label="t('equipment.observation.columnVisible')"><el-switch v-model="form.listVisible" /></el-form-item>
-        <el-form-item :label="t('equipment.observation.columnOrder')"><el-input-number v-model="form.listOrder" :min="0" :max="2147483647" /></el-form-item>
-        <el-form-item :label="t('monitor.observation.continuityConfirmed')"><el-switch v-model="form.rules.continuityConfirmed" /></el-form-item>
-        <el-form-item :label="t('monitor.observation.maxGapSeconds')"><el-input-number v-model="form.rules.maxGapSeconds" :min="1" /></el-form-item>
+        <el-form-item :label="t('energy.observation.unit')"><el-input v-model="form.unit" clearable /></el-form-item>
+        <el-form-item :label="t('energy.observation.decimals')"><el-input-number v-model="form.decimals" :min="0" :max="12" /></el-form-item>
+        <el-form-item :label="t('energy.observation.enabled')"><el-switch v-model="form.enabled" /></el-form-item>
+        <el-form-item :label="t('energy.observation.columnVisible')"><el-switch v-model="form.listVisible" /></el-form-item>
+        <el-form-item :label="t('energy.observation.columnOrder')"><el-input-number v-model="form.listOrder" :min="0" :max="2147483647" /></el-form-item>
+        <el-form-item :label="t('energy.observation.continuityConfirmed')"><el-switch v-model="form.rules.continuityConfirmed" /></el-form-item>
+        <el-form-item :label="t('energy.observation.maxGapSeconds')"><el-input-number v-model="form.rules.maxGapSeconds" :min="1" /></el-form-item>
       </el-form>
-      <template v-else-if="sampleDetail">
+      <section v-else-if="sampleDetail" class="dialog-section">
         <el-descriptions :title="tr('recordOverview')" :column="2" border>
           <el-descriptions-item :label="tr('recordId')">{{ sampleDetail.id }}</el-descriptions-item>
-          <el-descriptions-item :label="t('monitor.observation.meter')">{{ meterLabel(sampleDetail.meterId) }}</el-descriptions-item>
+          <el-descriptions-item :label="t('energy.observation.meter')">{{ meterLabel(sampleDetail.meterId) }}</el-descriptions-item>
           <el-descriptions-item :label="tr('group')">{{ sampleDetail.groupKey }}</el-descriptions-item>
           <el-descriptions-item :label="tr('sampledAt')">{{ formatShanghaiDateTime(sampleDetail.observedAt) }}</el-descriptions-item>
           <el-descriptions-item :label="tr('quality')">{{ qualityLabel(sampleDetail.quality) }}</el-descriptions-item>
         </el-descriptions>
-        <h3>{{ tr('sampleValues') }}</h3>
-        <el-table :data="sampleDetail.values" border>
-          <el-table-column prop="metricKey" :label="tr('key')" min-width="130" />
-          <el-table-column :label="tr('value')" min-width="100">
+        <div class="sample-values-heading">
+          <h3 class="dialog-section__title">{{ tr('sampleValues') }}</h3>
+          <el-tooltip :content="tr('resetWidths')" placement="top">
+            <ActionButton size="small" @click="detailWidths.reset">{{ tr('resetWidthsButton') }}</ActionButton>
+          </el-tooltip>
+        </div>
+        <el-table :key="detailWidths.version.value" :data="sampleDetail.values" border @header-dragend="detailWidths.onHeaderDragEnd">
+          <el-table-column prop="metricKey" :label="tr('key')" :width="detailWidths.widths.metricKey" :min-width="130" />
+          <el-table-column prop="value" :label="tr('value')" :min-width="detailWidths.widths.value">
             <template #default="{ row }">{{ String(row.value) }}</template>
           </el-table-column>
         </el-table>
-        <h3>{{ tr('managementRecord') }}</h3>
-      </template>
-      <el-form v-if="!isConfig" label-position="top">
-        <el-form-item :label="t('equipment.observation.remark')"><el-input v-model="form.remark" type="textarea" /></el-form-item>
-        <el-form-item :label="t('equipment.observation.reviewMark')"><el-select v-model="form.reviewMark" clearable>
-          <el-option value="abnormal" :label="t('equipment.observation.abnormal')" /><el-option value="reviewed" :label="t('equipment.observation.reviewed')" />
-        </el-select></el-form-item>
-      </el-form>
+      </section>
+      <section v-if="!isConfig" class="dialog-section">
+        <h3 class="dialog-section__title">{{ tr('managementRecord') }}</h3>
+        <el-form label-position="top" class="dialog-form-grid">
+          <el-form-item :label="t('energy.observation.remark')"><el-input v-model="form.remark" type="textarea" /></el-form-item>
+          <el-form-item :label="t('energy.observation.reviewMark')"><el-select v-model="form.reviewMark" clearable>
+            <el-option value="abnormal" :label="t('energy.observation.abnormal')" /><el-option value="reviewed" :label="t('energy.observation.reviewed')" />
+          </el-select></el-form-item>
+        </el-form>
+      </section>
       <template #footer>
         <div class="core-dialog-footer">
-          <ActionButton @click="dialog = false">{{ t('equipment.observation.cancel') }}</ActionButton>
-          <ActionButton variant="primary" :loading="saving" :disabled="kind === 'config' && !form.meterId" @click="save">{{ t('equipment.observation.save') }}</ActionButton>
+          <ActionButton :disabled="saving" @click="dialog = false">{{ t('energy.observation.cancel') }}</ActionButton>
+          <ActionButton variant="primary" :loading="saving" :disabled="kind === 'config' && !form.meterId" @click="save">{{ t('energy.observation.save') }}</ActionButton>
         </div>
       </template>
     </el-dialog>
@@ -149,13 +161,13 @@ import ActionButton from '@/components/common/ActionButton.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
 import { useTableColumnWidths } from '@/utils/tableColumnWidths'
 import { formatShanghaiDateTime } from '@/utils/date'
-import { energyOptions, energyConfigs, createEnergyConfig, updateEnergyConfig, energyAdminSamples, updateEnergySample } from '../../api/observations'
-const props = defineProps({ kind: { type: String, required: true }, active: { type: Boolean, default: true } })
+import { energyOptions, energyConfigs, createEnergyConfig, updateEnergyConfig, energyAdminSamples, updateEnergySample } from '../api/observations'
+const props = defineProps({ kind: { type: String, required: true } })
 const { t, locale } = useI18n()
-const tr = key => t(`equipment.observation.${key}`)
+const tr = key => t(`energy.observation.${key}`)
 const isConfig = props.kind === 'config'
-const cardProps = computed(() => isConfig ? { title: t('monitor.observation.energyConfig') }
-  : { title: t('monitor.observation.energyRecords'), class: 'energy-sample-card' })
+const cardProps = computed(() => isConfig ? { title: t('energy.observation.energyConfig') }
+  : { title: t('energy.observation.energyRecords'), class: 'energy-sample-card' })
 const modes = ['cumulative', 'interval', 'instantaneous']
 const baseColumns = {
   id: { width: 100, minWidth: 80 }, groupKey: { width: 140, minWidth: 110 }, metricKey: { width: 180, minWidth: 140 },
@@ -166,8 +178,11 @@ const sampleColumns = { meterId: { width: 172, minWidth: 140 }, reviewMark: { wi
 const widths = shallowRef(useTableColumnWidths(`observation.energy.${props.kind}`, isConfig ? {
   ...baseColumns, meterId: { width: 210, minWidth: 160 }, enabled: { width: 100, minWidth: 100 }
 } : { ...baseColumns, ...sampleColumns }))
+const detailWidths = useTableColumnWidths('observation.energy.detail', {
+  metricKey: { width: 180, minWidth: 130 }, value: { width: 120, minWidth: 100 }
+})
 const meter = ref(''), group = ref(''), meters = ref([]), configs = ref([]), samples = ref([])
-const page = ref(1), total = ref(0), failed = ref(false), dialog = ref(false), saving = ref(false), editing = ref(false), loading = ref(false)
+const page = ref(1), total = ref(0), failed = ref(false), dialog = ref(false), saving = ref(false), editing = ref(false), loading = ref(!isConfig)
 const form = reactive({})
 const sampleFilters = reactive({ meter: '', group: '' })
 const sampleDetail = ref(null)
@@ -192,6 +207,7 @@ function searchConfig() {
   return loadConfig()
 }
 function resetConfigFilters() { Object.assign(draft, blankFilters()); return searchConfig() }
+let alive = true
 let generation = 0, loadedSelection = null, editSelection = null, editTarget = null
 function selection() {
   return JSON.stringify(isConfig ? submitted.value : [meter.value, group.value, page.value])
@@ -207,10 +223,10 @@ const visibleColumns = computed(() => configs.value.filter(field => field.listVi
 function fieldKey(field) { return `metric:${field.groupKey}:${field.metricKey}` }
 function metricTitle(field) { const name = locale.value.startsWith('en') ? field.nameEn : field.nameZh; return field.unit ? `${name} (${field.unit})` : name }
 function metricValue(row, field) { const item = row.groupKey === field.groupKey && row.values.find(value => value.metricKey === field.metricKey); return item ? String(item.value) : '—' }
-function qualityLabel(value) { return t({ good: 'equipment.observation.qualityGood', bad: 'equipment.observation.qualityBad', unknown: 'equipment.observation.qualityUnknown' }[value] || 'equipment.observation.qualityUnknown') }
+function qualityLabel(value) { return t({ good: 'energy.observation.qualityGood', bad: 'energy.observation.qualityBad', unknown: 'energy.observation.qualityUnknown' }[value] || 'energy.observation.qualityUnknown') }
 function assign(value) { for (const key of Object.keys(form)) delete form[key]; Object.assign(form, value) }
 function openConfig(row) {
-  if (props.active === false || !meters.value.length || failed.value || loadedSelection !== selection() || saving.value ||
+  if (!meters.value.length || failed.value || loadedSelection !== selection() || saving.value ||
       (row && (!filteredConfigs.value.includes(row) || !metersById.value.has(row.meterId)))) return
   editing.value = !!row
   editSelection = selection()
@@ -241,7 +257,7 @@ async function loadConfig() {
   const request = ++generation, selected = selection()
   loadedSelection = null; editSelection = null; editTarget = null; dialog.value = false
   configs.value = []; failed.value = false; loading.value = true
-  const current = () => props.active !== false && request === generation && selected === selection()
+  const current = () => request === generation && selected === selection()
   try {
     const { meter, group } = submitted.value
     const [options, fields] = await Promise.all([
@@ -286,8 +302,9 @@ async function load() {
   } catch { if (current()) failed.value = true }
   finally { if (current()) loading.value = false }
 }
+function beforeClose(done) { if (!saving.value) done() }
 async function save() {
-  if (props.active === false || !dialog.value || saving.value || !editSelection || editSelection !== selection()) return
+  if (!dialog.value || saving.value || !editSelection || editSelection !== selection()) return
   if (isConfig && !metersById.value.has(editTarget?.meterId ?? form.meterId)) return
   const selected = editSelection, target = editTarget, isEditing = editing.value, request = generation
   saving.value = true
@@ -301,7 +318,7 @@ async function save() {
       } else await createEnergyConfig(payload)
     } else await updateEnergySample(target.id, { remark: form.remark || null, reviewMark: form.reviewMark || null })
     if (isConfig) {
-      if (props.active !== false) await loadConfig()
+      if (alive) await loadConfig()
     } else if (editSelection === selected && selection() === selected && dialog.value) {
       dialog.value = false
       await load()
@@ -312,23 +329,14 @@ async function save() {
   finally { saving.value = false }
 }
 if (isConfig) {
-  watch(() => props.active, active => {
-    generation++
-    dialog.value = false
-    editSelection = null
-    if (active) {
-      Object.assign(draft, submitted.value)
-      loadConfig()
-    }
-  }, { flush: 'sync' })
-  onMounted(() => { if (props.active) loadConfig() })
+  onMounted(loadConfig)
 } else {
   watch([meter, group, page], invalidate, { flush: 'sync' })
   watch(meter, () => { page.value = 1; if (meter.value) load() }, { flush: 'sync' })
   watch(group, () => { page.value = 1 }, { flush: 'sync' })
   onMounted(load)
 }
-onBeforeUnmount(() => { generation++; dialog.value = false })
+onBeforeUnmount(() => { alive = false; generation++; dialog.value = false })
 </script>
 <style scoped>
 .config-toolbar {
@@ -352,7 +360,23 @@ onBeforeUnmount(() => { generation++; dialog.value = false })
 }
 .config-toolbar :deep(.el-input), .config-toolbar :deep(.el-select) { width: 100%; }
 .energy-sample-card { min-width: 0; height: auto; }
-.sample-toolbar label { flex: 1 1 140px; min-width: 0; display: grid; gap: 6px; color: var(--text-secondary); }
+.sample-toolbar { padding-block-end: var(--space-md); }
+.sample-toolbar label { flex: 0 1 200px; min-width: 0; display: grid; gap: 6px; color: var(--text-secondary); }
 .sample-toolbar .table-actions { margin-inline-start: auto; }
-
+.sample-message { color: var(--text-secondary); text-align: center; padding: var(--space-md); }
+.sample-values-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); flex-wrap: wrap; }
+@media (max-width: 1279px) {
+  :global(body:has(.energy-sample-card)) { min-width: 0; }
+}
+@media (max-width: 600px) {
+  :global(.main-layout:has(.energy-sample-card)) { flex-direction: column; }
+  :global(.main-layout:has(.energy-sample-card) > .main-container) { flex: 1; min-height: 0; height: auto; }
+  :global(.main-layout:has(.energy-sample-card):not(:has(> .main-container-sidebar-hidden)) > .sidebar) {
+    width: 100% !important; max-height: min(150px, 22dvh);
+    flex: none; border-right: 0; border-bottom: 1px solid var(--border-primary);
+  }
+  :global(.main-layout:has(.energy-sample-card):not(:has(> .main-container-sidebar-hidden)) .sidebar-brand-footer) {
+    display: none;
+  }
+}
 </style>

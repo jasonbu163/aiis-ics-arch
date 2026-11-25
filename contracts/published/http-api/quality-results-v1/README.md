@@ -11,12 +11,13 @@ One normalized task number identifies one quality result. Report parsers run at 
 | `GET /integration/quality` | Trusted network. Read a filtered page. |
 | `GET /integration/quality/field-config` | Trusted network. Read enabled definitions and their revision. |
 | `GET /quality/results` | Signed-in user with Quality permission. The page includes enabled definitions in `data.fields` for rendering. |
+| `POST /quality/results` | Admin, supervisor or operator with Quality permission. Create one result with optional target and enabled, editable fields. |
 | `GET /quality/results/by-task/{taskNo}` | Signed-in user with Quality permission. Read one result. |
 | `POST /quality/results/upsert` | Admin, supervisor or operator with Quality permission. Update editable fields of an existing result. |
 | `GET /quality/field-config` | Administrator. Read all definitions, including disabled fields. |
 | `PUT /quality/field-config` | Administrator. Save the complete definition set with its current revision. |
 
-Deployers enforce network isolation for the four integration routes. All authorized callers use the same contract. Product-side report parsing and downstream delivery are separate responsibilities.
+The private `/quality` routes serve the platform Web UI and use its sign-in and role permissions. The public `/integration/quality` routes serve authorized SMA, CA, FF and third-party programs using the same trusted-network contract. Deployers enforce that network boundary. Edge programs handle report parsing and downstream delivery.
 
 ## Values and updates
 
@@ -30,6 +31,8 @@ Deployers enforce network isolation for the four integration routes. All authori
 
 Success uses `{code,message,data,timestamp}`. An upsert returns `data.outcome` (`created`, `updated` or `unchanged`) and `data.quality`. Empty results are allowed on the integration route and carry no report-completion signal.
 
+Manual creation returns HTTP 201 with envelope `code: 200`, `data.outcome: "created"` and `data.quality`. Supply `taskNo` and optionally `targetKey` and `items`. An existing normalized task number returns HTTP 409 with `quality.task_no_conflict`. Its stored values stay intact. A subsequent integration upsert may merge fields according to the existing write rules.
+
 Errors include `errorCode` and `details` alongside the envelope. Common outcomes are `quality.unauthenticated` (401), `quality.forbidden` (403), `quality.not_found` (404), `quality.target_conflict` or `quality.config_revision_conflict` (409), and `quality.invalid_request` (422). For a lost response or `quality.commit_unknown` (503), read the current result or configuration and compare it before resubmitting. `quality.unavailable` (503) indicates storage could not serve the operation.
 
-Source of truth is the [backend route](../../../../backend/app/quality/api/results.py), [schema](../../../../backend/app/quality/schemas/results.py) and [approved specification](../../../../plans/ARCH-QUALITY-001-task-quality-results/spec.md).
+See the [backend route](../../../../backend/app/quality/api/results.py), [schema](../../../../backend/app/quality/schemas/results.py), [base specification](../../../../plans/ARCH-QUALITY-001-task-quality-results/spec.md) and [manual creation specification](../../../../plans/ARCH-QUALITY-002-manual-results-and-legacy-retirement/spec.md).

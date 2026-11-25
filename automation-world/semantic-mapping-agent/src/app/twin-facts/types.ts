@@ -3,6 +3,8 @@
  * Description: Read-only source-fact, HTTP Mapping configuration and mapping-only startup contracts.
  * Main Features: Types backend-owned Mapping configuration, local runtime startup preferences, manual-run audit summaries, editable material load outcomes, and stable material reason codes.
  */
+import type { ResponseCondition } from "../http-mapping/types";
+
 export type CollectionFactKind = "current" | "incremental";
 export type CollectionFactDataType = "string" | "integer" | "number" | "boolean" | "datetime";
 
@@ -24,6 +26,9 @@ export interface TargetApiConfigurationInput {
   name: string;
   httpMethod: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD" | "OPTIONS" | "TRACE";
   path: string;
+  url?: string | null;
+  timeoutMs?: number | null;
+  receipt?: ResponseCondition | null;
   schemaSource: TargetApiSchemaSource;
   originType?: TargetApiOriginType;
   originMaterialKey?: string | null;
@@ -77,6 +82,7 @@ export interface MappingConfigurationInput {
   targetApiKey: string;
   bindings: Record<string, MappingConfigurationBinding>;
   intervalMs: number;
+  maxAgeMs?: number | null;
   enabled: boolean;
 }
 

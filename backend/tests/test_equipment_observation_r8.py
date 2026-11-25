@@ -103,10 +103,8 @@ async def test_admin_list_column_http_contract_and_role_restriction(monkeypatch)
         async def get(self, model, key): return row
         async def commit(self): pass
 
-    async def no_probe(db, target): return None
     async def column_data(db, target): return {'target': target, 'items': []}
     monkeypatch.setattr(routes, 'get_profile', lambda: {'readScopes': {'admin': ['line']}, 'target': {}})
-    monkeypatch.setattr(routes, 'probe_target', no_probe)
     monkeypatch.setattr(routes.configuration, 'list_columns', column_data)
     app = FastAPI()
     app.include_router(routes.router, prefix='/api/v1')
@@ -140,8 +138,8 @@ async def test_empty_and_scoped_admin_record_queries_are_fail_closed(monkeypatch
     with pytest.raises(ObservationError) as error:
         await reads._conditions(None, scoped, user, LatestSnapshot, equipment='line-2')
     assert error.value.status == 403
-    async def no_probe(db, target): return None
-    monkeypatch.setattr(reads, 'probe_target', no_probe)
+    async def no_registered_sources(db, *, include_deleted=False): return []
+    monkeypatch.setattr(reads.write_sources, 'visible_sources', no_registered_sources)
     class Result:
         def scalar_one_or_none(self): return None
     class DB:

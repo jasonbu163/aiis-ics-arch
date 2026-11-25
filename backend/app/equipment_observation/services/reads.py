@@ -3,7 +3,7 @@ import json
 from datetime import timedelta
 from sqlalchemy import func, or_, select
 
-from ..services.guard import probe_target
+from .guard import current_clock
 from ..domain import identifier, reject, task_no, wire_time
 from ..models import CardConfig, CurveGroup, HistorySample, LatestSnapshot, MetricConfig, MetricGroup, Receipt, SlotBinding, WriteSource
 from ..profile import allowed_device, allowed_devices
@@ -35,13 +35,12 @@ def freshness(now, observed_at, stale_after_seconds):
 
 
 async def options(db, profile, user, include_deleted=False):
-    await probe_target(db, profile['target'])
     await write_sources.check_profile(db, profile)
     if include_deleted and user.role != 'admin':
         reject('forbidden', 403)
     legacy = [{'equipmentId': key, 'nameZh': profile['devices'][key]['nameZh'],
                'nameEn': profile['devices'][key]['nameEn']} for key in sorted(allowed_devices(profile, user))]
-    registered = await write_sources.visible_sources(db, profile, include_deleted=include_deleted)
+    registered = await write_sources.visible_sources(db, include_deleted=include_deleted)
     return legacy + [
         {'equipmentId': row.storage_identity, 'nameZh': row.name or row.source_key,
          'nameEn': row.name or row.source_key, **write_sources.source_projection(row)}
@@ -49,9 +48,7 @@ async def options(db, profile, user, include_deleted=False):
     ]
 
 
-async def _registered_device(db, profile, equipment):
-    if not write_sources.registry_available(profile):
-        return None
+async def _registered_device(db, equipment):
     return (await db.execute(select(WriteSource).where(
         WriteSource.storage_identity == equipment, WriteSource.deleted_at.is_(None)
     ))).scalar_one_or_none()
@@ -62,7 +59,6 @@ async def public_latest(db, profile, source_key, target, task):
     if target not in TARGET_MODELS:
         reject()
     normalized_task = task_no(task) if task is not None else None
-    await probe_target(db, profile['target'])
     await write_sources.check_profile(db, profile)
     source = await write_sources.source_row(db, key)
     if source is None or source.deleted_at is not None:
@@ -86,9 +82,8 @@ async def public_latest(db, profile, source_key, target, task):
 
 
 async def task_candidates(db, profile, user, equipment):
-    await probe_target(db, profile['target'])
     await write_sources.check_profile(db, profile)
-    if await _registered_device(db, profile, equipment) is None:
+    if await _registered_device(db, equipment) is None:
         allowed_device(profile, user, equipment)
     rows = (await db.execute(select(LatestSnapshot).where(LatestSnapshot.equipment_id == equipment)
             .order_by(LatestSnapshot.observed_at.desc(), LatestSnapshot.task_no.asc()))).scalars().all()
@@ -100,10 +95,10 @@ async def task_candidates(db, profile, user, equipment):
 async def latest_cards(db, profile, user, equipment, page, language, selected=None):
     if page not in ('production', 'cleaning', 'temperature', 'drive'):
         reject()
-    now = await probe_target(db, profile['target'])
     await write_sources.check_profile(db, profile)
-    registered = await _registered_device(db, profile, equipment)
+    registered = await _registered_device(db, equipment)
     stale_seconds = 60 if registered is not None else allowed_device(profile, user, equipment)['staleAfterSeconds']
+    now = await current_clock(db)
     query = select(LatestSnapshot).where(LatestSnapshot.equipment_id == equipment)
     if selected:
         query = query.where(LatestSnapshot.task_no == task_no(selected))
@@ -204,9 +199,8 @@ async def sample_data(db, row, target, maps=None, details=False, source=None):
 
 
 async def samples(db, profile, user, target, filters, page, size, *, admin=False):
-    await probe_target(db, profile['target'])
     await write_sources.check_profile(db, profile)
-    sources = await write_sources.visible_sources(db, profile, include_deleted=admin)
+    sources = await write_sources.visible_sources(db, include_deleted=admin)
     registered = {row.storage_identity: row for row in sources}
     model = TARGET_MODELS[target]
     conditions = await _conditions(db, profile, user, model, registered=registered, **filters)
@@ -220,10 +214,9 @@ async def samples(db, profile, user, target, filters, page, size, *, admin=False
 
 
 async def detail(db, profile, user, target, identity):
-    await probe_target(db, profile['target'])
     await write_sources.check_profile(db, profile)
     model = TARGET_MODELS[target]
-    sources = await write_sources.visible_sources(db, profile, include_deleted=getattr(user, 'role', None) == 'admin')
+    sources = await write_sources.visible_sources(db, include_deleted=getattr(user, 'role', None) == 'admin')
     registered = {row.storage_identity: row for row in sources}
     allowed = allowed_devices(profile, user) | set(registered)
     row = (await db.execute(select(model).where(
@@ -275,17 +268,16 @@ def _drawable_history_query(equipment, slots, task=None):
 
 
 async def history_default_context(db, profile, user, category, equipment, task=None):
-    await probe_target(db, profile['target'])
     await write_sources.check_profile(db, profile)
     if category not in ('temperature', 'drive', 'cleaning'):
         reject()
     if equipment is not None:
         identifier(equipment)
-        if await _registered_device(db, profile, equipment) is None:
+        if await _registered_device(db, equipment) is None:
             allowed_device(profile, user, equipment)
         sources = {equipment}
     else:
-        registered = await write_sources.visible_sources(db, profile)
+        registered = await write_sources.visible_sources(db)
         sources = allowed_devices(profile, user) | {row.storage_identity for row in registered}
     if task is not None:
         task = task_no(task)
@@ -310,9 +302,8 @@ async def history_default_context(db, profile, user, category, equipment, task=N
 
 
 async def curves(db, profile, user, equipment, category, task, start, end, language):
-    await probe_target(db, profile['target'])
     await write_sources.check_profile(db, profile)
-    registered = await _registered_device(db, profile, equipment)
+    registered = await _registered_device(db, equipment)
     if registered is None:
         allowed_device(profile, user, equipment)
     if category not in ('temperature', 'drive', 'cleaning') or not start or not end:

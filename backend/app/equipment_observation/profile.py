@@ -10,7 +10,7 @@ from uuid import UUID
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from settings import resolve_env_file
 from common.integration.envelope import identifier as core_identifier
-from .domain import ObservationError
+from .domain import ObservationError, reject
 
 WRITE_SOURCES_REVISION = "e9f3b5d7c021"
 REVISIONS = (WRITE_SOURCES_REVISION, "f0a2b4c6d8e1")
@@ -37,10 +37,7 @@ def parse_profile(document):
             or not set(document).issubset(required_top | {"meters", "meterReadScopes"})):
         raise ValueError("invalid profile")
     target = document["target"]
-    if (not isinstance(target, dict) or set(target) != {"serverUuid", "schema", "schemaRevision"}
-            or target["schemaRevision"] not in REVISIONS or not isinstance(target["serverUuid"], str)
-            or str(UUID(target["serverUuid"])) != target["serverUuid"]
-            or not valid_identifier(target["schema"])):
+    if not isinstance(target, dict):
         raise ValueError("invalid target")
     devices = {}
     identity = {"equipmentId", "nameZh", "nameEn"}
@@ -188,6 +185,20 @@ def get_profile():
         return parse_profile(json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=unique_pairs))
     except (OSError, ValueError, TypeError, UnicodeError, AttributeError):
         raise ObservationError(503, "not_ready") from None
+
+
+def require_energy_target(profile):
+    """日常能耗操作只绑定目标库身份，不绑定全库迁移版本。"""
+    target = profile["target"]
+    try:
+        if (not isinstance(target, dict) or not {"serverUuid", "schema"}.issubset(target)
+                or not isinstance(target["serverUuid"], str)
+                or str(UUID(target["serverUuid"])) != target["serverUuid"]
+                or not valid_identifier(target["schema"])):
+            raise ValueError("invalid target")
+    except (TypeError, ValueError, AttributeError):
+        reject("not_ready", 503)
+    return profile
 
 
 def authenticate(profile, authorization):

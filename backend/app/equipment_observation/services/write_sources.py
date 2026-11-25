@@ -8,8 +8,7 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 
 from ..domain import ObservationError, reject, wire_time
 from ..models import HistorySample, LatestSnapshot, Receipt, WriteSource
-from ..profile import REVISIONS
-from .guard import current_clock, probe_target
+from .guard import current_clock
 
 _SOURCE_KEY = re.compile(r"[A-Za-z0-9_.-]{1,64}")
 _STORAGE_ID = re.compile(r"obsreg_[0-9a-f]{57}")
@@ -25,17 +24,11 @@ def storage_identity(key):
     return "obsreg_" + hashlib.sha256(key.encode("utf-8")).hexdigest()[:57]
 
 
-def registry_available(profile):
-    return profile.get("target", {}).get("schemaRevision") in REVISIONS
-
-
 def profile_identities(profile):
     return {key for kind in ("devices", "producers") for key in profile.get(kind, {}) if _STORAGE_ID.fullmatch(key)}
 
 
 async def check_profile(db, profile, *, writing_as=()):
-    if not registry_available(profile):
-        return
     identities = profile_identities(profile)
     active = identities.intersection(writing_as)
     if active:
@@ -60,9 +53,7 @@ async def source_row(db, key, *, lock=False):
     return (await db.execute(query)).scalar_one_or_none()
 
 
-async def visible_sources(db, profile, *, include_deleted=False):
-    if not registry_available(profile):
-        return []
+async def visible_sources(db, *, include_deleted=False):
     query = select(WriteSource).order_by(WriteSource.source_key)
     if not include_deleted:
         query = query.where(WriteSource.deleted_at.is_(None))
@@ -79,9 +70,8 @@ def source_projection(row):
 
 
 async def list_sources(db, profile):
-    await probe_target(db, profile["target"])
     await check_profile(db, profile)
-    return [data(row) for row in await visible_sources(db, profile)]
+    return [data(row) for row in await visible_sources(db)]
 
 
 async def commit(db):
@@ -96,10 +86,10 @@ async def commit(db):
 async def create(db, profile, key, name, enabled):
     key = source_key(key)
     identity = storage_identity(key)
-    now = await probe_target(db, profile["target"])
     await check_profile(db, profile)
     if identity in profile_identities(profile):
         reject("configuration_conflict", 409)
+    now = await current_clock(db)
     row = WriteSource(source_key=key, storage_identity=identity, name=name, enabled=enabled,
                       created_at=now, updated_at=now)
     db.add(row)
@@ -126,7 +116,6 @@ async def create(db, profile, key, name, enabled):
 
 
 async def change(db, profile, key, changes, *, delete=False):
-    await probe_target(db, profile["target"])
     await check_profile(db, profile)
     row = await source_row(db, source_key(key), lock=True)
     if row is None or row.deleted_at is not None:

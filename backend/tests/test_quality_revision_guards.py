@@ -6,7 +6,6 @@ import pytest
 
 from app.equipment_observation import profile as observation
 from app.equipment_observation.services.guard import EvidenceUnavailable, probe_target
-from app.equipment_observation.services.write_sources import registry_available
 from app.plc_facts import v2_config
 from app.plc_facts.crud import sync_v2_maintenance
 from app.plc_facts.v2_domain import V2Error
@@ -27,7 +26,7 @@ async def test_quality_successor_keeps_all_version_guards(revision, tmp_path):
     assert revision in ALLOWED_SCHEMA_REVISIONS
     assert sync_v2_maintenance.target_now(SyncProbe([revision]), profile) == NOW
     observed = observation.parse_profile(observation_document(revision))
-    assert registry_available(observed)
+    assert observation.require_energy_target(observed) is observed
     assert await probe_target(AsyncProbe([revision]), observed['target']) == NOW
     assert validate_target(target(revision), {**target(revision), "utcNow": NOW}).utcoffset().total_seconds() == 28800
 
@@ -51,4 +50,5 @@ async def test_quality_successor_does_not_accept_a_mismatched_or_unknown_target(
             await probe_target(AsyncProbe([actual]), config)
     with pytest.raises(ValueError, match='target'):
         validate_target(old, new)
-    assert not registry_available({'target': target('unknown')})
+    observed = {'target': target('unknown')}
+    assert observation.require_energy_target(observed) is observed

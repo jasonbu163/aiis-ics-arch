@@ -17,6 +17,14 @@ pub fn transform(
             d.connection = serde_json::from_value(i.payload.clone())
                 .map_err(|_| "SMA_CONFIGURATION_CONNECTION_INVALID")?
         }
+        "runtimeLimits" => {
+            d.runtime_limits = Some(
+                serde_json::from_value(i.payload.clone()).map_err(|_| "SMA_HTTP_LIMITS_INVALID")?,
+            );
+        }
+        "merge" if i.resource == "configuration" => {
+            super::merge::merge(&mut d, &i.payload)?;
+        }
         "metadata" => {
             d.source_metadata = serde_json::from_value(i.payload.clone())
                 .map_err(|_| "SMA_CONFIGURATION_SOURCE_METADATA_INVALID")?
@@ -162,10 +170,25 @@ pub fn transform(
         }
         _ => return Err("SMA_CONFIGURATION_INTENT_INVALID".into()),
     }
+    for rule in &d.mapping_value_rules {
+        if let Some(source_key) = rule["originSourceKey"].as_str() {
+            if old
+                .http_sources
+                .iter()
+                .any(|s| s["sourceKey"] == source_key)
+                && !d.http_sources.iter().any(|s| s["sourceKey"] == source_key)
+            {
+                return Err(format!(
+                    "SMA_CONFIGURATION_REFERENCE_MISSING:mappingValueRules:{}",
+                    rule["valueRuleKey"].as_str().unwrap_or_default()
+                ));
+            }
+        }
+    }
     validate(&d)?;
     Ok(d)
 }
-fn normalize(
+pub(super) fn normalize(
     d: &ConfigurationDocument,
     r: &str,
     v: &mut Value,
@@ -173,6 +196,10 @@ fn normalize(
 ) -> Result<(), String> {
     let key = key_field(r)?;
     let id = format!("{r}:{}", text(v, key)?);
+    if r == "httpSources" {
+        v["id"] = old.map(|e| e["id"].clone()).unwrap_or(json!(id));
+        return Ok(());
+    }
     v["id"] = old.map(|e| e["id"].clone()).unwrap_or(json!(id));
     v["rowVersion"] = Value::Null;
     v["createdAt"] = old

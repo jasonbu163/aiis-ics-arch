@@ -1,6 +1,6 @@
 Task ID: ARCH-QUALITY-002
 Revision: r1
-Status: pending_owner_approval
+Status: owner_approved
 Owner Role: PM
 Allowed Writers: PM, Human Owner
 Workflow Mode: STD
@@ -13,7 +13,7 @@ Acceptance Chain Reference: 本规格第 7–8 节及 Development Lifecycle Work
 Related Task: ARCH-QUALITY-001
 Created: 2026-11-24 Asia/Shanghai
 Updated: 2026-11-24 Asia/Shanghai
-Handoff: 待 Human Owner 审阅并批准精确 ARCH-QUALITY-002 r1
+Handoff: Human Owner 已批准精确 ARCH-QUALITY-002 r1，交 Development 实施
 
 # 质量结果人工新增与旧检验退役
 
@@ -149,4 +149,4 @@ Development 使用 backend-arch、frontend-ui、i18n-workflow 和 code-document-
 
 ## 8. 审批
 
-本文件是待审批 r1。Human Owner 批准 ARCH-QUALITY-002 r1 后才进入 Development。本规格审批不代表最终验收，也不授权实际部署、数据库迁移或旧数据删除。
+Human Owner 于 2026-11-24 明确批准「ARCH-QUALITY-002 r1，开始开发」，交 Development 按本规格实施。本规格审批不代表最终验收，也不授权实际部署、数据库迁移或旧数据删除。

@@ -106,7 +106,7 @@ async def test_source_registration_conflict_rolls_back_flushed_row(monkeypatch, 
     from app.equipment_observation.services import write_sources
 
     _, now, _, _ = normalize(request())
-    monkeypatch.setattr(write_sources, "probe_target", AsyncMock(return_value=now))
+    monkeypatch.setattr(write_sources, "current_clock", AsyncMock(return_value=now))
     db = SimpleNamespace(add=Mock(), flush=AsyncMock(), rollback=AsyncMock(), commit=AsyncMock(),
                          execute=AsyncMock(return_value=SimpleNamespace(first=lambda: (1,))))
     if duplicate:
@@ -142,7 +142,6 @@ async def test_source_change_updates_timestamp_only_on_mutation(monkeypatch, cha
     lookup = AsyncMock(return_value=row)
     clock = AsyncMock(return_value=now)
     db = SimpleNamespace(flush=AsyncMock(), rollback=AsyncMock(), commit=AsyncMock())
-    monkeypatch.setattr(write_sources, "probe_target", AsyncMock(return_value=now))
     monkeypatch.setattr(write_sources, "source_row", lookup)
     monkeypatch.setattr(write_sources, "current_clock", clock)
 

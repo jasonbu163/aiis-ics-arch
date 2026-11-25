@@ -10,6 +10,10 @@ import {
 } from '../../src/app/moduleManifest.js'
 import { loadRegistry } from '../../scripts/check-module-manifests.mjs'
 import { createMemoryHistory, createRouter } from 'vue-router'
+import energy from '../../src/app/energy/manifest.js'
+import { monitorModule } from '../../src/app/monitor/manifest.js'
+import { auxiliaryModule } from '../../src/app/auxiliary/manifest.js'
+import { equipmentModule } from '../../src/app/equipment/manifest.js'
 
 const admin = { isAdmin: true }
 const access = (...ids) => ({ isAdmin: false, hasPageAccess: id => ids.includes(id) })
@@ -18,6 +22,28 @@ const globals = {
   'en-US': { breadcrumb: { legacy: 'Legacy page' } },
   'zh-CN': { breadcrumb: { legacy: '旧页面' } }
 }
+
+test('energy titles and reused chart text resolve with the other optional modules disabled', async () => {
+  const modules = [energy, ...[monitorModule, auxiliaryModule, equipmentModule].map(module => ({ ...module, enabled: false }))]
+  const manifests = Object.fromEntries(modules.map(module => [`/app/${module.name}/manifest.js`, { default: module }]))
+  const locales = {}
+  for (const { name } of modules) {
+    for (const locale of ['en-US', 'zh-CN']) {
+      const file = `/app/${name}/locales/${locale}.json`
+      locales[file] = JSON.parse(await readFile(new URL(`../../src${file}`, import.meta.url), 'utf8'))
+    }
+  }
+  const registry = createModuleRegistry(manifests, locales, globals, { requiredModules: [] })
+  assert.deepEqual(registry.activeModuleNames, ['energy'])
+  const chartLabels = ['selectAreas', 'selectAll', 'chartLabel', 'curveLegend', 'noChartData', 'noVisibleSeries', 'precisionLimited']
+  for (const locale of ['en-US', 'zh-CN']) {
+    for (const label of chartLabels) {
+      assert.equal(typeof resolveMessage(registry.messages[locale], `energy.observation.${label}`), 'string')
+    }
+    assert.equal(registry.messages[locale].monitor, undefined)
+  }
+})
+
 function fixture(name = 'example', options = {}) {
   return {
     name, enabled: true, order: 100,
@@ -249,7 +275,7 @@ test('invalid schema, dynamic visible route and incomplete bilingual title fail'
 test('actual source preserves Core route identity, shell locales and default-disabled demo', async () => {
   const root = fileURLToPath(new URL('../../', import.meta.url))
   const registry = await loadRegistry(root)
-  assert.deepEqual(registry.activeModuleNames.filter(name => name !== 'acquisition-data'), ['plan', 'performance', 'monitor', 'equipment', 'auxiliary', 'quality', 'system', 'maintenance'])
+  assert.deepEqual(registry.activeModuleNames.filter(name => name !== 'acquisition-data'), ['plan', 'performance', 'monitor', 'equipment', 'energy', 'auxiliary', 'quality', 'system', 'maintenance'])
   assert.deepEqual(registry.routes.filter(route => !route.path.startsWith('acquisition-data/')).map(route => [route.name, route.path, route.meta.pageId]), [
     ['PlanList', 'plan/list', 'plan.list'],
     ['PlanLocalFields', 'plan/local-fields', 'plan.local-fields'],
@@ -258,7 +284,6 @@ test('actual source preserves Core route identity, shell locales and default-dis
     ['PerformanceLocalFields', 'performance/local-fields', 'performance.local-fields'],
     ['PerformanceSharedFields', 'performance/shared-fields', 'performance.shared-fields'],
     ['MonitorTemperature', 'monitor/temperature', 'monitor.temperature'],
-    ['MonitorEnergy', 'monitor/consumption', 'monitor.energy'],
     ['MonitorDrive', 'monitor/drive', 'monitor.drive'],
     ['MonitorCleaning', 'monitor/cleaning', 'monitor.cleaning'],
     ['MonitorObservationAdmin', 'monitor/observations/admin', 'monitor.observations.admin'],
@@ -269,9 +294,12 @@ test('actual source preserves Core route identity, shell locales and default-dis
     ['EquipmentCleaning', 'equipment/cleaning', 'equipment.cleaning'],
     ['EquipmentObservationAdmin', 'equipment/observations/admin', 'equipment.observations.admin'],
     ['EquipmentObservationData', 'equipment/observations/data', 'equipment.observations.data'],
+    ['MonitorEnergy', 'monitor/consumption', 'monitor.energy'],
+    ['AuxiliaryPrice', 'auxiliary/price', 'auxiliary.price'],
+    ['EnergyObservationData', 'energy/observations/data', 'energy.observations.data'],
+    ['EnergyObservationAdmin', 'energy/observations/admin', 'energy.observations.admin'],
     ['AuxiliaryStop', 'auxiliary/stop', 'auxiliary.stop'],
     ['AuxiliaryShift', 'auxiliary/shift', 'auxiliary.shift'],
-    ['AuxiliaryPrice', 'auxiliary/price', 'auxiliary.price'],
     ['QualityList', 'quality/list', 'quality.list'],
     ['QualityLocalFields', 'quality/local-fields', 'quality.local-fields'],
     ['QualitySPC', 'quality/spc', 'quality.spc'],
@@ -303,18 +331,17 @@ test('actual source preserves Core route identity, shell locales and default-dis
 })
 
 
-test('five adapted modules retain order, owned bilingual titles and current visible leaves', async () => {
+test('adapted modules retain order, owned bilingual titles and current visible leaves', async () => {
   const registry = await loadRegistry(fileURLToPath(new URL('../../', import.meta.url)))
   const groups = [
     ['performance', 30, 'DataLine'], ['monitor', 40, 'Monitor'],
-    ['equipment', 50, 'Monitor'], ['quality', 70, 'CircleCheck'], ['maintenance', 90, 'Notebook']
+    ['equipment', 50, 'Monitor'], ['energy', 55, 'Cpu'], ['quality', 70, 'CircleCheck'], ['maintenance', 90, 'Notebook']
   ]
   const pages = [
     ['performance.list', 'performance.list', 10, 'List'],
     ['performance.local-fields', 'performance.workflow.fieldSettings', 15, 'Setting'],
     ['performance.shared-fields', 'performance.workflow.sharedFieldSettings', 20, 'Setting'],
-    ['monitor.temperature', 'monitor.temperature', 20, 'TrendCharts'],
-    ['monitor.energy', 'monitor.energy', 30, 'Cpu'],
+    ['monitor.temperature', 'monitor.temperature', 30, 'TrendCharts'],
     ['monitor.drive', 'monitor.observation.drive', 40, 'TrendCharts'],
     ['monitor.cleaning', 'monitor.observation.cleaning', 50, 'TrendCharts'],
     ['monitor.observations.admin', 'monitor.observation.configManagement', 60, 'Setting'],
@@ -325,6 +352,10 @@ test('five adapted modules retain order, owned bilingual titles and current visi
     ['equipment.cleaning', 'equipment.observation.cleaning', 40, 'Operation'],
     ['equipment.observations.admin', 'equipment.observation.configManagement', 50, 'Setting'],
     ['equipment.observations.data', 'equipment.observation.dataManagement', 60, 'List'],
+    ['monitor.energy', 'energy.consumption', 10, 'TrendCharts'],
+    ['auxiliary.price', 'energy.price.title', 20, 'PriceTag'],
+    ['energy.observations.data', 'energy.data', 30, 'List'],
+    ['energy.observations.admin', 'energy.configuration', 40, 'Setting'],
     ['quality.list', 'quality.list', 10, 'List'],
     ['quality.local-fields', 'quality.localFields.title', 15, 'Setting'],
     ['quality.spc', 'quality.spc', 20, 'DataAnalysis'],
@@ -377,6 +408,6 @@ test('five adapted modules retain order, owned bilingual titles and current visi
   assert.equal(resolveMessage(registry.messages['en-US'], 'quality.control.routeTitle'), 'Quality Control')
   assert.equal(resolveMessage(registry.messages['zh-CN'], 'quality.control.routeTitle'), '质量控制')
   for (const locale of ['en-US', 'zh-CN']) {
-    assert.match(resolveMessage(registry.messages[locale], 'quality.control.title'), /\{coilNo\}/)
+    assert.equal(resolveMessage(registry.messages[locale], 'quality.control.title'), undefined)
   }
 })

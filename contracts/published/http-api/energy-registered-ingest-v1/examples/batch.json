@@ -1,0 +1,38 @@
+{
+  "request": {
+    "sourceKey": "energy-line-01",
+    "target": "energy",
+    "observedAt": "2026-11-24T12:00:00+08:00",
+    "items": {
+      "meter-01": {
+        "electricity": {
+          "quality": "good",
+          "intervalStartAt": "2026-11-24T11:00:00+08:00",
+          "intervalEndAt": "2026-11-24T12:00:00+08:00",
+          "values": { "intervalEnergy": 120 }
+        }
+      },
+      "meter-02": {
+        "electricity": {
+          "quality": "good",
+          "values": { "totalEnergy": 9820, "activePower": 0 }
+        }
+      }
+    }
+  },
+  "response": {
+    "code": 200,
+    "message": "success",
+    "data": {
+      "sourceKey": "energy-line-01",
+      "target": "energy",
+      "observedAt": "2026-11-24T12:00:00.000000+08:00",
+      "outcome": "stored",
+      "receiptId": "7001",
+      "records": [
+        { "meterId": "meter-01", "groupKey": "electricity", "recordId": "1048" },
+        { "meterId": "meter-02", "groupKey": "electricity", "recordId": "1049" }
+      ]
+    }
+  }
+}

@@ -123,8 +123,12 @@ def test_explicit_mysql_f_reintegration(monkeypatch):
                     assert (await request(client, "GET", f'/plans/{plan["id"]}'))["coilNo"] == coil
                     performance = await request(client, "POST", "/performances", json={"planId": plan["id"], "coilNo": coil, "grade": "Q235", "weight": 10, "productionDate": date.today().isoformat(), "startTime": (now-timedelta(hours=1)).isoformat(), "endTime": now.isoformat(), "outputQuantity": 10, "qualifiedQuantity": 9, "qualityScore": 90, "efficiencyRate": 80})
                     assert (await request(client, "GET", f'/performances/{performance["id"]}'))["planId"] == plan["id"]
-                    quality = await request(client, "POST", "/quality", json={"coilNo": coil, "grade": "Q235", "judgment": "qualified", "defects": [{"defectType": "synthetic"}]})
-                    assert (await request(client, "GET", f'/quality/{quality["id"]}'))["coilNo"] == coil
+                    assert (await client.get("/api/v1/quality")).status_code == 404
+                    assert (await client.post("/api/v1/quality", json={"coilNo": coil})).status_code == 404
+                    created = await client.post("/api/v1/quality/results", json={"taskNo": coil})
+                    assert created.status_code == 201, created.text
+                    assert created.json()["code"] == 200
+                    assert (await request(client, "GET", f"/quality/results/by-task/{coil}"))["taskNo"] == coil
                     report = await request(client, "POST", "/reports/generate", params={"report_type": "daily", "report_date": date.today().isoformat()})
                     assert (await request(client, "GET", f'/reports/{report["id"]}'))["totalCoils"] >= 1
                     efficiency = await request(client, "GET", "/statistics/efficiency", params={"startDate": date.today().isoformat(), "endDate": date.today().isoformat()})

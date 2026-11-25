@@ -103,7 +103,7 @@ test('actual list setup saves independent display settings and restores stable c
 })
 
 test('energy settings save column order and the sample list respects it', async () => {
-  const source = await readFile(new URL('../../src/app/monitor/components/observations/EnergyAdmin.vue', import.meta.url), 'utf8')
+  const source = await readFile(new URL('../../src/app/energy/components/EnergyAdmin.vue', import.meta.url), 'utf8')
   const { descriptor } = parse(source)
   const script = compileScript(descriptor, { id: 'energy-admin' }).content
     .replace(/^import\s+(.+?)\s+from\s+['"](.+?)['"];?$/gm, (_line, binding, name) => {
@@ -126,7 +126,7 @@ test('energy settings save column order and the sample list respects it', async 
   const deps = {
     vue: { ...vue, onMounted: fn => hooks.push(fn) }, 'vue-i18n': { useI18n: () => ({ t: key => key, locale: vue.ref('zh-CN') }) },
     '@/components/common/ActionButton.vue': {}, '@/utils/date': { formatShanghaiDateTime: value => value },
-    '@/utils/tableColumnWidths': { useTableColumnWidths }, '../../api/observations': api
+    '@/utils/tableColumnWidths': { useTableColumnWidths }, '../api/observations': api
   }
   const scope = vue.effectScope()
   try {
@@ -149,7 +149,7 @@ test('energy settings save column order and the sample list respects it', async 
 })
 
 async function energyAdminFixture(kind, api) {
-  const source = await readFile(new URL('../../src/app/monitor/components/observations/EnergyAdmin.vue', import.meta.url), 'utf8')
+  const source = await readFile(new URL('../../src/app/energy/components/EnergyAdmin.vue', import.meta.url), 'utf8')
   const script = compileScript(parse(source).descriptor, { id: 'energy-admin-race' }).content
     .replace(/^import\s+(.+?)\s+from\s+['"](.+?)['"];?$/gm, (_line, binding, name) => {
       if (binding.startsWith('{')) binding = binding.replace(/\bas\b/g, ':')
@@ -160,7 +160,7 @@ async function energyAdminFixture(kind, api) {
   const deps = { vue: { ...vue, onMounted: () => {}, onBeforeUnmount: () => {} },
     'vue-i18n': { useI18n: () => ({ t: key => key, locale: vue.ref('zh-CN') }) },
     '@/components/common/ActionButton.vue': {}, '@/utils/date': { formatShanghaiDateTime: value => value },
-    '@/utils/tableColumnWidths': { useTableColumnWidths }, '../../api/observations': api }
+    '@/utils/tableColumnWidths': { useTableColumnWidths }, '../api/observations': api }
   const scope = vue.effectScope()
   const component = new Function('deps', script)(deps)
   const state = scope.run(() => component.setup({ kind, active: true }, { expose() {} }))
@@ -370,26 +370,74 @@ test('actual ECharts time axis retains microsecond order and missing or simultan
   } finally { chart?.dispose(); scope.stop() }
 })
 
-async function energyPageFixture(api) {
-  const source = await readFile(new URL('../../src/app/monitor/views/observations/energy.vue', import.meta.url), 'utf8')
+async function energyPageFixture(api, { translate = key => key, parseDate = value => value } = {}) {
+  const source = await readFile(new URL('../../src/app/energy/views/consumption.vue', import.meta.url), 'utf8')
   const { descriptor } = parse(source)
   const script = compileScript(descriptor, { id: 'energy-races' }).content
     .replace(/^import\s+(.+?)\s+from\s+['"](.+?)['"];?$/gm, (_line, binding, name) => {
       if (binding.startsWith('{')) binding = binding.replace(/\bas\b/g, ':')
       return `const ${binding} = deps[${JSON.stringify(name)}]`
     }).replace('export default', 'return')
+  let unmount
   const deps = {
-    vue: { ...vue, onMounted: () => {}, onBeforeUnmount: () => {} }, 'vue-i18n': { useI18n: () => ({ t: key => key, locale: vue.ref('zh-CN') }) },
+    vue: { ...vue, onMounted: () => {}, onBeforeUnmount: fn => { unmount = fn } },
+    'vue-i18n': { useI18n: () => ({ t: translate, locale: vue.ref('zh-CN') }) },
     '@/components/common/ActionButton.vue': {}, '@/components/common/BaseCard.vue': {},
-    '@/utils/date': { shanghaiInputToRfc3339: value => value },
-    '../../components/observations/CurveChart.vue': {}, '../../components/observations/EmptyAxes.vue': {},
-    '../../api/observations': api
+    '@/utils/date': { shanghaiInputToRfc3339: parseDate },
+    '@/app/monitor/components/observations/CurveChart.vue': {},
+    '../api/observations': api
   }
   const scope = vue.effectScope()
   const component = new Function('deps', script)(deps)
   const state = scope.run(() => component.setup({}, { expose() {} }))
-  return { state, scope }
+  return { state, scope, unmount }
 }
+
+test('energy statistics require a strictly increasing Shanghai range in both languages', async () => {
+  const expected = {
+    'zh-CN': '请填写完整有效的起止时间，结束时间必须晚于开始时间',
+    'en-US': 'Enter both times. The end time must be later than the start time.'
+  }
+  const start = '2026-11-23 00:00:00'
+  const end = '2026-11-23 00:00:01'
+  for (const [locale, message] of Object.entries(expected)) {
+    const messages = JSON.parse(await readFile(new URL(`../../src/app/energy/locales/${locale}.json`, import.meta.url), 'utf8'))
+    const calls = []
+    const api = {
+      energyDefinitions: async () => [{ groupKey: 'power', metricKey: 'reading' }],
+      energySamples: async params => {
+        calls.push(['samples', params.from, params.to])
+        return { items: [], totalPages: 0 }
+      },
+      energySummary: async params => {
+        calls.push(['summary', params.from, params.to])
+        return { amount: 0 }
+      }
+    }
+    const { state, scope } = await energyPageFixture(api, {
+      translate: key => key === 'energy.observation.invalidHistoryRange' ? messages.observation.invalidHistoryRange : key,
+      parseDate: shanghaiInputToRfc3339
+    })
+    try {
+      state.meter.value = 'meter'
+      await state.loadDefinitions()
+      for (const invalidRange of [[start, start], [end, start]]) {
+        state.range.value = invalidRange
+        await state.load()
+        assert.equal(state.rangeError.value, message, locale)
+        assert.deepEqual(calls, [], locale)
+      }
+      state.range.value = [start, end]
+      await state.load()
+      assert.equal(state.rangeError.value, '', locale)
+      assert.equal(state.summary.value.amount, 0, locale)
+      assert.deepEqual(calls, [
+        ['samples', '2026-11-23T00:00:00+08:00', '2026-11-23T00:00:01+08:00'],
+        ['summary', '2026-11-23T00:00:00+08:00', '2026-11-23T00:00:01+08:00']
+      ], locale)
+    } finally { scope.stop() }
+  }
+})
 
 function deferred() {
   let resolve, reject
@@ -443,6 +491,66 @@ test('initialization and retry share an in-flight definition request for the sel
     await second
     assert.equal(state.failed.value,false)
     assert.equal(state.group.value,'A')
+  } finally { scope.stop() }
+})
+
+test('energy statistics hide empty charts while retaining a successful summary and drawable zero', async () => {
+  const options = deferred()
+  const metrics = [
+    { groupKey: 'power', metricKey: 'usage', nameZh: '能耗', quantityKey: 'energy', unit: 'kWh' },
+    { groupKey: 'power', metricKey: 'load', nameZh: '功率', quantityKey: 'power', unit: 'kW' }
+  ]
+  let items = []
+  const { state, scope } = await energyPageFixture({
+    energyOptions: () => options.promise,
+    energyDefinitions: async () => metrics,
+    energySamples: async () => ({ items, totalPages: 1 }),
+    energySummary: async () => ({ latest: null, amount: null, state: 'incomplete', reason: 'boundary_missing' })
+  })
+  try {
+    const first = state.retry()
+    assert.equal(state.emptyMessage.value, 'common.loading')
+    options.resolve([{ meterId: 'A' }])
+    await first
+    assert.equal(state.emptyMessage.value, 'energy.observation.chooseRange')
+    state.range.value = ['2026-11-24T00:00:00+08:00', '2026-11-24T01:00:00+08:00']
+    assert.equal(state.emptyMessage.value, 'energy.observation.queryCurves')
+    await state.load()
+    assert.equal(state.emptyMessage.value, 'energy.observation.noChartData')
+    assert.equal(state.summary.value.reason, 'boundary_missing')
+    assert.deepEqual(state.chartGroups.value, [])
+    items = [
+      { id: '1', observedAt: '2026-11-24T00:01:00+08:00', values: [] },
+      { id: '2', observedAt: '2026-11-24T00:02:00+08:00', values: [{ metricKey: 'usage', value: 0 }] }
+    ]
+    await state.load()
+    assert.equal(state.emptyMessage.value, '')
+    assert.equal(state.chartGroups.value.length, 1)
+    const points = state.chartGroups.value[0].series[0].points
+    assert.ok(points.some(point => point.present && point.value === 0))
+    assert.ok(points.some(point => !point.present && point.value === null))
+  } finally { scope.stop() }
+})
+
+test('leaving energy statistics prevents a delayed query from restoring the summary', async () => {
+  const summary = deferred()
+  const summaryRequested = deferred()
+  const { state, scope, unmount } = await energyPageFixture({
+    energyOptions: async () => [{ meterId: 'A' }],
+    energyDefinitions: async () => [{ groupKey: 'power', metricKey: 'usage' }],
+    energySamples: async () => ({ items: [], totalPages: 0 }),
+    energySummary: () => { summaryRequested.resolve(); return summary.promise }
+  })
+  try {
+    await state.retry()
+    state.range.value = ['2026-11-24T00:00:00+08:00', '2026-11-24T01:00:00+08:00']
+    const query = state.load()
+    await summaryRequested.promise
+    unmount()
+    summary.resolve({ latest: 0, amount: 0 })
+    await query
+    assert.equal(state.summary.value, null)
+    assert.deepEqual(state.chartGroups.value, [])
   } finally { scope.stop() }
 })
 

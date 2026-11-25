@@ -15,6 +15,10 @@ pub struct ConfigurationDocument {
     pub mapping_value_rules: Vec<Value>,
     pub mappings: Vec<Value>,
     pub source_metadata: Vec<SourceMetadata>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub http_sources: Vec<Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub runtime_limits: Option<super::http_mapping::RuntimeLimits>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub acquisition_loopback: Option<super::acquisition::LoopbackConfig>,
 }
@@ -49,6 +53,8 @@ impl Default for ConfigurationDocument {
             mapping_value_rules: vec![],
             mappings: vec![],
             source_metadata: vec![],
+            http_sources: vec![],
+            runtime_limits: None,
             acquisition_loopback: None,
         }
     }
@@ -92,4 +98,5 @@ pub struct ImportPreview {
     pub unchanged_keys: Vec<String>,
     pub deleted_keys: Vec<String>,
     pub errors: Vec<ImportError>,
+    pub conflict_keys: Vec<String>,
 }

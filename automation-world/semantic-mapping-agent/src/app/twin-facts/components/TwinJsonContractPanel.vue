@@ -30,11 +30,8 @@ import { createValueExportFile } from "../utils/collectionFactFiles";
 
 const props = defineProps<{ labels: LocaleMessages; enabled: boolean; page: AppPage; view: string }>();
 const emit = defineEmits<{ navigate: [id: string] }>();
-const loopbackActive = computed(() => props.page === "twinFacts" && props.view === "loopback");
 const factsActive = computed(() => props.page === "twinFacts" && props.view === "contract");
-const loopbackVisited = ref(false);
 const factsVisited = ref(false);
-watch(loopbackActive, (active) => { if (active) loopbackVisited.value = true; }, { immediate: true });
 watch(factsActive, (active) => { if (active) factsVisited.value = true; }, { immediate: true });
 const collection = useCollectionFactsStore();
 const apiMaterials = useApiMaterialsStore();
@@ -129,7 +126,7 @@ const headerStatuses = computed<CardHeaderStatus[]>(() => {
 
 <template>
   <div v-show="factsActive" class="single-fact-workspace-stack">
-    <AcquisitionLoopbackPanel v-if="factsVisited" :labels="labels" :enabled="enabled" read-only @navigate="emit('navigate', $event)" />
+    <AcquisitionLoopbackPanel v-if="factsVisited" :labels="labels" :enabled="enabled" @navigate="emit('navigate', $event)" />
     <FactsTablePanel
       :labels="labels"
       :source-key="collection.sourceKey.value"
@@ -143,11 +140,7 @@ const headerStatuses = computed<CardHeaderStatus[]>(() => {
       @load-source="run(() => loadSource($event))"
       @query="run(() => collection.updateQuery($event))"
       @export-values="exportValues"
-      @open-loopback="emit('navigate', 'acquisition-loopback')"
     />
-  </div>
-  <div v-if="loopbackVisited" v-show="loopbackActive" class="single-fact-workspace-stack">
-    <AcquisitionLoopbackPanel :labels="labels" :enabled="enabled" @navigate="emit('navigate', $event)" />
   </div>
 
   <div v-show="page === 'mappingIdentity'" class="mapping-page-stack">

@@ -13,5 +13,6 @@ import "./app/styles/shell.css";
 import "./app/styles/shared.css";
 import "./app/connection/styles.css";
 import "./app/styles/responsive.css";
+import "./app/http-mapping/styles.css";
 
 createApp(App).mount("#app");

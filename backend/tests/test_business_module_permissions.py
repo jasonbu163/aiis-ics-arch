@@ -8,7 +8,7 @@ from core.deps import get_current_user
 from database import get_db
 
 pytestmark=pytest.mark.no_db
-PATHS=('/energy/current','/items','/performances','/plans','/task-field-configs?module=plan','/project/list','/quality','/shift-rules')
+PATHS=('/energy/current','/items','/performances','/plans','/task-field-configs?module=plan','/project/list','/quality/results','/shift-rules')
 
 
 @pytest.mark.asyncio
@@ -20,7 +20,7 @@ async def test_all_business_owners_require_auth_then_explicit_grants():
             assert (await client.get('/api/v1'+path)).status_code==401,path
         app.dependency_overrides[get_current_user]=lambda:SimpleNamespace(role='operator',username='fixture')
         for path in PATHS:
-            assert (await client.get('/api/v1'+path)).status_code==403,path
+            assert (await client.get('/api/v1'+path,headers={'Authorization':'Bearer synthetic'})).status_code==403,path
         assert (await client.get('/api/v1/hr/health')).status_code==404
         assert (await client.get('/api/v1/aiis-demo/ping')).status_code==404
 
@@ -28,6 +28,7 @@ async def test_all_business_owners_require_auth_then_explicit_grants():
 def test_each_other_registered_business_method_has_declared_owner_guard():
     # Task, Plan and Performance use shared TaskRoute/authorize and are exercised by test_generic_task_source.
     from app.module_registry import get_module_manifests
+    from app.quality.api.results import admin as quality_config_admin
     manifests={m.name:m for m in get_module_manifests()}
     app=create_app(testing=True)
     for route in app.routes:
@@ -37,6 +38,11 @@ def test_each_other_registered_business_method_has_declared_owner_guard():
         module=getattr(endpoint,'__module__','')
         parts=module.split('.')
         if len(parts)<3 or parts[0]!='app' or parts[1] not in manifests or parts[1] in {'system','schema_maintenance','task','plan','performance','equipment_observation','plc_facts'}:continue
+        if route.path == '/api/v1/quality/field-config':
+            # 质量字段配置单独校验登录态和管理员身份，由质量 HTTP 测试核验权限。
+            assert any(dep.call is quality_config_admin and any(child.call is get_current_user
+                       for child in dep.dependencies) for dep in route.dependant.dependencies)
+            continue
         owner=parts[1];keys=set()
         def visit(dep):
             call=dep.call

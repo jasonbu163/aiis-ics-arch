@@ -1,19 +1,10 @@
-/** 采集回环草稿和最新操作状态，只驻留在页面内存。 */
+/** 采集点位只读查询，返回值只保留在当前会话。 */
 import { computed, onBeforeUnmount, ref, watch } from "vue";
-import { acquisition, type AcquisitionPoint, type Detail, type HistoryPage, type LoopbackConfig, type RequestPreview, type PushResult, type SourceChoice } from "../api/acquisition";
+import { acquisition, type AcquisitionPoint, type SourceChoice } from "../api/acquisition";
 import { loadLocalConfiguration, localConfiguration } from "../api/localConfiguration";
-import { isTauriRuntime } from "../../tauri";
 
-const emptyConfig = (): LoopbackConfig => ({
-  materialKey: "", plcId: "", dbNumber: 0, pointIds: [],
-  target: { plcId: "", dbNumber: 0, instanceId: "", sourceGeneration: "" },
-  moves: [], groupId: null, configRevision: null,
-});
-const clone = (value: LoopbackConfig): LoopbackConfig => JSON.parse(JSON.stringify(value)) as LoopbackConfig;
-
-export function useAcquisitionLoopback() {
-  const config = ref(emptyConfig());
-  const revision = ref(0);
+export function useAcquisitionLatest() {
+  const config = ref({ materialKey: "", plcId: "", dbNumber: 0, pointIds: [] as string[] });
   const ready = ref(false);
   const busy = ref("");
   const error = ref("");
@@ -23,17 +14,7 @@ export function useAcquisitionLoopback() {
   const latest = ref<AcquisitionPoint[] | null>(null);
   const missing = ref<string[]>([]);
   const allPoints = ref(true);
-  const history = ref<HistoryPage | null>(null);
-  const detail = ref<Detail | null>(null);
-  const from = ref("");
-  const to = ref("");
-  const sourceSeq = ref("");
-  const preview = ref<RequestPreview | null>(null);
-  const receipt = ref<PushResult | null>(null);
-  const readback = ref<Detail | null>();
-  const sendState = ref<"ready" | "unknown" | "done" | "rejected">("ready");
   let epoch = 0;
-  let savedLoopback = "";
   const materials = computed(() => localConfiguration.value?.document.materials.filter(
     item => item.httpMethod === "GET" && item.path === "/api/v1/acquisition-data/latest",
   ) ?? []);
@@ -41,33 +22,14 @@ export function useAcquisitionLoopback() {
   const materialReady = computed(() => materials.value.some(item => item.materialKey === config.value.materialKey));
   const sourceReady = computed(() => ready.value && materialReady.value && Boolean(config.value.plcId && config.value.dbNumber));
   const pointsReady = computed(() => allPoints.value || config.value.pointIds.length > 0);
-  const asShanghai = (value: string) => value.length === 16 ? value + ":00+08:00" : value + "+08:00";
-  const rangeValid = computed(() => {
-    const start = Date.parse(asShanghai(from.value));
-    const end = Date.parse(asShanghai(to.value));
-    return end > start && end - start <= 7 * 24 * 60 * 60 * 1000;
-  });
-  const mixed = computed(() => new Set(latest.value?.map(point => point.sampleId).filter(Boolean)).size > 1);
-  const canPost = computed(() => Boolean(preview.value) && (sendState.value === "ready" || sendState.value === "unknown"));
-  const canReadback = computed(() => Boolean(preview.value) && (sendState.value === "done" || sendState.value === "unknown"));
   const query = () => ({ materialKey: config.value.materialKey, plcId: config.value.plcId, dbNumber: config.value.dbNumber });
 
-  function invalidate() {
-    epoch++;
-    const hadPreview = preview.value !== null || busy.value === "preview";
-    preview.value = null;
-    receipt.value = null;
-    readback.value = undefined;
-    sendState.value = "ready";
-    if (hadPreview && isTauriRuntime()) void acquisition.invalidate().catch(() => {});
-  }
+  function invalidate() { epoch++; }
 
   function clearSourceResults() {
     choices.value = [];
     latest.value = null;
     missing.value = [];
-    history.value = null;
-    detail.value = null;
   }
 
   watch(() => JSON.stringify(config.value), invalidate, { flush: "sync" });
@@ -78,24 +40,12 @@ export function useAcquisitionLoopback() {
     latest.value = null;
     missing.value = [];
   });
-  watch(sourceSeq, invalidate, { flush: "sync" });
-  watch([from, to], () => {
-    invalidate();
-    history.value = null;
-    detail.value = null;
-  }, { flush: "sync" });
   watch(() => JSON.stringify(localConfiguration.value?.document.connection), () => {
     if (busy.value === "load") return;
     invalidate();
     sources.value = null;
     clearSourceResults();
   });
-  watch(() => localConfiguration.value?.revision, (value) => {
-    if (!ready.value || busy.value === "save" || busy.value === "load" || value === undefined || revision.value === value) return;
-    invalidate();
-    if (JSON.stringify(localConfiguration.value?.document.acquisitionLoopback ?? null) === savedLoopback) revision.value = value;
-  });
-
   async function run<T>(name: string, action: () => Promise<T>, apply: (value: T) => void) {
     if (busy.value) return;
     const current = epoch;
@@ -109,7 +59,6 @@ export function useAcquisitionLoopback() {
       if (current === epoch) {
         error.value = String(failure);
         errorAt.value = name;
-        if (name === "push") sendState.value = error.value.includes("SMA_ACQUISITION_RESULT_UNKNOWN") ? "unknown" : "rejected";
       }
     } finally {
       busy.value = "";
@@ -119,11 +68,9 @@ export function useAcquisitionLoopback() {
   function restoreSaved() {
     return run("load", loadLocalConfiguration, snapshot => {
       const stored = snapshot.document.acquisitionLoopback;
-      savedLoopback = JSON.stringify(stored ?? null);
-      config.value = stored ? clone(stored) : emptyConfig();
+      config.value = { materialKey: stored?.materialKey ?? "", plcId: stored?.plcId ?? "", dbNumber: stored?.dbNumber ?? 0, pointIds: [...(stored?.pointIds ?? [])] };
       if (!stored && materials.value.length === 1) config.value.materialKey = materials.value[0].materialKey;
       allPoints.value = !config.value.pointIds.length;
-      revision.value = snapshot.revision;
       ready.value = true;
       clearSourceResults();
     });
@@ -141,7 +88,6 @@ export function useAcquisitionLoopback() {
   }
   function dbChanged() {
     config.value.pointIds = [];
-    config.value.moves = [];
     allPoints.value = true;
     clearSourceResults();
   }
@@ -163,87 +109,13 @@ export function useAcquisitionLoopback() {
     });
   }
 
-  function applyHistory(page = 1) {
-    if (!sourceReady.value || !rangeValid.value || busy.value) return;
-    if (page === 1) history.value = null;
-    return run("history", () => acquisition.history(query(), asShanghai(from.value), asShanghai(to.value), page), result => {
-      history.value = result;
-    });
-  }
-
-  function pickSample(id: string) {
-    invalidate();
-    detail.value = null;
-    return run("detail", () => acquisition.sample(query(), id), result => {
-      detail.value = result;
-    });
-  }
-
-  function save() {
-    if (!allPoints.value && config.value.pointIds.length === 0) {
-      error.value = "SMA_ACQUISITION_SELECTION_REQUIRED";
-      errorAt.value = "save";
-      return;
-    }
-    const pruned = clone(config.value);
-    if (allPoints.value) pruned.pointIds = [];
-    pruned.moves = pruned.moves.filter(item => (item.to || item.name) && (!pruned.pointIds.length || pruned.pointIds.includes(item.from)));
-    const configToSave = { ...pruned, groupId: pruned.groupId || null, configRevision: pruned.configRevision || null };
-    return run("save", () => acquisition.save(configToSave, revision.value), snapshot => {
-      savedLoopback = JSON.stringify(snapshot.document.acquisitionLoopback ?? null);
-      revision.value = snapshot.revision;
-      config.value = configToSave;
-    });
-  }
-  const saved = computed(() => (allPoints.value || config.value.pointIds.length > 0)
-    && JSON.stringify(localConfiguration.value?.document.acquisitionLoopback) === JSON.stringify(config.value)
-    && revision.value === localConfiguration.value?.revision);
-  function prepare() {
-    if (!detail.value || !saved.value) return;
-    const id = detail.value.id;
-    invalidate();
-    return run("preview", () => acquisition.preview(id, sourceSeq.value, revision.value), result => {
-      preview.value = result;
-    });
-  }
-
-  function push() {
-    const id = preview.value?.id;
-    if (!id || !canPost.value || !saved.value) return;
-    return run("push", () => acquisition.push(id), result => {
-      receipt.value = result;
-      sendState.value = "done";
-    });
-  }
-
-  function checkTarget() {
-    const id = preview.value?.id;
-    if (!id || !canReadback.value) return;
-    readback.value = undefined;
-    return run("readback", () => acquisition.readback(id), result => {
-      readback.value = result;
-    });
-  }
-
   function changeAllPoints(selected: boolean) {
     allPoints.value = selected;
     if (selected) config.value.pointIds = [];
     invalidate();
   }
 
-  function setMove(from: string, key: "to" | "name", value: string) {
-    const existing = config.value.moves.find(item => item.from === from);
-    if (existing) {
-      existing[key] = value || null;
-      if (!existing.to && !existing.name) config.value.moves = config.value.moves.filter(item => item.from !== from);
-    } else if (value) {
-      config.value.moves.push({ from, to: key === "to" ? value : null, name: key === "name" ? value : null });
-    }
-  }
-
   onBeforeUnmount(invalidate);
-  return { config, ready, busy, error, errorAt, sources, choices, latest, missing, allPoints, history, detail,
-    from, to, sourceSeq, preview, receipt, readback, sendState, materials, databases, materialReady, sourceReady, pointsReady, rangeValid,
-    mixed, canPost, canReadback, saved, restoreSaved, loadSources, sourceChanged, dbChanged, testLatest,
-    applyHistory, pickSample, save, prepare, push, checkTarget, changeAllPoints, setMove, invalidate };
+  return { config, ready, busy, error, errorAt, sources, choices, latest, missing, allPoints, materials, databases,
+    materialReady, pointsReady, restoreSaved, loadSources, sourceChanged, dbChanged, testLatest, changeAllPoints };
 }
