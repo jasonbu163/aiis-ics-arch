@@ -19,3 +19,20 @@ export const energyWriteSources = () => request.get('/energy/write-sources', qui
 export const createEnergyWriteSource = data => request.post('/energy/write-sources', data, quiet)
 export const updateEnergyWriteSource = (key, data) => request.patch(sourcePath(key), data, quiet)
 export const deleteEnergyWriteSource = key => request.delete(sourcePath(key), quiet)
+
+export const energyMeters = () => request.get('/energy/meters', quiet)
+export const createEnergyMeter = data => request.post('/energy/meters', data, quiet)
+export const updateEnergyMeter = data => request.patch('/energy/meters', data, quiet)
+
+export const energyCurveGroups = params => request.get('/energy/curve-configs', { ...quiet, params })
+export const energyConsumptionCurveGroups = () => request.get('/energy/consumption/curve-configs', quiet)
+export const createEnergyCurveGroup = data => request.post('/energy/curve-configs', data, quiet)
+
+const curvePathKey = key => {
+  // 浏览器会移除单独的点段；以不同编码保留字面百分号标识。
+  if (key === '.' || key === '..') return key.replaceAll('.', '%252e')
+  if (key === '%2e' || key === '%2e%2e') return key.replaceAll('%2e', '%25%32%65')
+  return encodeURIComponent(key)
+}
+export const updateEnergyCurveGroup = (key, data) =>
+  request.patch(`/energy/curve-configs/${curvePathKey(key)}`, data, quiet)

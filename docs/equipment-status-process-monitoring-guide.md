@@ -164,3 +164,7 @@ Administrators enable a sender under **Energy Management → Configuration → W
 - **Clean up test data.** Keep the target, producer, event IDs, and record IDs. If cleanup is required, have the environment owner confirm ownership, references, and authorization and handle the exact records.
 
 Manual HTTP submission verifies configuration and the machine interface in the chosen environment. SMA product integration, DAA/PLC integration, and production deployment each require separate validation.
+
+## Public energy queries
+
+On the controlled internal network, use `GET /api/v1/integration/energy/latest` for the latest sample per meter and group, or `GET /api/v1/integration/energy/samples` for history by collection time. Neither GET uses a token. The older write POST on the same history path retains its machine Bearer token. [Query parameters, responses, and integration examples](../contracts/published/http-api/energy-public-reads-v1/README.md)

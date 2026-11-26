@@ -98,8 +98,8 @@ admin-only guard；授予一个 key 不会自动授予另一个 key。
 | `monitor` | collector 状态；不包含客户业务曲线或前端 monitor 页面授权。 |
 | `control-agent-read` | CA action-scope 目录查询。 |
 | `control-agent` | gate-token 签发 permission guard；不会远程执行设备动作，仍有独立角色限制。 |
-| `energy-price-read` | energy 现价/历史 GET；独立于 manage。 |
-| `energy-price-manage` | energy 小时整组价格 POST upsert；不隐含授予读取。 |
+| `energy-price-read` | 单价项目、现价和历史 GET。 |
+| `energy-price-manage` | 能源单价写入，配置项目另需管理员。 |
 | `equipment-temperature-read` | 仅新完整样本GET；所有caller另须唯一配置设备scope。 |
 | `equipment-temperature-ingest` | 仅新完整样本POST；admin-only且设备scope约束，不隐含read。 |
 | `aiis_demo` | 默认关闭示例 manifest；配置后告警并忽略，数组不会启用该模块。 |
@@ -326,7 +326,7 @@ MySQL root 维护通过 `MYSQL_ROOT_USER`/`MYSQL_ROOT_PASSWORD` 和 `MYSQL_HOST`
 
 过程读取使用 `monitor-observation-read`，设备状态读取使用 `equipment-observation-read`，表计读取使用 `energy-consumption-read`，并分别核对设备或表计范围。部署配置中若还有旧 `monitor` 权限，应在获批维护中审查并移除；本次没有自动添加替代权限。
 
-小时能源价沿用三API路径，按上海observedAt归桶；显式后继b8d0f2a4c6e8令完整metadata为十六表，原追加记录全留。采用前阅读[模块合同与独立gate归并SQL](app/energy/README.zh-CN.md)，源码验证不授权真实迁移或部署。
+可配置单价通过显式后继 `7cb6e40f3d19` 采用，保留旧三价接口。[模块采用及回退说明](app/energy/README.zh-CN.md) 记录目标和数据条件。
 
 ## 公共模块接入
 

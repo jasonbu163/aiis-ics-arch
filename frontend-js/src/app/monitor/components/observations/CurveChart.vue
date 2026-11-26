@@ -38,7 +38,8 @@ import { splitObservedPoints } from './curveSeries'
 const props = defineProps({
   group: { type: Object, required: true },
   range: { type: Array, default: () => [] },
-  messageNamespace: { type: String, default: 'monitor.observation' }
+  messageNamespace: { type: String, default: 'monitor.observation' },
+  zoom: { type: Boolean, default: false }
 })
 const { t } = useI18n()
 const tr = key => t(`${props.messageNamespace}.${key}`)
@@ -95,12 +96,12 @@ function render() {
   const bounds = props.range.map(observedAt => splitObservedPoints([{ observedAt, value: 0 }], null, origin).line[0]?.[0])
   const crossDay = props.range.length === 2 && formatShanghaiDateTime(props.range[0]).slice(0, 10) !==
     formatShanghaiDateTime(props.range[1]).slice(0, 10)
-  const names = new Map()
+  const labels = new Map()
   const series = []
   const colors = getComputedStyle(element.value)
   let limited = false
   for (const item of visible.value) {
-    names.set(item.key, item.label)
+    labels.set(item.key, { name: item.label, decimals: item.decimals })
     const points = item.points.map(point => Number.isFinite(point.value) ? point : { ...point, present: false })
     const values = splitObservedPoints(points, item.intervalSeconds, origin)
     limited ||= values.precisionLimited
@@ -113,10 +114,15 @@ function render() {
   chart.setOption({
     tooltip: { trigger: 'axis', confine: true, formatter: params => {
       if (!params.length) return ''
-      return [escapeText(formatTime(params[0].axisValue, origin)), ...params.map(item =>
-        `${item.marker}${escapeText(names.get(item.seriesName) || item.seriesName)}: ${escapeText(item.value?.[1] ?? '—')}` +
-        (item.data?.[2] ? ` · ${escapeText(item.data[2])}` : ''))].join('<br>')
+      return [escapeText(formatTime(params[0].axisValue, origin)), ...params.map(item => {
+        const label = labels.get(item.seriesName)
+        const value = item.value?.[1]
+        const display = Number.isInteger(label?.decimals) && Number.isFinite(value) ? value.toFixed(label.decimals) : value
+        return `${item.marker}${escapeText(label?.name || item.seriesName)}: ${escapeText(display ?? '—')}` +
+          (item.data?.[2] ? ` · ${escapeText(item.data[2])}` : '')
+      })].join('<br>')
     } },
+    ...(props.zoom ? { dataZoom: [{ type: 'inside', xAxisIndex: 0, filterMode: 'none' }] } : {}),
     grid: { left: 58, right: 14, top: 33, bottom: crossDay ? 55 : 38 },
     xAxis: { type: 'time', min: bounds[0], max: bounds[1],
       axisLine: { show: true },

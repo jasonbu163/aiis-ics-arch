@@ -276,3 +276,7 @@ The empty-device profile permits admin configuration of global metrics, slots, c
 ## Registered energy sources
 
 Administrators enable a sender under **Energy Management → Configuration → Write registration**. Set up each meter and its group metrics, then POST one batch for the same actual capture time without a Token. Read the records and statistics from the existing signed-in pages. [Energy batch contract and sample](../contracts/published/http-api/energy-registered-ingest-v1/README.md)
+
+## Public energy queries
+
+On the controlled internal network, use `GET /api/v1/integration/energy/latest` for the latest sample per meter and group, or `GET /api/v1/integration/energy/samples` for history by collection time. Neither GET uses a token. The older write POST on the same history path retains its machine Bearer token. [Query parameters, responses, and integration examples](../contracts/published/http-api/energy-public-reads-v1/README.md)

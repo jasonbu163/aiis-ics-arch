@@ -85,6 +85,8 @@ The eight-operation business integration contract is historical. The four old de
 
 [Energy registered ingest v1](published/http-api/energy-registered-ingest-v1/README.md) describes independent administrator registration and token-free multi-meter POST with atomic receipts, an OpenAPI snapshot and synthetic examples.
 
+[Public energy reads v1](published/http-api/energy-public-reads-v1/README.md) describes the token-free latest and history GETs, with OpenAPI, synthetic response vectors, and Python and SMA examples.
+
 ## Quality results v1
 
 [Quality results v1](published/http-api/quality-results-v1/README.md) contains the independent structured result, local-field and trusted-network integration contract, with synthetic requests and a source OpenAPI snapshot.
@@ -92,3 +94,9 @@ The eight-operation business integration contract is historical. The four old de
 ## CA to Field Flow candidate
 
 [Flow JSON v1](demands/ca-field-flow-v1/README.md) records CA's candidate wire format, semantic digest, and vectors. Field Flow acceptance is pending.
+
+[Energy meter management v1](published/http-api/energy-meters-v1/README.md) documents the authenticated meter catalog, creation, and partial updates.
+
+[Energy curve groups v1](published/http-api/energy-curve-groups-v1/README.md) documents administrator configuration and scoped statistics reads.
+
+[Energy pricing v1](published/http-api/energy-pricing-v1/README.md) documents configured price items, current prices and actual hourly writes.

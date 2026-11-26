@@ -1,0 +1,411 @@
+{
+  "components": {
+    "schemas": {
+      "CreateEnergyMeter": {
+        "additionalProperties": false,
+        "properties": {
+          "meterId": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Meterid",
+            "type": "string"
+          },
+          "nameEn": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Nameen",
+            "type": "string"
+          },
+          "nameZh": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Namezh",
+            "type": "string"
+          },
+          "readRoles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Readroles",
+            "type": "array"
+          }
+        },
+        "required": [
+          "meterId",
+          "nameZh",
+          "nameEn"
+        ],
+        "title": "CreateEnergyMeter",
+        "type": "object"
+      },
+      "EnergyMeterData": {
+        "additionalProperties": false,
+        "properties": {
+          "meterId": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Meterid",
+            "type": "string"
+          },
+          "nameEn": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Nameen",
+            "type": "string"
+          },
+          "nameZh": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Namezh",
+            "type": "string"
+          },
+          "readRoles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Readroles",
+            "type": "array"
+          }
+        },
+        "required": [
+          "meterId",
+          "nameZh",
+          "nameEn",
+          "readRoles"
+        ],
+        "title": "EnergyMeterData",
+        "type": "object"
+      },
+      "EnergyMeterError": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "title": "Data",
+            "type": "null"
+          },
+          "errorCode": {
+            "title": "Errorcode",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "EnergyMeterError",
+        "type": "object"
+      },
+      "EnergyMeterListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/EnergyMeterData"
+            },
+            "title": "Data",
+            "type": "array"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data"
+        ],
+        "title": "EnergyMeterListResponse",
+        "type": "object"
+      },
+      "EnergyMeterResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "integer"
+          },
+          "data": {
+            "$ref": "#/components/schemas/EnergyMeterData"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "data"
+        ],
+        "title": "EnergyMeterResponse",
+        "type": "object"
+      },
+      "PatchEnergyMeter": {
+        "additionalProperties": false,
+        "properties": {
+          "meterId": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Meterid",
+            "type": "string"
+          },
+          "nameEn": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nameen"
+          },
+          "nameZh": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Namezh"
+          },
+          "readRoles": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Readroles"
+          }
+        },
+        "required": [
+          "meterId"
+        ],
+        "title": "PatchEnergyMeter",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Energy meter management v1",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/energy/meters": {
+      "get": {
+        "operationId": "list_energy_meters_api_v1_energy_meters_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyMeterListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing or invalid user Bearer"
+          },
+          "403": {
+            "description": "Administrator permission required"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyMeterError"
+                }
+              }
+            },
+            "description": "Energy data unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Management — List energy meters",
+        "tags": [
+          "Energy"
+        ]
+      },
+      "patch": {
+        "operationId": "patch_energy_meter_api_v1_energy_meters_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchEnergyMeter"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyMeterResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing or invalid user Bearer"
+          },
+          "403": {
+            "description": "Administrator permission required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyMeterError"
+                }
+              }
+            },
+            "description": "Meter not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyMeterError"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyMeterError"
+                }
+              }
+            },
+            "description": "Energy data unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Management — Update energy meter",
+        "tags": [
+          "Energy"
+        ]
+      },
+      "post": {
+        "operationId": "add_energy_meter_api_v1_energy_meters_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEnergyMeter"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyMeterResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing or invalid user Bearer"
+          },
+          "403": {
+            "description": "Administrator permission required"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyMeterError"
+                }
+              }
+            },
+            "description": "Duplicate meter ID"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyMeterError"
+                }
+              }
+            },
+            "description": "Invalid request"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyMeterError"
+                }
+              }
+            },
+            "description": "Energy data unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Management — Add energy meter",
+        "tags": [
+          "Energy"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,469 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AIIS Public Energy Reads",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/api/v1"
+    }
+  ],
+  "paths": {
+    "/integration/energy/latest": {
+      "get": {
+        "tags": [
+          "Energy"
+        ],
+        "summary": "Public — Get latest energy samples",
+        "operationId": "public_energy_latest_api_v1_integration_energy_latest_get",
+        "parameters": [
+          {
+            "name": "meterId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Meterid"
+            }
+          },
+          {
+            "name": "groupKey",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Groupkey"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Latest stored sample for each matching meter and group",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "code": {
+                      "const": 200
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "items"
+                      ],
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "meterId",
+                              "groupKey",
+                              "observedAt",
+                              "quality",
+                              "values"
+                            ],
+                            "dependentRequired": {
+                              "intervalStartAt": [
+                                "intervalEndAt"
+                              ],
+                              "intervalEndAt": [
+                                "intervalStartAt"
+                              ]
+                            },
+                            "properties": {
+                              "meterId": {
+                                "type": "string"
+                              },
+                              "groupKey": {
+                                "type": "string"
+                              },
+                              "observedAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "quality": {
+                                "enum": [
+                                  "good",
+                                  "bad",
+                                  "unknown"
+                                ]
+                              },
+                              "intervalStartAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "intervalEndAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "values": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "number"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid sample query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code",
+                    "message",
+                    "data",
+                    "errorCode"
+                  ],
+                  "properties": {
+                    "code": {
+                      "const": 422
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "null"
+                    },
+                    "errorCode": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Energy data unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code",
+                    "message",
+                    "data",
+                    "errorCode"
+                  ],
+                  "properties": {
+                    "code": {
+                      "const": 503
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "null"
+                    },
+                    "errorCode": {
+                      "const": "equipment_observation.not_ready"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/integration/energy/samples": {
+      "get": {
+        "tags": [
+          "Energy"
+        ],
+        "summary": "Public — Get historical energy samples",
+        "operationId": "public_energy_history_api_v1_integration_energy_samples_get",
+        "parameters": [
+          {
+            "name": "meterId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "title": "Meterid"
+            }
+          },
+          {
+            "name": "groupKey",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Groupkey"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "To"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Pagesize"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stored samples and pagination metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code",
+                    "message",
+                    "data"
+                  ],
+                  "properties": {
+                    "code": {
+                      "const": 200
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "items",
+                        "total",
+                        "page",
+                        "pageSize",
+                        "totalPages"
+                      ],
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "meterId",
+                              "groupKey",
+                              "observedAt",
+                              "quality",
+                              "values"
+                            ],
+                            "dependentRequired": {
+                              "intervalStartAt": [
+                                "intervalEndAt"
+                              ],
+                              "intervalEndAt": [
+                                "intervalStartAt"
+                              ]
+                            },
+                            "properties": {
+                              "meterId": {
+                                "type": "string"
+                              },
+                              "groupKey": {
+                                "type": "string"
+                              },
+                              "observedAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "quality": {
+                                "enum": [
+                                  "good",
+                                  "bad",
+                                  "unknown"
+                                ]
+                              },
+                              "intervalStartAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "intervalEndAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "values": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "number"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 100
+                        },
+                        "totalPages": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid sample query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code",
+                    "message",
+                    "data",
+                    "errorCode"
+                  ],
+                  "properties": {
+                    "code": {
+                      "const": 422
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "null"
+                    },
+                    "errorCode": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Energy data unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code",
+                    "message",
+                    "data",
+                    "errorCode"
+                  ],
+                  "properties": {
+                    "code": {
+                      "const": 503
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "null"
+                    },
+                    "errorCode": {
+                      "const": "equipment_observation.not_ready"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    }
+  }
+}

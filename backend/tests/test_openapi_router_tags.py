@@ -8,7 +8,7 @@ from core.registrar import create_app
 pytestmark = pytest.mark.no_db
 
 EXPECTED_TAGS = {
-    "Auxiliary - Energy Price",
+    "Energy",
     "Auxiliary - Shift Teams", "Auxiliary - Shifts", "Auxiliary - Shift Rules", "Auxiliary - Stop Records",
     "Equipment observation", "Maintenance", "Maintenance - Logs",
     "Performance", "Plan", "Task fields", "Project", "Quality", "Quality - Defects",
@@ -52,3 +52,30 @@ def test_public_energy_slice_exposes_only_approved_methods():
     paths = create_app(testing=True).openapi()["paths"]
     energy = {path: set(paths[path]) for path in ("/api/v1/energy", "/api/v1/energy/current")}
     assert energy == {"/api/v1/energy": {"get", "post"}, "/api/v1/energy/current": {"get"}}
+
+
+def test_energy_swagger_group_and_authentication_labels():
+    paths = create_app(testing=True).openapi()["paths"]
+    public = {
+        ("/api/v1/integration/energy/latest", "get"),
+        ("/api/v1/integration/energy/samples", "get"),
+        ("/api/v1/integration/energy/registered-samples", "post"),
+    }
+    assert public <= {(path, method) for path, methods in paths.items() for method in methods}
+    for path, methods in paths.items():
+        is_energy = path == "/api/v1/energy" or path.startswith(("/api/v1/energy/", "/api/v1/integration/energy/"))
+        is_management = path.startswith(("/api/v1/energy/write-sources", "/api/v1/energy/metric-configs",
+                                        "/api/v1/energy/admin/", "/api/v1/energy/curve-configs")) or path == "/api/v1/energy/meters"
+        for method, operation in methods.items():
+            tags = operation.get("tags", [])
+            if not is_energy:
+                assert "Energy" not in tags
+                continue
+            assert tags == ["Energy"]
+            if (path, method) in public:
+                assert operation["summary"].startswith("Public — ")
+                assert not operation.get("security")
+            else:
+                scheme = "ObservationMachineBearer" if path.startswith("/api/v1/integration/energy/") else "HTTPBearer"
+                assert operation["security"] == [{scheme: []}]
+                assert operation["summary"].startswith("Management — ") == is_management

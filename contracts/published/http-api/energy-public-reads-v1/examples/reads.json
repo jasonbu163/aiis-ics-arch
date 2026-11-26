@@ -1,0 +1,74 @@
+[
+  {
+    "name": "latest_one_group",
+    "method": "GET",
+    "path": "/integration/energy/latest",
+    "query": {
+      "meterId": "meter-02",
+      "groupKey": "electricity"
+    },
+    "status": 200,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "items": [
+          {
+            "meterId": "meter-02",
+            "groupKey": "electricity",
+            "observedAt": "2026-11-24T13:00:00.000000+08:00",
+            "quality": "good",
+            "values": {
+              "activePower": 0
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "samples_event_range",
+    "method": "GET",
+    "path": "/integration/energy/samples",
+    "query": {
+      "meterId": "meter-02",
+      "groupKey": "electricity",
+      "from": "2026-11-24T12:00:00+08:00",
+      "to": "2026-11-24T13:00:00+08:00",
+      "page": 1,
+      "pageSize": 20
+    },
+    "status": 200,
+    "response": {
+      "code": 200,
+      "message": "success",
+      "data": {
+        "items": [
+          {
+            "meterId": "meter-02",
+            "groupKey": "electricity",
+            "observedAt": "2026-11-24T13:00:00.000000+08:00",
+            "quality": "good",
+            "values": {
+              "activePower": 0
+            }
+          },
+          {
+            "meterId": "meter-02",
+            "groupKey": "electricity",
+            "observedAt": "2026-11-24T12:00:00.000000+08:00",
+            "quality": "good",
+            "values": {
+              "totalEnergy": 9820,
+              "activePower": 21.3
+            }
+          }
+        ],
+        "total": 2,
+        "page": 1,
+        "pageSize": 20,
+        "totalPages": 1
+      }
+    }
+  }
+]

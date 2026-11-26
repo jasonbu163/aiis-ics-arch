@@ -211,6 +211,7 @@
   "postQueue": "POST 队列容量",
   "configureLimits": "调整上限",
   "recentRuns": "映射最近结果",
+  "queryResults": "查询",
   "targetPeak": "目标 POST 在途峰值",
   "details": "详情",
   "runtimeHelp": "采集和上报分别启动。每次周期执行读取符合条件的最新快照。",

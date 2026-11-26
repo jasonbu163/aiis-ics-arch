@@ -217,11 +217,15 @@ async def test_real_service_asgi_checks_derived_hour_mysql_lower_bound(monkeypat
     db = SimpleNamespace(commit=AsyncMock(), rollback=AsyncMock())
     app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(role='admin', username='fixture')
     app.dependency_overrides[get_db] = lambda: db
-    async def persist(_db, values, actor):
-        return SimpleNamespace(**values, id=1, operator=actor,
-                               created_at=datetime(2026,10,13), updated_at=datetime(2026,10,13))
-    write = AsyncMock(side_effect=persist)
-    monkeypatch.setattr(crud, 'upsert_price', write)
+    from app.energy.pricing import BUILTIN_ITEMS
+    from app.energy.schemas.energy_price import OUTPUT_ZONE
+
+    monkeypatch.setattr(crud, "items_for_update", AsyncMock(return_value=dict.fromkeys(BUILTIN_ITEMS)))
+    write = AsyncMock()
+    monkeypatch.setattr(crud, "upsert_hour", write)
+    hour = datetime(1000, 1, 1, 8, 54, 17)
+    persisted = dict(snapshot()) | {"hour_start": hour, "observed_at": hour}
+    monkeypatch.setattr(crud, "saved_legacy_price", AsyncMock(return_value=persisted))
     async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as client:
         response = await client.post('/api/v1/energy', json=dict(
             electricPrice=0, hydrogenPrice='1.2345', argonPrice=2, observedAt=observed_at,
@@ -231,9 +235,25 @@ async def test_real_service_asgi_checks_derived_hour_mysql_lower_bound(monkeypat
         write.assert_not_awaited(); db.commit.assert_not_awaited(); db.rollback.assert_not_awaited()
     else:
         write.assert_awaited_once(); db.commit.assert_awaited_once()
-        values = write.call_args.args[1]
-        assert values['observed_at'] == datetime.fromisoformat(observed_at.replace('Z','+00:00')).replace(tzinfo=None)
-        assert values['hour_start'] == datetime(1000,1,1,0,54,17)
-        row = response.json()['data']
-        assert row['electricPrice'] == 0 and row['hydrogenPrice'] == 1.2345
-        assert row['hourStart'] == '1000-01-01T08:54:17+08:00'
+        _, hour_start, prices, actor, observed, _ = write.call_args.args
+        assert observed == datetime.fromisoformat(observed_at.replace("Z", "+00:00")).astimezone(OUTPUT_ZONE).replace(tzinfo=None)
+        assert hour_start == hour and actor == "fixture" and prices["hydrogen"]["price"] == Decimal("1.2345")
+        row = response.json()["data"]
+        assert row["electricPrice"] == 0 and row["hydrogenPrice"] == 1.2345
+        assert row["hourStart"] == "1000-01-01T08:54:17+08:00"
+
+
+def test_published_pricing_openapi_matches_live_routes_and_bearer():
+    import json
+    from pathlib import Path
+
+    published = Path(__file__).resolve().parents[2] / "contracts/published/http-api/energy-pricing-v1/openapi.json"
+    contract = json.loads(published.read_text())
+    runtime = create_app(testing=True).openapi()
+    paths = {path: ops for path, ops in runtime["paths"].items() if path.startswith("/api/v1/energy/pricing/")}
+    assert contract["paths"] == paths
+    operations = [operation for methods in paths.values() for operation in methods.values()]
+    assert len(operations) == 6
+    assert all(operation["tags"] == ["Energy"] and operation["security"] for operation in operations)
+    for kind, components in contract["components"].items():
+        assert components == {name: runtime["components"][kind][name] for name in components}

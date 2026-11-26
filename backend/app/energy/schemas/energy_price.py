@@ -8,16 +8,9 @@ from pydantic import ConfigDict, Field, field_serializer, field_validator, model
 from common.schema_base import ApiSchema
 
 
-class PriceCreate(ApiSchema):
+class PriceInput(ApiSchema):
     model_config = ConfigDict(extra="forbid")
     observed_at: datetime | None = None
-    electric_price: Decimal
-    hydrogen_price: Decimal
-    argon_price: Decimal
-    electric_remark: str | None = Field(default=None, max_length=500)
-    hydrogen_remark: str | None = Field(default=None, max_length=500)
-    argon_remark: str | None = Field(default=None, max_length=500)
-    remark: str | None = Field(default=None, max_length=2000)
 
     @field_validator("observed_at", mode="before")
     @classmethod
@@ -33,21 +26,21 @@ class PriceCreate(ApiSchema):
         except (ValueError, OverflowError) as exc:
             raise ValueError("invalid_observed_at") from exc
 
+
+class PriceCreate(PriceInput):
+    electric_price: Decimal
+    hydrogen_price: Decimal
+    argon_price: Decimal
+    electric_remark: str | None = Field(default=None, max_length=500)
+    hydrogen_remark: str | None = Field(default=None, max_length=500)
+    argon_remark: str | None = Field(default=None, max_length=500)
+    remark: str | None = Field(default=None, max_length=2000)
+
     @model_validator(mode="before")
     @classmethod
     def reject_nonfinite_json_numbers(cls, values):
         # Python's JSON parser accepts non-standard NaN/Infinity. Keep validation
         # error inputs JSON-safe so FastAPI's existing 422 handler can serialize them.
-        def safe_input(value):
-            if isinstance(value, Decimal):
-                return {"decimal": str(value)}
-            if isinstance(value, float) and not math.isfinite(value):
-                return {"nonfinite": str(value)}
-            if isinstance(value, dict):
-                return {key: safe_input(item) for key, item in value.items()}
-            if isinstance(value, list):
-                return [safe_input(item) for item in value]
-            return value
         if isinstance(values, dict):
             # Preserve numeric lexemes as exact decimal strings only for price fields.
             # Other decimal-valued fields remain invalid and JSON-safe in 422 details.
@@ -55,32 +48,12 @@ class PriceCreate(ApiSchema):
                       "electricPrice", "hydrogenPrice", "argonPrice"}
             values = {key: str(value) if key in prices and isinstance(value, Decimal) else value
                       for key, value in values.items()}
-        return safe_input(values)
+        return json_safe_validation_input(values)
 
     @field_validator("electric_price", "hydrogen_price", "argon_price", mode="before")
     @classmethod
     def validate_price(cls, value):
-        if isinstance(value, bool) or not isinstance(value, (int, float, str, Decimal)):
-            raise ValueError("invalid_price")
-        if isinstance(value, str) and not re.fullmatch(r"[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?", value):
-            raise ValueError("invalid_price")
-        try:
-            number = Decimal(str(value))
-        except InvalidOperation as exc:
-            raise ValueError("invalid_price") from exc
-        if not number.is_finite() or not 0 <= number <= Decimal("999999.9999"):
-            raise ValueError("invalid_price")
-        # Decimal tuple examination avoids context rounding, including long trailing zeros.
-        digits = number.as_tuple().digits
-        exponent = number.as_tuple().exponent
-        trailing = 0
-        for digit in reversed(digits):
-            if digit != 0:
-                break
-            trailing += 1
-        if number != 0 and exponent + trailing < -4:
-            raise ValueError("invalid_price_precision")
-        return number
+        return exact_price(value)
 
     @field_validator("electric_remark", "hydrogen_remark", "argon_remark", "remark", mode="before")
     @classmethod
@@ -112,7 +85,7 @@ class HourlyPriceRecord(PriceRecord):
 
     @field_serializer("observed_at", "hour_start", "created_at", "updated_at")
     def business_time(self, value: datetime) -> str:
-        # MySQL DATETIME is deliberately stored as naive UTC in this module only.
+        # Naive timestamps are historical UTC. The new price view passes aware values.
         return value.replace(tzinfo=timezone.utc).astimezone(OUTPUT_ZONE).isoformat() if value.tzinfo is None else value.astimezone(OUTPUT_ZONE).isoformat()
 
 
@@ -155,3 +128,39 @@ def canonical_hour_start(observed_at: datetime) -> datetime:
     if instant.year < 1000 or hour_start.year < 1000:
         raise ValueError("unpersistable_observed_at")
     return hour_start
+
+
+def json_safe_validation_input(value):
+    if isinstance(value, Decimal):
+        return {"decimal": str(value)}
+    if isinstance(value, float) and not math.isfinite(value):
+        return {"nonfinite": str(value)}
+    if isinstance(value, dict):
+        return {key: json_safe_validation_input(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [json_safe_validation_input(item) for item in value]
+    return value
+
+
+def exact_price(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float, str, Decimal)):
+        raise ValueError("invalid_price")
+    if isinstance(value, str) and not re.fullmatch(r"[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?", value):
+        raise ValueError("invalid_price")
+    try:
+        number = Decimal(str(value))
+    except InvalidOperation as exc:
+        raise ValueError("invalid_price") from exc
+    if not number.is_finite() or not 0 <= number <= Decimal("999999.9999"):
+        raise ValueError("invalid_price")
+    # Decimal tuple examination avoids context rounding, including long trailing zeros.
+    digits = number.as_tuple().digits
+    exponent = number.as_tuple().exponent
+    trailing = 0
+    for digit in reversed(digits):
+        if digit != 0:
+            break
+        trailing += 1
+    if number != 0 and exponent + trailing < -4:
+        raise ValueError("invalid_price_precision")
+    return number

@@ -6,6 +6,7 @@ import { parse, compileScript } from 'vue/compiler-sfc'
 import { renderToString } from 'vue/server-renderer'
 import * as vue from 'vue'
 import * as echarts from 'echarts'
+import { curveIssue, curveTitle } from '../../src/app/energy/components/energyCurveGroups.js'
 import { splitObservedPoints } from '../../src/app/monitor/components/observations/curveSeries.js'
 import { metricField, metricTitle, metricValue } from '../../src/app/equipment/components/observations/columnModel.js'
 import { useTableColumnWidths } from '../../src/utils/tableColumnWidths.js'
@@ -385,7 +386,8 @@ async function energyPageFixture(api, { translate = key => key, parseDate = valu
     '@/components/common/ActionButton.vue': {}, '@/components/common/BaseCard.vue': {},
     '@/utils/date': { shanghaiInputToRfc3339: parseDate },
     '@/app/monitor/components/observations/CurveChart.vue': {},
-    '../api/observations': api
+    '../api/observations': { energyConsumptionCurveGroups: async () => [], ...api },
+    '../components/energyCurveGroups': { curveIssue, curveTitle }
   }
   const scope = vue.effectScope()
   const component = new Function('deps', script)(deps)
@@ -469,7 +471,7 @@ test('late meter definitions and errors cannot replace the currently selected me
     await vue.nextTick(); await vue.nextTick()
     requests.filter(request => request.meter === 'A').at(-1).reject(new Error('late failure'))
     await vue.nextTick(); await vue.nextTick()
-    assert.equal(state.failed.value, false)
+    assert.equal(state.failureStage.value, '')
     assert.equal(state.definitions.value[0].nameZh, 'Meter B')
   } finally { scope.stop() }
 })
@@ -484,13 +486,36 @@ test('initialization and retry share an in-flight definition request for the sel
     const first=state.retry(); await vue.nextTick(); await vue.nextTick()
     assert.equal(requests.length,1)
     requests[0].reject(new Error('fixture failure')); await first
-    assert.equal(state.failed.value,true)
+    assert.equal(state.failureStage.value,'definitions')
     const second=state.retry(); await vue.nextTick(); await vue.nextTick()
     assert.equal(requests.length,2)
     requests[1].resolve([{ groupKey:'A', metricKey:'reading', nameZh:'读数', nameEn:'Reading', quantityKey:'energy', unit:'kWh' }])
     await second
-    assert.equal(state.failed.value,false)
+    assert.equal(state.failureStage.value,'')
     assert.equal(state.group.value,'A')
+  } finally { scope.stop() }
+})
+
+test('manual statistics can retry while the curve catalog is unresolved', async () => {
+  const catalog = deferred()
+  const unit = { groupKey: 'power', metricKey: 'usage' }
+  const { state, scope } = await energyPageFixture({
+    energyOptions: async () => [{ meterId: 'A' }],
+    energyConsumptionCurveGroups: () => catalog.promise,
+    energyDefinitions: async () => [unit],
+    energySamples: async () => ({ items: [], totalPages: 0 }),
+    energySummary: async () => ({ latest: 0, amount: null })
+  })
+  try {
+    state.range.value = ['2026-11-24T00:00:00+08:00', '2026-11-24T01:00:00+08:00']
+    await state.retry()
+    assert.equal(state.curvesLoading.value, true)
+    assert.equal(state.summary.value.latest, 0)
+    catalog.reject(new Error('fixture curve catalog unavailable'))
+    await vue.nextTick()
+    await vue.nextTick()
+    assert.equal(state.curvesFailed.value, true)
+    assert.equal(state.summary.value.latest, 0)
   } finally { scope.stop() }
 })
 
@@ -516,7 +541,7 @@ test('energy statistics hide empty charts while retaining a successful summary a
     state.range.value = ['2026-11-24T00:00:00+08:00', '2026-11-24T01:00:00+08:00']
     assert.equal(state.emptyMessage.value, 'energy.observation.queryCurves')
     await state.load()
-    assert.equal(state.emptyMessage.value, 'energy.observation.noChartData')
+    assert.equal(state.emptyMessage.value, 'energy.curves.noSamples')
     assert.equal(state.summary.value.reason, 'boundary_missing')
     assert.deepEqual(state.chartGroups.value, [])
     items = [
@@ -624,7 +649,7 @@ test('late summaries, page results and errors cannot replace the current group a
     stalePage.reject(new Error('late page failure')); await oldPage
     assert.equal(state.group.value, 'B')
     assert.equal(state.summary.value.source, 'B')
-    assert.equal(state.failed.value, false)
+    assert.equal(state.failureStage.value, '')
     assert.equal(state.loading.value, false)
   } finally { scope.stop() }
 })

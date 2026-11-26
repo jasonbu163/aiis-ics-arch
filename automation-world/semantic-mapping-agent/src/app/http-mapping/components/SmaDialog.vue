@@ -2,13 +2,14 @@
 <script setup lang="ts">
 import { ElDialog } from "element-plus";
 
-defineProps<{ title: string; error?: string }>();
+defineProps<{ title: string; error?: string; compact?: boolean }>();
 const open = defineModel<boolean>({ required: true });
 </script>
 
 <template>
   <ElDialog v-model="open" :title="title" append-to="#sma-overlays" align-center
-    :close-on-click-modal="true" class="sma-dialog standard-form-dialog compact-form-dialog sma-http-dialog">
+    :close-on-click-modal="true" :show-close="!compact"
+    class="sma-dialog standard-form-dialog compact-form-dialog sma-http-dialog" :class="{ 'sma-http-dialog--compact': compact }">
     <template #header="{ titleId, titleClass }">
       <h2 :id="titleId" :class="titleClass">{{ title }}</h2>
     </template>

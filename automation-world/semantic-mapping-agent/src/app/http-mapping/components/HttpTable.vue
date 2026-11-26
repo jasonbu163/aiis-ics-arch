@@ -1,4 +1,4 @@
-<!-- SMA HTTP 业务表格共用本机列宽、横向滚动和布局状态。 -->
+<!-- SMA HTTP 业务表格共用本机列宽、横向滚动及末列固定。 -->
 <script setup lang="ts">
 import { ConsoleActionButton } from "@aw-ui";
 import { ElPagination } from "element-plus";
@@ -11,20 +11,23 @@ const props = defineProps<{
   total: number;
   busy?: boolean;
   caption: string;
+  hideTools?: boolean;
 }>();
 const page = defineModel<number>("page");
 const pageSize = defineModel<number>("pageSize");
 const ui = useHttpMessages();
 const table = useTableWidths(props.tableId, props.columns);
+defineExpose({ resetWidths: table.reset });
 </script>
 
 <template>
-  <div class="http-table-tools">
+  <div v-if="!hideTools" class="http-table-tools">
     <div class="http-table-filters"><slot name="filters" /></div>
     <ConsoleActionButton :title="ui.resetHelp" @click="table.reset">{{ ui.reset }}</ConsoleActionButton>
   </div>
   <div class="table-scroll http-table-scroll" role="region" tabindex="0" :aria-label="caption" :aria-busy="busy">
-    <table v-table-widths="[table, ui.resize]" class="http-table" :aria-label="caption">
+    <table v-table-widths="[table, ui.resize]" class="http-table"
+      :class="{ 'http-table--pinned-end': columns[columns.length - 1]?.fixed }" :aria-label="caption">
       <thead><tr><th v-for="column in columns" :key="column.id" scope="col">{{ column.title }}</th></tr></thead>
       <tbody>
         <slot />

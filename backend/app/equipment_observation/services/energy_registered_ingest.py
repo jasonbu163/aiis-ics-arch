@@ -9,6 +9,7 @@ from common.integration.envelope import fact_time
 from ..domain import ObservationError, identifier, reject, wire_time
 from ..models import EnergyMetric, EnergyReceipt, EnergySample
 from . import energy_write_sources, v2_domain
+from .energy_meters import catalog
 from .guard import current_clock, verify_energy_target
 from .ingest_v2 import _previous
 from .write_sources import commit, source_key
@@ -109,7 +110,7 @@ async def submit(db, profile, document):
                               records=previous.result_detail["records"])
                 await db.rollback()
                 return replay
-            configs = await _validated_samples(db, profile["meters"], groups)
+            configs = await _validated_samples(db, await catalog(db, profile), groups)
             now = await current_clock(db)
             receipt = EnergyReceipt(target="energy", producer_id=source.storage_identity, event_id=event_id,
                                     request_digest=digest, outcome="stored", processed_at=now,

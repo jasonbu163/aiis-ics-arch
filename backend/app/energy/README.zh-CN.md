@@ -1,30 +1,33 @@
-# Energy 能源单价
+# 能源单价
 
-[English version](README.md)
+[English](README.md)
 
-energy 是两个价格表、三条路由及独立读写权限的唯一 owner。本公共模块拥有每小时整组能源价格；客户规则与真实数据归消费项目。[backend PLAN](../../PLAN.zh-CN.md) 索引工作，当前合同归 [ARCH-BE-004 r2](../../../plans/ARCH-BE-004-energy-price-hourly-history/spec.md)；[BE002](../../../plans/ARCH-BE-002-energy-price-api/spec.md) 保持已验收的追加历史基线。
+启用的 `energy` 模块统一维护单价项目及每项目每小时的实际变更。[公开单价 API](../../../contracts/published/http-api/energy-pricing-v1/README.zh-CN.md) · [ARCH-ENERGY-001 r2](../../../plans/ARCH-ENERGY-001-configurable-hourly-pricing/spec.md)
 
-## API 与时间合同
+- `energy_price_items` 存项目键、名称、单位、排序和启用状态。迁移初始化原三个内置项目。没有旧小时历史的环境从空价格开始。
+- `energy_price_item_hours` 以项目和规范上海民用小时为唯一键，金额精度为 `DECIMAL(10,4)`。未提交项目保留原记录。写入锁定涉及的项目和小时，并在一个事务提交。
+- `energy_price_hour_meta` 保存小时总备注及旧视图的稳定 ID、操作者和时间。新旧写入统一使用项目小时记录。旧视图按各项最近的适用小时组成完整三价。仅写入自定义项目时，显式提交的总备注可以更新已有兼容小时。
 
-启用 manifest 仍只注册 GET `/energy/current`、GET `/energy`、POST `/energy`，归配置的 prefix。GET 要求 energy-price-read，POST 要求 energy-price-manage，互不授予；页面可见不授予 API 权限，原 admin/supervisor/operator guard 保留。
+新业务时间保存为固定 `+08:00` 的 `DATETIME(6)`。按 IANA `Asia/Shanghai` 及 fold 0 确定小时身份，转换至固定 `+08:00` 后存储。记录、创建和实际修改各自保留事实语义。自然日先计算 IANA 本地零点边界，再转为固定偏移。旧历史按事件时间筛选，新历史按规范小时筛选。
 
-三价格必填，Decimal/Numeric(10,4)，范围 0..999999.9999，最多四位有效小数。原始 JSON 小数先精确解析，兼容十进制字符串，输出 JSON number，0 有效。电价 CNY/kWh，气价 CNY/Nm³。单项备注最多500，总备注2000，空串归null。操作者取认证username；不隐式DDL、seed或填默认价。
+## 采用修订 `7cb6e40f3d19`
 
-POST 新增可选/null observedAt，API 一次捕获 aware UTC now 用于空值兜底及拒未来。明确输入须为带offset ISO datetime，且可持久化MySQL DATETIME并安全转换上海时间；非法、空串、无时区、未来均422。固定Asia/Shanghai归小时，MySQL唯一键 uq_energy_price_hours_hour_start 配合原子upsert整组覆盖价格、备注、observedAt和actor，保留id/hourStart/createdAt。Service提交/回滚，CRUD不控制事务，新HTTP请求重新取now。不引入请求重放或小时任务。
+1. 核对前驱 `af6d8b2c4e90`、schema 与服务器 UUID，确认原小时表四个时间字段遵循已验收的 UTC 存储约定。核对服务与数据库时钟，以及设备实时、过程曲线、能耗样本读链路。来源时区不确定或有人工导入记录时，先查清数据语义。
+2. 在独立批准的操作中核对可恢复的数据库与应用备份，停止所有新旧写入，保存来源行数、ID 和代表性旧 API 响应。直到完成对账和服务切换才恢复写入。可执行 `SELECT @@server_uuid, DATABASE()`、`SELECT version_num FROM alembic_version`、`SELECT COUNT(*), MIN(id), MAX(id) FROM energy_price_hours`。
+3. 设置 `ENERGY_PRICING_EXPECTED_SCHEMA`、`ENERGY_PRICING_EXPECTED_SERVER_UUID`、`ENERGY_PRICING_WRITE_WINDOW` 为已确认的 schema、UUID 和 `<schema>:<server-uuid>:UTC`。在已配置的 backend 对显式目标执行 `uv run alembic upgrade 7cb6e40f3d19`。这个后继需要在线 MySQL。逐项导入既有小时三价并保留其旧 ID。`energy_prices` 和 `energy_price_hours` 继续保留为转换来源。
+4. 核对修订号、来源行数、每个来源小时的三条项目记录及旧 GET 完整投影。迁移脚本逐行核对金额、备注、操作者、ID 与转换后的时间，并通过 MySQL advisory lock 串行化迁移。切换后再次核对观测读链路和时钟，再恢复写入。无关的全库后继不影响日常价格读写。
 
-energy_price_hours 的事件/小时/DB创建修改时间均按UTC DATETIME(6)保存，DB表达式UTC_TIMESTAMP(6)，不改变全局连接时区。四个输出时间字段带上海offset。hourStart代表最终小时快照，不证明分钟级生效；updatedAt是实际修改时刻。
+失败时 MySQL 可能已经提交 DDL。继续保持停写，检查 `alembic_version`、暂存表结构和行数。结构一致且数据为空或能够逐行与来源对账时，可重跑同一显式升级。DDL 之后的导入与 revision 变更同事务。如果结构或内容不符，保留备份并在恢复副本上核查，再确定修复办法。未导入完成的数据库不得手工 stamp 为已采用。
 
-current 按 observed_at<=请求now、observed_at DESC/id DESC选择，无有效记录null，缺日沿用最近价格；补历史不能因updatedAt较新抢占当前价。历史仍返回{items,total,page,pageSize}，默认1/20、size1..100；可选严格单值date=YYYY-MM-DD按上海observedAt自然日过滤，总数是过滤后实际条数，空日/越界页items为空，边界日期安全。按observed_at DESC/id DESC，不制造空小时。页面查询选日page1/size24，卡片只读，新增弹窗picker按上海解释、null表示服务端now，同小时覆盖整组；成功切响应记录日并刷新两GET，不把历史POST响应直接赋给current。
+### 回退与数据保护
 
-业务小时身份为上海民用日期+小时，夏令时回拨重复小时统一fold=0（最早瞬间）生成UTC hour_start，observed_at保留真实事件瞬间，因此每日仍最多24行。picker不存在的民用时间校验失败。wire统一+08:00保留真实瞬间并兼容浏览器，显示和picker解析仍使用IANA Asia/Shanghai历史规则。
+先停写并备份三个新表、两个来源表和应用配置。切换后数据保持迁移原状时，在同一目标校验条件下经另行批准可运行 `uv run alembic downgrade af6d8b2c4e90`。回退在移除可重建的新表之前逐行确认其与原来源等价，发现数据增加或变化会拒绝。若回退在 DDL 后中断，保持停写并检查剩余结构，再重跑同一受控命令。
 
-## 显式schema与旧数据归并gate
+切换后已有写入时，先保留完整新表和可恢复备份。在写入暂停期间导出旧 GET 的全部分页，在独立恢复副本将完整兼容行投影为旧小时格式。保留 ID、三价、各项及总备注、操作者，把带偏移的四个输出时间解析还原为 UTC。逐行核对投影、ID 与小时键，调整恢复副本的自增值，使其高于导入最大 ID。旧三列无法表达的自定义价格、缺项的小时及部分录入原貌继续留在完整备份。切换旧程序、决定采用哪个恢复副本及后续清理，均由独立操作审批。
 
-十四表root d4e6f8a0b2c4 和BE002 a6c8e0f2b4d6原样保留；BE004后继b8d0f2a4c6e8创建小时表，形成受保护十六表基线；BE005后继d2f4a6b8c0e2只增42个其他业务表，本任务F组合共58表。energy_prices全部原行及Model保留，Registry/启动/普通请求不归并。
+## BE004 旧追加表归并历史参考
 
-运行采用前独立批准精确源/目标库、原无offset时间来源、已验证可恢复备份、暂停全部新旧写入窗口、命令和回退责任人。不得猜旧时区；确认MySQL Asia/Shanghai命名时区表、服务端与DB时钟。混合/歧义时间或非法转换先解决。预检输出原行数、小时组数、冲突组数、异常数、每小时所选旧id受控本地清单；目标非空或时间不明立即停止，不能覆盖。以下SQL在预检与事务之间要求人工核对，不是无人值守脚本。
-
-同小时按(created_at DESC, id DESC)选最后完整快照，整组复制价格/备注/actor，原created/updated含义经时区转换保留；新id独立。导入后对照旧id清单核对每组值/时间及小时数，原表行数/校验和必须不变，核对后commit再切应用。新表未导入返回null不能宣称旧业务没有价格。
+以下 SQL 记录前驱的历史操作。r2 导入 UTC 小时表，保留更早的追加归档。
 
 ```sql
 -- OPERATIONAL GATE ONLY. Confirm source/target DB, backups, paused writers, time source.
@@ -114,11 +117,3 @@ CHECKSUM TABLE energy_prices;
 -- COMMIT only after review; default example explicitly rolls back.
 ROLLBACK;
 ```
-
-SQL默认以ROLLBACK结束，真实导入/COMMIT需独立operational gate。合成数据测试不证明真实MySQL并发或备份恢复。
-
-## 回退与验证
-
-先停新写入、备份小时表。旧追加归档不含切换后新写入，直接回切应用不能恢复这些数据；转回旧追加格式需另行批准并核对。b8d0f2a4c6e8 downgrade仅删除energy_price_hours并丢失全部新数据，真实downgrade/删除/重放另gate。同小时覆盖的旧版本不新增归档，不支持计费重算。
-
-验证复用既有uv/pnpm依赖与本任务公开隔离fixture，完整no_db、compileall、离线Alembic SQL、前端模块check/test/build。真实持久化/唯一键竞争、历史归并与恢复、时钟核对和运行联调均为延后operational gate，源码通过不等于部署。参见[API测试](../../tests/test_energy_price_api.py)。

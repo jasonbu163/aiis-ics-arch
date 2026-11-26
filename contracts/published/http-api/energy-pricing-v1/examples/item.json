@@ -1,0 +1,8 @@
+{
+  "itemKey": "water",
+  "nameZh": "工业用水",
+  "nameEn": "Industrial water",
+  "unit": "元/m³",
+  "sortOrder": 40,
+  "enabled": true
+}

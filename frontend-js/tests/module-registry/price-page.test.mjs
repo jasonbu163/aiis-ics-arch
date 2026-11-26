@@ -1,5 +1,4 @@
-/** 文件路径: /frontend-js/tests/module-registry/price-page.test.mjs
- * 功能描述: 编译实际价格页 SFC，注入 API stub 验证局部状态、提交及刷新语义；不发送网络请求。 */
+/** 编译实际单价页并替换网络依赖，验证日期筛选、部分写入、上海小时及请求竞态。 */
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
@@ -7,19 +6,23 @@ import { parse, compileScript } from 'vue/compiler-sfc'
 import * as vue from 'vue'
 import { createI18n } from 'vue-i18n'
 import { useTableColumnWidths } from '../../src/utils/tableColumnWidths.js'
+import * as priceHelpers from '../../src/app/energy/components/energyPricing.js'
 import { loadRegistry } from '../../scripts/check-module-manifests.mjs'
 
 const source = await readFile(new URL('../../src/app/energy/views/price.vue', import.meta.url), 'utf8')
 const { descriptor } = parse(source)
 const script = compileScript(descriptor, { id: 'price-page-test' }).content
-// 只替换模块导入；所有状态与 handler 均来自编译后的实际页面，未复制业务实现。
 const executable = script.replace(/^import\s+(.+?)\s+from\s+['"](.+?)['"];?$/gm, (_line, binding, module) => {
-  if (binding.startsWith('{')) binding = binding.replace(/\bas\b/g, ':')
-  return `const ${binding} = deps[${JSON.stringify(module)}]`
+  return `const ${binding.replace(/\bas\b/g, ':')} = deps[${JSON.stringify(module)}]`
 }).replace('export default', 'return')
 const makeComponent = new Function('deps', executable)
 const registry = await loadRegistry(new URL('../../', import.meta.url).pathname)
-const current = { observedAt: '2026-10-13T10:59:00+08:00', electricPrice: 0, hydrogenPrice: '15.2500', argonPrice: 3.5, electricRemark: 'existing' }
+const water = { itemKey: 'water_feed', nameZh: '工业用水', nameEn: 'Water', unit: '元/m³' }
+const electric = { itemKey: 'electric', nameZh: '电能单价', nameEn: 'Electricity Price', unit: 'CNY/kWh' }
+const definitions = [{ ...water, enabled: true }, { ...electric, enabled: true }]
+const current = [{ ...water, price: null }, { ...electric, price: 0 }]
+const observedAt = '2026-10-13T10:59:00+08:00'
+const history = { columns: definitions, items: [] }
 const deferred = () => {
   let resolve, reject
   const promise = new Promise((yes, no) => { resolve = yes; reject = no })
@@ -33,163 +36,201 @@ function page(api = {}, locale = 'en-US') {
   const component = makeComponent({
     vue: { ...vue, onMounted: hook => hooks.push(hook), onBeforeUnmount: hook => unmounts.push(hook) },
     'vue-i18n': { useI18n: () => i18n.global },
-    'element-plus': { ElMessage: {
-      error: value => messages.push(['error', value]), success: value => messages.push(['success', value])
-    } },
+    'element-plus': { ElMessage: Object.fromEntries(['error', 'success', 'warning'].map(
+      type => [type, value => messages.push([type, value])]
+    )) },
     '@/components/common/ActionButton.vue': {}, '@/components/common/BaseCard.vue': {},
     '@/utils/tableColumnWidths': { useTableColumnWidths },
-    '@/app/auxiliary/api': {
-      getCurrentPrice: () => { calls.current++; return api.current ? api.current() : Promise.resolve(current) },
-      getPriceList: params => { calls.history.push(params); return api.history ? api.history(params) : Promise.resolve({ items: [] }) },
-      createPrice: data => { calls.post.push(data); return api.post ? api.post(data) : Promise.resolve({ observedAt: data.observedAt || "2026-10-13T12:00:00+08:00" }) }
+    '../components/energyPricing': priceHelpers,
+    '../api/pricing': {
+      currentPrices: () => { calls.current++; return api.current ? api.current() : Promise.resolve(current) },
+      hourlyPrices: params => { calls.history.push(params); return api.history ? api.history(params) : Promise.resolve(history) },
+      pricingItems: () => Promise.resolve(definitions),
+      saveHourlyPrices: input => {
+        calls.post.push(input)
+        return api.post ? api.post(input) : Promise.resolve({ values: { water_feed: { observedAt } } })
+      }
     }
   })
   const state = component.setup({}, { expose() {} })
-  state.formRef.value = { validate: async () => true }
-  return { state, calls, messages, mount: () => hooks[0](), unmount: () => unmounts[0](), t: i18n.global.t, i18n }
+  return { state, calls, messages, mount: () => hooks[0](), unmount: () => unmounts[0](), t: i18n.global.t }
 }
 
-const fill = p => Object.assign(p.state.form, { electricPrice: '0', hydrogenPrice: '2.1234', argonPrice: '3', electricRemark: 'E', hydrogenRemark: 'H', argonRemark: 'A', remark: 'whole snapshot' })
-
-test('actual SFC: readonly current, Shanghai today, day history request and distinct event/modification columns', async () => {
-  const p = page()
-  assert.equal(p.state.selectedDate.value, p.state.businessDate(Date.now()))
+test('actual SFC loads latest history by default, filters by day, and restores latest on clear', async () => {
+  const latest = { hourStart: '2026-10-13T10:00:00+08:00', values: {} }
+  const p = page({ history: async ({ date }) => date ? history : { ...history, items: [latest] } })
+  assert.equal(p.state.selectedDate.value, null)
   await p.mount()
-  assert.equal(p.state.currentPrice.value.electricPrice,0)
-  assert.equal(p.state.form.electricPrice,'')
-  assert.deepEqual(p.calls.history,[{date:p.state.selectedDate.value,page:1,pageSize:24}])
-  assert.equal(p.state.businessDate('2026-10-12T16:00:00Z'),'2026-10-13')
-  assert.equal(p.state.businessDateTime('2026-10-13T02:59:00Z'),'2026-10-13 10:59:00')
-  // Inspect the real template structure, in addition to executing its compiled setup.
-  const beforeDialog=descriptor.template.content.split('<el-dialog')[0]
-  assert.equal(beforeDialog.includes('<el-form'),false)
-  assert.equal(beforeDialog.includes("@click=\"handleSave\""),false)
-  assert.equal(descriptor.template.content.includes('el-pagination'),false)
-  assert.match(descriptor.template.content,/prop="observedAt"/)
-  assert.match(descriptor.template.content,/prop="updatedAt"/)
-  assert.match(descriptor.template.content,/:editable="false" clearable/)
+  assert.deepEqual(p.state.current.value, current)
+  assert.deepEqual(p.state.history.value, [latest])
+
+  p.state.selectedDate.value = '2026-11-25'
+  await p.state.loadHistory()
+  assert.deepEqual(p.state.historyColumns.value, definitions)
+  assert.deepEqual(p.state.history.value, [])
+
+  p.state.selectedDate.value = null
+  await p.state.loadHistory()
+  assert.deepEqual(p.state.history.value, [latest])
+  assert.deepEqual(p.calls.history, [
+    { page: 1, pageSize: 1 },
+    { date: '2026-11-25', page: 1, pageSize: 24 },
+    { page: 1, pageSize: 1 },
+  ])
+  assert.equal(p.state.displayPrice(null), '—')
+  assert.equal(p.state.displayPrice(0), '0')
+  assert.match(descriptor.template.content, /v-for="item in historyColumns"/)
+  assert.match(descriptor.template.content, /valueFor\(row, item.itemKey\)/)
+  assert.match(descriptor.template.content, /:close-on-click-modal="true"/)
 })
 
-test('null current and bad price failures preserve recognizable previous values; histories never touch dialog', async () => {
-  const empty=page({current:async()=>null});await empty.mount();assert.equal(empty.state.currentPrice.value,null)
-  for(const bad of [null,undefined,'',' ','no',Infinity,NaN,-1,false,{}]) {
-    const p=page({current:async()=>({...current,electricPrice:bad}),history:async()=>{throw Error('history')}})
-    p.state.currentPrice.value=current;p.state.openAdd();fill(p)
-    await p.mount()
-    assert.equal(p.state.currentPrice.value.electricPrice,0)
-    assert.equal(p.state.form.electricRemark,'E')
-    assert.equal(p.state.currentError.value,true)
-    assert.equal(p.state.historyError.value,true)
-    assert.equal(p.state.currentLoading.value,false)
-    assert.equal(p.state.historyLoading.value,false)
+test('history columns and details hide a disabled project with saved prices', async () => {
+  const [waterColumn, electricColumn] = definitions
+  const saved = { hourStart: observedAt, values: { water_feed: { price: 0 }, electric: { price: 8 } } }
+  let enabled = false
+  const p = page({ history: async () => ({
+    columns: [waterColumn, { ...electricColumn, enabled }],
+    items: [saved],
+  }) })
+  await p.mount()
+  p.state.details.value = saved
+  assert.deepEqual(p.state.historyColumns.value, [waterColumn])
+  assert.deepEqual(p.state.detailItems.value.map(item => item.itemKey), ['water_feed'])
+  assert.equal(p.state.history.value[0].values.electric.price, 8)
+
+  enabled = true
+  await p.state.loadHistory()
+  assert.deepEqual(p.state.historyColumns.value, definitions)
+  assert.deepEqual(p.state.detailItems.value.map(item => item.itemKey), ['water_feed', 'electric'])
+})
+
+test('only entered prices are submitted and unset remarks and server clock remain distinguishable', async () => {
+  const p = page()
+  await p.mount()
+  p.state.openAdd()
+  assert.equal(p.state.observedAt.value, null)
+  const [input, peer] = p.state.formItems.value
+  input.price = '0'
+  input.remarkTouched = true
+  assert.equal(peer.price, '')
+  await p.state.save()
+  assert.deepEqual(p.calls.post, [{ observedAt: null, items: { water_feed: { price: '0', remark: '' } } }])
+  assert.equal(p.state.dialogVisible.value, false)
+  assert.equal(p.state.selectedDate.value, '2026-10-13')
+  assert.equal(p.calls.current, 2)
+  assert.deepEqual(p.calls.history.at(-1), { date: '2026-10-13', page: 1, pageSize: 24 })
+})
+
+test('invalid inputs never POST, future failures preserve form and unlock', async () => {
+  const p = page({ post: async () => { throw Error('post') } })
+  await p.mount()
+  p.state.openAdd()
+  await p.state.save()
+  assert.deepEqual(p.calls.post, [])
+  const [input] = p.state.formItems.value
+  for (const value of ['-1', '1000000', '0.00001', '1.2345000000000001']) {
+    input.price = value
+    await p.state.save()
+    assert.deepEqual(p.calls.post, [])
   }
+  input.price = '1.2345000000000'
+  p.state.observedAt.value = '2026-10-10T10:59:00'
+  p.state.remarkTouched.value = true
+  await p.state.save()
+  assert.equal(p.state.dialogVisible.value, true)
+  assert.equal(p.state.saving.value, false)
+  assert.equal(input.price, '1.2345000000000')
+  assert.deepEqual(p.calls.post[0], { observedAt: '2026-10-10T02:59:00.000Z',
+    items: { water_feed: { price: '1.2345000000000' } }, remark: '' })
 })
 
-test('new form is blank, cancel has no POST, clear picker encodes null, explicit picker encodes Shanghai offset',async()=>{
-  const p=page();p.state.openAdd();assert.equal(p.state.form.observedAt,null)
-  fill(p);p.state.cancelAdd();assert.equal(p.calls.post.length,0)
-  p.state.openAdd();assert.equal(p.state.form.electricPrice,'');fill(p)
-  await p.state.handleSave()
-  assert.equal(p.calls.post[0].observedAt,null)
-  assert.equal(p.calls.post[0].remark,'whole snapshot')
-  p.state.openAdd();fill(p);p.state.form.observedAt='2026-10-10T10:59:00'
-  await p.state.handleSave()
-  assert.equal(p.calls.post[1].observedAt,'2026-10-10T02:59:00.000Z')
-})
-
-test('POST snapshot locks validation, duplicate submit, cancel and close; success closes, switches response day and reads current',async()=>{
-  const validation=deferred(),post=deferred()
-  const p=page({post:()=>post.promise});p.state.openAdd();fill(p)
-  p.state.form.observedAt='2026-10-10T10:59:00'
-  p.state.formRef.value.validate=()=>validation.promise
-  const saving=p.state.handleSave()
-  await p.state.handleSave();p.state.cancelAdd();let closed=false;p.state.beforeClose(()=>closed=true)
-  assert.equal(closed,false);assert.equal(p.state.dialogVisible.value,true)
-  p.state.form.electricPrice='99'
-  validation.resolve(true);await Promise.resolve();await Promise.resolve()
-  assert.equal(p.calls.post.length,1);assert.equal(p.calls.post[0].electricPrice,'0')
-  post.resolve({observedAt:'2026-10-10T02:59:00Z',electricPrice:888})
+test('modal cancel sends no request and concurrent saving locks submit and close', async () => {
+  const pending = deferred()
+  const p = page({ post: () => pending.promise })
+  await p.mount()
+  p.state.openAdd()
+  let closed = false
+  p.state.beforeClose(() => { closed = true })
+  assert.equal(closed, true)
+  assert.equal(p.calls.post.length, 0)
+  p.state.formItems.value[0].price = '0'
+  const saving = p.state.save()
+  closed = false
+  p.state.beforeClose(() => { closed = true })
+  await p.state.save()
+  assert.equal(closed, false)
+  assert.equal(p.calls.post.length, 1)
+  pending.resolve({ values: { water_feed: { observedAt } } })
   await saving
-  assert.equal(p.state.dialogVisible.value,false)
-  assert.equal(p.state.selectedDate.value,'2026-10-10')
-  assert.equal(p.state.currentPrice.value.electricPrice,0)
-  assert.equal(p.calls.current,1)
-  assert.deepEqual(p.calls.history,[{date:'2026-10-10',page:1,pageSize:24}])
-  assert.deepEqual(p.messages,[['success',p.t('common.success')]])
+  assert.equal(p.state.dialogVisible.value, false)
 })
 
-test('validation failure never POSTs; POST failure preserves every input and unlocks; no rounding',async()=>{
-  for(const invalid of ['',null,-1,'1000000','0.00001','1.2345000000000001']) {
-    const p=page();p.state.openAdd();fill(p);p.state.form.electricPrice=invalid
-    await p.state.handleSave();assert.equal(p.calls.post.length,0);assert.equal(p.state.saveLoading.value,false)
-  }
-  const p=page({post:async()=>{throw Error('post')}});p.state.openAdd();fill(p)
-  p.state.form.observedAt='2026-10-10T12:00:00'
-  const input={...p.state.form};await p.state.handleSave()
-  assert.deepEqual({...p.state.form},input);assert.equal(p.state.dialogVisible.value,true)
-  assert.equal(p.calls.current,0);assert.equal(p.calls.history.length,0)
-  assert.equal(p.state.saveLoading.value,false)
-  for(const result of [false,Error('invalid')]) {
-    const q=page();q.state.openAdd();fill(q);q.state.formRef.value.validate=async()=>{if(result instanceof Error)throw result;return result}
-    await q.state.handleSave();assert.equal(q.calls.post.length,0)
-  }
+test('failed refresh after a write remains successful and leaves current and historical errors independent', async () => {
+  let fail = false
+  const p = page({
+    current: async () => { if (fail) throw Error('current'); return current },
+    history: async () => { if (fail) throw Error('history'); return history }
+  })
+  await p.mount()
+  fail = true
+  p.state.openAdd()
+  p.state.formItems.value[0].price = '1'
+  await p.state.save()
+  assert.equal(p.state.dialogVisible.value, false)
+  assert.equal(p.state.currentError.value && p.state.historyError.value, true)
+  assert.deepEqual(p.state.current.value, current)
+  assert.deepEqual(p.messages.map(([level]) => level), ['success', 'error', 'error'])
 })
 
-test('successful POST then failed GETs remains successful and never reopens/replays',async()=>{
-  const p=page({current:async()=>{throw Error('get')},history:async()=>{throw Error('get')}})
-  p.state.openAdd();fill(p);await p.state.handleSave()
-  assert.equal(p.state.dialogVisible.value,false);assert.equal(p.calls.post.length,1)
-  assert.deepEqual(p.messages,[['success',p.t('common.success')],['error',p.t('energy.price.currentLoadError')],['error',p.t('energy.price.historyLoadError')]])
+test('late history and current requests cannot replace newer responses or update unmounted state', async () => {
+  const previous = deferred(), recent = deferred()
+  let n = 0
+  const p = page({ history: params => params.date === '2026-10-11' ? previous.promise : recent.promise,
+    current: () => ++n === 1 ? previous.promise : Promise.resolve(current) })
+  p.state.selectedDate.value = '2026-10-11'
+  const stale = p.state.loadHistory(), staleCurrent = p.state.loadCurrent()
+  p.state.selectedDate.value = '2026-10-12'
+  const active = p.state.loadHistory()
+  await p.state.loadCurrent()
+  previous.resolve({ items: [{ hourStart: 'stale' }], columns: [] })
+  await stale
+  await staleCurrent
+  assert.deepEqual(p.state.current.value, current)
+  assert.equal(p.state.historyLoading.value, true)
+  recent.resolve({ columns: definitions, items: [{ hourStart: 'active' }] })
+  await active
+  assert.deepEqual(p.state.history.value, [{ hourStart: 'active' }])
+  const late = deferred()
+  const q = page({ current: () => late.promise })
+  const result = q.state.loadCurrent()
+  q.unmount()
+  late.resolve(current)
+  await result
+  assert.deepEqual(q.state.current.value, [])
 })
 
-test('history A/B late result/error/finally cannot replace B, current requests and unmount have same guard',async()=>{
-  for(const rejectOld of [false,true]) {
-    const a=deferred(),b=deferred();const p=page({history:params=>params.date==='2026-10-10'?a.promise:b.promise})
-    p.state.selectedDate.value='2026-10-10';p.state.priceHistory.value=[{id:0}];const first=p.state.loadHistory()
-    assert.deepEqual(p.state.priceHistory.value,[])
-    p.state.selectedDate.value='2026-10-11';const second=p.state.loadHistory()
-    if(rejectOld)a.reject(Error('old'));else a.resolve({items:[{id:1}]})
-    await first;assert.equal(p.state.historyLoading.value,true);assert.deepEqual(p.messages,[])
-    b.resolve({items:[{id:2}]});await second;assert.deepEqual(p.state.priceHistory.value,[{id:2}])
-  }
-  const a=deferred(),b=deferred();let n=0;const p=page({current:()=>++n===1?a.promise:b.promise})
-  const first=p.state.loadCurrent(),second=p.state.loadCurrent();b.resolve({...current,electricPrice:2});await second
-  a.resolve({...current,electricPrice:1});await first;assert.equal(p.state.currentPrice.value.electricPrice,2)
-  const late=deferred();const q=page({current:()=>late.promise});const pending=q.state.loadCurrent();q.unmount();late.resolve(current);await pending
-  assert.equal(q.state.currentPrice.value,null)
-})
-
-test('save auto day and subsequent manual day use latest request; pending old current cannot undo refreshed current',async()=>{
-  const old=deferred(),saved=deferred(),manual=deferred(),oldCurrent=deferred();let n=0
-  const p=page({current:()=>++n===1?oldCurrent.promise:Promise.resolve({...current,electricPrice:4}),history:params=>params.date==='2026-10-09'?old.promise:params.date==='2026-10-13'?saved.promise:manual.promise})
-  p.state.selectedDate.value='2026-10-09';const starting=p.state.handleRefresh()
-  p.state.openAdd();fill(p);const saving=p.state.handleSave();await Promise.resolve();await Promise.resolve();await Promise.resolve()
-  assert.equal(p.state.selectedDate.value,'2026-10-13')
-  p.state.selectedDate.value='2026-10-14';const latest=p.state.loadHistory()
-  saved.resolve({items:[{id:1}]});old.resolve({items:[{id:0}]});oldCurrent.resolve({...current,electricPrice:9})
-  await starting;await saving
-  assert.equal(p.state.currentPrice.value.electricPrice,4);assert.equal(p.state.historyLoading.value,true)
-  manual.resolve({items:[{id:2}]});await latest
-  assert.deepEqual(p.state.priceHistory.value,[{id:2}])
-})
-
-test('both languages expose identical price keys and translated labels; facade/mock remain paired',()=>{
-  const en=registry.messages['en-US'].energy.price,zh=registry.messages['zh-CN'].energy.price
-  assert.deepEqual(Object.keys(en).sort(),Object.keys(zh).sort())
-  for(const locale of ['en-US','zh-CN']) {
-    const p=page({},locale)
-    for(const key of ['add','observedAt','lastModified','serverTimeHint','overwriteHint','historyEmpty']) assert.notEqual(p.t('energy.price.'+key),'energy.price.'+key)
+test('language fallback, original localized units, and static locale key symmetry', () => {
+  const zh = page({}, 'zh-CN')
+  const en = page({}, 'en-US')
+  assert.equal(zh.state.name({ ...water, nameZh: null }), 'Water')
+  assert.equal(en.state.name({ ...water, nameEn: null }), '工业用水')
+  assert.equal(zh.state.unit(electric), '元/kWh')
+  assert.equal(en.state.unit(electric), 'CNY/kWh')
+  assert.equal(zh.state.unit({ ...electric, unit: 'custom unit' }), 'custom unit')
+  assert.equal(zh.t('energy.price.historyLatest'), '最近一条记录')
+  assert.equal(en.t('energy.price.historyLatest'), 'Latest record')
+  const keys = (locale, namespace) => Object.keys(registry.messages[locale].energy[namespace]).sort()
+  for (const namespace of ['price', 'pricing']) {
+    assert.deepEqual(keys('en-US', namespace), keys('zh-CN', namespace))
   }
 })
 
-
-test('Shanghai historical DST picker uses IANA offset, repeated hour fold=0, gap rejects and LMT remains representable',async()=>{
-  const p=page()
-  assert.equal(p.state.encodeObservedAt('1991-08-01T10:00:00'),'1991-08-01T01:00:00.000Z')
-  assert.equal(p.state.encodeObservedAt('1991-09-15T01:30:00'),'1991-09-14T16:30:00.000Z')
-  assert.equal(p.state.encodeObservedAt('1000-01-01T10:00:00'),'1000-01-01T01:54:17.000Z')
-  assert.throws(()=>p.state.encodeObservedAt('1991-04-14T02:30:00'))
-  p.state.openAdd();fill(p);p.state.form.observedAt='1991-04-14T02:30:00'
-  await p.state.handleSave();assert.equal(p.calls.post.length,0);assert.equal(p.state.dialogVisible.value,true)
-  assert.deepEqual(p.messages,[['error',p.t('energy.price.invalidObservedAt')]])
+test('Shanghai historical picker resolves repeated hours and rejects gaps in any host timezone', () => {
+  const { encodeObservedAt, businessDate, businessDateTime } = priceHelpers
+  assert.equal(encodeObservedAt('1991-08-01T10:00:00'), '1991-08-01T01:00:00.000Z')
+  assert.equal(encodeObservedAt('1991-09-15T01:30:00'), '1991-09-14T16:30:00.000Z')
+  assert.equal(encodeObservedAt('1000-01-01T10:00:00'), '1000-01-01T01:54:17.000Z')
+  assert.throws(() => encodeObservedAt('1991-04-14T02:30:00'))
+  assert.equal(businessDate('2026-10-12T16:00:00Z'), '2026-10-13')
+  assert.equal(businessDateTime('2026-10-13T02:59:00Z'), '2026-10-13 10:59:00')
 })

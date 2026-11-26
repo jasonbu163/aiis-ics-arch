@@ -8,9 +8,9 @@
     "/energy/write-sources": {
       "get": {
         "tags": [
-          "Equipment observation"
+          "Energy"
         ],
-        "summary": "List Energy Write Sources",
+        "summary": "Management — List energy write sources",
         "operationId": "list_energy_write_sources_api_v1_energy_write_sources_get",
         "responses": {
           "200": {
@@ -30,9 +30,9 @@
       },
       "post": {
         "tags": [
-          "Equipment observation"
+          "Energy"
         ],
-        "summary": "Add Energy Write Source",
+        "summary": "Management — Add energy write source",
         "operationId": "add_energy_write_source_api_v1_energy_write_sources_post",
         "requestBody": {
           "content": {
@@ -74,9 +74,9 @@
     "/energy/write-sources/{sourceKey}": {
       "patch": {
         "tags": [
-          "Equipment observation"
+          "Energy"
         ],
-        "summary": "Patch Energy Write Source",
+        "summary": "Management — Update energy write source",
         "operationId": "patch_energy_write_source_api_v1_energy_write_sources__sourceKey__patch",
         "security": [
           {
@@ -127,9 +127,9 @@
       },
       "delete": {
         "tags": [
-          "Equipment observation"
+          "Energy"
         ],
-        "summary": "Delete Energy Write Source",
+        "summary": "Management — Delete energy write source",
         "operationId": "delete_energy_write_source_api_v1_energy_write_sources__sourceKey__delete",
         "security": [
           {
@@ -172,9 +172,9 @@
     "/integration/energy/registered-samples": {
       "post": {
         "tags": [
-          "Equipment observation"
+          "Energy"
         ],
-        "summary": "Write Registered Energy",
+        "summary": "Public — Write registered energy samples",
         "operationId": "write_registered_energy_api_v1_integration_energy_registered_samples_post",
         "requestBody": {
           "content": {

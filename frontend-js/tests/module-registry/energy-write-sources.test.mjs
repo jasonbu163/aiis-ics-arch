@@ -6,6 +6,23 @@ import manifest from '../../src/app/energy/manifest.js'
 
 const source = filepath => readFile(new URL('../../src/app/energy/' + filepath, import.meta.url), 'utf8')
 
+test('energy admin opens meter metrics by default and keeps the existing workspaces in order alongside pricing and curves', async () => {
+  const [view, metrics, meters, en, zh] = await Promise.all([
+    source('views/admin.vue'), source('components/EnergyAdmin.vue'), source('components/EnergyMeters.vue'),
+    source('locales/en-US.json').then(JSON.parse), source('locales/zh-CN.json').then(JSON.parse)
+  ])
+  const workspaces = [...view.matchAll(/<el-radio-button value="(\w+)"/g)].map(match => match[1])
+  assert.deepEqual(workspaces, ['meters', 'metrics', 'sources', 'prices', 'curves'])
+  assert.match(view, /const active = ref\('metrics'\)/)
+  assert.match(view, /<EnergyMeters v-if="active === 'meters'" \/>/)
+  assert.match(view, /<EnergyAdmin v-else-if="active === 'metrics'" kind="config" \/>/)
+  assert.doesNotMatch(metrics, /manage-meters/)
+  assert.doesNotMatch(meters, /meter\('back'\)/)
+  assert.deepEqual(Object.keys(en.meters).sort(), Object.keys(zh.meters).sort())
+  assert.equal(en.meters.title, 'Meter management')
+  assert.equal(zh.meters.title, '表计管理')
+})
+
 test('write registration remains in the energy admin configuration route and keeps bilingual strings', async () => {
   const admin = manifest.routes.find(route => route.name === 'EnergyObservationAdmin')
   assert.equal(admin.meta.requiresAdmin, true)

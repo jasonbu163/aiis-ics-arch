@@ -211,6 +211,7 @@
   "postQueue": "POST queue capacity",
   "configureLimits": "Edit limits",
   "recentRuns": "Latest mapping results",
+  "queryResults": "Search",
   "targetPeak": "Peak POSTs per target",
   "details": "Details",
   "runtimeHelp": "Acquisition and delivery start separately. Each scheduled execution reads eligible latest snapshots.",

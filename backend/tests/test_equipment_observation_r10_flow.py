@@ -16,7 +16,7 @@ from sqlalchemy.pool import StaticPool
 from app.equipment_observation.api import routes
 from app.equipment_observation.profile import authenticate
 from app.equipment_observation.models import CardConfig, CurveGroup, EnergyMetric, EnergyReceipt, EnergySample, HistorySample, LatestSnapshot, MetricConfig, MetricGroup, Receipt, SlotBinding, WriteSource
-from app.equipment_observation.services import (energy_reads, energy_registered_ingest, energy_write_sources,
+from app.equipment_observation.services import (energy_meters, energy_registered_ingest, energy_write_sources,
                                                ingest_v2, reads, registered_ingest, write_sources)
 from core.deps import get_current_user
 from database import get_db
@@ -26,6 +26,7 @@ pytestmark = pytest.mark.no_db
 
 class AsyncSQLite:
     def __init__(self, session): self.session = session
+    def get_bind(self): return self.session.get_bind()
     def add(self, row): self.session.add(row)
     def add_all(self, rows): self.session.add_all(rows)
     async def execute(self, statement): return self.session.execute(statement)
@@ -51,6 +52,7 @@ def app_and_db(monkeypatch):
         'CREATE TABLE energy_ingest_receipts (id INTEGER PRIMARY KEY AUTOINCREMENT, target TEXT NOT NULL, producer_id TEXT NOT NULL, event_id TEXT NOT NULL, request_digest BLOB NOT NULL, outcome TEXT NOT NULL, processed_at DATETIME NOT NULL, result_record_id INTEGER, mapping_id TEXT, mapping_revision TEXT, source_refs JSON, task_evidence JSON, contract_version TEXT NOT NULL, result_version TEXT NOT NULL, result_detail JSON, UNIQUE(target,producer_id,event_id))',
         'CREATE TABLE equipment_main (id INTEGER PRIMARY KEY AUTOINCREMENT, equipment_id TEXT NOT NULL, task_no TEXT NOT NULL, observed_at DATETIME NOT NULL, quality TEXT NOT NULL, source_sample_key BLOB NOT NULL, ingest_receipt_id INTEGER NOT NULL, local_values JSON NOT NULL, remark TEXT, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, UNIQUE(equipment_id,task_no))',
         'CREATE TABLE monitor_main (id INTEGER PRIMARY KEY AUTOINCREMENT, equipment_id TEXT NOT NULL, task_no TEXT NOT NULL, observed_at DATETIME NOT NULL, quality TEXT NOT NULL, source_sample_key BLOB NOT NULL, ingest_receipt_id INTEGER NOT NULL, local_values JSON NOT NULL, remark TEXT, review_mark TEXT, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL)',
+        'CREATE TABLE energy_meters (meter_id TEXT PRIMARY KEY, name_zh TEXT NOT NULL, name_en TEXT NOT NULL, read_roles JSON NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL)',
         'CREATE TABLE energy_metric_configs (meter_id TEXT NOT NULL,group_key TEXT NOT NULL,metric_key TEXT NOT NULL,slot_no INTEGER NOT NULL,name_zh TEXT NOT NULL,name_en TEXT NOT NULL,value_type TEXT NOT NULL,quantity_key TEXT NOT NULL,measurement_mode TEXT NOT NULL,unit TEXT,decimals INTEGER,enabled BOOLEAN NOT NULL,list_visible BOOLEAN NOT NULL DEFAULT 0,list_order INTEGER,rules JSON NOT NULL,first_used_at DATETIME,PRIMARY KEY(meter_id,group_key,metric_key), UNIQUE(meter_id,group_key,slot_no))',
         'CREATE TABLE energy_consumption_main (id INTEGER PRIMARY KEY AUTOINCREMENT,meter_id TEXT NOT NULL,group_key TEXT NOT NULL,observed_at DATETIME NOT NULL,quality TEXT NOT NULL,interval_start_at DATETIME,interval_end_at DATETIME,ingest_receipt_id INTEGER NOT NULL,local_values JSON NOT NULL,remark TEXT,review_mark TEXT,created_at DATETIME NOT NULL,updated_at DATETIME NOT NULL)',
     ]
@@ -87,9 +89,9 @@ def app_and_db(monkeypatch):
                'meterReadScopes':{'admin':['meter1','meter2']}}
     async def now(db, target): return datetime(2026,11,17,12,30)
     async def business_now(db): return datetime(2026,11,17,12,30,0,123456)
-    for module in (ingest_v2, reads, registered_ingest, write_sources, routes, energy_registered_ingest, energy_write_sources):
+    for module in (ingest_v2, reads, registered_ingest, write_sources, routes, energy_registered_ingest, energy_write_sources, energy_meters):
         monkeypatch.setattr(module, 'current_clock', business_now)
-    for module in (energy_reads, routes, ingest_v2, energy_registered_ingest):
+    for module in (energy_meters, routes, ingest_v2, energy_registered_ingest):
         monkeypatch.setattr(module, 'verify_energy_target', now)
     monkeypatch.setattr(routes, 'get_profile', lambda: profile)
     monkeypatch.setattr(routes, 'authenticate', lambda _profile, _header: producer)

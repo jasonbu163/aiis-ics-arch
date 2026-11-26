@@ -55,7 +55,7 @@ def retirement_graph():
 
 def test_single_forward_only_revision_with_precise_retirement_allowlist(retirement_graph):
     graph = retirement_graph
-    assert graph.get_heads() == ["b52e9c416a07"]
+    assert graph.get_heads() == ["9e0c5d41b7a2"]
     script = graph.get_revision("c9e1a3b5d720")
     assert script.down_revision == "ae20b4d6f831"
     assert set(script.module.RETIRED_TABLES) == RETIRED_TABLES

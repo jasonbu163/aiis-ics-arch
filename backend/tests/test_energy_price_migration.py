@@ -89,3 +89,24 @@ def test_documented_merge_sql_synthetic_winner_archive_and_conflict_guard():
         doc=(Path(__file__).parents[1]/'app/energy'/name).read_text()
         for snippet in ('ROW_NUMBER()', 'created_at DESC, id DESC', 'energy_price_hours', '@legacy_offset', 'ROLLBACK', 'CHECKSUM TABLE energy_prices'):
             assert snippet in doc
+
+
+
+def test_pricing_revision_layout_matches_runtime_models():
+    module = load_price(VERSIONS_DIR / "20261125_1800_7cb6e40f3d19_configurable_energy_pricing.py")
+    assert module.down_revision == "af6d8b2c4e90"
+    assert ScriptDirectory.from_config(Config("alembic.ini")).get_heads() == [module.revision]
+    from sqlalchemy.dialects.mysql import dialect
+    from sqlalchemy.schema import CreateTable
+
+    mysql = dialect()
+    for table in module.target_tables():
+        source = str(CreateTable(table).compile(dialect=mysql))
+        model = Base.metadata.tables[table.name]
+        current = str(CreateTable(model).compile(dialect=mysql))
+        assert {line.rstrip(",") for line in source.splitlines()} == {
+            line.rstrip(",") for line in current.splitlines()
+        }
+        assert {(i.name, tuple(i.columns.keys())) for i in table.indexes} == {
+            (i.name, tuple(i.columns.keys())) for i in model.indexes
+        }

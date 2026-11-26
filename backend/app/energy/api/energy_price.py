@@ -33,7 +33,7 @@ class PriceRoute(APIRoute):
 
 
 router = APIRouter(
-    prefix="/energy", tags=["Auxiliary - Energy Price"], route_class=PriceRoute,
+    prefix="/energy", tags=["Energy"], route_class=PriceRoute,
 )
 
 
@@ -54,14 +54,7 @@ async def price_history(
     db: AsyncSession = Depends(get_db),
     actor: User = Depends(require_permissions("energy-price-read")),
 ):
-    day = None
-    if "date" in request.query_params:
-        try:
-            if len(request.query_params.getlist("date")) != 1:
-                raise ValueError("duplicate_date")
-            day = parse_history_date(date)
-        except ValueError:
-            raise RequestValidationError([{"type": "value_error", "loc": ("query", "date"), "msg": "invalid_date", "input": date}])
+    day = history_day(request, date)
     return ResponseModel(data=await service.price_history(db, page, page_size, day))
 
 
@@ -71,13 +64,34 @@ async def save_price(
     db: AsyncSession = Depends(get_db),
     actor: User = Depends(require_permissions("energy-price-manage")),
 ):
-    now = utc_now()
-    observed_at = payload.observed_at if payload.observed_at is not None else now
-    if observed_at > now:
-        raise RequestValidationError([{"type": "value_error", "loc": ("body", "observedAt"), "msg": "future_observed_at", "input": observed_at.isoformat()}])
+    observed_at = observed_time(payload.observed_at, utc_now())
     return ResponseModel(data=await service.save_price(db, payload, actor.username, observed_at))
 
 
 def utc_now():
     """每次请求由 API 捕获一次，便于固定钟验证。"""
     return datetime.now(timezone.utc)
+
+
+def history_day(request, date):
+    if "date" not in request.query_params:
+        return None
+    try:
+        if len(request.query_params.getlist("date")) != 1:
+            raise ValueError("duplicate_date")
+        return parse_history_date(date)
+    except ValueError as exc:
+        raise RequestValidationError([
+            {"type": "value_error", "loc": ("query", "date"), "msg": "invalid_date", "input": date},
+        ]) from exc
+
+
+def observed_time(observed_at, now):
+    if observed_at is None:
+        return now
+    if observed_at > now:
+        raise RequestValidationError([
+            {"type": "value_error", "loc": ("body", "observedAt"), "msg": "future_observed_at",
+             "input": observed_at.isoformat()},
+        ])
+    return observed_at

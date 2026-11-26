@@ -1,0 +1,234 @@
+{
+  "task": "ARCH-ENERGY-001",
+  "revision": "r2",
+  "date": "2026-11-25 Asia/Shanghai",
+  "mysql": {
+    "endpoint": "127.0.0.1:3307",
+    "schema_name": "industrial_level_2_system",
+    "mysql_version": "8.4.6",
+    "uuid_sha256": "ac2319a3fdc8255b61b8d7d1d02ae64f13f818c656edad50da5a10d8a8dc7e55"
+  },
+  "preflight": {
+    "revision": "af6d8b2c4e90",
+    "table_count": 70,
+    "old_counts": {
+      "energy_price_hours": 3,
+      "energy_prices": 1
+    },
+    "legacy_history_checked_via_proxy": 3,
+    "proxy_reads": {
+      "/equipment/observation-options": {
+        "status": 200,
+        "size": 1
+      },
+      "/equipment/admin/latest-snapshots?page=1&pageSize=20": {
+        "status": 200,
+        "size": 5
+      },
+      "/monitor/observation-options": {
+        "status": 200,
+        "size": 1
+      },
+      "/monitor/history-samples?page=1&pageSize=20": {
+        "status": 200,
+        "size": 23
+      },
+      "/monitor/curve-configs": {
+        "status": 200,
+        "size": 12
+      },
+      "/energy/consumption/options": {
+        "status": 200,
+        "size": 0
+      },
+      "/energy/consumption/curve-configs": {
+        "status": 200,
+        "size": 0
+      },
+      "/integration/energy/latest": {
+        "status": 200,
+        "size": null
+      }
+    },
+    "backend_pid": 85985,
+    "frontend_pid": 98598,
+    "backup_client_version": "8.4.6"
+  },
+  "backup_first_attempt": {
+    "client": "9.3.0",
+    "exit": 2,
+    "diagnostic": "8.4.6 lacks INFORMATION_SCHEMA.LIBRARIES",
+    "original_service_restored": true,
+    "migration_started": false,
+    "sql_error_code": 1109
+  },
+  "backup": {
+    "path": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend/data/dev-backups/arch-energy-001-r2-9yepf7io/dev-before-7cb6e40f3d19.sql",
+    "sha256": "90ce31c10fa6332cc79d4a716f056b6af054b5320d458df3218a28278b75c9f9",
+    "size": 590958,
+    "tables": 70,
+    "revision": "af6d8b2c4e90",
+    "old_counts": {
+      "energy_price_hours": 3,
+      "energy_prices": 1
+    }
+  },
+  "migration": {
+    "from": "af6d8b2c4e90",
+    "to": "7cb6e40f3d19",
+    "unchanged_definitions": 70,
+    "new_tables": [
+      "energy_price_items",
+      "energy_price_hour_meta",
+      "energy_price_item_hours"
+    ],
+    "source_hours": 3,
+    "archive_rows": 1,
+    "imported_hour_ids": 3,
+    "imported_prices": 9,
+    "initialized_projects": 3
+  },
+  "formal_source": {
+    "files": 41,
+    "patch_sha256": "3ab47215aa201ec6e56e95624171a53d4895e6be548cbb0738edc0c19049310f",
+    "manifest_sha256": "c50a13c237ee5b534bafeb811644adf99e119887fa7b88079f5ef6f15040ea1d",
+    "head": "9c30258358f169792d4cd0faeae3b80a41b43b81"
+  },
+  "backend_restart": {
+    "launcher_pid": 86325,
+    "supervisor_pid": 86326,
+    "console_log": "/Users/jason/Desktop/DreamCode/aiis-ics-arch/backend/logs/arch-energy-001-dev-restart-1795612134.log"
+  },
+  "read_only_runtime": {
+    "revision": "7cb6e40f3d19",
+    "verified_gets": {
+      "http://127.0.0.1:8000": {
+        "pricing": {
+          "projects": 3,
+          "current_cards": 3,
+          "history_columns": 3,
+          "legacy_hours": 3,
+          "private_gets_200": 3,
+          "anonymous_401": 3
+        },
+        "regressions": {
+          "/equipment/observation-options": {
+            "status": 200,
+            "size": 1
+          },
+          "/equipment/admin/latest-snapshots?page=1&pageSize=20": {
+            "status": 200,
+            "size": 5
+          },
+          "/monitor/observation-options": {
+            "status": 200,
+            "size": 1
+          },
+          "/monitor/history-samples?page=1&pageSize=20": {
+            "status": 200,
+            "size": 23
+          },
+          "/monitor/curve-configs": {
+            "status": 200,
+            "size": 12
+          },
+          "/energy/consumption/options": {
+            "status": 200,
+            "size": 0
+          },
+          "/energy/consumption/curve-configs": {
+            "status": 200,
+            "size": 0
+          },
+          "/integration/energy/latest": {
+            "status": 200,
+            "size": null
+          }
+        }
+      },
+      "http://127.0.0.1:5190": {
+        "pricing": {
+          "projects": 3,
+          "current_cards": 3,
+          "history_columns": 3,
+          "legacy_hours": 3,
+          "private_gets_200": 3,
+          "anonymous_401": 3
+        },
+        "regressions": {
+          "/equipment/observation-options": {
+            "status": 200,
+            "size": 1
+          },
+          "/equipment/admin/latest-snapshots?page=1&pageSize=20": {
+            "status": 200,
+            "size": 5
+          },
+          "/monitor/observation-options": {
+            "status": 200,
+            "size": 1
+          },
+          "/monitor/history-samples?page=1&pageSize=20": {
+            "status": 200,
+            "size": 23
+          },
+          "/monitor/curve-configs": {
+            "status": 200,
+            "size": 12
+          },
+          "/energy/consumption/options": {
+            "status": 200,
+            "size": 0
+          },
+          "/energy/consumption/curve-configs": {
+            "status": 200,
+            "size": 0
+          },
+          "/integration/energy/latest": {
+            "status": 200,
+            "size": null
+          }
+        }
+      }
+    },
+    "swagger_pricing_operations": 6,
+    "active_backend_pids": [
+      86326,
+      86328
+    ],
+    "frontend_pids": [
+      98598
+    ]
+  },
+  "browser": {
+    "origin": "http://127.0.0.1:5190",
+    "viewport": [
+      1440,
+      900
+    ],
+    "language": "zh-CN",
+    "checked": [
+      "单价项目配置",
+      "当前单价卡",
+      "历史列",
+      "录价弹窗取消",
+      "能耗统计入口"
+    ],
+    "projectRows": 3,
+    "priceCards": 3,
+    "priceColumns": 3,
+    "meterOptions": 0,
+    "writeAttempts": 0
+  },
+  "formal_checks": {
+    "backend_no_db_pass": 7,
+    "backend_no_db_deselected": 68,
+    "frontend_module_tests_pass": 11,
+    "frontend_module_groups": 10,
+    "frontend_routes": 32,
+    "backend_compile_exit": 0,
+    "frontend_build_exit": 0,
+    "git_diff_check_exit": 0,
+    "git_apply_reverse_check_exit": 0
+  }
+}

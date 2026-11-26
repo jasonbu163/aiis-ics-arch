@@ -1,0 +1,649 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Energy curve groups v1",
+    "version": "1"
+  },
+  "paths": {
+    "/api/v1/energy/curve-configs": {
+      "get": {
+        "tags": [
+          "Energy"
+        ],
+        "summary": "Management — List energy curve groups",
+        "operationId": "list_energy_curve_groups_api_v1_energy_curve_configs_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "meterId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Meterid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid user Bearer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission or meter access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid fields, metric references or curve units",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Energy data unavailable or commit result unknown",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Energy"
+        ],
+        "summary": "Management — Add energy curve group",
+        "operationId": "add_energy_curve_group_api_v1_energy_curve_configs_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnergyCurveCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid user Bearer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission or meter access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid fields, metric references or curve units",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Energy data unavailable or commit result unknown",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Duplicate curve group key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/energy/curve-configs/{curveGroupKey}": {
+      "patch": {
+        "tags": [
+          "Energy"
+        ],
+        "summary": "Management — Update energy curve group",
+        "operationId": "patch_energy_curve_group_api_v1_energy_curve_configs__curveGroupKey__patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "curveGroupKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Curvegroupkey"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnergyCurvePatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid user Bearer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission or meter access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid fields, metric references or curve units",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Energy data unavailable or commit result unknown",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Curve group not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/energy/consumption/curve-configs": {
+      "get": {
+        "tags": [
+          "Energy"
+        ],
+        "summary": "List enabled energy curve groups",
+        "operationId": "energy_consumption_curve_groups_api_v1_energy_consumption_curve_configs_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "meterId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Meterid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid user Bearer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Permission or meter access denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid fields, metric references or curve units",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Energy data unavailable or commit result unknown",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergyCurveError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EnergyCurveCreate": {
+        "properties": {
+          "curveGroupKey": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Curvegroupkey"
+          },
+          "titleZh": {
+            "type": "string",
+            "maxLength": 128,
+            "title": "Titlezh",
+            "default": ""
+          },
+          "titleEn": {
+            "type": "string",
+            "maxLength": 128,
+            "title": "Titleen",
+            "default": ""
+          },
+          "meterId": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Meterid"
+          },
+          "groupKey": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Groupkey"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "maximum": 9.223372036854776e+18,
+            "minimum": -9.223372036854776e+18,
+            "title": "Sortorder"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "series": {
+            "items": {
+              "$ref": "#/components/schemas/EnergyCurveSeries"
+            },
+            "type": "array",
+            "title": "Series"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "curveGroupKey",
+          "meterId",
+          "groupKey",
+          "sortOrder",
+          "enabled",
+          "series"
+        ],
+        "title": "EnergyCurveCreate"
+      },
+      "EnergyCurveData": {
+        "properties": {
+          "curveGroupKey": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Curvegroupkey"
+          },
+          "titleZh": {
+            "type": "string",
+            "maxLength": 128,
+            "title": "Titlezh"
+          },
+          "titleEn": {
+            "type": "string",
+            "maxLength": 128,
+            "title": "Titleen"
+          },
+          "meterId": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Meterid"
+          },
+          "groupKey": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Groupkey"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "maximum": 9.223372036854776e+18,
+            "minimum": -9.223372036854776e+18,
+            "title": "Sortorder"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "series": {
+            "items": {
+              "$ref": "#/components/schemas/EnergyCurveSeries"
+            },
+            "type": "array",
+            "title": "Series"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "curveGroupKey",
+          "titleZh",
+          "titleEn",
+          "meterId",
+          "groupKey",
+          "sortOrder",
+          "enabled",
+          "series"
+        ],
+        "title": "EnergyCurveData"
+      },
+      "EnergyCurveError": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "type": "null",
+            "title": "Data"
+          },
+          "errorCode": {
+            "type": "string",
+            "title": "Errorcode"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "data",
+          "errorCode"
+        ],
+        "title": "EnergyCurveError"
+      },
+      "EnergyCurveListResponse": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/EnergyCurveData"
+            },
+            "type": "array",
+            "title": "Data"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "data"
+        ],
+        "title": "EnergyCurveListResponse"
+      },
+      "EnergyCurvePatch": {
+        "properties": {
+          "titleZh": {
+            "type": "string",
+            "maxLength": 128,
+            "title": "Titlezh"
+          },
+          "titleEn": {
+            "type": "string",
+            "maxLength": 128,
+            "title": "Titleen"
+          },
+          "meterId": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Meterid"
+          },
+          "groupKey": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Groupkey"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "maximum": 9.223372036854776e+18,
+            "minimum": -9.223372036854776e+18,
+            "title": "Sortorder",
+            "default": 0
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "series": {
+            "items": {
+              "$ref": "#/components/schemas/EnergyCurveSeries"
+            },
+            "type": "array",
+            "title": "Series"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "EnergyCurvePatch"
+      },
+      "EnergyCurveResponse": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "$ref": "#/components/schemas/EnergyCurveData"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "data"
+        ],
+        "title": "EnergyCurveResponse"
+      },
+      "EnergyCurveSeries": {
+        "properties": {
+          "metricKey": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Metrickey"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "lineStyle": {
+            "type": "string",
+            "enum": [
+              "solid",
+              "dashed"
+            ],
+            "title": "Linestyle"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "metricKey",
+          "enabled",
+          "lineStyle"
+        ],
+        "title": "EnergyCurveSeries"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

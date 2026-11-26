@@ -99,8 +99,8 @@ do not change authenticated-only APIs or admin-only guards. Granting one key nev
 | `monitor` | Collector status; excludes customer business curves and frontend monitor-page access. |
 | `control-agent-read` | CA action-scope catalog queries. |
 | `control-agent` | Gate-token issuance permission guard; does not remotely execute device actions and retains independent role restrictions. |
-| `energy-price-read` | Energy GET current/history only; independent from manage. |
-| `energy-price-manage` | Energy hourly whole-group POST upsert; does not grant reads. |
+| `energy-price-read` | Energy price project, current and history GET. |
+| `energy-price-manage` | Energy price writes. Project configuration also requires admin. |
 | `equipment-temperature-read` | New complete sample GET only; every caller also needs the one configured equipment scope. |
 | `equipment-temperature-ingest` | New complete sample POST only; admin-only and equipment-scoped, with no implicit read grant. |
 | `aiis_demo` | Default-disabled reference manifest; a configured grant warns and is ignored. The array does not enable it. |
@@ -339,7 +339,7 @@ own operational authorization; its entry first performs the permission configura
 
 Process reads require `monitor-observation-read`, device reads require `equipment-observation-read`, and meter reads require `energy-consumption-read`, each with its configured device or meter scope. Review and remove a retired `monitor` grant during approved maintenance. This change adds no replacement grants automatically.
 
-Hourly energy-price adoption uses the existing three API paths, Shanghai observedAt buckets and a new explicit b8d0f2a4c6e8 successor (sixteen total tables). Legacy append rows remain intact; read [the module contract and gated conversion SQL](app/energy/README.md) before adoption. Source validation does not authorize real migration or deployment.
+Dynamic price adoption uses explicit revision `7cb6e40f3d19` and retains the three legacy price routes. Use the [module adoption and rollback instructions](app/energy/README.md) for target and data gates.
 
 ## Public module admission
 

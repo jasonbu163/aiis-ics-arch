@@ -31,6 +31,7 @@ from tests.test_equipment_observation_r10_flow import document as legacy_equipme
 
 PREDECESSOR = "a1c307f8d2e4"
 REVISION = "b52e9c416a07"
+METER_REVISION = "9e0c5d41b7a2"
 SUCCESSOR = "obs010_unrelated"
 ROOT = Path(__file__).resolve().parents[1]
 STAMP = "2026-11-24T12:00:00.000000+08:00"
@@ -44,7 +45,7 @@ PROTECTED = (
 
 
 @pytest.fixture
-def target(monkeypatch, tmp_path):
+def target(monkeypatch, tmp_path, request):
     port, server, password, confirm = [os.getenv("OBS010_TEST_" + key) for key in ("PORT", "UUID", "PASSWORD", "ACK")]
     if not all((port, server, password, confirm)):
         pytest.skip("requires an explicitly confirmed isolated OBS-010 MySQL instance")
@@ -64,6 +65,10 @@ def target(monkeypatch, tmp_path):
         "MYSQL_PASSWORD": password, "MYSQL_DATABASE": schema, "TEST_MYSQL_DATABASE": schema,
         "MYSQL_ROOT_USER": "root", "MYSQL_ROOT_PASSWORD": password, "TESTING": "true",
         "ENERGY_WRITE_EXPECTED_SCHEMA": schema, "ENERGY_WRITE_EXPECTED_SERVER_UUID": server,
+        "ENERGY_METER_EXPECTED_SCHEMA": schema, "ENERGY_METER_EXPECTED_SERVER_UUID": server,
+        "ENERGY_CURVE_EXPECTED_SCHEMA": schema, "ENERGY_CURVE_EXPECTED_SERVER_UUID": server,
+        "ENERGY_PRICING_EXPECTED_SCHEMA": schema, "ENERGY_PRICING_EXPECTED_SERVER_UUID": server,
+        "ENERGY_PRICING_WRITE_WINDOW": f"{schema}:{server}:UTC",
         "JWT_SECRET_KEY": "obs010-isolated-credential", "ADMIN_BOOTSTRAP_ENABLED": "false",
     }
 
@@ -72,14 +77,17 @@ def target(monkeypatch, tmp_path):
     shutil.copyfile(ROOT / "alembic.ini", tmp_path / "alembic.ini")
     (tmp_path / "alembic/versions/obs010_unrelated.py").write_text(
         "from alembic import op\nimport sqlalchemy as sa\n"
-        f"revision = '{SUCCESSOR}'\ndown_revision = '{REVISION}'\n"
+        f"revision = '{SUCCESSOR}'\ndown_revision = '{getattr(request, 'param', REVISION)}'\n"
         "def upgrade():\n    op.create_table('obs010_unrelated', sa.Column('id', sa.Integer, primary_key=True))\n"
         "def downgrade():\n    op.drop_table('obs010_unrelated')\n"
     )
 
     def migrate(revision, operation="upgrade", expected_server=server):
         result = subprocess.run([sys.executable, "-m", "alembic", operation, revision],
-            cwd=tmp_path, env={**env, "ENERGY_WRITE_EXPECTED_SERVER_UUID": expected_server},
+            cwd=tmp_path, env={**env, "ENERGY_WRITE_EXPECTED_SERVER_UUID": expected_server,
+                               "ENERGY_METER_EXPECTED_SERVER_UUID": expected_server,
+                               "ENERGY_CURVE_EXPECTED_SERVER_UUID": expected_server,
+                               "ENERGY_PRICING_EXPECTED_SERVER_UUID": expected_server},
             capture_output=True, text=True, timeout=30)
         return result.returncode, (result.stdout + result.stderr).replace(password, "[redacted]")
 
@@ -198,6 +206,9 @@ def test_mysql_migration_batch_atomicity_replay_and_operational_compatibility(ta
                 code, log = migrate(REVISION)
                 assert code == 0, log
                 assert snapshot(engine) == old_rows
+                # 单独验证旧迁移的回退合同，给当前服务提供表计表夹具。
+                from app.equipment_observation.models import EnergyMeter
+                EnergyMeter.__table__.create(engine)
                 assert (await client.get(MANAGE)).status_code == 401
                 assert (await client.get(MANAGE, headers={"Authorization": "Bearer invalid"})).status_code == 401
                 assert (await client.post(MANAGE, headers=operator, json={"sourceKey": "Line.A"})).status_code == 403

@@ -89,6 +89,14 @@ PLC 事实 v2 定义 DAA 和外部程序的原值上报及按 PLC/DB 范围读�
 
 [能耗登记来源写入 v1](published/http-api/energy-registered-ingest-v1/README.zh-CN.md) 提供独立管理员登记、免 Token 多表 POST 整包回执、OpenAPI 和合成示例。
 
+[能耗公有读取 v1](published/http-api/energy-public-reads-v1/README.zh-CN.md) 说明最新样本和历史分页的免 Token GET，提供 OpenAPI、合成回包以及 Python 和 SMA 示例。
+
 ## CA 到 Field Flow 候选合同
 
 [流程 JSON v1](demands/ca-field-flow-v1/README.zh-CN.md)记录 CA 候选结构、语义摘要和向量。Field Flow 接受门槛待验证。
+
+[能耗表计管理 v1](published/http-api/energy-meters-v1/README.zh-CN.md) 说明登录后管理表计目录、新增和部分更新的接口。
+
+[能耗曲线组 v1](published/http-api/energy-curve-groups-v1/README.zh-CN.md) 说明管理员曲线组配置接口和按表计授权的统计读取接口。
+
+[能源单价 v1](published/http-api/energy-pricing-v1/README.zh-CN.md) 说明单价项目、当前价格及实际小时更新接口。

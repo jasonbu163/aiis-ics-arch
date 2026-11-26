@@ -14,7 +14,10 @@ manifest = ModuleManifest(
     requires=(),
     model_requires=(),
     exports=(),
-    error_codes=(),
+    error_codes=(
+        "energy.pricing_item_exists", "energy.pricing_item_missing", "energy.pricing_item_disabled",
+        "energy.pricing_unit_in_use", "energy.pricing_item_invalid",
+    ),
     name="energy",
     enabled=True,
     order=90,

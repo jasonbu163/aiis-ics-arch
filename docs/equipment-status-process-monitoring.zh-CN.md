@@ -300,3 +300,7 @@ SMA 每次发送完整信封，包括版本、写入方、投递事件、映射�
 ## 能耗来源登记
 
 管理员在「能耗管理 → 配置管理 → 写入登记」启用写入来源。配置好各表计的采样组和指标后，使用免 Token POST 提交同一实际采集时刻的一包数据，再通过登录后的数据管理和能耗统计查看。[能耗批量写入合同及样例](../contracts/published/http-api/energy-registered-ingest-v1/README.zh-CN.md)
+
+## 能耗公有查询
+
+在受控内网使用 `GET /api/v1/integration/energy/latest` 读取各表计和采样组的最新样本，使用 `GET /api/v1/integration/energy/samples` 按采集时间分页查询。两条 GET 均免 Token，同路径的旧写入 POST 继续使用机器 Bearer。[查询参数、回包与接入示例](../contracts/published/http-api/energy-public-reads-v1/README.zh-CN.md)

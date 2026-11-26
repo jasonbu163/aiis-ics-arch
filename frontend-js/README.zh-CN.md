@@ -4,6 +4,8 @@ English version: [README.md](README.md)
 
 「能耗管理」下的能耗统计沿用地址 `/monitor/consumption` 和页面授权键 `monitor.energy`。能耗单价沿用地址 `/auxiliary/price` 和页面授权键 `auxiliary.price`。旧直链 `/monitor/energy` 已退出。已有 `monitor.consumption` 的部署须由负责人审查并显式处理，页面权限不会增加 `energy-consumption-read`、表计范围或管理权限。 [清退规格](../plans/ARCH-OBS-002-legacy-observation-retirement/spec.md)
 
+能耗单价按启用项目显示现价、录价字段和每日历史。管理员可在「能耗管理 → 配置管理 → 单价项目配置」维护项目。缺失价格显示为「—」。[单价 API](../contracts/published/http-api/energy-pricing-v1/README.zh-CN.md)
+
 这是 JavaScript 形态的 Vue 3 + Vite Core 前端模板，包含登录、认证壳层、系统页面、通用计划/实绩页面和共享基础设施。使用方项目在 src/app/<module>/ 下增加业务模块。
 
 ## 稳定边界
@@ -243,3 +245,5 @@ runtime。runtime 不挂载源码或 `node_modules`，`/api/v1` 反向代理到 
 质量列表展示结构化任务结果。有权限的用户可按任务号新增一条结果，并编辑允许人工录入的字段。用户访问遵循现有页面权限。旧检验链接经质量列表权限校验后进入质量列表，隐藏的 `quality.control` 页面标识兼容已有授权列表。管理员通过本地字段管理配置质量字段，两个列表使用公共的本机列宽偏好。[质量 HTTP 合同](../contracts/published/http-api/quality-results-v1/README.zh-CN.md)
 
 管理员在「能耗管理 → 配置管理 → 写入登记」通过现有登录会话维护来源标识、名称和启用状态。表计指标保留独立选项。[能耗写入合同](../contracts/published/http-api/energy-registered-ingest-v1/README.zh-CN.md)
+
+管理员在「能耗管理 → 配置管理 → 曲线设置」为一块表计及其一个采样组配置一张图。「能耗统计」支持按已保存曲线组或按表计查询。选组时，汇总取第一条启用曲线。[能耗曲线组](../contracts/published/http-api/energy-curve-groups-v1/README.zh-CN.md)

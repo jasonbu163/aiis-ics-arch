@@ -27,7 +27,7 @@ source topology or important entrypoints change.
 - `backend/app/energy/manifest.py` — unique price owner and independent read/manage permissions.
 - `backend/app/energy/api/energy_price.py` — current/date-filtered history/hourly upsert HTTP APIs.
 - `backend/app/energy/models/energy_price.py` / `schemas/energy_price.py` — constrained snapshot persistence and local JSON number contract.
-- `backend/app/energy/crud/async_energy_price.py` / `services/async_energy_price.py` — async atomic hourly SQL, observedAt ordering and whole-group transaction.
+- `backend/app/energy/crud/async_energy_price.py` / `services/async_energy_price.py` — shared project-hour transaction SQL and legacy three-price view.
 - `backend/alembic/versions/20261013_1200_a6c8e0f2b4d6_add_public_energy_prices.py` — one-table successor to the unchanged Core root.
 - `backend/tests/test_energy_price_api.py` / `test_energy_price_service.py` / `test_energy_price_migration.py` — no-DB HTTP, transaction, SQL and metadata checks.
 - `backend/app/equipment_observation/` — configurable equipment cards, multi-region history, independent energy statistics, administration and source-independent ingest.
@@ -40,6 +40,22 @@ source topology or important entrypoints change.
 - `backend/alembic/versions/20261124_2300_b52e9c416a07_energy_write_sources.py` — additive energy registration successor.
 - `frontend-js/src/app/energy/components/EnergyWriteSources.vue` — energy configuration write registration tab.
 - `contracts/published/http-api/energy-registered-ingest-v1/` — token-free batch and Bearer registration contract.
+- `backend/app/equipment_observation/services/energy_public_reads.py` / `api/energy_public_read_contract.py` — token-free latest and historical sample projection and OpenAPI shapes.
+- `backend/tests/test_energy_public_reads.py` / `backend/tests_mysql/test_energy_public_reads_mysql.py` — isolated HTTP, MySQL, pagination and consumer-example checks.
+- `contracts/published/http-api/energy-public-reads-v1/` — read-only integration contract, OpenAPI, and synthetic examples.
+- `backend/app/equipment_observation/models/energy_meter.py` — independent persisted meter definitions and read roles.
+- `backend/app/equipment_observation/services/energy_meters.py` — database catalog, compatibility profile overlay and transactional edits.
+- `backend/app/equipment_observation/api/energy_meter_contract.py` — administrator meter API schema.
+- `backend/alembic/versions/20261125_1100_9e0c5d41b7a2_energy_meters.py` — guarded energy meter migration.
+- `frontend-js/src/app/energy/components/EnergyMeters.vue` — bilingual meter management and role editing.
+- `contracts/published/http-api/energy-meters-v1/` — authenticated management API contract and OpenAPI.
+- `backend/app/equipment_observation/models/energy_curve_group.py` — single-meter energy curve configuration and ordered series.
+- `backend/app/equipment_observation/crud/async_energy_curve_groups.py` / `services/async_energy_curve_groups.py` — scoped reads, metric validation and row-locked partial updates.
+- `backend/app/equipment_observation/api/energy_curve_contract.py` — Bearer curve group schemas and documented error envelopes.
+- `backend/alembic/versions/20261125_1400_af6d8b2c4e90_energy_curve_groups.py` — guarded energy curve group successor.
+- `backend/tests/test_energy_curve_groups.py` / `backend/tests_mysql/test_energy_curve_groups_mysql.py` — isolated HTTP and MySQL migration, scope and concurrency checks.
+- `frontend-js/src/app/energy/components/EnergyCurveGroups.vue` / `views/consumption.vue` — curve management editor and saved or manual statistics.
+- `contracts/published/http-api/energy-curve-groups-v1/` — energy curve configuration and statistics read contract.
 - `backend/app/equipment_observation/machine_openapi.py` — v2 machine request schemas shared by the live OpenAPI routes.
 - `backend/app/plc_facts/services/observation_evidence.py` — retained r8 task attribution helper; r10 observation ingest does not require PLC evidence.
 - `backend/alembic/versions/20261116_1800_8c0e2a4d6f18_add_equipment_observation.py` — explicit seven-table r8 successor.
@@ -81,7 +97,7 @@ source topology or important entrypoints change.
 - `frontend-js/src/app/plan/` / `frontend-js/src/app/performance/` — generic task list, detail, field settings and actions; old dashboard is disabled.
 - `frontend-js/src/app/acquisition-data/` — paginated realtime PLC points and DB sample history with optional filters, source labels and sample details.
 - `frontend-js/src/app/{equipment,monitor}/views/observations/` — configurable cards, curves and administrator pages; `equipment/components/observations/RecordList.vue` provides configurable metric columns.
-- `frontend-js/src/app/energy/` — energy menu, existing statistics and hourly prices, meter definitions and sample review; statistics reuse the process time-series chart.
+- `frontend-js/src/app/energy/` — energy menu, statistics and configurable hourly prices, meter definitions and sample review; statistics reuse the process time-series chart.
 - `frontend-js/src/app/acquisition-data/views/sources/index.vue` — administrator source list, copyable parameters, confirmed takeover and deletion.
 - `frontend-js/src/utils/tableColumnWidths.js` — shared local column-width preferences keyed by table and field.
 - `frontend-js/src/config/systemName.js` — independent bilingual build-time system names and optional login descriptions consumed through global i18n.
@@ -150,11 +166,19 @@ README files own stable usage and boundaries; PLAN files own current workstream
 indexes; task bundles own scope and verification facts. Do not run global
 documentation initialization in this repository.
 
+## ARCH-ENERGY-001 configurable pricing
+
+- `backend/app/energy/models/energy_pricing.py` and `backend/app/energy/pricing.py` — project, price and legacy hour metadata models with Shanghai time boundaries.
+- `backend/app/energy/api/energy_pricing.py` / `schemas/energy_pricing.py` / `services/async_energy_pricing.py` — authenticated configuration, current prices and actual history.
+- `backend/alembic/versions/20261125_1800_7cb6e40f3d19_configurable_energy_pricing.py` — guarded UTC import, reconciliation and pristine rollback.
+- `frontend-js/src/app/energy/components/EnergyPriceItems.vue` / `api/pricing.js` — project configuration and pricing API facade.
+- `backend/tests_mysql/test_energy_pricing_mysql.py` — isolated migration, concurrency, legacy projection and HTTP-contract regression.
+
 ## ARCH-BE-004 hourly price entries
 
 - `backend/app/energy/models/energy_price_hour.py` — UTC observedAt/hourStart hourly snapshots with a unique hour key.
 - `backend/alembic/versions/20261013_1600_b8d0f2a4c6e8_add_energy_price_hours.py` — explicit hours-table successor; preserves the append archive.
-- `frontend-js/src/app/energy/views/price.vue` — readonly current prices, Shanghai daily history and whole-group add dialog.
+- `frontend-js/src/app/energy/views/price.vue` — dynamic current cards, Shanghai daily history and partial entry.
 
 ## Public module admission and reintegration
 

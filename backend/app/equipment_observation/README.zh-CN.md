@@ -15,3 +15,9 @@
 写入登记及无需 token 的观测读写使用独立合同。[写入登记合同](../../../contracts/published/http-api/observation-write-sources-v1/README.zh-CN.md)
 
 能耗日常运行核对所配置的 MySQL 服务和库名，只按自身业务依赖读写。管理员独立登记能耗来源。[能耗登记来源批量写入](../../../contracts/published/http-api/energy-registered-ingest-v1/README.zh-CN.md)说明免 Token 多表 POST、单一回执与事务内样本写入。
+
+能耗集成新增免 Token GET，可按表计及采样组读取最新样本，也可按采集时间范围分页读取历史。同路径的旧 POST 继续使用机器 Bearer，Web 查询和管理继续使用登录用户 Bearer。[能耗公有读取](../../../contracts/published/http-api/energy-public-reads-v1/README.zh-CN.md)
+
+管理员可以新增表计、修改名称和可读角色。采用本服务版本前，应在独立批准的目标库应用受保护迁移 `9e0c5d41b7a2`，执行时显式指定 `ENERGY_METER_EXPECTED_SCHEMA` 和 `ENERGY_METER_EXPECTED_SERVER_UUID`。尚未编辑的 profile 表计继续沿用原名称和角色范围。[能耗表计管理](../../../contracts/published/http-api/energy-meters-v1/README.zh-CN.md)
+
+能耗曲线组保存一块表计、一个采样组下的有序数值指标。配置和统计读取沿用表计范围。应用迁移时，对独立获批的目标从 `9e0c5d41b7a2` 升至 `af6d8b2c4e90`，指定 `ENERGY_CURVE_EXPECTED_SCHEMA` 和 `ENERGY_CURVE_EXPECTED_SERVER_UUID`。迁移增加一张配置表，应用代码回退时保留该表。[能耗曲线组接口合同](../../../contracts/published/http-api/energy-curve-groups-v1/README.zh-CN.md)

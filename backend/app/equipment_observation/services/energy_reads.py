@@ -1,7 +1,7 @@
 """受表计范围约束的原始能耗样本、只读统计与管理标注。"""
 from sqlalchemy import func, select
 
-from .guard import verify_energy_target
+from .energy_meters import effective_profile
 from ..domain import reject, wire_time
 from ..models import EnergyMetric, EnergySample
 from ..profile import allowed_meter
@@ -25,8 +25,8 @@ async def sample_data(db, row, metrics=None):
 
 
 async def samples(db, profile, user, meter, group, start, end, page, size):
+    profile = await effective_profile(db, profile)
     allowed_meter(profile, user, meter)
-    await verify_energy_target(db, profile['target'])
     conditions = [EnergySample.meter_id == meter]
     if group:
         conditions.append(EnergySample.group_key == group)
@@ -44,8 +44,8 @@ async def samples(db, profile, user, meter, group, start, end, page, size):
 
 
 async def summary(db, profile, user, meter, group, metric_key, start, end):
+    profile = await effective_profile(db, profile)
     allowed_meter(profile, user, meter)
-    await verify_energy_target(db, profile['target'])
     beginning, ending = observed_time(start), observed_time(end)
     if beginning >= ending:
         reject('invalid_time_range')
@@ -71,7 +71,7 @@ async def summary(db, profile, user, meter, group, metric_key, start, end):
 
 
 async def detail(db, profile, user, identity):
-    await verify_energy_target(db, profile['target'])
+    profile = await effective_profile(db, profile)
     row = await db.get(EnergySample, identity)
     if row is None or row.meter_id not in profile.get('meterReadScopes', {}).get(user.role, []):
         reject('not_found', 404)

@@ -7,6 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from starlette.exceptions import HTTPException
 from sqlalchemy import select
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,20 +23,36 @@ from ..machine_openapi import request_body
 from ..profile import allowed_meter, authenticate, get_profile, permitted_energy, require_energy_target
 from ..schemas import (Card, CardPatch, Curve, CurvePatch, EnergyMetric as EnergyMetricInput,
                        EnergyMetricPatch, Group, GroupPatch, HistoryReview, Metric, MetricPatch, Remark, Slot, SlotPatch)
-from ..services import (configuration, energy_reads, energy_registered_ingest, energy_write_sources,
+from ..services import (async_energy_curve_groups, configuration, energy_meters, energy_public_reads, energy_reads, energy_registered_ingest, energy_write_sources,
                         ingest_v2, reads, registered_ingest, write_sources)
+from .energy_curve_contract import (CURVE_ERRORS, EnergyCurveCreate, EnergyCurveError, EnergyCurveListResponse,
+                                    EnergyCurvePatch, EnergyCurveResponse)
+from .energy_meter_contract import (CreateEnergyMeter, EnergyMeterError, EnergyMeterListResponse,
+                                    EnergyMeterResponse, METER_CHANGE_ERRORS, METER_READ_ERRORS, PatchEnergyMeter)
+from .energy_public_read_contract import ENERGY_HISTORY_READ, LATEST_ENERGY_READ
 from .write_source_contract import CreateWriteSource, ENERGY_WRITE_REQUEST, PatchWriteSource, WRITE_REQUEST
 
 
 class ObservationRoute(APIRoute):
+    def __init__(self, path, **kwargs):
+        if path.startswith(("/energy/", "/integration/energy/")):
+            kwargs["tags"] = ["Energy"]
+        super().__init__(path, **kwargs)
+
     def get_route_handler(self):
         handler = super().get_route_handler()
         path = self.path
         is_energy = "/energy/" in path
         async def protected(request):
-            is_registered = (path.endswith(("/integration/observations", "/integration/observations/latest"))
-                             or path.endswith("/integration/energy/registered-samples")
-                             or "/equipment/write-sources" in path or "/energy/write-sources" in path)
+            public_energy_read = request.method == "GET" and path.endswith(
+                ("/integration/energy/latest", "/integration/energy/samples")
+            )
+            curve_route = is_energy and "/curve-configs" in path
+            stable_validation = (public_energy_read or curve_route
+                                 or path.endswith(("/integration/observations", "/integration/observations/latest"))
+                                 or path.endswith("/integration/energy/registered-samples")
+                                 or path.endswith("/energy/meters")
+                                 or "/equipment/write-sources" in path or "/energy/write-sources" in path)
             try:
                 if request.method == "POST" and path.endswith((
                     "/integration/equipment/latest-snapshots", "/integration/monitor/history-samples", "/integration/energy/samples"
@@ -46,8 +63,12 @@ class ObservationRoute(APIRoute):
                     await strict_body(request)
                 try:
                     return await handler(request)
+                except HTTPException as exc:
+                    if not curve_route or exc.status_code not in (401, 403):
+                        raise
+                    reject("unauthenticated" if exc.status_code == 401 else "forbidden", exc.status_code)
                 except RequestValidationError:
-                    if not is_registered:
+                    if not stable_validation:
                         raise
                     reject()
                 except DBAPIError:
@@ -211,6 +232,24 @@ async def write_energy(request: Request, payload: dict, identity=Depends(machine
     return response(await ingest_v2.energy(db, profile, producer, request._obs_decimal))
 
 
+@router.get("/integration/energy/latest", responses=LATEST_ENERGY_READ, openapi_extra={"security": []},
+            summary="Public — Get latest energy samples")
+async def public_energy_latest(meter: str | None = Query(None, alias="meterId", min_length=1, max_length=64),
+                               group: str | None = Query(None, alias="groupKey", min_length=1, max_length=64),
+                               db: AsyncSession = Depends(get_db)):
+    return response(await energy_public_reads.latest(db, energy_profile(), meter, group))
+
+
+@router.get("/integration/energy/samples", responses=ENERGY_HISTORY_READ, openapi_extra={"security": []},
+            summary="Public — Get historical energy samples")
+async def public_energy_history(meter: str = Query(alias="meterId", min_length=1, max_length=64),
+                                group: str | None = Query(None, alias="groupKey", min_length=1, max_length=64),
+                                start: str = Query(alias="from"), end: str = Query(alias="to"),
+                                page: int = Query(1, ge=1), size: int = Query(20, ge=1, le=100, alias="pageSize"),
+                                db: AsyncSession = Depends(get_db)):
+    return response(await energy_public_reads.history(db, energy_profile(), meter, group, start, end, page, size))
+
+
 @router.post("/integration/observations", openapi_extra=WRITE_REQUEST)
 async def write_observation(request: Request, db: AsyncSession = Depends(get_db)):
     document = await strict_body(request, decimal_only=True)
@@ -302,7 +341,8 @@ async def patch_metric_group(key: str, item: GroupPatch, user=Depends(get_curren
     return response(await configuration.save_group(db, item, key))
 
 
-@router.post("/integration/energy/registered-samples", openapi_extra=ENERGY_WRITE_REQUEST)
+@router.post("/integration/energy/registered-samples", openapi_extra=ENERGY_WRITE_REQUEST,
+             summary="Public — Write registered energy samples")
 async def write_registered_energy(request: Request, db: AsyncSession = Depends(get_db)):
     document = await strict_body(request, decimal_only=True)
     result = await energy_registered_ingest.submit(db, energy_profile(), document)
@@ -314,20 +354,20 @@ async def write_registered_energy(request: Request, db: AsyncSession = Depends(g
     return response(result)
 
 
-@router.get("/energy/write-sources")
+@router.get("/energy/write-sources", summary="Management — List energy write sources")
 async def list_energy_write_sources(user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
     await verify_energy_target(db, energy_profile()["target"])
     return response(await energy_write_sources.list_sources(db))
 
 
-@router.post("/energy/write-sources")
+@router.post("/energy/write-sources", summary="Management — Add energy write source")
 async def add_energy_write_source(item: CreateWriteSource, user=Depends(get_current_active_admin),
                                   db: AsyncSession = Depends(get_db)):
     await verify_energy_target(db, energy_profile()["target"])
     return response(await energy_write_sources.create(db, item.source_key, item.name, item.enabled))
 
 
-@router.patch("/energy/write-sources/{sourceKey}")
+@router.patch("/energy/write-sources/{sourceKey}", summary="Management — Update energy write source")
 async def patch_energy_write_source(source_key: Annotated[str, Path(alias="sourceKey")], item: PatchWriteSource,
                                     user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
     changes = item.model_dump(exclude_unset=True)
@@ -337,58 +377,122 @@ async def patch_energy_write_source(source_key: Annotated[str, Path(alias="sourc
     return response(await energy_write_sources.change(db, _source_path_key(source_key), changes))
 
 
-@router.delete("/energy/write-sources/{sourceKey}")
+@router.delete("/energy/write-sources/{sourceKey}", summary="Management — Delete energy write source")
 async def delete_energy_write_source(source_key: Annotated[str, Path(alias="sourceKey")],
                                      user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
     await verify_energy_target(db, energy_profile()["target"])
     return response(await energy_write_sources.change(db, _source_path_key(source_key), {}, delete=True))
 
 
-@router.get("/energy/consumption/options")
-async def energy_options(user=Depends(energy_reader)):
+@router.get("/energy/meters", summary="Management — List energy meters",
+            response_model=EnergyMeterListResponse, responses=METER_READ_ERRORS)
+async def list_energy_meters(user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
     profile = energy_profile()
+    await verify_energy_target(db, profile["target"])
+    meters = await energy_meters.catalog(db, profile)
+    return response([meters[key] for key in sorted(meters)])
+
+
+@router.post("/energy/meters", summary="Management — Add energy meter",
+             response_model=EnergyMeterResponse, responses={**METER_CHANGE_ERRORS,
+                 409: {"description": "Duplicate meter ID", "model": EnergyMeterError}})
+async def add_energy_meter(item: CreateEnergyMeter, user=Depends(get_current_active_admin),
+                           db: AsyncSession = Depends(get_db)):
+    profile = energy_profile()
+    await verify_energy_target(db, profile["target"])
+    return response(await energy_meters.create(db, profile, item.meter_id, item.model_dump(exclude={"meter_id"})))
+
+
+@router.patch("/energy/meters", summary="Management — Update energy meter",
+              response_model=EnergyMeterResponse, responses={**METER_CHANGE_ERRORS,
+                  404: {"description": "Meter not found", "model": EnergyMeterError}})
+async def patch_energy_meter(item: PatchEnergyMeter, user=Depends(get_current_active_admin),
+                             db: AsyncSession = Depends(get_db)):
+    profile = energy_profile()
+    await verify_energy_target(db, profile["target"])
+    changes = item.model_dump(exclude={"meter_id"}, exclude_unset=True)
+    return response(await energy_meters.change(db, profile, item.meter_id, changes))
+
+
+@router.get("/energy/curve-configs", summary="Management — List energy curve groups",
+            response_model=EnergyCurveListResponse, responses=CURVE_ERRORS)
+async def list_energy_curve_groups(meter_id: str | None = Query(None, alias="meterId"),
+                                   user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
+    return response(await async_energy_curve_groups.list_groups(
+        db, energy_profile(), user, meter_id, enabled_only=False))
+
+
+@router.post("/energy/curve-configs", summary="Management — Add energy curve group",
+             response_model=EnergyCurveResponse, responses={**CURVE_ERRORS,
+                 409: {"description": "Duplicate curve group key", "model": EnergyCurveError}})
+async def add_energy_curve_group(item: EnergyCurveCreate, user=Depends(get_current_active_admin),
+                                 db: AsyncSession = Depends(get_db)):
+    return response(await async_energy_curve_groups.create(db, energy_profile(), user, item))
+
+
+@router.patch("/energy/curve-configs/{curveGroupKey:path}", summary="Management — Update energy curve group",
+              response_model=EnergyCurveResponse, responses={**CURVE_ERRORS,
+                  404: {"description": "Curve group not found", "model": EnergyCurveError}})
+async def patch_energy_curve_group(request: Request, curve_group_key: Annotated[str, Path(alias="curveGroupKey")],
+                                   item: EnergyCurvePatch, user=Depends(get_current_active_admin),
+                                   db: AsyncSession = Depends(get_db)):
+    # 保护浏览器会规范化的两个点段，其他路径参数继续使用框架解码后的值。
+    dots = {"%2e": ".", "%2e%2e": ".."}.get(curve_group_key)
+    if dots and request.scope.get("raw_path", b"").endswith(dots.replace(".", "%252e").encode()):
+        curve_group_key = dots
+    return response(await async_energy_curve_groups.patch(db, energy_profile(), user, curve_group_key, item))
+
+
+@router.get("/energy/consumption/curve-configs", summary="List enabled energy curve groups",
+            response_model=EnergyCurveListResponse, responses=CURVE_ERRORS)
+async def energy_consumption_curve_groups(meter_id: str | None = Query(None, alias="meterId"),
+                                          user=Depends(energy_reader), db: AsyncSession = Depends(get_db)):
+    return response(await async_energy_curve_groups.list_groups(
+        db, energy_profile(), user, meter_id, enabled_only=True))
+
+
+@router.get("/energy/consumption/options")
+async def energy_options(user=Depends(energy_reader), db: AsyncSession = Depends(get_db)):
+    profile = await energy_meters.effective_profile(db, energy_profile())
     return response([profile["meters"][key] for key in sorted(profile["meterReadScopes"].get(user.role, []))])
 
 
 @router.get("/energy/consumption/definitions")
 async def energy_read_definitions(meter_id: str = Query(alias="meterId"), user=Depends(energy_reader),
                                   db: AsyncSession = Depends(get_db)):
-    profile = energy_profile()
+    profile = await energy_meters.effective_profile(db, energy_profile())
     allowed_meter(profile, user, meter_id)
-    await verify_energy_target(db, profile["target"])
     rows = (await db.execute(select(EnergyMetric).where(EnergyMetric.meter_id == meter_id)
                              .order_by(EnergyMetric.group_key, EnergyMetric.slot_no))).scalars().all()
     return response([configuration.energy_metric_data(row) for row in rows])
 
 
-@router.get("/energy/metric-configs")
+@router.get("/energy/metric-configs", summary="Management — List energy metric configurations")
 async def energy_configs(meter_id: str | None = Query(None, alias="meterId"),
                          group_key: str | None = Query(None, alias="groupKey"),
                          user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
-    profile = energy_profile()
+    profile = await energy_meters.effective_profile(db, energy_profile())
     if meter_id is not None:
         allowed_meter(profile, user, meter_id)
         meter_ids = (meter_id,)
     else:
         meter_ids = profile["meterReadScopes"].get(user.role, ())
-    await verify_energy_target(db, profile["target"])
     return response(await configuration.energy_metric_configs(db, meter_ids, group_key))
 
 
-@router.post("/energy/metric-configs")
+@router.post("/energy/metric-configs", summary="Management — Add energy metric configuration")
 async def add_energy_config(item: EnergyMetricInput, user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
-    profile = energy_profile()
+    profile = await energy_meters.effective_profile(db, energy_profile())
     allowed_meter(profile, user, item.meter_id)
-    await verify_energy_target(db, profile["target"])
     return response(await configuration.save_energy_metric(db, item))
 
 
-@router.patch("/energy/metric-configs/{meter_id}/{group_key}/{metric_key}")
+@router.patch("/energy/metric-configs/{meter_id}/{group_key}/{metric_key}",
+              summary="Management — Update energy metric configuration")
 async def patch_energy_config(meter_id: str, group_key: str, metric_key: str, item: EnergyMetricPatch,
                               user=Depends(get_current_active_admin), db: AsyncSession = Depends(get_db)):
-    profile = energy_profile()
+    profile = await energy_meters.effective_profile(db, energy_profile())
     allowed_meter(profile, user, meter_id)
-    await verify_energy_target(db, profile["target"])
     return response(await configuration.save_energy_metric(db, item, (meter_id, group_key, metric_key)))
 
 
@@ -407,7 +511,7 @@ async def energy_summary(meter_id: str = Query(alias="meterId"), group_key: str 
     return response(await energy_reads.summary(db, energy_profile(), user, meter_id, group_key, metric_key, start, end))
 
 
-@router.get("/energy/admin/consumption-samples")
+@router.get("/energy/admin/consumption-samples", summary="Management — List energy consumption samples")
 async def energy_admin_samples(meter_id: str = Query(alias="meterId"), group_key: str | None = Query(None, alias="groupKey"),
                          start: str | None = Query(None, alias="from"), end: str | None = Query(None, alias="to"),
                          page: int = Query(1, ge=1), size: int = Query(20, ge=1, le=100, alias="pageSize"),
@@ -415,7 +519,7 @@ async def energy_admin_samples(meter_id: str = Query(alias="meterId"), group_key
     return response(await energy_reads.samples(db, energy_profile(), user, meter_id, group_key, start, end, page, size))
 
 
-@router.patch("/energy/admin/consumption-samples/{identity}")
+@router.patch("/energy/admin/consumption-samples/{identity}", summary="Management — Update energy sample review")
 async def patch_energy_sample(identity: int, item: HistoryReview, user=Depends(get_current_active_admin),
                               db: AsyncSession = Depends(get_db)):
     row = await energy_reads.detail(db, energy_profile(), user, identity)
